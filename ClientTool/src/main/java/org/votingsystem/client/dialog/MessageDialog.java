@@ -19,7 +19,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -43,28 +42,23 @@ public class MessageDialog {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
         //stage.initOwner(window);
-
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }
         });
 
         VBox mainBox = new VBox(10);
-
         messageBox = new HBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
 
-
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-        messageWebView.setPrefHeight(300);
-        messageWebView.setPrefWidth(600);
+        messageWebView.setPrefHeight(270);
+        //messageWebView.setPrefWidth(600);
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");
-
         messageBox.getChildren().add(messageLabel);
-
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {

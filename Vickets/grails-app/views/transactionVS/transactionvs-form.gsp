@@ -137,7 +137,7 @@
 
             if(document.querySelector("#coreSignals")) {
                 document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
-                    this.$.receptorBox.addUser(e.detail)
+                    if(this.$.receptorBox) this.$.receptorBox.addUser(e.detail)
                 }.bind(this));
             }
 

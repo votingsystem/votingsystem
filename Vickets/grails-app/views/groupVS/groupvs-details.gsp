@@ -25,7 +25,7 @@
     <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
-                <div style="margin: 20px 20px 0 0;" title="<g:message code="backLbl"/>" >
+                <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </div>
             </template>
@@ -77,16 +77,21 @@
                 </template>
 
                 <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                    <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
+                        <template if="{{groupvs.userVS.tags.length > 0}}">
+                            <div layout horizontal center center-justified>
+                                <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
+                                <template repeat="{{tag in groupvs.userVS.tags}}">
+                                    <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
                     </div>
-                    <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.userVS.tags.length > 0?'block':'none'}}">
-                        <div layout horizontal center center-justified>
-                            <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
-                            <template repeat="{{tag in groupvs.userVS.tags}}">
-                                <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
-                            </template>
-                        </div>
+                    <div flex style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right;">
+                        <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
                     </div>
                 </div>
             </div>
@@ -103,17 +108,13 @@
                 </votingsystem-button>
             </div>
             <div flex></div>
-            <div id="" style="margin:5px 0 0 0; font-size: 0.75em; color:#888;">
+            <div id="" style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
                 <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
-            </div>
-            <div flex></div>
-            <div id="" style="margin:5px 0 0 0; font-size: 0.75em; color:#888;">
-                <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
             </div>
         </div>
 
-        <div style="min-height: 300px;">
-            <div  style="text-align:center; font-size: 1.2em;font-weight: bold; color: #888;margin: 0 0 10px 0;
+        <div style="min-height: 300px; border-top: 1px solid #ccc; margin: 15px 0 0 0; padding: 10px 0 0 0;">
+            <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888;margin: 0 0 10px 0;
                 text-decoration: underline;">
                 <g:message code="usersLbl"/>
             </div>
@@ -150,7 +151,7 @@
             groupvs: {value: {}}
         },
         isClientToolConnected:false,
-        ready :  function() {
+        ready : function() {
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
@@ -236,6 +237,8 @@
             }
             this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id + "/user"
             this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.userVS.id
+
+            this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
         },
         configGroup:function(e) {
             //e.detail.isSelected = false

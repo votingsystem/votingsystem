@@ -51,8 +51,8 @@ class TestingController {
     }
 
     def newWeek() {
-        //balanceService.initWeekPeriod()
-        List transactionList
+        balanceService.initWeekPeriod()
+        /*List transactionList
         TransactionVS.withTransaction {
             //transactionList = TransactionVS.findAllWhere(type:[TransactionVS.Type.VICKET_INIT_PERIOD,
             //       TransactionVS.Type.VICKET_INIT_PERIOD_TIME_LIMITED])
@@ -66,7 +66,7 @@ class TestingController {
             }
 
 
-        }
+        }*/
         render "OK"
         return false
     }

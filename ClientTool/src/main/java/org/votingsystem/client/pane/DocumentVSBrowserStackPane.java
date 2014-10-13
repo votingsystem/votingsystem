@@ -7,7 +7,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
@@ -47,7 +46,7 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DocumentVSBrowserStackPane extends StackPane{
+public class DocumentVSBrowserStackPane extends StackPane {
 
     private static Logger log = Logger.getLogger(DocumentVSBrowserStackPane.class);
 
@@ -64,10 +63,6 @@ public class DocumentVSBrowserStackPane extends StackPane{
     private List<String> fileList = new ArrayList<String>();
 
     public DocumentVSBrowserStackPane() {
-        Region progressRegion = new Region();
-        progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
-        progressRegion.setPrefSize(240, 160);
-
         progressBox = new VBox();
         progressBox.setAlignment(Pos.CENTER);
         progressBox.setPrefWidth(400);
@@ -88,8 +83,7 @@ public class DocumentVSBrowserStackPane extends StackPane{
 
         Button nextButton = new Button(ContextVS.getMessage("buttonNextLbl"));
         nextButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
+            @Override public void handle(ActionEvent actionEvent) {
                 goNext();
             }
         });

@@ -21,6 +21,19 @@
         window[this.objectId] = callbackFunction;
     }
 
+
+    function updateLinksVS(elementsArray) {
+        for (var i = 0; i < elementsArray.length; i++) {
+            //console.log("elementsArray[i].href: " + elementsArray[i].href)
+            if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
+                elementsArray[i].addEventListener('click', function(e) {
+                    document.querySelector('#navBar').loadURL(e.target.href)
+                    e.preventDefault()
+                });
+            } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
+        }
+    }
+
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms

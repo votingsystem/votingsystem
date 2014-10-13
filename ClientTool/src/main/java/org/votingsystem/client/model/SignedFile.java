@@ -5,7 +5,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.model.PDFDocumentVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.FileUtils;

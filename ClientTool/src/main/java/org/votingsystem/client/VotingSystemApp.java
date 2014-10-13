@@ -24,11 +24,11 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
-import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
-import org.votingsystem.client.service.SignatureService;
+import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.WebSocketService;
-import org.votingsystem.client.util.*;
+import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -176,7 +176,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 }
                 ResponseVS responseVS = null;
                 try {
-                    responseVS = SignatureService.checkServer(accessControlServerURL);
+                    responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true);
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
@@ -184,7 +184,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 }
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {
-                    responseVS = SignatureService.checkServer(vicketsServerURL);
+                    responseVS = Utils.checkServer(vicketsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVicketServerAvailable(true);
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());

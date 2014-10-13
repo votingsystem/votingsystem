@@ -4,11 +4,9 @@ import javafx.scene.image.Image;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.*;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Created by jgzornoza on 10/05/14.
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class Utils {
 
@@ -43,6 +42,41 @@ public class Utils {
                     "/resources/icon_32/button_default.png"));
         }
         return image;
+    }
+
+    public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
+        log.debug(" - checkServer: " + serverURL);
+        ActorVS actorVS = ContextVS.getInstance().checkServer(serverURL.trim());
+        if (actorVS == null) {
+            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                actorVS = ActorVS.parse((Map) responseVS.getMessageJSON());
+                responseVS.setData(actorVS);
+                log.error("checkServer - adding " + serverURL.trim() + " to sever map");
+                switch (actorVS.getType()) {
+                    case ACCESS_CONTROL:
+                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
+                        break;
+                    case VICKETS:
+                        ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
+                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
+                        break;
+                    case CONTROL_CENTER:
+                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
+                        break;
+                    default:
+                        log.debug("Unprocessed actor:" + actorVS.getType());
+                }
+            } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
+                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
+            }
+            return responseVS;
+        } else {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+            responseVS.setData(actorVS);
+            return responseVS;
+        }
     }
 
     public static File getReceiptBundle(ResponseVS responseVS) throws Exception {

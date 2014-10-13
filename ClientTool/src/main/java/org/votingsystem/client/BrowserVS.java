@@ -41,8 +41,8 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
-import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -129,8 +129,7 @@ public class BrowserVS extends Region {
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         browserStage.setResizable(true);
         browserStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
+            @Override public void handle(WindowEvent event) {
                 event.consume();
                 browserStage.hide();
                 log.debug("browserStage.setOnCloseRequest");
@@ -286,7 +285,6 @@ public class BrowserVS extends Region {
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
-            log.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     webView.getEngine().executeScript(jsCommand);
@@ -305,7 +303,6 @@ public class BrowserVS extends Region {
         try {
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     new String(Base64.getEncoder().encode(message.getBytes("UTF8")), "UTF8") + "')";
-            log.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     webView.getEngine().executeScript(jsCommand);
@@ -407,8 +404,7 @@ public class BrowserVS extends Region {
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
             try {
                 String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
-                String logMsg = messageToSignatureClient.length() > 300 ? messageToSignatureClient.substring(0, 300) +
-                        "..." : messageToSignatureClient;
+                String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
                 log.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
                 OperationVS operationVS = OperationVS.parse(jsonObject);

@@ -13,25 +13,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import jdk.nashorn.internal.parser.JSONParser;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.vicket.model.VicketTransactionBatch;
-
-import java.io.File;
 
 /**
  * @author jgzornoza
@@ -53,6 +43,12 @@ public class JSONFormDialog {
     public JSONFormDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
+        stage.setResizable(true);
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override public void handle(WindowEvent event) {
+                log.debug("browserStage.setOnCloseRequest");
+            }
+        });
         //stage.initOwner(window);
 
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
@@ -68,7 +64,6 @@ public class JSONFormDialog {
         HBox.setHgrow(textArea, Priority.ALWAYS);
         VBox.setVgrow(textArea, Priority.ALWAYS);
         textArea.setStyle("-fx-word-wrap:break-word;");
-
 
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -91,9 +86,9 @@ public class JSONFormDialog {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         footerButtonsBox.getChildren().addAll(spacer,cancelButton, acceptButton);
 
-        mainBox.getChildren().addAll(textArea, footerButtonsBox);
+        mainBox.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(mainBox, Color.TRANSPARENT));
+        stage.setScene(new Scene(mainBox));
         stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();

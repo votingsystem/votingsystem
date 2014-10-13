@@ -18,10 +18,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
-
-
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
@@ -31,7 +28,7 @@
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->
-        <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
+        <core-signals on-core-signal-votingsystem-innerpage="{{innerPageSignal}}"></core-signals>
         <votingsystem-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
@@ -114,11 +111,12 @@
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 //window.addEventListener("popstate", function(e) {  });
             },
-            innerPageSignal:function(e, detail, sender) {
-                this.url = detail;
-            },
             urlChanged: function() {
                 this.loadURL(this.url)
+            },
+            innerPageSignal:function(e, detail, sender) {
+                console.log("innerPageSignal - title:" + detail.title)
+                if(detail.title) this.appTitle = detail.title
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
@@ -185,11 +183,6 @@
 </body>
 </html>
 <asset:script>
-    document.addEventListener('votingsystem-signal-innerPage', function(e) {
-        console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
-        document.querySelector('#navBar').url = e.detail
-    });
-
     window.addEventListener('WebComponentsReady', function(e) {  });
 
     document.addEventListener('polymer-ready', function() {

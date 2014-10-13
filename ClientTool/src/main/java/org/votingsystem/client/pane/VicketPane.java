@@ -1,29 +1,33 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.web.WebView;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.JSONFormDialog;
 import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -32,8 +36,6 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.votingsystem.vicket.model.VicketTransactionBatch;
 
-import javax.transaction.Transaction;
-import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,11 +54,12 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
     private Button sendVicketButton;
     private MessageDialog messageDialog;
     private HBox progressBox;
+    private ProgressBar progressBar;
     private Label progressLabel;
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
             try {
-                ResponseVS responseVS = SignatureService.checkServer(vicket.getVicketServerURL());
+                ResponseVS responseVS = Utils.checkServer(vicket.getVicketServerURL());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     vicketServer = (VicketServer) responseVS.getData();
                     responseVS = HttpHelper.getInstance().getData(
@@ -122,9 +125,9 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
                 DateUtils.getDayWeekDateStr(vicket.getValidTo())));
         vicketDateInfoLbl.getStyleClass().add("dateInfo");
 
-
         progressLabel = new Label();
-        final ProgressBar progressBar = new ProgressBar(0);
+        progressLabel.setStyle("-fx-font-size: 12;-fx-font-weight: bold;");
+        progressBar = new ProgressBar(0);
 
         progressBox = new HBox();
         progressBox.setSpacing(5);
@@ -145,6 +148,7 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         setColumnSpan(vicketTagLbl, 2);
         setColumnSpan(vicketStatusLbl, 2);
         setColumnSpan(vicketDateInfoLbl, 2);
+        setColumnSpan(progressBox, 2);
 
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
@@ -196,6 +200,13 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         return vicket;
     }
 
+    private void setProgressVisible(final boolean isProgressVisible, final boolean isButtonVisible) {
+        PlatformImpl.runLater(new Runnable() { @Override public void run() {
+            sendVicketButton.setVisible(isButtonVisible);
+            progressBox.setVisible(isProgressVisible);  }
+        });
+    }
+
     @Override public byte[] getDocumentBytes() throws Exception {
         return ObjectUtils.serializeObject(vicket);
     }
@@ -210,7 +221,7 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         VicketTransactionBatch transactionBatch = new VicketTransactionBatch();
         transactionBatch.addVicket(vicket);
         try {
-            progressBox.setVisible(true);
+            setProgressVisible(true, false);
             Task transactionTask =  new Task() {
                 @Override protected Object call() throws Exception {
                     updateProgress(1, 10);
@@ -226,17 +237,23 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
                     JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
                     transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"), vicketServer.getTrustAnchors());
                     Thread.sleep(3000);
-                    progressBox.setVisible(false);
+                    setProgressVisible(false, false);
                     showMessage(responseJSON.getString("message"), Boolean.FALSE);
                     return true;
                 }
             };
+            progressBar.progressProperty().unbind();
+            progressBar.progressProperty().bind(transactionTask.progressProperty());
+            transactionTask.messageProperty().addListener(new ChangeListener<String>() {
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    PlatformImpl.runLater(new Runnable() { @Override public void run() { progressLabel.setText(newValue);}});
+                }
+            });
             new Thread(transactionTask).start();
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             showMessage(ex.getMessage(), Boolean.FALSE);
-        } finally {
-            progressBox.setVisible(false);
+            setProgressVisible(false, true);
         }
     }
 

@@ -22,14 +22,14 @@
             font-weight: bold; margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
+        .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
+            margin:10px 0 10px 0; text-decoration: underline;}
         </style>
         <div layout vertical style="padding: 0 20px;">
-            <div layout horizontal center center-justified style="position: relative; display: block;" >
-                <div id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
-                margin:10px 0 10px 0;">
-                    {{caption}} - {{userVSName}}
-                </div>
-                <div style="font-size: 0.8em; color: #888; font-weight: normal; right:0px;top:0px; float: right; vertical-align: top;">
+            <div horizontal layout center center-justified>
+                <div flex></div>
+                <div id="caption" class="pageTitle">{{caption}} - {{userVSName}}</div>
+                <div flex style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">
                     {{description}}
                 </div>
             </div>

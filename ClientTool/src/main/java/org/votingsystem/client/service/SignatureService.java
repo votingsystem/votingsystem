@@ -11,6 +11,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
@@ -64,12 +65,12 @@ public class SignatureService extends Service<ResponseVS> {
                 switch (operationVS.getType()) {
                     case SEND_SMIME_VOTE:
                         String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL();
-                        responseVS = checkServer(accessControlURL);
+                        responseVS = Utils.checkServer(accessControlURL);
                         if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                         else ContextVS.getInstance().setServer((AccessControlVS) responseVS.getData());
                         operationVS.setTargetServer((AccessControlVS) responseVS.getData());
                         String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL();
-                        responseVS = checkServer(controlCenterURL);
+                        responseVS = Utils.checkServer(controlCenterURL);
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
@@ -78,7 +79,7 @@ public class SignatureService extends Service<ResponseVS> {
                         responseVS = new ResponseVS(ResponseVS.SC_OK);
                         break;
                     default:
-                        responseVS = checkServer(operationVS.getServerURL().trim());
+                        responseVS = Utils.checkServer(operationVS.getServerURL().trim());
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             ContextVS.getInstance().setServer((ActorVS) responseVS.getData());
                             operationVS.setTargetServer((ActorVS) responseVS.getData());
@@ -516,39 +517,5 @@ public class SignatureService extends Service<ResponseVS> {
         }
     }
 
-    //we know this is done in a background thread
-    public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
-        log.debug(" - checkServer: " + serverURL);
-        ActorVS actorVS = ContextVS.getInstance().checkServer(serverURL.trim());
-        if (actorVS == null) {
-            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
-            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ActorVS.parse((Map) responseVS.getMessageJSON());
-                responseVS.setData(actorVS);
-                log.error("checkServer - adding " + serverURL.trim() + " to sever map");
-                switch (actorVS.getType()) {
-                    case ACCESS_CONTROL:
-                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-                        break;
-                    case VICKETS:
-                        ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
-                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
-                        break;
-                    case CONTROL_CENTER:
-                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
-                        break;
-                    default:
-                        log.debug("Unprocessed actor:" + actorVS.getType());
-                }
-            } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
-            }
-            return responseVS;
-        } else {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-            responseVS.setData(actorVS);
-            return responseVS;
-        }
-    }
+
 }
