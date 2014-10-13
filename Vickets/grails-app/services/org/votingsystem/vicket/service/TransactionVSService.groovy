@@ -304,6 +304,34 @@ class TransactionVSService {
         return balancesCash
     }
 
+    public Map<String, Map> getBalancesMap(Collection<TransactionVS> transactionVSCollection) {
+        Map resultMap = [:]
+        for(TransactionVS transactionVS : transactionVSCollection) {
+            if(resultMap[transactionVS.getCurrencyCode()]) {
+                if(resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()]) {
+                    resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()] =
+                            resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()].add(transactionVS.amount)
+                } else resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()] = transactionVS.amount
+            } else {
+                resultMap[(transactionVS.getCurrencyCode())] = [(transactionVS.getTag().getName()): transactionVS.amount]
+            }
+        }
+        return resultMap
+    }
+
+    public String getBalancesMapMsg(Map<String, Map> balancesMap) {
+        StringBuilder sb = new StringBuilder()
+        String forLbl = messageSource.getMessage('forLbl', null, LocaleContextHolder.locale);
+        for(String currency: balancesMap.keySet()) {
+            for(String tag : balancesMap[currency].keySet()) {
+                if(sb.length() == 0) sb.append("${balancesMap[currency][tag]} $currency $forLbl $tag")
+                else sb.append(", ${balancesMap[currency][tag]} $currency $forLbl $tag")
+            }
+        }
+        sb.toString()
+    }
+
+
     @Transactional
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]

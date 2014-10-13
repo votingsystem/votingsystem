@@ -85,13 +85,12 @@ public class VicketTransactionBatch {
         return (JSONArray) JSONSerializer.toJSON(vicketTransactionBatch);
     }
 
-    public void validateTransactionVSResponse(String responseStr, Set<TrustAnchor> trustAnchor) throws Exception {
-        JSONArray transactionBatchResponseJSON = JSONArray.fromObject(responseStr);
+    public void validateTransactionVSResponse(JSONArray responseJSON, Set<TrustAnchor> trustAnchor) throws Exception {
         Map<String, Vicket> vicketMap = getVicketMap();
-        if(vicketMap.size() != transactionBatchResponseJSON.size()) throw new ExceptionVS("Num. vickets: '" +
-                vicketMap.size() + "' - num. receipts: " + transactionBatchResponseJSON.size());
-        for(int i = 0; i < transactionBatchResponseJSON.size(); i++) {
-            JSONObject receiptData = (JSONObject) transactionBatchResponseJSON.get(i);
+        if(vicketMap.size() != responseJSON.size()) throw new ExceptionVS("Num. vickets: '" +
+                vicketMap.size() + "' - num. receipts: " + responseJSON.size());
+        for(int i = 0; i < responseJSON.size(); i++) {
+            JSONObject receiptData = (JSONObject) responseJSON.get(i);
             String hashCertVS = (String) receiptData.keySet().iterator().next();
             SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     java.util.Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes())));

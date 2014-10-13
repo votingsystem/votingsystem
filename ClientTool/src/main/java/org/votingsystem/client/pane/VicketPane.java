@@ -223,9 +223,11 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
                     updateProgress(8, 10);
                     log.debug("Vicket Transaction result: " + responseVS.getStatusCode());
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-                    transactionBatch.validateTransactionVSResponse(responseVS.getMessage(), vicketServer.getTrustAnchors());
+                    JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
+                    transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"), vicketServer.getTrustAnchors());
+                    Thread.sleep(3000);
                     progressBox.setVisible(false);
-                    showMessage(responseVS.getMessage(), Boolean.FALSE);
+                    showMessage(responseJSON.getString("message"), Boolean.FALSE);
                     return true;
                 }
             };

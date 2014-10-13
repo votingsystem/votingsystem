@@ -1,6 +1,7 @@
 package org.votingsystem.test.vicket
 
-
+import net.sf.json.JSONObject
+import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
@@ -30,7 +31,9 @@ responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVS
         ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
 logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
-transactionBatch.validateTransactionVSResponse(responseVS.getMessage(), vicketServer.getTrustAnchors());
+JSONObject responseJSON = JSONSerializer.toJSON(responseVS.getMessage());
+logger.debug("Transaction result - statusCode: $responseJSON.statusCode - message:$responseJSON.message")
+transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"), vicketServer.getTrustAnchors());
 System.exit(0);
 
 

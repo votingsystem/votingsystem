@@ -108,9 +108,10 @@ class VicketService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         List<Vicket> validatedVicketList = new ArrayList<Vicket>()
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        UserVS toUserVS;
         for(Vicket vicket : vicketBatch.getVicketList()) {
             try {
-                UserVS toUserVS = UserVS.findWhere(IBAN:vicket.getToUserIBAN())
+                toUserVS = UserVS.findWhere(IBAN:vicket.getToUserIBAN())
                 if(!toUserVS) throw new ExceptionVS("Error - Vicket with hash '${vicket?.hashCertVS}' has wrong receptor IBAN '" +
                         vicket.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
                 vicket.setToUserVS(toUserVS)
@@ -123,7 +124,8 @@ class VicketService {
             }
         }
         List responseList = []
-
+        Map currencyMap = [:]
+        List<TransactionVS> transactionVSList = []
         for(Vicket vicket: validatedVicketList) {
             Date validTo = null
             if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
@@ -134,11 +136,15 @@ class VicketService {
                     toUserIBAN:vicket.getToUserIBAN(), state:TransactionVS.State.OK, validTo: validTo,
                     subject:vicket.getSubject(), toUserVS: vicket.getToUserVS(), type:TransactionVS.Type.VICKET_SEND,
                     currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
+            transactionVSList.add(transactionVS)
             vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
             responseList.add([(vicket.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
-
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: responseList)
+        Map resultMap = [statusCode:ResponseVS.SC_OK, message: messageSource.getMessage('vicketSendResultMsg',
+                [toUserVS.name, transactionVSService.getBalancesMapMsg(
+                        transactionVSService.getBalancesMap(transactionVSList))].toArray(),
+                LocaleContextHolder.locale), receiptList:responseList]
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)
     }
 
     public Vicket validateVicket(Vicket vicket) throws ExceptionVS {
