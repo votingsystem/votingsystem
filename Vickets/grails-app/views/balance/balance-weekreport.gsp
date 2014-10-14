@@ -148,12 +148,6 @@
                 balances: {value: {}}
             },
             ready: function() {},
-            tagDescription: function(tagName) {
-                switch (tagName) {
-                    case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
-                    default: return tagName
-                }
-            },
             balancesChanged: function() {
                 console.log("balancesChanged")
                 this.balancesStr = JSON.stringify(this.balances)

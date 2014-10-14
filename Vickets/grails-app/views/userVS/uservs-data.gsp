@@ -40,35 +40,37 @@
                         <div class="uservsCancelled">{{uservs.state}}</div>
                     </template>
 
-                    <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                        <div>
-                            <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
-                                                 style="margin:10px 20px 0px 0px;">
-                                <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
-                            </votingsystem-button>
-                        </div>
+                    <template if="{{uservs.state == 'ACTIVE'}}">
+                        <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
+                            <div>
+                                <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
+                                                     style="margin:10px 20px 0px 0px;">
+                                    <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
+                                </votingsystem-button>
+                            </div>
 
-                        <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                            <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
-                                                 style="margin:10px 20px 0px 0px;">
-                                <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
-                            </votingsystem-button>
-                        </div>
+                            <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
+                                <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
+                                                     style="margin:10px 20px 0px 0px;">
+                                    <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
+                                </votingsystem-button>
+                            </div>
 
-                        <div>
-                            <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
-                                                 style="margin:10px 20px 0px 0px;">
-                                <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
-                            </votingsystem-button>
-                        </div>
+                            <div>
+                                <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
+                                                     style="margin:10px 20px 0px 0px;">
+                                    <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
+                                </votingsystem-button>
+                            </div>
 
-                        <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
-                            <votingsystem-button id="blockUserVSButton" type="submit"
-                                                 style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
-                                <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
-                            </votingsystem-button>
+                            <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
+                                <votingsystem-button id="blockUserVSButton" type="submit"
+                                                     style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
+                                    <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
+                                </votingsystem-button>
+                            </div>
                         </div>
-                    </div>
+                    </template>
 
                     <template if="{{uservs.description}}">
                         <div style="margin:0 0 20px 0;">
@@ -143,15 +145,6 @@
             this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_USERVS, this.uservs.name, this.uservs.IBAN ,
                     this.uservs.id)
             this.page = 1;
-
-            /*var encodedIBAN = encodeURIComponent("")
-            var encodedSubject = encodeURIComponent(transactionSubject)
-            var encodedRefererURL = encodeURIComponent(window.location.href)
-            var encodedReceptor = encodeURIComponent('<g:message code="receptorTestWebAccountLbl"/>')
-            var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTIONVS&amount=20&currencyCode=EUR" +
-                    "&tagVS=HIDROGENO&IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&toUser=" + encodedReceptor +
-                    "&toUserIBAN=ES8978788989450000000004&refererURL=" + encodedRefererURL
-            window.location.href = uriData.replace("\n","")*/
         },
         showByIBAN:function(IBAN) {
             var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + IBAN

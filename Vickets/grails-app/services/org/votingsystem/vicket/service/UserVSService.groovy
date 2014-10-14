@@ -162,7 +162,7 @@ class UserVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
-        userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
+        if(UserVS.Type.SYSTEM != userVS.type) userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         return resultMap
     }
 }

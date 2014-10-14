@@ -8,7 +8,7 @@
 </head>
 <body>
 <votingsystem-innerpage-signal title="<g:message code="usersvsPageLbl"/>"></votingsystem-innerpage-signal>
-<div class="pageContentDiv">
+<div class="pageContentDiv" style="max-width: 900px;">
     <uservs-data id="userData" userVSData="${uservsMap as grails.converters.JSON}"></uservs-data>
 </div>
 </body>

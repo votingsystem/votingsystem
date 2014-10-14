@@ -54,7 +54,7 @@
 
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div layout horizontal center center-justified>
-                    <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton"></paper-radio-button></div>
+                    <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
                     <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
                 <div>
@@ -238,10 +238,11 @@
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
-                isTimeLimited:this.$.timeLimitedRButton.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
-                amount: this.$.amount.value, currencyCode:this.$.currencySelector.getSelected(),
-                fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN,
-                toUser:this.toUserName}
+                isTimeLimited:this.$.timeLimitedRButton.checked, tags:tagList, amount: this.$.amount.value,
+                currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
+                fromUserIBAN:this.fromUserIBAN}
+            if(this.toUserName)  webAppMessage.signedContent.toUser = this.toUserName
+            if(this.getToUserIBAN()) webAppMessage.signedContent.toUserIBAN = this.getToUserIBAN()
             webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
@@ -253,14 +254,16 @@
                 }.bind(this))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
-
-        toUserIBAN: function () {
-            var receptorList = this.$.receptorBox? this.$.receptorBox.getUserList():[]
-            var result = []
-            for(userIdx in receptorList) {
-                result.push(receptorList[userIdx].IBAN);
+        getToUserIBAN: function () {
+            if(this.operation === Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS) return null
+            else {
+                var receptorList = this.$.receptorBox.getUserList()
+                var result = []
+                for(userIdx in receptorList) {
+                    result.push(receptorList[userIdx].IBAN);
+                }
+                return result
             }
-            return result
         },
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
@@ -306,16 +309,6 @@
 
                     break;
             }
-
-            /*var encodedIBAN = encodeURIComponent("")
-             var encodedSubject = encodeURIComponent(transactionSubject)
-             var encodedRefererURL = encodeURIComponent(window.location.href)
-             var encodedReceptor = encodeURIComponent('<g:message code="receptorTestWebAccountLbl"/>')
-             var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTIONVS&amount=20&currencyCode=EUR" +
-             "&tagVS=HIDROGENO&IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&toUser=" + encodedReceptor +
-             "&toUserIBAN=ES8978788989450000000004&refererURL=" + encodedRefererURL
-             window.location.href = uriData.replace("\n","")*/
-
             this.selectedTags = []
             return this.caption
         }

@@ -27,7 +27,6 @@ class TransactionVS_UserVSService {
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS fromUserVS = messageSMIMEReq.userVS
         UserVS toUserVS
-        log.debug("====== $methodName - messageJSON: $messageJSON")
         //Validate request
         ResponseVS responseVS
         String msg

@@ -23,12 +23,12 @@
             padding:10px 20px 10px 20px;
         }
         .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
-            margin:10px 0 10px 0; text-decoration: underline;}
+            margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
         </style>
         <div layout vertical style="padding: 0 20px;">
             <div horizontal layout center center-justified>
                 <div flex></div>
-                <div id="caption" class="pageTitle">{{caption}} - {{userVSName}}</div>
+                <div id="caption" class="pageTitle" on-click="{{goToUserVSPage}}">{{caption}} - {{userVSName}}</div>
                 <div flex style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">
                     {{description}}
                 </div>
@@ -83,12 +83,11 @@
                     </div>
                 </div>
                 <div layout horizontal>
-                    <div vertical layout style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
+                    <div flex style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                         <transactionvs-list-balance caption="<g:message code="incomesLbl"/>" transactionList="{{balance.transactionToList}}"
                                                     balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
-                        <div flex></div>
                     </div>
-                    <div>
+                    <div flex>
                         <transactionvs-list-balance id="balanceFromItem"  transactionList="{{balance.transactionFromList}}"
                                                     balances="{{balance.balancesFrom}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                     </div>
@@ -123,6 +122,9 @@
                     case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
                     default: return tagName
                 }
+            },
+            goToUserVSPage:function() {
+                loadURL_VS("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.balance.userVS.id)
             },
             getTimeLimitedForTagMsg: function(currency, tag) {
                 var expendedFromTag = 0

@@ -39,59 +39,58 @@ class TransactionVSController {
     }
 
     def index() {
-        if(request.contentType?.contains("json")) {
-            Map sortParamsMap = RequestUtils.getSortParamsMap(params)
-            Map.Entry sortParam
-            if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
-            List<TransactionVS> transactionList = null
-            int totalTransactions = 0;
-            TransactionVS.withTransaction {
-                if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
-                    TransactionVS.Type transactionType = null
-                    BigDecimal amount = null
-                    Date dateFrom = null
-                    Date dateTo = null
-                    try {
-                        if(params.transactionvsType) transactionType = TransactionVS.Type.valueOf(params.transactionvsType)
-                        else transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
-                    try {amount = new BigDecimal(params.searchText)} catch(Exception ex) {}
-                    //searchFrom:2014/04/14 00:00:00, max:100, searchTo
-                    if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
-                    if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+        Map sortParamsMap = RequestUtils.getSortParamsMap(params)
+        Map.Entry sortParam
+        if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
+        List<TransactionVS> transactionList = null
+        int totalTransactions = 0;
+        TransactionVS.withTransaction {
+            if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
+                TransactionVS.Type transactionType = null
+                BigDecimal amount = null
+                Date dateFrom = null
+                Date dateTo = null
+                try {
+                    if(params.transactionvsType) transactionType = TransactionVS.Type.valueOf(params.transactionvsType)
+                    else transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
+                try {amount = new BigDecimal(params.searchText)} catch(Exception ex) {}
+                //searchFrom:2014/04/14 00:00:00, max:100, searchTo
+                if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
+                if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
 
-                    transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
-                            sort:sortParam?.key, order:sortParam?.value) {
-                        or {
-
-                            if(transactionType) eq("type", transactionType)
-                            if(amount) eq("amount", amount)
-                            ilike('subject', "%${params.searchText}%")
-                            ilike('currencyCode', "%${params.searchText}%")
-                        }
-                        and {
-                            isNull('transactionParent')
-                            if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
-                            else if(dateFrom) {ge("dateCreated", dateFrom)}
-                            else if(dateTo) {le("dateCreated", dateTo)}
-                        }
+                transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:sortParam?.key, order:sortParam?.value) {
+                    or {
+                        if(transactionType) eq("type", transactionType)
+                        if(amount) eq("amount", amount)
+                        ilike('subject', "%${params.searchText}%")
+                        ilike('currencyCode', "%${params.searchText}%")
                     }
-                    totalTransactions = transactionList.totalCount
-                } else {
-                    transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
-                            sort:sortParam?.key, order:sortParam?.value){
+                    and {
                         isNull('transactionParent')
-                    };
-                    totalTransactions = transactionList.totalCount
+                        if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
+                        else if(dateFrom) {ge("dateCreated", dateFrom)}
+                        else if(dateTo) {le("dateCreated", dateTo)}
+                    }
                 }
+                totalTransactions = transactionList.totalCount
+            } else {
+                transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:sortParam?.key, order:sortParam?.value){
+                    isNull('transactionParent')
+                };
+                totalTransactions = transactionList.totalCount
             }
-            def resultList = []
-            transactionList.each {transactionItem ->
-                resultList.add(transactionVSService.getTransactionMap(transactionItem))
-            }
-            def resultMap = [transactionRecords:resultList, queryRecordCount: totalTransactions,
-                             numTotalTransactions:totalTransactions ]
-            render resultMap as JSON
         }
+        def resultList = []
+        transactionList.each {transactionItem ->
+            resultList.add(transactionVSService.getTransactionMap(transactionItem))
+        }
+        def resultMap = [transactionRecords:resultList, queryRecordCount: totalTransactions,
+                         numTotalTransactions:totalTransactions ]
+        if(request.contentType?.contains("json")) {
+            render resultMap as JSON
+        } else render(view:'index', model: [transactionsMap:resultMap])
     }
 
     /**
@@ -152,12 +151,7 @@ class TransactionVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-        ResponseVS responseVS = null
-        if(ContentTypeVS.VICKET == contentTypeVS) {
-            responseVS = vicketService.processTransactionVS(messageSMIMEReq, null, request.locale)
-        } else responseVS = transactionVSService.processTransactionVS(messageSMIMEReq, request.locale)
-        return [responseVS:responseVS]
+        return [responseVS:transactionVSService.processTransactionVS(messageSMIMEReq, request.locale)]
     }
 
     /**

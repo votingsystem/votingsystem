@@ -27,7 +27,8 @@
                     <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
                         <div style="margin:0 10px 0 0; color: #888;"><i class="fa fa-tag"></i></div>
                         <template repeat="{{tag in transactionvs.tags}}">
-                            <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
+                            <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">
+                                {{tag}}</a>
                         </template>
                     </div>
                 </core-tooltip>

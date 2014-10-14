@@ -5,30 +5,14 @@
 <template>
     <style>
     .tableHeadervs {
-        margin: 0px 0px 0px 0px;
-        color:#6c0404;
-        border-bottom: 1px solid #6c0404;
-        background: white;
-        font-weight: bold;
-        padding:5px 0px 5px 0px;
-        width: 100%;
+        margin: 0px 0px 0px 0px; color:#6c0404;  border-bottom: 1px solid #6c0404; background: white;
+        font-weight: bold; padding:5px 0px 5px 0px; width: 100%;
     }
-    .tableHeadervs div {
-        text-align:center;
-    }
-    .rowvs {
-        border-bottom: 1px solid #ccc;
-        padding: 10px 0px 10px 0px;
-        cursor: pointer;
-        width: 100%;
-        font-size: 0.9em;
-    }
-    .rowvs div {
-        text-align:center;
-    }
-    .expenseRow {
-        background: #fee;
-    }
+    .tableHeadervs div { text-align:center; }
+    .rowvs { border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px; cursor: pointer;
+        width: 100%; font-size: 0.9em; }
+    .rowvs div { text-align:center; }
+    .expenseRow { background: #fee; }
     </style>
     <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                contentType="json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
@@ -43,13 +27,13 @@
             <div flex style="width:240px;"><g:message code="subjectLbl"/></div>
         </div>
         <div>
-            <template repeat="{{transaction in transactionList}}">
+            <template repeat="{{transaction in transactionsMap.transactionRecords}}">
                 <div layout horizontal center center justified on-click="{{showTransactionDetails}}" class="rowvs {{getClass(transaction)}}">
                     <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
                         <a> {{transaction| transactionDescription}}</a>
                     </div>
-                    <div style="width:140px;">{{transaction.tag}}</div>
+                    <div style="width:140px;">{{transaction.tags[0]}}</div>
                     <div style="width:110px;">{{amount(transaction)}}</div>
                     <div style="width:140px;">{{transaction.dateCreated}}</div>
                     <div flex style="width:240px;">{{transaction.subject}}</div>
@@ -61,9 +45,11 @@
 </template>
 <script>
     Polymer('transactionvs-table', {
-        ready:function() { },
         userNif:null,
         isUserVSTable:false,
+        publish: {
+            transactionsMap: {value: {}}
+        },
         transactionListChanged:function() {
             console.log("transactionListChanged")
         },

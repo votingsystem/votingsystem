@@ -8,7 +8,7 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         .transactionvsRow { cursor: pointer;}
-        .dateCreated {font-size: 0.8em; color:#888; width: 110px; margin: 0 10px 0 0;}
+        .dateCreated {font-size: 0.8em; color:#888; width: 120px; margin: 0 10px 0 0;}
         .subjectColumn {
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
         }
@@ -28,7 +28,7 @@
                         <div class="subjectColumn">{{transaction.subject}}</div>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div layout horizontal center center-justified class="tagColumn">
-                            <div flex horizontal layout center center-justified>{{transaction.tags[0].name | tagDescription}}</div>
+                            <div flex horizontal layout center center-justified>{{transaction.tags[0]}}</div>
                             <div style="margin:0 0 0 5px; width: 10px;">
                                 <div style="display:{{ isTimeLimited(transaction) ? 'block':'none'}}">
                                     <core-tooltip large label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
@@ -61,12 +61,6 @@
             publish: {
                 balances: {value: {}},
                 transactionList: {value: []}
-            },
-            tagDescription: function(tagName) {
-                switch (tagName) {
-                    case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
-                    default: return tagName
-                }
             },
             ready: function() {
                 console.log(this.tagName + " - ready - transactionList: " + this.transactionList.length)

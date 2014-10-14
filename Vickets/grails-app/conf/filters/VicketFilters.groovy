@@ -5,7 +5,8 @@ import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.signature.smime.ValidationResult
-import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.FileUtils
+import org.votingsystem.vicket.model.AlertVS;
 
 import javax.servlet.http.HttpServletResponse
 import java.security.cert.X509Certificate;
@@ -250,6 +251,7 @@ class VicketFilters {
 
     private boolean printOutput(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
+        if(ResponseVS.SC_OK != responseVS.statusCode) new AlertVS(responseVS.getAlertMessage()).save()
         response.setContentType(responseVS.getContentType()?.getName()+";charset=UTF-8")
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
         if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"

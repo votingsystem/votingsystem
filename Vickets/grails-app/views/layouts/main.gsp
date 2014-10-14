@@ -88,7 +88,7 @@
                     </core-selector>
                 </core-menu>
             </core-header-panel>
-            <div id="appTitle" style="font-size:1.5em;width: 100%;" tool>{{appTitle}}</div>
+            <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content id="content"></content>
         </votingsystem-navbar>
         <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">

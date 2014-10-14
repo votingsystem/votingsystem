@@ -26,7 +26,7 @@ if(vicketFiles.length == 0) throw new ExceptionVS(" --- Wallet empty ---")
 VicketTransactionBatch transactionBatch = new VicketTransactionBatch()
 transactionBatch.addVicket(vicketFiles[0])
 transactionBatch.initTransactionVSRequest("toUserName", "ES0878788989450000000007",
-        "First Vicket Transaction", false, vicketServer.getTimeStampServiceURL())
+        "First Vicket Transaction", true, vicketServer.getTimeStampServiceURL())
 responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVSRequest().toString().getBytes(),
         ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
 logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())

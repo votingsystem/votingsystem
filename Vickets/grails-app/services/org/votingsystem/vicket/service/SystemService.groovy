@@ -92,10 +92,22 @@ class SystemService {
         resultMap.userVS = ((UserVSService)grailsApplication.mainContext.getBean("userVSService")).getUserVSDataMap(
                 getSystemUser(), false)
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            isNull('transactionParent')
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD])}
+            or {
+                and {
+                    eq('state', TransactionVS.State.OK)
+                    isNotNull('transactionParent')
+                    between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                    //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
+                }
+                and {
+                    eq('state', TransactionVS.State.OK)
+                    isNull('transactionParent')
+                    inList("type", [TransactionVS.Type.VICKET_SEND])
+                }
+            }
+
         }
+
         def transactionFromList = []
         Map<String, Map> balancesMap = [:]
         transactionList.each { transaction ->
@@ -115,9 +127,9 @@ class SystemService {
         resultMap.balancesFrom = balancesMap
 
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            isNotNull('transactionParent')
+            isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
+            not{ inList("type", [TransactionVS.Type.VICKET_SEND])}
         }
 
         def transactionToList = []

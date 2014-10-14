@@ -49,9 +49,8 @@ class TransactionVSService {
         String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         if(messageJSON.toUserIBAN instanceof JSONArray) {
-            messageJSON.toUserIBAN.each { it ->
-                IbanVSUtil.validate(it);}
-        } else {
+            messageJSON.toUserIBAN.each { it ->IbanVSUtil.validate(it);}
+        } else if(messageJSON.toUserIBAN) {
             IbanVSUtil.validate(messageJSON.toUserIBAN);
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
@@ -162,6 +161,7 @@ class TransactionVSService {
                 or {
                     and{
                         eq('fromUserVS', fromUserVS)
+                        eq('state', TransactionVS.State.OK)
                         isNotNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
                         not { inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS,
@@ -169,6 +169,7 @@ class TransactionVSService {
                     }
                     and {
                         eq('fromUserVS', fromUserVS)
+                        eq('state', TransactionVS.State.OK)
                         isNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
                         inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS] )
@@ -178,11 +179,13 @@ class TransactionVSService {
                 or {
                     and {
                         eq('fromUserVS', fromUserVS)
+                        eq('state', TransactionVS.State.OK)
                         isNotNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
                     }
                     and {
                         eq('fromUserVS', fromUserVS)
+                        eq('state', TransactionVS.State.OK)
                         isNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
                         inList("type", [TransactionVS.Type.VICKET_REQUEST] )
@@ -218,6 +221,7 @@ class TransactionVSService {
     public PagedResultList getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('toUserVS', toUserVS)
+            eq('state', TransactionVS.State.OK)
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         return transactionList
@@ -370,9 +374,10 @@ class TransactionVSService {
             transactionMap.numChildTransactions = TransactionVS.countByTransactionParent(transactionParent)
         }
         if(transaction.tag) {
-            transactionMap.tags = [[id:transaction.tag.id, name:transaction.tag.name]]
+            String tagName = TagVS.WILDTAG.equals(transaction.tag.name)? messageSource.getMessage('wildTagLbl', null,
+                    LocaleContextHolder.locale).toUpperCase():transaction.tag.name
+            transactionMap.tags = [tagName]
         } else transactionMap.tags = []
-
         return transactionMap
     }
 

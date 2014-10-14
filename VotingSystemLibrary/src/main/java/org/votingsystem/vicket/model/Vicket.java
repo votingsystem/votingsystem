@@ -23,6 +23,9 @@ import java.math.BigDecimal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -150,21 +153,30 @@ public class Vicket implements Serializable  {
         return this;
     }
 
+    private String getErrorPrefix() {
+        return "ERROR - Vicket with hash: " + hashCertVS + " - ";
+    }
+
     public void validateSignedData() throws ExceptionVS {
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
         TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
         if(TypeVS.VICKET_SEND != operation)
             throw new ExceptionVS("Error - Vicket with invalid operation '" + operation.toString() + "'");
-        if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS("Error - Vicket with value of '" + amount +
+        if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS(getErrorPrefix() + "and value '" + amount +
                 "' has signed amount  '" + toUserVSAmount + "'");
-        if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS("Error - Vicket with currencyCode '" +
-                currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
-        if(!signedTagVS.equals(messageJSON.getString("tag"))) throw new ExceptionVS("Error - Vicket with tag '" +
+        if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS(getErrorPrefix() +
+                "currencyCode '" + currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
+        if(!signedTagVS.equals(messageJSON.getString("tag"))) throw new ExceptionVS(getErrorPrefix() + "tag '" +
                 signedTagVS + "' has signed tag  '" + messageJSON.getString("tag"));
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS("Error - Vicket valid to '" +
+        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
+        if(messageJSON.getBoolean("isTimeLimited") == false) {
+            boolean isTimeLimited = checkIfTimeLimited(x509AnonymousCert.getNotBefore(), x509AnonymousCert.getNotAfter());
+            if(isTimeLimited) throw new ExceptionVS(getErrorPrefix() +
+                    "Time limited Vicket with 'isTimeLimited' signature param set to false");
+        }
         subject = messageJSON.getString("subject");
         toUserIBAN = messageJSON.getString("toUserIBAN");
         toUserName = messageJSON.getString("toUserName");
@@ -443,6 +455,13 @@ public class Vicket implements Serializable  {
         this.certificationRequest = certificationRequest;
     }
 
+    public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {
+        LocalDate notBeforeLD = notBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate notAfterLD = notAfter.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        Period validPeriod = Period.between(notBeforeLD, notAfterLD);
+        return validPeriod.getDays() <= 7;//one week
+    }
+
     public TagVS getTag() {
         return tag;
     }
@@ -467,11 +486,15 @@ public class Vicket implements Serializable  {
         }
     }
 
-    public JSONObject getTransaction(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {
+    public JSONObject getTransaction(String toUserName, String toUserIBAN, String subject,
+                                     Boolean isTimeLimited) throws ExceptionVS {
         this.toUserName = toUserName;
         this.toUserIBAN = toUserIBAN;
         this.subject = subject;
-        this.isTimeLimited = isTimeLimited;
+        if(isTimeLimited == false && checkIfTimeLimited(x509AnonymousCert.getNotBefore(),
+                x509AnonymousCert.getNotAfter())) {
+            throw new ExceptionVS("Time limited Vicket with 'isTimeLimited' signature param set to false");
+        }
         Map dataMap = new HashMap();
         dataMap.put("operation", TypeVS.VICKET_SEND.toString());
         dataMap.put("subject", subject);
@@ -480,7 +503,7 @@ public class Vicket implements Serializable  {
         dataMap.put("tag", tag.getName());
         dataMap.put("amount", amount.toString());
         dataMap.put("currencyCode", currencyCode);
-        if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
+        dataMap.put("isTimeLimited", false);
         dataMap.put("UUID", UUID.randomUUID().toString());
         return (JSONObject) JSONSerializer.toJSON(dataMap);
     }
