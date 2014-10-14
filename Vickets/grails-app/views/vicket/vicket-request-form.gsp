@@ -1,19 +1,18 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/currency-selector']"/>">
 
 
-<polymer-element name="vicket-request-form"  on-core-select="{{selectAction}}">
+<polymer-element name="vicket-request-form">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
             .green-slider paper-slider::shadow #sliderKnobInner,
             .green-slider paper-slider::shadow #sliderKnobInner::before,
             .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
@@ -86,12 +85,7 @@
                     <div layout horizontal center center-justified>
                         <div style="font-size: 2.2em; width: 50px;">{{amountValue}}</div>
 
-                        <paper-dropdown-menu valueattr="label" halign="right" selected="0"
-                                             style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;">
-                            <template repeat="{{currencyCodes}}">
-                                <paper-item id="{{code}}" label="{{name}}"></paper-item>
-                            </template>
-                        </paper-dropdown-menu>
+                        <currency-selector id="currencySelector" style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;"></currency-selector>
                     </div>
                 </div>
             </div>
@@ -105,19 +99,11 @@
                              serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
 
         <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
-
     </template>
     <script>
         Polymer('vicket-request-form', {
             selectedTags: [],
-            currencyCode:null,
-            currencyCodes: [
-                {name: 'Euro', code: 'EUR'},
-                {name: 'Dollar', code: 'USD'},
-                {name: 'Yuan', code: 'CNY'},
-                {name: 'Yen', code: 'JPY'}],
             messageToUser:null,
-
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.$.tagDialog.addEventListener('tag-selected', function (e) {
@@ -125,18 +111,8 @@
                     this.selectedTags = e.detail
                 }.bind(this))
             },
-            currencyCodeSelect:function() {
-                this.fire("selected", this.$.currencyCodeSelect.value)
-                this.fire('core-signal', {name: "amount-selected", data: this.$.currencyCodeSelect.value});
-            },
             valueChanged:function() {
                 this.amountValue = this.value * 10;
-            },
-            selectAction: function(e, details) {
-                if(details.isSelected) {
-                    this.currencyCode = details.item.id
-                }
-
             },
             showTagDialog: function() {
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
@@ -179,8 +155,8 @@
                 webAppMessage.serviceURL = "${createLink( controller:'vicket', action:"request", absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code='vicketRequestLbl'/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_REQUEST, totalAmount:this.amountValue,
-                    isTimeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.currencyCode, tag:tagList[0]}
-
+                    isTimeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),
+                    tag:tagList[0]}
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
