@@ -80,9 +80,8 @@ class GroupVSController {
             ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 GroupVS newGroupVS = responseVS.data
-                String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
                 responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
-                        args:[newGroupVS.name]), URL:URL]
+                        args:[newGroupVS.name]), URL:"${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"]
                 responseVS.setContentType(ContentTypeVS.JSON)
             }
             return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]

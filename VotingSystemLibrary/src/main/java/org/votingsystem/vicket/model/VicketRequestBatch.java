@@ -31,7 +31,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
     @OneToOne private MessageSMIME messageSMIME;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag", nullable=false) private VicketTagVS tagVS;
+    @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
 
 
@@ -87,13 +87,13 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
             "Amount signed '" + requestAmount.toString() + "' - total amount in CSRs '" + csrRequestAmount.toString() + "'");
     }
 
-    public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tagVS,
+    public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, TagVS tagVS,
               Boolean isTimeLimited, VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
         this.isTimeLimited = isTimeLimited;
-        this.tagVS = tagVS == null ? new VicketTagVS(VicketTagVS.WILDTAG):tagVS;
+        this.tagVS = tagVS == null ? new TagVS(TagVS.WILDTAG):tagVS;
         this.tag = this.tagVS.getName();
         this.vicketsValue = vicketsValue;
         this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, isTimeLimited, vicketServer);
@@ -172,7 +172,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     }
 
     public static Map<String, Vicket> getVicketBatch(BigDecimal requestAmount, BigDecimal vicketsValue,
-                 String currencyCode, VicketTagVS tag, Boolean isTimeLimited,  VicketServer vicketServer) {
+                 String currencyCode, TagVS tag, Boolean isTimeLimited,  VicketServer vicketServer) {
         Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
         BigDecimal numVickets = requestAmount.divide(vicketsValue);
         for(int i = 0; i < numVickets.intValue(); i++) {
@@ -220,11 +220,11 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         this.tag = tag;
     }
 
-    public VicketTagVS getTagVS() {
+    public TagVS getTagVS() {
         return tagVS;
     }
 
-    public void setTagVS(VicketTagVS tagVS) {
+    public void setTagVS(TagVS tagVS) {
         this.tagVS = tagVS;
         for(Vicket vicket : vicketsMap.values()) {
             vicket.setTag(tagVS);

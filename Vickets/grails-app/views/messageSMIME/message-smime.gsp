@@ -180,14 +180,10 @@
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + e.target.templateInstance.model.IBAN
-                document.querySelector('#navBar').loadURL(serviceURL)
+                loadURL_VS("${createLink( controller:'userVS')}/IBAN/" + e.target.templateInstance.model.IBAN)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
-
-
-
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);

@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
@@ -91,7 +91,7 @@ public class CertificationRequestVS implements java.io.Serializable {
               String amount, String currency, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        tagVS = (tagVS == null)? VicketTagVS.WILDTAG:tagVS;
+        tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
                 ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");

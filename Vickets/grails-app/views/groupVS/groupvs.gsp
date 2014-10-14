@@ -7,6 +7,8 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-details']"/>">
 </head>
 <body>
-    <groupvs-details groupvs="${groupvsMap as grails.converters.JSON}" id="groupvsDetails"></groupvs-details>
+    <div class="pageContentDiv">
+        <groupvs-details groupvs="${groupvsMap as grails.converters.JSON}" id="groupvsDetails"></groupvs-details>
+    </div>
 </body>
 </html>

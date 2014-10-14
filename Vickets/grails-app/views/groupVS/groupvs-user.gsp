@@ -22,26 +22,18 @@
                 <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>:
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>
-            <template if="{{isClientToolConnected}}">
-                <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
-                    <votingsystem-button id="activateUserButton" type="button" on-click="{{groupVSUserLastOperations}}"
-                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}">
-                        <i class="fa fa-list" style="margin:0 5px 0 2px;"></i> <g:message code="groupVSUserLastOperationsLbl"/>
-                    </votingsystem-button>
-                    <votingsystem-button id="activateUserButton" type="button" on-click="{{activateUser}}"
-                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}">
+            <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
+                <template if="{{isClientToolConnected}}">
+                    <votingsystem-button type="button" on-click="{{activateUser}}"
+                                         style="margin:0 10px;display:{{isActive?'none':'block'}}">
                         <i class="fa fa-thumbs-o-up" style="margin:0 5px 0 2px;"></i> <g:message code="activateUserLbl"/>
                     </votingsystem-button>
-                    <votingsystem-button id="deActivateUserButton" on-click="{{initCancellation}}"
-                         style="margin:0 0 0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
+                    <votingsystem-button on-click="{{initCancellation}}"
+                                         style="margin:0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                         <i class="fa fa-thumbs-o-down" style="margin:0 5px 0 2px;"></i> <g:message code="deActivateUserLbl"/>
                     </votingsystem-button>
-                </div>
-            </template>
-
-            <div layout horizontal center center-justified>
-                <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{goToUserVSPage}}"
-                                     style="margin:10px 20px 0px 0px;">
+                </template>
+                <votingsystem-button type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
                     <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> <g:message code="userVSPageLbl"/>
                 </votingsystem-button>
             </div>
@@ -87,7 +79,7 @@
                 this.opened = this.$.xDialog.opened
             },
             goToUserVSPage:function() {
-                document.querySelector('#navBar').loadURL("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.userId)
+                loadURL_VS("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.userId)
                 this.$.xDialog.opened = false
             },
             openedChanged:function() {
@@ -100,9 +92,6 @@
             },
             userIdChanged:function() {
                 this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId + "?mode=simplePage&menu=" + menuType
-            },
-            groupVSUserLastOperations:function() {
-
             },
             activateUser : function(e) {
                 console.log("activateUser")

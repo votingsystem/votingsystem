@@ -65,7 +65,7 @@ public class Vicket implements Serializable  {
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
+    @JoinColumn(name="tagVS", nullable=false) private TagVS tag;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="transactionvs") private TransactionVS transactionVS;
@@ -239,7 +239,7 @@ public class Vicket implements Serializable  {
         this.csr = csr;
     }
 
-    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, VicketTagVS tag) {
+    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, TagVS tag) {
         this.amount = amount;
         this.vicketServerURL = vicketServerURL;
         this.currencyCode = currencyCode;
@@ -443,11 +443,11 @@ public class Vicket implements Serializable  {
         this.certificationRequest = certificationRequest;
     }
 
-    public VicketTagVS getTag() {
+    public TagVS getTag() {
         return tag;
     }
 
-    public void setTag(VicketTagVS tag) {
+    public void setTag(TagVS tag) {
         this.tag = tag;
     }
 

@@ -2,7 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.WalletVS
@@ -23,7 +23,7 @@ class WalletVSService {
 	public void init() { }
 
     @Transactional
-    public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, VicketTagVS tag, String currencyCode) {
+    public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, TagVS tag, String currencyCode) {
         List accountList = []
         def wildTagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:systemService.getWildTag())
         if(wildTagAccount) accountList.add(wildTagAccount)
@@ -38,7 +38,7 @@ class WalletVSService {
 
     @Transactional
     public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(String fromUserIBAN,
-            VicketTagVS tag, BigDecimal amount, String currencyCode) {
+            TagVS tag, BigDecimal amount, String currencyCode) {
         WalletVS transactionWallet = getWalletVSForTransactionVS(fromUserIBAN, tag, currencyCode)
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
                 transactionWallet.getAccountMovementsForTransaction(tag, amount, currencyCode)

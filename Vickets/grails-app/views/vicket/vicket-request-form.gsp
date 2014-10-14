@@ -5,7 +5,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
 
 
@@ -102,7 +102,7 @@
             </div>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                             serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
+                             serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
 
         <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
 

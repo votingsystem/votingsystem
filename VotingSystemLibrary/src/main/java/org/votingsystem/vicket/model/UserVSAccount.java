@@ -3,7 +3,7 @@ package org.votingsystem.vicket.model;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.TagVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -42,7 +42,7 @@ public class UserVSAccount implements Serializable {
     @JoinColumn(name="userVS") private UserVS userVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag") private VicketTagVS tag;
+    @JoinColumn(name="tag") private TagVS tag;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -103,11 +103,11 @@ public class UserVSAccount implements Serializable {
         this.IBAN = IBAN;
     }
 
-    public VicketTagVS getTag() {
+    public TagVS getTag() {
         return tag;
     }
 
-    public void setTag(VicketTagVS tag) {
+    public void setTag(TagVS tag) {
         this.tag = tag;
     }
 

@@ -49,9 +49,9 @@ class TransactionVS_UserVSService {
         Date validTo = null
         if(messageJSON.isTimeLimited == true) validTo = DateUtils.getCurrentWeekPeriod().dateTo
 
-        VicketTagVS tag
+        TagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = VicketTagVS.findWhere(name:messageJSON.tags[0])
+            tag = TagVS.findWhere(name:messageJSON.tags[0])
             if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0]}'")
         } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
         //Check cash available for user

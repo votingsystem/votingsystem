@@ -62,7 +62,7 @@
                             </votingsystem-button>
                         </div>
 
-                        <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
+                        <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
                             <votingsystem-button id="blockUserVSButton" type="submit"
                                                  style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
                                 <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
@@ -129,7 +129,7 @@
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {
-            document.querySelector('#navBar').loadURL("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
+            loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))

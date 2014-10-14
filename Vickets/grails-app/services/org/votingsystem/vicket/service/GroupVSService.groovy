@@ -5,7 +5,6 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -119,12 +118,12 @@ class GroupVSService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
 
-        Set<VicketTagVS> tagSet
+        Set<TagVS> tagSet
         if(messageJSON.tags) {
-            tagSet = new HashSet<VicketTagVS>()
+            tagSet = new HashSet<TagVS>()
             messageJSON.tags.each {tag ->
-                VicketTagVS vicketTagVS = VicketTagVS.findWhere(id:Long.valueOf(tag.id), name:tag.name)
-                if(vicketTagVS) tagSet.add(vicketTagVS)
+                TagVS tagVS = TagVS.findWhere(id:Long.valueOf(tag.id), name:tag.name)
+                if(tagVS) tagSet.add(tagVS)
                 else log.error("Tag '${tag}' not found ")
             }
         }

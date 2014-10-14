@@ -142,7 +142,7 @@
                 if(e.detail.isSelected) {
                     this.fire('item-selected', this.coreSelectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
-                        window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
+                        window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
                     } else {
                         this.loadURL(this.coreSelectorValue)
                     }

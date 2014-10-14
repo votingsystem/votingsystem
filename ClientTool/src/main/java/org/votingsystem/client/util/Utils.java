@@ -98,7 +98,7 @@ public class Utils {
     }
 
     public static String getTagDescription(String tagName) {
-        if(VicketTagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
+        if(TagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
         else return tagName;
 
     }

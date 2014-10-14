@@ -78,10 +78,10 @@ public class UserVS implements Serializable {
 
     //Owning Entity side of the relationship
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinTable(name = "uservs_vickettagvs", joinColumns = {
-            @JoinColumn(name = "UserVS", referencedColumnName = "id", nullable = false) },
-            inverseJoinColumns = { @JoinColumn(name = "VicketTagVS", nullable = false, referencedColumnName = "id") })
-    private Set<VicketTagVS> tagVSSet;
+    @JoinTable(name = "uservs_tagvs", joinColumns = {
+            @JoinColumn(name = "uservs", referencedColumnName = "id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "tagvs", nullable = false, referencedColumnName = "id") })
+    private Set<TagVS> tagVSSet;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -336,11 +336,11 @@ public class UserVS implements Serializable {
         this.certificateVS = certificateVS;
     }
 
-    public Set<VicketTagVS> getTagVSSet() {
+    public Set<TagVS> getTagVSSet() {
         return tagVSSet;
     }
 
-    public void setTagVSSet(Set<VicketTagVS> tagVSSet) {
+    public void setTagVSSet(Set<TagVS> tagVSSet) {
         this.tagVSSet = tagVSSet;
     }
 

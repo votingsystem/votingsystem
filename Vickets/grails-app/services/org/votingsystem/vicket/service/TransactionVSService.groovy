@@ -286,12 +286,12 @@ class TransactionVSService {
                     if(balancesCash [currency][tag]) {
                         balancesCash [currency][tag] =  balancesCash [currency][tag].subtract( balancesFrom[currency][tag])
                         if(balancesCash [currency][tag].compareTo(BigDecimal.ZERO) < 0) {
-                            balancesCash [currency][VicketTagVS.WILDTAG] =
-                                    balancesCash[currency][VicketTagVS.WILDTAG].add( balancesCash [currency][tag])
+                            balancesCash [currency][TagVS.WILDTAG] =
+                                    balancesCash[currency][TagVS.WILDTAG].add( balancesCash [currency][tag])
                             balancesCash [currency][tag] = BigDecimal.ZERO
                         }
-                    } else balancesCash [currency][VicketTagVS.WILDTAG] =
-                            balancesCash[currency][VicketTagVS.WILDTAG].subtract( balancesFrom[currency][tag])
+                    } else balancesCash [currency][TagVS.WILDTAG] =
+                            balancesCash[currency][TagVS.WILDTAG].subtract( balancesFrom[currency][tag])
                 }
             } else {
                 balancesCash[(currency)] = [:]

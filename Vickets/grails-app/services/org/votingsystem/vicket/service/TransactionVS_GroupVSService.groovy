@@ -50,9 +50,9 @@ class TransactionVS_GroupVSService {
         Date validTo = null
         if(messageJSON.isTimeLimited == true) validTo = DateUtils.getCurrentWeekPeriod().dateTo
 
-        VicketTagVS tag
+        TagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = VicketTagVS.findWhere(name:messageJSON.tags[0])
+            tag = TagVS.findWhere(name:messageJSON.tags[0])
             if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0]}'")
         } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
 
@@ -127,7 +127,7 @@ class TransactionVS_GroupVSService {
     @Transactional
     private ResponseVS processTransactionVSForAllMembers(MessageSMIME messageSMIMEReq, JSONObject messageJSON,
             Map<UserVSAccount, BigDecimal> accountFromMovements, Date transactionValidTo,
-            Currency currency, GroupVS groupVS, VicketTagVS tag, Locale locale) {
+            Currency currency, GroupVS groupVS, TagVS tag, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         String msg;
         String metaInfMsg

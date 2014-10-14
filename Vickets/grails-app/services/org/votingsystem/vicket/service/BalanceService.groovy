@@ -24,12 +24,12 @@ class BalanceService {
     def bankVSService
     def filesService
     def signatureVSService
-    Map<String, VicketTagVS> tagMap = [:]
+    Map<String, TagVS> tagMap = [:]
 
-    public VicketTagVS getTag(String tagName) throws Exception{
+    public TagVS getTag(String tagName) throws Exception{
         if(!tagMap[tagName]) {
-            VicketTagVS tag = VicketTagVS.findWhere(name:tagName)
-            if(!tag) throw new Exception("VicketTagVS with name '${tagName}' not found")
+            TagVS tag = TagVS.findWhere(name:tagName)
+            if(!tag) throw new Exception("TagVS with name '${tagName}' not found")
             tagMap[(tagName)] = tag
         }
         return tagMap[tagName]
@@ -82,7 +82,7 @@ class BalanceService {
             currencyEntries.each { currency ->
                 Map<String, BigDecimal> tagVSMap = currency.getValue()
                 for(Map.Entry<String, BigDecimal> tagVSEntry: tagVSMap.entrySet()) {
-                    VicketTagVS currentTagVS = getTag(tagVSEntry.key)
+                    TagVS currentTagVS = getTag(tagVSEntry.key)
                     List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0) {
                         ge("dateCreated", timePeriod.getDateFrom())
                         eq("type", TransactionVS.Type.VICKET_INIT_PERIOD)

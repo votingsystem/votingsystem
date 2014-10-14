@@ -4,7 +4,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 </head>
 <body>
 <innerpage-signal title="<g:message code="newGroupVSLbl"/>"></innerpage-signal>
@@ -24,7 +24,7 @@
             </ul>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                                        serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
+                                        serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
         <form onsubmit="return submitForm();">
 
             <div layout vertical>

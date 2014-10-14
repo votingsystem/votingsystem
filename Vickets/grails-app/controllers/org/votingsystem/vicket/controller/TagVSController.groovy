@@ -5,7 +5,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.vicket.model.UserVSAccount
 
 import java.text.Normalizer
@@ -17,7 +17,7 @@ import java.text.Normalizer
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
-class VicketTagVSController {
+class TagVSController {
 
     def systemService
 
@@ -28,13 +28,13 @@ class VicketTagVSController {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                         message(code: 'missingParamErrorMsg', args:['tag']))]
             } else  {
-                VicketTagVS tag
-                VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
+                TagVS tag
+                TagVS.withTransaction { tag = TagVS.findWhere(name:requestJSON.tag) }
                 if(!tag) {
                     String tagName = requestJSON.tag
                     tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
                             "\\p{InCombiningDiacriticalMarks}+", "");
-                    tag = new VicketTagVS(name:tagName).save()
+                    tag = new TagVS(name:tagName).save()
                     new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
                             userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:tag).save()
                 }
@@ -49,8 +49,8 @@ class VicketTagVSController {
                         message(code: 'missingParamErrorMsg', args:['tag']))]
             }
             def listDB
-            VicketTagVS.withTransaction {
-                listDB = VicketTagVS.createCriteria().list(offset: 0) {
+            TagVS.withTransaction {
+                listDB = TagVS.createCriteria().list(offset: 0) {
                     if(params.tag) { ilike('name', "%${params.tag}%") }
                 }
             }
@@ -63,19 +63,19 @@ class VicketTagVSController {
 
     def list () {
         def listDB
-        VicketTagVS.withTransaction {
-            listDB = VicketTagVS.findAll()
+        TagVS.withTransaction {
+            listDB = TagVS.findAll()
         }
         List resultList = []
         listDB.each { it -> resultList.add(id:it.id, name:it.name) }
-        Map result = [tagRecords:resultList, numTotalTags:listDB.size()]
+        Map result = [numTotalTags:listDB.size(), tagRecords:resultList]
         render result as JSON
     }
 
     def test () {
         def listDB
-        VicketTagVS.withTransaction {
-            listDB = VicketTagVS.createCriteria().list(offset: 0) { }
+        TagVS.withTransaction {
+            listDB = TagVS.createCriteria().list(offset: 0) { }
         }
         listDB.each { it ->
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,

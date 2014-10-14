@@ -53,7 +53,7 @@ class BankVSService {
         def bankVSDB = UserVS.findWhere(nif:validatedNIF)
         if(!bankVSDB || (bankVSDB instanceof UserVS)) {
             if(bankVSDB instanceof UserVS) {
-                bankVSDB.setState(BankVS.State.SUSPENDED)
+                bankVSDB.setState(UserVS.State.SUSPENDED)
                 bankVSDB.setReason("Updated to BankVS")
                 bankVSDB.save()
                 log.debug("${methodName} - UserVS: '${bankVSDB.id}' updated to bank")

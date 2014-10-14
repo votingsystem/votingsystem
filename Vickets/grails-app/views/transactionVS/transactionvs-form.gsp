@@ -5,7 +5,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector-dialog']"/>">
 
 <polymer-element name="transactionvs-form" attributes="subpage">
@@ -52,12 +52,10 @@
             </div>
 
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
-
                 <div layout horizontal center center-justified>
                     <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton"></paper-radio-button></div>
                     <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
-
                 <div>
                     <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
                            title="<g:message code="amountLbl"/>"
@@ -74,7 +72,8 @@
                                 <g:message code="transactionvsWithTagAdvertMsg"/>
                             </div>
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
-                            <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                            <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;
+                                margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                                 <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
                             </votingsystem-button>
                         </div>
@@ -89,7 +88,7 @@
                         </div>
                     </div>
                 </div>
-                <template if="{{isWithUserSelector}}">
+                <div style="display:{{isWithUserSelector?'block':'none'}}">
                     <div>
                         <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                             <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
@@ -98,7 +97,7 @@
                             <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
                         </div>
                     </div>
-                </template>
+                </div>
                 <template if="{{!isWithUserSelector}}">
                     <div style="margin:10px 0 0 0; text-align: center; font-weight: bold; color:#6c0404;">{{selectReceptorMsg}}</div>
                 </template>
@@ -117,7 +116,7 @@
     <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
             <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
+                serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
         </div>
     </div>
 </template>

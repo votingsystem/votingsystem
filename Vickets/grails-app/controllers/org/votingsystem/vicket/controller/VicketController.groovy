@@ -77,9 +77,9 @@ class VicketController {
         VicketRequestBatch vicketBatch = new VicketRequestBatch(params[ContextVS.CSR_FILE_NAME], messageSMIMEReq,
                 grailsApplication.config.grails.serverURL)
         if(!vicketBatch.tagVS) {
-            VicketTagVS.withTransaction {
-                VicketTagVS vicketTagVS = VicketTagVS.findWhere(name:vicketBatch.getTag())
-                vicketBatch.setTagVS(vicketTagVS)
+            TagVS.withTransaction {
+                TagVS tagVS = TagVS.findWhere(name:vicketBatch.getTag())
+                vicketBatch.setTagVS(tagVS)
             }
         }
         return [responseVS:vicketService.processVicketRequest(vicketBatch)]

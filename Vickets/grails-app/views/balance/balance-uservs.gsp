@@ -165,26 +165,25 @@
                 console.log(this.tagName + " - initBalance typeof: " + typeof balance)
                 if('object' !== typeof balance) this.balance = JSON.parse(balance)
                 else this.balance = balance
-                var caption = "<g:message code="balanceDetailCaption"/>"
                 console.log(this.tagName + " - this.balance.userVS: " + this.balance)
                 this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.IBAN
                 this.userVSName = this.balance.userVS.name
                 if('SYSTEM' == this.balance.userVS.type) {
-                    this.caption = caption.format("<g:message code="systemLbl"/>")
+                    this.caption = "<g:message code="systemLbl"/>"
                     this.description = "IBAN: " + this.balance.userVS.IBAN
                 }
                 else if('BANKVS' == this.balance.userVS.type) {
-                    this.caption = caption.format("<g:message code="bankVSLbl"/>")
+                    this.caption = "<g:message code="bankVSLbl"/>"
                     this.$.balanceFromItem.caption = "<g:message code="contributionsLbl"/>"
                 }
                 else if('GROUP' == this.balance.userVS.type) {
-                    this.caption = caption.format("<g:message code="groupLbl"/>")
+                    this.caption = "<g:message code="groupLbl"/>"
                     this.description = "IBAN: " + this.balance.userVS.IBAN
                     this.balance.userVS.nif = ""
                 }
                 else if('USER' == this.balance.userVS.type) {
                     this.userVSName = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
-                    this.caption = caption.format("<g:message code="userLbl"/>")
+                    this.caption = "<g:message code="userLbl"/>"
                 }
 
                 if('SYSTEM' != this.balance.userVS.type) {

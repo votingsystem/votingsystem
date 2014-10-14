@@ -22,15 +22,15 @@
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
          transitions="cross-fade-all">
     <section id="page1">
-    <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
-        <div layout horizontal center center-justified>
+    <div cross-fade>
+        <div horizontal layout center center-justified>
             <template if="{{subpage}}">
                 <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </div>
             </template>
 
-            <div layout vertical flex>
+            <div vertical layout flex>
                 <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
                 </div>
 
@@ -134,7 +134,7 @@
     </section>
 
     <section id="page2">
-        <div class="pageContentDiv" cross-fade>
+        <div cross-fade>
             <transactionvs-form id="transactionvsForm" subpage></transactionvs-form>
         </div>
     </section>
@@ -183,8 +183,7 @@
             }
         },
         goToWeekBalance:function() {
-            document.querySelector('#navBar').loadURL("${createLink( controller:'balance', action:"userVS", absolute:true)}/" +
-                    this.groupvs.userVS.id)
+            loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.groupvs.userVS.id)
         },
         messagedialogClosed:function(e) {
             console.log("messagedialog signal - messagedialogClosed: " + e)
@@ -215,7 +214,7 @@
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
         groupvsChanged:function() {
-            if(("admin" == menuType || "superadmin" == menuType) && 'ACTIVE' == this.groupvs.userVS.state) this.isAdminView = true
+            if(("admin" == menuType || "superuser" == menuType) && 'ACTIVE' == this.groupvs.userVS.state) this.isAdminView = true
             else {
                 this.isAdminView = false
                 if("user" == menuType && 'ACTIVE' == this.groupvs.userVS.state) this.isUserView = true
@@ -244,9 +243,8 @@
             if('cancelGroup' == e.detail.item.id) {
                 showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.userVS.name),
                         "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
-            }else if('editGroup' == e.detail.item.id) {
-                var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.userVS.id + "?menu=admin"
-                this.fire('core-signal', {name: "innerpage", data: editorURL});
+            } else if('editGroup' == e.detail.item.id) {
+                loadURL_VS("${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.userVS.id + "?menu=admin")
             }
             this.$.configGroupDropDown.selected = ""
             this.$.configGroupDropDown.selectedItem = null

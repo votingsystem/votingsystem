@@ -259,7 +259,7 @@ public class SignatureService extends Service<ResponseVS> {
             log.debug("sendVicketRequest");
             BigDecimal totalAmount = new BigDecimal((Integer)operationVS.getDocumentToSignMap().get("totalAmount"));
             String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
-            VicketTagVS tag = new VicketTagVS((String) operationVS.getDocumentToSignMap().get("tag"));
+            TagVS tag = new TagVS((String) operationVS.getDocumentToSignMap().get("tag"));
             Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
             VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, currencyCode, tag,
                     isTimeLimited, (VicketServer) operationVS.getTargetServer());

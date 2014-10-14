@@ -1,13 +1,15 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<polymer-element name="votingsystem-innerpage-signal" attributes="title innerPage">
+<polymer-element name="votingsystem-innerpage-signal" attributes="title innerPage searchVisible">
     <template></template>
     <script>
         Polymer('votingsystem-innerpage-signal', {
             title:null,
             innerPage:null,
+            searchVisible:false,
             domReady: function() {
-                this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:this.title, innerPage:this.innerPage}});
+                this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:this.title,
+                    innerPage:this.innerPage, searchVisible:this.searchVisible}});
             }
         });
     </script>

@@ -4,11 +4,9 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.vicket.model.UserVSAccount;
-import org.votingsystem.model.VicketTagVS;
-
+import org.votingsystem.model.TagVS;
 import java.math.BigDecimal;
 import java.util.*;
-
 
 /**
  * @author jgzornoza
@@ -31,14 +29,14 @@ public class WalletVS {
     }
 
     public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(
-            VicketTagVS tag, BigDecimal amount, String currencyCode) throws Exception {
+            TagVS tag, BigDecimal amount, String currencyCode) throws Exception {
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
                 ApplicationContextHolder.getMessage("negativeAmountRequestedErrorMsg", amount.toString()));
 
         Map<UserVSAccount, BigDecimal> result = new HashMap<UserVSAccount, BigDecimal>();
-        UserVSAccount wildTagAccount = tagDataMap.get(VicketTagVS.WILDTAG);
+        UserVSAccount wildTagAccount = tagDataMap.get(TagVS.WILDTAG);
         if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
-        if(!VicketTagVS.WILDTAG.equals(tag.getName())) {
+        if(!TagVS.WILDTAG.equals(tag.getName())) {
             UserVSAccount tagAccount = tagDataMap.get(tag.getName());
             if(tagAccount != null && tagAccount.getBalance().compareTo(amount) > 0) result.put(tagAccount, amount);
             else {

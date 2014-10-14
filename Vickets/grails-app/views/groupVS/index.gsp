@@ -17,11 +17,6 @@
 </body>
 </html>
 <asset:script>
-
-    document.addEventListener('polymer-ready', function() {
-        if(document.querySelector("#navBar") != null) document.querySelector("#navBar").searchVisible('false')
-    });
-
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = 'block'

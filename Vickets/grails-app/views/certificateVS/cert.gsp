@@ -16,7 +16,7 @@
 <votingsystem-innerpage-signal title="<g:message code="trustedCertPageTitle"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
-        <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
+        <g:if test="${"admin".equals(params.menu) || "superuser".equals(params.menu)}">
             <votingsystem-button onclick="document.querySelector('#reasonDialog').toggle()">
                 <g:message code="cancelCertLbl"/>
             </votingsystem-button>

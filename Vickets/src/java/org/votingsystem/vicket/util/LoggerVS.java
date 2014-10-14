@@ -1,9 +1,8 @@
 package org.votingsystem.vicket.util;
 
-import grails.converters.JSON;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
@@ -45,7 +44,7 @@ public class LoggerVS {
     }
 
     public static void logTransactionVS(long id, String state, String type, String fromUser, String toUser,
-         String currency, BigDecimal amount, VicketTagVS tag, Date dateCreated, Date validTo, String subject, boolean isParent) {
+         String currency, BigDecimal amount, TagVS tag, Date dateCreated, Date validTo, String subject, boolean isParent) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
         dataMap.put("state", state);
@@ -63,7 +62,7 @@ public class LoggerVS {
     }
 
     public static void logVicketIssued(long id, String currency, BigDecimal amount,
-                VicketTagVS tag, boolean isTimeLimited, Date dateCreated, Date validTo) {
+                TagVS tag, boolean isTimeLimited, Date dateCreated, Date validTo) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
         dataMap.put("currency", currency);

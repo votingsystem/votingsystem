@@ -328,6 +328,11 @@ function updateMenuLinks() {
     }
 }
 
+function loadURL_VS(urlToLoad) {
+    if(document.querySelector('#navBar')) document.querySelector('#navBar').loadURL(urlToLoad)
+    else window.location.href = updateMenuLink(urlToLoad, "&mode=simplePage")
+}
+
 function updateMenuLink(urlToUpdate, param) {
     if(urlToUpdate == null) return
     var result = urlToUpdate

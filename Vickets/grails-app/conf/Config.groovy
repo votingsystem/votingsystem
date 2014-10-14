@@ -242,6 +242,8 @@ VotingSystem.keyStorePath='WEB-INF/cms/VicketServer.jks'
 VotingSystem.signKeysAlias='VicketServerKeys'
 VotingSystem.signKeysPassword='PemPass'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
+VotingSystem.defaulTagsFilePath='WEB-INF/docs/defaultTags.txt'
+
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
 VotingSystem.defaultLocale = 'en'

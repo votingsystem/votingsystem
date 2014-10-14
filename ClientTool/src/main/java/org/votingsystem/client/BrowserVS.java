@@ -170,7 +170,7 @@ public class BrowserVS extends Region {
         reloadButton.setGraphic(new ImageView(Utils.getImage(this, "fa-refresh")));
         reloadButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
-                webView.getEngine().reload();
+                webView.getEngine().load(locationField.getText());
             }
         });
 

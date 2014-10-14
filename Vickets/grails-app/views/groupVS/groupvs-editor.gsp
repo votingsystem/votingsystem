@@ -5,7 +5,7 @@
     <template>
         <h3>
             <div id="editGroupHeader" class="pageHeader text-center">
-                <votingsystem-html-echo html="{{pageHeader}}"></votingsystem-html-echo>
+                <votingsystem-html-echo html="{{groupvs.name}}"></votingsystem-html-echo>
             </div>
         </h3>
         <div class="text-left" style="margin:10px 0 10px 0;">
@@ -22,8 +22,8 @@
         </div>
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
-                <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
-                    <g:message code="saveChangesLbl"/> <i class="fa fa-check"></i>
+                <votingsystem-button on-click="{{submitForm}}">
+                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="saveChangesLbl"/>
                 </votingsystem-button>
             </div>
         </div>
@@ -37,7 +37,6 @@
                 console.log(this.tagName + " - ready")
                 if(this.groupvs != null) {
                     this.$.textEditor.setData(this.groupvs.description)
-                    this.pageHeader =  "<g:message code="editingGroupMsgTitle"/>".format(this.groupvs.name)
                 }
             },
 

@@ -54,7 +54,7 @@
                             </template>
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
-                        <g:elseif test="${"superadmin".equals(params.menu)}">
+                        <g:elseif test="${"superuser".equals(params.menu)}">
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'newBankVS', absolute: true)}">
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newBankVSLbl"/>
                             </paper-item>
@@ -71,7 +71,7 @@
                             <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}" on-click="{{changeToAdminMenu}}">
                                 <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i><g:message code="changeToAdminMenuLbl"/>
                             </paper-item>
-                            {{ "<g:message code="superAdminTitle"/>" | setTitle}}
+                            {{ "<g:message code="superUserTitle"/>" | setTitle}}
                         </g:elseif>
                         <g:else>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
@@ -88,7 +88,7 @@
                     </core-selector>
                 </core-menu>
             </core-header-panel>
-            <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
+            <div id="appTitle" style="font-size:1.5em;width: 100%;" tool>{{appTitle}}</div>
             <content id="content"></content>
         </votingsystem-navbar>
         <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
@@ -113,12 +113,13 @@
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 //window.addEventListener("popstate", function(e) {  });
             },
-            urlChanged: function() {
-                this.loadURL(this.url)
-            },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - title:" + detail.title)
-                if(detail.title) this.appTitle = detail.title
+                var sufix = ""
+                if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
+                if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
+                if(detail.title) this.appTitle = detail.title + sufix
+                if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
@@ -135,15 +136,12 @@
                 if(e.detail.isSelected) {
                     this.fire('item-selected', this.coreSelectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
-                        window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
+                        window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
                     } else {
                         this.loadURL(this.coreSelectorValue)
                     }
                     this.coreSelectorValue = null
                 }
-            },
-            searchVisible: function(isVisible) {
-                this.$._navbar.searchVisible(isVisible)
             },
             setTitle: function(appTitle) {
                 this.appTitle = appTitle

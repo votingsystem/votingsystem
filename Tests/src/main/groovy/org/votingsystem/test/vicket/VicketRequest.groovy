@@ -8,7 +8,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
@@ -29,7 +29,7 @@ ContextVS.getInstance().setDefaultServer(vicketServer)
 
 BigDecimal totalAmount = new BigDecimal(10)
 String curencyCode = "EUR"
-VicketTagVS tag = new VicketTagVS("HIDROGENO")
+TagVS tag = new TagVS("HIDROGENO")
 Boolean isTimeLimited = true
 VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, curencyCode, tag, isTimeLimited,
         ContextVS.getInstance().getVicketServer())

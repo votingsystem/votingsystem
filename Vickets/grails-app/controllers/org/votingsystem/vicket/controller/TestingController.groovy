@@ -5,10 +5,10 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper

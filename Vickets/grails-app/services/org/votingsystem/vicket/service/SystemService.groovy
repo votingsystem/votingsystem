@@ -5,7 +5,7 @@ import net.sf.json.JSONArray
 import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -23,7 +23,7 @@ class SystemService {
     private static final CLASS_NAME = SystemService.class.getSimpleName()
 
     private UserVS systemUser
-    private VicketTagVS wildTag
+    private TagVS wildTag
     private Locale defaultLocale
     def grailsApplication
     def subscriptionVSService
@@ -39,7 +39,14 @@ class SystemService {
                     name:grailsApplication.config.VotingSystem.serverName).save()
             systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
             systemUser.save()
-            wildTag = new VicketTagVS(name:VicketTagVS.WILDTAG).save()
+            wildTag = new TagVS(name:TagVS.WILDTAG).save()
+            String[] defaultTags = grailsApplication.mainContext.getResource(
+                    grailsApplication.config.VotingSystem.defaulTagsFilePath).getFile()?.text.split(",")
+            for(String tag: defaultTags) {
+                TagVS newTagVS = new TagVS(name:tag).save()
+                new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
+                        balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:newTagVS).save()
+            }
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
                     balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:wildTag).save()
         }
@@ -134,7 +141,7 @@ class SystemService {
     }
 
     public String getTagMessage(String tag) {
-        if(VicketTagVS.WILDTAG.equals(tag)) {
+        if(TagVS.WILDTAG.equals(tag)) {
             return  messageSource.getMessage('wildTagMsg', null, LocaleContextHolder.locale)
         } else return  messageSource.getMessage('tagMsg', [tag].toArray(), LocaleContextHolder.locale)
     }
@@ -144,7 +151,7 @@ class SystemService {
         return getSystemUser().getMetaInfJSON()?.adminsDNI?.contains(nif)
     }
 
-    public void updateTagBalance(BigDecimal amount, String currencyCode, VicketTagVS tag) {
+    public void updateTagBalance(BigDecimal amount, String currencyCode, TagVS tag) {
         UserVSAccount tagAccount = UserVSAccount.findWhere(userVS:getSystemUser(), tag:tag, currencyCode:currencyCode,
                 state: UserVSAccount.State.ACTIVE)
         if(!tagAccount) throw new Exception("THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG '${tag.name}' and currency '${currencyCode}'")
@@ -162,8 +169,8 @@ class SystemService {
         return systemUser;
     }
 
-    public VicketTagVS getWildTag() {
-        if(!wildTag) wildTag = VicketTagVS.findWhere(name:VicketTagVS.WILDTAG)
+    public TagVS getWildTag() {
+        if(!wildTag) wildTag = TagVS.findWhere(name:TagVS.WILDTAG)
         return wildTag
     }
 }

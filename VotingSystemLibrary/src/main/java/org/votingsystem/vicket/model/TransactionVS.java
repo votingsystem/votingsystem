@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
@@ -44,7 +44,7 @@ public class TransactionVS  implements Serializable {
     @Column(name="currency", nullable=false) private String currencyCode;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
+    @JoinColumn(name="tag", nullable=false) private TagVS tag;
 
     @Column(name="amount") private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
@@ -211,11 +211,11 @@ public class TransactionVS  implements Serializable {
         this.fromUser = fromUser;
     }
 
-    public VicketTagVS getTag() {
+    public TagVS getTag() {
         return tag;
     }
 
-    public void setTag(VicketTagVS tag) {
+    public void setTag(TagVS tag) {
         this.tag = tag;
     }
 

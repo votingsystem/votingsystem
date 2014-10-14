@@ -19,6 +19,7 @@ import org.votingsystem.test.model.SimulationData
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
@@ -30,7 +31,7 @@ import java.util.concurrent.Executors
 Logger log = TestHelper.init(AddUsersToGroup.class)
 
 Map userBaseData = [numUsers: 10, userIndex:100 ]
-Map simulationDataMap = [groupId:5, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
+Map simulationDataMap = [groupId:4, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
 
 
 @Log4j
@@ -63,7 +64,7 @@ class SimulationHelper {
         log.debug("-------------------------------------------------------");
     }
 
-    private void getGroupData(Long groupId) {
+    private ResponseVS getGroupData(Long groupId) {
         ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupURL(groupId), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
@@ -77,11 +78,11 @@ class SimulationHelper {
             groupDataJSON1.put("representative", representativeDataJSON1)
             requestSubscribeData.put("groupvs", groupDataJSON1)
         }
+        return responseVS
     }
 
     private ResponseVS subscribeUsers() {
-        log.debug("subscribeUsers ### Enter status SUBSCRIBE_USERS - " +
-                "Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
+        log.debug("subscribeUser - Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
         ResponseVS responseVS = null;
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
         int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
@@ -139,11 +140,12 @@ class SimulationHelper {
                     ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
                 }
             }
-            getGroupData(simulationData.getGroupId());
-            ResponseVS response = subscribeUsers();
+            ResponseVS response = getGroupData(simulationData.getGroupId());
+            if(ResponseVS.SC_OK != response.statusCode) throw new ExceptionVS(responseVS.getMessage())
+            response = subscribeUsers();
             finishSimulation(response);
         } else {
-            log.error("Problems initializing server: " + responseVS.getMessage())
+            log.error("ERROR initializing server: " + responseVS.getMessage())
             System.exit(0);
         }
     }
