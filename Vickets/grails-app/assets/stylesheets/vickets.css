@@ -47,7 +47,7 @@ votingsystem-button i {padding: 0px 0px 0px 5px; }
 }
 
 .pageContentDiv {
-    margin:0px auto 0px auto;
+    margin:10px auto 0px auto;
     padding:0px 30px 0px 30px;
     max-width: 1400px;
 }
@@ -71,29 +71,6 @@ votingsystem-button i {padding: 0px 0px 0px 5px; }
     color: #6c0404;
     font-weight: bold;
     text-overflow: ellipsis;
-}
-
-.breadcrumbVS {
-    padding: 4px 15px;
-    margin: 0px;
-    list-style: none;
-    border-radius: 4px;
-}
-
-.breadcrumbVS > ol {
-    margin: 0px;
-}
-
-.breadcrumbVS > li {
-    display: inline-block;
-}
-.breadcrumbVS > li + li:before {
-    padding: 0 5px;
-    color: #ccc;
-    content: "/\00a0";
-}
-.breadcrumbVS > .active {
-    color: #999;
 }
 
 .messagePanel {

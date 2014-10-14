@@ -8,18 +8,9 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/mailSimulation/mail-form']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-    <div>
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
-                <g:message code="votingSystemOperationsLbl"/></a></li>
-            <li class="active"><g:message code="initMailProtocolSimulationMsg"/></li>
-        </ol>
+    <votingsystem-innerpage-signal title="<g:message code="initMailProtocolSimulationMsg"/>"></votingsystem-innerpage-signal>
+    <div class="pageContentDiv">
+        <mail-form id="mailForm"></mail-form>
     </div>
-    <mail-form id="mailForm"></mail-form>
-</div>
 </body>
 </html>
-<asset:script>
-</asset:script>

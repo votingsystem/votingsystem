@@ -9,12 +9,8 @@
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="transactionPageTitle"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="transactionPageTitle"/></li>
-    </ol>
-
     <div layout horizontal center center-justified>
         <transactionvs-selector id="transactionSelector"></transactionvs-selector>
     </div>
@@ -23,8 +19,7 @@
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
     <transactionvs-table id="vicketTransactionTable"
-                                url="${createLink(controller: 'transactionVS', action: 'index', absolute: true)}"></transactionvs-table>
-
+                url="${createLink(controller: 'transactionVS', action: 'index', absolute: true)}"></transactionvs-table>
 </div>
 </body>
 

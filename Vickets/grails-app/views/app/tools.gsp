@@ -6,11 +6,8 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
+    <votingsystem-innerpage-signal title="<g:message code="toolsPageTitle"/>"></votingsystem-innerpage-signal>
     <div class="pageContentDiv" style="max-width: 1300px; margin:0px auto 0px auto; padding: 0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="toolsPageTitle"/></li>
-        </ol>
         <div style="margin:30px 0px 0px 0px;">
             <g:if test="${request.getHeader("user-agent").toLowerCase().contains('android')}">
                 <div class="userAdvert text-left">

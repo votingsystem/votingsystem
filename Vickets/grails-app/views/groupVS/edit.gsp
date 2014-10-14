@@ -11,12 +11,8 @@
 
 </head>
 <body>
-    <div id="contentDiv" class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto; padding:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>
-            <li class="active"><g:message code="editGroupVSLbl"/></li>
-        </ol>
+    <votingsystem-innerpage-signal title="<g:message code="editGroupVSLbl"/>"></votingsystem-innerpage-signal>
+    <div class="pageContentDiv" style="min-height: 1000px; padding:0px 30px 0px 30px;">
         <groupvs-editor groupvs='${groupvsMap as grails.converters.JSON}'></groupvs-editor>
     </div>
 </body>

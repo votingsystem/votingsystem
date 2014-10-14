@@ -7,12 +7,8 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="userSearchPageTitle"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="userSearchPageTitle"/></li>
-    </ol>
-
     <div layout vertical center>
         <div id="searchPanel" class="" style="background:#ba0011; padding:10px 10px 10px 10px; width: 320px; margin:0px auto 0px auto;border-radius: 5px;">
             <input id="userSearchInput" type="text" placeholder="<g:message code="userSearchLbl" />" class="form-control"

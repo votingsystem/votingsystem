@@ -13,13 +13,8 @@
     </style>
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="trustedCertPageTitle"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
-        <li class="active"><g:message code="trustedCertPageTitle"/></li>
-    </ol>
-
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
             <votingsystem-button onclick="document.querySelector('#reasonDialog').toggle()">

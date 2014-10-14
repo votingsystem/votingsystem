@@ -7,14 +7,9 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 </head>
 <body>
-
-<div id="contentDiv" class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto;">
+<votingsystem-innerpage-signal title="<g:message code="newBankVSLbl"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'userVS', action: 'index')}"><g:message code="uservsLbl"/></a></li>
-            <li class="active"><g:message code="newBankVSLbl"/></li>
-        </ol>
         <h3>
             <div class="pageHeader text-center">
                 <g:message code="newBankVSLbl"/>

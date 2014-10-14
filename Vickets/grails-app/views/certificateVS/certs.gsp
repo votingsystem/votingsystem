@@ -8,14 +8,9 @@
     <style type="text/css" media="screen"></style>
 </head>
 <body>
-<div class="pageContentDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="certsPageTitle"/></li>
-    </ol>
-
+<votingsystem-innerpage-signal title="<g:message code="certsPageTitle"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv">
     <cert-list id="certList" url="<g:createLink controller="certificateVS" action="certs"/>"></cert-list>
-
 </div>
 </body>
 </html>

@@ -6,48 +6,41 @@
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="newCACertLbl"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv" style="min-height: 1000px;">
+    <h3>
+        <div class="pageHeader text-center">
+            <g:message code="newCACertLbl"/>
+        </div>
+    </h3>
 
-<div id="contentDiv" class="pageContentDiv" style="min-height: 1000px;">
-    <div style="margin:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
-            <li class="active"><g:message code="newCACertLbl"/></li>
-        </ol>
-        <h3>
-            <div class="pageHeader text-center">
-                <g:message code="newCACertLbl"/>
-            </div>
-        </h3>
+    <div class="text-left" style="margin:10px 0 10px 0;">
+        <ul>
+            <li><g:message code="systemAdminReservedOperationMsg"/></li>
+            <li><g:message code="signatureRequiredMsg"/></li>
+        </ul>
+    </div>
 
-        <div class="text-left" style="margin:10px 0 10px 0;">
-            <ul>
-                <li><g:message code="systemAdminReservedOperationMsg"/></li>
-                <li><g:message code="signatureRequiredMsg"/></li>
-            </ul>
+    <form onsubmit="return submitForm()">
+        <div style="position:relative; width:100%;">
+            <label><g:message code="interestInfoLbl"/></label>
+            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
         </div>
 
-        <form onsubmit="return submitForm()">
-            <div style="position:relative; width:100%;">
-                <label><g:message code="interestInfoLbl"/></label>
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
-            </div>
+        <div layout vertical style="margin:15px 0px 0px 0px;">
+            <label><g:message code="pemCertLbl"/></label>
+            <textarea id="pemCert" rows="8" required=""></textarea>
+        </div>
 
-            <div layout vertical style="margin:15px 0px 0px 0px;">
-                <label><g:message code="pemCertLbl"/></label>
-                <textarea id="pemCert" rows="8" required=""></textarea>
+        <div style="margin:10px 10px 60px 0px;height:20px;">
+            <div style="float:right;">
+                <votingsystem-button onclick="submitForm()">
+                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="addCALbl"/>
+                </votingsystem-button>
             </div>
+        </div>
 
-            <div style="margin:10px 10px 60px 0px;height:20px;">
-                <div style="float:right;">
-                    <votingsystem-button onclick="submitForm()">
-                        <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="addCALbl"/>
-                    </votingsystem-button>
-                </div>
-            </div>
-
-        </form>
-    </div>
+    </form>
 </div>
 </body>
 </html>

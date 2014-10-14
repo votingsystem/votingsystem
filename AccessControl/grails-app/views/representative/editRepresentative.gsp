@@ -6,16 +6,10 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-edit-form']"/>">
 </head>
 <body>
-<div layout vertical class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-    <ol class="breadcrumbVS pull-left">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'representative')}"><g:message code="representativesPageLbl"/></a></li>
-        <li class="active"><g:message code="editRepresentativeLbl"/></li>
-    </ol>
-
-    <representative-edit-form id="representativeEditor"></representative-edit-form>
-
-</div>
+    <votingsystem-innerpage-signal title="<g:message code="editRepresentativeLbl"/>"></votingsystem-innerpage-signal>
+    <div layout vertical class="pageContentDiv">
+        <representative-edit-form id="representativeEditor"></representative-edit-form>
+    </div>
 </body>
 </html>
 <asset:script>

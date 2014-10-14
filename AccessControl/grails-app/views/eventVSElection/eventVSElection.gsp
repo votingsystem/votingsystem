@@ -6,17 +6,9 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'eventVSElection')}"><g:message code="electionSystemLbl"/></a></li>
-        <li class="active"><g:message code="pollLbl"/></li>
-    </ol>
-
-    <eventvs-election id="electionVS" eventvs="${eventMap as grails.converters.JSON}"></eventvs-election>
-</div>
-
+    <votingsystem-innerpage-signal title="<g:message code="pollLbl"/>"></votingsystem-innerpage-signal>
+    <div class="pageContentDiv">
+        <eventvs-election id="electionVS" eventvs="${eventMap as grails.converters.JSON}"></eventvs-election>
+    </div>
 </body>
 </html>
-<asset:script>
-</asset:script>

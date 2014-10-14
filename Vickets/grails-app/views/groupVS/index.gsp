@@ -8,16 +8,11 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-list']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="groupvsLbl"/></li>
-    </ol>
-
+<votingsystem-innerpage-signal title="<g:message code="groupvsLbl"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv" style="padding:0px 30px 0px 30px;">
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
     <groupvs-list id="groupvsList" url="${createLink(controller: 'groupVS')}?menu=${params.menu}"></groupvs-list>
-
 </div>
 </body>
 </html>

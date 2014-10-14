@@ -7,19 +7,9 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-request-form']"/>">
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="doVicketRequestLbl"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="doVicketRequestLbl"/></li>
-    </ol>
-
     <vicket-request-form></vicket-request-form>
-
 </div>
 </body>
-
 </html>
-<asset:script>
-
-</asset:script>
-<asset:deferredScripts/>

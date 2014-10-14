@@ -8,18 +8,9 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/encryptionSimulation/encryption-form']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-    <div>
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
-                <g:message code="votingSystemOperationsLbl"/></a></li>
-            <li class="active"><g:message code="initEncryptionProtocolSimulationButton"/></li>
-        </ol>
+    <votingsystem-innerpage-signal title="<g:message code="initEncryptionProtocolSimulationButton"/>"></votingsystem-innerpage-signal>
+    <div class="pageContentDiv">
+        <encryption-form id="encryptionForm"></encryption-form>
     </div>
-    <encryption-form id="encryptionForm"></encryption-form>
-</div>
 </body>
 </html>
-<asset:script>
-</asset:script>

@@ -5,14 +5,9 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-
-<div id="contentDiv" class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto;">
+<votingsystem-innerpage-signal title="<g:message code="newUserCertLbl"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv" style="min-height: 1000px;">
     <div style="margin:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
-            <li class="active"><g:message code="newUserCertLbl"/></li>
-        </ol>
         <h3>
             <div class="pageHeader text-center">
                 <g:message code="newUserCertLbl"/>

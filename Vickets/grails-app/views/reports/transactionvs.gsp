@@ -8,12 +8,8 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
 </head>
 <body>
+<votingsystem-innerpage-signal title="<g:message code="transactionPageTitle"/>"></votingsystem-innerpage-signal>
 <div class="pageContentDiv">
-    <ol class="breadcrumbVS">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="transactionPageTitle"/></li>
-    </ol>
-
     <div layout horizontal center center-justified>
         <transactionvs-selector id="transactionSelector"></transactionvs-selector>
     </div>

@@ -7,13 +7,8 @@
     <title><g:message code="simulationWebAppCaption"/></title>
 </head>
 <body>
-    <div layout vertical class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
-        <div  style="">
-            <ol class="breadcrumbVS pull-left">
-                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-                <li class="active"><g:message code="vicketsOperationsLbl"/></li>
-            </ol>
-        </div>
+    <votingsystem-innerpage-signal title="<g:message code="vicketsOperationsLbl"/>"></votingsystem-innerpage-signal>
+    <div layout vertical class="pageContentDiv">
         <div class="text-center" style="margin: 50px 0 20 0; font-weight: bold; font-size: 2em; color: #6c0404;">
             <g:message code="vicketsOperationsLbl"/>
         </div>

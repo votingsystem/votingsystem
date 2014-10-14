@@ -6,14 +6,9 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-<div class="pageContentDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
+<votingsystem-innerpage-signal title="<g:message code="bankVSListPageLbl"/>"></votingsystem-innerpage-signal>
+<div class="pageContentDiv">
     <div style="margin:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
-            <li class="active"><g:message code="bankVSListPageLbl"/></li>
-        </ol>
-
         <div layout horizontal center center-justified>
             <select id="bankVSStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                      onchange="bankVSState(this)">
