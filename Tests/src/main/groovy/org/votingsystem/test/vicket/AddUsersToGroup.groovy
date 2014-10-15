@@ -124,30 +124,17 @@ class SimulationHelper {
 
     public void run() {
         simulationData.init(System.currentTimeMillis());
-        //initializeServer
         log.debug("initializeServer")
-        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(simulationData.getServerURL()), ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            vicketServer = ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
-            if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR, "SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
-                        vicketServer.getEnvironmentVS());
-            } else {
-                responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                        vicketServer.getTimeStampServerURL()),ContentTypeVS.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ActorVS timeStampServer = ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
-                    ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
-                }
-            }
-            ResponseVS response = getGroupData(simulationData.getGroupId());
-            if(ResponseVS.SC_OK != response.statusCode) throw new ExceptionVS(responseVS.getMessage())
-            response = subscribeUsers();
-            finishSimulation(response);
-        } else {
-            log.error("ERROR initializing server: " + responseVS.getMessage())
-            System.exit(0);
+        vicketServer = TestHelper.fetchVicketServer(simulationData.getServerURL())
+        if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
+            throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
+                    vicketServer.getEnvironmentVS());
         }
+        ContextVS.getInstance().setDefaultServer(vicketServer)
+        ResponseVS responseVS = getGroupData(simulationData.getGroupId());
+        if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+        responseVS = subscribeUsers();
+        finishSimulation(responseVS);
     }
 }
 

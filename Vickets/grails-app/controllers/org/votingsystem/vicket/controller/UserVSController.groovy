@@ -273,7 +273,7 @@ class UserVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            responseVS = bankVSService.saveBankVS(messageSMIMEReq, request.getLocale())
+            responseVS = bankVSService.saveBankVS(messageSMIMEReq)
             return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
         }
     }

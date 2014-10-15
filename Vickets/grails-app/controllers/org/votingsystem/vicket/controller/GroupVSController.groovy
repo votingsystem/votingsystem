@@ -77,7 +77,7 @@ class GroupVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+            ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq)
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 GroupVS newGroupVS = responseVS.data
                 responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
@@ -100,7 +100,7 @@ class GroupVSController {
                 if(!messageSMIMEReq) {
                     return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
                 }
-                ResponseVS responseVS = groupVSService.editGroup(groupVS, messageSMIMEReq, request.getLocale())
+                ResponseVS responseVS = groupVSService.editGroup(groupVS, messageSMIMEReq)
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
                     responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupEditedOKMsg',
@@ -127,7 +127,7 @@ class GroupVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = groupVSService.cancelGroup(groupVS, messageSMIMEReq, request.getLocale())
+            ResponseVS responseVS = groupVSService.cancelGroup(groupVS, messageSMIMEReq)
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
                 responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupCancelledOKMsg',
@@ -145,7 +145,7 @@ class GroupVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = groupVSService.subscribe(messageSMIMEReq, request.getLocale())
+            ResponseVS responseVS = groupVSService.subscribe(messageSMIMEReq)
             return [responseVS:responseVS]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]

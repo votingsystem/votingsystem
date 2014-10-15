@@ -58,8 +58,12 @@ public class VicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/app/admin?menu=admin";
     }
 
-    public String getNewBankServiceURL() {
+    public String getSaveBankServiceURL() {
         return getServerURL() + "/userVS/newBankVS";
+    }
+
+    public String getSaveGroupVSServiceURL() {
+        return getServerURL() + "/groupVS/newGroup";
     }
 
     public String getSubscribeUserToGroupURL(Long groupId) {

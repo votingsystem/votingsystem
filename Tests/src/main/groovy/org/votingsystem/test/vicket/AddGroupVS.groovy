@@ -16,20 +16,19 @@ import org.votingsystem.util.HttpHelper
 
 Logger logger = TestHelper.init(VicketRequest.class)
 
-Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
-        certChainPEM:new String(ContextVS.getInstance().getResourceBytes("./certs/Cert_BankVS_03455543T.pem"),"UTF-8"),
-        IBAN:"ES1877777777450000000050", operation:"BANKVS_NEW", UUID:UUID.randomUUID().toString()]
+Map requestDataMap = [groupvsInfo:"GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
+        tags:[], groupvsName:"GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
+        operation:'VICKET_GROUP_NEW']
 
 VicketServer vicketServer = TestHelper.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
-SignatureVSService superUserSignatureService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
-UserVS fromUserVS = superUserSignatureService.getUserVS()
-
-String messageSubject = "TEST_ADD_BANKVS";
-SMIMEMessage smimeMessage = superUserSignatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,
+SignatureVSService representativeSignatureService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_00111222V.jks")
+UserVS fromUserVS = representativeSignatureService.getUserVS()
+String messageSubject = "TEST_ADD_GROUPVS";
+SMIMEMessage smimeMessage = representativeSignatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,
         vicketServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-        vicketServer.getSaveBankServiceURL())
+        vicketServer.getSaveGroupVSServiceURL())
 logger.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())
 
 System.exit(0)

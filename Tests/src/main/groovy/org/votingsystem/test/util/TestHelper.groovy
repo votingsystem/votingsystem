@@ -21,10 +21,9 @@ class TestHelper {
         return Logger.getLogger(clazz);
     }
 
-    public static VicketServer fetchVicketServer() throws ExceptionVS {
+    public static VicketServer fetchVicketServer(String vicketServerURL) throws ExceptionVS {
         VicketServer vicketServer = null
         if(ContextVS.getInstance().getVicketServer() == null) {
-            String vicketServerURL = ContextVS.getInstance().config.vicketServerURL
             ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(vicketServerURL),
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {

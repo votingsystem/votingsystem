@@ -43,7 +43,7 @@ public class UserVS implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type = Type.USER;
-    @Column(name="nif") private String nif;
+    @Column(name="nif", unique=true) private String nif;
 
     @Column(name="IBAN") private String IBAN;
 
@@ -108,8 +108,9 @@ public class UserVS implements Serializable {
         return IBAN;
     }
 
-    public void setIBAN(String IBAN) {
+    public UserVS setIBAN(String IBAN) {
         this.IBAN = IBAN;
+        return this;
     }
 
     public UserVS(String nif) { this.nif = nif; }
@@ -308,8 +309,9 @@ public class UserVS implements Serializable {
         return description;
     }
 
-    public void setDescription(String description) {
+    public UserVS setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Date getDateActivated() {

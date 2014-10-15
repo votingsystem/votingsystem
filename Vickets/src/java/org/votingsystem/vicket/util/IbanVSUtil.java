@@ -40,7 +40,8 @@ public class IbanVSUtil {
         return INSTANCE;
     }
 
-    public static void validate(String IBAN) throws IbanFormatException, InvalidCheckDigitException, UnsupportedCountryException {
+    public static String validate(String IBAN) throws IbanFormatException, InvalidCheckDigitException, UnsupportedCountryException {
         IbanUtil.validate(IBAN);
+        return IBAN;
     }
 }

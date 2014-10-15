@@ -131,7 +131,6 @@
         webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
         webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
             groupvsName:document.querySelector("#groupSubject").value, operation:Operation.VICKET_GROUP_NEW}
-        webAppMessage.signedContent.tags = document.querySelector('#selectedTags').selectedTags
         webAppMessage.setCallback(function(appMessage) {
             console.log("newGroupVSCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)
