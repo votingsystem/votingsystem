@@ -503,7 +503,7 @@ public class Vicket implements Serializable  {
         dataMap.put("tag", tag.getName());
         dataMap.put("amount", amount.toString());
         dataMap.put("currencyCode", currencyCode);
-        dataMap.put("isTimeLimited", false);
+        dataMap.put("isTimeLimited", isTimeLimited);
         dataMap.put("UUID", UUID.randomUUID().toString());
         return (JSONObject) JSONSerializer.toJSON(dataMap);
     }

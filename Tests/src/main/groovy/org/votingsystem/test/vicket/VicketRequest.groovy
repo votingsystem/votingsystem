@@ -23,8 +23,7 @@ Logger logger = TestHelper.init(VicketRequest.class)
 SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = signatureVSService.getUserVS()
 
-VicketServer vicketServer = TestHelper.loadVicketServer()
-if(vicketServer == null) throw new ExceptionVS("Vicket server not found")
+VicketServer vicketServer = TestHelper.fetchVicketServer()
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 BigDecimal totalAmount = new BigDecimal(10)

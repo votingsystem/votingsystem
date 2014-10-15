@@ -22,7 +22,7 @@
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
          transitions="cross-fade-all">
     <section id="page1">
-    <div cross-fade>
+    <div cross-fade style="max-width: 900px; margin:0 auto;">
         <div horizontal layout center center-justified>
             <template if="{{subpage}}">
                 <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >

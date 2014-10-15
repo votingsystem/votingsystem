@@ -14,7 +14,7 @@ import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
 Logger logger = TestHelper.init(VicketSendFromWallet.class)
-VicketServer vicketServer = TestHelper.loadVicketServer()
+VicketServer vicketServer = TestHelper.fetchVicketServer()
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 File walletFir = new File(ContextVS.getInstance().config.walletDir)

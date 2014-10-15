@@ -113,6 +113,9 @@
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 //window.addEventListener("popstate", function(e) {  });
             },
+            urlChanged: function() { //for history navigation
+                this.loadURL(this.url)
+            },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - title:" + detail.title)
                 var sufix = ""
@@ -120,6 +123,7 @@
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
                 if(detail.title) this.appTitle = detail.title + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
+                document.dispatchEvent( new Event('innerPageSignal'));
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
@@ -184,7 +188,11 @@
 </html>
 <asset:script>
     window.addEventListener('WebComponentsReady', function(e) {  });
+    document.querySelector('#coreSignals').addEventListener('core-signal-votingsystem-innerpage', function(e) {
+        console.log("simplePage.gsp - innerPageSignal: " + e.detail)
+        var message = e.detail
 
+    });
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
         updateLinksVS(document.getElementsByTagName('a'))

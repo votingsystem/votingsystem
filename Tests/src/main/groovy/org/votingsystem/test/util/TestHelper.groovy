@@ -3,6 +3,7 @@ package org.votingsystem.test.util
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 
@@ -20,7 +21,7 @@ class TestHelper {
         return Logger.getLogger(clazz);
     }
 
-    public static VicketServer loadVicketServer() {
+    public static VicketServer fetchVicketServer() throws ExceptionVS {
         VicketServer vicketServer = null
         if(ContextVS.getInstance().getVicketServer() == null) {
             String vicketServerURL = ContextVS.getInstance().config.vicketServerURL
@@ -30,8 +31,8 @@ class TestHelper {
                 try {
                     vicketServer = (VicketServer) ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
                     ContextVS.getInstance().setVicketServer(vicketServer);
-                } catch(Exception ex) {ex.printStackTrace();}
-            }
+                } catch(Exception ex) { throw new ExceptionVS("Error fetching Vicket server: " + ex.getMessage(), ex);}
+            } else throw new ExceptionVS("Error fetching Vicket server: " + responseVS.getMessage())
         }
         return vicketServer
     }

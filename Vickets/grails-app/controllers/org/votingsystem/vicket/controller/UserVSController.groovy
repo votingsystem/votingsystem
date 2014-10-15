@@ -174,22 +174,21 @@ class UserVSController {
     }
 
     def bankVSList() {
-        if(request.contentType?.contains('json')) {
-            List<BankVS> bankVSList = null
-            int numTotalBankVSs = 0;
-            BankVS.withTransaction {
-                bankVSList = BankVS.createCriteria().list(max: params.max, offset: params.offset,
-                        sort:'dateCreated', order:'desc'){
-                };
-                numTotalBankVSs = bankVSList.totalCount
-            }
-            def resultList = []
-            bankVSList.each {userItem ->
-                resultList.add(userVSService.getUserVSDataMap(userItem, false))
-            }
-            def resultMap = [bankVSList:resultList, queryRecordCount: numTotalBankVSs, numTotalBankVSs:numTotalBankVSs ]
-            render resultMap as JSON
+        List<BankVS> bankVSList = null
+        int numTotalBankVSs = 0;
+        BankVS.withTransaction {
+            bankVSList = BankVS.createCriteria().list(max: params.max, offset: params.offset,
+                    sort:'dateCreated', order:'desc'){
+            };
+            numTotalBankVSs = bankVSList.totalCount
         }
+        def resultList = []
+        bankVSList.each {userItem ->
+            resultList.add(userVSService.getUserVSDataMap(userItem, false))
+        }
+        def resultMap = [bankVSList:resultList, queryRecordCount: numTotalBankVSs, numTotalBankVSs:numTotalBankVSs ]
+        if(request.contentType?.contains('json')) render resultMap as JSON
+        else render(view:'bankVSList', model: [bankVSMap:resultMap])
     }
 
 
