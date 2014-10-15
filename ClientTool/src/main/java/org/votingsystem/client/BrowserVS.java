@@ -50,6 +50,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -403,7 +404,7 @@ public class BrowserVS extends Region {
 
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
             try {
-                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
+                String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
                 String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
                 log.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
@@ -447,7 +448,7 @@ public class BrowserVS extends Region {
         public String call(String messageToSignatureClient) {
             String result = null;
             try {
-                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
+                String jsonStr = StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
                 OperationVS operationVS = OperationVS.parse(jsonObject);
                 switch (operationVS.getType()) {
@@ -513,10 +514,9 @@ public class BrowserVS extends Region {
         } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
     }
 
-    private void openReceipt(OperationVS operation) throws Exception{
+    private void openReceipt(OperationVS operation) throws Exception {
         log.debug("openReceipt");
-        String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage()), "UTF-8");
-        DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operation.getDocument());
+        DocumentVSBrowserStackPane.showDialog(StringUtils.decodeB64_TO_UTF8(operation.getMessage()), operation.getDocument());
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

@@ -290,7 +290,7 @@ class  SignatureVSService {
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK).setUserVS(anonymousSigner)
                 } else {
-                    responseVS = subscriptionVSService.checkUser(userVS, locale)
+                    responseVS = subscriptionVSService.checkUser(userVS)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(responseVS.userVS.nif.equals(signerNIF)) checkedSigner = responseVS.userVS;
                 }

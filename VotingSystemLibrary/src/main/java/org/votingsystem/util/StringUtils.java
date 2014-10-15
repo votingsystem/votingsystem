@@ -3,6 +3,9 @@ package org.votingsystem.util;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 import javax.xml.transform.Transformer;
@@ -13,6 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
@@ -26,6 +30,13 @@ public class StringUtils {
 
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+    public static String decodeB64_TO_UTF8 (String encodedStr) throws UnsupportedEncodingException, ScriptException {
+        String decodeStr = new String(Base64.getMimeDecoder().decode(encodedStr.getBytes()), "UTF-8");
+        ScriptEngineManager factory = new ScriptEngineManager();
+        ScriptEngine engine = factory.getEngineByName("JavaScript");
+        String result = (String) engine.eval("unescape('" + java.net.URLDecoder.decode(decodeStr, "UTF-8") + "')");
+        return result;
+    }
 
     public static String getStringFromClob (Clob clob) {
     		if(clob == null) return null;

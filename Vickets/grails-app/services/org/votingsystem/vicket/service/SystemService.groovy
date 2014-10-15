@@ -70,7 +70,7 @@ class SystemService {
             X509Certificate x509AdminCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(adminCert))
             UserVS userVS = UserVS.getUserVS(x509AdminCert)
             signatureVSService.verifyUserCertificate(userVS)
-            ResponseVS responseVS = subscriptionVSService.checkUser(userVS, getDefaultLocale())
+            ResponseVS responseVS = subscriptionVSService.checkUser(userVS)
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS("Problems updating admin cert " +
                     "'${adminCert.absolutePath}'")
             userVS = responseVS.userVS

@@ -369,7 +369,7 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     }
     var messageToSignatureClient = JSON.stringify(messageJSON);
 //    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
-    clientTool.setJSONMessageToSignatureClient(window.btoa(messageToSignatureClient))
+    clientTool.setJSONMessageToSignatureClient(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
 }
 
 VotingSystemClient.call = function (messageJSON) {

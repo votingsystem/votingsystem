@@ -244,7 +244,7 @@ class GroupVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = subscriptionVSService.activateUser(messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = subscriptionVSService.activateUser(messageSMIMEReq)
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SubscriptionVS subscription = responseVS.data
             responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupUserActivatedMsg',
@@ -259,7 +259,7 @@ class GroupVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = subscriptionVSService.deActivateUser(messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = subscriptionVSService.deActivateUser(messageSMIMEReq)
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SubscriptionVS subscription = responseVS.data
             responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupUserdeActivatedMsg',

@@ -2,17 +2,12 @@ package org.votingsystem.test.vicket
 
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketServer
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
-
 
 Logger logger = TestUtils.init(VicketRequest.class)
 

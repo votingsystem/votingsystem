@@ -63,7 +63,7 @@ class UserVSService {
         UserVS newUser = UserVS.getUserVS(certChain.iterator().next())
 
         signatureVSService.verifyUserCertificate(newUser)
-        responseVS = subscriptionVSService.checkUser(newUser, locale)
+        responseVS = subscriptionVSService.checkUser(newUser)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         String userURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${responseVS.getUserVS().id}"
 
