@@ -2,12 +2,10 @@ package org.votingsystem.test.vicket
 
 
 import groovy.util.logging.Log4j
-import groovy.util.logging.Slf4j
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.callable.SMIMESignedSender
-import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
@@ -16,8 +14,9 @@ import org.votingsystem.model.VicketServer
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.test.model.SimulationData
+import org.votingsystem.test.util.MockDNI
 import org.votingsystem.test.util.SignatureVSService
-import org.votingsystem.test.util.TestHelper
+import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
@@ -28,114 +27,46 @@ import java.security.KeyStore
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-Logger log = TestHelper.init(AddUsersToGroup.class)
+Logger log = TestUtils.init(AddUsersToGroup.class)
 
-Map userBaseData = [numUsers: 10, userIndex:100 ]
-Map simulationDataMap = [groupId:4, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
-
+Map userBaseData = [numUsers: 10, userIndex:300 ]
+Map simulationDataMap = [groupId:39, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
 
 @Log4j
 class SimulationHelper {
 
     SimulationData simulationData
-    ExecutorService requestExecutor = Executors.newFixedThreadPool(100);
-    List<String> errorList = Collections.synchronizedList(new ArrayList<String>());
-    List<String> userList = new ArrayList<String>();
+    List<MockDNI> userList = null;
     VicketServer vicketServer
-    JSONObject requestSubscribeData
-    SignatureVSService signatureVSService = SignatureVSService.getAuthoritySignatureVSService()
+    SignatureVSService authoritySignatureVSService = SignatureVSService.getAuthoritySignatureVSService()
 
     SimulationHelper(Map simulationDataMap) {
         simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
     }
 
-    private void finishSimulation(ResponseVS responseVS){
-        log.debug("finishSimulation - StatusCode: ${responseVS.getStatusCode()}")
-        simulationData.finish(responseVS.getStatusCode(), System.currentTimeMillis());
-        log.debug("--------------- UserBaseDataSimulationService -----------");
+    private void finishSimulation(){
+        simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
+        log.debug("--------------- finishSimulation AddUsersToGroup -----------");
         log.info("Begin: " + DateUtils.getDateStr(simulationData.getBeginDate())  +
                 " - Duration: " + simulationData.getDurationStr());
         log.info("num users: " + userList.size());
-        if(!errorList.isEmpty()) {
-            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
-            log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
-            responseVS.setMessage(errorsMsg)
-        }
-        log.debug("-------------------------------------------------------");
-    }
-
-    private ResponseVS getGroupData(Long groupId) {
-        ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupURL(groupId), ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
-            JSONObject groupDataJSON =  dataJSON.getJSONObject("userVS")
-            JSONObject representativeDataJSON = groupDataJSON.getJSONObject("representative")
-            //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
-            requestSubscribeData = new JSONObject([operation:"VICKET_GROUP_SUBSCRIBE"])
-            JSONObject groupDataJSON1 = new JSONObject([id:groupDataJSON.getLong("id"), name:groupDataJSON.getString("name")])
-            JSONObject representativeDataJSON1 = new JSONObject([id:representativeDataJSON.getLong("id"),
-                                                                 nif:representativeDataJSON.getString("nif")])
-            groupDataJSON1.put("representative", representativeDataJSON1)
-            requestSubscribeData.put("groupvs", groupDataJSON1)
-        }
-        return responseVS
-    }
-
-    private ResponseVS subscribeUsers() {
-        log.debug("subscribeUser - Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
-        ResponseVS responseVS = null;
-        int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
-        int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
-                simulationData.getUserBaseSimulationData().getNumUsers()
-        for(int i = fromFirstUser; i < toLastUser; i++ ) {
-            int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
-            try {
-                String userNif = NifUtils.getNif(userIndex);
-                KeyStore mockDnie = signatureVSService.generateKeyStore(userNif);
-                userList.add(userNif);
-                String toUser = vicketServer.getNameNormalized();
-                String subject = "subscribeToGroupMsg - subscribeToGroupMsg"
-                requestSubscribeData.put("UUID", UUID.randomUUID().toString())
-                SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
-                        ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-                SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
-                        requestSubscribeData.toString(), subject);
-                SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                        vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),
-                        vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
-                responseVS = worker.call();
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
-                    errorList.add(responseVS.getMessage());
-                    simulationData.getUserBaseSimulationData().getAndIncrementnumUserRequestsERROR();
-                } else simulationData.getUserBaseSimulationData().getAndIncrementnumUserRequestsOK();
-            } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
-                errorList.add(ex.getMessage());
-            }
-            if(!errorList.isEmpty()) break;
-            if((i % 50) == 0) log.debug("Created " + i + " of " +
-                    simulationData.getUserBaseSimulationData().getNumUsers() + " mock DNIe certs");
-        }
-        if(!errorList.isEmpty()) responseVS = new ResponseVS(ResponseVS.SC_ERROR);
-        else responseVS = new ResponseVS(ResponseVS.SC_OK)
-        return responseVS
+        log.debug("------------------------------------------------------------");
     }
 
     public void run() {
         simulationData.init(System.currentTimeMillis());
         log.debug("initializeServer")
-        vicketServer = TestHelper.fetchVicketServer(simulationData.getServerURL())
+        vicketServer = TestUtils.fetchVicketServer(simulationData.getServerURL())
         if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
             throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
                     vicketServer.getEnvironmentVS());
         }
         ContextVS.getInstance().setDefaultServer(vicketServer)
-        ResponseVS responseVS = getGroupData(simulationData.getGroupId());
-        if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
-        responseVS = subscribeUsers();
-        finishSimulation(responseVS);
+        JSONObject subscriptionData = TestUtils.getGroupVSData(vicketServer.getGroupURL(simulationData.getGroupId()));
+        userList = authoritySignatureVSService.subscribeUsers(subscriptionData, simulationData, vicketServer)
+        finishSimulation();
     }
+
 }
 
 SimulationHelper simulationHelper = new SimulationHelper(simulationDataMap)

@@ -1,16 +1,19 @@
 package org.votingsystem.test.util
 
+import net.sf.json.JSONObject
 import org.apache.log4j.Logger
 import org.votingsystem.callable.MessageTimeStamper
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.callable.SMIMESignedSender
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.test.model.SimulationData
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
+import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
 import javax.mail.Header
@@ -24,7 +27,7 @@ import java.security.cert.X509Certificate
 
 class SignatureVSService {
 
-    private static Logger logger = Logger.getLogger(SignatureVSService.class);
+    private static Logger log = Logger.getLogger(SignatureVSService.class);
 
 	private SignedMailGenerator signedMailGenerator;
 	private X509Certificate certSigner;
@@ -54,7 +57,7 @@ class SignatureVSService {
     }
 
 	public synchronized Map init(String keyStorePath, String keyAlias, String password) throws Exception {
-		logger.debug("init")
+		log.debug("init")
         byte[] keyStoreBytes = ContextVS.getInstance().getResourceBytes(keyStorePath)
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -63,7 +66,7 @@ class SignatureVSService {
 		signedMailGenerator = new SignedMailGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
 		byte[] pemCertsArray
 		for (int i = 0; i < chain.length; i++) {
-			logger.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
+			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
 			if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
 		}
@@ -93,7 +96,7 @@ class SignatureVSService {
 
 	public File getSignedFile (String fromUser, String toUser,
 		String textToSign, String subject, Header header) {
-		logger.debug "getSignedFile - textToSign: ${textToSign}"
+		log.debug "getSignedFile - textToSign: ${textToSign}"
 		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
 		File resultFile = File.createTempFile("smime", "p7m");
 		resultFile.deleteOnExit();
@@ -103,7 +106,7 @@ class SignatureVSService {
 
     public SMIMEMessage getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
                            Header... headers) {
-        logger.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
@@ -116,7 +119,7 @@ class SignatureVSService {
     }
 		
 	public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
-		logger.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, headers)
@@ -125,7 +128,7 @@ class SignatureVSService {
 		
 	public synchronized SMIMEMessage getMultiSignedMimeMessage (
 		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
-		logger.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setFrom(new InternetAddress(fromUser))
@@ -140,17 +143,17 @@ class SignatureVSService {
 
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        logger.debug("encryptToCMS ${new String(dataToEncrypt)}")
+        log.debug("encryptToCMS ${new String(dataToEncrypt)}")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        logger.debug("encryptMessage(...) - ");
+        log.debug("encryptMessage(...) - ");
         try {
             return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
@@ -160,11 +163,11 @@ class SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        logger.debug "decryptMessage"
+        log.debug "decryptMessage"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
-            logger.error (ex.getMessage(), ex)
+            log.error (ex.getMessage(), ex)
             return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
@@ -174,11 +177,11 @@ class SignatureVSService {
      * Method to encrypt SMIME signed messages
      */
     ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        logger.debug("encryptSMIMEMessage(...) ");
+        log.debug("encryptSMIMEMessage(...) ");
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
-            logger.error (ex.getMessage(), ex)
+            log.error (ex.getMessage(), ex)
             return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
@@ -188,11 +191,11 @@ class SignatureVSService {
      * Method to decrypt SMIME signed messages
      */
     ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        logger.debug("decryptSMIMEMessage ")
+        log.debug("decryptSMIMEMessage ")
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {
-            logger.error (ex.getMessage(), ex)
+            log.error (ex.getMessage(), ex)
             return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
@@ -217,4 +220,37 @@ class SignatureVSService {
         ContextVS.getInstance().copyFile(keyStoreBytes, userSubPath,  "userVS_" + userNIF + ".jks");
         return keyStore;
     }
+
+    private List<MockDNI> subscribeUsers(JSONObject subscriptionData, SimulationData simulationData,
+              VicketServer vicketServer) throws ExceptionVS {
+        log.debug("subscribeUser - Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
+        List<MockDNI> userList = new ArrayList<MockDNI>();
+        int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
+        int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
+                simulationData.getUserBaseSimulationData().getNumUsers()
+        for(int i = fromFirstUser; i < toLastUser; i++ ) {
+            int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
+            String userNif = NifUtils.getNif(userIndex);
+            KeyStore mockDnie = generateKeyStore(userNif);
+            String toUser = vicketServer.getNameNormalized();
+            String subject = "subscribeToGroupMsg - subscribeToGroupMsg"
+            subscriptionData.put("UUID", UUID.randomUUID().toString())
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
+                    ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+            userList.add(new MockDNI(userNif, mockDnie, signedMailGenerator));
+            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
+                    subscriptionData.toString(), subject);
+            SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
+                    vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),
+                    vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+            ResponseVS responseVS = worker.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                throw new ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
+            } else simulationData.getUserBaseSimulationData().getAndIncrementnumUserRequestsOK();
+            if((i % 50) == 0) log.debug("Subscribed " + i + " of " +
+                    simulationData.getUserBaseSimulationData().getNumUsers() + " users to groupVS");
+        }
+        return userList
+    }
+
 }

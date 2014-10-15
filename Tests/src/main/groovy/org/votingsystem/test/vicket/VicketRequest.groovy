@@ -11,19 +11,18 @@ import org.votingsystem.model.VicketServer
 import org.votingsystem.model.TagVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureVSService
-import org.votingsystem.test.util.TestHelper
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.WalletUtils
 import org.votingsystem.vicket.model.VicketRequestBatch
 
 
-Logger logger = TestHelper.init(VicketRequest.class)
+Logger logger = TestUtils.init(VicketRequest.class)
 
 SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = signatureVSService.getUserVS()
 
-VicketServer vicketServer = TestHelper.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
+VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 BigDecimal totalAmount = new BigDecimal(10)

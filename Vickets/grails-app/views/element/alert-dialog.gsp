@@ -44,7 +44,6 @@
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
-                console.log(this.tagName + "======= setMessage: " + this.callerId)
             },
             sendAndroidURIMessage:function(encodedData) {
                 this.uriData = "${createLink(controller:'app', action:'androidClient', absolute:'true')}?operationvs="+ encodedData

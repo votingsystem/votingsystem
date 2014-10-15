@@ -7,14 +7,14 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.VicketServer
-import org.votingsystem.test.util.TestHelper
+import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
-Logger logger = TestHelper.init(VicketSendFromWallet.class)
-VicketServer vicketServer = TestHelper.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
+Logger logger = TestUtils.init(VicketSendFromWallet.class)
+VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 File walletFir = new File(ContextVS.getInstance().config.walletDir)
