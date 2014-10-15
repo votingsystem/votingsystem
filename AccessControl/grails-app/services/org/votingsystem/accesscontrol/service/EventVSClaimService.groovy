@@ -71,12 +71,10 @@ class EventVSClaimService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = signerVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimEventValidated', null, locale)
-        SMIMEMessage smimeMessage = signatureVSService.getSMIMEMessage(
-                fromUser, toUser,  messageJSON.toString(), subject, null)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                eventVS:eventVS, content:smimeMessage.getBytes())
-        MessageSMIME.withTransaction { messageSMIMEResp.save() }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, data:messageSMIMEResp,
+        SMIMEMessage smimeMessage = signatureVSService.getMultiSignedMimeMessage(
+                fromUser, toUser,  messageSMIMEReq.getSmimeMessage(), subject)
+        messageSMIMEReq.setSmimeMessage(smimeMessage).setEventVS(eventVS)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, data:messageSMIMEReq,
                 type:TypeVS.CLAIM_EVENT)
     }
 

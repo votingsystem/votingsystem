@@ -52,8 +52,7 @@ class VicketService {
             vicket.setState(Vicket.State.CANCELLED)
             SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                     smimeMessageReq, subject)
-            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                    content:receipt.getBytes()).save()
+            messageSMIMEReq.setSmimeMessage(receipt)
             vicket.cancelMessage = messageSMIMEReq
             vicket.save()
             TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
@@ -98,9 +97,8 @@ class VicketService {
         String subject = messageSource.getMessage('vicketReceiptSubject', null, LocaleContextHolder.locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                 smimeMessageReq, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                content:smimeMessageResp.getBytes()).save()
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEResp,
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEReq,
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
 

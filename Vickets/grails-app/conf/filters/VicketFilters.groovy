@@ -176,7 +176,6 @@ class VicketFilters {
                             messageSMIMEReq = messageSMIMEReq.merge()
                             messageSMIMEReq.getSmimeMessage().setMessageID(
                                     "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
-                            messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
                             if(responseVS.type) messageSMIMEReq.type = responseVS.type
                             if(responseVS.reason) messageSMIMEReq.setReason(responseVS.getReason())
                             if(responseVS.metaInf) messageSMIMEReq.setMetaInf(responseVS.getMetaInf())

@@ -52,16 +52,10 @@ class EventVSClaimSignatureCollectorService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimSignatureValidated', null, locale)
-
         SMIMEMessage smimeMessageResp = signatureVSService.
             getMultiSignedMimeMessage (fromUser, toUser, smimeMessage, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-            smimeParent:messageSMIMEReq, eventVS:eventVSClaim, content:smimeMessageResp.getBytes())
-        MessageSMIME.withTransaction {
-            messageSMIMEResp.save()
-        }
-        messageSMIMEResp.smimeMessage = smimeMessageResp
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, eventVS:eventVSClaim,
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp).setEventVS(eventVSClaim)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEReq, eventVS:eventVSClaim,
             smimeMessage:smimeMessage, type:TypeVS.CLAIM_EVENT_SIGN, contentType:ContentTypeVS.JSON_SIGNED)
         } else {
             msg = messageSource.getMessage('claimSignatureRepeated',

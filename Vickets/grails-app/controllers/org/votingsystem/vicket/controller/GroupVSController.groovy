@@ -145,8 +145,7 @@ class GroupVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = groupVSService.subscribe(messageSMIMEReq)
-            return [responseVS:responseVS]
+            return [responseVS:groupVSService.subscribe(messageSMIMEReq)]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]
     }

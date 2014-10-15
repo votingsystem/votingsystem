@@ -19,27 +19,6 @@ import org.votingsystem.vicket.util.IbanVSUtil
 @Transactional
 class GroupVSService {
 
-    private static final CLASS_NAME = CsrService.class.getSimpleName()
-    private class GroupVSRequest {
-        String groupvsName, groupvsInfo;
-        TypeVS operation;
-        Set<TagVS> tagSet = new HashSet<TagVS>();
-        public GroupVSRequest(String signedContent) throws ExceptionVS {
-            def messageJSON = JSON.parse(signedContent)
-            groupvsName = messageJSON.groupvsName;
-            groupvsInfo = messageJSON.groupvsInfo
-            if(!groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
-            if(!groupvsInfo) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsInfo'")
-            if(TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
-                    "Operation expected: 'VICKET_GROUP_NEW' - operation found: " + messageJSON.operation)
-            messageJSON.tags?.each {tag ->
-                TagVS tagVS = TagVS.findWhere(name:tag.name)
-                if(tagVS) tagSet.add(tagVS)
-                else throw new ValidationExceptionVS(this.getClass(), "Tag '${tag}' not found");
-            }
-        }
-    }
-
     def userVSService
     def messageSource
     def grailsApplication
@@ -49,67 +28,37 @@ class GroupVSService {
     def systemService
     def userVSAccountService
 
-
-	public void init() { }
-
     public ResponseVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("cancelGroup '${groupVS.id}' - signer: ${userSigner?.nif}")
-        String msg = null
-        ResponseVS responseVS = null
+        log.debug("$methodName '${groupVS.id}' - signer: ${userSigner?.nif}")
         if(!groupVS.getRepresentative().nif.equals(userSigner.nif) && !systemService.isUserAdmin(userSigner.nif)) {
-            msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
-                             TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), LocaleContextHolder.locale)
-            log.error "cancelGroup - ${msg}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg,
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivilege"))
+            throw new ExceptionVS(messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
+                    TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.groupvsName || !messageJSON.id ||
-                (TypeVS.VICKET_GROUP_CANCEL != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, LocaleContextHolder.locale)
-            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
-        }
-        groupVS.state = UserVS.State.CANCELLED
+        GroupVSRequest request = GroupVSRequest.getCancelRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        groupVS.setState(UserVS.State.CANCELLED)
         groupVS.save()
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL, message:msg,
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}"))
     }
-
 
     public ResponseVS editGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
-        String msg = null
-        ResponseVS responseVS = null
         if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) &&
                 !systemService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
-            msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
-                 TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), LocaleContextHolder.locale)
-            log.error "editGroup - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
+            throw new ExceptionVS(messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
+                    TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
-        if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||!messageJSON.id ||
-                (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, LocaleContextHolder.locale)
-            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "params"),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        GroupVSRequest request = GroupVSRequest.getEditRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        if(request.id != groupVS.id) {
+            throw new ExceptionVS(messageSource.getMessage('identifierErrorMsg', [groupVS.id, request.id].toArray(),
+                LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, "groupVS_${groupVS?.id}"))
         }
-        if(Long.valueOf(messageJSON.id) != groupVS.id) {
-            msg = messageSource.getMessage('identifierErrorMsg', [groupVS.id, messageJSON.id].toArray(), LocaleContextHolder.locale)
-            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupVS_${groupVS?.id}"),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        groupVS.setDescription(messageJSON.groupvsInfo)
+        groupVS.setDescription(request.groupvsInfo)
         groupVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_EDIT, data:groupVS,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}"))
@@ -136,10 +85,10 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, LocaleContextHolder.locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMessage(fromUser, toUser,
-                messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                messageSMIMEReq.getSmimeMessage(), subject)
         log.debug("${metaInf}")
-        messageSMIMEReq.setContent(smimeMessageResp.getBytes()).setType(TypeVS.RECEIPT)
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
@@ -148,39 +97,26 @@ class GroupVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SubscriptionVS subscriptionVS = null
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("subscribe - signer: ${userSigner?.nif}")
-        String msg = null
-        ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.groupvs || (TypeVS.VICKET_GROUP_SUBSCRIBE != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, LocaleContextHolder.locale)
-            log.error "subscribe - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        GroupVS groupVS = GroupVS.get(messageJSON.groupvs.id)
-
+        log.debug("$methodName - signer: ${userSigner?.nif}")
+        GroupVSRequest request = GroupVSRequest.getSubscribeRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVS groupVS = GroupVS.get(request.id)
         if(groupVS.getRepresentative().nif.equals(userSigner.nif)) {
-            msg = messageSource.getMessage('representativeSubscribedErrorMsg',
-                    [groupVS.representative.nif, groupVS.name].toArray(), LocaleContextHolder.locale)
-            log.error "subscribe - ERROR - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "representativeSubscribed"))
+            throw new ExceptionVS(messageSource.getMessage('representativeSubscribedErrorMsg',
+                    [groupVS.representative.nif, groupVS.name].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "representativeSubscribed"))
         }
 
         subscriptionVS = SubscriptionVS.findWhere(groupVS:groupVS, userVS:userSigner)
         if(subscriptionVS) {
-            msg = messageSource.getMessage('userAlreadySubscribedErrorMsg', [userSigner.nif, groupVS.name].toArray(), LocaleContextHolder.locale)
-            log.error "subscribe - ERROR - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userAlreadySubscribed"))
+            throw new ExceptionVS(messageSource.getMessage('userAlreadySubscribedErrorMsg',
+                    [userSigner.nif, groupVS.name].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "userAlreadySubscribed"))
         }
         subscriptionVS = new SubscriptionVS(userVS:userSigner, groupVS:groupVS, state:SubscriptionVS.State.PENDING,
                 subscriptionSMIME: messageSMIMEReq).save()
-        msg = messageSource.getMessage('groupvsSubscriptionOKMsg', [userSigner.nif, groupVS.name].toArray(), LocaleContextHolder.locale)
-        log.debug("subscribe - OK subsscription: ${subscriptionVS.id} to groupVS: ${groupVS.id}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type: TypeVS.VICKET_GROUP_SUBSCRIBE, message: msg,
+        log.debug("$methodName - subscription OK id '${subscriptionVS.id}' to groupVS '${groupVS.id}'")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type: TypeVS.VICKET_GROUP_SUBSCRIBE,
+                message: messageSource.getMessage('groupvsSubscriptionOKMsg', [userSigner.nif, groupVS.name].toArray(), LocaleContextHolder.locale),
                 metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscriptionVS.id}"))
     }
 
@@ -224,6 +160,65 @@ class GroupVSService {
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
         userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
+    }
+
+    private static class GroupVSRequest {
+        String groupvsName, groupvsInfo;
+        TypeVS operation;
+        Long id;
+        Set<TagVS> tagSet = new HashSet<TagVS>();
+        public GroupVSRequest() {}
+        public GroupVSRequest(String signedContent) throws ExceptionVS {
+            def messageJSON = JSON.parse(signedContent)
+            groupvsName = messageJSON.groupvsName;
+            groupvsInfo = messageJSON.groupvsInfo
+            if(!groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
+            if(!groupvsInfo) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsInfo'")
+            if(TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_NEW' - operation found: " + messageJSON.operation)
+            messageJSON.tags?.each {tag ->
+                TagVS tagVS = TagVS.findWhere(name:tag.name)
+                if(tagVS) tagSet.add(tagVS)
+                else throw new ValidationExceptionVS(this.getClass(), "Tag '${tag}' not found");
+            }
+        }
+
+        public static GroupVSRequest getCancelRequest(String signedContent) {
+            GroupVSRequest result = new GroupVSRequest()
+            def messageJSON = JSON.parse(signedContent)
+            if(TypeVS.VICKET_GROUP_CANCEL != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_CANCEL' - operation found: " + messageJSON.operation)
+            result.groupvsName = messageJSON.groupvsName;
+            if(!result.groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
+            result.id = Long.valueOf(messageJSON.id)
+            return result
+        }
+
+        public static GroupVSRequest getEditRequest(String signedContent) {
+            GroupVSRequest result = new GroupVSRequest()
+            def messageJSON = JSON.parse(signedContent)
+            if(TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_NEW' - operation found: " + messageJSON.operation)
+            result.groupvsName = messageJSON.groupvsName;
+            if(!result.groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
+            result.id = Long.valueOf(messageJSON.id)
+            result.groupvsName = messageJSON.groupvsName;
+            result.groupvsInfo = messageJSON.groupvsInfo
+            if(!result.groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
+            if(!result.groupvsInfo) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsInfo'")
+            return result
+        }
+
+        public static GroupVSRequest getSubscribeRequest(String signedContent) {
+            GroupVSRequest result = new GroupVSRequest()
+            def messageJSON = JSON.parse(signedContent)
+            if(TypeVS.VICKET_GROUP_SUBSCRIBE != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_SUBSCRIBE' - operation found: " + messageJSON.operation)
+            if(!messageJSON.groupvs?.id) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvs.id'");
+            result.id = Long.valueOf(messageJSON.groupvs.id)
+            return result
+        }
+
     }
 
 }

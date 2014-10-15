@@ -44,6 +44,7 @@
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
+                console.log(this.tagName + "======= setMessage: " + this.callerId)
             },
             sendAndroidURIMessage:function(encodedData) {
                 this.uriData = "${createLink(controller:'app', action:'androidClient', absolute:'true')}?operationvs="+ encodedData
@@ -56,8 +57,10 @@
                 if(this.uriData != null) {
                     window.location.href = this.uriData.replace("\n","")
                 }
+                var coresignalData = {name: "messagedialog-accept", data: this.callerId} //when close -> reset values
                 this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
+                this.fire('core-signal', coresignalData);
+
             },
             close: function() {
                 console.log(this.tagName + " - close")

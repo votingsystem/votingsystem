@@ -76,7 +76,7 @@
                     </div>
                 </template>
 
-                <div layout horizontal center center-justified>
+                <div id="pageHeader" layout horizontal center center-justified>
                     <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
                         <template if="{{groupvs.userVS.tags.length > 0}}">
                             <div layout horizontal center center-justified>
@@ -96,7 +96,6 @@
                 </div>
             </div>
         </div>
-
         <div class="eventContentDiv" style="">
             <votingsystem-html-echo html="{{groupvs.userVS.description}}"></votingsystem-html-echo>
         </div>
@@ -161,6 +160,7 @@
         },
         messagedialog:function(e, detail, sender) {
             console.log("messagedialog signal - cancelgroup: " + detail)
+            alert("detail: " + detail)
             if('cancel_group' == detail) {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.userVS.id
@@ -174,6 +174,7 @@
                         var caption = '<g:message code="groupCancelERRORLbl"/>'
                         if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                             caption = "<g:message code='groupCancelOKLbl'/>"
+                            loadURL_VS("${createLink(controller:'groupVS', action:'',absolute:true)}/" + this.groupvs.userVS.id)
                         }
                         showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                     }
@@ -206,8 +207,10 @@
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)
                 var caption
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) caption = "<g:message code='groupSubscriptionOKLbl'/>"
-                else caption = '<g:message code="groupSubscriptionERRORLbl"/>'
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "<g:message code='groupSubscriptionOKLbl'/>"
+                    loadURL_VS( "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.userVS.id)
+                } else caption = '<g:message code="groupSubscriptionERRORLbl"/>'
                 var msg = appMessageJSON.message
                 showMessageVS(msg, caption)
             }.bind(this))

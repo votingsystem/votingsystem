@@ -5,7 +5,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 
 
-<polymer-element name="groupvs-list" attributes="url">
+<polymer-element name="groupvs-list" attributes="url state">
     <template>
         <style no-shim>
         .card {
@@ -62,7 +62,8 @@
     <script>
         Polymer('groupvs-list', {
             ready :  function(e) {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready - state: " + this.state)
+                if(this.state) this.$.groupvsTypeSelect.value = this.state
                 this.loading = true
                 this.groupvsData = {}
                 this.page = 0;

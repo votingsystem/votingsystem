@@ -47,6 +47,12 @@
                     showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
                     return
                 }
+                if(this.$.textEditor.getData().length > 1500){
+                    this.$.textEditor.classList.add("formFieldError");
+                    showMessageVS("<g:message code="fieldSizeExcededERRORMsg"/>".format(1500, this.$.textEditor.getData().length),
+                            '<g:message code="dataFormERRORLbl"/>')
+                    return
+                }
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
                 webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
@@ -59,8 +65,7 @@
                     var msg = appMessageJSON.message
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = '<g:message code="editGroupOKCaption"/>'
-                        var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                        msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
+                        loadURL_VS(appMessageJSON.URL)
                     }
                     showMessageVS(msg, caption)
                     window.scrollTo(0,0);

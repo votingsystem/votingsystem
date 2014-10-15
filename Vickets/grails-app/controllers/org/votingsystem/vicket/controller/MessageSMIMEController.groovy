@@ -46,36 +46,6 @@ class MessageSMIMEController {
                 message(code: 'messageSMIMENotFound', args:[params.id]))]
     }
 
-
-    /**
-     * Servicio que devuelve el recibo con el que el servidor respondió un message
-     *
-     * @httpMethod [GET]
-     * @serviceURL [/messageSMIME/receipt/$requestMessageId]
-     * @param [requestMessageId] Obligatorio. Identificador del message origen del recibo en la base de datos
-     * @return El recibo asociado al message pasado como parámetro.
-     */
-    def receipt() {
-        MessageSMIME messageSMIMEOri = null
-        MessageSMIME messageSMIME = null
-        MessageSMIME.withTransaction{
-            messageSMIMEOri = MessageSMIME.get(params.long('requestMessageId'))
-            if (messageSMIMEOri) {
-                messageSMIME = MessageSMIME.findWhere(smimeParent:messageSMIMEOri, type: TypeVS.RECEIPT)
-                if (messageSMIME) {
-                    return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
-                            messageBytes: messageSMIME.content)]
-                }
-            }
-        }
-        if(messageSMIMEOri && !messageSMIME) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'messageSMIMEWithoutReceiptMsg', args:[params.requestMessageId]))]
-        } else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'messageSMIMENotFound', args:[params.requestMessageId]))]
-    }
-
-
     def transactionVS() {
         TransactionVS transactionVS = null
         TransactionVS.withTransaction {
@@ -108,9 +78,15 @@ class MessageSMIMEController {
             } else {
                 signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
             }
-            if(TypeVS.VICKET_SEND != TypeVS.valueOf(signedContentJSON.operation)) {
+            TypeVS operation = TypeVS.valueOf(signedContentJSON.operation)
+            if(TypeVS.VICKET_SEND != operation) {
                 if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS =
                         userVSService.getUserVSBasicDataMap(request.messageSMIME.userVS)
+            }
+            switch(operation) {
+                case TypeVS.VICKET_GROUP_NEW:
+                    viewer = "message-smime-groupvs-new"
+                    break;
             }
             params.operation = signedContentJSON.operation
         }

@@ -18,7 +18,7 @@ Logger logger = TestHelper.init(VicketRequest.class)
 
 Map requestDataMap = [groupvsInfo:"GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
         tags:[], groupvsName:"GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
-        operation:'VICKET_GROUP_NEW']
+        operation:'VICKET_GROUP_NEW', UUID:UUID.randomUUID().toString()]
 
 VicketServer vicketServer = TestHelper.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)

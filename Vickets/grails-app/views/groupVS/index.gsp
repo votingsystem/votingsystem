@@ -12,7 +12,8 @@
 <div class="pageContentDiv" style="padding:0px 30px 0px 30px;">
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-    <groupvs-list id="groupvsList" url="${createLink(controller: 'groupVS')}?menu=${params.menu}"></groupvs-list>
+    <groupvs-list id="groupvsList" state="${params.state}"
+                  url="${createLink(controller: 'groupVS')}?menu=${params.menu}&state=${params.state}"></groupvs-list>
 </div>
 </body>
 </html>

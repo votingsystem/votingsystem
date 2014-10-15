@@ -109,8 +109,9 @@ public class MessageSMIME implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-	public void setType(TypeVS type) {
+	public MessageSMIME setType(TypeVS type) {
 		this.type = type;
+        return this;
 	}
 
 	public TypeVS getType() {
@@ -170,8 +171,10 @@ public class MessageSMIME implements Serializable {
 		return smimeMessage;
 	}
 
-	public void setSmimeMessage(SMIMEMessage smimeMessage) {
+	public MessageSMIME setSmimeMessage(SMIMEMessage smimeMessage) throws Exception {
 		this.smimeMessage = smimeMessage;
+        this.content = smimeMessage.getBytes();
+        return this;
 	}
 
     public Set<UserVS> getSigners() {
@@ -236,7 +239,7 @@ public class MessageSMIME implements Serializable {
             setSignedContent(getSmimeMessage().getSignedContent());
             setMessageSubject(getSmimeMessage().getSubject());
             setContent(getSmimeMessage().getBytes());
-            if(TypeVS.RECEIPT != type) setBase64ContentDigest(getSmimeMessage().getContentDigestStr());
+            setBase64ContentDigest(getSmimeMessage().getContentDigestStr());
         }catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
