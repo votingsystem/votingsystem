@@ -1,4 +1,4 @@
-<%@ page import="org.votingsystem.signature.util.CertUtils; org.votingsystem.signature.util.CertUtil; java.security.cert.X509Certificate" %>
+<%@ page import="org.votingsystem.signature.util.CertUtils; java.security.cert.X509Certificate" %>
 <!DOCTYPE HTML>
 <html>
 <head>
