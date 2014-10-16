@@ -20,10 +20,6 @@ import java.security.cert.X509Certificate
 */
 class SubscriptionVSService {
 
-	static transactional = false
-
-    private static final CLASS_NAME = SubscriptionVSService.class.getSimpleName()
-
     def grailsApplication
 	def messageSource
     def userVSService
@@ -115,54 +111,34 @@ class SubscriptionVSService {
     public ResponseVS deActivateUser(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("deActivateUser - signer: ${userSigner?.nif}")
-        String msg = null
-        ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        log.debug("deActivateUser - documentStr: ${documentStr}")
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.groupvs.name || !messageJSON.groupvs.id ||
-                !messageJSON.uservs.name || !messageJSON.uservs.NIF ||
-                (TypeVS.VICKET_GROUP_USER_DEACTIVATE != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, LocaleContextHolder.locale)
-            log.error "deActivateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        GroupVS groupVS = GroupVS.findWhere(name:messageJSON.groupvs.name.trim(), id:Long.valueOf(messageJSON.groupvs.id))
+        log.debug("$methodName - signer: ${userSigner?.nif}")
+        SubscriptionVSRequest request = new SubscriptionVSRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVS groupVS = GroupVS.findWhere(name:request.groupvsName, id:Long.valueOf(request.id))
         if(!groupVS) {
-            msg = messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(), LocaleContextHolder.locale)
-            log.error "deActivateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupNotFound"), statusCode:ResponseVS.SC_ERROR_REQUEST)
+            throw new ExceptionVS(messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(),
+                    LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, "groupNotFound"))
         }
-
-        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !systemService.isUserAdmin(
+        if(!groupVS.getRepresentative().nif.equals(request.userVSNIF) && !systemService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
-            msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
-                 TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), LocaleContextHolder.locale)
-            log.error "deActivateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivilege"))
+            throw new ExceptionVS(messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
+                TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivilege"))
         }
-        UserVS userToActivate = UserVS.findWhere(nif:messageJSON.uservs.NIF)
+        UserVS userToActivate = UserVS.findWhere(nif:request.userVSNIF)
         SubscriptionVS subscription = SubscriptionVS.findWhere(groupVS: groupVS, userVS:userToActivate)
 
         if(SubscriptionVS.State.CANCELLED == subscription.state) {
-            msg = messageSource.getMessage('groupUserAlreadyCencelledErrorMsg',
-                    [groupVS.name, userSigner.getNif()].toArray(), LocaleContextHolder.locale)
-            log.error "deActivateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupUserAlreadyCancelled"))
+            throw new ExceptionVS(messageSource.getMessage('groupUserAlreadyCencelledErrorMsg',
+                    [groupVS.name, userSigner.getNif()].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, "groupUserAlreadyCancelled"))
         }
-        subscription.setReason(messageJSON.reason)
+        subscription.setReason(request.reason)
         subscription.setState(SubscriptionVS.State.CANCELLED)
         subscription.dateCancelled = Calendar.getInstance().getTime()
         messageSMIMEReq.setSubscriptionVS(subscription)
         log.debug("deActivateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
-        return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_DEACTIVATE, message:msg, statusCode:ResponseVS.SC_OK,
+        return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_DEACTIVATE, statusCode:ResponseVS.SC_OK,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"), data:subscription)
-        return responseVS
     }
 
     public UserVSAccount checkUserVSAccount(UserVS userVS){
@@ -217,25 +193,34 @@ class SubscriptionVSService {
     }
 
     private static class SubscriptionVSRequest {
-        String groupvsName, groupvsInfo, userVSName, userVSNIF;
+        String groupvsName, groupvsInfo, userVSName, userVSNIF, reason;
         TypeVS operation;
         Long id;
-        public SubscriptionVSRequest() {}
-        public static SubscriptionVSRequest getUserVSActivationRequest(String signedContent) {
-            SubscriptionVSRequest result = new SubscriptionVSRequest()
+        public SubscriptionVSRequest(String signedContent) {
             def messageJSON = JSON.parse(signedContent)
-            if(TypeVS.VICKET_GROUP_USER_ACTIVATE != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
-                    "Operation expected: 'VICKET_GROUP_USER_ACTIVATE' - operation found: " + messageJSON.operation)
-            result.groupvsName = messageJSON.groupvs.name;
-            result.userVSName = messageJSON.uservs.name
-            result.id = Long.valueOf(messageJSON.groupvs.id)
-            result.userVSNIF = messageJSON.uservs.NIF
-            if(!result.groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
-            if(!result.userVSName) throw new ValidationExceptionVS(this.getClass(), "missing param 'userVSName'");
-            if(!result.userVSNIF) throw new ValidationExceptionVS(this.getClass(), "missing param 'userVSNIF'");
+            operation = TypeVS.valueOf(messageJSON.operation)
+            groupvsName = messageJSON.groupvs.name;
+            userVSName = messageJSON.uservs.name
+            reason = messageJSON.reason
+            id = Long.valueOf(messageJSON.groupvs.id)
+            userVSNIF = messageJSON.uservs.NIF
+            if(!groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");
+            if(!userVSName) throw new ValidationExceptionVS(this.getClass(), "missing param 'userVSName'");
+            if(!userVSNIF) throw new ValidationExceptionVS(this.getClass(), "missing param 'userVSNIF'");
+        }
+        public static SubscriptionVSRequest getUserVSActivationRequest(String signedContent) {
+            SubscriptionVSRequest result = new SubscriptionVSRequest(signedContent)
+            if(TypeVS.VICKET_GROUP_USER_ACTIVATE != result.operation) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_USER_ACTIVATE' - operation found: " + result.operation.toString())
+            return result
+        }
+
+        public static SubscriptionVSRequest getUserVSDeActivationRequest(String signedContent) {
+            SubscriptionVSRequest result = new SubscriptionVSRequest(signedContent)
+            if(TypeVS.VICKET_GROUP_USER_DEACTIVATE != result.operation) throw ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'VICKET_GROUP_USER_ACTIVATE' - operation found: " + result.operation.toString())
             return result
         }
     }
-
 
 }

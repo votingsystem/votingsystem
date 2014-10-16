@@ -162,7 +162,7 @@ class VicketAddUsersToGroupSimulationService {
                 SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
                         requestSubscribeData.toString(), subject);
                 SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                        vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),
+                        vicketServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
                         vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
                 responseVS = worker.call();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

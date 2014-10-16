@@ -369,6 +369,7 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     }
     var messageToSignatureClient = JSON.stringify(messageJSON);
 //    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
+    //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
     clientTool.setJSONMessageToSignatureClient(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
 }
 

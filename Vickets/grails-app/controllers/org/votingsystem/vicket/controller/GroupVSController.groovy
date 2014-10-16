@@ -176,9 +176,12 @@ class GroupVSController {
         if(params.long('id')) {
             def result
             Map resultMap = [:]
+            SubscriptionVS.State state
+            if(params.state) try {state = SubscriptionVS.State.valueOf(params.state)} catch(Exception ex) {}
             SubscriptionVS.withTransaction {
                 result = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
                     eq("groupVS.id", params.long('id'))
+                    if(state)eq("state", state)
                 }
             }
             def resultList = []
@@ -203,8 +206,12 @@ class GroupVSController {
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
             }
             resultMap = [groupName: groupVS.name, id:groupVS.id]
+            SubscriptionVS.State subscriptionState
+            if(params.subscriptionState) try {subscriptionState = SubscriptionVS.State.valueOf(
+                    params.subscriptionState)} catch(Exception ex) {}
+
             UserVS.State state = UserVS.State.ACTIVE
-            try {state = UserVS.State.valueOf(params.state)} catch(Exception ex) {}
+            try {state = UserVS.State.valueOf(params.userVSState)} catch(Exception ex) {}
             if(request.contentType?.contains("json")) {
                 def userList
                 SubscriptionVS.withTransaction {
@@ -222,6 +229,7 @@ class GroupVSController {
                             }
                         } else {
                             userVS { eq("state", state) }
+                            if(subscriptionState) eq("state", subscriptionState)
                         }
                     }
                 }
@@ -276,7 +284,7 @@ class GroupVSController {
         Throwable rootCause = StackTraceUtils.extractRootCause(exception)
         log.error " Exception occurred. ${rootCause.getMessage()}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: metaInf,
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
                 metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
     }
 

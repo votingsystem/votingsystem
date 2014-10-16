@@ -66,8 +66,21 @@ public class VicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/groupVS/newGroup";
     }
 
-    public String getSubscribeUserToGroupURL(Long groupId) {
+    public String getGroupVSSubscriptionServiceURL(Long groupId) {
         return getServerURL() + "/groupVS/" + String.valueOf(groupId) + "/subscribe";
+    }
+
+    public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
+                SubscriptionVS.State subscriptionState, UserVS.State userVSState) {
+        return getServerURL() + "/groupVS/" + String.valueOf(groupId) + "/users" +
+                "?max=" + ((max != null)?max:"") +
+                "&offset=" + ((offset != null)?offset:"") +
+                "&subscriptionState=" + ((subscriptionState != null)?subscriptionState.toString():"") +
+                "&userVSState=" + ((userVSState != null)?userVSState.toString():"");
+    }
+
+    public String getGroupVSUsersActivationServiceURL() {
+        return getServerURL() + "/groupVS/activateUser";
     }
 
 }

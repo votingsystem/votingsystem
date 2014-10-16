@@ -16,8 +16,8 @@ import org.votingsystem.util.ExceptionVS
 
 log = TestUtils.init(AddUsersToGroup.class)
 
-Map userBaseData = [numUsers: 10, userIndex:600]
-Map simulationDataMap = [groupId:39, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
+Map userBaseData = [numUsers: 2, userIndex:280]
+Map simulationDataMap = [groupId:133, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
 isWithUserValidation = Boolean.TRUE
 
 SignatureVSService authoritySignatureVSService = SignatureVSService.getAuthoritySignatureVSService()
@@ -27,8 +27,7 @@ simulationData.init(System.currentTimeMillis());
 log.debug("initializeServer")
 VicketServer vicketServer = TestUtils.fetchVicketServer(simulationData.getServerURL())
 if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
-    throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
-            vicketServer.getEnvironmentVS());
+    throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" + vicketServer.getEnvironmentVS());
 }
 ContextVS.getInstance().setDefaultServer(vicketServer)
 JSONObject subscriptionData = TestUtils.getGroupVSData(vicketServer.getGroupURL(simulationData.getGroupId()));
@@ -38,8 +37,19 @@ userList = authoritySignatureVSService.subscribeUsers(subscriptionData, simulati
 
 if(!isWithUserValidation) finishSimulation()
 
+log.debug("activateUsers")
+SignatureVSService representativeSignatureService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_00111222V.jks")
+representativeSignatureService.validateUserVSSubscriptions(simulationDataMap.groupId, vicketServer, getUserVSMap(userList))
+finishSimulation()
 
 
+private Map<String, MockDNI> getUserVSMap(List<MockDNI> userList) {
+    Map<String, MockDNI> result = new HashMap<>();
+    for(MockDNI mockDNI:userList) {
+        result.put(mockDNI.getNif(), mockDNI);
+    }
+    return result
+}
 
 private void finishSimulation() {
     simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());

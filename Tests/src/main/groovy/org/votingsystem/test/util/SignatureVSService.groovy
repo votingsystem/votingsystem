@@ -1,6 +1,8 @@
 package org.votingsystem.test.util
 
+import net.sf.json.JSONArray
 import net.sf.json.JSONObject
+import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.callable.SMIMESignedSender
@@ -13,6 +15,7 @@ import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.test.model.SimulationData
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
@@ -73,7 +76,6 @@ class SignatureVSService {
 		certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
         rootCAPrivateCredential = new X500PrivateCredential(certSigner, serverPrivateKey,  ContextVS.ROOT_ALIAS);
-
         encryptor = new Encryptor(certSigner, serverPrivateKey);
         return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, rootCAPrivateCredential:rootCAPrivateCredential,
                 certSigner:certSigner, serverPrivateKey:serverPrivateKey];
@@ -154,8 +156,7 @@ class SignatureVSService {
             return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS("dataToEncryptErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
@@ -168,8 +169,7 @@ class SignatureVSService {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
-            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS("encryptedMessageErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
@@ -182,8 +182,7 @@ class SignatureVSService {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
-            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS("dataToEncryptErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
@@ -196,8 +195,7 @@ class SignatureVSService {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
-            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS("encryptedMessageErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
@@ -241,7 +239,7 @@ class SignatureVSService {
             SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
                     subscriptionData.toString(), subject);
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                    vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),
+                    vicketServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
                     vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             ResponseVS responseVS = worker.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -250,7 +248,46 @@ class SignatureVSService {
             if((i % 50) == 0) log.debug("Subscribed " + i + " of " +
                     simulationData.getUserBaseSimulationData().getNumUsers() + " users to groupVS");
         }
+        log.debug("subscribeUser - '" + userList.size() + "' user subscribed")
         return userList
     }
 
+    public List<JSONObject> validateUserVSSubscriptions(Long groupVSId, VicketServer vicketServer,
+            Map<String, MockDNI> userVSMap) throws ExceptionVS {
+        log.debug("validateUserVSSubscriptions");
+        ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupVSUsersServiceURL(
+                groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
+                ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+        JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
+        JSONArray jsonArray = dataJSON.getJSONArray("userVSList");
+        List<JSONObject> usersToActivate = new ArrayList<>();
+        for(int i = 0; i < jsonArray.size() ; i++) {
+            JSONObject userSubscriptionData = jsonArray.get(i);
+            if(UserVS.State.PENDING == UserVS.State.valueOf(userSubscriptionData.getString("state"))){
+                JSONObject userVSData = userSubscriptionData.getJSONObject("uservs")
+                if(userVSMap.get(userVSData.getString("NIF")) != null) usersToActivate.add(userSubscriptionData);
+            }
+        }
+        if(usersToActivate.size() != userVSMap.values().size()) throw new ExceptionVS("Expected '" + userVSMap.values().size() +
+                "' pending users and found '" + usersToActivate.size() + "'");
+        List<JSONObject> requests = new ArrayList<>();
+        for(JSONObject userToActivate:usersToActivate) {
+            JSONObject request = new JSONObject();
+            request.put("operation", TypeVS.VICKET_GROUP_USER_ACTIVATE.toString())
+            request.put("groupvs", userToActivate.getJSONObject("groupvs"));
+            request.put("uservs", userToActivate.getJSONObject("uservs"));
+            requests.add(request)
+        }
+        String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS"
+        UserVS userVS = UserVS.getUserVS(certSigner)
+        for(JSONObject request:requests) {
+            SMIMEMessage smimeMessage = getTimestampedSignedMimeMessage(userVS.nif,
+                    vicketServer.getNameNormalized(), request.toString(), messageSubject)
+            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    vicketServer.getGroupVSUsersActivationServiceURL())
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+        }
+        return requests
+    }
 }
