@@ -9,7 +9,7 @@ import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 
-Logger logger = TestUtils.init(VicketRequest.class)
+Logger logger = TestUtils.init(Vicket_request.class)
 
 Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
         certChainPEM:new String(ContextVS.getInstance().getResourceBytes("./certs/Cert_BankVS_03455543T.pem"),"UTF-8"),

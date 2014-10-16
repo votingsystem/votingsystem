@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
-    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
-    <g:else><meta name="layout" content="main" /></g:else>
+    <g:render template="/template/pagevs"/>
     <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-transition', file: 'core-transition-css.html')}">

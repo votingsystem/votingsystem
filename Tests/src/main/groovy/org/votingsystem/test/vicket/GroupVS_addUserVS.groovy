@@ -2,7 +2,6 @@ package org.votingsystem.test.vicket
 
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
-import org.apache.log4j.Logger
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.ResponseVS
@@ -14,7 +13,7 @@ import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 
-log = TestUtils.init(AddUsersToGroup.class)
+log = TestUtils.init(GroupVS_addUserVS.class)
 
 Map userBaseData = [numUsers: 2, userIndex:280]
 Map simulationDataMap = [groupId:133, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]

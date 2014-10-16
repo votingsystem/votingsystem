@@ -11,7 +11,7 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.WalletUtils
 import org.votingsystem.vicket.model.VicketRequestBatch
 
-Logger logger = TestUtils.init(VicketRequest.class)
+Logger logger = TestUtils.init(Vicket_request.class)
 
 SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = signatureVSService.getUserVS()

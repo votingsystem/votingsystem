@@ -6,9 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
-    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
-    <g:else><meta name="layout" content="main" /></g:else>
+    <g:render template="/template/pagevs"/>
 </head>
 <body>
     <div class="pageContentDiv" style="max-width:1000px; margin: 0px auto 0px auto;padding:20px 30px 0px 30px;">

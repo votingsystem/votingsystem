@@ -6,9 +6,7 @@
 <html>
 <head>
     <title><g:message code="weekReportsPageTitle"/></title>
-    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
-    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
-    <g:else><meta name="layout" content="main" /></g:else>
+    <g:render template="/template/pagevs"/>
     <link rel="stylesheet" type="text/css" href="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.css')}">
     <script type="text/javascript" src="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.js')}"></script>
     <!-- ace editor -->

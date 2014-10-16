@@ -9,7 +9,7 @@ import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 
-Logger logger = TestUtils.init(VicketRequest.class)
+Logger logger = TestUtils.init(Vicket_request.class)
 
 Map requestDataMap = [groupvsInfo:"GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
         tags:[], groupvsName:"GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
