@@ -148,7 +148,7 @@
                     case 'FROM_GROUP_TO_MEMBER':
                         this.caption = "<g:message code="transactionVSFromGroupToMember"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
+                    case 'FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "<g:message code="transactionVSFromGroupToMemberGroup"/>"
                         break;
                     case 'VICKET_INIT_PERIOD':

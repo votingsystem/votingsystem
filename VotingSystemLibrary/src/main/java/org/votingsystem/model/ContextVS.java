@@ -280,7 +280,8 @@ public class ContextVS {
     
     public void shutdown() {
         try {
-            log.debug("------------- shutdown ----------------- ");
+            log.debug("------------------------------------------------");
+            log.debug("shutdown");
             FileUtils.deleteRecursively(new File(APPTEMPDIR));
         } catch (IOException ex) {
            log.error(ex.getMessage(), ex);

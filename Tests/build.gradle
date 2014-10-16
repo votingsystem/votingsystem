@@ -31,9 +31,6 @@ dependencies {
             'log4j:log4j:1.2.12')
 
 
-
-
-
     testCompile 'junit:junit:4.11'
     testCompile localGroovy()
 }

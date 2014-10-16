@@ -46,7 +46,7 @@ public class Formatter {
                 case SEND_SMIME_VOTE:
                     result = formatVote(jsonObject);
                     break;
-                case TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
+                case FROM_GROUP_TO_ALL_MEMBERS:
                     result = formatTransactionVSFromGroupToAllMembers(jsonObject);
                     break;
                 default:

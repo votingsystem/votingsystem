@@ -120,7 +120,8 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public String getAlertMessage() {
-        return ((metaInf ==null)?"":metaInf) + ((message == null)?"":message) + "###" + "###" + ((reason == null)?"":reason);
+        return ((metaInf ==null)?" ":metaInf) + "###" + ((message == null)?" ":message) + "###" +
+                ((reason == null)?" ":reason);
     }
 
     public JSON getMessageJSON() {

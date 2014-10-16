@@ -48,7 +48,7 @@ public class TransactionVSService extends IntentService {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
                     vicketServer.getTransactionVSServiceURL(), transactionVSJSON.toString(),
-                    ContentTypeVS.JSON_SIGNED, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
+                    ContentTypeVS.JSON_SIGNED, getString(R.string.FROM_USERVS_msg_subject), null, contextVS);
             responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();

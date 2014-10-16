@@ -35,11 +35,11 @@ class TransactionVS_UserVSService {
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
         Currency currency = Currency.getInstance(messageJSON.currencyCode)
         BigDecimal transactionVSAmount = new BigDecimal(messageJSON.amount)
-        if(messageJSON.toUserIBAN?.size() != 1) throw new ExceptionVS("'TRANSACTIONVS_FROM_USERVS' can only have one " +
+        if(messageJSON.toUserIBAN?.size() != 1) throw new ExceptionVS("'FROM_USERVS' can only have one " +
                 "receptor and request has '${messageJSON.toUserIBAN}'")
         toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN[0])
         if(!toUserVS) throw new ExceptionVS("User not found for IBAN '${messageJSON.toUserIBAN[0]}'")
-        if (!transactionVSAmount || !currency  || !messageJSON.subject || operationType != TypeVS.TRANSACTIONVS_FROM_USERVS) {
+        if (!transactionVSAmount || !currency  || !messageJSON.subject || operationType != TypeVS.FROM_USERVS) {
             msg = messageSource.getMessage('paramsErrorMsg', null, LocaleContextHolder.getLocale())
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,

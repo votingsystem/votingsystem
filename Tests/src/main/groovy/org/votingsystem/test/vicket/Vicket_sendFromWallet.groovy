@@ -14,6 +14,7 @@ import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
 Logger logger = TestUtils.init(Vicket_sendFromWallet.class)
+
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
 

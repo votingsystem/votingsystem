@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class UserBaseSimulationData extends SimulationData {
 
-    private static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(UserBaseSimulationData.class);
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserBaseSimulationData.class);
 
     private int statusCode = ResponseVS.SC_ERROR;
     private String message = null;
@@ -115,13 +115,13 @@ class UserBaseSimulationData extends SimulationData {
     }
 
     public static UserBaseSimulationData parse (String dataStr) {
-        logger.debug("- parse");
+        log.debug("- parse");
         if(dataStr == null) return null;
         return JSONSerializer.toJSON(dataStr)
     }
 
     public static UserBaseSimulationData parseJSON (JSONObject dataJSON) {
-        logger.debug("- parse - json "  + dataJSON.toString());
+        log.debug("- parse - json "  + dataJSON.toString());
         if(dataJSON == null) return null;
         UserBaseSimulationData userBaseData = new UserBaseSimulationData();
         if (dataJSON.containsKey("userIndex")) {

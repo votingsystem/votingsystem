@@ -28,31 +28,51 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.X509Certificate
 
-class SignatureVSService {
+class SignatureService {
 
-    private static Logger log = Logger.getLogger(SignatureVSService.class);
+    private static Logger log = Logger.getLogger(SignatureService.class);
 
-	private SignedMailGenerator signedMailGenerator;
+    private static Map<String, SignatureService> signatureServices	= new HashMap<>()
+
+    private SignedMailGenerator signedMailGenerator;
 	private X509Certificate certSigner;
     private X500PrivateCredential rootCAPrivateCredential;
     private PrivateKey serverPrivateKey;
     private Encryptor encryptor;
 
-    public SignatureVSService(String keyStorePath, String keyAlias, String password) {
+
+    public SignatureService(String keyStorePath, String keyAlias, String password) {
         init(keyStorePath, keyAlias, password)
     }
 
-    public static SignatureVSService getAuthoritySignatureVSService() {
+    public static SignatureService getAuthoritySignatureService() {
         String keyStorePath = ContextVS.getInstance().getConfig().authorityKeyStorePath
         String keyAlias = ContextVS.getInstance().config.authorityKeysAlias
         String password = ContextVS.getInstance().config.authorityKeysPassword
-        return new SignatureVSService(keyStorePath, keyAlias, password)
+        return new SignatureService(keyStorePath, keyAlias, password)
     }
 
-    public static SignatureVSService getUserVSSignatureVSService(String keyStorePath) {
+    public static SignatureService getUserVSSignatureService(String keyStorePath) {
         String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
         String password = ContextVS.getInstance().config.userVSKeysPassword
-        return new SignatureVSService(keyStorePath, keyAlias, password)
+        return new SignatureService(keyStorePath, keyAlias, password)
+    }
+
+    public static SignatureService getUserVSSignatureService(String nif, UserVS.Type userType) {
+        if(signatureServices.get(nif) != null) return signatureServices.get(nif)
+        String keyStorePath = null
+        switch (userType) {
+            case UserVS.Type.BANKVS:
+                keyStorePath = "./certs/Cert_BankVS_${nif}.jks"
+                break;
+            default:
+                keyStorePath = "./certs/Cert_UserVS_${nif}.jks"
+                break;
+        }
+        log.debug("loading keystore: " + keyStorePath);
+        SignatureService signatureService = getUserVSSignatureService(keyStorePath)
+        signatureServices.put(nif, signatureService)
+        return signatureService
     }
 
     public UserVS getUserVS() {

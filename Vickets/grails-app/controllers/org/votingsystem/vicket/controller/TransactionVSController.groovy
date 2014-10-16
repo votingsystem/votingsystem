@@ -151,7 +151,7 @@ class TransactionVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        return [responseVS:transactionVSService.processTransactionVS(messageSMIMEReq, request.locale)]
+        return [responseVS:transactionVSService.processTransactionVS(messageSMIMEReq)]
     }
 
     /**

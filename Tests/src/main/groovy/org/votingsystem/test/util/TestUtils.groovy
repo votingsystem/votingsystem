@@ -4,6 +4,8 @@ import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
+import org.votingsystem.test.model.SimulationData
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
@@ -16,14 +18,35 @@ class TestUtils {
 
     private static Logger log
 
+    private static Map<Long, UserVS> userVSMap = new HashMap<>();
+    private static SimulationData simulationData;
+    private static Class initClass;
 
     public static Logger init(Class clazz) {
+        initClass = clazz;
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("log4jTests.properties"),
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
         log =  Logger.getLogger(TestUtils.class);
         return Logger.getLogger(clazz);
     }
+
+    public static Logger init(Class clazz, Map simulationDataMap) {
+        Logger logger = init(clazz)
+        simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
+        simulationData.init(System.currentTimeMillis());
+        return logger;
+    }
+
+    public static Map<String, MockDNI> getUserVSMap(List<MockDNI> userList) {
+        Map<String, MockDNI> result = new HashMap<>();
+        for(MockDNI mockDNI:userList) {
+            result.put(mockDNI.getNif(), mockDNI);
+        }
+        return result
+    }
+
+    public static SimulationData getSimulationData() {return simulationData;}
 
     public static VicketServer fetchVicketServer(String vicketServerURL) throws ExceptionVS {
         VicketServer vicketServer = null
@@ -46,7 +69,18 @@ class TestUtils {
         return FileUtils.getFileFromBytes(fileBytes)
     }
 
-    public static JSONObject getGroupVSData(String groupVSURL) throws ExceptionVS {
+    public static UserVS getUserVS(Long userId, ActorVS server) throws ExceptionVS {
+        if(userVSMap.get(userId) != null) return userVSMap.get(userId);
+        ResponseVS responseVS = HttpHelper.getInstance().getData(server.getUserVSURL(userId), ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
+            UserVS userVS = UserVS.parse(dataJSON.getJSONObject("userVS"));
+            userVSMap.put(userId, userVS);
+            return userVS
+        } else throw new ExceptionVS(responseVS.getMessage())
+    }
+
+    public static JSONObject getGroupVSSubscriptionData(String groupVSURL) throws ExceptionVS {
         ResponseVS responseVS = HttpHelper.getInstance().getData(groupVSURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
@@ -61,5 +95,13 @@ class TestUtils {
             subscriptionData.put("groupvs", groupDataJSON1)
             return subscriptionData;
         } else throw new ExceptionVS(responseVS.getMessage())
+    }
+
+    public static void finish() {
+        simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
+        log.debug("------------------------------------------------");
+        log.debug("${initClass.getSimpleName()} finished");
+        log.debug("Begin: ${DateUtils.getDateStr(simulationData.getBeginDate())} - Duration: ${simulationData.getDurationStr()}")
+        System.exit(0)
     }
 }

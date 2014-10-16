@@ -57,7 +57,7 @@ public class IntentFilterActivity extends FragmentActivity {
                             operationVS.setEventVS(selectedEvent);
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS ||
-                            operationVS.getTypeVS() == TypeVS.TRANSACTIONVS_FROM_USERVS) {
+                            operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
                         Intent newIntent = new Intent(getBaseContext(), VicketPagerActivity.class);
                         newIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -256,13 +256,13 @@
             console.log("showTransactionVSDialog")
             //e.detail.isSelected
             if('fromGroupToMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.userVS.name,
+                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER, this.groupvs.userVS.name,
                         this.groupvs.userVS.IBAN , this.groupvs.userVS.id)
             } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.userVS.name,
+                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.userVS.name,
                         this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.userVS.name,
+                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.userVS.name,
                         this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
             }
             this.page = 1;

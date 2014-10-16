@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.model;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -12,9 +13,7 @@ import org.votingsystem.util.DateUtils;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -57,14 +56,14 @@ public class TransactionVS  implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
 
-    //This is for Transactions From BankVS, and not anonymous transactions
+    //This is to set the data of the Bank client the transaction comes from
     @Column(name="fromUserIBAN") private String fromUserIBAN;
     @Column(name="fromUser") private String fromUser;
 
     @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
-
+    @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
@@ -74,6 +73,8 @@ public class TransactionVS  implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
     @Transient private Map<UserVSAccount, BigDecimal> accountFromMovements;
+    @Transient private Long userId;
+    @Transient private List<String> toUserVSList;
 
     public Long getId() {
         return id;
@@ -199,6 +200,14 @@ public class TransactionVS  implements Serializable {
         return toUserIBAN;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public void setToUserIBAN(String toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
     }
@@ -211,6 +220,23 @@ public class TransactionVS  implements Serializable {
         this.fromUser = fromUser;
     }
 
+
+    public Boolean getIsTimeLimited() {
+        return isTimeLimited;
+    }
+
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
+    }
+
+    public List<String> getToUserVSList() {
+        return toUserVSList;
+    }
+
+    public void setToUserVSList(List<String> toUserVSList) {
+        this.toUserVSList = toUserVSList;
+    }
+
     public TagVS getTag() {
         return tag;
     }
@@ -221,8 +247,18 @@ public class TransactionVS  implements Serializable {
 
     public static TransactionVS parse(JSONObject jsonData) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
-        transactionVS.setId(jsonData.getLong("id"));
-        if(jsonData.has("fromUserVS")) {
+        if(jsonData.has("id")) transactionVS.setId(jsonData.getLong("id"));
+        if(jsonData.has("userId")) transactionVS.setUserId(jsonData.getLong("userId"));
+        if(jsonData.has("operation")) transactionVS.setType(Type.valueOf(jsonData.getString("operation")));
+        if(jsonData.has("bankIBAN")) {
+            transactionVS.setFromUser(jsonData.getString("fromUser"));
+            transactionVS.setFromUserIBAN(jsonData.getString("fromUserIBAN"));
+            UserVS toUserVS = new UserVS();
+            toUserVS.setName(jsonData.getString("toUserName"));
+            JSONArray toUserArray = jsonData.getJSONArray("toUserIBAN");
+            toUserVS.setIBAN(toUserArray.getString(0));
+            transactionVS.setToUserVS(toUserVS);
+        } else if (jsonData.has("fromUserVS")) {
             JSONObject fromUserJSON = jsonData.getJSONObject("fromUserVS");
             transactionVS.setFromUserVS(UserVS.parse(fromUserJSON));
             if(fromUserJSON.has("sender")) {
@@ -236,12 +272,19 @@ public class TransactionVS  implements Serializable {
         if(jsonData.has("toUserVS")) {
             transactionVS.setToUserVS(UserVS.parse(jsonData.getJSONObject("toUserVS")));
         }
+        if(jsonData.has("tags")) {
+            JSONArray tagsArray = jsonData.getJSONArray("tags");
+            transactionVS.setTag(new TagVS(tagsArray.getString(0)));
+        }
+        if(jsonData.has("isTimeLimited")) transactionVS.setIsTimeLimited(jsonData.getBoolean("isTimeLimited"));
         transactionVS.setSubject(jsonData.getString("subject"));
-        transactionVS.setCurrencyCode(jsonData.getString("currency"));
-        transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreatedValue")));
-        if(jsonData.has("validToValue") && !JSONNull.getInstance().equals(jsonData.getString("validToValue"))) transactionVS.setValidTo(
-                DateUtils.getDateFromString(jsonData.getString("validToValue")));
-        transactionVS.setType(Type.valueOf(jsonData.getString("type")));
+        if(jsonData.has("currencyCode")) transactionVS.setCurrencyCode(jsonData.getString("currencyCode"));
+        else transactionVS.setCurrencyCode(jsonData.getString("currency"));
+        if(jsonData.has("dateCreatedValue")) transactionVS.setDateCreated(
+                DateUtils.getDateFromString(jsonData.getString("dateCreatedValue")));
+        if(jsonData.has("validToValue") && !JSONNull.getInstance().equals(jsonData.getString("validToValue")))
+                transactionVS.setValidTo(DateUtils.getDateFromString(jsonData.getString("validToValue")));
+        if(jsonData.has("type")) transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         return transactionVS;
     }
@@ -282,4 +325,10 @@ public class TransactionVS  implements Serializable {
     public void afterInsert() {
         ContextVS.getInstance().updateBalances(this);
     }
+
+    public void beforeInsert() {
+        if(this.validTo != null) isTimeLimited = Boolean.TRUE;
+        else isTimeLimited = Boolean.FALSE;
+    }
+
 }

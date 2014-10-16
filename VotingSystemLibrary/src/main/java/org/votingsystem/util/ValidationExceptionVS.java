@@ -10,6 +10,10 @@ public class ValidationExceptionVS extends ExceptionVS {
         super(clazz.getSimpleName() + "_ExceptionVS: " + message);
     }
 
+    public ValidationExceptionVS(Class clazz, String message, String metaInf) {
+        super(clazz.getSimpleName() + "_ExceptionVS: " + message, metaInf);
+    }
+
     public ValidationExceptionVS(String message, String metaInf) {
         super(message, metaInf);
     }

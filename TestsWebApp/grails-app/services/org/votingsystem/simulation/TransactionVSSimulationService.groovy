@@ -135,7 +135,7 @@ class TransactionVSSimulationService {
             Map signatureContentMap = [amount:simulationData.getTransactionVSAmount().toString(),
                     "UUID": UUID.randomUUID().toString(), currency:simulationData.getCurrency().toString(),
                     subject:simulationData.getSubject(),
-                    typeVS:TypeVS.TRANSACTIONVS_FROM_BANKVS, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
+                    typeVS:TypeVS.FROM_BANKVS, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
             String signatureContentStr = new JSONObject(signatureContentMap).toString()
             log.debug("makeTransactionVS ${signatureContentStr}")
             SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage(userNif,

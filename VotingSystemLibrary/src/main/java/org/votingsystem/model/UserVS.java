@@ -420,7 +420,18 @@ public class UserVS implements Serializable {
     }
 
     public static UserVS parse (Map userVSDataMap) {
-        UserVS userVS = new UserVS();
+        UserVS userVS = null;
+        switch (Type.valueOf((String) userVSDataMap.get("type"))) {
+            case BANKVS:
+                userVS = new BankVS();
+                break;
+            case GROUP:
+                userVS = new GroupVS();
+                ((GroupVS)userVS).setRepresentative(UserVS.parse((Map) userVSDataMap.get("representative")));
+                break;
+            default:
+                userVS = new UserVS();
+        }
         if(userVSDataMap.containsKey("id")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());
         if(userVSDataMap.containsKey("nif")) userVS.setNif((String) userVSDataMap.get("nif"));
         if(userVSDataMap.containsKey("IBAN")) userVS.setIBAN((String) userVSDataMap.get("IBAN"));

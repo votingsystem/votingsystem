@@ -173,8 +173,7 @@ public class FileUtils {
             //directory is empty, then delete it
             if(file.list().length==0){
                 file.delete();
-                log.debug("Directory is deleted : "
-                        + file.getAbsolutePath());
+                log.debug("Deleted dir: " + file.getAbsolutePath());
             }else{
                 //list all the directory contents
                 String files[] = file.list();
@@ -187,8 +186,7 @@ public class FileUtils {
                 //check the directory again, if empty then delete it
                 if(file.list().length==0){
                     file.delete();
-                    log.debug("Directory is deleted : "
-                            + file.getAbsolutePath());
+                    log.debug("Deleted file: " + file.getAbsolutePath());
                 }
             }
         } else file.delete();//if file, then delete it

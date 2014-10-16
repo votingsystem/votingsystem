@@ -95,10 +95,10 @@ class MessageSMIMEController {
                 TypeVS operationType = TypeVS.valueOf(params.operation.toUpperCase())
                 operationType = TypeVS.valueOf(params.operation.toUpperCase())
                 switch(operationType) {
-                    case TypeVS.TRANSACTIONVS_FROM_BANKVS:
+                    case TypeVS.FROM_BANKVS:
                         viewer = "message-smime"
                         break;
-                    case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
+                    case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
                         viewer = "message-smime"
                         break;
                 }

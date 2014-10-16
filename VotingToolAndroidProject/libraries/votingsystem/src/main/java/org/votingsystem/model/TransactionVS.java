@@ -359,8 +359,8 @@ public class TransactionVS  implements Serializable {
         transactionVS.setToUserIBAN(toUserIBAN);
         UserVS toUserVS = new UserVS();
         toUserVS.setName(documentToSign.getString("toUser"));
-        if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS_FROM_USERVS) {
-            if(toUserIBAN.size() != 1) throw new ExceptionVS("TRANSACTIONVS_FROM_USERVS must have " +
+        if(operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
+            if(toUserIBAN.size() != 1) throw new ExceptionVS("FROM_USERVS must have " +
                     "'one' receptor and it has '" + toUserIBAN.size() + "'");
             toUserVS.setIBAN(toUserIBAN.iterator().next());
         }
@@ -404,7 +404,7 @@ public class TransactionVS  implements Serializable {
 
     public JSONObject transactionFromUserVSJSON(String fromUserIBAN) throws Exception {
         Map mapToSend = new HashMap();
-        mapToSend.put("operation", TypeVS.TRANSACTIONVS_FROM_USERVS.toString());
+        mapToSend.put("operation", TypeVS.FROM_USERVS.toString());
         mapToSend.put("fromUserIBAN", fromUserIBAN);
         mapToSend.put("subject", subject);
         mapToSend.put("toUser", toUserVS.getName());

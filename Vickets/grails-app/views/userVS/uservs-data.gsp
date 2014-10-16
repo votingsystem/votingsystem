@@ -142,7 +142,7 @@
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_USERVS, this.uservs.name, this.uservs.IBAN ,
+            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.uservs.name, this.uservs.IBAN ,
                     this.uservs.id)
             this.page = 1;
         },

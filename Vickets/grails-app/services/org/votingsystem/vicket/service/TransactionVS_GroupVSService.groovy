@@ -2,11 +2,13 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 
@@ -23,95 +25,51 @@ class TransactionVS_GroupVSService {
     def signatureVSService
 
     @Transactional
-    private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+    private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        UserVS messageSigner = messageSMIMEReq.userVS
-        List<UserVS> receptorList = []
-        GroupVS groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
-        String msg;
-        if(!groupVS) {
-            msg = messageSource.getMessage('groupNotFoundByIBANErrorMsg',
-                    [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale)
-            log.error "${methodName} - ${msg}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
-        }
-        ResponseVS responseVS
-        TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-        Currency currency = Currency.getInstance(messageJSON.currencyCode)
-        if (!messageJSON.amount || !messageJSON.currencyCode  || !messageJSON.subject) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
-        }
-
-        Date validTo = null
-        if(messageJSON.isTimeLimited == true) validTo = DateUtils.getCurrentWeekPeriod().dateTo
-
-        TagVS tag
-        if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = TagVS.findWhere(name:messageJSON.tags[0])
-            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0]}'")
-        } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
-
-        BigDecimal amount = new BigDecimal(messageJSON.amount)
-        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                walletVSService.getAccountMovementsForTransaction(messageJSON.fromUserIBAN, tag, amount, messageJSON.currencyCode)
+        GroupVSTransactionVSRequest request = new GroupVSTransactionVSRequest(messageJSON, messageSMIMEReq.userVS)
+        String msg
+        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+                request.groupVS.IBAN, request.tag, request.amount, request.currencyCode)
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
-            log.error "${methodName} - ${accountFromMovements.getMessage()}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
-        if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS) {
-            return processTransactionVSForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, validTo ,
-                    currency, groupVS, tag, locale)
+        if(request.operation == TypeVS.FROM_GROUP_TO_ALL_MEMBERS) {
+            return processTransactionVSForAllMembers(messageSMIMEReq, request, accountFromMovements.data)
         } else {
-            messageJSON.toUserIBAN?.each { it ->
-                UserVS userVS = getUserFromGroup(groupVS, it)
-                if(!userVS) {
-                    msg = messageSource.getMessage('groupUserNotFoundByIBANErrorMsg', [it, groupVS.name].toArray(), locale)
-                    log.error "${methodName} - ${msg}"
-                    responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                            message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
-                } else {
-                    receptorList.add(userVS)
-                }
-            }
-            if(responseVS != null) return responseVS
-            if(receptorList.isEmpty()) throw new Exception("Transaction without valid receptors")
-
-            BigDecimal numUsersBigDecimal = new BigDecimal(receptorList.size())
-            BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
-
+            BigDecimal numUsersBigDecimal = new BigDecimal(request.toUserVSList.size())
+            BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
             String metaInfMsg
             TransactionVS.Type transactionVSType
-            if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER) {
+            if(request.operation == TypeVS.FROM_GROUP_TO_MEMBER) {
                 transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
-                        ["${messageJSON.amount} ${currency.getCurrencyCode()}", receptorList.iterator().next().nif].toArray(), locale)
-            } else if (operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP) {
+                        ["${request.amount} ${request.currencyCode}", request.toUserVSList.iterator().next().nif].toArray(),
+                        LocaleContextHolder.locale)
+            } else if (request.operation == TypeVS.FROM_GROUP_TO_MEMBER_GROUP) {
                 transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
-                        ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
+                        ["${request.amount} ${request.currencyCode}"].toArray(), LocaleContextHolder.locale)
             }
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
-                    fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
-                    validTo: validTo, subject:messageJSON.subject, type:transactionVSType,
-                    accountFromMovements: accountFromMovements.data, currencyCode: currency.getCurrencyCode(), tag:tag).save()
-            receptorList.each { toUser ->
+                    fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
+                    validTo: request.validTo, subject:request.subject, type:transactionVSType,
+                    accountFromMovements: accountFromMovements.data, currencyCode: request.currencyCode,
+                    tag:request.tag).save()
+            for(UserVS toUser: request.toUserVSList) {
                 TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart,toUser, toUser.IBAN).save()
-                metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-                log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currencyCode} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
+                metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${request.operation.toString()}")
+                log.debug("${metaInfMsg} - ${userPart} ${request.currencyCode} - from group '${request.groupVS.name}' " +
+                        "to userVS '${toUser.id}' ")
             }
-            metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)
+            metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${request.operation.toString()}")
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:request.operation)
         }
     }
-
 
     @Transactional
     private UserVS getUserFromGroup (GroupVS groupVS, String IBAN) {
@@ -125,50 +83,90 @@ class TransactionVS_GroupVSService {
     }
 
     @Transactional
-    private ResponseVS processTransactionVSForAllMembers(MessageSMIME messageSMIMEReq, JSONObject messageJSON,
-            Map<UserVSAccount, BigDecimal> accountFromMovements, Date transactionValidTo,
-            Currency currency, GroupVS groupVS, TagVS tag, Locale locale) {
+    private ResponseVS processTransactionVSForAllMembers(MessageSMIME messageSMIMEReq,
+            GroupVSTransactionVSRequest request, Map<UserVSAccount, BigDecimal> accountFromMovements) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        String msg;
-        String metaInfMsg
-        TypeVS operationType = TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS
-
         def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
-            eq("groupVS", groupVS)
+            eq("groupVS", request.groupVS)
             eq("state", SubscriptionVS.State.ACTIVE)
         }
-
-        BigDecimal amount = new BigDecimal(messageJSON.amount)
         BigDecimal numUsersBigDecimal = new BigDecimal(subscriptionList.totalCount)
-        BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
-
+        BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
         TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS
-        msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
-                ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
-        TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
-                validTo: transactionValidTo, subject:messageJSON.subject, currencyCode: currency.getCurrencyCode(),
-                type:transactionVSType, tag:tag, accountFromMovements: accountFromMovements).save()
-
+        String msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
+                ["${request.amount.toString()} ${request.currencyCode}"].toArray(), LocaleContextHolder.locale)
+        TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:messageSMIMEReq,
+                fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
+                validTo: request.validTo, subject:request.subject, currencyCode: request.currencyCode,
+                type:transactionVSType, tag:request.tag, accountFromMovements: accountFromMovements).save()
         subscriptionList.each { it ->
-            messageJSON.messageSMIMEParentId = messageSMIMEReq.id
-            messageJSON.toUser = it.userVS.getNif()
-            messageJSON.numUsers = subscriptionList.totalCount
-            messageJSON.toUserAmount = userPart.toString()
+            JSONObject messageJSON = request.getReceptorData(messageSMIMEReq.id, it.userVS.getNif(),
+                    subscriptionList.totalCount, userPart)
             SMIMEMessage receipt = signatureVSService.getSMIMEMessage(systemService.getSystemUser().getNif(),
-                    it.userVS.getNif(),
-                    messageJSON.toString(), TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
+                    it.userVS.getNif(), messageJSON.toString(), request.operation.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,
-                    type:TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
-
-            TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
-                    transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
-
-            metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currencyCode} - from group '${groupVS.name}' to userVS '${it.userVS.id}' ")
+                    type:TypeVS.FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
+            TransactionVS.generateTriggeredTransaction(transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
         }
-        metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName,
+                "transactionVS_${transactionParent.id}_${request.operation.toString()}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:request.operation)
+    }
+
+    private class GroupVSTransactionVSRequest {
+        Boolean isTimeLimited;
+        BigDecimal amount;
+        UserVS signer;
+        List<UserVS> toUserVSList = []
+        GroupVS groupVS
+        TagVS tag;
+        String currencyCode, fromUser, subject;
+        TypeVS operation;
+        Date validTo;
+        JSONObject messageJSON;
+        public GroupVSTransactionVSRequest(JSONObject messageJSON, UserVS messageSigner) {
+            if(!messageJSON.operation) throw new ValidationExceptionVS(this.getClass(), "missing param 'operation'");
+            operation = TypeVS.valueOf(messageJSON.operation)
+            this.messageJSON = messageJSON
+            signer = messageSigner
+            groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
+            if(!groupVS) {
+                throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage('groupNotFoundByIBANErrorMsg',
+                        [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), LocaleContextHolder.locale))
+            }
+            if(!messageJSON.amount)  throw new ValidationExceptionVS(this.getClass(), "missing param 'amount'");
+            amount = new BigDecimal(messageJSON.amount)
+            currencyCode = messageJSON.currencyCode
+            if(!currencyCode)  throw new ValidationExceptionVS(this.getClass(), "missing param 'currencyCode'");
+            subject = messageJSON.subject
+            if(!subject)  throw new ValidationExceptionVS(this.getClass(), "missing param 'subject'");
+            isTimeLimited = messageJSON.isTimeLimited
+            if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().dateTo
+            if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
+                tag = TagVS.findWhere(name:messageJSON.tags[0])
+                if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0]}'")
+            } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
+            if(operation != TypeVS.FROM_GROUP_TO_ALL_MEMBERS) {
+                messageJSON.toUserIBAN?.each { it ->
+                    UserVS userVS = getUserFromGroup(groupVS, it)
+                    if(!userVS) {
+                        throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
+                                'groupUserNotFoundByIBANErrorMsg',  [it, groupVS.name].toArray(), LocaleContextHolder.locale))
+                    } else toUserVSList.add(userVS)
+                }
+                if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),
+                        "Transaction without valid receptors")
+            }
+        }
+
+        JSONObject getReceptorData(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
+            messageJSON.messageSMIMEParentId = messageSMIMEReqId? messageSMIMEReqId : null
+            messageJSON.toUser = toUserNif? toUserNif : null
+            messageJSON.numUsers = numReceptors?numReceptors:null
+            messageJSON.toUserAmount = userPart?userPart.toString():null
+            return messageJSON;
+        }
+
     }
 
 }

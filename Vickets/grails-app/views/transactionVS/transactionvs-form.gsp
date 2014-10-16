@@ -196,19 +196,19 @@
         submitForm: function () {
             this.removeErrorStyle(this.$.formDataDiv)
             switch(this.operation) {
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
+                case Operation.FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
                         this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                         return false
                     }
                     break;
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
+                case Operation.FROM_GROUP_TO_MEMBER_GROUP:
                     if(this.$.receptorBox.getUserList().length == 0){
                         this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                         return false
                     }
                     break;
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
+                case Operation.FROM_GROUP_TO_ALL_MEMBERS:
                     break;
             }
             if(!this.$.amount.validity.valid) {
@@ -255,7 +255,7 @@
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
         getToUserIBAN: function () {
-            if(this.operation === Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS) return null
+            if(this.operation === Operation.FROM_GROUP_TO_ALL_MEMBERS) return null
             else {
                 var receptorList = this.$.receptorBox.getUserList()
                 var result = []
@@ -283,23 +283,23 @@
             this.toUserName = null
             this.$.timeLimitedRButton.checked = false
             switch(operation) {
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
+                case Operation.FROM_GROUP_TO_MEMBER:
                     this.operationMsg = "<g:message code='transactionVSFromGroupToMember'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                     this.$.receptorBox.multiSelection = false
                     break;
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
+                case Operation.FROM_GROUP_TO_MEMBER_GROUP:
                     this.operationMsg = "<g:message code='transactionVSFromGroupToMemberGroup'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                     this.$.receptorBox.multiSelection = true
                     break;
-                case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
+                case Operation.FROM_GROUP_TO_ALL_MEMBERS:
                     this.isWithUserSelector = false
                     this.operationMsg = "<g:message code='transactionVSFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
-                case Operation.TRANSACTIONVS_FROM_USERVS:
-                    console.log("== TRANSACTIONVS_FROM_USERVS - isClientToolConnected: " + window['isClientToolConnected'] +
+                case Operation.FROM_USERVS:
+                    console.log("== FROM_USERVS - isClientToolConnected: " + window['isClientToolConnected'] +
                         " - isAndroid: " + isAndroid())
                     this.operationMsg = "<g:message code='transactionVSFromUserVS'/>"
                     this.fromUserName = null

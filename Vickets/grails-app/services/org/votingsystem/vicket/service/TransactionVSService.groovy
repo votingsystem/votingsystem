@@ -43,10 +43,8 @@ class TransactionVSService {
         listenerSet.add(listenerId)
     }
 
-    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         if(messageJSON.toUserIBAN instanceof JSONArray) {
             messageJSON.toUserIBAN.each { it ->IbanVSUtil.validate(it);}
@@ -55,19 +53,18 @@ class TransactionVSService {
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
-            case TypeVS.TRANSACTIONVS_FROM_BANKVS:
-                return transactionVS_BankVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
-            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
-            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
-            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
-            case TypeVS.TRANSACTIONVS_FROM_USERVS:
+            case TypeVS.FROM_BANKVS:
+                return transactionVS_BankVSService.processTransactionVS(messageSMIMEReq, messageJSON)
+            case TypeVS.FROM_GROUP_TO_MEMBER:
+            case TypeVS.FROM_GROUP_TO_MEMBER_GROUP:
+            case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
+                return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON)
+            case TypeVS.FROM_USERVS:
                 return transactionVS_UserVSService.processTransactionVS(messageSMIMEReq, messageJSON)
             default:
-                msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
-                log.debug("${methodName} - ${msg}");
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                        metaInf:MetaInfMsg.getErrorMsg(methodName, "UNKNOWN_TRANSACTION"), type:TypeVS.ERROR)
+                throw new ExceptionVS(messageSource.getMessage('unknownTransactionErrorMsg',
+                        [transactionType.toString()].toArray(), LocaleContextHolder.locale),
+                        MetaInfMsg.getErrorMsg(methodName, "UNKNOWN_TRANSACTION"))
         }
     }
 
@@ -396,13 +393,13 @@ class TransactionVSService {
             case 'FROM_BANKVS':
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, LocaleContextHolder.locale);
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
+            case 'FROM_GROUP_TO_MEMBER':
                 typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, LocaleContextHolder.locale);
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
+            case 'FROM_GROUP_TO_MEMBER_GROUP':
                 typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, LocaleContextHolder.locale);
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
+            case 'FROM_GROUP_TO_ALL_MEMBERS':
                 typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, LocaleContextHolder.locale);
                 break;
             default: typeDescription = transactionType

@@ -279,6 +279,10 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/groupVS/" + String.valueOf(groupId);
     }
 
+    public String getUserVSURL(Long groupId) {
+        return getServerURL() + "/userVS/" + String.valueOf(groupId);
+    }
+
     public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

@@ -127,17 +127,17 @@
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
                 switch (this.signedDocument.operation) {
-                    case 'TRANSACTIONVS_FROM_BANKVS':
+                    case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
+                    case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
                         this.caption = "<g:message code="transactionVSFromGroupToAllMembers"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
+                    case 'FROM_GROUP_TO_MEMBER':
                         this.caption = "<g:message code="transactionVSFromGroupToMember"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
+                    case 'FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "<g:message code="transactionVSFromGroupToMemberGroup"/>"
                         break;
                     case 'VICKET_INIT_PERIOD':

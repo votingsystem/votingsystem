@@ -4,7 +4,7 @@ import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.test.util.SignatureVSService
+import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
@@ -17,7 +17,7 @@ Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDa
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
-SignatureVSService superUserSignatureService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
+SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = superUserSignatureService.getUserVS()
 
 String messageSubject = "TEST_ADD_BANKVS";

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class SimulationData {
 
-    private static Logger logger = Logger.getLogger(SimulationData.class);
+    private static Logger log = Logger.getLogger(SimulationData.class);
 
     private Integer statusCode = ResponseVS.SC_PAUSED;
     private String message = null;
@@ -111,7 +111,6 @@ class SimulationData {
     }
 
     public static SimulationData parse (JSONObject dataJSON) throws Exception {
-        logger.debug(" ------ parse - json ");
         SimulationData simulationData = new SimulationData();
         if (dataJSON.containsKey("serverURL")) {
             simulationData.setServerURL(dataJSON.getString("serverURL"));
