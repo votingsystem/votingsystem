@@ -1,7 +1,6 @@
 package org.votingsystem.test.model
 
 import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils

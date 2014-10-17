@@ -1,15 +1,14 @@
 package org.votingsystem.test.util
 
 import net.sf.json.JSONArray
-import net.sf.json.JSONObject;
+import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketServer;
-import org.votingsystem.util.FileUtils
-import org.votingsystem.vicket.model.TransactionVS;
-
-import java.io.File;
+import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.HttpHelper
+import org.votingsystem.vicket.model.TransactionVS
 
 /**
  * @author jgzornoza
@@ -58,6 +57,50 @@ public class TransactionVSPlan {
         for(int i = 0; i < userVSTransacionArray.size(); i++) {
             userVSTransacionList.add(TransactionVS.parse(userVSTransacionArray.get(i)));
         }
+    }
+
+    public Map runBankVSTransactions(String smimeMessageSubject) {
+        Map currencyResultMap = [:]
+        for(TransactionVS transactionVS :bankVSTransacionList) {
+            SignatureService signatureService = SignatureService.getUserVSSignatureService(
+                    transactionVS.fromUserVS.nif, UserVS.Type.BANKVS)
+            SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(transactionVS.fromUserVS.nif,
+                    vicketServer.getNameNormalized(), JSONSerializer.toJSON(
+                    TransactionVSUtils.getBankVSTransactionVS(transactionVS)).toString(), smimeMessageSubject)
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    vicketServer.getTransactionVSServiceURL())
+            if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+            updateCurrencyMap(currencyResultMap, transactionVS)
+        }
+        return currencyResultMap
+    }
+
+    public Map runGroupVSTransactions(String smimeMessageSubject) {
+        Map currencyResultMap = [:]
+        for(TransactionVS transactionVS : groupVSTransacionList) {
+            UserVS representative = ((GroupVS)transactionVS.fromUserVS).representative
+            SignatureService signatureService = SignatureService.getUserVSSignatureService(
+                    representative.nif, UserVS.Type.GROUP)
+            SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(representative.nif,
+                    vicketServer.getNameNormalized(), JSONSerializer.toJSON(
+                    TransactionVSUtils.getGroupVSTransactionVS(transactionVS, transactionVS.fromUserVS)).toString(),
+                    smimeMessageSubject)
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    vicketServer.getTransactionVSServiceURL())
+            if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+            updateCurrencyMap(currencyResultMap, transactionVS)
+        }
+        return currencyResultMap
+    }
+
+    public static Map updateCurrencyMap(Map currencyMap, TransactionVS transactionVS) {
+        if(currencyMap[transactionVS.currencyCode]) {
+            if(currencyMap[transactionVS.currencyCode][transactionVS.tag.name]) {
+                currencyMap[transactionVS.currencyCode][(transactionVS.tag.name)] =
+                        currencyMap[transactionVS.currencyCode][(transactionVS.tag.name)].add(transactionVS.amount)
+            } else currencyMap[transactionVS.currencyCode][(transactionVS.tag.name)] = transactionVS.amount
+        } else currencyMap[(transactionVS.currencyCode)] = [(transactionVS.tag.name):transactionVS.amount]
+        return currencyMap;
     }
 
     public List<TransactionVS> getBankVSTransacionList() {

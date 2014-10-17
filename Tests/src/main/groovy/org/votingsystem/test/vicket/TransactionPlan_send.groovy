@@ -12,6 +12,8 @@ VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 TransactionVSPlan transactionVSPlan = new TransactionVSPlan(
-        TestUtils.getFileFromResources("bankVS_transactionPlan.json"), vicketServer)
-Map currencyResultMap = transactionVSPlan.runBankVSTransactions("TEST_BANKVS_SEND_TRANSACTIONVS")
-TestUtils.finish("currencyResultMap: " + currencyResultMap);
+        TestUtils.getFileFromResources("transactionPlan.json"), vicketServer)
+Map bankVSCurrencyResultMap = transactionVSPlan.runBankVSTransactions("TEST_BANKVS_SEND_TRANSACTIONVS")
+Map groupVSCurrencyResultMap = transactionVSPlan.runGroupVSTransactions("TEST_GROUPVS_SEND_TRANSACTIONVS")
+TestUtils.finish("bankVSCurrencyResultMap: " + bankVSCurrencyResultMap + "\n groupVSCurrencyResultMap: " +
+        groupVSCurrencyResultMap);

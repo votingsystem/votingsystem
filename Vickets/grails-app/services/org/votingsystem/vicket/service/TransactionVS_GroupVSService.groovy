@@ -37,26 +37,23 @@ class TransactionVS_GroupVSService {
                     reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
-        if(request.operation == TypeVS.FROM_GROUP_TO_ALL_MEMBERS) {
+        if(request.operation == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             return processTransactionVSForAllMembers(messageSMIMEReq, request, accountFromMovements.data)
         } else {
             BigDecimal numUsersBigDecimal = new BigDecimal(request.toUserVSList.size())
             BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
             String metaInfMsg
-            TransactionVS.Type transactionVSType
-            if(request.operation == TypeVS.FROM_GROUP_TO_MEMBER) {
-                transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER
+            if(request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
                         ["${request.amount} ${request.currencyCode}", request.toUserVSList.iterator().next().nif].toArray(),
                         LocaleContextHolder.locale)
-            } else if (request.operation == TypeVS.FROM_GROUP_TO_MEMBER_GROUP) {
-                transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP
+            } else if (request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${request.amount} ${request.currencyCode}"].toArray(), LocaleContextHolder.locale)
             }
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                     fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
-                    validTo: request.validTo, subject:request.subject, type:transactionVSType,
+                    validTo: request.validTo, subject:request.subject, type:request.operation,
                     accountFromMovements: accountFromMovements.data, currencyCode: request.currencyCode,
                     tag:request.tag).save()
             for(UserVS toUser: request.toUserVSList) {
@@ -67,7 +64,8 @@ class TransactionVS_GroupVSService {
                         "to userVS '${toUser.id}' ")
             }
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${request.operation.toString()}")
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:request.operation)
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg,
+                    type:TypeVS.valueOf(request.operation.toString()))
         }
     }
 
@@ -110,7 +108,8 @@ class TransactionVS_GroupVSService {
         }
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName,
                 "transactionVS_${transactionParent.id}_${request.operation.toString()}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:request.operation)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg,
+                type:TypeVS.valueOf(request.operation.toString()))
     }
 
     private class GroupVSTransactionVSRequest {
@@ -121,12 +120,12 @@ class TransactionVS_GroupVSService {
         GroupVS groupVS
         TagVS tag;
         String currencyCode, fromUser, subject;
-        TypeVS operation;
+        TransactionVS.Type operation;
         Date validTo;
         JSONObject messageJSON;
         public GroupVSTransactionVSRequest(JSONObject messageJSON, UserVS messageSigner) {
             if(!messageJSON.operation) throw new ValidationExceptionVS(this.getClass(), "missing param 'operation'");
-            operation = TypeVS.valueOf(messageJSON.operation)
+            operation = TransactionVS.Type.valueOf(messageJSON.operation)
             this.messageJSON = messageJSON
             signer = messageSigner
             groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
@@ -146,7 +145,7 @@ class TransactionVS_GroupVSService {
                 tag = TagVS.findWhere(name:messageJSON.tags[0])
                 if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0]}'")
             } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
-            if(operation != TypeVS.FROM_GROUP_TO_ALL_MEMBERS) {
+            if(operation != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
                 messageJSON.toUserIBAN?.each { it ->
                     UserVS userVS = getUserFromGroup(groupVS, it)
                     if(!userVS) {

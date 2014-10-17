@@ -97,11 +97,12 @@ class TestUtils {
         } else throw new ExceptionVS(responseVS.getMessage())
     }
 
-    public static void finish() {
+    public static void finish(String resultMessage) {
         simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
         log.debug("------------------------------------------------");
-        log.debug("${initClass.getSimpleName()} finished");
+        log.debug("--- ${initClass.getSimpleName()} finished ---");
         log.debug("Begin: ${DateUtils.getDateStr(simulationData.getBeginDate())} - Duration: ${simulationData.getDurationStr()}")
+        if(resultMessage) log.debug(resultMessage)
         System.exit(0)
     }
 }
