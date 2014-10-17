@@ -1,7 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
@@ -261,8 +260,7 @@ class CertificateVSController {
             File destFile = new File("${System.getProperty('user.home')}/${params.givenName}_${nif}.jks")
             destFile.createNewFile()
             FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
-            byte[] base64ResultBytes = Base64.encode(resultBytes)
-            response.outputStream <<  base64ResultBytes
+            response.outputStream <<  Base64.getEncoder().encode(resultBytes)
             response.outputStream.flush()
             return false
 

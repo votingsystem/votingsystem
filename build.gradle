@@ -20,7 +20,7 @@ ext {
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestsWebApp:war', ':ClientTool:distZip',
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', ':ClientTool:distZip',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
@@ -74,15 +74,11 @@ def initWebAppsCertsData() {
             distinguishedName:timeStampServerDN, alias:timeStampServerCertAlias,
             isTimeStampingCert:true]
 
-    Map testWebAppMap = [file:"$projectDir/TestsWebApp/web-app/WEB-INF/cms/TestWebApp.jks",
-        distinguishedName:testWebAppDN, alias:testWebAppServerCertAlias,
-        isTimeStampingCert:false]
-
     Map vicketServerMap = [file:"$projectDir/Vickets/web-app/WEB-INF/cms/VicketServer.jks",
             distinguishedName:vicketServerDN, alias:vicketServerCertAlias,
             isTimeStampingCert:true]
 
-    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, testWebAppMap, vicketServerMap]
+    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, vicketServerMap]
 
     rootProject.certsDataMap.certs = certs
 }
@@ -117,7 +113,7 @@ task installCerts(dependsOn:['VotingSystemLibrary:publish'])  {
 
 task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     runCommand(project, file("./AccessControl") ,["grails", "refresh-dependencies"])
-    runCommand(project, file("./TestsWebApp") ,["grails", "refresh-dependencies"])
+    runCommand(project, file("./Vickets") ,["grails", "refresh-dependencies"])
     runCommand(project, file("./ControlCenter") ,["grails", "refresh-dependencies"])
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
@@ -174,7 +170,7 @@ def runCommand(project, targetDir, commands) {
 }
 
 task installAllBowerComponents(dependsOn: ['AccessControl:installBowerComponents', 'ControlCenter:installBowerComponents',
-           'TestsWebApp:installBowerComponents', 'Vickets:installBowerComponents']) { }
+           'Vickets:installBowerComponents']) { }
 
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.

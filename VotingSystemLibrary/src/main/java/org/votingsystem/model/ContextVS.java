@@ -288,7 +288,10 @@ public class ContextVS {
         }
     }
 
-    public void initTestEnvironment(InputStream logPropertiesStream, InputStream configPropertiesStream) throws Exception {
+    public void initTestEnvironment(InputStream logPropertiesStream, InputStream configPropertiesStream, String appDir)
+            throws Exception {
+        log.debug("initTestEnvironment - appDir: " + appDir);
+        if(appDir != null) initDirs(appDir);
         try {
             Properties props = new Properties();
             props.load(logPropertiesStream);
@@ -308,30 +311,24 @@ public class ContextVS {
         return FileUtils.getBytesFromInputStream(input);
     }
 
-    public void initTestEnvironment(String appDir) throws Exception {
-        log.debug("--------  initTestEnvironment - appDir: " + appDir + "-------- ");
-        if(appDir != null) initDirs(appDir);
-        try {
-            DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
-            String dateStr = formatter.format(new Date(CERT_VALID_FROM));
-            String strSubjectDN = getMessage("rootTestCASubjectDN", dateStr);
-            rootCAKeyStore = KeyStoreUtil.createRootKeyStore (CERT_VALID_FROM, ROOT_KEYSTORE_PERIOD,
-                    PASSWORD.toCharArray(), ROOT_ALIAS, strSubjectDN);
-            rootCACert = (X509Certificate)rootCAKeyStore.getCertificate(ROOT_ALIAS);
-            rootCAPrivateKey = (PrivateKey)rootCAKeyStore.getKey(ROOT_ALIAS,PASSWORD.toCharArray());
-            rootCAPrivateCredential = new X500PrivateCredential(rootCACert, rootCAPrivateKey,  ROOT_ALIAS);
-            userTest = new UserVS();
-            userTest.setNif(NifUtils.getNif(Integer.valueOf(getMessage("testUserNifNumber"))));
-            userTest.setFirstName(getMessage("testUserFirstName"));
-            userTest.setLastName(getMessage("testUserLastName"));
-            userTest.setEmail(getMessage("testUserEmail"));
-            String testUserDN = getMessage("userDN", userTest.getFirstName(),userTest.getLastName(), userTest.getNif());
-            KeyStore userKeySTore = KeyStoreUtil.createUserKeyStore(CERT_VALID_FROM, USER_KEYSTORE_PERIOD,
-                    PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential, testUserDN);
-            userTest.setKeyStore(userKeySTore);
-        } catch (Exception ex) {
-            log.error (ex.getMessage(), ex);
-        }
+    public void initTestKeyStore() throws Exception {
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
+        String dateStr = formatter.format(new Date(CERT_VALID_FROM));
+        String strSubjectDN = getMessage("rootTestCASubjectDN", dateStr);
+        rootCAKeyStore = KeyStoreUtil.createRootKeyStore (CERT_VALID_FROM, ROOT_KEYSTORE_PERIOD,
+                PASSWORD.toCharArray(), ROOT_ALIAS, strSubjectDN);
+        rootCACert = (X509Certificate)rootCAKeyStore.getCertificate(ROOT_ALIAS);
+        rootCAPrivateKey = (PrivateKey)rootCAKeyStore.getKey(ROOT_ALIAS,PASSWORD.toCharArray());
+        rootCAPrivateCredential = new X500PrivateCredential(rootCACert, rootCAPrivateKey,  ROOT_ALIAS);
+        userTest = new UserVS();
+        userTest.setNif(NifUtils.getNif(Integer.valueOf(getMessage("testUserNifNumber"))));
+        userTest.setFirstName(getMessage("testUserFirstName"));
+        userTest.setLastName(getMessage("testUserLastName"));
+        userTest.setEmail(getMessage("testUserEmail"));
+        String testUserDN = getMessage("userDN", userTest.getFirstName(),userTest.getLastName(), userTest.getNif());
+        KeyStore userKeySTore = KeyStoreUtil.createUserKeyStore(CERT_VALID_FROM, USER_KEYSTORE_PERIOD,
+                PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential, testUserDN);
+        userTest.setKeyStore(userKeySTore);
     }
 
     public ConfigObject getConfig() {return config;}
@@ -475,7 +472,6 @@ public class ContextVS {
     public X509Certificate getTimeStampServerCert() throws ExceptionVS {
         if(timeStampCACert != null) return timeStampCACert;
         if(defaultServer != null) {
-            log.debug("Fetching TimeStampServerCert from default server");
             return defaultServer.getTimeStampCert();
         } else throw new ExceptionVS("TimeStampServerCert not initialized");
     }
@@ -512,6 +508,7 @@ public class ContextVS {
     public void setAccessControl(AccessControlVS accessControl) {
         this.accessControl = accessControl;
         this.controlCenter = accessControl.getControlCenters().iterator().next();
+        if(this.defaultServer == null) this.defaultServer = accessControl;
     }
 
     public PKIXParameters getSessionPKIXParameters() throws InvalidAlgorithmParameterException, Exception {

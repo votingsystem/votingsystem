@@ -6,10 +6,8 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
-
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -373,7 +371,8 @@ public class UserVS implements Serializable {
 
     public String getContentDigestHex() {
         if (signerInformation.getContentDigest() == null) return null;
-        return new String(Hex.encode(signerInformation.getContentDigest()));
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(signerInformation.getContentDigest());
     }
 
     public void setSigner(SignerInformation signer) {

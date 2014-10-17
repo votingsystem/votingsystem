@@ -75,9 +75,8 @@ class RepresentativeDelegationService {
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessage, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME( smimeMessage:smimeMessageResp,
-                type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save();
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEReq,
                 type:TypeVS.REPRESENTATIVE_SELECTION)
 	}
 

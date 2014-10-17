@@ -17,7 +17,7 @@ Map requestDataMap = [groupvsInfo:"GroupVS From TESTS Description - " + DateUtil
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
-SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("./certs/Cert_UserVS_00111222V.jks")
+SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER)
 UserVS fromUserVS = representativeSignatureService.getUserVS()
 String messageSubject = "TEST_ADD_GROUPVS";
 SMIMEMessage smimeMessage = representativeSignatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,

@@ -6,7 +6,6 @@ import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
-import org.bouncycastle.util.encoders.Base64
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
@@ -321,7 +320,7 @@ class  SignatureVSService {
         JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(new String(messageVSBytes, "UTF-8"));
 
         SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(
-                Base64.decode(messageVSJSON.smimeMessage.getBytes())))
+                Base64.getDecoder().decode(messageVSJSON.smimeMessage.getBytes())))
         ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         MessageSMIME messageSMIMEReq = responseVS.data

@@ -169,7 +169,7 @@ class SignatureVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, eventVS:eventVS, message:msg)
         }
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS)
-        responseVS = timeStampService.validateToken(voteVS.getTimeStampToken(), eventVS, locale)
+        responseVS = timeStampService.validateToken(voteVS.getTimeStampToken(), eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             responseVS.type = TypeVS.VOTE_ERROR
             responseVS.eventVS = eventVS
@@ -306,15 +306,6 @@ class SignatureVSService {
                       extensionChecker:validatorResult.getChecker()])
     }
 
-    public File getSignedFile (String fromUser, String toUser, String textToSign, String subject, Header header) {
-        log.debug "getSignedFile - textToSign: ${textToSign}"
-        MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(
-                fromUser, toUser, textToSign, subject, header)
-        File resultFile = File.createTempFile("smime", "p7m");
-        mimeMessage.writeTo(new FileOutputStream(resultFile));
-        return resultFile
-    }
-
     public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject,Header header) {
         log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
@@ -323,7 +314,6 @@ class SignatureVSService {
         SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
         return mimeMessage;
     }
-
 
     public synchronized SMIMEMessage getMultiSignedMimeMessage (
             String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {

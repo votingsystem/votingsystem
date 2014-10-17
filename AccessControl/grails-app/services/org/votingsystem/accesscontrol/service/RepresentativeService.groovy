@@ -1,7 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -459,7 +458,7 @@ class RepresentativeService {
 			String base64ImageHash = messageJSON.base64ImageHash
 			MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
 			byte[] resultDigest =  messageDigest.digest(imageBytes);
-			String base64ResultDigest = new String(Base64.encode(resultDigest));
+			String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
 			log.debug("saveRepresentativeData - base64ImageHash: ${base64ImageHash}" + 
 				" - server calculated base64ImageHash: ${base64ResultDigest}")
 			if(!base64ResultDigest.equals(base64ImageHash)) {

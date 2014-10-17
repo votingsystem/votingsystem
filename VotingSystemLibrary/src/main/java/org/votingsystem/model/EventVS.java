@@ -479,8 +479,10 @@ public class EventVS implements Serializable {
             }
             if(eventMap.containsKey("fieldsEventVS")) {
                 Set<FieldEventVS> fieldsEventVS =  new HashSet<FieldEventVS>();
-                for(Map option : (List<Map>) eventMap.get("fieldsEventVS")) {
-                    fieldsEventVS.add(FieldEventVS.populate(option));
+                Object fieldList =  eventMap.get("fieldsEventVS");
+                for(Object option : (List) eventMap.get("fieldsEventVS")) {
+                    if(option instanceof Map) fieldsEventVS.add(FieldEventVS.populate((Map)option));
+                    else fieldsEventVS.add(new FieldEventVS(((String)option), null));
                 }
                 eventVS.setFieldsEventVS(fieldsEventVS);
             }

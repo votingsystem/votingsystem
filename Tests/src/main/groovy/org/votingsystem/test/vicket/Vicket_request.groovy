@@ -11,9 +11,9 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.WalletUtils
 import org.votingsystem.vicket.model.VicketRequestBatch
 
-Logger logger = TestUtils.init(Vicket_request.class)
+Logger log = TestUtils.init(Vicket_request.class)
 
-SignatureService signatureService = SignatureService.getUserVSSignatureService("./certs/Cert_UserVS_07553172H.jks")
+SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER)
 UserVS fromUserVS = signatureService.getUserVS()
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
@@ -38,6 +38,6 @@ if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
     vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
     WalletUtils.saveVicketsToWallet(vicketBatch.getVicketsMap().values(), ContextVS.getInstance().config.walletDir)
 } else {
-    logger.error(" --- ERROR --- " + responseVS.getMessage())
+    log.error(" --- ERROR --- " + responseVS.getMessage())
 }
 System.exit(0)

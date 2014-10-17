@@ -4,8 +4,8 @@ import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.TagVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.vicket.model.UserVSAccount
 
 import java.text.Normalizer

@@ -17,7 +17,6 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -147,8 +146,7 @@ public class SMIMEMessage extends MimeMessage {
      */
     public String getContentDigestStr() throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-        byte[] resultDigest =  messageDigest.digest(signedContent.getBytes());
-        return new String(Base64.encode(resultDigest));
+        return Base64.getEncoder().encodeToString(messageDigest.digest(signedContent.getBytes()));
     }
 
     /**
@@ -317,7 +315,7 @@ public class SMIMEMessage extends MimeMessage {
         AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
 
         byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-        //String hashTokenStr = new String(Base64.encode(hashTokenBytes));
+        //String hashTokenStr = Base64.getEncoder().encodeToString(hashTokenBytes);
         //log.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         Iterator<SignerInformation> it = signers.getSigners().iterator();
@@ -325,7 +323,7 @@ public class SMIMEMessage extends MimeMessage {
         while (it.hasNext()) {
             SignerInformation signer = it.next();
             byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
-            //String digestStr = new String(Base64.encode(digestBytes));
+            //String digestStr = Base64.getEncoder().encodeToString(digestBytes);
             //log.debug("setTimeStampToken - hash signerVS: " +  digestStr +
             //        " - hash token: " + hashTokenStr);
             if(Arrays.equals(hashTokenBytes, digestBytes)) {
@@ -372,7 +370,7 @@ public class SMIMEMessage extends MimeMessage {
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
-        //byte[] digest = Base64.encode(as.getOctets());
+        //byte[] digest = Base64.getEncoder().encodeToString(as.getOctets());
         //log.debug(" - digest: " + new String(digest));
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         //reqgen.setReqPolicy(m_sPolicyOID);
@@ -410,8 +408,8 @@ public class SMIMEMessage extends MimeMessage {
     //Call this method after isValidSignature()!!!
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
-        byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
-        String digestStr = new String(Base64.encode(digestBytes));
+        //byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
+        //String digestStr = Base64.getEncoder().encodeToString(digestBytes);
         AttributeTable  unsignedAttributes = signer.getUnsignedAttributes();
         if(unsignedAttributes != null) {
             Attribute timeStampAttribute = unsignedAttributes.get(
@@ -422,7 +420,7 @@ public class SMIMEMessage extends MimeMessage {
                         new CMSSignedData(dob.getDERObject().getEncoded());
                 timeStampToken = new TimeStampToken(signedData);
                 byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-                String digestTokenStr = new String(Base64.encode(hashToken));
+                //String digestTokenStr = Base64.getEncoder().encodeToString(hashToken);
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
                 log.debug("checkTimeStampToken - timeStampToken: " +  cal.getTime());

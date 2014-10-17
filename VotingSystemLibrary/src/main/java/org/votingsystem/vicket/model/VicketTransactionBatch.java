@@ -4,7 +4,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -54,7 +53,7 @@ public class VicketTransactionBatch {
         vicketList = new ArrayList<Vicket>();
         for(int i = 0; i < vicketsArray.size(); i++) {
             SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.decode(vicketsArray.getString(i).getBytes())));
+                    Base64.getDecoder().decode(vicketsArray.getString(i).getBytes())));
             try {
                 vicketList.add(new Vicket(smimeMessage));
             } catch(Exception ex) {

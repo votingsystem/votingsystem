@@ -10,6 +10,8 @@ import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -18,7 +20,7 @@ class TestUtils {
 
     private static Logger log
 
-    private static Map<Long, UserVS> userVSMap = new HashMap<>();
+    private static ConcurrentHashMap<Long, UserVS> userVSMap = new ConcurrentHashMap<>();
     private static SimulationData simulationData;
     private static Class initClass;
 
@@ -26,16 +28,24 @@ class TestUtils {
         initClass = clazz;
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("log4jTests.properties"),
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"),"TestDir");
         log =  Logger.getLogger(TestUtils.class);
         return Logger.getLogger(clazz);
     }
 
     public static Logger init(Class clazz, Map simulationDataMap) {
-        Logger logger = init(clazz)
+        Logger log = init(clazz)
         simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
         simulationData.init(System.currentTimeMillis());
-        return logger;
+        return log;
+    }
+
+
+    public static Logger init(Class clazz, SimulationData simulationData) {
+        Logger log = init(clazz)
+        this.simulationData = simulationData;
+        this.simulationData.init(System.currentTimeMillis());
+        return log;
     }
 
     public static Map<String, MockDNI> getUserVSMap(List<MockDNI> userList) {

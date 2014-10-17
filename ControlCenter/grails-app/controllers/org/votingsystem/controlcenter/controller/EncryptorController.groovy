@@ -1,10 +1,8 @@
 package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
@@ -29,7 +27,7 @@ class EncryptorController {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'publicKeyMissingErrorMsg'))]
 		}
 		
-	    byte[] decodedPK = Base64.decode(messageJSON.publicKey);
+	    byte[] decodedPK = Base64.getDecoder().decode(messageJSON.publicKey);
 	    PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
 	    //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
 		messageJSON.message="Hello '${messageJSON.from}' from '${grailsApplication.config.grails.serverURL}'"

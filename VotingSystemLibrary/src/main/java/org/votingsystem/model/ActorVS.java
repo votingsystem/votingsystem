@@ -251,6 +251,10 @@ public class ActorVS implements Serializable {
         return serverURL + "/encryptor/getMultiSignedMessage";
     }
 
+    public String getEncryptionServiceURL() {
+        return getServerURL() + "/encryptor";
+    }
+
     public static String getServerInfoURL(String serverURL) {
         return serverURL + "/serverInfo";
     }

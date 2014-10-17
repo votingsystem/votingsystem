@@ -6,7 +6,6 @@ import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.client.VotingSystemApp;
@@ -240,9 +239,9 @@ public class SignatureService extends Service<ResponseVS> {
             } else {
                 MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
                 byte[] resultDigest =  messageDigest.digest(imageFileBytes);
-                String base64ResultDigest = new String(Base64.encode(resultDigest));
+                String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
                 operationVS.getDocumentToSignMap().put("base64ImageHash", base64ResultDigest);
-                //String base64RepresentativeEncodedImage = new String(Base64.encode(imageFileBytes));
+                //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
                 //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
                 JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
                 SMIMEMessage representativeRequestSMIME = ContentSignerHelper.genMimeMessage(null,
@@ -322,7 +321,7 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS responseVS = timeStamper.call();
             smimeMessage = timeStamper.getSmimeMessage();
             try {
-                String base64ResultDigest = new String(Base64.encode(smimeMessage.getBytes()));
+                String base64ResultDigest = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
                 operationVS.getDocumentToSignMap().put("smimeMessage", base64ResultDigest);
                 operationVS.getDocumentToSignMap().put("encryptedDataList", encryptedDataList);
                 JSONObject documentToSendJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());

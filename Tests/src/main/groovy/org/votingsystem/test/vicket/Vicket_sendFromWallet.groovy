@@ -13,7 +13,7 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
-Logger logger = TestUtils.init(Vicket_sendFromWallet.class)
+Logger log = TestUtils.init(Vicket_sendFromWallet.class)
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
@@ -30,10 +30,10 @@ transactionBatch.initTransactionVSRequest("toUserName", "ES087878898945000000000
         "First Vicket Transaction", true, vicketServer.getTimeStampServiceURL())
 responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVSRequest().toString().getBytes(),
         ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
-logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
+log.debug("Vicket Transaction result: " + responseVS.getStatusCode())
 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
 JSONObject responseJSON = JSONSerializer.toJSON(responseVS.getMessage());
-logger.debug("Transaction result - statusCode: $responseJSON.statusCode - message:$responseJSON.message")
+log.debug("Transaction result - statusCode: $responseJSON.statusCode - message:$responseJSON.message")
 transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"), vicketServer.getTrustAnchors());
 System.exit(0);
 

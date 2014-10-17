@@ -6,7 +6,6 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.util.CertUtils
-import java.security.cert.X509Certificate
 
 /**
  * @infoController Información de la aplicación

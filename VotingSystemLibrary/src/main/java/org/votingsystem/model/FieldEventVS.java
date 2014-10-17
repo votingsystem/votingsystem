@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONNull;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -28,6 +29,11 @@ public class FieldEventVS implements Serializable {
     @Transient private Long numVotesResult;
 
     public FieldEventVS() {}
+
+    public FieldEventVS(String content, String value) {
+        this.content = content;
+        this.value = value;
+    }
 
     public String getContent() {
         return content;
@@ -106,11 +112,12 @@ public class FieldEventVS implements Serializable {
         FieldEventVS fieldEvent = null;
         try {
             fieldEvent = new FieldEventVS();
-            if(fieldMap.containsKey("id")) fieldEvent.setId(((Integer) fieldMap.get("id")).longValue());
+            if(fieldMap.containsKey("id") && !JSONNull.getInstance().equals(fieldMap.get("id")))
+                fieldEvent.setId(((Integer) fieldMap.get("id")).longValue());
             if(fieldMap.containsKey("content")) {
                 fieldEvent.setContent((String) fieldMap.get("content"));
             }
-            if(fieldMap.containsKey("value")) {
+            if(fieldMap.containsKey("value")&& !JSONNull.getInstance().equals(fieldMap.get("value"))) {
                 fieldEvent.setValue((String) fieldMap.get("value"));
             }
         } catch(Exception ex) {

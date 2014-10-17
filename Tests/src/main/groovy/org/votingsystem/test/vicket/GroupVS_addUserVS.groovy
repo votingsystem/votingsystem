@@ -3,6 +3,7 @@ package org.votingsystem.test.vicket
 import net.sf.json.JSONObject
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
 import org.votingsystem.test.model.SimulationData
 import org.votingsystem.test.util.MockDNI
@@ -33,8 +34,7 @@ List<MockDNI> userList = authoritySignatureService.subscribeUsers(subscriptionDa
 if(!isWithUserValidation) TestUtils.finish()
 
 log.debug("activateUsers")
-SignatureService representativeSignatureService =
-        SignatureService.getUserVSSignatureService("./certs/Cert_UserVS_00111222V.jks")
+SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER)
 representativeSignatureService.validateUserVSSubscriptions(simulationDataMap.groupId, vicketServer,
         TestUtils.getUserVSMap(userList))
 

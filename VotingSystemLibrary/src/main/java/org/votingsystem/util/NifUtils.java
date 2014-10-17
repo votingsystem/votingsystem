@@ -5,27 +5,23 @@ import org.votingsystem.model.ContextVS;
 public class NifUtils {
 	    
     public static String getNif(int number) {
-        String numberStr = String.format("%08d", number);
-        return numberStr + getNifLetter(number);
+        return String.format("%08d", number) + getNifLetter(number);
     }
     
-    public static String validate(String nifParam) throws ExceptionVS {
+    public static String validate(String nif) throws ExceptionVS {
+        String result = null;
         try {
-            String nif = new String(nifParam);
             if(nif != null && nif.length() <= 9) {
-                nif  = nif.toUpperCase();
-                int numberZeros = 9 - nif.length();
-                for(int i = 0; i < numberZeros ; i++) {
-                    nif = "0" + nif;
-                }
+                nif = String.format("%09d", nif).toUpperCase();
                 String number = nif.substring(0, 8);
                 String letter = nif.substring(8, 9);
-                if(letter.equals(getNifLetter(new Integer(number)))) return nif;
+                if(letter.equals(getNifLetter(new Integer(number)))) result = nif;
             }
-        } catch(Exception ex) {
-            throw new ExceptionVS(ContextVS.getMessage("NIFWithErrorsMsg", nifParam));
+        } catch(Exception ex) {} finally {
+            if(result != null) return result;
+            else throw new ExceptionVS(ContextVS.getMessage("NIFWithErrorsMsg", nif));
         }
-        throw new ExceptionVS(ContextVS.getMessage("NIFWithErrorsMsg", nifParam));
+
     }
 
     public static String getNifLetter(int dni) {

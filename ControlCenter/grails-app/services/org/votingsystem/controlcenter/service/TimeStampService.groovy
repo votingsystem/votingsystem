@@ -12,7 +12,6 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.operator.DigestCalculator
 import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
-import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
@@ -98,21 +97,21 @@ class TimeStampService {
     }
 
 	
-	public ResponseVS validateToken(TimeStampToken timeStampToken, EventVS eventVS, Locale locale) throws Exception {
+	public ResponseVS validateToken(TimeStampToken timeStampToken, EventVS eventVS) throws Exception {
 		try {
-            ResponseVS responseVS = validateToken(timeStampToken, locale)
+            ResponseVS responseVS = validateToken(timeStampToken)
 			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
 			if(!timestampDate.after(eventVS.dateBegin) || !timestampDate.before(eventVS.getDateFinish())) {
                 String msg = messageSource.getMessage('timestampDateErrorMsg',
-					[timestampDate, eventVS.dateBegin, eventVS.getDateFinish()].toArray(), locale)
+					[timestampDate, eventVS.dateBegin, eventVS.getDateFinish()].toArray(), LocaleContextHolder.locale)
 				log.debug("validateToken - ERROR TIMESTAMP DATE -  - Event '${eventVS.id}' - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, eventVS:eventVS)
 			} else return new ResponseVS(statusCode:ResponseVS.SC_OK);
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-            String msg = messageSource.getMessage('timeStampErrorMsg', null, locale)
+            String msg = messageSource.getMessage('timeStampErrorMsg', null, LocaleContextHolder.locale)
 			log.error ("validateToken - msg:${msg} - Event '${eventVS.id}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
@@ -160,9 +159,9 @@ class TimeStampService {
         byte[] resultDigest =  sha.digest(contentBytes);
         baos.close();
         if(!Arrays.equals(digestToken, resultDigest)) {
-            String tokenStr = new String(Base64.encode(tsToken.getEncoded()));
-            String resultDigestStr = new String(Base64.encode(resultDigest));
-            String digestTokenStr = new String(Base64.encode(digestToken));
+            String tokenStr = java.util.Base64.getEncoder().encodeToString(tsToken.getEncoded());
+            String resultDigestStr =  java.util.Base64.getEncoder().encodeToString(resultDigest);
+            String digestTokenStr = java.util.Base64.getEncoder().encodeToString(digestToken);
             throw new ExceptionVS("algorithmStr: '${algorithmStr} 'resultDigestStr '${resultDigestStr} - digestTokenStr '${digestTokenStr}'")
         }
     }

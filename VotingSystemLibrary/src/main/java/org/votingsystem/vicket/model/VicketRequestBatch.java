@@ -117,8 +117,8 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
     public void initVickets(JSONArray issuedVicketsArray) throws Exception {
         log.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
-        if(issuedVicketsArray.size() != vicketsMap.values().size()) {
-            log.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketsMap.values().size() +
+        if(issuedVicketsArray.size() != vicketsMap.size()) {
+            log.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketsMap.size() +
                     " - num. vickets received: " + issuedVicketsArray.size());
         }
         for(int i = 0; i < issuedVicketsArray.size(); i++) {

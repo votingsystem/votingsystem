@@ -1,17 +1,15 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
-import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
-import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketTransactionBatch
 
 class TransactionVSController {

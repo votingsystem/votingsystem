@@ -344,9 +344,9 @@ public class VicketService extends IntentService {
                 }
                 JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
                 Log.d(TAG + "vicketRequest(...)", "Num IssuedVickets: " + issuedVicketsArray.length());
-                if(issuedVicketsArray.length() != vicketBatch.getVicketsMap().values().size()) {
+                if(issuedVicketsArray.length() != vicketBatch.getVicketsMap().size()) {
                     Log.e(TAG + "vicketRequest(...)", "ERROR - Num vickets requested: " +
-                            vicketBatch.getVicketsMap().values().size() + " - num. vickets received: " +
+                            vicketBatch.getVicketsMap().size() + " - num. vickets received: " +
                             issuedVicketsArray.length());
                 }
                 for(int i = 0; i < issuedVicketsArray.length(); i++) {

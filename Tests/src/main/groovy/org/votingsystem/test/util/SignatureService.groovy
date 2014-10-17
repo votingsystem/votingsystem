@@ -17,41 +17,62 @@ import org.votingsystem.util.*
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 import javax.security.auth.x500.X500PrivateCredential
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.cert.Certificate
 import java.security.cert.X509Certificate
+import java.util.concurrent.ConcurrentHashMap
 
 class SignatureService {
 
     private static Logger log = Logger.getLogger(SignatureService.class);
 
-    private static Map<String, SignatureService> signatureServices	= new HashMap<>()
+    private static ConcurrentHashMap<String, SignatureService> signatureServices	= new ConcurrentHashMap<>()
 
     private SignedMailGenerator signedMailGenerator;
 	private X509Certificate certSigner;
+    private Certificate[] certSignerChain;
     private X500PrivateCredential rootCAPrivateCredential;
-    private PrivateKey serverPrivateKey;
+    private PrivateKey privateKey;
     private Encryptor encryptor;
+    private static SignatureService authoritySignatureService;
+    private KeyStore keyStore
+    private UserVS userVS;
 
+    public SignatureService(KeyStore keyStore, String keyAlias, String password) {
+        init(keyStore, keyAlias, password)
+    }
 
-    public SignatureService(String keyStorePath, String keyAlias, String password) {
-        init(keyStorePath, keyAlias, password)
+    public synchronized Map init(KeyStore keyStore, String keyAlias, String password) throws Exception {
+        log.debug("init")
+        this.keyStore = keyStore
+        certSignerChain = keyStore.getCertificateChain(keyAlias);
+        signedMailGenerator = new SignedMailGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
+        byte[] pemCertsArray
+        for (int i = 0; i < certSignerChain.length; i++) {
+            log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${certSignerChain[i].getSubjectDN()}'"
+            if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (certSignerChain[i])
+            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (certSignerChain[i]))
+        }
+        certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
+        privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
+        rootCAPrivateCredential = new X500PrivateCredential(certSigner, privateKey,  ContextVS.ROOT_ALIAS);
+        encryptor = new Encryptor(certSigner, privateKey);
+        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, certSigner:certSigner,
+                privateKey:privateKey, rootCAPrivateCredential:rootCAPrivateCredential];
     }
 
     public static SignatureService getAuthoritySignatureService() {
+        if(authoritySignatureService != null) return authoritySignatureService
         String keyStorePath = ContextVS.getInstance().getConfig().authorityKeyStorePath
         String keyAlias = ContextVS.getInstance().config.authorityKeysAlias
         String password = ContextVS.getInstance().config.authorityKeysPassword
-        return new SignatureService(keyStorePath, keyAlias, password)
-    }
-
-    public static SignatureService getUserVSSignatureService(String keyStorePath) {
-        String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
-        String password = ContextVS.getInstance().config.userVSKeysPassword
-        return new SignatureService(keyStorePath, keyAlias, password)
+        KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
+        authoritySignatureService = new SignatureService(keyStore, keyAlias, password)
+        signatureServices.put(authoritySignatureService.getUserVS().nif, authoritySignatureService)
+        return authoritySignatureService
     }
 
     public static SignatureService getUserVSSignatureService(String nif, UserVS.Type userType) {
@@ -66,45 +87,42 @@ class SignatureService {
                 break;
         }
         log.debug("loading keystore: " + keyStorePath);
-        SignatureService signatureService = getUserVSSignatureService(keyStorePath)
+        String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
+        String password = ContextVS.getInstance().config.userVSKeysPassword
+        KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
+        SignatureService signatureService = new SignatureService(keyStore, keyAlias, password)
+        signatureServices.put(nif, signatureService)
+        return signatureService
+    }
+
+    public static SignatureService genUserVSSignatureService(String nif) {
+        KeyStore mockDnie = getAuthoritySignatureService().generateKeyStore(nif)
+        SignatureService signatureService = new SignatureService(mockDnie, ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD);
         signatureServices.put(nif, signatureService)
         return signatureService
     }
 
     public UserVS getUserVS() {
-        return UserVS.getUserVS(certSigner)
+        if(userVS == null) userVS = UserVS.getUserVS(certSigner)
+        return userVS
     }
 
-	public synchronized Map init(String keyStorePath, String keyAlias, String password) throws Exception {
-		log.debug("init")
-        byte[] keyStoreBytes = ContextVS.getInstance().getResourceBytes(keyStorePath)
+    public  KeyStore getKeyStore() {
+        return keyStore;
+    }
 
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new ByteArrayInputStream(keyStoreBytes), password.toCharArray());
-        java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-		signedMailGenerator = new SignedMailGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
-		byte[] pemCertsArray
-		for (int i = 0; i < chain.length; i++) {
-			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
-			if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (chain[i])
-			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
-		}
-		certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
-        serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
-        rootCAPrivateCredential = new X500PrivateCredential(certSigner, serverPrivateKey,  ContextVS.ROOT_ALIAS);
-        encryptor = new Encryptor(certSigner, serverPrivateKey);
-        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, rootCAPrivateCredential:rootCAPrivateCredential,
-                certSigner:certSigner, serverPrivateKey:serverPrivateKey];
-	}
-
-    public X509Certificate getServerCert() {
+    public X509Certificate getCertSigner() {
         if(certSigner == null) certSigner = init().certSigner
         return certSigner
     }
 
-    private PrivateKey getServerPrivateKey() {
-        if(serverPrivateKey == null) serverPrivateKey = init().serverPrivateKey
-        return serverPrivateKey
+    public Certificate[] getCertSignerChain() {
+        return certSignerChain;
+    }
+
+    public PrivateKey getPrivateKey() {
+        if(privateKey == null) privateKey = init().privateKey
+        return privateKey
     }
     private X500PrivateCredential getRootCAPrivateCredential() {
         if(rootCAPrivateCredential == null) rootCAPrivateCredential = init().rootCAPrivateCredential
@@ -112,18 +130,15 @@ class SignatureService {
     }
 
 
-	public File getSignedFile (String fromUser, String toUser,
-		String textToSign, String subject, Header header) {
-		log.debug "getSignedFile - textToSign: ${textToSign}"
-		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
-		File resultFile = File.createTempFile("smime", "p7m");
-		resultFile.deleteOnExit();
-		mimeMessage.writeTo(new FileOutputStream(resultFile));
-		return resultFile
-	}
+    public static KeyStore loadKeyStore(String keyStorePath, String keyAlias, String password) {
+        byte[] keyStoreBytes = ContextVS.getInstance().getResourceBytes(keyStorePath)
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new ByteArrayInputStream(keyStoreBytes), password.toCharArray());
+        return keyStore
+    }
 
     public SMIMEMessage getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
-                           Header... headers) {
+                       Header... headers) {
         log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
@@ -285,7 +300,7 @@ class SignatureService {
                 if(userVSMap.get(userVSData.getString("NIF")) != null) usersToActivate.add(userSubscriptionData);
             }
         }
-        if(usersToActivate.size() != userVSMap.values().size()) throw new ExceptionVS("Expected '" + userVSMap.values().size() +
+        if(usersToActivate.size() != userVSMap.size()) throw new ExceptionVS("Expected '" + userVSMap.size() +
                 "' pending users and found '" + usersToActivate.size() + "'");
         List<JSONObject> requests = new ArrayList<>();
         for(JSONObject userToActivate:usersToActivate) {

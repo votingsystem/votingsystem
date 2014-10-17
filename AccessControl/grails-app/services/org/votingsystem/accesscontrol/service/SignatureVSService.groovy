@@ -231,16 +231,6 @@ class SignatureVSService {
         }
     }
 
-    public File getSignedFile (String fromUser, String toUser,
-                               String textToSign, String subject, Header header) {
-        log.debug "getSignedFile - textToSign: ${textToSign}"
-        MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
-        File resultFile = File.createTempFile("smime", "p7m");
-        resultFile.deleteOnExit();
-        mimeMessage.writeTo(new FileOutputStream(resultFile));
-        return resultFile
-    }
-
     public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
         log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")

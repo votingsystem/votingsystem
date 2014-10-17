@@ -1,5 +1,3 @@
-include "VotingSystemLibrary", "ClientTool", "TimeStampServer", "AccessControl",
-        "ControlCenter", "Vickets", "Tests", "TestsWebApp"
+include "VotingSystemLibrary", "ClientTool", "TimeStampServer", "AccessControl", "ControlCenter", "Vickets", "Tests"
 
-include 'Tests'
 

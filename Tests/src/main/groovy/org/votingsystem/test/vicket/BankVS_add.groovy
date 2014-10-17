@@ -9,7 +9,7 @@ import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 
-Logger logger = TestUtils.init(Vicket_request.class)
+Logger log = TestUtils.init(Vicket_request.class)
 
 Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
         certChainPEM:new String(ContextVS.getInstance().getResourceBytes("./certs/Cert_BankVS_03455543T.pem"),"UTF-8"),
@@ -17,7 +17,7 @@ Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDa
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
-SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("./certs/Cert_UserVS_07553172H.jks")
+SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER)
 UserVS fromUserVS = superUserSignatureService.getUserVS()
 
 String messageSubject = "TEST_ADD_BANKVS";
@@ -25,7 +25,7 @@ SMIMEMessage smimeMessage = superUserSignatureService.getTimestampedSignedMimeMe
         vicketServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
         vicketServer.getSaveBankServiceURL())
-logger.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())
+log.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())
 
 System.exit(0)
 

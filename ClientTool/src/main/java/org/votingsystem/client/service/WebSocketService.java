@@ -7,7 +7,6 @@ import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -229,7 +228,7 @@ public class WebSocketService extends Service<ResponseVS> {
         if(data != null) messageToServiceMap.put("data", data);
         if(smimeMessage != null) {
             try {
-                String smimeMessageStr = new String(Base64.encode(smimeMessage.getBytes()));
+                String smimeMessageStr = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
                 messageToServiceMap.put("smimeMessage", smimeMessageStr);
             } catch (Exception ex) {
                 log.debug(ex.getMessage(), ex);

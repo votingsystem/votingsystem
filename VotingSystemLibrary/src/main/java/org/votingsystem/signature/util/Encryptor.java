@@ -7,7 +7,6 @@ import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -25,6 +24,7 @@ import java.io.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -138,7 +138,7 @@ public class Encryptor {
                 encodedContentType = mimeMessage.getHeader("votingSystemMessageType")[0];
             if(encodedContentType != null) {
                 if(ContextVS.BASE64_ENCODED_CONTENT_TYPE.equals(encodedContentType)) {
-                    messageContentBytes = Base64.decode((String)messageContent);
+                    messageContentBytes = Base64.getDecoder().decode((String) messageContent);
                 } else log.error("### unknown  votingSystemMessageType: " + encodedContentType);
             } else messageContentBytes = messageContent.toString().getBytes();
         }
@@ -230,8 +230,7 @@ public class Encryptor {
         out.write(dataToEncrypt);
         out.close();
         byte[] result = bOut.toByteArray();
-        byte[] base64EncryptedDataBytes = Base64.encode(result);
-        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
+        return new ResponseVS(ResponseVS.SC_OK, Base64.getEncoder().encode(result), null);
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
@@ -245,12 +244,11 @@ public class Encryptor {
         out.write(dataToEncrypt);
         out.close();
         byte[] result = bOut.toByteArray();
-        byte[] base64EncryptedDataBytes = Base64.encode(result);
-        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes);
+        return new ResponseVS(ResponseVS.SC_OK, Base64.getEncoder().encode(result));
     }
 
     public byte[] decryptCMS(byte[] base64EncryptedData) throws Exception {
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+        byte[] cmsEncryptedData = Base64.getDecoder().decode(base64EncryptedData);
         CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection                 c = recipients.getRecipients();
@@ -277,7 +275,7 @@ public class Encryptor {
     public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
         log.debug("decryptCMS");
         try {
-            byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+            byte[] cmsEncryptedData = Base64.getDecoder().decode(base64EncryptedData);
             CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
             RecipientInformationStore  recipients = ep.getRecipientInfos();
             Collection                 c = recipients.getRecipients();

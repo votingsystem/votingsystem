@@ -13,7 +13,6 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.operator.DigestCalculator
 import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
-import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
@@ -189,9 +188,9 @@ class TimeStampService {
         byte[] resultDigest =  sha.digest(contentBytes);
         baos.close();
         if(!Arrays.equals(digestToken, resultDigest)) {
-            String tokenStr = new String(Base64.encode(tsToken.getEncoded()));
-            String resultDigestStr = new String(Base64.encode(resultDigest));
-            String digestTokenStr = new String(Base64.encode(digestToken));
+            String tokenStr = Base64.getEncoder().encodeToString(tsToken.getEncoded());
+            String resultDigestStr =  Base64.getEncoder().encodeToString(resultDigest);
+            String digestTokenStr = Base64.getEncoder().encodeToString(digestToken);
             throw new ExceptionVS("algorithmStr: '${algorithmStr} 'resultDigestStr '${resultDigestStr} - digestTokenStr '${digestTokenStr}'")
         }
     }
