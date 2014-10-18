@@ -8,6 +8,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.MessageVS
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
 * @author jgzornoza
@@ -23,7 +24,7 @@ class MessageVSService {
 
 	public void init() { }
 
-    public ResponseVS send(MessageVS messageVS , Locale locale) {
+    public ResponseVS send(MessageVS messageVS) {
         log.debug("send - messageVS: ${messageVS.id}")
         return new ResponseVS(statusCode: ResponseVS.SC_OK)
 

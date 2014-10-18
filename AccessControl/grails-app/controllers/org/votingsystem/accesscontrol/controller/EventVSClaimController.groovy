@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 
 /**
@@ -48,7 +49,7 @@ class EventVSClaimController {
                         message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
                 EventVSClaim eventVS = resultList.iterator().next()
-                eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
+                eventVS = eventVSService.checkEventVSDates(eventVS).eventVS
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					return [responseVS: new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                             data:eventVSService.getEventVSMap(eventVS))]
@@ -87,7 +88,7 @@ class EventVSClaimController {
             }
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
-                eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
+                eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSClaimMap(eventVSItem))
             }
             render eventsVSMap as JSON
@@ -162,25 +163,19 @@ class EventVSClaimController {
 	}
     
 	/**
-	 * Servicio para publicar reclamaciones.
+	 * Claim publishing service.
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
-	 *                     documento en formato SMIME  en cuyo content se
-	 *        encuentra la reclamación que se desea publicar en formato HTML.
-	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el documento SMIME recibido con la signatureVS añadida del servidor.
+	 * @requestContentType [application/x-pkcs7-signature] required. The content of the event to publish.
+	 * @responseContentType [application/x-pkcs7-signature] required. The request signed by the system.
 	 */
     def save () {
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = eventVSClaimService.saveEvent(messageSMIMEReq, request.getLocale())
+		MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        ResponseVS responseVS = eventVSClaimService.saveEvent(messageSMIME)
         if(ResponseVS.SC_OK == responseVS.statusCode) {
             response.setHeader('eventURL',
                     "${grailsApplication.config.grails.serverURL}/eventVSClaim/${responseVS.eventVS.id}")
-            responseVS.setContentType(ContentTypeVS.SIGNED)
         }
         return [responseVS:responseVS]
     }
@@ -197,12 +192,10 @@ class EventVSClaimController {
     def statistics () {
         EventVSClaim eventVSClaim
 		if (!params.eventVS) {
-			EventVSClaim.withTransaction {
-				eventVSClaim = EventVSClaim.get(params.long('id'))
-			}
+			EventVSClaim.withTransaction { eventVSClaim = EventVSClaim.get(params.long('id')) }
 		} else eventVSClaim = params.eventVS
         if (eventVSClaim) {
-            def statisticsMap = eventVSClaimSignatureCollectorService.getStatisticsMap(eventVSClaim, request.getLocale())
+            def statisticsMap = eventVSClaimSignatureCollectorService.getStatisticsMap(eventVSClaim)
 			if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 				if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
 				else render statisticsMap as JSON
@@ -242,16 +235,15 @@ class EventVSClaimController {
 		eventVSClaimInfoMap.eventURL =
 			"${grailsApplication.config.grails.serverURL}/eventVS/${eventVS.id}"
 		eventVSClaimInfoMap.signatures = []
-		signatures.each { firma ->
-			def signatureMap = [id:firma.id, dateCreated:firma.dateCreated, userVS:firma.userVS.nif,
+		signatures.each { signature ->
+			def signatureMap = [id:signature.id, dateCreated:signature.dateCreated, userVS:signature.userVS.nif,
 			firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
-				"/get?id=${firma.messageSMIME.id}",
-			reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
-				"/receipt/${firma.messageSMIME?.id}"]
-			def fieldValues = FieldValueEventVS.findAllWhere(firma:firma)
+				"/get?id=${signature.messageSMIME.id}",
+			reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" + "/${signature.messageSMIME?.id}"]
+			def fieldValues = FieldValueEventVS.findAllWhere(signatureVS:signature)
 			signatureMap.fieldsEventVS = []
 			fieldValues.each { fieldValue ->
-				signatureMap.fieldsEventVS.add([campo:fieldValue.getFieldEventVS.content, value:fieldValue.value])
+				signatureMap.fieldsEventVS.add([content:fieldValue.getFieldEventVS.content, value:fieldValue.value])
 			}
 			eventVSClaimInfoMap.signatures.add(signatureMap)
 		}
@@ -259,13 +251,11 @@ class EventVSClaimController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

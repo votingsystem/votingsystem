@@ -2,7 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.TagVS
@@ -154,8 +154,8 @@ class SystemService {
 
     public String getTagMessage(String tag) {
         if(TagVS.WILDTAG.equals(tag)) {
-            return  messageSource.getMessage('wildTagMsg', null, LocaleContextHolder.locale)
-        } else return  messageSource.getMessage('tagMsg', [tag].toArray(), LocaleContextHolder.locale)
+            return  messageSource.getMessage('wildTagMsg', null, locale)
+        } else return  messageSource.getMessage('tagMsg', [tag].toArray(), locale)
     }
 
     boolean isUserAdmin(String nif) {

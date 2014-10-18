@@ -4,13 +4,11 @@ import grails.converters.JSON
 import grails.orm.PagedResultList
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.CoreSignal
@@ -63,7 +61,7 @@ class TransactionVSService {
                 return transactionVS_UserVSService.processTransactionVS(messageSMIMEReq, messageJSON)
             default:
                 throw new ExceptionVS(messageSource.getMessage('unknownTransactionErrorMsg',
-                        [transactionType.toString()].toArray(), LocaleContextHolder.locale),
+                        [transactionType.toString()].toArray(), locale),
                         MetaInfMsg.getErrorMsg(methodName, "UNKNOWN_TRANSACTION"))
         }
     }
@@ -85,10 +83,10 @@ class TransactionVSService {
                 transactionVS.subject, transactionVS.transactionParent?true:false)
     }
 
-    public void alert(AlertVS alertVS) {
+    public void alert(ResponseVS responseVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.error("${methodName} - " + alertVS.getMessage());
-        alertVS.save()
+        log.error("${methodName} - " + responseVS.getMetaInf());
+        responseVS.save()
     }
 
     private UserVSAccount updateUserVSAccountTo(TransactionVS transactionVS) {
@@ -322,7 +320,7 @@ class TransactionVSService {
 
     public String getBalancesMapMsg(Map<String, Map> balancesMap) {
         StringBuilder sb = new StringBuilder()
-        String forLbl = messageSource.getMessage('forLbl', null, LocaleContextHolder.locale);
+        String forLbl = messageSource.getMessage('forLbl', null, locale);
         for(String currency: balancesMap.keySet()) {
             for(String tag : balancesMap[currency].keySet()) {
                 if(sb.length() == 0) sb.append("${balancesMap[currency][tag]} $currency $forLbl $tag")
@@ -372,7 +370,7 @@ class TransactionVSService {
         }
         if(transaction.tag) {
             String tagName = TagVS.WILDTAG.equals(transaction.tag.name)? messageSource.getMessage('wildTagLbl', null,
-                    LocaleContextHolder.locale).toUpperCase():transaction.tag.name
+                    locale).toUpperCase():transaction.tag.name
             transactionMap.tags = [tagName]
         } else transactionMap.tags = []
         return transactionMap
@@ -382,25 +380,25 @@ class TransactionVSService {
         String typeDescription
         switch(transactionType) {
             case 'VICKET_REQUEST':
-                typeDescription = messageSource.getMessage('vicketRequestLbl', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('vicketRequestLbl', null, locale);
                 break;
             case 'VICKET_SEND':
-                typeDescription = messageSource.getMessage('vicketSendLbl', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('vicketSendLbl', null, locale);
                 break;
             case 'VICKET_CANCELLATION':
-                typeDescription = messageSource.getMessage('vicketCancellationLbl', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
                 break;
             case 'FROM_BANKVS':
-                typeDescription = messageSource.getMessage('bankVSInputLbl', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
             case 'FROM_GROUP_TO_MEMBER':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, locale);
                 break;
             case 'FROM_GROUP_TO_MEMBER_GROUP':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, locale);
                 break;
             case 'FROM_GROUP_TO_ALL_MEMBERS':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, LocaleContextHolder.locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, locale);
                 break;
             default: typeDescription = transactionType
         }

@@ -1,6 +1,7 @@
 package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -26,14 +27,10 @@ class VoteVSCancellerController {
 	 * 			SMIME con el <a href="https://github.com/votingsystem/votingsystem/wiki/Anulador-de-voto">El anulador de voto</a>
 	 * @return Recibo firmado con el certificado del servidor
 	 */
-	def index() { 
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = voteVSService.processCancel( messageSMIMEReq, request.getLocale())
-        if(ResponseVS.SC_OK == responseVS.statusCode) return responseVS.data
-        else return [responseVS:responseVS]
+	def index() {
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        else return [responseVS:voteVSService.processCancel(messageSMIME)]
     }
 	
 
@@ -65,12 +62,10 @@ class VoteVSCancellerController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 }

@@ -12,10 +12,10 @@ public class NifUtils {
         String result = null;
         try {
             if(nif != null && nif.length() <= 9) {
-                nif = String.format("%09d", nif).toUpperCase();
-                String number = nif.substring(0, 8);
-                String letter = nif.substring(8, 9);
-                if(letter.equals(getNifLetter(new Integer(number)))) result = nif;
+                String number = nif.substring(0, nif.length() -1);
+                String letter = nif.substring(nif.length() -1, nif.length());
+                if(letter.equals(getNifLetter(new Integer(number))))
+                    result = String.format("%08d", Integer.valueOf(number)) + letter;
             }
         } catch(Exception ex) {} finally {
             if(result != null) return result;

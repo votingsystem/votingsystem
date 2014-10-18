@@ -9,7 +9,6 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
-
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
@@ -19,6 +18,7 @@ import java.security.PublicKey
 import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 @Transactional
 class SignatureVSService {
@@ -135,7 +135,7 @@ class SignatureVSService {
         return result
     }
 
-    public ResponseVS validateSMIMEVote(SMIMEMessage smimeMessageReq, Locale locale) {
+    public ResponseVS validateSMIMEVote(SMIMEMessage smimeMessageReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessageReq.getContentDigestStr())
@@ -165,7 +165,7 @@ class SignatureVSService {
             log.error("$methodName - repeated vote - hashCertVSBase64:${voteVS.hashCertVSBase64}")
             VoteVS repeatedVoteVS = VoteVS.findWhere(certificateVS:certificateVS)
             msg = messageSource.getMessage('voteRepeatedErrorMsg', [repeatedVoteVS.id].toArray(), locale)
-            log.error("validateVoteCerts - ${msg}")
+            log.error("validateSMIMEVote - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, eventVS:eventVS, message:msg)
         }
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS)
@@ -190,7 +190,7 @@ class SignatureVSService {
                 data:[checkedSigner:checkedSigner])
     }
 
-    public ResponseVS validateSMIMEVoteCancellation(String url, SMIMEMessage smimeMessage, Locale locale) {
+    public ResponseVS validateSMIMEVoteCancellation(String url, SMIMEMessage smimeMessage) {
         log.debug("validateSMIMEVoteCancellation - url: ${url}")
         EventVS eventVS = null
         EventVS.withTransaction { eventVS = EventVS.findByUrl(url) }
@@ -206,7 +206,7 @@ class SignatureVSService {
             log.error("validateSMIMEVoteCancellation - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
         }
-        return validateVoteCerts(smimeMessage,	eventVS, locale)
+        return validateVoteCerts(smimeMessage,	eventVS)
     }
 
     public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS) {
@@ -224,7 +224,7 @@ class SignatureVSService {
     }
 
 
-    public ResponseVS validateVoteCerts(SMIMEMessage smimeMessageReq, EventVS eventVS, Locale locale) {
+    public ResponseVS validateVoteCerts(SMIMEMessage smimeMessageReq, EventVS eventVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         Set<UserVS> signersVS = smimeMessageReq.getSigners();
@@ -250,7 +250,7 @@ class SignatureVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, smimeMessage:smimeMessageReq)
     }
 
-    public ResponseVS validateSMIME(SMIMEMessage smimeMessageReq, Locale locale) {
+    public ResponseVS validateSMIME(SMIMEMessage smimeMessageReq) {
         log.debug("validateSMIME")
         MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessageReq.getContentDigestStr())
         if(messageSMIME) {
@@ -259,10 +259,10 @@ class SignatureVSService {
             log.error("validateSMIME - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
         }
-        return validateSignersCerts(smimeMessageReq, locale)
+        return validateSignersCerts(smimeMessageReq)
     }
 
-    public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage, Locale locale) {
+    public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
@@ -287,7 +287,7 @@ class SignatureVSService {
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)
                 } else {
-                    responseVS = subscriptionVSService.checkUser(userVS, locale)
+                    responseVS = subscriptionVSService.checkUser(userVS)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
                 }
@@ -343,8 +343,7 @@ class SignatureVSService {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug "decryptMessage"
+    public ResponseVS decryptMessage (byte[] encryptedFile) {
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
@@ -357,8 +356,7 @@ class SignatureVSService {
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug(" - encryptSMIMEMessage(...) ");
+    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
@@ -371,8 +369,7 @@ class SignatureVSService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug(" - decryptSMIMEMessage")
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

@@ -7,7 +7,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
-
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import java.security.cert.X509Certificate
 
 /**
@@ -21,7 +21,7 @@ class SubscriptionVSService {
     def messageSource
     def userVSService
 
-    ResponseVS checkUser(UserVS userVS, Locale locale) {
+    ResponseVS checkUser(UserVS userVS) {
         log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
         String msg
         CertificateVS certificate = null;
@@ -74,8 +74,7 @@ class SubscriptionVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
     }
 
-    ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
-                           String deviceId, Locale locale) {
+    ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email, String deviceId) {
         log.debug "checkDevice - givenname: ${givenname} - surname: ${surname} - nif:${nif} - phone:${phone} " +
                 "- email:${email} - deviceId:${deviceId}"
         if(!nif || !deviceId) {
@@ -89,17 +88,15 @@ class SubscriptionVSService {
                     messageSource.getMessage('nifWithErrors', [nif].toArray(), locale))
         }
         UserVS userVS = UserVS.findWhere(nif:validatedNIF)
-        if (!userVS) {
-            userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,
+        if (!userVS) userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,
                     name:givenname, firstName:givenname, lastName:surname).save()
-        }
-        DeviceVS dispositivo = DeviceVS.findWhere(deviceId:deviceId)
-        if (!dispositivo || (dispositivo.userVS.id != userVS.id)) dispositivo =
+        DeviceVS device = DeviceVS.findWhere(deviceId:deviceId)
+        if (!device || (device.userVS.id != userVS.id)) device =
                 new DeviceVS(userVS:userVS, phone:phone, email:email, deviceId:deviceId).save()
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:dispositivo)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:device)
     }
 
-    ResponseVS checkControlCenter(String serverURL, Locale locale) {
+    ResponseVS checkControlCenter(String serverURL) {
         log.debug "checkControlCenter - serverURL: ${serverURL}"
         String msg = null
         CertificateVS controlCenterCert = null
@@ -152,7 +149,7 @@ class SubscriptionVSService {
         }
     }
 
-    public ResponseVS associateControlCenter (MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS associateControlCenter (MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -181,7 +178,7 @@ class SubscriptionVSService {
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR,
                         metaInf: MetaInfMsg.getErrorMsg(methodName, "controlCenterAlreadyAssociated"))
             } else {
-                ResponseVS responseVS = checkControlCenter(serverURL, locale)
+                ResponseVS responseVS = checkControlCenter(serverURL)
                 if (ResponseVS.SC_OK != responseVS.statusCode) {
                     log.error("$methodName - ERROR - ${responseVS.message}")
                     return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,

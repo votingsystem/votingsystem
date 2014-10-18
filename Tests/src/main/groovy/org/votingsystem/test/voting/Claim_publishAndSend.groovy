@@ -84,13 +84,18 @@ private void launchSignature(String nif) throws Exception {
 private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
     while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
-        Future<ResponseVS> f = signClaimCompletionService.take();
-        ResponseVS responseVS = f.get();
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            TestUtils.simulationData.getAndIncrementNumRequestsOK();
-        } else throw new ExceptionVS(responseVS.getMessage());
+        try {
+            Future<ResponseVS> f = signClaimCompletionService.take();
+            ResponseVS responseVS = f.get();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                TestUtils.simulationData.getAndIncrementNumRequestsOK();
+            } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        }
     }
-    TestUtils.finish("Num. requests completed: " + TestUtils.simulationData.getAndIncrementNumRequestsOK())
+    TestUtils.finish("OK - Num. requests completed: " + TestUtils.simulationData.getNumRequestsOK())
 }
 
 private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
@@ -115,16 +120,16 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     return EventVS.populate(JSONSerializer.toJSON(responseVS.getMessage()));
 }
 
-launcher = new SignTask.Launcher() {
-    @Override void processTask(String param) {
-        launchSignature(param)
-    }
-};
 
 public void startSimulationTimer(SimulationData simulationData) throws Exception {
     Long interval = simulationData.getDurationInMillis()/simulationData.getNumRequestsProjected();
     log.debug("startSimulationTimer - interval between requests: "+ interval + " milliseconds");
     simulationTimer = new Timer();
+    SignTask.Launcher launcher = new SignTask.Launcher() {
+        @Override void processTask(String param) {
+            launchSignature(param)
+        }
+    };
     simulationTimer.schedule(new SignTask(simulationTimer, synchronizedSignerList, launcher), 0, interval);
 }
 

@@ -6,12 +6,13 @@
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
 
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/receipt/'+ viewer]"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="signedDocumentLbl"/></title>
+
     <g:include view="/include/styles.gsp"/>
 
 </head>
@@ -25,9 +26,10 @@
 <asset:script>
     var timeStampDate = "${timeStampDate}"
     var viewer = null
-    var receiptJSON
 
-    <g:applyCodec encodeAs="none">var receiptJSON = ${signedContentMap as grails.converters.JSON}</g:applyCodec>
+    <g:applyCodec encodeAs="none">
+        var smimeMessageContent = ${signedContentMap as grails.converters.JSON}
+    </g:applyCodec>
 
     document.addEventListener('polymer-ready', function() {
         console.log("receiptViewer - polymer-ready")
@@ -38,16 +40,16 @@
 
     function showContent(contentStr, timeStampDateStr) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(contentStr)))
-        receiptJSON = JSON.parse(b64_to_utf8)
+        smimeMessageContent = JSON.parse(b64_to_utf8)
         timeStampDate = timeStampDateStr
         if(viewer != null) loadContent()
     }
 
     function loadContent() {
-        viewer.receipt = receiptJSON
-        viewer.timeStampDate = timeStampDate
         viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-        receiptJSON = null
+        viewer.smimeMessageContent = smimeMessageContent
+        viewer.timeStampDate = timeStampDate
+        smimeMessageContent = null
         timeStampDate = null
     }
 </asset:script>

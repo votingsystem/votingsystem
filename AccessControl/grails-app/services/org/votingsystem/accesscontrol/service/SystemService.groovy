@@ -23,7 +23,7 @@ class SystemService {
             }
             if(!controlCenters.isEmpty()) {
                 controlCenter = controlCenters.iterator().next()
-                ResponseVS responseVS = subscriptionVSService.checkControlCenter(controlCenter.serverURL, getLocale())
+                ResponseVS responseVS = subscriptionVSService.checkControlCenter(controlCenter.serverURL)
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     log.debug("There are '${controlCenters.getTotalCount()}' with state 'OK' - fetching Control Center " +
                             "with url: '${controlCenter.serverURL}' ")

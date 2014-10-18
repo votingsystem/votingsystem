@@ -1,5 +1,6 @@
 package org.votingsystem.timestamp.controller
 
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
@@ -55,8 +56,7 @@ class TimeStampController {
 	 */
 	def index() {
         byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes,
-                Calendar.getInstance().getTime(), request.getLocale())
+        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes, Calendar.getInstance().getTime())
         response.status = responseVS.getStatusCode()
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             response.contentLength = responseVS.getMessageBytes().length
@@ -124,20 +124,17 @@ class TimeStampController {
      * @return Si todo va bien devuelve un código de estado HTTP 200.
      */
     def validateTestMessage() {
-        ResponseVS responseVS =  timeStampTestService.validateMessage(
-                "${request.getInputStream()}".getBytes(), request.getLocale())
+        ResponseVS responseVS =  timeStampTestService.validateMessage("${request.getInputStream()}".getBytes())
         response.status = responseVS.statusCode
         render responseVS.message
         return false
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 }

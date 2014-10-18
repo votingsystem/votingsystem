@@ -12,8 +12,8 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
-
 import java.security.cert.X509Certificate
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
 * @author jgzornoza
@@ -30,9 +30,8 @@ class EventVSElectionService {
 	def tagVSService
 	def signatureVSService
 	
-	ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+	ResponseVS saveEvent(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName);
 		ResponseVS responseVS
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		String msg
@@ -63,7 +62,7 @@ class EventVSElectionService {
 
         UserVS user = UserVS.getUserVS(userCert);
         //Publish request comes with Access Control cert
-        responseVS = subscriptionVSService.checkUser(user, locale)
+        responseVS = subscriptionVSService.checkUser(user)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             log.error("$methodName - USER CHECK ERROR - ${responseVS.message}")
             return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message, type:TypeVS.ERROR,
@@ -74,7 +73,7 @@ class EventVSElectionService {
                 content:messageJSON.content, url:messageJSON.URL, accessControlVS:accessControl,
                 userVS:user, dateBegin:DateUtils.getDateFromString(messageJSON.dateBegin),
                 dateFinish:DateUtils.getDateFromString(messageJSON.dateFinish))
-        responseVS = setEventDatesState(eventVS, locale)
+        responseVS = setEventDatesState(eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
                     type:TypeVS.ERROR,  metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
@@ -123,10 +122,10 @@ class EventVSElectionService {
         return fieldsEventVSSet
     }
 
-	ResponseVS setEventDatesState (EventVS eventVS, Locale locale) {
+	ResponseVS setEventDatesState (EventVS eventVS) {
 		if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
-                    'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale) )
+                    'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale))
 		}
 		Date fecha = Calendar.getInstance().getTime()
 		if (fecha.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
@@ -136,13 +135,13 @@ class EventVSElectionService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 
-    ResponseVS checkEventVSDates (EventVS eventVS, Locale locale) {
+    ResponseVS checkEventVSDates (EventVS eventVS) {
         if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
             return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
         }
         if(eventVS.dateBegin.after(eventVS.dateFinish)) {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
+                    message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale))
         }
         Date currentDate = Calendar.getInstance().getTime()
         if (currentDate.after(eventVS.dateFinish) &&
@@ -163,7 +162,7 @@ class EventVSElectionService {
     }
 	
 	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}
-	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON, Locale locale) {
+	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON) {
 		int status = ResponseVS.SC_ERROR_REQUEST
 		TypeVS typeVS = TypeVS.ERROR
 		String msg
@@ -184,25 +183,27 @@ class EventVSElectionService {
 		return new ResponseVS(statusCode:status, message:msg, type:typeVS)
 	}
 	
-	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq) {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
         log.debug("cancelEvent - message: ${smimeMessageReq.getSignedContent()}")
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
+        ResponseVS responseVS = checkCancelEventJSONData(messageJSON)
         if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
         EventVSElection.withTransaction {
             eventVS = EventVSElection.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
         }
         if(!eventVS) {
-            msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(), locale)
+            msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(),
+                    locale)
             log.error("cancelEvent - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
         }
         if(eventVS.state != EventVS.State.ACTIVE) {
-            msg = messageSource.getMessage('eventAllreadyCancelledMsg', [messageJSON?.eventId].toArray(), locale)
+            msg = messageSource.getMessage('eventAllreadyCancelledMsg', [messageJSON?.eventId].toArray(),
+                    locale)
             log.error("cancelEvent - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, type:TypeVS.ERROR, message:msg)
         }
@@ -221,34 +222,20 @@ class EventVSElectionService {
         if(!(newState == EventVS.State.DELETED_FROM_SYSTEM || newState == EventVS.State.CANCELLED)) {
             msg = messageSource.getMessage('eventCancelacionStateError', [messageJSON.state].toArray(), locale)
             log.error("cancelEvent new state error - msg: ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
-                    message:msg, eventVS:eventVS)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg, eventVS:eventVS)
         }
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = eventVS.accessControlVS.serverURL
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.
                 getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-                smimeParent:messageSMIMEReq, eventVS:eventVS, content:smimeMessageResp.getBytes())
-        if (!messageSMIMEResp.validate()) {
-            messageSMIMEResp.errors.each {log.debug("messageSMIMEResp - error: ${it}")}
-        }
-        MessageSMIME.withTransaction {
-            if (!messageSMIMEResp.save()) {
-                messageSMIMEResp.errors.each {log.error("cancel event error saving messageSMIMEResp - ${it}")}
-            }
-        }
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
         eventVS.state = newState
         eventVS.dateCanceled = Calendar.getInstance().getTime();
-        EventVS.withTransaction {
-            if (!eventVS.save()) {
-                eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}
-            }
-        }
+        eventVS.save()
         log.debug("cancelEvent - cancelled event with id: ${eventVS.id}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg, type:TypeVS.EVENT_CANCELLATION,
-                data:messageSMIMEResp, eventVS:eventVS)
+                messageSMIME: messageSMIMEReq, eventVS:eventVS, contentType: ContentTypeVS.JSON_SIGNED)
 	}
 
 	public Map getEventVSElectionMap(EventVSElection eventVS) {

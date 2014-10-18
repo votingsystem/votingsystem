@@ -1,11 +1,13 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
@@ -26,12 +28,20 @@ class CsrService {
 	def subscriptionVSService
 	def messageSource
     def signatureVSService
-	
-	public synchronized ResponseVS signCertVoteVS (byte[] csrPEMBytes, EventVS eventVS, UserVS userVS, Locale locale) {
-		log.debug("signCertVoteVS - eventVS: ${eventVS?.id}");
-		ResponseVS responseVS = validateCSRVote(csrPEMBytes, eventVS, locale)
-		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-		PublicKey requestPublicKey = responseVS.data.publicKey
+
+    public static class CsrResponse {
+        PublicKey publicKey
+        byte[] issuedCert
+        String hashCertVSBase64
+        public CsrResponse(PublicKey publicKey, byte[] issuedCert, String hashCertVSBase64) {
+            this.publicKey = publicKey
+            this.issuedCert = issuedCert
+            this.hashCertVSBase64 = hashCertVSBase64
+        }
+    }
+
+	public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVS eventVS, UserVS userVS) throws Exception {
+        CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS)
 		KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS()
 		//TODO ==== vote keystore -- this is for developement
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreVS.bytes,
@@ -46,27 +56,19 @@ class CsrService {
             representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_VOTE_TAG,
                     new DERUTF8String(representativeURL))
         }
-
 		X509Certificate issuedCert = CertUtils.signCSR(csr, null, privateKeySigner, certSigner, eventVS.dateBegin,
                 eventVS.dateFinish, representativeExtension)
-		if (!issuedCert) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error(msg)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
-		} else {
-			CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
-				    content:issuedCert.getEncoded(), eventVSElection:eventVS,
-                    type:CertificateVS.Type.VOTEVS, state:CertificateVS.State.OK,
-				    hashCertVSBase64:responseVS.data.hashCertVSBase64)
-            if(userVS?.type == UserVS.Type.REPRESENTATIVE) certificate.setUserVS(userVS)
-			certificate.save()
-			byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,
-                    data:[requestPublicKey:requestPublicKey, issuedCert:issuedCertPEMBytes])
-		}
+		if (!issuedCert) throw new ExceptionVS(messageSource.getMessage('csrRequestErrorMsg', null, locale))
+        CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
+                content:issuedCert.getEncoded(), eventVSElection:eventVS,
+                type:CertificateVS.Type.VOTEVS, state:CertificateVS.State.OK, hashCertVSBase64:csrResponse.hashCertVSBase64)
+        if(userVS?.type == UserVS.Type.REPRESENTATIVE) certificate.setUserVS(userVS)
+        certificate.save()
+        csrResponse.issuedCert = CertUtils.getPEMEncoded(issuedCert);
+        return csrResponse
 	}
 
-    private ResponseVS validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS, Locale locale) {
+    private CsrResponse validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS) throws Exception{
         PKCS10CertificationRequest csr
         try {
             csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
@@ -76,35 +78,29 @@ class CsrService {
         }
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
         Enumeration csrAttributes = info.getAttributes().getObjects()
-        def voteCertDataJSON
+        JSONObject certDataJSON
         while(csrAttributes.hasMoreElements()) {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
                 case ContextVS.VOTE_TAG:
-                    voteCertDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
+                    certDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
                     break;
             }
         }
-        String eventId = voteCertDataJSON.eventId
-        log.debug("validateCSRVote - accessControlURL: ${voteCertDataJSON.accessControlURL} - " +
-                "eventId: ${voteCertDataJSON.eventId} - hashCertVS: ${voteCertDataJSON.hashCertVS}")
+        String eventId = certDataJSON.eventId
         if (!eventId.equals(String.valueOf(eventVS.getId()))) {
-            String msg = messageSource.getMessage('csrRequestError', null, locale)
-            log.error("- validateCSRVote - ERROR - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+            throw new ExceptionVS(messageSource.getMessage('csrRequestError', null, locale))
         }
-        String accessControlURL = StringUtils.checkURL(voteCertDataJSON.accessControlURL)
+        String accessControlURL = StringUtils.checkURL(certDataJSON.accessControlURL)
         String serverURL = grailsApplication.config.grails.serverURL
         if (!serverURL.equals(accessControlURL)) {
-            String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
-            log.error("- validateCSRVote - ERROR - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+            throw new ExceptionVS(messageSource.getMessage('accessControlURLError',[serverURL, accessControlURL].toArray(),
+                    locale))
         }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST,
-                data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
+        return new CsrResponse(csr.getPublicKey(), null, certDataJSON.hashCertVS)
     }
 
-    public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes, Locale locale) {
+    public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes) {
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         if(!csr) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
@@ -172,7 +168,7 @@ class CsrService {
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
         emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
-	public ResponseVS saveUserCSR(byte[] csrPEMBytes, Locale locale) {
+	public ResponseVS saveUserCSR(byte[] csrPEMBytes) {
 		PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
         String givenname;
@@ -202,7 +198,7 @@ class CsrService {
         }
 
 		ResponseVS responseVS = subscriptionVSService.checkDevice(givenname, surname, nif, deviceDataJSON?.mobilePhone,
-                deviceDataJSON?.email,  deviceDataJSON?.deviceId, locale)
+                deviceDataJSON?.email,  deviceDataJSON?.deviceId)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		UserRequestCsrVS requestCSR
 		def previousRequest = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(
@@ -219,7 +215,7 @@ class CsrService {
 		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
 	}
 	
-	public synchronized ResponseVS signCertUserVS (UserRequestCsrVS requestCSR, Locale locale) {
+	public synchronized ResponseVS signCertUserVS (UserRequestCsrVS requestCSR) {
 		log.debug("signCertUserVS");
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()

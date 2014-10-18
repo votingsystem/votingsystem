@@ -13,7 +13,7 @@ import org.bouncycastle.operator.DigestCalculator
 import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.ExceptionVS
@@ -100,7 +100,7 @@ class TimeStampService {
     public void validateToken(TimeStampToken tsToken) throws ExceptionVS {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(tsToken == null) throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
-                LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
+                locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
         SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
         if(!sigVerifier)throw new ExceptionVS("TimeStamp service not initialized")
         X509CertificateHolder certHolder = sigVerifier.getAssociatedCertificate();
@@ -109,16 +109,16 @@ class TimeStampService {
         cOut.write(certHolder.getEncoded());
         cOut.close();
         if (!Arrays.equals(tsToken.certID.getCertHash(), calc.getDigest())) {
-            throw new ExceptionVS(messageSource.getMessage('certHashErrorMsg', null, LocaleContextHolder.locale))
+            throw new ExceptionVS(messageSource.getMessage('certHashErrorMsg', null, locale))
         }
         if (tsToken.certID.getIssuerSerial() != null) {
             IssuerAndSerialNumber issuerSerial = certHolder.getIssuerAndSerialNumber();
             if (!tsToken.certID.getIssuerSerial().getSerial().equals(issuerSerial.getSerialNumber())) {
-                throw new ExceptionVS(messageSource.getMessage('issuerSerialErrorMsg', null, LocaleContextHolder.locale))
+                throw new ExceptionVS(messageSource.getMessage('issuerSerialErrorMsg', null, locale))
             }
         }
         if (!certHolder.isValidOn(tsToken.tstInfo.getGenTime())) {
-            throw new ExceptionVS(messageSource.getMessage('certificateDateError', null, LocaleContextHolder.locale))
+            throw new ExceptionVS(messageSource.getMessage('certificateDateError', null, locale))
         }
         CMSSignedData tokenCMSSignedData = tsToken.tsToken
         Collection signers = tokenCMSSignedData.getSignerInfos().getSigners();

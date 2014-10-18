@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.controller
 
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 
@@ -20,13 +21,11 @@ class AccountController {
 	def index() { }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 	
 }

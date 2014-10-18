@@ -14,7 +14,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 Map simulationDataMap = [serverURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
-                         numRequestsProjected:2, timer:[active:false, time:"00:00:10"]]
+                         numRequestsProjected:50, timer:[active:false, time:"00:00:10"]]
 
 log = TestUtils.init(Multisign_send.class, simulationDataMap)
 
@@ -63,11 +63,16 @@ private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " +
             TestUtils.simulationData.getNumRequestsProjected());
     while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
-        Future<ResponseVS> f = signCompletionService.take();
-        ResponseVS responseVS = f.get();
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            TestUtils.simulationData.getAndIncrementNumRequestsOK();
-        } else throw new ExceptionVS(responseVS.getMessage())
+        try {
+            Future<ResponseVS> f = signCompletionService.take();
+            ResponseVS responseVS = f.get();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                TestUtils.simulationData.getAndIncrementNumRequestsOK();
+            } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        }
     }
-    TestUtils.finish("Num. requests completed: " + TestUtils.simulationData.getAndIncrementNumRequestsOK());
+    TestUtils.finish("OK - Num. requests completed: " + TestUtils.simulationData.getNumRequestsOK());
 }

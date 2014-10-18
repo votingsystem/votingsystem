@@ -2,11 +2,11 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
-
 import java.security.MessageDigest
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -30,7 +30,7 @@ class RepresentativeService {
 	/**
 	 * Creates backup of the state of all the representatives for a closed event
 	 */
-	private synchronized ResponseVS getAccreditationsBackupForEvent (EventVSElection event, Locale locale){
+	private synchronized ResponseVS getAccreditationsBackupForEvent (EventVSElection event){
 		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
 		String msg = null
 		if(!event) {
@@ -42,7 +42,7 @@ class RepresentativeService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)	
 		}
 		
-		Map<String, File> mapFiles = filesService.getBackupFiles(event, TypeVS.REPRESENTATIVE_DATA, locale)
+		Map<String, File> mapFiles = filesService.getBackupFiles(event, TypeVS.REPRESENTATIVE_DATA)
 		File zipResult   = mapFiles.zipResult
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir    = mapFiles.filesDir
@@ -228,7 +228,7 @@ class RepresentativeService {
 	 * en los resultados debido a los usuarios que hayan cambiado de representante a mitad de la votación. 
 	 * En el backup no se presenta este fallo)
 	 */
-	private synchronized ResponseVS getAccreditationsMapForEvent (EventVSElection event, Locale locale){
+	private synchronized ResponseVS getAccreditationsMapForEvent (EventVSElection event){
 		log.debug("getAccreditationsMapForEvent - event: ${event?.id}")
 		String msg = null
 		if(!event) {
@@ -365,7 +365,7 @@ class RepresentativeService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap)
 	}
 
-	private synchronized ResponseVS getAccreditationsBackup (UserVS representative, Date selectedDate, Locale locale){
+	private synchronized ResponseVS getAccreditationsBackup (UserVS representative, Date selectedDate){
 		log.debug("getAccreditationsBackup - representative: ${representative.nif}" +" - selectedDate: ${selectedDate}")
 		def representationDocuments
 		RepresentationDocumentVS.withTransaction {
@@ -447,8 +447,7 @@ class RepresentativeService {
 		}
 	}
 	
-    ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, 
-		byte[] imageBytes, Locale locale) {
+    ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, byte[] imageBytes) {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		log.debug("saveRepresentativeData - userVS: ${userVS.nif}")
@@ -513,8 +512,7 @@ class RepresentativeService {
 		}
     }
 	
-	private ResponseVS getVotingHistoryBackup (UserVS representative,
-		Date dateFrom, Date dateTo, Locale locale){
+	private ResponseVS getVotingHistoryBackup (UserVS representative, Date dateFrom, Date dateTo){
 		log.debug("getVotingHistoryBackup - representative: ${representative.nif}" + 
 			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
 		
@@ -583,7 +581,7 @@ class RepresentativeService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap, message:backupURL)
 	}
 	
-	ResponseVS processVotingHistoryRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+	ResponseVS processVotingHistoryRequest(MessageSMIME messageSMIMEReq) {
 		log.debug("processVotingHistoryRequest")
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
@@ -600,13 +598,14 @@ class RepresentativeService {
 				DateFormat formatter = new SimpleDateFormat("dd MMM 'de' yyyy 'a las' HH:mm");
 				
 				msg = messageSource.getMessage('dateRangeErrorMsg',[formatter.format(dateFrom), 
-					formatter.format(dateTo)].toArray(), locale) 
+					formatter.format(dateTo)].toArray(), locale)
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 			}
 			TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
 			if(TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST != operationType) {
-				msg = messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(), locale)
+				msg = messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(),
+                        locale)
 				log.error "processVotingHistoryRequest - OPERATION ERROR - ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
@@ -616,7 +615,8 @@ class RepresentativeService {
 			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF,
 				type:UserVS.Type.REPRESENTATIVE)
 			if(!representative) {
-				msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale)
+				msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(),
+                        locale)
 				log.error "processVotingHistoryRequest - USER NOT REPRESENTATIVE ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, 
 					type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
@@ -624,23 +624,23 @@ class RepresentativeService {
 
 			runAsync {
 				ResponseVS backupGenResponseVS
-				backupGenResponseVS = getVotingHistoryBackup(representative, dateFrom,  dateTo, locale)
+				backupGenResponseVS = getVotingHistoryBackup(representative, dateFrom,  dateTo)
 				if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
 		
-					BackupRequestVS solicitudCopia = new BackupRequestVS(
+					BackupRequestVS backupRequest = new BackupRequestVS(
 						filePath:backupGenResponseVS.message,
 						type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, 
 						representative:representative,
 						messageSMIME:messageSMIMEReq, email:messageJSON.email)
-					log.debug("messageSMIME: ${messageSMIMEReq.id} - ${solicitudCopia.type}");
+					log.debug("messageSMIME: ${messageSMIMEReq.id} - ${backupRequest.type}");
 					BackupRequestVS.withTransaction {
-						if (!solicitudCopia.save()) {
-							solicitudCopia.errors.each {
-                                log.error("processVotingHistoryRequest - ERROR solicitudCopia - ${it}")}
+						if (!backupRequest.save()) {
+							backupRequest.errors.each {
+                                log.error("processVotingHistoryRequest - ERROR backupRequest - ${it}")}
 						}
 					}
 					mailSenderService.sendRepresentativeVotingHistory(
-                            solicitudCopia, messageJSON.dateFrom, messageJSON.dateTo, locale)
+                            backupRequest, messageJSON.dateFrom, messageJSON.dateTo)
 				} else log.error("Error generating backup");
 			}
 		} catch(Exception ex) {
@@ -654,160 +654,133 @@ class RepresentativeService {
 			type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, message:msg)
 	}
 	
-	ResponseVS processRevoke(MessageSMIME messageSMIMEReq, Locale locale) {
+	ResponseVS processRevoke(MessageSMIME messageSMIMEReq) {
 		String msg = null;
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage();
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processRevoke - user ${userVS.nif}")
-		try{
-			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-			if(TypeVS.REPRESENTATIVE_REVOKE != operationType) {
-				msg = messageSource.getMessage('operationErrorMsg',
-					[messageJSON.operation].toArray(), locale)
-				log.error "processRevoke - OPERATION ERROR - ${msg}" 
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
-			}
-			if(UserVS.Type.REPRESENTATIVE != userVS.type) {
-				msg = messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg',
-					[userVS.nif].toArray(), locale)
-				log.error "processRevoke - USER TYPE ERROR - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
-			}
-			//(TODO notify users)=====
-			def representedUsers
-			UserVS.withTransaction {
-				def criteria = UserVS.createCriteria()
-				representedUsers = criteria.scroll {
-					eq("representative", userVS)
-				}
-				while (representedUsers.next()) {
-					UserVS representedUser = (UserVS) representedUsers.get(0);
-					representedUser.representative = null
-					representedUser.save()
-					if((representedUsers.getRowNumber() % 100) == 0) {
-						sessionFactory.currentSession.flush() 
-						sessionFactory.currentSession.clear()
-						log.debug("processRevoke - processed ${representedUsers.getRowNumber()} user updates")
-					}	
-				}
-			}
+        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
+        if(TypeVS.REPRESENTATIVE_REVOKE != operationType) {
+            msg = messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(), locale)
+            log.error "processRevoke - OPERATION ERROR - ${msg}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
+        }
+        if(UserVS.Type.REPRESENTATIVE != userVS.type) {
+            msg = messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg', [userVS.nif].toArray(), locale)
+            log.error "processRevoke - USER TYPE ERROR - ${msg}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
+        }
+        //(TODO notify users)=====
+        def representedUsers
+        UserVS.withTransaction {
+            def criteria = UserVS.createCriteria()
+            representedUsers = criteria.scroll {
+                eq("representative", userVS)
+            }
+            while (representedUsers.next()) {
+                UserVS representedUser = (UserVS) representedUsers.get(0);
+                representedUser.representative = null
+                representedUser.save()
+                if((representedUsers.getRowNumber() % 100) == 0) {
+                    sessionFactory.currentSession.flush()
+                    sessionFactory.currentSession.clear()
+                    log.debug("processRevoke - processed ${representedUsers.getRowNumber()} user updates")
+                }
+            }
+        }
 
-			RepresentationDocumentVS.withTransaction {
-				def repDocCriteria = RepresentationDocumentVS.createCriteria()
-				def representationDocuments = repDocCriteria.scroll {
-					eq("state", RepresentationDocumentVS.State.OK)
-					eq("representative", userVS)
-				}
-				while (representationDocuments.next()) {
-					RepresentationDocumentVS representationDocument = (RepresentationDocumentVS) representationDocuments.get(0);
-					representationDocument.state = RepresentationDocumentVS.State.CANCELLED_BY_REPRESENTATIVE
-					representationDocument.cancellationSMIME = messageSMIMEReq
-					representationDocument.dateCanceled = userVS.getTimeStampToken().
-						getTimeStampInfo().getGenTime()
-					representationDocument.save()
-					if((representationDocuments.getRowNumber() % 100) == 0) {
-						sessionFactory.currentSession.flush() 
-						sessionFactory.currentSession.clear()
-						log.debug("processRevoke - processed ${representationDocuments.getRowNumber()} representationDocument updates")
-					}
-				}
-			}
-			
-			userVS.representativeMessage = messageSMIMEReq
-			userVS.type = UserVS.Type.USER
-			
-			UserVS.withTransaction  {
-				userVS.save()
-			}
-			
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = userVS.getNif()
-			String subject = messageSource.getMessage(
-					'unsubscribeRepresentativeValidationSubject', null, locale)
+        RepresentationDocumentVS.withTransaction {
+            def repDocCriteria = RepresentationDocumentVS.createCriteria()
+            def representationDocuments = repDocCriteria.scroll {
+                eq("state", RepresentationDocumentVS.State.OK)
+                eq("representative", userVS)
+            }
+            while (representationDocuments.next()) {
+                RepresentationDocumentVS representationDocument = (RepresentationDocumentVS) representationDocuments.get(0);
+                representationDocument.state = RepresentationDocumentVS.State.CANCELLED_BY_REPRESENTATIVE
+                representationDocument.cancellationSMIME = messageSMIMEReq
+                representationDocument.dateCanceled = userVS.getTimeStampToken().
+                        getTimeStampInfo().getGenTime()
+                representationDocument.save()
+                if((representationDocuments.getRowNumber() % 100) == 0) {
+                    sessionFactory.currentSession.flush()
+                    sessionFactory.currentSession.clear()
+                    log.debug("processRevoke - processed ${representationDocuments.getRowNumber()} representationDocument updates")
+                }
+            }
+        }
 
-			SMIMEMessage smimeMessageResp = signatureVSService.
-				getMultiSignedMimeMessage(fromUser, toUser, smimeMessage, subject)
-				
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq,
-				content:smimeMessageResp.getBytes())
-			MessageSMIME.withTransaction {
-				messageSMIMEResp.save();
-			}
-			log.debug "processRevoke - saved MessageSMIME '${messageSMIMEResp.id}'"
-			msg =  messageSource.getMessage('representativeRevokeMsg',
-				[userVS.getNif()].toArray(), locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-				data:messageSMIMEResp, userVS:userVS,
-				type:TypeVS.REPRESENTATIVE_REVOKE, message:msg )
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			msg = messageSource.getMessage(
-				'representativeRevokeErrorMsg',null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-				message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
-		}
+        userVS.representativeMessage = messageSMIMEReq
+        userVS.type = UserVS.Type.USER
+
+        UserVS.withTransaction  {
+            userVS.save()
+        }
+
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = userVS.getNif()
+        String subject = messageSource.getMessage(
+                'unsubscribeRepresentativeValidationSubject', null, locale)
+
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                smimeMessage, subject)
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+
+        msg =  messageSource.getMessage('representativeRevokeMsg', [userVS.getNif()].toArray(), locale)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIMEReq, userVS:userVS,
+                type:TypeVS.REPRESENTATIVE_REVOKE, message:msg, contentType: ContentTypeVS.JSON_SIGNED)
 	}
 	
 	//{"operation":"REPRESENTATIVE_ACCREDITATIONS_REQUEST","representativeNif":"...",
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
-	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq) {
 		String msg = null
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
 		RepresentationDocumentVS representationDocument = null
-		def messageJSON = null
-		try {
-			messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-			Date selectedDate = getDateFromString(messageJSON.selectedDate)
-			if(!requestValidatedNIF || !messageJSON.operation || 
-				(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != TypeVS.valueOf(messageJSON.operation))||
-				!selectedDate || !messageJSON.email || !messageJSON.UUID ){
-				msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
-				log.error "processAccreditationsRequest - ERROR DATA - ${msg} - ${messageJSON.toString()}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
-					type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
-			}
-			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF,
-							type:UserVS.Type.REPRESENTATIVE)
-			if(!representative) {
-			   msg = messageSource.getMessage('representativeNifErrorMsg',
-				   [requestValidatedNIF].toArray(), locale)
-			   log.error "processAccreditationsRequest - ERROR REPRESENTATIVE - ${msg}"
-			   return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
-				   type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
-		   }
-			runAsync {
-					ResponseVS backupGenResponseVS = getAccreditationsBackup( representative, selectedDate ,locale)
-					if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-						File backupFile = backupGenResponseVS.file
-						BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupFile.getAbsolutePath(),
-							type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representative:representative,
-							messageSMIME:messageSMIMEReq, email:messageJSON.email)
-						BackupRequestVS.withTransaction {
-							if (!backupRequest.save()) {
-								backupRequest.errors.each {
-									log.error("processAccreditationsRequest - ERROR backupRequest - ${it}")}
-							}
-						}
-						log.debug("processAccreditationsRequest - saved BackupRequestVS '${backupRequest.id}'");
-						mailSenderService.sendRepresentativeAccreditations(
-                                backupRequest, messageJSON.selectedDate, locale)
-					} else log.error("processAccreditationsRequest - ERROR creating backup");
-			}
-			msg = messageSource.getMessage('backupRequestOKMsg', [messageJSON.email].toArray(), locale)
-			new ResponseVS(statusCode:ResponseVS.SC_OK,	message:msg,
-				type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
-			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR,
-				type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
-		}
+		def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
+        Date selectedDate = getDateFromString(messageJSON.selectedDate)
+        if(!requestValidatedNIF || !messageJSON.operation ||
+                (TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != TypeVS.valueOf(messageJSON.operation))||
+                !selectedDate || !messageJSON.email || !messageJSON.UUID ){
+            msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
+            log.error "processAccreditationsRequest - ERROR DATA - ${msg} - ${messageJSON.toString()}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+                    type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
+        }
+        UserVS representative = UserVS.findWhere(nif:requestValidatedNIF,
+                type:UserVS.Type.REPRESENTATIVE)
+        if(!representative) {
+            msg = messageSource.getMessage('representativeNifErrorMsg',
+                    [requestValidatedNIF].toArray(), locale)
+            log.error "processAccreditationsRequest - ERROR REPRESENTATIVE - ${msg}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+                    type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
+        }
+        runAsync {
+            ResponseVS backupGenResponseVS = getAccreditationsBackup( representative, selectedDate ,locale)
+            if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
+                File backupFile = backupGenResponseVS.file
+                BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupFile.getAbsolutePath(),
+                        type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representative:representative,
+                        messageSMIME:messageSMIMEReq, email:messageJSON.email)
+                BackupRequestVS.withTransaction {
+                    if (!backupRequest.save()) {
+                        backupRequest.errors.each {
+                            log.error("processAccreditationsRequest - ERROR backupRequest - ${it}")}
+                    }
+                }
+                log.debug("processAccreditationsRequest - saved BackupRequestVS '${backupRequest.id}'");
+                mailSenderService.sendRepresentativeAccreditations(backupRequest, messageJSON.selectedDate)
+            } else log.error("processAccreditationsRequest - ERROR creating backup");
+        }
+        msg = messageSource.getMessage('backupRequestOKMsg', [messageJSON.email].toArray(), locale)
+        new ResponseVS(statusCode:ResponseVS.SC_OK,	message:msg,
+                type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 	}
 		
 	public Map getRepresentativeMap(UserVS representative) {

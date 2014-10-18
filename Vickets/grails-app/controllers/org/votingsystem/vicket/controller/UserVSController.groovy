@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
@@ -204,13 +205,11 @@ class UserVSController {
      * @return
      */
     def userInfo() {
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-        UserVS userVS = messageSMIMEReq.getUserVS()
+        UserVS userVS = messageSMIME.getUserVS()
         if(!messageJSON.NIF.equals(userVS.getNif())) {
             ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_ERROR, message:  message(code:'nifMisMatchErrorMsg',
                     args: [userVS.getNif(), messageJSON.NIF]), contentType:ContentTypeVS.TEXT)
@@ -224,7 +223,7 @@ class UserVSController {
         }
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
-        //X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
+        //X509Certificate cert = messageSMIME?.getSmimeMessage()?.getSigner()?.certificate
         return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
                 contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]
     }
@@ -245,15 +244,11 @@ class UserVSController {
                     message(code: "serviceDevelopmentModeMsg"))]
         }
         log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-        return [responseVS:signatureVSService.addCertificateAuthority(
-            "${request.getInputStream()}".getBytes(), request.getLocale())]*/
+        return [responseVS:signatureVSService.addCertificateAuthority("${request.getInputStream()}".getBytes())]*/
         if("POST".equals(request.method)) {
-            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-            if(!messageSMIMEReq) {
-                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-            }
-            ResponseVS responseVS = userVSService.saveUser(messageSMIMEReq, request.getLocale())
-            return [responseVS:responseVS]
+            MessageSMIME messageSMIME = request.messageSMIMEReq
+            if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+            return [responseVS:userVSService.saveUser(messageSMIMEReq)]
         } else render(view:'newUser')
     }
 
@@ -269,29 +264,22 @@ class UserVSController {
     def newBankVS() {
         ResponseVS responseVS = null
         if("POST".equals(request.method)) {
-            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-            if(!messageSMIMEReq) {
-                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-            }
-            responseVS = bankVSService.saveBankVS(messageSMIMEReq)
-            return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+            MessageSMIME messageSMIME = request.messageSMIMEReq
+            if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+            return [responseVS:bankVSService.saveBankVS(messageSMIMEReq)]
         }
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error " Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
     def daoExceptionHandler(final DataAccessException exception) {
-        log.error " Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: message(code:'paramsErrorMsg'),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 }

@@ -4,7 +4,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votevs-canceller" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-votevs-canceller" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -33,10 +33,10 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </template>
-            <div><b><g:message code="hashAccessRequestLbl"/>: </b>{{receipt.hashAccessRequestBase64}}</div>
-            <div><b><g:message code="originHashAccessRequestLbl"/>: </b>{{receipt.originHashAccessRequest}}</div>
-            <div><b><g:message code="hashCertVSLbl"/>: </b>{{receipt.hashCertVSBase64}}</div>
-            <div><b><g:message code="originHashCertVote"/>: </b>{{receipt.originHashCertVote}}</div>
+            <div><b><g:message code="hashAccessRequestLbl"/>: </b>{{smimeMessageContent.hashAccessRequestBase64}}</div>
+            <div><b><g:message code="originHashAccessRequestLbl"/>: </b>{{smimeMessageContent.originHashAccessRequest}}</div>
+            <div><b><g:message code="hashCertVSLbl"/>: </b>{{smimeMessageContent.hashCertVSBase64}}</div>
+            <div><b><g:message code="originHashCertVote"/>: </b>{{smimeMessageContent.originHashCertVote}}</div>
 
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
@@ -51,9 +51,9 @@
         </div>
     </template>
     <script>
-        Polymer('receipt-votevs-canceller', {
+        Polymer('message-smime-votevs-canceller', {
             publish: {
-                receipt: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -64,10 +64,10 @@
                     this.isClientToolConnected = true
                 }.bind(this))
             },
-            receiptChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.CANCEL_VOTE.toString()}' != this.receipt.operation )
-                    this.messageToUser = '<g:message code="receiptTypeErrorMsg"/>' + " - " + this.receipt.operation
+                if('${TypeVS.CANCEL_VOTE.toString()}' != this.smimeMessageContent.operation )
+                    this.messageToUser = '<g:message code="smimeTypeErrorMsg"/>' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)

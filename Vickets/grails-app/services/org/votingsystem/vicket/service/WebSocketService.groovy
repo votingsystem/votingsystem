@@ -113,7 +113,7 @@ class WebSocketService {
                     SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
                             messageJSON.smimeMessage.decodeBase64()))
                     messageJSON.remove("smimeMessage")
-                    ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null, locale)
+                    ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
                     if(ResponseVS.SC_OK == responseVS.statusCode) {
                         UserVS userVS = ((MessageSMIME)responseVS.data).userVS
                         SessionVSHelper.getInstance().put(session, userVS)

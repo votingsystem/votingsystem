@@ -1,7 +1,7 @@
 package org.votingsystem.vicket.service
 
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -43,7 +43,7 @@ class CsrService {
         } catch(Exception ex) {
             cancelVickets(vicketBatchRequest.vicketsMap.values(), ex.getMessage())
             throw new ExceptionVS(messageSource.getMessage('vicketRequestDataError', null,
-                    LocaleContextHolder.locale), ex)
+                    locale), ex)
         }
     }
 

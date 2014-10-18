@@ -3,11 +3,10 @@
 <hibernate-configuration>
     <session-factory>
         <!--<property name="hibernate.generate_statistics">true</property>-->
-
-        <mapping class="org.votingsystem.model.AccessRequestVS"/>
         <mapping class="org.votingsystem.model.ActorVS" />
         <mapping class="org.votingsystem.model.AddressVS" />
         <mapping class="org.votingsystem.model.AccessControlVS" />
+        <mapping class="org.votingsystem.model.AccessRequestVS"/>
         <mapping class="org.votingsystem.model.AnonymousDelegation"/>
         <mapping class="org.votingsystem.model.BackupRequestVS" />
         <mapping class="org.votingsystem.model.BatchRequest" />
@@ -26,6 +25,7 @@
         <mapping class="org.votingsystem.model.MessageSMIME" />
         <mapping class="org.votingsystem.model.PDFDocumentVS" />
         <mapping class="org.votingsystem.model.RepresentationDocumentVS" />
+        <mapping class="org.votingsystem.model.ResponseVS" />
         <mapping class="org.votingsystem.model.SignatureVS" />
         <mapping class="org.votingsystem.model.SubscriptionVS" />
         <mapping class="org.votingsystem.model.TagVS" />

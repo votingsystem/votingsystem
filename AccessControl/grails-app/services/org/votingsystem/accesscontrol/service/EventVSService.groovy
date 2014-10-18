@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -23,13 +24,13 @@ class EventVSService {
 	def signatureVSService
 	def filesService
 	
-	ResponseVS checkEventVSDates (EventVS eventVS, Locale locale) {
+	ResponseVS checkEventVSDates (EventVS eventVS) {
 		if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 		}
 		if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
+				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale))
 		}
 		Date currentDate = Calendar.getInstance().getTime()
 		if (currentDate.after(eventVS.dateFinish) &&
@@ -49,18 +50,17 @@ class EventVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state?.toString())
 	}
 	
-   ResponseVS setEventDatesState (EventVS eventVS, Locale locale) {
+   ResponseVS setEventDatesState (EventVS eventVS) {
        if(!eventVS.dateBegin) eventVS.dateBegin = new Date(System.currentTimeMillis());
        Date todayDate = new Date(System.currentTimeMillis() + 1);// to avoid race conditions
        if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
-                    'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale) )
+                    'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale))
 		}
 		if (todayDate.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
 		if (todayDate.after(eventVS.dateBegin) && todayDate.before(eventVS.dateFinish))
 			eventVS.setState(EventVS.State.ACTIVE)
 		if (todayDate.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.PENDING)
-		log.debug("setEventDatesState - state ${eventVS.state.toString()}")
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 	}
 	
@@ -72,7 +72,7 @@ class EventVSService {
 	}
    
 	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}
-	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON, Locale locale) {
+	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON) {
 		int status = ResponseVS.SC_ERROR_REQUEST
 		TypeVS typeRespuesta = TypeVS.ERROR
 		String msg
@@ -85,7 +85,8 @@ class EventVSService {
 				String requestURL = StringUtils.checkURL(cancelDataJSON.accessControlURL)
 				String serverURL = grailsApplication.config.grails.serverURL
 				if(requestURL.equals(serverURL))  status = ResponseVS.SC_OK
-				else msg = messageSource.getMessage('accessControlURLError', [serverURL, requestURL].toArray(), locale)
+				else msg = messageSource.getMessage('accessControlURLError',
+                        [serverURL, requestURL].toArray(), locale)
 			} else {
 				msg = messageSource.getMessage('eventCancellationDataError', null, locale)
 			}
@@ -98,100 +99,86 @@ class EventVSService {
 		return new ResponseVS(statusCode:status, message:msg, type:typeRespuesta)
 	}
 	
-	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq) {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
-		try {
-			log.debug("cancelEvent - message: ${smimeMessageReq.getSignedContent()}")
-			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-			ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
-			if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
-			EventVS.withTransaction {
-				eventVS = EventVS.findWhere(id:Long.valueOf(messageJSON.eventId))
-			}
-			if(!eventVS) {
-				msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(), locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
-			} else if(eventVS.state != EventVS.State.ACTIVE) {
-				msg = messageSource.getMessage('eventNotActiveMsg', [messageJSON?.eventId].toArray(), locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
-			}
-			if(eventVS.userVS?.nif.equals(signer.nif) || isUserAdmin(signer.nif)){
-				log.debug("UserVS with cancel event cancel privileges")
-				switch(eventVS.state) {
-					case EventVS.State.CANCELLED:
-						 msg = messageSource.getMessage('eventCancelled', [messageJSON?.eventId].toArray(), locale)
-						 break;
-					 case EventVS.State.DELETED_FROM_SYSTEM:
-						 msg = messageSource.getMessage('eventDeleted', [messageJSON?.eventId].toArray(), locale)
-						 break;
-				}
-				SMIMEMessage smimeMessageResp
-				String fromUser = grailsApplication.config.VotingSystem.serverName
-				String toUser = null
-				String subject = messageSource.getMessage(
-					'mime.subject.eventCancellationValidated', null, locale)
-				if(eventVS instanceof EventVSElection) {
-					smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-						fromUser, toUser, smimeMessageReq, subject)
-					String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().serverURL
-					toUser = ((EventVSElection)eventVS).getControlCenterVS()?.name
-					String cancelServiceURL = controlCenterUrl + "/eventVSElection/cancelled"
-					ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
-                            org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
-					log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
-					if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
-						ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVSControlCenter.statusCode) {
-						msg = msg + " - " + messageSource.getMessage(
-							'controlCenterNotified', [controlCenterUrl].toArray(), locale)
-					} else {
-						msg = msg + " - " + messageSource.getMessage('controlCenterCommunicationErrorMsg',
-							[controlCenterUrl].toArray(), locale)
-						log.error("cancelEvent - msg: ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-							type:TypeVS.ERROR, message:msg, eventVS:eventVS)
-					}
-				} else {
-					toUser = signer.getNif()
-					smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-						fromUser, toUser, smimeMessageReq, subject)
-				}
-				log.debug("cancel event - msg:${msg}")
-				MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-					smimeParent:messageSMIMEReq, eventVS:eventVS,  content:smimeMessageResp.getBytes())
-				MessageSMIME.withTransaction {
-					if (!messageSMIMEResp.save()) {
-						messageSMIMEResp.errors.each {
-							log.error("cancel event - save messageSMIMEResp error - ${it}")}
-					}
-					
-				}
-				eventVS.state = EventVS.State.valueOf(messageJSON.state)
-				eventVS.dateCanceled = new Date(System.currentTimeMillis());
-				log.debug("eventVS validated")
-				EventVSElection.withTransaction {
-					if (!eventVS.save()) {eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}}
-				}
-				log.debug("updated eventVS.id: ${eventVS.id}")
-				return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg, type:TypeVS.EVENT_CANCELLATION,
-                        data:messageSMIMEResp, eventVS:eventVS)
-			} else {
-				msg = messageSource.getMessage('userWithoutPrivilege', null, locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
-                        message:msg, eventVS:eventVS)
-			}	
-		} catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('eventCancellationDataError', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
-                     eventVS:eventVS, type:TypeVS.ERROR)
-		}
-	}
+        log.debug("cancelEvent - message: ${smimeMessageReq.getSignedContent()}")
+        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
+        if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
+        EventVS.withTransaction {
+            eventVS = EventVS.findWhere(id:Long.valueOf(messageJSON.eventId))
+        }
+        if(!eventVS) {
+            msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(),
+                    locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
+        } else if(eventVS.state != EventVS.State.ACTIVE) {
+            msg = messageSource.getMessage('eventNotActiveMsg', [messageJSON?.eventId].toArray(),
+                    locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
+        }
+        if(eventVS.userVS?.nif.equals(signer.nif) || isUserAdmin(signer.nif)){
+            log.debug("UserVS with cancel event cancel privileges")
+            switch(eventVS.state) {
+                case EventVS.State.CANCELLED:
+                    msg = messageSource.getMessage('eventCancelled', [messageJSON?.eventId].toArray(),
+                            locale)
+                    break;
+                case EventVS.State.DELETED_FROM_SYSTEM:
+                    msg = messageSource.getMessage('eventDeleted', [messageJSON?.eventId].toArray(),
+                            locale)
+                    break;
+            }
+            SMIMEMessage smimeMessageResp
+            String fromUser = grailsApplication.config.VotingSystem.serverName
+            String toUser = null
+            String subject = messageSource.getMessage(
+                    'mime.subject.eventCancellationValidated', null, locale)
+            if(eventVS instanceof EventVSElection) {
+                smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+                        fromUser, toUser, smimeMessageReq, subject)
+                String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().serverURL
+                toUser = ((EventVSElection)eventVS).getControlCenterVS()?.name
+                String cancelServiceURL = controlCenterUrl + "/eventVSElection/cancelled"
+                ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
+                        org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
+                log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
+                if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
+                        ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVSControlCenter.statusCode) {
+                    msg = msg + " - " + messageSource.getMessage(
+                            'controlCenterNotified', [controlCenterUrl].toArray(), locale)
+                } else {
+                    msg = msg + " - " + messageSource.getMessage('controlCenterCommunicationErrorMsg',
+                            [controlCenterUrl].toArray(), locale)
+                    log.error("cancelEvent - msg: ${msg}")
+                    return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                            type:TypeVS.ERROR, message:msg, eventVS:eventVS)
+                }
+            } else {
+                toUser = signer.getNif()
+                smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+                        fromUser, toUser, smimeMessageReq, subject)
+            }
+            messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+
+            eventVS.state = EventVS.State.valueOf(messageJSON.state)
+            eventVS.dateCanceled = new Date(System.currentTimeMillis());
+            eventVS.save()
+            log.debug("updated eventVS.id: ${eventVS.id}")
+            return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg, type:TypeVS.EVENT_CANCELLATION,
+                    messageSMIME:messageSMIMEReq, eventVS:eventVS, contentType: ContentTypeVS.JSON_SIGNED)
+        } else {
+            msg = messageSource.getMessage('userWithoutPrivilege', null, locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
+                    message:msg, eventVS:eventVS)
+        }
+    }
 
 	public Map getEventVSMap(EventVS eventVSItem) {
 		if(eventVSItem instanceof EventVSElection) return getEventVSElectionMap(eventVSItem)

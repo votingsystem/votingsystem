@@ -31,7 +31,7 @@ public class StringUtils {
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public static String decodeB64_TO_UTF8 (String encodedStr) throws UnsupportedEncodingException, ScriptException {
-        String decodeStr = new String(Base64.getMimeDecoder().decode(encodedStr.getBytes()), "UTF-8");
+        String decodeStr = new String(Base64.getDecoder().decode(encodedStr.getBytes()), "UTF-8");
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("JavaScript");
         String result = (String) engine.eval("unescape('" + java.net.URLDecoder.decode(decodeStr, "UTF-8") + "')");

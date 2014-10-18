@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.transaction.Transactional
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -92,7 +93,7 @@ class SignatureVSService {
         return result
     }
 
-    public ResponseVS getEventTrustedCerts(EventVS event, Locale locale) {
+    public ResponseVS getEventTrustedCerts(EventVS event) {
         log.debug("getEventTrustedCerts")
         if(!event) throw new ExceptionVS("EventVS null")
         CertificateVS eventVSCertificateVS = CertificateVS.findWhere(eventVSElection:event, state:CertificateVS.State.OK,
@@ -119,7 +120,7 @@ class SignatureVSService {
         return issuedCert
     }
 
-    public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS, Locale locale) {
+    public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS) {
         Set<TrustAnchor> eventTrustedAnchors = eventTrustedAnchorsMap.get(eventVS.id)
         if(!eventTrustedAnchors) {
             CertificateVS eventCACert = CertificateVS.findWhere(eventVSElection:eventVS, state:CertificateVS.State.OK,
@@ -276,7 +277,7 @@ class SignatureVSService {
         return trustedCertsHashMap.get(numSerie)
     }
 
-    public ResponseVS validateSMIME(SMIMEMessage smimeMessage, Locale locale) {
+    public ResponseVS validateSMIME(SMIMEMessage smimeMessage) {
         MessageSMIME messageSMIME = null
         MessageSMIME.withTransaction {
             messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessage.getContentDigestStr())
@@ -287,10 +288,10 @@ class SignatureVSService {
             log.error("validateSMIME - ${message}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
         }
-        return validateSignersCerts(smimeMessage, locale)
+        return validateSignersCerts(smimeMessage)
     }
 
-    public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage, Locale locale) {
+    public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage) {
         Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
                 messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
@@ -314,7 +315,7 @@ class SignatureVSService {
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)
                 } else {
-                    responseVS = subscriptionVSService.checkUser(userVS, locale)
+                    responseVS = subscriptionVSService.checkUser(userVS)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
                 }
@@ -333,7 +334,7 @@ class SignatureVSService {
                       extensionChecker:validatorResult.getChecker()])
     }
 
-    public ResponseVS validateSMIMEVote(SMIMEMessage smimeMessageReq, Locale locale) {
+    public ResponseVS validateSMIMEVote(SMIMEMessage smimeMessageReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessageReq.getContentDigestStr())
@@ -382,7 +383,7 @@ class SignatureVSService {
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)
         }
         smimeMessageReq.voteVS.setCertificateVS(certificate)
-        Set<TrustAnchor> trustedAnchors = getEventTrustedAnchors(eventVS, locale)
+        Set<TrustAnchor> trustedAnchors = getEventTrustedAnchors(eventVS)
         CertUtils.CertValidatorResultVS validatorResult;
         X509Certificate certCaResult;
         X509Certificate checkedCert = voteVS.getX509Certificate()
@@ -450,8 +451,7 @@ class SignatureVSService {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug "decryptMessage"
+    public ResponseVS decryptMessage (byte[] encryptedFile) {
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
@@ -464,8 +464,7 @@ class SignatureVSService {
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug("encryptSMIMEMessage(...) ");
+    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
@@ -478,8 +477,7 @@ class SignatureVSService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug("decryptSMIMEMessage ")
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

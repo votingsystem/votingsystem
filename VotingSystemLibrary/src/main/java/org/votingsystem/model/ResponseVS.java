@@ -5,15 +5,22 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ExceptionVS;
 
+import javax.persistence.*;
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+
+import static javax.persistence.GenerationType.IDENTITY;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Entity
+@Table(name="ResponseVS")
 public class ResponseVS<T> implements Serializable {
 
     public static final long serialVersionUID = 1L;
@@ -39,24 +46,27 @@ public class ResponseVS<T> implements Serializable {
     public static final int SC_CANCELLED                = 0;
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;
-    
-    private Integer statusCode;
-    private StatusVS<?> status;
-    private String message;
-    private JSON messageJSON;
-    private String reason;
-    private String metaInf;
-    private String url;
-    private SMIMEMessage smimeMessage;
-    private EventVS eventVS;
-    private T data;
-    private TypeVS type;
-    private UserVS userVS;
-    private byte[] messageBytes;
-    private ContentTypeVS contentType = ContentTypeVS.TEXT;
-    private File file;
-    private List<String> errorList;
-    private Integer size;
+
+    @Id @GeneratedValue(strategy=IDENTITY)
+    @Column(name="id", unique=true, nullable=false) private Long id;
+    @Column(name="statusCode") private Integer statusCode;
+    @Column(name="reason") private String reason;
+    @Column(name="metaInf") private String metaInf;
+    @Column(name="url") private String url;
+    @Column(name="message", columnDefinition="TEXT") private String message;
+    @Column(name="typeVS") @Enumerated(EnumType.STRING) private TypeVS type;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="userVS") private UserVS userVS;
+    @Column(name="messageBytes") @Lob private byte[] messageBytes;
+    private MessageSMIME messageSMIME;
+    @Transient private StatusVS<?> status;
+    @Transient private JSON messageJSON;
+    @Transient private SMIMEMessage smimeMessage;
+    @Transient private EventVS eventVS;
+    @Transient private T data;
+    @Transient private ContentTypeVS contentType = ContentTypeVS.TEXT;
+    @Transient private File file;
+    @Transient private List<String> errorList;
         
     public ResponseVS () {  }
 
@@ -190,7 +200,9 @@ public class ResponseVS<T> implements Serializable {
         this.errorList = errorList;
     }
 
-    public byte[] getMessageBytes() {
+    public byte[] getMessageBytes() throws Exception {
+        if(ContentTypeVS.JSON_SIGNED == contentType && messageBytes == null && messageSMIME != null)
+            return messageSMIME.getSmimeMessage().getBytes();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
@@ -256,14 +268,6 @@ public class ResponseVS<T> implements Serializable {
         this.reason = reason;
     }
 
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
     public String getMetaInf() {
         return metaInf;
     }
@@ -280,6 +284,41 @@ public class ResponseVS<T> implements Serializable {
         this.url = url;
     }
 
+    public MessageSMIME refreshMessageSMIME() throws Exception {
+        messageSMIME.getSmimeMessage().setMessageID("/messageSMIME/" + messageSMIME.getId());
+        messageSMIME.setContent(messageSMIME.getSmimeMessage().getBytes());
+        if(eventVS != null) messageSMIME.setEventVS(eventVS);
+        if(type != null) messageSMIME.setType(type);
+        if(reason != null) messageSMIME.setReason(reason);
+        if(metaInf != null) messageSMIME.setMetaInf(metaInf);
+        return messageSMIME;
+    }
+
+    public static ResponseVS getExceptionResponse(String controller, Map action, Exception exception,
+          Throwable rootCause) {
+        log.error("controller: " + controller + " - action: " + action + " - exception:" + rootCause.getMessage(), rootCause);
+        String metaInf = null;
+        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
+            metaInf = ((ExceptionVS)exception).getMetInf();
+        else metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
+                rootCause.getClass().getSimpleName();
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, rootCause.getMessage());
+        responseVS.setReason(rootCause.getMessage());
+        responseVS.setMetaInf(metaInf);
+        return responseVS;
+    }
+
+    public static ResponseVS getErrorRequestResponse(String message) {
+        return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message);
+    }
+
+    public static ResponseVS getAlert(String message, String metaInf) {
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message);
+        responseVS.setMetaInf(metaInf);
+        responseVS.setType(TypeVS.ALERT);
+        return responseVS;
+    }
+
     public static ResponseVS parseWebSocketResponse(String message) {
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(message);
         ResponseVS result = new ResponseVS();
@@ -289,6 +328,15 @@ public class ResponseVS<T> implements Serializable {
         if(messageJSON.containsKey("message")) result.setMessage(messageJSON.getString("message"));
         if(messageJSON.containsKey("URL")) result.setMessage(messageJSON.getString("URL"));
         return result;
+    }
+
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
+    }
+
+    public ResponseVS setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
+        return this;
     }
 
 }

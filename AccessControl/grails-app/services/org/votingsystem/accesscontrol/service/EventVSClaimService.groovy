@@ -7,9 +7,10 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
-
+import org.votingsystem.util.ExceptionVS
 import java.security.cert.X509Certificate
 import java.text.DecimalFormat
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
 * @author jgzornoza
@@ -28,27 +29,22 @@ class EventVSClaimService {
 	def timeStampService
 	def sessionFactory
 
-    ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+    ResponseVS saveEvent(MessageSMIME messageSMIMEReq) {
 		EventVSClaim eventVS
         UserVS signerVS = messageSMIMEReq.getUserVS()
-        String documentStr = messageSMIMEReq.getSmimeMessage().getSignedContent()
         log.debug("saveEvent - signerVS: ${signerVS.nif}")
-        def messageJSON = JSON.parse(documentStr)
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
         if(dateFinish.before(Calendar.getInstance().getTime())) {
-            String msg = messageSource.getMessage('publishDocumentDateErrorMsg',
-                    [DateUtils.getDateStr(dateFinish)].toArray(), locale)
-            log.error("DATE ERROR - msg: ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-                    message:msg, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:eventVS)
+            throw new ExceptionVS(messageSource.getMessage('publishDocumentDateErrorMsg',
+                    [DateUtils.getDayWeekDateStr(dateFinish)].toArray(), locale))
         }
         eventVS = new EventVSClaim(userVS:signerVS, subject:messageJSON.subject, content:messageJSON.content,
                 backupAvailable:messageJSON.backupAvailable, dateFinish:dateFinish)
         if(messageJSON.cardinality) eventVS.cardinality = EventVS.Cardinality.valueOf(messageJSON.cardinality)
         else eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
-        if(messageJSON.dateBegin) eventVS.dateBegin = new Date().parse(
-                "yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
-        ResponseVS responseVS = eventVSService.setEventDatesState(eventVS, locale)
+        if(messageJSON.dateBegin) eventVS.dateBegin = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
+        ResponseVS responseVS = eventVSService.setEventDatesState(eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         eventVS = responseVS.eventVS.save()
         if (messageJSON.tags) {
@@ -74,19 +70,18 @@ class EventVSClaimService {
         SMIMEMessage smimeMessage = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser,  messageSMIMEReq.getSmimeMessage(), subject)
         messageSMIMEReq.setSmimeMessage(smimeMessage).setEventVS(eventVS)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, data:messageSMIMEReq,
-                type:TypeVS.CLAIM_EVENT)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, messageSMIME: messageSMIMEReq,
+                type:TypeVS.CLAIM_EVENT, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-    public synchronized ResponseVS generateBackup (EventVSClaim event, Locale locale) {
+    public synchronized ResponseVS generateBackup (EventVSClaim event) {
         log.debug("generateBackup - eventId: ${event.id}")
 		ResponseVS responseVS;
         if (!event) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 				messageSource.getMessage('requestWithoutEventVS', null, locale))
         }		
-		Map<String, File> mapFiles = filesService.getBackupFiles(
-			event, TypeVS.CLAIM_EVENT, locale)
+		Map<String, File> mapFiles = filesService.getBackupFiles(event, TypeVS.CLAIM_EVENT)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
@@ -125,9 +120,7 @@ class EventVSClaimService {
 				eq("eventVS", event)
 				eq("type", TypeVS.CLAIM_EVENT_SIGN)
 			}
-			
-			
-			
+
 			while (eventSigantures.next()) {
 				SignatureVS firma = (SignatureVS) eventSigantures.get(0);
 				MessageSMIME messageSMIME = firma.messageSMIME

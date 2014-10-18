@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 
@@ -44,7 +45,7 @@ class EventVSManifestController {
                 }
                 if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
                 if(eventVS) {
-                    eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
+                    eventVS = eventVSService.checkEventVSDates(eventVS).eventVS
                     if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                                 data:eventVSService.getEventVSMap(eventVS))]
@@ -133,7 +134,7 @@ class EventVSManifestController {
                     return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             message(code:'manifestNotPending', args:["${params.id}"]))]
                 } else {
-                    return [responseVS:eventVSManifestService.saveManifest(pdfDocument, eventVS, request.getLocale())]
+                    return [responseVS:eventVSManifestService.saveManifest(pdfDocument, eventVS)]
                 }
             }
 		} else {
@@ -235,7 +236,7 @@ class EventVSManifestController {
                         message(code: 'eventVSNotFound', args: [params.id]))]
             } else {
                 EventVSManifest eventVS = resultList.iterator().next()
-                eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
+                eventVS = eventVSService.checkEventVSDates(eventVS).eventVS
                 render eventVSService.getEventVSMap(eventVS) as JSON
             }
         } else if(request.contentType?.contains("json")) {
@@ -273,7 +274,7 @@ class EventVSManifestController {
                 }
             }
             resultList.each { eventVSItem ->
-                eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
+                eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
             render eventsVSMap as JSON
         } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
@@ -385,13 +386,11 @@ class EventVSManifestController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

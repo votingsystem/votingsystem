@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votingsystem" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -17,7 +17,7 @@
         </style>
         <div layout vertical style="margin: 10px 30px; max-width:1000px;">
             <div class="pageHeader"  layout horizontal center center-justified>
-                <h3>{{receipt.operation}}</h3>
+                <h3>{{smimeMessageContent.operation}}</h3>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
@@ -30,7 +30,7 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <votingsystem-html-echo html="{{receiptStr}}"></votingsystem-html-echo>
+            <votingsystem-html-echo html="{{smimeMessageContentStr}}"></votingsystem-html-echo>
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
@@ -44,9 +44,9 @@
         </div>
     </template>
     <script>
-        Polymer('receipt-votingsystem', {
+        Polymer('message-smime', {
             publish: {
-                receipt: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -61,9 +61,9 @@
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
             },
-            receiptChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                this.receiptStr = JSON.stringify(this.receipt)
+                this.smimeMessageContentStr = JSON.stringify(this.smimeMessageContent)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)

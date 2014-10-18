@@ -35,12 +35,12 @@ dependencies {
     testCompile localGroovy()
 }
 
-task runJava(dependsOn: 'classes', type: JavaExec) {
+/*task runJava(dependsOn: 'classes', type: JavaExec) {
     main = 'org.votingsystem.test.util.ContextVS'
     classpath = sourceSets.main.runtimeClasspath
     args 'VotingSystem test'
     systemProperty 'simple.message', 'Hello from VotingSystem'
-}
+}*/
 
 test {
     testLogging.showStandardStreams = true
@@ -52,6 +52,6 @@ test {
 
 task testRequestVickets(type: JavaExec) {
     description 'VicketRequest description'
-    main = 'org.votingsystem.test.VicketRequest'
+    main = 'org.votingsystem.test.vicket.Vicket_request'
     classpath = sourceSets.main.runtimeClasspath
 }

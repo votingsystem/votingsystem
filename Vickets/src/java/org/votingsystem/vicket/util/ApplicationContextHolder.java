@@ -7,8 +7,8 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ApplicationVS;
-import org.votingsystem.vicket.model.AlertVS;
 import org.votingsystem.vicket.model.TransactionVS;
 import org.votingsystem.vicket.service.TransactionVSService;
 
@@ -85,8 +85,8 @@ public class ApplicationContextHolder implements ApplicationContextAware, Applic
         ((TransactionVSService)getBean("transactionVSService")).updateBalances(transactionVS);
     }
 
-    public void alert(AlertVS alertVS) {
-        ((TransactionVSService) ApplicationContextHolder.getBean("transactionVSService")).alert(alertVS);
+    public void alert(ResponseVS responseVS) {
+        ((TransactionVSService) ApplicationContextHolder.getBean("transactionVSService")).alert(responseVS);
     }
 
 }

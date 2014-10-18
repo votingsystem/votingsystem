@@ -7,7 +7,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.NifUtils
-
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import java.security.cert.X509Certificate
 
 /**
@@ -32,7 +32,7 @@ class UserVSService {
      * Add users from PEM certs
      */
     @Transactional
-    public ResponseVS saveUser(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS saveUser(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         /*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {

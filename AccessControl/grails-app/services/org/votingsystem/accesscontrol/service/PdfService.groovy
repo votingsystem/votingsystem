@@ -11,11 +11,11 @@ import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
-
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 class PdfService {
 
@@ -41,7 +41,7 @@ class PdfService {
 		log.debug "keyAlias: ${keyAlias} - chain.length:${chain.length}"
 	}
 	
-	public ResponseVS checkSignature (byte[] signedPDF, Locale locale) {
+	public ResponseVS checkSignature (byte[] signedPDF) {
 		log.debug "checkSignature - signedPDF.length: ${signedPDF.length}"
 		ResponseVS responseVS = null;
 		PdfReader reader = new PdfReader(signedPDF);
@@ -95,7 +95,7 @@ class PdfService {
 						userVS.setCertificateCA(certificateCA);
 					}
 				}
-				ResponseVS userValidationResponseVS = subscriptionVSService.checkUser(userVS, locale);
+				ResponseVS userValidationResponseVS = subscriptionVSService.checkUser(userVS);
 				if(ResponseVS.SC_OK != userValidationResponseVS.statusCode) return userValidationResponseVS;
 				userVS = userValidationResponseVS.userVS;
 				certificate = (CertificateVS)userValidationResponseVS.data;

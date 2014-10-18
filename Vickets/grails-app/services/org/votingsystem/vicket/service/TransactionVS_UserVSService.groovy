@@ -1,7 +1,7 @@
 package org.votingsystem.vicket.service
 
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils

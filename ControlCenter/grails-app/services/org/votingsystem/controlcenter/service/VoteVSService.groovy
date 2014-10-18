@@ -8,9 +8,9 @@ import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
 * @author jgzornoza
@@ -26,7 +26,7 @@ class VoteVSService {
     def grailsApplication
 	
 	
-	public synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq, Locale locale) {
+	public synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
@@ -66,7 +66,7 @@ class VoteVSService {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(messageSMIMEReq.content,
                 ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
-            //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes, locale)
+            //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes)
             //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSmimeMessage();
             SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
             if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
@@ -75,7 +75,7 @@ class VoteVSService {
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR,
                         eventVS:eventVS, message:messageSource. getMessage('voteContentErrorMsg', null, locale))
             }
-            responseVS = signatureVSService.validateVoteCerts(smimeMessageResp, eventVS, locale)
+            responseVS = signatureVSService.validateVoteCerts(smimeMessageResp, eventVS)
             if(ResponseVS.SC_OK != responseVS.statusCode) {
                 log.error("validateVote - validateVoteValidationCerts ERROR - > ${responseVS.message}")
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
@@ -102,7 +102,7 @@ class VoteVSService {
         }
 	}
 	
-	public synchronized ResponseVS processCancel (MessageSMIME messageSMIMEReq, Locale locale) {
+	public synchronized ResponseVS processCancel (MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -129,17 +129,14 @@ class VoteVSService {
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessageReq, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(content:smimeMessageResp.getBytes(),
-                smimeParent:messageSMIMEReq, eventVS:eventVS, type:TypeVS.RECEIPT).save()
-        if (!messageSMIMEResp) { messageSMIMEResp.errors.each { log.error("processCancel - ${it}") } }
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
         VoteVSCanceller voteVSCanceller = new VoteVSCanceller(voteVS:voteVS, certificateVS:certificateVS,
                 eventVSElection:eventVS, state:VoteVSCanceller.State.CANCELLATION_OK, messageSMIME:messageSMIMEResp,
                 originHashCertVSBase64:originHashCertVote, hashCertVSBase64:hashCertVSBase64).save()
         if (!voteVSCanceller) { voteVSCanceller.errors.each { log.error("processCancel - ${it}") } }
         log.debug("$methodName - voteVSCanceller.id: ${voteVSCanceller.id}")
-        Map modelData = [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-                type:TypeVS.CANCEL_VOTE, contentType: ContentTypeVS.JSON_SIGNED, data:messageSMIMEResp)]
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:modelData)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
+                type:TypeVS.CANCEL_VOTE, contentType: ContentTypeVS.JSON_SIGNED, messageSMIME: messageSMIMEResp)
     }
 			
 	public Map getVoteVSMap(VoteVS voteVS) {

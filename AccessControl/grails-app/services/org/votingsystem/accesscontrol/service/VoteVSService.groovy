@@ -9,8 +9,8 @@ import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 @Transactional
 class VoteVSService {
@@ -19,7 +19,7 @@ class VoteVSService {
 	def grailsApplication
 	def signatureVSService
 	
-    synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq, Locale locale) {
+    synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
@@ -58,7 +58,7 @@ class VoteVSService {
 		}
     }
 	
-	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON, Locale locale) {
+	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON) {
 		def originHashCertVote = cancelDataJSON.originHashCertVote
 		def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
 		def originHashAccessRequest = cancelDataJSON.originHashAccessRequest
@@ -79,7 +79,7 @@ class VoteVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 
-	public synchronized ResponseVS processCancel (MessageSMIME messageSMIME, Locale locale) {
+	public synchronized ResponseVS processCancel (MessageSMIME messageSMIME) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		UserVS signer = messageSMIME.getUserVS();
@@ -88,7 +88,7 @@ class VoteVSService {
 		MessageSMIME messageSMIMEResp;
 		EventVSElection eventVSElection;
         def cancelDataJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
-        ResponseVS responseVS = checkCancelJSONData(cancelDataJSON, locale)
+        ResponseVS responseVS = checkCancelJSONData(cancelDataJSON)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
         def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
@@ -137,7 +137,7 @@ class VoteVSService {
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, eventVS:eventVSElection,
                         type:TypeVS.CANCEL_VOTE_ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "smimeContentMismatchError"))
             }
-            signatureVSService.validateSignersCerts(smimeMessageResp, locale)
+            signatureVSService.validateSignersCerts(smimeMessageResp)
             messageSMIMEResp.content = smimeMessageResp.getBytes()
             messageSMIMEResp.smimeMessage = smimeMessageResp
             messageSMIMEResp.save()

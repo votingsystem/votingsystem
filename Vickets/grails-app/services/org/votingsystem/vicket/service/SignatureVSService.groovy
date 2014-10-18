@@ -6,7 +6,7 @@ import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
@@ -238,7 +238,7 @@ class  SignatureVSService {
 	}
 
     @Transactional
-	public ResponseVS validateSMIME(SMIMEMessage smimeMessage, Locale locale) {
+	public ResponseVS validateSMIME(SMIMEMessage smimeMessage) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessage.getContentDigestStr())
 		if(messageSMIME) {
@@ -248,7 +248,7 @@ class  SignatureVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message,
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "hashRepeated"))
 		}
-		return validateSignersCerts(smimeMessage, locale)
+		return validateSignersCerts(smimeMessage)
 	}
 
     public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {
@@ -269,7 +269,7 @@ class  SignatureVSService {
         return validationResponse
     }
 
-	public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage, Locale locale) {
+	public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		Set<UserVS> signersVS = smimeMessage.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
@@ -315,13 +315,13 @@ class  SignatureVSService {
 	}
 
     @Transactional
-    private ResponseVS processMessageVS(byte[] messageVSBytes, ContentTypeVS contenType, Locale locale) {
+    private ResponseVS processMessageVS(byte[] messageVSBytes, ContentTypeVS contenType) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(new String(messageVSBytes, "UTF-8"));
 
         SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(
                 Base64.getDecoder().decode(messageVSJSON.smimeMessage.getBytes())))
-        ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
+        ResponseVS responseVS = processSMIMERequest(smimeSender, contenType)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         MessageSMIME messageSMIMEReq = responseVS.data
         UserVS fromUser = messageSMIMEReq.getUserVS()
@@ -357,14 +357,14 @@ class  SignatureVSService {
     }
 
     @Transactional
-    private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType, Locale locale) {
+    private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
             switch(contenType) {
                 //case ContentTypeVS.VICKET: break;
                 default:
-                    certValidationResponse = validateSMIME(smimeMessageReq, locale);
+                    certValidationResponse = validateSMIME(smimeMessageReq);
             }
             TypeVS typeVS = TypeVS.OK;
             if(contenType && ContentTypeVS.VICKET == contenType) typeVS = TypeVS.VICKET;
@@ -391,18 +391,15 @@ class  SignatureVSService {
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug("encryptToCMS")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
-        log.debug("encryptToCMS")
         return getEncryptor().encryptToCMS(dataToEncrypt, receptorPublicKey);
     }
 
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        log.debug("encryptMessage(...) - ");
         try {
             return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
         } catch(Exception ex) {
@@ -412,8 +409,7 @@ class  SignatureVSService {
         }
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug("encryptMessage(...)");
+    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         try {
             byte[] result = getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
             new ResponseVS(ResponseVS.SC_OK, result);
@@ -427,8 +423,7 @@ class  SignatureVSService {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug "decryptMessage"
+    public ResponseVS decryptMessage (byte[] encryptedFile) {
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
@@ -440,8 +435,7 @@ class  SignatureVSService {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptCMS (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptCMS"
+    public ResponseVS decryptCMS (byte[] encryptedFile) {
         try {
             return getEncryptor().decryptCMS(serverPrivateKey, encryptedFile)
         } catch(Exception ex) {
@@ -454,8 +448,7 @@ class  SignatureVSService {
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug("encryptSMIMEMessage(...) ");
+    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
@@ -468,8 +461,7 @@ class  SignatureVSService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug("decryptSMIMEMessage ")
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

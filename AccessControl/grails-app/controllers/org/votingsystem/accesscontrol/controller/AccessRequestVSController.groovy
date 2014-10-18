@@ -1,6 +1,9 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.accesscontrol.service.CsrService
 import org.votingsystem.model.*
+import org.votingsystem.util.ExceptionVS
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
@@ -38,55 +41,39 @@ class AccessRequestVSController {
     }
 
 	/**
-	 * Servicio que valida las <a href="https://github.com/votingsystem/votingsystem/wiki/Solicitud-de-acceso">
-	 * solicitudes de acceso</a> recibidas en una votación.
+	 * Service that validates vote requests (https://github.com/votingsystem/votingsystem/wiki/Solicitud-de-acceso)
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/accessRequestVS]
-	 * @requestContentType [application/x-pkcs7-signature] La solicitud de acceso.
-	 * @param [csr] Obligatorio. La solicitud de certificado de voto.
-	 * @return La solicitud de certificado de voto firmada.
+	 * @requestContentType [application/x-pkcs7-signature] User signed access request.
+	 * @param [csr] Required. CSR to get the anonymous certificate which signs the vote.
+	 * @return CSR signed.
 	 */
     def processFileMap () {
-		MessageSMIME messageSMIMEReq = params[ContextVS.ACCESS_REQUEST_FILE_NAME]
-        request.messageSMIMEReq = messageSMIMEReq
-		if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-		}
-		AccessRequestVS accessRequestVS;
-        EventVSElection eventVS
-		ResponseVS responseVS = accessRequestVSService.saveRequest(messageSMIMEReq, request.getLocale())
+		MessageSMIME messageSMIME = params[ContextVS.ACCESS_REQUEST_FILE_NAME]
+		if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+		ResponseVS responseVS = accessRequestVSService.saveRequest(messageSMIME)
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
-			accessRequestVS = responseVS.data
-            eventVS = responseVS.eventVS
+            AccessRequestVS accessRequestVS = responseVS.data
+            EventVSElection eventVS = responseVS.eventVS
 			byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-			UserVS representative = null
-			if(accessRequestVS.userVS.type == UserVS.Type.REPRESENTATIVE) {
-				representative = accessRequestVS.userVS
-			}
-			ResponseVS csrValidationResponseVS = csrService.signCertVoteVS(csrRequest, responseVS.eventVS,
-                    representative, request.getLocale())
-			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
-				responseVS.type = TypeVS.ACCESS_REQUEST;
-                responseVS.message = "EventVS_${eventVS.id}"
-                responseVS.messageBytes = csrValidationResponseVS.data.issuedCert
-                responseVS.setContentType(ContentTypeVS.TEXT_STREAM)
-				//return [responseVS:responseVS, receiverPublicKey:csrValidationResponseVS.data.requestPublicKey]
-                return [responseVS:responseVS]
-			} else {
-				csrValidationResponseVS.type = TypeVS.ACCESS_REQUEST_ERROR;
-				if (accessRequestVS) {
+			UserVS representative = (accessRequestVS.userVS.type == UserVS.Type.REPRESENTATIVE)?accessRequestVS.userVS:null
+            try {
+                CsrService.CsrResponse csrResponse = csrService.signCertVoteVS(csrRequest, responseVS.eventVS, representative)
+                return [responseVS: new ResponseVS(messageSMIME:messageSMIME, type: TypeVS.ACCESS_REQUEST,
+                        message: "EventVS_${eventVS.id}", messageBytes:csrResponse.issuedCert, contentType: ContentTypeVS.TEXT_STREAM)]
+            } catch(Exception ex) {
+                if (accessRequestVS) {
                     log.debug("cancelling accessRequestVS '${accessRequestVS.id}'")
                     AccessRequestVS.withTransaction {
                         accessRequestVS.metaInf = responseVS.message
-                        accessRequestVS = accessRequestVS.merge()
                         accessRequestVS.state = AccessRequestVS.State.CANCELLED
                         accessRequestVS.save()
                     }
                 }
-                return [responseVS:csrValidationResponseVS]
-			}
-		} else return [responseVS:responseVS]
+                throw ex
+            }
+		} else return [responseVS:responseVS.setMessageSMIME(messageSMIME)]
     }
     
 	/**
@@ -155,12 +142,11 @@ class AccessRequestVSController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
+
 }

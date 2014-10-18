@@ -27,8 +27,8 @@ Map eventDataMap = [subject:"Claim subject", content:"<p>Election content</p>", 
                     dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/10/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
-                       numRepresentatives:1, numRepresentativesWithVote:1,
-                       numUsersWithRepresentative:1, numUsersWithRepresentativeWithVote:1]
+                       numRepresentatives:0, numRepresentativesWithVote:0,
+                       numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
@@ -59,12 +59,6 @@ CountDownLatch userBaseDataLatch = new CountDownLatch(1);
 userBaseDataLatch.await()
 
 sendVotes(((VotingSimulationData)TestUtils.simulationData).userBaseData)
-
-SignTask.Launcher launcher = new SignTask.Launcher() {
-    @Override void processTask(String param) {
-        launchSignature(param)
-    }
-};
 
 private void sendVotes(UserBaseSimulationData userBaseSimulationData){
     log.debug("sendVotes");
@@ -101,14 +95,19 @@ private void waitForVoteResponses() throws Exception {
     VotingSimulationData simulationData = ((VotingSimulationData)TestUtils.simulationData)
     log.debug("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
     while (simulationData.hasPendingVotes()) {
-        String nifFrom = null;
-        Future<ResponseVS> f = responseService.take();
-        ResponseVS responseVS = f.get();
-        nifFrom = responseVS.getData()?.userVS?.getNif();
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            VoteVS voteReceipt = responseVS.getData().voteVS;
-            simulationData.getAndIncrementNumVotingRequestsOK();
-        } else throw new ExceptionVS(responseVS.getMessage());
+        try {
+            String nifFrom = null;
+            Future<ResponseVS> f = responseService.take();
+            ResponseVS responseVS = f.get();
+            nifFrom = responseVS.getData()?.userVS?.getNif();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                VoteVS voteReceipt = responseVS.getData().voteVS;
+                simulationData.getAndIncrementNumVotingRequestsOK();
+            } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        }
     }
     if(simulationData.getEventStateWhenFinished() != null) changeEventState();
     else if(simulationData.getBackupRequestEmail() != null) requestBackup();

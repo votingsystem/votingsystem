@@ -4,7 +4,7 @@ import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
-
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import java.security.cert.X509Certificate
 
 /**
@@ -18,7 +18,7 @@ class SubscriptionVSService {
 	def messageSource
     def grailsApplication
 	
-	ResponseVS checkUser(UserVS userVS, Locale locale) {
+	ResponseVS checkUser(UserVS userVS) {
 		log.debug " --- checkUser - userVS '${userVS.nif}'"
 		String msg
 		if(!userVS?.nif) {

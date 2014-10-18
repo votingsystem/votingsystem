@@ -6,7 +6,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
-
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import java.security.cert.X509Certificate
 
 //@Transactional
@@ -23,7 +23,7 @@ class CertificateVSService {
      * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
      */
     @Transactional
-    public ResponseVS addCertificateAuthority(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS addCertificateAuthority(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         /*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
@@ -90,7 +90,7 @@ class CertificateVSService {
     }
 
     @Transactional
-    public ResponseVS editCert(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS editCert(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         UserVS userSigner = messageSMIMEReq.getUserVS()

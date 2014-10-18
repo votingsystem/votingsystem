@@ -1,14 +1,12 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
-
+<asset:javascript src="utilsVS.js"/>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-representative-anonymousdelegation-request"
-                 attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-votevs-canceller" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
-
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -22,12 +20,11 @@
         </style>
         <div layout vertical style="margin: 10px auto; max-width:1000px;">
             <div class="pageHeader"  layout horizontal center center-justified>
-                <h3><g:message code="anonymousdelegationRequest"/></h3>
+                <h3><g:message code="voteVSCancellerReceipt"/></h3>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
             </div>
-
             <template if="{{messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
                     <div>
@@ -36,7 +33,11 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </template>
-            <div><b><g:message code="weeksAnonymousDelegation"/>: </b>{{receipt.weeksOperationActive}}</div>
+            <div><b><g:message code="hashAccessRequestLbl"/>: </b>{{smimeMessageContent.hashAccessRequestBase64}}</div>
+            <div><b><g:message code="originHashAccessRequestLbl"/>: </b>{{smimeMessageContent.originHashAccessRequest}}</div>
+            <div><b><g:message code="hashCertVSLbl"/>: </b>{{smimeMessageContent.hashCertVSBase64}}</div>
+            <div><b><g:message code="originHashCertVote"/>: </b>{{smimeMessageContent.originHashCertVote}}</div>
+
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
@@ -50,9 +51,9 @@
         </div>
     </template>
     <script>
-        Polymer('receipt-representative-anonymousdelegation-request', {
+        Polymer('message-smime-votevs-canceller', {
             publish: {
-                receipt: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -63,20 +64,16 @@
                     this.isClientToolConnected = true
                 }.bind(this))
             },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
-            },
-            receiptChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString()}' != this.receipt.operation )
-                    this.messageToUser = '<g:message code="receiptTypeErrorMsg"/>' + " - " + this.receipt.operation
+                if('${TypeVS.CANCEL_VOTE.toString()}' != this.smimeMessageContent.operation )
+                    this.messageToUser = '<g:message code="smimeTypeErrorMsg"/>' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage);
+                    console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

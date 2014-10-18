@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
@@ -56,12 +57,9 @@ class VoteVSCancellerController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor. La respuesta viaja cifrada.
 	 */
     def post () {
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-		ResponseVS responseVS = voteVSService.processCancel(messageSMIMEReq, request.getLocale())
-		return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+		return [responseVS:voteVSService.processCancel(messageSMIME)]
     }
 
 	/**
@@ -92,13 +90,11 @@ class VoteVSCancellerController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

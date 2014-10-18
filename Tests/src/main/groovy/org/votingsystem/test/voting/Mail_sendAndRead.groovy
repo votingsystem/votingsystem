@@ -88,5 +88,5 @@ private void readMails () throws Exception {
         }
         remoteInbox.close(true);
     }
-    TestUtils.finish("Num. requests completed: " + simulationData.getNumRequestsColected())
+    TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsColected())
 }

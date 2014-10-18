@@ -6,6 +6,7 @@ import com.sun.syndication.feed.synd.SyndFeed
 import com.sun.syndication.feed.synd.SyndFeedImpl
 import com.sun.syndication.io.SyndFeedOutput
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.HttpHelper
@@ -35,11 +36,9 @@ class SubscriptionVSController {
 	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
 	 *					Dcoumento con los datos del control de acceso que se desea dar de alta.
 	 */
-	def index() { 
-		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		}
+	def index() {
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
 		SMIMEMessage smimeMessageReq = messageSMIME.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 		if (messageJSON.serverURL) {
@@ -118,13 +117,11 @@ class SubscriptionVSController {
     def feeds () { }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

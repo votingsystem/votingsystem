@@ -6,6 +6,7 @@ package org.votingsystem.model;
 */
 public enum TypeVS {
 
+    ALERT,
 	CONTROL_CENTER_VALIDATED_VOTE,
     ACCESS_CONTROL_VALIDATED_VOTE,
 	   

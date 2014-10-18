@@ -11,7 +11,7 @@ class EventVSManifestSignatureCollectorService {
 	def subscriptionVSService
 	
 	
-	public ResponseVS saveManifestSignature(PDFDocumentVS pdfDocument, EventVS eventVS, Locale locale) {
+	public ResponseVS saveManifestSignature(PDFDocumentVS pdfDocument, EventVS eventVS) {
 		log.debug "saveManifestSignature - pdfDocument.id: ${pdfDocument.id} - eventVS: ${eventVS.id}";
 		try {
 			UserVS userVS = pdfDocument.userVS

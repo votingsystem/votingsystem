@@ -220,8 +220,7 @@ class SignatureService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug("decryptSMIMEMessage ")
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

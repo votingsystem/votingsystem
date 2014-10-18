@@ -63,11 +63,16 @@ public void sendRequests (String serviceURL) throws Exception {
 private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
     while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
-        Future<ResponseVS> f = completionService.take();
-        ResponseVS responseVS = f.get();
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            TestUtils.simulationData.getAndIncrementNumRequestsOK();
-        } else throw new ExceptionVS(responseVS.getMessage())
+        try {
+            Future<ResponseVS> f = completionService.take();
+            ResponseVS responseVS = f.get();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                TestUtils.simulationData.getAndIncrementNumRequestsOK();
+            } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.simulationData.getNumRequestsOK())
+        }
     }
-    TestUtils.finish("Num. requests completed: " + TestUtils.simulationData.getAndIncrementNumRequestsOK());
+    TestUtils.finish("OK - Num. requests completed: " + TestUtils.simulationData.getNumRequestsOK());
 }

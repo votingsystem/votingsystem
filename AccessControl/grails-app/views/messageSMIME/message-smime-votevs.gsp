@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votevs" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-votevs" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -30,8 +30,8 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <div><b><g:message code="eventVSLbl"/>: </b><a href="{{receipt.eventURL}}?mode=simplePage">{{receipt.eventURL}}</a></div>
-            <div><b><g:message code="optionSelectedLbl"/>: </b>{{receipt.optionSelected.content}}</div>
+            <div><b><g:message code="eventVSLbl"/>: </b><a href="{{smimeMessageContent.eventURL}}?mode=simplePage">{{smimeMessageContent.eventURL}}</a></div>
+            <div><b><g:message code="optionSelectedLbl"/>: </b>{{smimeMessageContent.optionSelected.content}}</div>
 
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
@@ -46,9 +46,9 @@
         </div>
     </template>
     <script>
-        Polymer('receipt-votevs', {
+        Polymer('message-smime-votevs', {
             publish: {
-                receipt: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -63,10 +63,10 @@
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
             },
-            receiptChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.SEND_SMIME_VOTE.toString()}' != this.receipt.operation )
-                    this.messageToUser = '<g:message code="receiptTypeErrorMsg"/>' + " - " + this.receipt.operation
+                if('${TypeVS.SEND_SMIME_VOTE.toString()}' != this.smimeMessageContent.operation )
+                    this.messageToUser = '<g:message code="smimeTypeErrorMsg"/>' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)

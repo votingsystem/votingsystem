@@ -344,7 +344,6 @@ public class Encryptor {
    public static SMIMEMessage decryptSMIMEMessage(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
-        log.debug("decryptSMIMEMessage(...) ");
         InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
         return new SMIMEMessage(inputStream);

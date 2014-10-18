@@ -1,12 +1,12 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.gsp.PageRenderer
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.votingsystem.model.BackupRequestVS
 import org.votingsystem.model.UserVS
-
 import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 
@@ -49,7 +49,7 @@ class MailSenderService {
         }
     }
 	
-	public void sendBackupMsg (BackupRequestVS request, Locale locale) {
+	public void sendBackupMsg (BackupRequestVS request) {
 		log.debug "sendInstruccionesDescarga - email:${request.email} - request:${request.id}"
 		def subject;
 		String eventVSSubject
@@ -71,7 +71,7 @@ class MailSenderService {
         sendHTMLMail(request.email, htmlMessage, emailSubject);
    }
 	
-	public void sendRepresentativeAccreditations (BackupRequestVS request, String dateStr, Locale locale) {
+	public void sendRepresentativeAccreditations (BackupRequestVS request, String dateStr) {
 		log.debug "sendRepresentativeAccreditations - email:${request.email} - request:${request.id}"
 		String subject;
 		UserVS userRequest
@@ -100,8 +100,7 @@ class MailSenderService {
 
 	}
 	
-	public void sendRepresentativeVotingHistory (BackupRequestVS request,
-		String dateFromStr, String dateToStr, Locale locale) {
+	public void sendRepresentativeVotingHistory (BackupRequestVS request, String dateFromStr, String dateToStr) {
 		log.debug "sendRepresentativeVotingHistory - email:${request.email} - request:${request.id}"
 		String subject;
 		UserVS userRequest

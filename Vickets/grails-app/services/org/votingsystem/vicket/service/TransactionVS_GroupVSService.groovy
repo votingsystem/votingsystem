@@ -2,7 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -46,10 +46,10 @@ class TransactionVS_GroupVSService {
             if(request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
                         ["${request.amount} ${request.currencyCode}", request.toUserVSList.iterator().next().nif].toArray(),
-                        LocaleContextHolder.locale)
+                        locale)
             } else if (request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
-                        ["${request.amount} ${request.currencyCode}"].toArray(), LocaleContextHolder.locale)
+                        ["${request.amount} ${request.currencyCode}"].toArray(), locale)
             }
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                     fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
@@ -92,7 +92,7 @@ class TransactionVS_GroupVSService {
         BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
         TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS
         String msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
-                ["${request.amount.toString()} ${request.currencyCode}"].toArray(), LocaleContextHolder.locale)
+                ["${request.amount.toString()} ${request.currencyCode}"].toArray(), locale)
         TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:messageSMIMEReq,
                 fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
                 validTo: request.validTo, subject:request.subject, currencyCode: request.currencyCode,
@@ -131,7 +131,7 @@ class TransactionVS_GroupVSService {
             groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
             if(!groupVS) {
                 throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage('groupNotFoundByIBANErrorMsg',
-                        [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), LocaleContextHolder.locale))
+                        [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale))
             }
             if(!messageJSON.amount)  throw new ValidationExceptionVS(this.getClass(), "missing param 'amount'");
             amount = new BigDecimal(messageJSON.amount)
@@ -150,7 +150,7 @@ class TransactionVS_GroupVSService {
                     UserVS userVS = getUserFromGroup(groupVS, it)
                     if(!userVS) {
                         throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
-                                'groupUserNotFoundByIBANErrorMsg',  [it, groupVS.name].toArray(), LocaleContextHolder.locale))
+                                'groupUserNotFoundByIBANErrorMsg',  [it, groupVS.name].toArray(), locale))
                     } else toUserVSList.add(userVS)
                 }
                 if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),

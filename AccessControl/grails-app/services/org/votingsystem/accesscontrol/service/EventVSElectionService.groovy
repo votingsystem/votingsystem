@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -36,7 +37,7 @@ class EventVSElectionService {
 	def sessionFactory
     def systemService
 
-    @Transactional ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+    @Transactional ResponseVS saveEvent(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = null
@@ -44,13 +45,12 @@ class EventVSElectionService {
 		log.debug("saveEvent --- signer: ${userSigner?.nif}")
 		String msg = null
 		ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
         eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
                 controlCenterVS:systemService.getControlCenter(),
                 dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
                 dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
-        responseVS = eventVSService.setEventDatesState(eventVS, locale)
+        responseVS = eventVSService.setEventDatesState(eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             log.error "$methodName - EVENT DATES ERROR - ${responseVS.message}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
@@ -130,7 +130,7 @@ class EventVSElectionService {
     }
 
     @Transactional
-	public synchronized ResponseVS generateBackup (EventVSElection eventVS, Locale locale) {
+	public synchronized ResponseVS generateBackup (EventVSElection eventVS) {
 		log.debug("generateBackup - eventVSId: ${eventVS.id}")
 		ResponseVS responseVS;
 		String msg = null
@@ -144,12 +144,13 @@ class EventVSElectionService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,  message:msg, type:TypeVS.ERROR)
 			}
 			
-			Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT, locale)
+			Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT)
 			File zipResult   = mapFiles.zipResult
 			File metaInfFile = mapFiles.metaInfFile
 			File filesDir    = mapFiles.filesDir
 			
-			String serviceURLPart = messageSource.getMessage('votingBackupPartPath', [eventVS.id].toArray(), locale)
+			String serviceURLPart = messageSource.getMessage('votingBackupPartPath', [eventVS.id].toArray(),
+                    locale)
 			String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy/MM/dd")
 			String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 			String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
@@ -158,14 +159,14 @@ class EventVSElectionService {
 				log.debug("generateBackup - backup file already exists")
 				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
 			}
-			responseVS = representativeService.getAccreditationsBackupForEvent(eventVS, locale)
+			responseVS = representativeService.getAccreditationsBackupForEvent(eventVS)
 			Map representativeDataMap = responseVS.data
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
 				log.error("generateBackup - REPRESENTATIVE BACKUP DATA GENERATION ERROR:  ${responseVS.message}")
 				return responseVS
 			}			
 			
-			responseVS = signatureVSService.getEventTrustedCerts(eventVS, locale)
+			responseVS = signatureVSService.getEventTrustedCerts(eventVS)
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
 				responseVS.type = TypeVS.ERROR
 				return responseVS
@@ -287,7 +288,7 @@ class EventVSElectionService {
 
 	}
         
-    public Map getStatisticsMap (EventVSElection eventVS, Locale locale) {
+    public Map getStatisticsMap (EventVSElection eventVS) {
         log.debug("getStatisticsMap - eventId: ${eventVS?.id}")
         if(!eventVS) throw new ExceptionVS("EventVSElection null")
         def statisticsMap = new HashMap()

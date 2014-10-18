@@ -119,22 +119,16 @@ class TagVSController {
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
-        log.error "Exception occurred. ${rootCause.getMessage()}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
     def daoExceptionHandler(final DataAccessException exception) {
-        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
-        log.error "Exception occurred. ${rootCause.getMessage()}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: message(code:'paramsErrorMsg'),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

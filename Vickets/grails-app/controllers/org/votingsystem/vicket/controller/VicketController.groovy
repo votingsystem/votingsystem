@@ -42,11 +42,9 @@ class VicketController {
     }
 
     def cancel() {
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        return [responseVS:vicketService.cancelVicket(messageSMIMEReq)]
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        return [responseVS:vicketService.cancelVicket(messageSMIME)]
     }
 
 
@@ -124,15 +122,11 @@ class VicketController {
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
-        log.error "Exception occurred. ${rootCause.getMessage()}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
-        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
-                metaInf = ((ExceptionVS)exception).getMetInf()
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
+
 }

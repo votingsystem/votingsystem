@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import java.security.KeyFactory
@@ -48,40 +49,27 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-		response.contentType = ContentTypeVS.SIGNED
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
-		
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-			fromUser, toUser, smimeMessage, subject)
-
-		
-		//ByteArrayOutputStream messageBaos = new ByteArrayOutputStream();
-		//smimeMessageResp.writeTo(messageBaos)
-		//log.debug("========= ${new String(messageBaos.toByteArray())}")
-		
-		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST, content:smimeMessageResp.getBytes())
-		return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST,
-                contentType:ContentTypeVS.SIGNED)]
+		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                messageSMIME.getSmimeMessage(), subject)
+		return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TEST,
+                contentType:ContentTypeVS.JSON_SIGNED, messageBytes:smimeMessageResp.getBytes())]
 	}
 	
 	def validateTimeStamp() {
 		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
-		UserVS userVS = messageSMIMEReq.getUserVS()
+		SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage()
+		UserVS userVS = messageSMIME.getUserVS()
 		//Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
 		def msgJSON = JSON.parse(smimeMessage.getSignedContent())
 		
@@ -99,13 +87,11 @@ class EncryptorController {
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

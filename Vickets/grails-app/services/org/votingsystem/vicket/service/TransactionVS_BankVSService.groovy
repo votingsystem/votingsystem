@@ -3,7 +3,7 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -25,7 +25,7 @@ class TransactionVS_BankVSService {
         BankVS signer = BankVS.findWhere(nif:messageSMIMEReq.userVS.nif)
         if(!(signer)) {
             throw new ExceptionVS(messageSource.getMessage('bankVSPrivilegesErrorMsg',
-                    [request.operation.toString()].toArray(), LocaleContextHolder.locale),
+                    [request.operation.toString()].toArray(), locale),
                     MetaInfMsg.getErrorMsg(methodName, "bankVSPrivilegesError"))
         }
         TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:messageSMIMEReq,
@@ -50,7 +50,7 @@ class TransactionVS_BankVSService {
         TypeVS operation;
         Date validTo;
         public BankVSTransactionVSRequest(JSONObject messageJSON) {
-            if(TypeVS.FROM_BANKVS != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+            if(TypeVS.FROM_BANKVS != TypeVS.valueOf(messageJSON.operation)) throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'FROM_BANKVS' - operation found: " + messageJSON.operation)
             if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
                     "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")

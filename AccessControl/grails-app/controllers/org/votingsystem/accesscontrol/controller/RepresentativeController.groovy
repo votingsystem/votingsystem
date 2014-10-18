@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.NifUtils
 
@@ -147,14 +148,8 @@ class RepresentativeController {
 	 */
 	def revoke() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		}
-		ResponseVS responseVS = representativeService.processRevoke(messageSMIME, request.getLocale())
-		if (ResponseVS.SC_OK == responseVS.statusCode){
-            responseVS.setContentType(ContentTypeVS.SIGNED)
-		}
-        return [responseVS : responseVS]
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        return [responseVS : representativeService.processRevoke(messageSMIME)]
 	}
 	
 	/**
@@ -172,10 +167,8 @@ class RepresentativeController {
 	 */
 	def accreditations() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		} else  return [responseVS : representativeService.processAccreditationsRequest(
-			messageSMIME, request.getLocale())]
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        return [responseVS : representativeService.processAccreditationsRequest(messageSMIME)]
 	}
 	
 	/**
@@ -191,10 +184,9 @@ class RepresentativeController {
 	 * @return 
 	 */
 	def history() {
-		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		} else return [responseVS : representativeService.processVotingHistoryRequest(messageSMIME,request.getLocale())]
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        return [responseVS : representativeService.processVotingHistoryRequest(messageSMIME)]
 	}
 	
 	/**
@@ -210,10 +202,8 @@ class RepresentativeController {
 	 */
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		}
-		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME, request.getLocale())
+if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME)
 		if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
@@ -251,8 +241,7 @@ class RepresentativeController {
 			log.error "processFileMap - ERROR - msg: ${msg}"
             return [responseVS : new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     type:TypeVS.REPRESENTATIVE_DATA_ERROR)]
-		} else return [responseVS : representativeService.saveRepresentativeData(
-                    messageSMIMEReq, imageBytes, request.getLocale())]
+		} else return [responseVS : representativeService.saveRepresentativeData(messageSMIMEReq, imageBytes)]
 	}
 
 	/**
@@ -300,7 +289,6 @@ class RepresentativeController {
 	 * del voto de los representates en el momento en que finaliza una votación.
 	 */
 	def accreditationsBackupForEvent() {
-		log.debug("getAccreditationsBackupForEvent - event: ${params.id}")
 		EventVSElection event = null
 		EventVSElection.withTransaction { event = EventVSElection.get(params.long('id')) }
 		String msg = null
@@ -309,8 +297,7 @@ class RepresentativeController {
             if(event.isActive(Calendar.getInstance().getTime())) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventDateNotFinished'))]
             } else {
-                return [responseVS : representativeService.getAccreditationsBackupForEvent(
-                        event, request.getLocale())]
+                return [responseVS : representativeService.getAccreditationsBackupForEvent(event)]
             }
         }
 	}
@@ -328,14 +315,10 @@ class RepresentativeController {
      * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
      */
     def anonymousDelegation() {
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS: new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-        }
-        ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(
-                messageSMIMEReq, request.getLocale())
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
         //return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
-        return [responseVS : responseVS]
+        return [responseVS : representativeDelegationService.saveAnonymousDelegation(messageSMIME)]
     }
 
     /**
@@ -357,7 +340,7 @@ class RepresentativeController {
                 messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest, request.getLocale())
+            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest)
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
                 csrValidationResponse.setContentType(ContentTypeVS.TEXT_STREAM)
                 return [responseVS:csrValidationResponse]
@@ -388,13 +371,11 @@ class RepresentativeController {
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

@@ -43,7 +43,7 @@ class TimeStampTestService {
         return trustAnchors;
     }
 
-    public ResponseVS validateMessage(byte[] messageContentBytes, Locale locale) {
+    public ResponseVS validateMessage(byte[] messageContentBytes) {
         SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
         Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:

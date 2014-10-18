@@ -21,7 +21,7 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', ':ClientTool:distZip',
-                         'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
+                         'AccessControl:war', 'ControlCenter:war', 'Vickets:war', 'Tests:jar', ':releaseAndroid']) << { }
 
 
 task releaseAndroid () {

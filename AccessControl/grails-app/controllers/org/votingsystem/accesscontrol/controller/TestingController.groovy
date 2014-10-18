@@ -1,4 +1,8 @@
 package org.votingsystem.accesscontrol.controller
+
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.ExceptionVS
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal
@@ -11,7 +15,12 @@ class TestingController {
     def signatureVSService
     def grailsApplication
 
-    def index() {  }
+    def index() {
+        ResponseVS responseVS = ResponseVS.getExceptionResponse(null, null, new ExceptionVS("Test"),
+                new ExceptionVS("Throwable"))
+        render responseVS.metaInf
+        return false
+    }
 
     def polymer() {  }
 

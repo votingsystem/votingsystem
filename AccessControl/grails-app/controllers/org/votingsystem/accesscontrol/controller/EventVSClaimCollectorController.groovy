@@ -1,8 +1,9 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+
 
 /**
  * @infoController Recogida de reclamaciones
@@ -26,22 +27,17 @@ class EventVSClaimCollectorController {
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def index() {
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = eventVSClaimSignatureCollectorService.save(messageSMIMEReq, request.getLocale())
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+		MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        return [responseVS:eventVSClaimSignatureCollectorService.save(messageSMIME)]
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

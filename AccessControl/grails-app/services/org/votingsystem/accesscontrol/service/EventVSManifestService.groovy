@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -24,15 +25,14 @@ class EventVSManifestService {
 	def sessionFactory
 	def timeStampService
 
-	public ResponseVS saveManifest(PDFDocumentVS pdfDocument, EventVS eventVS, Locale locale) {
-		PDFDocumentVS documento = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
-		String messageValidacionDocumento
-		if(documento) {
-			messageValidacionDocumento = messageSource.getMessage('pdfManifestRepeated',
-				[eventVS.subject, documento.userVS?.nif].toArray(), locale)
-			log.debug ("saveManifest - ${messageValidacionDocumento}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-				message:messageValidacionDocumento)
+	public ResponseVS saveManifest(PDFDocumentVS pdfDocument, EventVS eventVS) {
+		PDFDocumentVS document = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
+		String msg
+		if(document) {
+			msg = messageSource.getMessage('pdfManifestRepeated',
+				[eventVS.subject, document.userVS?.nif].toArray(), locale)
+			log.debug ("saveManifest - ${msg}")
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,  message:msg)
 		} else {
 			pdfDocument.state = PDFDocumentVS.State.VALIDATED_MANIFEST
 			pdfDocument.eventVS = eventVS
@@ -40,27 +40,26 @@ class EventVSManifestService {
 			eventVS.state = EventVS.State.ACTIVE
 			eventVS.userVS = pdfDocument.userVS
 			eventVS.save()
-			messageValidacionDocumento = messageSource.getMessage('pdfManifestOK',
-				[eventVS.subject, pdfDocument.userVS?.nif].toArray(), locale)
-			log.debug ("saveManifest - ${messageValidacionDocumento}")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,
-				message:messageValidacionDocumento)
+			msg = messageSource.getMessage('pdfManifestOK', [eventVS.subject, pdfDocument.userVS?.nif].toArray(),
+                    locale)
+			log.debug ("saveManifest - ${msg}")
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg)
 		}
 
 	}
 
-	public synchronized ResponseVS generateBackup(EventVSManifest eventVS, Locale locale) {
+	public synchronized ResponseVS generateBackup(EventVSManifest eventVS) {
 		log.debug("generateBackup - eventId: ${eventVS.id}")
 		if(!eventVS) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('eventVSNotFound', [eventVS.id].toArray(), locale))
         ResponseVS responseVS;
 		int numSignatures = PDFDocumentVS.countByEventVSAndState(eventVS, PDFDocumentVS.State.MANIFEST_SIGNATURE_VALIDATED)
-		Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.MANIFEST_EVENT, locale)
+		Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.MANIFEST_EVENT)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
-		
-		String serviceURLPart = messageSource.getMessage('manifestsBackupPartPath', [eventVS.id].toArray(), locale)
+		String serviceURLPart = messageSource.getMessage('manifestsBackupPartPath', [eventVS.id].toArray(),
+                locale)
 		String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(), "yyyy/MM/dd")
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"

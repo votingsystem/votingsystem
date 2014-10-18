@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 
 /**
@@ -112,17 +113,9 @@ class EventVSController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
    def cancelled() {
-		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-       if(!messageSMIMEReq) {
-           return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-       }
-		ResponseVS responseVS = eventVSService.cancelEvent(
-			messageSMIMEReq, request.getLocale());
-		if(ResponseVS.SC_OK == responseVS.statusCode) {
-			response.status = ResponseVS.SC_OK
-            responseVS.setContentType(ContentTypeVS.SIGNED)
-	    }
-       return [responseVS : responseVS]
+       MessageSMIME messageSMIME = request.messageSMIMEReq
+       if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+       return [responseVS : eventVSService.cancelEvent(messageSMIME)]
    }
 
    /**
@@ -140,17 +133,15 @@ class EventVSController {
 	   }
 	   if(!eventVS) return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                message(code: 'eventVSNotFound', args:[params.id]))]
-	   else return [responseVS:eventVSService.checkEventVSDates(eventVS, request.getLocale())]
+	   else return [responseVS:eventVSService.checkEventVSDates(eventVS)]
    }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

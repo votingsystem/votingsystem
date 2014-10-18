@@ -2,7 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import org.springframework.context.i18n.LocaleContextHolder
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -28,8 +28,8 @@ class BankVSService {
             info = messageJSON.info;
             certChainPEM = messageJSON.certChainPEM
             if(!info) throw new ValidationExceptionVS(this.getClass(), "missing param 'info'");
-            if(!certChainPEM) throw ValidationExceptionVS(this.getClass(), "missing param 'certChainPEM'")
-            if(TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) throw ValidationExceptionVS(this.getClass(),
+            if(!certChainPEM) throw new ValidationExceptionVS(this.getClass(), "missing param 'certChainPEM'")
+            if(TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'BANKVS_NEW' - operation found: " + messageJSON.operation)
         }
     }
@@ -50,7 +50,7 @@ class BankVSService {
         SaveBankRequest request = new SaveBankRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
         if(!systemService.isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
-                                         TypeVS.BANKVS_NEW.toString()].toArray(), LocaleContextHolder.locale)
+                                         TypeVS.BANKVS_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
@@ -74,7 +74,7 @@ class BankVSService {
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
                 IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
         bankVSDB.save()
-        msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), LocaleContextHolder.locale)
+        msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
         String metaInfMsg = MetaInfMsg.getOKMsg(CLASS_NAME, methodName,
                 "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
         String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"

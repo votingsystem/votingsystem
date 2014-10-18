@@ -1,6 +1,7 @@
 package filters
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.util.MetaInfMsg
@@ -53,26 +54,25 @@ class ControlCenterFilters {
             before = {
                 if("assets".equals(params.controller) || params.isEmpty() || "element".equals(params.controller)) return
                 ResponseVS responseVS = null
+                byte[] requestBytes = null
                 try {
-                    ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-                    request.contentTypeVS = contentTypeVS
-                    log.debug("before - request.contentTypeVS: ${request.contentTypeVS}")
-                    if(!contentTypeVS?.isPKCS7()) return;
-                    byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
+                    request.contentTypeVS = ContentTypeVS.getByName(request?.contentType)
+                    if(!request.contentTypeVS?.isPKCS7()) return;
+                    requestBytes = getBytesFromInputStream(request.getInputStream())
                     //log.debug "before  - requestBytes: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
-                    switch(contentTypeVS) {
+                    switch(request.contentTypeVS) {
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                            responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
+                            responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
+                                responseVS = processSMIMERequest(responseVS.smimeMessage,request.contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
-                            responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
+                            responseVS =  signatureVSService.decryptMessage(requestBytes)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 params.requestBytes = responseVS.messageBytes
                             break;
@@ -80,49 +80,33 @@ class ControlCenterFilters {
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessage(
-                                    new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
+                                    new ByteArrayInputStream(requestBytes)), request.contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         default: return;
                     }
+                    if(responseVS != null && ResponseVS.SC_OK !=responseVS.statusCode)
+                        return printOutput(response,responseVS)
                 } catch(Exception ex) {
-                    log.error(ex.getMessage(), ex)
-                    return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                            messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
+                    return printOutput(response, ResponseVS.getExceptionResponse(params.controller, params.action,
+                            ex, StackTraceUtils.extractRootCause(ex)).save())
                 }
-                if(responseVS != null && ResponseVS.SC_OK !=responseVS.statusCode)
-                    return printOutput(response,responseVS)
+
             }
 
             after = { model ->
-                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
                 ResponseVS responseVS = model?.responseVS
-                if(messageSMIMEReq && responseVS){
-                    MessageSMIME.withTransaction {
-                        messageSMIMEReq = messageSMIMEReq.merge()
-                        messageSMIMEReq.getSmimeMessage().setMessageID(
-                                "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
-                        messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
-                        if(responseVS.eventVS) messageSMIMEReq.eventVS = responseVS.eventVS
-                        if(responseVS.type) messageSMIMEReq.type = responseVS.type
-                        if(responseVS.reason) messageSMIMEReq.setReason(responseVS.getReason())
-                        if(responseVS.metaInf) messageSMIMEReq.setMetaInf(responseVS.getMetaInf())
-                        messageSMIMEReq.save(flush:true)
-                    }
-                    log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
-                }
                 if(!responseVS) return;
-                MessageSMIME messageSMIME = null
-                if(responseVS?.data instanceof MessageSMIME) {
-                    messageSMIME = responseVS?.data
-                    responseVS.setMessageBytes(messageSMIME.content)
+                if(responseVS.messageSMIME){
+                    MessageSMIME.withTransaction { responseVS.refreshMessageSMIME().save() }
+                    log.debug "after - MessageSMIME - id '${responseVS.messageSMIME.id}' - type '${responseVS.messageSMIME.type}'"
                 }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
+                                responseVS.getMessageBytes(), model.receiverCert)
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
@@ -210,10 +194,10 @@ class ControlCenterFilters {
             ResponseVS certValidationResponse = null;
             switch(contenType) {
                 case ContentTypeVS.VOTE:
-                    certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq, request.getLocale())
+                    certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq)
                     break;
                 default:
-                    certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
+                    certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq);
             }
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
@@ -233,7 +217,6 @@ class ControlCenterFilters {
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
         } else if(smimeMessageReq) {
-            log.error "**** Filter - processSMIMERequest - signature ERROR - "
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                     message:messageSource.getMessage('signatureErrorMsg', null, request.getLocale()))
         }

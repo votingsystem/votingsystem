@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -23,13 +24,11 @@ class RepresentativeDelegationService {
 	def mailSenderService
 	def signatureVSService
 	def eventVSService
-	def sessionFactory
 	LinkGenerator grailsLinkGenerator
 
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
-	public synchronized ResponseVS saveDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
-		log.debug("saveDelegation")
+	public synchronized ResponseVS saveDelegation(MessageSMIME messageSMIMEReq) {
 		//def future = callAsync {}
 		//return future.get(30, TimeUnit.SECONDS)
 		MessageSMIME messageSMIME = null
@@ -37,7 +36,7 @@ class RepresentativeDelegationService {
 		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg = null
-        ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
+        ResponseVS responseVS = checkUserDelegationStatus(userVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
         String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
@@ -80,7 +79,7 @@ class RepresentativeDelegationService {
                 type:TypeVS.REPRESENTATIVE_SELECTION)
 	}
 
-    private ResponseVS checkUserDelegationStatus(UserVS userVS, Locale locale) {
+    private ResponseVS checkUserDelegationStatus(UserVS userVS) {
         String msg = null
         if(UserVS.Type.REPRESENTATIVE == userVS.type) {
             msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
@@ -103,7 +102,7 @@ class RepresentativeDelegationService {
         return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
-    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
@@ -143,13 +142,12 @@ class RepresentativeDelegationService {
     }
 
     @Transactional
-    public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName)
         MessageSMIME messageSMIME = null
         SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
-        String msg = null
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
                 type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK)
         if(!certificateVS) throw new ExceptionVS(messageSource.getMessage('certificateVSUnknownErrorMsg' , null, locale))
@@ -168,21 +166,20 @@ class RepresentativeDelegationService {
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessage, subject)
-        MessageSMIME messageSMIMEResp = new MessageSMIME(smimeMessage:smimeMessageResp,
-                type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save()
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
         certificateVS.state = CertificateVS.State.USED
-        certificateVS.messageSMIME = messageSMIMEResp
+        certificateVS.messageSMIME = messageSMIMEReq
         certificateVS.save()
         RepresentationDocumentVS representationDocument =new RepresentationDocumentVS(representative:representative,
-                activationSMIME:messageSMIMEResp, state:RepresentationDocumentVS.State.OK).save();
-        msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
+                activationSMIME:messageSMIMEReq, state:RepresentationDocumentVS.State.OK).save();
+        String msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
                 [messageJSON.representativeName].toArray(), locale)
         log.debug "$methodName - representationDocument: ${representationDocument.id}"
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, messageSMIME: messageSMIMEReq,
                 type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-    public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq) {
         SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
@@ -215,7 +212,7 @@ class RepresentativeDelegationService {
 	
 	//{"operation":"REPRESENTATIVE_ACCREDITATIONS_REQUEST","representativeNif":"...",
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
-	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq) {
 		String msg = null
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS();
@@ -242,25 +239,23 @@ class RepresentativeDelegationService {
 				   type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		   }
 			runAsync {
-					ResponseVS backupGenResponseVS = getAccreditationsBackup(
-						representative, selectedDate ,locale)
-					if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-						File archivoCopias = backupGenResponseVS.file
-						BackupRequestVS solicitudCopia = new BackupRequestVS(
-							filePath:archivoCopias.getAbsolutePath(),
-							type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-							representative:representative,
-							messageSMIME:messageSMIMEReq, email:messageJSON.email)
-						BackupRequestVS.withTransaction {
-							if (!solicitudCopia.save()) {
-								solicitudCopia.errors.each {
-									log.error("processAccreditationsRequest - ERROR solicitudCopia - ${it}")}
-							}
-						}
-						log.debug("processAccreditationsRequest - saved BackupRequestVS '${solicitudCopia.id}'");
-						mailSenderService.sendRepresentativeAccreditations(
-							solicitudCopia, messageJSON.selectedDate, locale)
-					} else log.error("processAccreditationsRequest - ERROR creating backup");
+                //to avoid circular references
+                ResponseVS backupGenResponseVS = ((RepresentativeService)grailsApplication.mainContext.getBean(
+                        "representativeService")).getAccreditationsBackup(representative, selectedDate)
+                if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
+                    File backupFile = backupGenResponseVS.file
+                    BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupFile.getAbsolutePath(),
+                        type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representative:representative,
+                        messageSMIME:messageSMIMEReq, email:messageJSON.email)
+                    BackupRequestVS.withTransaction {
+                        if (!backupRequest.save()) {
+                            backupRequest.errors.each {
+                                log.error("processAccreditationsRequest - ERROR backupRequest - ${it}")}
+                        }
+                    }
+                    log.debug("processAccreditationsRequest - saved BackupRequestVS '${backupRequest.id}'");
+                    mailSenderService.sendRepresentativeAccreditations(backupRequest, messageJSON.selectedDate)
+                } else log.error("processAccreditationsRequest - ERROR creating backup");
 			}
 			msg = messageSource.getMessage('backupRequestOKMsg', [messageJSON.email].toArray(), locale)
 			new ResponseVS(statusCode:ResponseVS.SC_OK,	message:msg, type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST)

@@ -1,10 +1,12 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVSManifest
 import org.votingsystem.model.PDFDocumentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
  * @infoController Recogida de firmas
@@ -36,8 +38,7 @@ class EventVSManifestCollectorController {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                         message(code: 'manifestNotFound', args:[params.id]))]
 			} else {
-                return [responseVS:eventVSManifestSignatureCollectorService.saveManifestSignature(
-                        pdfDocument, eventVS, request.getLocale())]
+                return [responseVS:eventVSManifestSignatureCollectorService.saveManifestSignature(pdfDocument, eventVS)]
             }
 		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
@@ -46,12 +47,10 @@ class EventVSManifestCollectorController {
 
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 }

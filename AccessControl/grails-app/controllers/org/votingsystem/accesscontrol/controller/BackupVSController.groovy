@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.controller
 
 import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.ApplicationContextHolder
 
@@ -54,26 +55,25 @@ class BackupVSController {
             ResponseVS backupGenResponseVS = null
             if(grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
                 log.debug "Request from DEVELOPMENT environment generating sync response"
-                backupGenResponseVS = requestBackup(eventVS, request.locale)
+                backupGenResponseVS = requestBackup(eventVS)
                 if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
                     BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupGenResponseVS.message,
                             type:backupGenResponseVS.type, PDFDocumentVS:pdfDocument, email:email)
                     BackupRequestVS.withTransaction {backupRequest.save()}
-                    mailSenderService.sendBackupMsg(backupRequest, request.locale)
+                    mailSenderService.sendBackupMsg(backupRequest)
                     return [responseVS:new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())]
                 }
             } else {
                 final EventVS event = eventVS
-                final Locale locale = request.locale
                 final String emailRequest = email
                 runAsync {
-                    ResponseVS backupResponse = requestBackup(event, locale)
+                    ResponseVS backupResponse = requestBackup(event)
                     if(ResponseVS.SC_OK == backupResponse?.statusCode) {
                         BackupRequestVS backupRequest = new BackupRequestVS(
                                 filePath:backupResponse.message, type:backupResponse.type,
                                 PDFDocumentVS:pdfDocument, email:emailRequest)
                         BackupRequestVS.withTransaction { backupRequest.save() }
-                        mailSenderService.sendBackupMsg(backupRequest, request.locale)
+                        mailSenderService.sendBackupMsg(backupRequest)
                     } else log.error("Error generating Backup");
                 }
                 return [responseVS:new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))]
@@ -101,7 +101,7 @@ class BackupVSController {
             if(!event) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))]
             } else {
-                ResponseVS requestBackup = requestBackup(event, request.locale)
+                ResponseVS requestBackup = requestBackup(event)
                 if(ResponseVS.SC_OK == requestBackup?.statusCode) {
                     redirect(uri: requestBackup.message)
                 } else {
@@ -159,29 +159,27 @@ class BackupVSController {
 		else return [responseVS:responseVS]
 	}
 
-    private ResponseVS requestBackup(EventVS eventVS, Locale locale) {
+    private ResponseVS requestBackup(EventVS eventVS) {
         ResponseVS backupGenResponseVS
         if(eventVS instanceof EventVSManifest) {
-            backupGenResponseVS = eventVSManifestService.generateBackup((EventVSManifest)eventVS, locale)
+            backupGenResponseVS = eventVSManifestService.generateBackup((EventVSManifest)eventVS)
             log.debug("requestBackup - EventVSManifest")
         } else if(eventVS instanceof EventVSClaim) {
             log.debug("requestBackup - EventVSClaim")
-            backupGenResponseVS = eventVSClaimService.generateBackup((EventVSClaim)eventVS,locale)
+            backupGenResponseVS = eventVSClaimService.generateBackup((EventVSClaim)eventVS)
         } else if(eventVS instanceof EventVSElection) {
             log.debug("requestBackup - EventVSElection")
-            backupGenResponseVS = eventVSElectionService.generateBackup((EventVSElection)eventVS, locale)
+            backupGenResponseVS = eventVSElectionService.generateBackup((EventVSElection)eventVS)
         } else  log.debug ("unknown eventVS class: ${eventVS.class}")
         return backupGenResponseVS
     }
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

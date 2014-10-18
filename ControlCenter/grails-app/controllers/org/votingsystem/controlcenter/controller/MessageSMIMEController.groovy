@@ -1,10 +1,13 @@
 package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.DateUtils
 
 /**
  * @infoController Messages firmados
@@ -40,14 +43,44 @@ class MessageSMIMEController {
                 message(code: 'messageSMIMENotFound', args:[params.id]))]
     }
 
+    def contentViewer() {
+        String viewer = "message-smime"
+        String smimeMessageStr
+        String timeStampDate
+        def signedContentJSON
+        if(request.messageSMIME) {
+            smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
+            SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
+            if(smimeMessage.getTimeStampToken() != null) {
+                timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+            }
+            signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
+            if(signedContentJSON.operation) {
+                TypeVS operationType = TypeVS.valueOf(signedContentJSON.operation)
+                switch(operationType) {
+                    case TypeVS.SEND_SMIME_VOTE:
+                        viewer = "message-smime-votevs"
+                        break;
+                    case TypeVS.CANCEL_VOTE:
+                        viewer = "message-smime-votevs-canceller"
+                        break;
+                }
+                params.operation = signedContentJSON.operation
+            }
+        }
+        Map model = [operation:params.operation, smimeMessage:smimeMessageStr,
+                     viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:timeStampDate]
+        if(request.contentType?.contains("json")) {
+            render model as JSON
+        } else render(view:'contentViewer', model:model)
+    }
+
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 
 }

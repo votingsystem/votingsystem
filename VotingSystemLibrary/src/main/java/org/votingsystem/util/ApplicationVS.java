@@ -1,6 +1,6 @@
 package org.votingsystem.util;
 
-import org.votingsystem.vicket.model.AlertVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.vicket.model.TransactionVS;
 
 /**
@@ -10,6 +10,6 @@ import org.votingsystem.vicket.model.TransactionVS;
 public interface ApplicationVS {
 
     public void updateBalances(TransactionVS transactionVS);
-    public void alert(AlertVS alertVS);
+    public void alert(ResponseVS responseVS);
 
 }

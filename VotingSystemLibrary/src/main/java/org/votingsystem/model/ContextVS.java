@@ -15,7 +15,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.*;
-import org.votingsystem.vicket.model.AlertVS;
 import org.votingsystem.vicket.model.TransactionVS;
 
 import javax.mail.Session;
@@ -463,8 +462,8 @@ public class ContextVS {
         return keyStore;
     }
 
-    public void alert(AlertVS alertVS) {
-        applicationVS.alert(alertVS);
+    public void alert(ResponseVS responseVS) {
+        applicationVS.alert(responseVS);
     }
 
     public void updateBalances(TransactionVS transactionVS) { applicationVS.updateBalances(transactionVS);  }

@@ -2,11 +2,10 @@
         "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-
+        <mapping class="org.votingsystem.model.AccessControlVS" />
         <mapping class="org.votingsystem.model.AccessRequestVS"/>
         <mapping class="org.votingsystem.model.ActorVS" />
         <mapping class="org.votingsystem.model.AddressVS" />
-        <mapping class="org.votingsystem.model.AccessControlVS" />
         <mapping class="org.votingsystem.model.AnonymousDelegation"/>
         <mapping class="org.votingsystem.model.BackupRequestVS" />
         <mapping class="org.votingsystem.model.BatchRequest" />
@@ -25,6 +24,7 @@
         <mapping class="org.votingsystem.model.MessageSMIME" />
         <mapping class="org.votingsystem.model.PDFDocumentVS" />
         <mapping class="org.votingsystem.model.RepresentationDocumentVS" />
+        <mapping class="org.votingsystem.model.ResponseVS" />
         <mapping class="org.votingsystem.model.SignatureVS" />
         <mapping class="org.votingsystem.model.SubscriptionVS" />
         <mapping class="org.votingsystem.model.TagVS" />
@@ -35,8 +35,6 @@
         <mapping class="org.votingsystem.model.VoteVSCanceller"/>
         <mapping class="org.votingsystem.model.VoteVS" />
 
-
-        <mapping class="org.votingsystem.vicket.model.AlertVS" />
         <mapping class="org.votingsystem.vicket.model.MessageVS" />
         <mapping class="org.votingsystem.vicket.model.TransactionVS" />
         <mapping class="org.votingsystem.vicket.model.UserVSAccount" />

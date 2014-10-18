@@ -9,6 +9,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureService
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.Callable
@@ -37,13 +38,13 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,
                 ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
-        ResponseVS senderResponse = sender.call();
-        if(ResponseVS.SC_OK == senderResponse.getStatusCode()) {
-            byte[] multiSigendResponseBytes = senderResponse.getMessageBytes();
+        ResponseVS responseVS = sender.call();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            byte[] multiSigendResponseBytes = responseVS.getMessageBytes();
             SMIMEMessage smimeResponse = new SMIMEMessage(new ByteArrayInputStream(multiSigendResponseBytes));
             log.debug("- smimeResponse.isValidSignature(): " + smimeResponse.isValidSignature());
-        }
-        return senderResponse;
+        } else throw new ExceptionVS(responseVS.getMessage())
+        return responseVS;
     }
 
     private JSONObject getRequestJSON(String from) {

@@ -516,7 +516,8 @@ public class BrowserVS extends Region {
 
     private void openReceipt(OperationVS operation) throws Exception {
         log.debug("openReceipt");
-        DocumentVSBrowserStackPane.showDialog(StringUtils.decodeB64_TO_UTF8(operation.getMessage()), operation.getDocument());
+        String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage().getBytes()), "UTF-8");
+        DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operation.getDocument());
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

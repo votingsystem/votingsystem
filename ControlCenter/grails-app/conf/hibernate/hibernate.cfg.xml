@@ -2,11 +2,10 @@
 <!DOCTYPE hibernate-configuration SYSTEM "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
  <session-factory name="">
-
+     <mapping class="org.votingsystem.model.AccessControlVS" />
      <mapping class="org.votingsystem.model.AccessRequestVS"/>
      <mapping class="org.votingsystem.model.ActorVS" />
      <mapping class="org.votingsystem.model.AddressVS" />
-     <mapping class="org.votingsystem.model.AccessControlVS" />
      <mapping class="org.votingsystem.model.BackupRequestVS" />
      <mapping class="org.votingsystem.model.BatchRequest" />
      <mapping class="org.votingsystem.model.CertificateVS" />
@@ -24,6 +23,7 @@
      <mapping class="org.votingsystem.model.MessageSMIME" />
      <mapping class="org.votingsystem.model.PDFDocumentVS" />
      <mapping class="org.votingsystem.model.RepresentationDocumentVS" />
+     <mapping class="org.votingsystem.model.ResponseVS" />
      <mapping class="org.votingsystem.model.SignatureVS" />
      <mapping class="org.votingsystem.model.SubscriptionVS" />
      <mapping class="org.votingsystem.model.TagVS" />

@@ -115,4 +115,8 @@ class TestUtils {
         if(resultMessage) log.debug(resultMessage)
         System.exit(0)
     }
+
+    public static void finishWithError(String errorType, String resultMessage, Long numRequestCompleted) {
+        finish(errorType + ": " + resultMessage + "\n" + " - Num. requests completed: " + numRequestCompleted)
+    }
 }

@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtils
@@ -79,7 +80,7 @@ class CsrController {
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
-		} else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes(), request.getLocale())]
+		} else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes())]
 	}
 	
 	/**
@@ -103,9 +104,7 @@ class CsrController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-		if(!messageSMIME) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
-		}
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
 		List<String> admins = grailsApplication.config.VotingSystem.adminsDNI
 		UserVS userVS = messageSMIME.getUserVS()
 		def docValidacionJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
@@ -126,7 +125,7 @@ class CsrController {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                         message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif]))]
 			}
-            return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
+            return [responseVS:csrService.signCertUserVS(csrRequest)]
 		} else return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                 message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))]
 	}
@@ -176,16 +175,14 @@ class CsrController {
 		if (!csrRequest) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: "csrRequestNotFound", args: [requestStr]))]
-		} else return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
+		} else return [responseVS:csrService.signCertUserVS(csrRequest)]
 	}
 
     /**
-     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
     }
 }
