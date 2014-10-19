@@ -1,11 +1,11 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="newBankVSLbl"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="newBankVSLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
         <h3>
@@ -28,7 +28,7 @@
                          validate="" error="<g:message code="requiredLbl"/>" style="" required>
             </paper-input>
             <div style="position:relative; width:100%;">
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+                <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
             </div>
 
             <div layout vertical style="margin:15px 0px 0px 0px;">

@@ -6,7 +6,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet']"/>">
 </head>
 <body>
-    <votingsystem-innerpage-signal title="<g:message code="vicketWalletLbl"/>"></votingsystem-innerpage-signal>
+    <vs-innerpage-signal title="<g:message code="vicketWalletLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv">
         <vicket-wallet></vicket-wallet>
     </div>

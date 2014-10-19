@@ -1,8 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-user-box', file: 'vs-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
@@ -75,10 +75,10 @@
                                 <g:message code="transactionvsWithTagAdvertMsg"/>
                             </div>
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
-                            <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;
+                            <vs-button on-click="{{showTagDialog}}" style="font-size: 0.9em;
                                 margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                                 <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
-                            </votingsystem-button>
+                            </vs-button>
                         </div>
                         <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
                             display: {{selectedTags.length == 0? 'none':'block'}};">
@@ -93,11 +93,11 @@
                 </div>
                 <div style="display:{{isWithUserSelector?'block':'none'}}">
                     <div>
-                        <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                        <vs-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                             <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
-                        </votingsystem-button>
+                        </vs-button>
                         <div style="margin:10px 0 0 0;">
-                            <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                            <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
                         </div>
                     </div>
                 </div>
@@ -108,9 +108,9 @@
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <votingsystem-button on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
+                    <vs-button on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
                         <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
             </div>
         </div>

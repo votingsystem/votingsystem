@@ -1,0 +1,71 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../vs-i18n/vs-i18n.html">
+
+<polymer-element name="vs-user-box" attributes="boxCaption multiSelection">
+    <template>
+        <style>
+            .receptorsBox {
+                margin: 10px auto 30px auto;
+                padding: 5px 0px 0px 0px;;
+                border: none;
+                width:450px;
+            }
+            .receptorsBox legend {
+                font-size: 1.2em;
+                font-weight: bold;
+                color:#6c0404;
+            }
+        </style>
+        <vs-i18n id="i18nVS"></vs-i18n>
+        <div layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;display:{{ uservsList.length == 0?'none':'block'}}">
+            <fieldset class="receptorsBox">
+                <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
+                <template repeat="{{uservs in uservsList}}">
+                    <div layout horizontal style="padding: 0px 10px 0px 10px;">
+                        <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{removeUser}}"></core-icon-button>
+                        <div flex layout vertical center-justified style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>
+                            {{(uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name}}
+                        </div>
+                    </div>
+                </template>
+            </fieldset>
+        </div>
+    </template>
+    <script>
+        Polymer('vs-user-box', {
+            publish: {
+                uservsList: {value: []}
+            },
+            ready:function() {
+                this.messages = this.$.i18nVS.getMessages()
+                this.multiSelection = this.multiSelection || true
+            },
+            addUser:function(userToAdd) {
+                var isNewUser = true
+                for(userIdx in this.uservsList) {
+                    if(userToAdd.id == this.uservsList[userIdx].id) isNewUser = false
+                }
+                console.log("vs-user-box - addUser: " + userToAdd.nif + " - isNewUser: " + isNewUser +
+                        " - multiSelection: " + this.multiSelection)
+                if(isNewUser) {
+                    if(!this.multiSelection) this.uservsList = [userToAdd]
+                    else this.uservsList.push(userToAdd)
+                }
+            },
+            getUserList:function(userList) {
+                return this.uservsList
+            },
+            removeUser:function(e) {
+                var userToDelete = e.target.templateInstance.model.uservs
+                for(userIdx in this.uservsList) {
+                    if(userToDelete.id == this.uservsList[userIdx].id) {
+                        this.uservsList.splice(userIdx, 1)
+                    }
+                }
+            },
+            removeUsers:function(e) {
+                this.uservsList = []
+            }
+        });</script>
+</polymer-element>

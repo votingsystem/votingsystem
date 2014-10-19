@@ -1,7 +1,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 </head>
 <body>
@@ -32,8 +32,8 @@
                                      validate="" error="<g:message code="requiredLbl"/>" style="" required>
                         </paper-input>
                     </div>
-                    <votingsystem-button type="button" onclick="showTagDialog()">
-                        <i class="fa fa-tag"></i> <g:message code="addTagLbl" /></votingsystem-button>
+                    <vs-button type="button" onclick="showTagDialog()">
+                        <i class="fa fa-tag"></i> <g:message code="addTagLbl" /></vs-button>
                 </div>
                 <div id="tagsDiv" style="padding:5px 0px 5px 30px; display:none;">
                     <div layout horizontal center>
@@ -49,14 +49,14 @@
             </div>
 
             <div style="position:relative; width:100%;">
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+                <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
             </div>
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <votingsystem-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
+                    <vs-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-check"></i> <g:message code="newGroupVSLbl"/>
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
             </div>
 

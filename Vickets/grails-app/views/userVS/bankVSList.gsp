@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="pageContentDiv">
-    <votingsystem-innerpage-signal title="<g:message code="bankVSListLbl"/>"></votingsystem-innerpage-signal>
+    <vs-innerpage-signal title="<g:message code="bankVSListLbl"/>"></vs-innerpage-signal>
     <bankVS-list bankVSMap="${bankVSMap as grails.converters.JSON}"></bankVS-list>
 </div>
 </body>

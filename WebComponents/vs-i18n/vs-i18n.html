@@ -1,0 +1,61 @@
+<polymer-element name="vs-i18n" attributes="messages">
+<template>
+</template>
+<script>
+    Polymer('vs-i18n', {
+        publish: {
+            messages: {value: {}}
+        },
+        ready:function() {
+            this.messages = {
+                es: {
+                    selectedTagsLbl:"Etiquetas seleccionadas",
+                    searchResultLbl:"Resultado de la búsqueda",
+                    tagLbl:"Etiqueta",
+                    tagSearchLbl:"Buscar",
+                    acceptLbl:"Aceptar",
+                    closeLbl:"Cerrar",
+                    caption:"Búsqueda avanzada",
+                    fromDate:"Fecha desde (dd/mm/aa)",
+                    toDate:"Fecha hasta (dd/mm/aa)",
+                    searchInputMessage:"Cadena de búsqueda",
+                    dateLbl:"Fecha",
+                    hourLbl: "Hora (hh:mm)",
+                    invalidSearchLbl:"Introduzca una consulta válida",
+                    invalidDateLbl:"No es una fecha válida!",
+                    invalidHourLbl:"No es una hora válida!",
+                    deleteLbl:"Borrar"
+                },
+                en: {
+                    selectedTagsLbl:"Selected tags",
+                    searchResultLbl:"Search result",
+                    tagLbl:"Tag",
+                    tagSearchLbl:"Search",
+                    acceptLbl:"Accept",
+                    closeLbl:"Close",
+                    caption:"Avanced search",
+                    fromDate:"From date (dd/mm/aa)",
+                    toDate:"To date (dd/mm/aa)",
+                    searchInputMessage:"Enter search text",
+                    dateLbl:"Date",
+                    hourLbl: "Hour (hh:mm)",
+                    invalidSearchLbl:"Enter a valid search",
+                    invalidDateLbl:"Invalid date!",
+                    invalidHourLbl:"Invalid hour!",
+                    deleteLbl:"Delete"
+                }
+            }
+            console.log(this.tagName + " - ready")
+        },
+        getMessages:function() {
+            var resultMessages
+            var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
+            var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
+            if(this.messages[userLocale]) resultMessages = this.messages[userLocale]
+            else resultMessages = this.messages['es']
+            console.log(this.tagName + " loaded locales for: " + userLocale)
+            return resultMessages
+        }
+    });
+</script>
+</polymer-element>

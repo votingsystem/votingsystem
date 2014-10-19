@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 
 <polymer-element name="asciidoc-template-test" attributes="jsonDoc">
@@ -40,7 +40,7 @@
             <div>
                 <input type="checkbox" id="isSignedDocument"/><label><g:message code="sendSignedDocumentLbl"/></label>
             </div>
-            <votingsystem-html-echo html="{{responseData}}"></votingsystem-html-echo>
+            <vs-html-echo html="{{responseData}}"></vs-html-echo>
             <div layout horizontal style="margin:0px 20px 0px 0px;">
                 <div flex>
                     <input type="text" id="keyEnterListener" style="width: 0px;background-color:white; border: none;" autofocus/>

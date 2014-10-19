@@ -7,8 +7,11 @@ import java.lang.reflect.Field;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -311,7 +314,7 @@ public class FileUtils {
         out.close();
     }
 
-    private static void mkdirs(File outdir,String path) {
+    private static void mkdirs(File outdir, String path) {
         File d = new File(outdir, path);
         if( !d.exists() )
             d.mkdirs();
@@ -352,6 +355,48 @@ public class FileUtils {
             zin.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void copyDirs(String sourcePath, String destPath) {
+        try {
+            Path source = Paths.get(sourcePath);
+            Path target = Paths.get(destPath);
+            Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS),
+                    Integer.MAX_VALUE, new CopyDirectory(source, target));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static class CopyDirectory extends SimpleFileVisitor<Path> {
+
+        private Path source;
+        private Path target;
+
+        public CopyDirectory(Path source, Path target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+            Files.copy(file, target.resolve(source.relativize(file)));
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path directory,
+                                                 BasicFileAttributes attributes) throws IOException {
+            Path targetDirectory = target.resolve(source.relativize(directory));
+            try {
+                Files.copy(directory, targetDirectory);
+            } catch (FileAlreadyExistsException e) {
+                if (!Files.isDirectory(targetDirectory)) {
+                    throw e;
+                }
+            }
+            return FileVisitResult.CONTINUE;
         }
     }
 }

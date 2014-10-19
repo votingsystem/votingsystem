@@ -1,12 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 
 
 <polymer-element name="image-viewer-dialog" attributes="url description">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .dialog {
                 box-sizing: border-box;
@@ -34,7 +34,7 @@
             <div layout horizontal center center-justified>
                 <img src="{{url}}" style="width:100%; height: 100%;"></img>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('image-viewer-dialog', {

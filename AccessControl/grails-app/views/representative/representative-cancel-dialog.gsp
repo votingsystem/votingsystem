@@ -1,11 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 
 
 <polymer-element name="representative-cancel-dialog">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .dialog {
@@ -40,13 +40,13 @@
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div>
-                        <votingsystem-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
+                        <vs-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                 </div>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('representative-cancel-dialog', {

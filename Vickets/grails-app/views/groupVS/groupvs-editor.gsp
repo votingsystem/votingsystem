@@ -1,11 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
 
 <polymer-element name="groupvs-editor">
     <template>
         <h3>
             <div id="editGroupHeader" class="pageHeader text-center">
-                <votingsystem-html-echo html="{{groupvs.name}}"></votingsystem-html-echo>
+                <vs-html-echo html="{{groupvs.name}}"></vs-html-echo>
             </div>
         </h3>
         <div class="text-left" style="margin:10px 0 10px 0;">
@@ -16,15 +16,15 @@
             </ul>
         </div>
         <div style="position:relative; width:100%;">
-            <votingsystem-texteditor id="textEditor"  dataJSON=""
+            <vs-texteditor id="textEditor"  dataJSON=""
                              type="pc" style="height:300px; width:100%;">
-            </votingsystem-texteditor>
+            </vs-texteditor>
         </div>
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
-                <votingsystem-button on-click="{{submitForm}}">
+                <vs-button on-click="{{submitForm}}">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="saveChangesLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
         </div>
     </template>

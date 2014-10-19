@@ -5,7 +5,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="groupvsUserListLbl"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="groupvsUserListLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>

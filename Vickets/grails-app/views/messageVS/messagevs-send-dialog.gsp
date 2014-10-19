@@ -1,11 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
     <template>
-        <votingsystem-dialog id="xDialog"  title="<g:message code="sendMessageVSDialogCaption"/>"
+        <vs-dialog id="xDialog"  title="<g:message code="sendMessageVSDialogCaption"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style> </style>
             <g:include view="/include/styles.gsp"/>
@@ -17,13 +17,13 @@
 
                     <div layout horizontal style="padding:20px 20px 20px 20px;">
                         <div flex></div>
-                        <votingsystem-button on-click="{{sendMessage}}">
+                        <vs-button on-click="{{sendMessage}}">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl" />
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                 </div>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('messagevs-send-dialog', {

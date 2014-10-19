@@ -1,15 +1,15 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-i18n', file: 'votingsystem-i18n.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-i18n', file: 'vs-i18n.html')}">
 
 
 <polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
 <template>
-    <votingsystem-dialog id="xDialog" title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <vs-dialog id="xDialog" title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
             .selectTagDialog {
                 box-sizing: border-box;
@@ -27,7 +27,7 @@
             }
         </style>
         <g:include view="/include/styles.gsp"/>
-        <votingsystem-i18n id="i18nVS"></votingsystem-i18n>
+        <vs-i18n id="i18nVS"></vs-i18n>
         <div layout vertical id="container" style="padding:10px;">
             <div>
                 <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
@@ -46,9 +46,9 @@
                 <div flex layout horizontal center center-justified>
                     <input id="tagSearchInput" class="form-control" required autofocus
                            title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                    <votingsystem-button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
+                    <vs-button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-search" style="margin:0 5px 0 2px;"></i>  {{messages.tagSearchLbl}}
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
             </div>
 
@@ -69,14 +69,14 @@
 
             <div layout horizontal style="margin:20px 0 0 0;">
                 <div flex></div>
-                <votingsystem-button on-click="{{processTags}}">
+                <vs-button on-click="{{processTags}}">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> {{messages.acceptLbl}}
-                </votingsystem-button>
+                </vs-button>
             </div>
         </div>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
-    </votingsystem-dialog>
+    </vs-dialog>
 </template>
 <script>
     Polymer('tagvs-select-dialog', {

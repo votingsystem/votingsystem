@@ -33,9 +33,9 @@
 
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
                     <div flex></div>
-                    <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <vs-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                         <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
                <content></content>
             </div>

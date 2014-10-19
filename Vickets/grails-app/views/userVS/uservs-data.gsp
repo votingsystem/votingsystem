@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageVS/messagevs-send-dialog']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
@@ -43,31 +43,31 @@
                     <template if="{{uservs.state == 'ACTIVE'}}">
                         <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
                             <div>
-                                <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
+                                <vs-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
 
                             <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                                <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
+                                <vs-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
 
                             <div>
-                                <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
+                                <vs-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
 
                             <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
-                                <votingsystem-button id="blockUserVSButton" type="submit"
+                                <vs-button id="blockUserVSButton" type="submit"
                                                      style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
                                     <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
                         </div>
                     </template>
@@ -75,7 +75,7 @@
                     <template if="{{uservs.description}}">
                         <div style="margin:0 0 20px 0;">
                             <div id="userDescriptionDiv" class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
-                                <votingsystem-html-echo html="{{uservs.description}}"></votingsystem-html-echo>
+                                <vs-html-echo html="{{uservs.description}}"></vs-html-echo>
                             </div>
                         </div>
                     </template>

@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-addoption-dialog.gsp']"/>">
 
 <polymer-element name="eventvs-vote-editor">
@@ -48,7 +48,7 @@
             </div>
 
             <div style="position:relative; width:100%;">
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+                <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
             </div>
 
 
@@ -77,9 +77,9 @@
                     </button>
                 </div>
                 <div flex></div>
-                <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                <vs-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="publishLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
         </form>
 

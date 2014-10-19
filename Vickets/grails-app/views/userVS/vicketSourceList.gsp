@@ -4,7 +4,7 @@
     <g:render template="/template/pagevs"/>
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="bankVSListPageLbl"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="bankVSListPageLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div style="margin:0px 30px 0px 30px;">
         <div layout horizontal center center-justified>

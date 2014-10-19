@@ -55,9 +55,9 @@
                 <div layout vertical center center-justified>
                 <div horizontal layout center center-justified style="">
                     <div style="width: 200px;">
-                        <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <vs-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                             <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                     <div><g:message code="transactionvsWithTagAdvertMsg"/></div>
                 </div>

@@ -11,13 +11,13 @@
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-navbar', file: 'vs-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-innerpage-signal', file: 'votingsystem-innerpage-signal.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
@@ -28,7 +28,7 @@
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
-        <votingsystem-navbar id="_navbar" style="display: none;">
+        <vs-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
                 </core-toolbar>
@@ -100,7 +100,7 @@
             </core-header-panel>
             <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
             <content id="content"></content>
-        </votingsystem-navbar>
+        </vs-navbar>
         <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>

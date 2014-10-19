@@ -1,13 +1,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
 
 <polymer-element name="votevs-result-dialog" attributes="opened url">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .dialog {
@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
-                    <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
+                    <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <template if="{{messageType == 'VOTE_RESULT'}}">
                     <p style="text-align: center; display:{{optionSelected == null? 'none':'block'}}">
@@ -47,15 +47,15 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
                             <div flex></div>
                             <div style="margin:10px 0px 10px 0px;">
-                                <votingsystem-button on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
+                                <vs-button on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-times" style="margin:0 10px 0 0;"></i> <g:message code="cancelVoteLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
                         </div>
                     </template>
@@ -64,16 +64,16 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
-                                </votingsystem-button>
+                                </vs-button>
                             </div>
                             <div flex></div>
                         </div>
                     </template>
                 </template>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('votevs-result-dialog', {

@@ -1,7 +1,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
+
+<link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
+
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype">
     <template>
@@ -52,6 +55,7 @@
                             </select>
                         </template>
                     </div>
+                    <vs-pager on-pager-data="{{pagerEvent}}">vs-pagervs-pager</vs-pager>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventVSData.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
@@ -101,6 +105,9 @@
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")
                 this.page = 0;
+            },
+            pagerEvent:function(e) {
+                console.log(this.tagName + " - pagerEvent" + e.detail)
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")

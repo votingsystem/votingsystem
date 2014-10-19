@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
@@ -14,9 +14,9 @@
 <polymer-element name="balance-uservs" attributes="url balance">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
+        <vs-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
             <transactionvs-data id="transactionViewer"></transactionvs-data>
-        </votingsystem-dialog>
+        </vs-dialog>
         <style no-shim>
         .messageToUser {
             font-weight: bold; margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;

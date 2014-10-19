@@ -1,7 +1,7 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 
 <polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
@@ -84,9 +84,9 @@
             <div layout horizontal style="margin:15px 20px 0px 0px;">
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;">
-                    <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                    <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkSignatureLbl"/>
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
             </div>
         </template>

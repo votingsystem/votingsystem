@@ -11,13 +11,13 @@
     </style>
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="trustedCertPageTitle"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="trustedCertPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superuser".equals(params.menu)}">
-            <votingsystem-button onclick="document.querySelector('#reasonDialog').toggle()">
+            <vs-button onclick="document.querySelector('#reasonDialog').toggle()">
                 <g:message code="cancelCertLbl"/>
-            </votingsystem-button>
+            </vs-button>
         </g:if>
     </div>
     <div>

@@ -1,3 +1,7 @@
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
 version = '0.5.0'
 
 apply plugin: 'project-report'
@@ -127,6 +131,28 @@ def copyVotingSystemApps(project) {
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
 	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
     copyClientTool(project)
+}
+
+
+def copyWebComponents(project) {
+    File[] webComponents = file("./WebComponents").listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String fileName) {
+            return fileName.startsWith("vs-")
+        }
+    });
+    String baseDestPath = project.file("web-app/bower_components").absolutePath
+    for(File webComponent:webComponents) {
+        copy {
+            from webComponent.absolutePath
+            into "$baseDestPath/${webComponent.getName()}"
+        }
+    }
+}
+
+task copyWebComponents() {
+    doLast {
+        copyWebComponents(project)
+    }
 }
 
 def copyClientTool(project) {

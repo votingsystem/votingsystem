@@ -1,11 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <votingsystem-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 540px;">
+        <vs-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 540px;">
             <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
@@ -24,18 +24,18 @@
             </div>
             <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
                 <template if="{{isClientToolConnected}}">
-                    <votingsystem-button type="button" on-click="{{activateUser}}"
+                    <vs-button type="button" on-click="{{activateUser}}"
                                          style="margin:0 10px;display:{{isActive?'none':'block'}}">
                         <i class="fa fa-thumbs-o-up" style="margin:0 5px 0 2px;"></i> <g:message code="activateUserLbl"/>
-                    </votingsystem-button>
-                    <votingsystem-button on-click="{{initCancellation}}"
+                    </vs-button>
+                    <vs-button on-click="{{initCancellation}}"
                                          style="margin:0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                         <i class="fa fa-thumbs-o-down" style="margin:0 5px 0 2px;"></i> <g:message code="deActivateUserLbl"/>
-                    </votingsystem-button>
+                    </vs-button>
                 </template>
-                <votingsystem-button type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
+                <vs-button type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
                     <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> <g:message code="userVSPageLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
             <div id="receipt" style="display:none;"> </div>
         </div>
@@ -45,7 +45,7 @@
                                    messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></reason-dialog>
             </div>
         </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('groupvs-user', {

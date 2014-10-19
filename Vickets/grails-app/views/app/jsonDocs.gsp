@@ -11,15 +11,15 @@
 <body>
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
-            <votingsystem-button onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
+            <vs-button onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
                 TransactionVS from BankVS
-            </votingsystem-button>
+            </vs-button>
             <div id="transactionvsFromBankVS" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
             <div layout horizontal center center-justified>
-                <votingsystem-button style="margin: 0px 0px 0px 5px;">TransactionVS </votingsystem-button>
+                <vs-button style="margin: 0px 0px 0px 5px;">TransactionVS </vs-button>
                 - http://vickets:8086/Vickets/transaction
             </div>
             <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>

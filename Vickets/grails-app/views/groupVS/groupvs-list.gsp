@@ -2,7 +2,7 @@
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-details']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 
 
 <polymer-element name="groupvs-list" attributes="url state">
@@ -40,7 +40,7 @@
                             <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
-                                <div class='groupvsInfoDiv'><votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo></div>
+                                <div class='groupvsInfoDiv'><vs-html-echo html="{{groupvs.description}}"></vs-html-echo></div>
                                 <div style="position: relative;display: {{(groupvs.state == 'CANCELLED')?'block':'none'}};">
                                     <div class='groupvsMessageCancelled' style=""><g:message code="groupvsCancelledLbl"/></div>
                                 </div>

@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
 
 <polymer-element name="representative-editor" attributes="pageHeader editorData">
     <template>
@@ -34,17 +34,17 @@
         </div>
 
         <div style="position:relative; width:100%;">
-            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+            <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
         </div>
 
         <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
-            <votingsystem-button on-click="{{selectImage}}" style="margin: 0px 0px 0px 5px;">
+            <vs-button on-click="{{selectImage}}" style="margin: 0px 0px 0px 5px;">
                 <i class="fa fa-file-image-o" style="margin:0 5px 0 2px;"></i> <g:message code="selectImageLbl"/>
-            </votingsystem-button>
+            </vs-button>
             <div flex></div>
-            <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+            <vs-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                 <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="publishLbl"/>
-            </votingsystem-button>
+            </vs-button>
         </div>
         <div style="margin:10px 10px 40px 10px;">{{selectedImagePath}}</div>
 

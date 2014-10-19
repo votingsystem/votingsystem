@@ -1,0 +1,18 @@
+{
+  "name": "vs-socket",
+  "version": "0.0.4",
+  "authors": [
+    "JJ <jgzornoza@gamil.com>"
+  ],
+  "description": "Element to make websocket connections",
+  "keywords": "votingsystem, vickets, polymer, web-components",
+  "main": "vs-socket.html",
+  "license": "Licensed under the Apache License, Version 2.0",
+  "homepage": "https://github.com/votingsystem/vs-socket/",
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.4.0"
+  }
+}

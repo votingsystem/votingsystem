@@ -4,10 +4,10 @@
     <g:render template="/template/pagevs"/>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="transactionPageTitle"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div layout horizontal center center-justified>
         <transactionvs-selector id="transactionSelector"></transactionvs-selector>

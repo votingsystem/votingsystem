@@ -60,7 +60,7 @@
                                      style="text-align:center; width: 100px;margin-right: 20px;"></img>
                             </div>
                             <div style="margin:auto auto">
-                                <votingsystem-html-echo html="{{representative.description}}"></votingsystem-html-echo>
+                                <vs-html-echo html="{{representative.description}}"></vs-html-echo>
                             </div>
                         </div>
                     </div>
@@ -69,16 +69,16 @@
                         <template if="{{'admin' == menuType}}">
                             <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
                                 <div style="display:table-cell;">
-                                    <votingsystem-button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                    <vs-button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
                                              on-click="{{requestVotingHistory}}">
                                         <g:message code="requestVotingHistoryLbl"/>
-                                    </votingsystem-button>
+                                    </vs-button>
                                 </div>
                                 <div style="display:table-cell;">
-                                    <votingsystem-button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                    <vs-button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
                                             on-click="{{requestAccreditations}}">
                                         <g:message code="requestRepresentativeAcreditationsLbl"/>
-                                    </votingsystem-button>
+                                    </vs-button>
                                 </div>
                             </div>
                         </template>

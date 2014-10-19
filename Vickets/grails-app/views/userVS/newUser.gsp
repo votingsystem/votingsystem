@@ -3,7 +3,7 @@
     <g:render template="/template/pagevs"/>
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="newUserCertLbl"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="newUserCertLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="min-height: 1000px;">
     <div style="margin:0px 30px 0px 30px;">
         <h3>
@@ -22,7 +22,7 @@
         <form onsubmit="return submitForm()">
             <div style="position:relative; width:100%;">
                 <label><g:message code="interestInfoLbl"/></label>
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+                <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
             </div>
 
             <div style="margin:15px 0px 0px 0px;">

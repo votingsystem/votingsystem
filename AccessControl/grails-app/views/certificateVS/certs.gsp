@@ -6,7 +6,7 @@
     <style type="text/css" media="screen"></style>
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="certsPageTitle"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="certsPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <cert-list id="certList" url="<g:createLink controller="certificateVS" action="certs"/>"></cert-list>
 </div>

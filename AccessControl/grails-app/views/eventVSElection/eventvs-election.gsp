@@ -47,7 +47,7 @@
 
             <div>
                 <div class="eventContentDiv">
-                    <votingsystem-html-echo html="{{eventvs.content}}"></votingsystem-html-echo>
+                    <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
                 </div>
 
                 <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">

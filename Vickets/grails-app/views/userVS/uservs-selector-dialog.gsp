@@ -1,10 +1,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 
 <polymer-element name="uservs-selector-dialog" attributes="transactionvsURL opened">
     <template>
-        <votingsystem-dialog id="xDialog" class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
+        <vs-dialog id="xDialog" class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}" style="overflow: auto;">
         <style no-shim>
             .uservsSearchDialog {
@@ -18,22 +18,22 @@
                 <div style="">
                     <div>
                         <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
-                        <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                        <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
                     </div>
 
                     <div>
                         <div layout horizontal center center-justified id="searchPanel" style="margin:5px auto 0px auto;width: 100%;">
                             <input id="userSearchInput" type="text" style="width:200px;" class="form-control"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
-                            <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
+                            <vs-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
                                 <i class="fa fa-search" style="margin:0 5px 0 2px;"></i> <g:message code="userSearchLbl"/>
-                            </votingsystem-button>
+                            </vs-button>
                         </div>
                         <uservs-selector id="userVSSelector" isSelector="true"></uservs-selector>
                     </div>
                 </div>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('uservs-selector-dialog', {

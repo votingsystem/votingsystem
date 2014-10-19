@@ -67,12 +67,12 @@
 
                 <template if="{{isUserView}}">
                     <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;">
-                        <votingsystem-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                        <vs-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
-                        </votingsystem-button>
-                        <votingsystem-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                        </vs-button>
+                        <vs-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                 </template>
 
@@ -97,14 +97,14 @@
             </div>
         </div>
         <div class="eventContentDiv" style="">
-            <votingsystem-html-echo html="{{groupvs.userVS.description}}"></votingsystem-html-echo>
+            <vs-html-echo html="{{groupvs.userVS.description}}"></vs-html-echo>
         </div>
 
         <div layout horizontal>
             <div style="margin: 5px 0 0 0;">
-                <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
+                <vs-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
                     <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
             <div flex></div>
             <div id="" style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">

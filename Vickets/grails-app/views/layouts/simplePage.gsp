@@ -9,9 +9,9 @@
     <g:include view="/include/utils_js.gsp"/>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-innerpage-signal', file: 'votingsystem-innerpage-signal.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>

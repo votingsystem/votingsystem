@@ -1,12 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 
 <polymer-element name="add-control-center-dialog" attributes="opened">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .dialog {
@@ -68,15 +68,15 @@
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div style="margin:10px 0px 10px 0px;">
-                        <votingsystem-button on-click="{{checkControlCenter}}" style="margin: 0px 0px 0px 5px;">
+                        <vs-button on-click="{{checkControlCenter}}" style="margin: 0px 0px 0px 5px;">
                             <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                 </div>
 
 
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('add-control-center-dialog', {

@@ -1,12 +1,12 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog', file: 'votingsystem-advanced-search-dialog.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-advanced-search-dialog', file: 'vs-advanced-search-dialog.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/search-info.gsp']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-list']"/>">
 </head>
 <body>
-    <votingsystem-innerpage-signal title="<g:message code="electionSystemLbl"/>"></votingsystem-innerpage-signal>
+    <vs-innerpage-signal title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv">
         <search-info id="searchInfo"></search-info>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -14,7 +14,7 @@
         <eventvs-election-list id="eventvsList" url="${createLink(controller: 'eventVSElection', action: 'index')}?menu=${params.menu}&eventVSState=ACTIVE"
                       eventvstype="election"></eventvs-election-list>
     </div>
-    <votingsystem-advanced-search-dialog id="advancedSearchDialog"></votingsystem-advanced-search-dialog>
+    <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
 </body>
 </html>
 <asset:script>

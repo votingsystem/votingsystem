@@ -44,7 +44,7 @@
 
             <div>
                 <div class="eventContentDiv" style="width:100%;">
-                    <votingsystem-html-echo html="{{eventvs.content}}"></votingsystem-html-echo>
+                    <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
                 </div>
 
 
@@ -92,9 +92,9 @@
 
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                 <div flex></div>
-                <votingsystem-button on-click="{{submitClaim}}" style="margin: 0px 0px 0px 5px;">
+                <vs-button on-click="{{submitClaim}}" style="margin: 0px 0px 0px 5px;">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="signLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
         </div>
         <eventvs-admin-dialog id="eventVSAdminDialog"></eventvs-admin-dialog>

@@ -1,12 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 
 
 <polymer-element name="eventvs-admin-dialog" attributes="opened">
     <template>
-        <votingsystem-dialog flex vertical id="xDialog" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
+        <vs-dialog flex vertical id="xDialog" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
             <g:include view="/include/styles.gsp"/>
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
@@ -57,12 +57,12 @@
 
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
                     <div flex></div>
-                    <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <vs-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                    </votingsystem-button>
+                    </vs-button>
                 </div>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('eventvs-admin-dialog', {

@@ -1,10 +1,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/message-smime']"/>">
 
 <polymer-element name="message-smime-dialog" attributes="transactionvsURL opened">
     <template>
-        <votingsystem-dialog id="xDialog" class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <vs-dialog id="xDialog" class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{transactionvsURL}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="json"></core-ajax>
             <div style="display:{{isProcessing? 'block':'none'}}">
@@ -15,7 +15,7 @@
             <div>
                 <message-smime id="transactionViewer"></message-smime>
             </div>
-        </votingsystem-dialog>
+        </vs-dialog>
     </template>
     <script>
         Polymer('message-smime-dialog', {

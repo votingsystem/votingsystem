@@ -1,10 +1,10 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
 </head>
 <body>
-<votingsystem-innerpage-signal title="<g:message code="newCACertLbl"/>"></votingsystem-innerpage-signal>
+<vs-innerpage-signal title="<g:message code="newCACertLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="min-height: 1000px;">
     <h3>
         <div class="pageHeader text-center">
@@ -22,7 +22,7 @@
     <form onsubmit="return submitForm()">
         <div style="position:relative; width:100%;">
             <label><g:message code="interestInfoLbl"/></label>
-            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+            <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
         </div>
 
         <div layout vertical style="margin:15px 0px 0px 0px;">
@@ -32,9 +32,9 @@
 
         <div style="margin:10px 10px 60px 0px;height:20px;">
             <div style="float:right;">
-                <votingsystem-button onclick="submitForm()">
+                <vs-button onclick="submitForm()">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="addCALbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
         </div>
 

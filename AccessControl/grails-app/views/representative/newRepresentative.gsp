@@ -4,7 +4,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-editor']"/>">
 </head>
 <body>
-    <votingsystem-innerpage-signal title="<g:message code="newRepresentativeLbl"/>"></votingsystem-innerpage-signal>
+    <vs-innerpage-signal title="<g:message code="newRepresentativeLbl"/>"></vs-innerpage-signal>
     <div layout vertical class="pageContentDiv">
         <representative-editor id="representativeEditor"></representative-editor>
     </div>

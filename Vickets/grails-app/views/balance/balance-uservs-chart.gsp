@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-highcharts', file: 'highcharts-import.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-highcharts', file: 'highcharts-import.html')}">
 
 <polymer-element name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
     <template>

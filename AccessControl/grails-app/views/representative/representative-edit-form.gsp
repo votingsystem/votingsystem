@@ -17,14 +17,14 @@
 
         <div style="display:{{step == 'operationSelection'?'block':'none'}}">
             <div layout horizontal center center-justified>
-                <votingsystem-button type="button" on-click="{{representativeCancel}}"
+                <vs-button type="button" on-click="{{representativeCancel}}"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-times" style="margin:0 5px 0 2px;"></i> <g:message code="removeRepresentativeLbl"/>
-                </votingsystem-button>
-                <votingsystem-button type="button" on-click="{{representativeEdit}}"
+                </vs-button>
+                <vs-button type="button" on-click="{{representativeEdit}}"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-hand-o-right" style="margin:0 5px 0 2px;"></i> <g:message code="editRepresentativeLbl"/>
-                </votingsystem-button>
+                </vs-button>
             </div>
         </div>
 
@@ -38,9 +38,9 @@
                 <div>
                     <div layout horizontal style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                         <div flex></div>
-                        <votingsystem-button on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
+                        <vs-button on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                        </votingsystem-button>
+                        </vs-button>
                     </div>
                 </div>
             </div>
