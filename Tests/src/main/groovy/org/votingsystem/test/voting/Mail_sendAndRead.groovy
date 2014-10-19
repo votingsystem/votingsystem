@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 Map simulationDataMap = [smtpHostName:"localhost", pop3HostName:"localhost", userName:"voting_system_access_control",
-                         domainName:"votingsystem.org", password:"123456", maxPendingResponses:10,
+                         domainName:"votingsystem.org", password:"1234", maxPendingResponses:10,
                          numRequestsProjected:2, timer:[active:false, time:"00:00:10"]]
 
 

@@ -23,39 +23,22 @@ class VoteVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
-		String localServerURL = grailsApplication.config.grails.serverURL
-		String msg
-		try {
-			SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-			CertificateVS voteVSCertificate = smimeMessageReq.getVoteVS().getCertificateVS()
-			FieldEventVS optionSelected = eventVS.checkOptionId(smimeMessageReq.getVoteVS().getOptionSelected().getId())
-			if (!optionSelected) {
-				msg = messageSource.getMessage('voteOptionNotFoundErrorMsg',
-					[smimeMessageReq.getVoteVS().getOptionSelected().getId()].toArray(), locale)
-				log.error ("$methodName - ERROR OPTION -> '${msg}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                        message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-			}
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = eventVS.controlCenterVS.serverURL
-			String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
-			smimeMessageReq.setMessageID("${localServerURL}/messageSMIME/${messageSMIMEReq.id}")
-			SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-				fromUser,toUser, smimeMessageReq, subject)
-			messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
-			messageSMIMEReq.content = smimeMessageResp.getBytes()
-            messageSMIMEReq.save()
-			voteVSCertificate.state = CertificateVS.State.USED;
-			VoteVS voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
-                    certificateVS:voteVSCertificate, messageSMIME:messageSMIMEReq).save()
-            ResponseVS modelResponseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.VOTE,
-                    type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:messageSMIMEReq, eventVS:eventVS)
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[responseVS:modelResponseVS])
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR, eventVS:eventVS,
-                    message:messageSource.getMessage('voteErrorMsg', null, locale))
-		}
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        CertificateVS voteVSCertificate = smimeMessageReq.getVoteVS().getCertificateVS()
+        FieldEventVS optionSelected = eventVS.checkOptionId(smimeMessageReq.getVoteVS().getOptionSelected().getId())
+        if (!optionSelected) throw new ExceptionVS(messageSource.getMessage('voteOptionNotFoundErrorMsg',
+                    [smimeMessageReq.getVoteVS().getOptionSelected().getId()].toArray(), locale))
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = eventVS.controlCenterVS.serverURL
+        String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+                fromUser,toUser, smimeMessageReq, subject)
+        messageSMIMEReq.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setSmimeMessage(smimeMessageResp)
+        voteVSCertificate.state = CertificateVS.State.USED;
+        VoteVS voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
+                certificateVS:voteVSCertificate, messageSMIME:messageSMIMEReq).save()
+        return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.VOTE,
+                type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, messageSMIME:messageSMIMEReq, eventVS:eventVS)
     }
 	
 	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON) {

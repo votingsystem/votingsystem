@@ -1,12 +1,18 @@
+version = '0.6.0'
+
 apply plugin: 'java'
+apply plugin:'application'
 apply plugin: 'groovy'
 
 sourceCompatibility = 1.8
-version = '1.0'
+
 
 repositories {
     mavenCentral()
 }
+
+sourceCompatibility = 8
+
 
 dependencies {
     compile localGroovy()
@@ -30,9 +36,12 @@ dependencies {
             'org.slf4j:slf4j-log4j12:1.7.5',
             'log4j:log4j:1.2.12')
 
-
     testCompile 'junit:junit:4.11'
-    testCompile localGroovy()
+
+    def javaFXPath = "${System.getenv()['JAVA_HOME']}/jre/lib/ext/jfxrt.jar"
+    if(!file(javaFXPath).exists()) println ("=== Java 8 runtime missing ===")
+    compile files(javaFXPath)
+
 }
 
 /*task runJava(dependsOn: 'classes', type: JavaExec) {
@@ -41,6 +50,14 @@ dependencies {
     args 'VotingSystem test'
     systemProperty 'simple.message', 'Hello from VotingSystem'
 }*/
+
+sourceSets {
+    main {
+        //to override the defaults:
+        //output.resourcesDir = "$buildDir/classes"
+        output.classesDir   = "$buildDir/classes"
+    }
+}
 
 test {
     testLogging.showStandardStreams = true
@@ -53,5 +70,10 @@ test {
 task testRequestVickets(type: JavaExec) {
     description 'VicketRequest description'
     main = 'org.votingsystem.test.vicket.Vicket_request'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task testClaims(type: JavaExec) {
+    main = 'org.votingsystem.test.voting.Claim_publishAndSend'
     classpath = sourceSets.main.runtimeClasspath
 }

@@ -54,10 +54,10 @@ class AccessRequestVSService {
         EventVSElection eventVS;
         public AccessRequest(String signedContent, Date timeStampDate) throws ExceptionVS {
             JSONObject messageJSON = JSON.parse(signedContent)
-            if(messageJSON.eventId) throw new ValidationExceptionVS(this.getClass(), "missing param 'eventId'");
-            if(messageJSON.eventURL) throw new ValidationExceptionVS(this.getClass(), "missing param 'eventURL'");
+            if(!messageJSON.eventId) throw new ValidationExceptionVS(this.getClass(), "missing param 'eventId'");
+            if(!messageJSON.eventURL) throw new ValidationExceptionVS(this.getClass(), "missing param 'eventURL'");
             eventURL = messageJSON.eventURL
-            if(messageJSON.hashAccessRequestBase64) throw new ValidationExceptionVS(this.getClass(), "missing param 'hashAccessRequestBase64'");
+            if(!messageJSON.hashAccessRequestBase64) throw new ValidationExceptionVS(this.getClass(), "missing param 'hashAccessRequestBase64'");
             hashAccessRequestBase64 = messageJSON.hashAccessRequestBase64
             eventVS = EventVSElection.get(Long.valueOf(messageJSON.eventId))
             if(!eventVS) throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage('eventVSNotFound',

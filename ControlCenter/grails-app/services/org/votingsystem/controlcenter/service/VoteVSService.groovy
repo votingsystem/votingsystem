@@ -32,7 +32,6 @@ class VoteVSService {
 		EventVSElection eventVS = messageSMIMEReq.eventVS
 		String msg
         VoteVS voteVS = messageSMIMEReq.getSmimeMessage().getVoteVS()
-        X509Certificate responseReceiverCert = voteVS.getX509Certificate()
         FieldEventVS optionSelected = FieldEventVS.findWhere(eventVS:eventVS,
                 accessControlFieldEventId:voteVS.getOptionSelected().getId())
         if (!optionSelected) {
@@ -45,61 +44,45 @@ class VoteVSService {
                 userVS:messageSMIMEReq.userVS, eventVSElection:eventVS,
                 serialNumber:voteVS.getX509Certificate().getSerialNumber().longValue(),
                 validFrom:voteVS.getX509Certificate().getNotBefore(),
-                validTo:voteVS.getX509Certificate().getNotAfter())
-        certificateVS.save()
-        String localServerURL = grailsApplication.config.grails.serverURL
+                validTo:voteVS.getX509Certificate().getNotAfter()).save()
         String signedVoteDigest = messageSMIMEReq.getSmimeMessage().getContentDigestStr()
-
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = eventVS.accessControlVS.name
         String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
-        messageSMIMEReq.getSmimeMessage().setMessageID("${localServerURL}/messageSMIME/${messageSMIMEReq.id}")
+        messageSMIMEReq.getSmimeMessage().setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
 
         SMIMEMessage smimeVoteValidation = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, messageSMIMEReq.getSmimeMessage(), subject)
-        messageSMIMEReq.type = TypeVS.CONTROL_CENTER_VALIDATED_VOTE
-        messageSMIMEReq.content = smimeVoteValidation.getBytes()
-        messageSMIMEReq.save();
+        messageSMIMEReq.setType(TypeVS.CONTROL_CENTER_VALIDATED_VOTE).setSmimeMessage(smimeVoteValidation).save()
         //byte[] encryptResponseBytes = encryptResponse.messageBytes
         //String encryptResponseStr = new String(encryptResponseBytes)
         //log.debug(" - encryptResponseStr: ${encryptResponseStr}")
         ResponseVS responseVS = HttpHelper.getInstance().sendData(messageSMIMEReq.content,
                 ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
-        if (ResponseVS.SC_OK == responseVS.statusCode) {
-            //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes)
-            //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSmimeMessage();
-            SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
-            if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
-                log.error("validateVote - ERROR digest sent: " + signedVoteDigest +
-                        " - digest received: " + smimeMessageResp.getContentDigestStr())
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR,
-                        eventVS:eventVS, message:messageSource. getMessage('voteContentErrorMsg', null, locale))
-            }
-            responseVS = signatureVSService.validateVoteCerts(smimeMessageResp, eventVS)
-            if(ResponseVS.SC_OK != responseVS.statusCode) {
-                log.error("validateVote - validateVoteValidationCerts ERROR - > ${responseVS.message}")
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-                        type:TypeVS.VOTE_ERROR, eventVS:eventVS, message:responseVS.message)
-            }
-            messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
-            messageSMIMEReq.content = smimeMessageResp.getBytes()
-            messageSMIMEReq.setSmimeMessage(smimeMessageResp)
-            messageSMIMEReq.save()
-
-            new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
-                    certificateVS:certificateVS, messageSMIME:messageSMIMEReq).save()
-
-            String voteURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${messageSMIMEReq.id}"
-            Map modelData = [voteURL:voteURL, receiverCert: responseReceiverCert,
-                     responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
-                     eventVS:eventVS, contentType: ContentTypeVS.VOTE, data:messageSMIMEReq)]
-
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:modelData)
-        } else {
-            msg = messageSource.getMessage('accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale)
-            log.error("validateVote - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.VOTE_ERROR, message:msg)
+        if (ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(messageSource.getMessage(
+                'accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale))
+        //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes)
+        //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSmimeMessage();
+        SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
+        if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
+            log.error("validateVote - ERROR digest sent: " + signedVoteDigest +
+                    " - digest received: " + smimeMessageResp.getContentDigestStr())
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR,
+                    eventVS:eventVS, message:messageSource. getMessage('voteContentErrorMsg', null, locale))
         }
+        responseVS = signatureVSService.validateVoteCerts(smimeMessageResp, eventVS)
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            log.error("validateVote - validateVoteValidationCerts ERROR - > ${responseVS.message}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                    type:TypeVS.VOTE_ERROR, eventVS:eventVS, message:responseVS.message)
+        }
+        messageSMIMEReq.setSmimeMessage(smimeMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).save()
+
+        new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
+                certificateVS:certificateVS, messageSMIME:messageSMIMEReq).save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
+                eventVS:eventVS, contentType: ContentTypeVS.VOTE, messageSMIME: messageSMIMEReq,
+                url:"${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${messageSMIMEReq.id}" )
 	}
 	
 	public synchronized ResponseVS processCancel (MessageSMIME messageSMIMEReq) {

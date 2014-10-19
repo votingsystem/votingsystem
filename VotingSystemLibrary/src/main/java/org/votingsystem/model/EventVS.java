@@ -357,28 +357,27 @@ public class EventVS implements Serializable {
 
     public Map getDataMap() {
         log.debug("getDataMap");
-        Map map = new HashMap();
-        map.put("subject", subject);
-        map.put("content", content);
-        map.put("dateBegin", DateUtils.getDateStr(dateBegin));
-        map.put("dateFinish", DateUtils.getDateStr(dateFinish));
-        if(url != null) map.put("url", url);
-        map.put("backupAvailable", backupAvailable);
+        Map resultMap = new HashMap();
+        resultMap.put("subject", subject);
+        resultMap.put("content", content);
+        resultMap.put("dateBegin", DateUtils.getDateStr(dateBegin));
+        resultMap.put("dateFinish", DateUtils.getDateStr(dateFinish));
+        if(url != null) resultMap.put("url", url);
+        resultMap.put("backupAvailable", backupAvailable);
         if(userVS != null) {
             Map userVSHashMap = new HashMap();
             userVSHashMap.put("nif", userVS.getNif());
             userVSHashMap.put("email", userVS.getEmail());
             userVSHashMap.put("name", userVS.getName());
-            map.put("userVS", userVSHashMap);
+            resultMap.put("userVS", userVSHashMap);
         }
-        if(voteVS != null) map.put("voteVS", voteVS.getDataMap());
-        if(accessControlEventVSId != null) map.put("accessControlEventVSId", accessControlEventVSId);
+        if(voteVS != null) resultMap.put("voteVS", voteVS.getDataMap());
+        if(accessControlEventVSId != null) resultMap.put("accessControlEventVSId", accessControlEventVSId);
 
-        if (type != null) map.put("type", type.toString());
-        if (getAccessControlEventVSId() != null) map.put("accessControlEventVSId", getAccessControlEventVSId());
-        if (id != null) map.put("id", id);
-        //map.put("UUID", UUID.randomUUID().toString());
-        HashMap resultMap = new HashMap(map);
+        if (type != null) resultMap.put("type", type.toString());
+        if (getAccessControlEventVSId() != null) resultMap.put("accessControlEventVSId", getAccessControlEventVSId());
+        if (id != null) resultMap.put("id", id);
+        resultMap.put("UUID", UUID.randomUUID().toString());
         if (tagVSSet != null && !tagVSSet.isEmpty()) {
             List<String> tagList = new ArrayList<String>();
             for (TagVS tag : tagVSSet) {
@@ -404,7 +403,7 @@ public class EventVS implements Serializable {
             }
             resultMap.put("fieldsEventVS", fieldList);
         }
-        if (cardinality != null) map.put("cardinality", cardinality.toString());
+        if (cardinality != null) resultMap.put("cardinality", cardinality.toString());
         return resultMap;
     }
 

@@ -5,6 +5,7 @@ import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.test.model.SimulationData
+import org.votingsystem.test.ui.TestsApp
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
@@ -37,6 +38,8 @@ class TestUtils {
         Logger log = init(clazz)
         simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
         simulationData.init(System.currentTimeMillis());
+
+        new Thread(new Runnable() {  @Override void run() { TestsApp.getInstance().init(simulationData)  } }).start()
         return log;
     }
 

@@ -3,6 +3,8 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.signature.smime.SMIMEMessage
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
@@ -97,10 +99,10 @@ class EventVSElectionService {
         String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
         responseVS = signatureVSService.getTimestampedSignedMimeMessage(
                 fromUser, toUser, messageJSON.toString(), subject, header)
-        byte[] signedMessageBytes = responseVS.getSmimeMessage().getBytes()
-        if(ResponseVS.SC_OK != responseVS.statusCode) throw new Exception(responseVS.getMessage())
-        responseVS = HttpHelper.getInstance().sendData(signedMessageBytes,
-                ContentTypeVS.SIGNED, "${eventVS.controlCenterVS.serverURL}/eventVSElection")
+        if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+        SMIMEMessage smimeMessage = responseVS.getSmimeMessage()
+        responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(),
+                ContentTypeVS.JSON_SIGNED, "${eventVS.controlCenterVS.serverURL}/eventVSElection")
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             throw new ExceptionVS(messageSource.getMessage('controlCenterCommunicationErrorMsg',
                     [responseVS.message].toArray(),locale))
@@ -119,14 +121,13 @@ class EventVSElectionService {
                 state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,
                 content:accessControlX509Cert.getEncoded(), serialNumber:accessControlX509Cert.getSerialNumber().longValue(),
                 validFrom:accessControlX509Cert?.getNotBefore(), validTo:accessControlX509Cert?.getNotAfter()).save()
-
-        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-                smimeParent:messageSMIMEReq, eventVS:eventVS,  content:signedMessageBytes)
-        messageSMIMEResp.save()
+        MessageSMIME messageSMIME = new MessageSMIME(type:TypeVS.RECEIPT,
+                smimeParent:messageSMIMEReq, eventVS:eventVS,  smimeMessage: smimeMessage).save()
+        log.debug "$methodName - MessageSMIME receipt - id '${messageSMIME.id}'"
         eventVS.setState(EventVS.State.ACTIVE)
         eventVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
-                data:messageSMIMEResp)
+                messageSMIME: messageSMIME, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
     @Transactional

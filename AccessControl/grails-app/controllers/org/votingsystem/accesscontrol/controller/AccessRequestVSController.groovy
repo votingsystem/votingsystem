@@ -61,7 +61,8 @@ class AccessRequestVSController {
             try {
                 CsrService.CsrResponse csrResponse = csrService.signCertVoteVS(csrRequest, responseVS.eventVS, representative)
                 return [responseVS: new ResponseVS(messageSMIME:messageSMIME, type: TypeVS.ACCESS_REQUEST,
-                        message: "EventVS_${eventVS.id}", messageBytes:csrResponse.issuedCert, contentType: ContentTypeVS.TEXT_STREAM)]
+                        statusCode: ResponseVS.SC_OK, message: "EventVS_${eventVS.id}",
+                        messageBytes:csrResponse.issuedCert, contentType: ContentTypeVS.TEXT_STREAM)]
             } catch(Exception ex) {
                 if (accessRequestVS) {
                     log.debug("cancelling accessRequestVS '${accessRequestVS.id}'")

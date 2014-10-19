@@ -163,7 +163,7 @@ public class ResponseVS<T> implements Serializable {
     	return responseVS.toString();
     }
 
-    public int getStatusCode() {
+    public Integer getStatusCode() {
         return statusCode; 
     }
 
@@ -201,7 +201,7 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public byte[] getMessageBytes() throws Exception {
-        if(ContentTypeVS.JSON_SIGNED == contentType && messageBytes == null && messageSMIME != null)
+        if(contentType.isSigned() && messageBytes == null && messageSMIME != null)
             return messageSMIME.getSmimeMessage().getBytes();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;

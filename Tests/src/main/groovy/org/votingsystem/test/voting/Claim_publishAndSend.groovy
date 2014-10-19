@@ -19,12 +19,12 @@ import java.util.concurrent.Future
 
 String publisherNIF = "00111222V"
 Map eventDataMap = [subject:"Claim subject", content:"<p>Claim content</p>", UUID:UUID.randomUUID().toString(),
-        dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/10/19 00:00:00",  fieldsEventVS:["field1", "field2"]]
+        dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/10/25 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
                       numRequestsProjected:2, whenFinishChangeEventStateTo:"",backupRequestEmail:"", event:eventDataMap,
-                      dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
+                      dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/25 00:00:00",
                       timer:[active:true, time:"00:00:10"]]
 
 log = TestUtils.init(Claim_publishAndSend.class, simulationDataMap)

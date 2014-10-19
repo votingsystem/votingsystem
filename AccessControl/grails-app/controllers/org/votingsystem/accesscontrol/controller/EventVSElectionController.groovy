@@ -128,7 +128,6 @@ class EventVSElectionController {
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			response.setHeader('eventURL', 
 				"${grailsApplication.config.grails.serverURL}/eventVSElection/${responseVS.eventVS.id}")
-            responseVS.setContentType(ContentTypeVS.JSON_SIGNED)
 		}
         return [responseVS:responseVS]
     }

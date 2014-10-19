@@ -34,9 +34,9 @@ class VoteVSController {
 		ResponseVS responseVS = voteVSService.validateVote(messageSMIME)
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			if(messageSMIME.getUserVS()) response.setHeader("representativeNIF", messageSMIME.getUserVS().nif)
-            response.setHeader('voteURL', responseVS.data.voteURL)
-            return responseVS.data
-		} else return [responseVS:responseVS]
+            response.setHeader('voteURL', responseVS.url)
+		}
+        return [responseVS:responseVS]
 	}
 	
 	/**
