@@ -258,7 +258,7 @@ public class VoteVS extends ReceiptContainer {
         this.hashCertVSBase64 = hashCertVSBase64;
     }
 
-    public static VoteVS populate (Map eventMap) {
+    public static VoteVS parse (Map eventMap) {
         VoteVS voteVS = null;
         try {
             voteVS = new VoteVS();
@@ -281,7 +281,7 @@ public class VoteVS extends ReceiptContainer {
                 voteVS.setOptionSelected(optionSelected);
             }
             if(eventMap.containsKey("optionSelected")) {
-                voteVS.setOptionSelected(FieldEventVS.populate((Map) eventMap.get("optionSelected")));
+                voteVS.setOptionSelected(FieldEventVS.parse((Map) eventMap.get("optionSelected")));
             }
             voteVS.setEventVS(eventVS);
         } catch(Exception ex) {
@@ -290,7 +290,7 @@ public class VoteVS extends ReceiptContainer {
         return voteVS;
     }
 
-    public static VoteVS populate (JSONObject voteJSON) {
+    public static VoteVS parse (JSONObject voteJSON) {
         VoteVS voteVS = null;
         try {
             voteVS = new VoteVS();
@@ -313,7 +313,7 @@ public class VoteVS extends ReceiptContainer {
                 voteVS.setOptionSelected(optionSelected);
             }
             if(voteJSON.has("optionSelected")) {
-                voteVS.setOptionSelected(FieldEventVS.populate((Map) voteJSON.get("optionSelected")));
+                voteVS.setOptionSelected(FieldEventVS.parse((Map) voteJSON.get("optionSelected")));
             }
             voteVS.setEventVS(eventVS);
         } catch(Exception ex) {
@@ -383,7 +383,7 @@ public class VoteVS extends ReceiptContainer {
 
     public static VoteVS getInstance(Map contentMap, X509Certificate x509Certificate,
             TimeStampToken timeStampToken) throws IOException, JSONException {
-        VoteVS voteVS = VoteVS.populate(contentMap);
+        VoteVS voteVS = VoteVS.parse(contentMap);
         voteVS.setTimeStampToken(timeStampToken);
         voteVS.setX509Certificate(x509Certificate);
         byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);

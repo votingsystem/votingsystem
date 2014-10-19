@@ -382,7 +382,7 @@ public class EventVS implements Serializable {
             androidEventVS.setState(State.valueOf(jsonData.getString("state")));
         }
         if(jsonData.has("voteVS")) {
-            VoteVS voteVS = VoteVS.populate((Map) jsonData.get("voteVS"));
+            VoteVS voteVS = VoteVS.parse((Map) jsonData.get("voteVS"));
             androidEventVS.setVote(voteVS);
         }
         return androidEventVS;

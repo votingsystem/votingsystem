@@ -414,83 +414,77 @@ public class EventVS implements Serializable {
         return null;
     }
 
-    public HashMap getChangeEventDataMap(String serverURL, State state) {
+    public Map getChangeEventDataMap(String serverURL, State state) {
         log.debug("getCancelEventDataMap");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.EVENT_CANCELLATION.toString());
-        map.put("accessControlURL", serverURL);
-        if(getAccessControlEventVSId() != null) map.put("eventId", getAccessControlEventVSId());
-        else map.put("eventId", id);
-        map.put("state", state.toString());
-        map.put("UUID", UUID.randomUUID().toString());
-        HashMap jsonObject = new HashMap(map);
-        return jsonObject;
+        Map resultMap = new HashMap();
+        resultMap.put("operation", TypeVS.EVENT_CANCELLATION.toString());
+        resultMap.put("accessControlURL", serverURL);
+        if(getAccessControlEventVSId() != null) resultMap.put("eventId", getAccessControlEventVSId());
+        else resultMap.put("eventId", id);
+        resultMap.put("state", state.toString());
+        resultMap.put("UUID", UUID.randomUUID().toString());
+        return resultMap;
     }
 
-    public static EventVS populate (Map eventMap) {
-        EventVS eventVS = null;
-        try {
-            eventVS = new EventVS();
-            if(eventMap.get("id") != null &&
-                    !"null".equals(eventMap.get("id").toString())) {
-                eventVS.setId(((Integer) eventMap.get("id")).longValue());
+    public static EventVS parse (Map eventMap) throws Exception {
+        EventVS eventVS = new EventVS();
+        if(eventMap.get("id") != null &&
+                !"null".equals(eventMap.get("id").toString())) {
+            eventVS.setId(((Integer) eventMap.get("id")).longValue());
+        }
+        if(eventMap.containsKey("accessControlEventVSId")) eventVS.setAccessControlEventVSId(
+                ((Integer) eventMap.get("accessControlEventVSId")).longValue());
+        if(eventMap.containsKey("URL")) eventVS.setUrl((String) eventMap.get("URL"));
+        if(eventMap.containsKey("controlCenter")) {
+            Map controlCenterMap = (Map) eventMap.get("controlCenter");
+            controlCenterMap.put("serverType", ActorVS.Type.CONTROL_CENTER);
+            eventVS.setControlCenterVS((ControlCenterVS) ActorVS.parse(controlCenterMap));
+        }
+        if(eventMap.containsKey("accessControl")) {
+            Map accessControlMap = (Map) eventMap.get("accessControl");
+            accessControlMap.put("serverType", ActorVS.Type.ACCESS_CONTROL);
+            eventVS.setAccessControlVS((AccessControlVS) ActorVS.parse(accessControlMap));
+        }
+        if(eventMap.containsKey("subject")) eventVS.setSubject((String) eventMap.get("subject"));
+        if(eventMap.containsKey("voteVS")) {
+            VoteVS voteVS = VoteVS.parse((Map) eventMap.get("voteVS"));
+            eventVS.setVoteVS(voteVS);
+        }
+        if(eventMap.containsKey("state")) {
+            State state = State.valueOf((String) eventMap.get("state"));
+            eventVS.setState(state);
+        }
+        if(eventMap.containsKey("content")) eventVS.setContent((String) eventMap.get("content"));
+        if(eventMap.containsKey("dateBegin")) eventVS.setDateBeginStr((String) eventMap.get("dateBegin"));
+        if(eventMap.containsKey("dateFinish")) eventVS.setDateFinishStr((String) eventMap.get("dateFinish"));
+        if (eventMap.containsKey("numSignaturesCollected"))
+            eventVS.setNumSignaturesCollected((Integer) eventMap.get("numSignaturesCollected"));
+        if (eventMap.containsKey("numVotesCollected"))eventVS.setNumVotesCollected((Integer) eventMap.get("numVotesCollected"));
+        if(eventMap.containsKey("cardinality")) {
+            eventVS.setCardinality(Cardinality.valueOf((String) eventMap.get("cardinality")));
+        }
+        if (eventMap.containsKey("userVS")) {
+            Object userVSData = eventMap.get("userVS");
+            if(userVSData instanceof String) {
+                UserVS userVS = new UserVS();
+                userVS.setName((String) eventMap.get("userVS"));
+            } else eventVS.setUserVS(UserVS.parse((Map) userVSData));
+        }
+        if (eventMap.containsKey("backupAvailable")) {
+            eventVS.setBackupAvailable((Boolean) eventMap.get("backupAvailable"));
+        }
+        if(eventMap.containsKey("fieldsEventVS")) {
+            Set<FieldEventVS> fieldsEventVS =  new HashSet<FieldEventVS>();
+            Object fieldList =  eventMap.get("fieldsEventVS");
+            for(Object option : (List) eventMap.get("fieldsEventVS")) {
+                if(option instanceof Map) fieldsEventVS.add(FieldEventVS.parse((Map)option));
+                else fieldsEventVS.add(new FieldEventVS(((String)option), null));
             }
-            if(eventMap.containsKey("accessControlEventVSId")) eventVS.setAccessControlEventVSId(
-                    ((Integer) eventMap.get("accessControlEventVSId")).longValue());
-            if(eventMap.containsKey("URL")) eventVS.setUrl((String) eventMap.get("URL"));
-            if(eventMap.containsKey("controlCenter")) {
-                Map controlCenterMap = (Map) eventMap.get("controlCenter");
-                controlCenterMap.put("serverType", ActorVS.Type.CONTROL_CENTER);
-                eventVS.setControlCenterVS((ControlCenterVS) ActorVS.parse(controlCenterMap));
-            }
-            if(eventMap.containsKey("accessControl")) {
-                Map accessControlMap = (Map) eventMap.get("accessControl");
-                accessControlMap.put("serverType", ActorVS.Type.ACCESS_CONTROL);
-                eventVS.setAccessControlVS((AccessControlVS) ActorVS.parse(accessControlMap));
-            }
-            if(eventMap.containsKey("subject")) eventVS.setSubject((String) eventMap.get("subject"));
-            if(eventMap.containsKey("voteVS")) {
-                VoteVS voteVS = VoteVS.populate((Map) eventMap.get("voteVS"));
-                eventVS.setVoteVS(voteVS);
-            }
-            if(eventMap.containsKey("state")) {
-                State state = State.valueOf((String) eventMap.get("state"));
-                eventVS.setState(state);
-            }
-            if(eventMap.containsKey("content")) eventVS.setContent((String) eventMap.get("content"));
-            if(eventMap.containsKey("dateBegin")) eventVS.setDateBeginStr((String) eventMap.get("dateBegin"));
-            if(eventMap.containsKey("dateFinish")) eventVS.setDateFinishStr((String) eventMap.get("dateFinish"));
-            if (eventMap.containsKey("numSignaturesCollected"))
-                eventVS.setNumSignaturesCollected((Integer) eventMap.get("numSignaturesCollected"));
-            if (eventMap.containsKey("numVotesCollected"))eventVS.setNumVotesCollected((Integer) eventMap.get("numVotesCollected"));
-            if(eventMap.containsKey("cardinality")) {
-                eventVS.setCardinality(Cardinality.valueOf((String) eventMap.get("cardinality")));
-            }
-            if (eventMap.containsKey("userVS")) {
-                Object userVSData = eventMap.get("userVS");
-                if(userVSData instanceof String) {
-                    UserVS userVS = new UserVS();
-                    userVS.setName((String) eventMap.get("userVS"));
-                } else eventVS.setUserVS(UserVS.parse((Map) userVSData));
-            }
-            if (eventMap.containsKey("backupAvailable")) {
-                eventVS.setBackupAvailable((Boolean) eventMap.get("backupAvailable"));
-            }
-            if(eventMap.containsKey("fieldsEventVS")) {
-                Set<FieldEventVS> fieldsEventVS =  new HashSet<FieldEventVS>();
-                Object fieldList =  eventMap.get("fieldsEventVS");
-                for(Object option : (List) eventMap.get("fieldsEventVS")) {
-                    if(option instanceof Map) fieldsEventVS.add(FieldEventVS.populate((Map)option));
-                    else fieldsEventVS.add(new FieldEventVS(((String)option), null));
-                }
-                eventVS.setFieldsEventVS(fieldsEventVS);
-            }
-            if(eventMap.get("tags") != null && !"null".equals(eventMap.get("tags").toString())) {
-                List<String> labelList = (List<String>)eventMap.get("tags");
-                eventVS.setTags(labelList.toArray(new String[labelList.size()]));
-            }
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            eventVS.setFieldsEventVS(fieldsEventVS);
+        }
+        if(eventMap.get("tags") != null && !"null".equals(eventMap.get("tags").toString())) {
+            List<String> labelList = (List<String>)eventMap.get("tags");
+            eventVS.setTags(labelList.toArray(new String[labelList.size()]));
         }
         return eventVS;
     }

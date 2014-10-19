@@ -72,41 +72,36 @@ class EventVSElectionController {
                             eventMap: eventVSService.getEventVSMap(eventVS)])
                 }
             }
-        } else if(request.contentType?.contains("json")) {
-            def resultList
-            def eventsVSMap = new HashMap()
-            eventsVSMap.eventVS = []
-            params.sort = "dateBegin"
-            EventVS.State eventVSState
-            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
-            EventVSElection.withTransaction {
-                resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
-                        sort:params.sort, order:params.order) {
-                    if(eventVSState == EventVS.State.TERMINATED) {
-                        or{
-                            eq("state", EventVS.State.TERMINATED)
-                            eq("state", EventVS.State.CANCELLED)
-                        }
-                    } else if(eventVSState) {
-                        eq("state", eventVSState)
-                    } else {
-                        or{
-                            eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.PENDING)
-                            eq("state", EventVS.State.TERMINATED)
-                            eq("state", EventVS.State.CANCELLED)
-                        }
+        }
+        def resultList
+        def eventsVSMap = new HashMap()
+        eventsVSMap.eventVS = []
+        params.sort = "dateBegin"
+        EventVS.State eventVSState
+        try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
+        if(!eventVSState) eventVSState = EventVS.State.ACTIVE
+        EventVSElection.withTransaction {
+            resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
+                    sort:params.sort, order:params.order) {
+                if(eventVSState == EventVS.State.TERMINATED) {
+                    or{
+                        eq("state", EventVS.State.TERMINATED)
+                        eq("state", EventVS.State.CANCELLED)
                     }
+                } else if(eventVSState) {
+                    eq("state", eventVSState)
                 }
             }
-            eventsVSMap.totalEventVS = resultList?.totalCount
-            eventsVSMap.offset = params.long('offset')
-            resultList.each {eventVSItem ->
-                eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS
-                eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
-            }
+        }
+        eventsVSMap.totalEventVS = resultList?.totalCount
+        eventsVSMap.offset = params.long('offset')
+        resultList.each {eventVSItem ->
+            eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS
+            eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
+        }
+        if(request.contentType?.contains("json")) {
             render eventsVSMap as JSON
-        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+        } else render(view:"index" , model:[eventsVSMap:eventsVSMap, selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
 	
 	/**

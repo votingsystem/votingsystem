@@ -10,6 +10,7 @@ import org.votingsystem.util.ExceptionVS;
 import javax.persistence.*;
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -306,6 +307,13 @@ public class ResponseVS<T> implements Serializable {
         responseVS.setReason(rootCause.getMessage());
         responseVS.setMetaInf(metaInf);
         return responseVS;
+    }
+
+    public static ResponseVS getExceptionResponse(String controller, String action, Exception exception,
+            Throwable rootCause) {
+        Map actionMap = new HashMap<>();
+        actionMap.put("", action);
+        return getExceptionResponse(controller, actionMap, exception, rootCause);
     }
 
     public static ResponseVS getErrorRequestResponse(String message) {

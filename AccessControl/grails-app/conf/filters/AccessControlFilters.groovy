@@ -44,7 +44,7 @@ class AccessControlFilters {
                 if(!params.int("max")) params.max = 20
                 if(!params.int("offset")) params.offset = 0
                 if(!params.sort) params.sort = "dateCreated"
-                if(!params.order) params.order = "desc"
+                if(!params.order) params.order = "asc"
                 response.setHeader("Cache-Control", "no-store")
             }
         }

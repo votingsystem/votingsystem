@@ -26,14 +26,14 @@ publisherNIF = "00111222V"
 Map eventDataMap = [subject:"Claim subject", content:"<p>Election content</p>", UUID:UUID.randomUUID().toString(),
                     dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/10/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:10,
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
                        numRepresentatives:0, numRepresentativesWithVote:0,
                        numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
-                         userBaseData:userBaseDataMap,
-                         whenFinishChangeEventStateTo:"",backupRequestEmail:"", event:eventDataMap,
+                         userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"CANCELLED",
+                         backupRequestEmail:"", event:eventDataMap,
                          dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
                          timer:[active:false, time:"00:00:10"]]
 
@@ -109,9 +109,9 @@ private void waitForVoteResponses() throws Exception {
             TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.simulationData.getNumRequestsOK())
         }
     }
-    if(simulationData.getEventStateWhenFinished() != null) changeEventState();
-    else if(simulationData.getBackupRequestEmail() != null) requestBackup();
-    else TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
+    if(simulationData.getEventStateWhenFinished() != null) changeEventState(publisherNIF);
+    else if(simulationData.getBackupRequestEmail() != null) requestBackup(eventVS, publisherNIF);
+    TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
 }
 
 private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
@@ -133,7 +133,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
     //dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
     responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-    return EventVS.populate(JSONSerializer.toJSON(responseVS.getMessage()));
+    return EventVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 }
 
 public void startSimulationTimer(SimulationData simulationData) throws Exception {
@@ -147,7 +147,7 @@ private void changeEventState(String publisherNIF) throws Exception {
     log.debug("changeEventState");
     Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
             TestUtils.simulationData.getEventStateWhenFinished());
-    String smimeMessageSubject ="cancelEventMsgSubject"
+    String smimeMessageSubject = "cancelEventMsgSubject"
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
     SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(publisherNIF,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
@@ -157,7 +157,7 @@ private void changeEventState(String publisherNIF) throws Exception {
             ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
             ContentTypeVS.JSON_SIGNED, null, null);
     ResponseVS responseVS = worker.call();
-    if(ResponseVS.SC_OK == responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+    if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
 }
 
 private void requestBackup(EventVS eventVS, String nif) throws Exception {

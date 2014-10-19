@@ -50,7 +50,7 @@ public class FieldEventVS implements Serializable {
         this.value = value;
     }
 
-    public static FieldEventVS populate (Map fieldMap) {
+    public static FieldEventVS parse (Map fieldMap) {
         FieldEventVS fieldEvent = null;
         try {
             fieldEvent = new FieldEventVS();

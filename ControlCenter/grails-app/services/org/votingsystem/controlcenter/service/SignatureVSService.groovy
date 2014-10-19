@@ -9,6 +9,8 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
+import org.votingsystem.util.MetaInfMsg
+
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
@@ -272,9 +274,13 @@ class SignatureVSService {
         UserVS anonymousSigner = null
         CertUtils.CertValidatorResultVS validatorResult
         String signerNIF = smimeMessage.getSigner().getNif()
+        boolean isTimeStamped = false
         for(UserVS userVS: signersVS) {
             try {
-                timeStampService.validateToken(userVS.getTimeStampToken())
+                if(userVS.getTimeStampToken()) {
+                    timeStampService.validateToken(userVS.getTimeStampToken())
+                    isTimeStamped = true
+                }
                 validatorResult = CertUtils.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
@@ -301,6 +307,8 @@ class SignatureVSService {
                 return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
             }
         }
+        if(!isTimeStamped) throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
+                locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
         return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
                       extensionChecker:validatorResult.getChecker()])

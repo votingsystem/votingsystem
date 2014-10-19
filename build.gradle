@@ -141,6 +141,7 @@ def copyWebComponents(project) {
         }
     });
     String baseDestPath = project.file("web-app/bower_components").absolutePath
+    println "copyWebComponents - baseDestPath: '${baseDestPath}'"
     for(File webComponent:webComponents) {
         copy {
             from webComponent.absolutePath
@@ -149,11 +150,6 @@ def copyWebComponents(project) {
     }
 }
 
-task copyWebComponents() {
-    doLast {
-        copyWebComponents(project)
-    }
-}
 
 def copyClientTool(project) {
     project.file("web-app/tools/").mkdirs();

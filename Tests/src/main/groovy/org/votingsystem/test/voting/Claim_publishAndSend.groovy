@@ -117,7 +117,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
     //dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
     responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-    return EventVS.populate(JSONSerializer.toJSON(responseVS.getMessage()));
+    return EventVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 }
 
 

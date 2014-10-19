@@ -76,7 +76,10 @@ class SignatureService {
     }
 
     public static SignatureService getUserVSSignatureService(String nif, UserVS.Type userType) {
-        if(signatureServices.get(nif) != null) return signatureServices.get(nif)
+        if(signatureServices.get(nif) != null) {
+            SignatureService sv = signatureServices.get(nif)
+            return sv
+        }
         String keyStorePath = null
         switch (userType) {
             case UserVS.Type.BANKVS:

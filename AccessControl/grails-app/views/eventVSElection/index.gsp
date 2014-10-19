@@ -11,7 +11,7 @@
         <search-info id="searchInfo"></search-info>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-        <eventvs-election-list id="eventvsList" url="${createLink(controller: 'eventVSElection', action: 'index')}?menu=${params.menu}&eventVSState=ACTIVE"
+        <eventvs-election-list id="eventvsList" eventsVSMap="${eventsVSMap as grails.converters.JSON}"
                       eventvstype="election"></eventvs-election-list>
     </div>
     <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>

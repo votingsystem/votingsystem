@@ -106,7 +106,7 @@ class SimulationData {
             simulationData.setMaxPendingResponses(dataJSON.getInt("maxPendingResponses"));
         }
         if (dataJSON.containsKey("event")) {
-            eventVS = EventVS.populate(dataJSON.getJSONObject("event"));
+            eventVS = EventVS.parse(dataJSON.getJSONObject("event"));
         }
         if (dataJSON.containsKey("eventId")) {
             simulationData.setEventId(dataJSON.getLong("eventId"));

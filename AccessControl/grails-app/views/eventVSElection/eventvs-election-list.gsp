@@ -15,12 +15,12 @@
             display: inline-block;
             width: 300px;
             vertical-align: top;
-            background-color: #fff;
+            background-color: #f9f9f9;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             margin: 10px;
         }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{eventVSData}}" handleAs="json"
+        <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
@@ -55,9 +55,12 @@
                             </select>
                         </template>
                     </div>
-                    <vs-pager on-pager-data="{{pagerEvent}}">vs-pagervs-pager</vs-pager>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}"
+                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalEventVS}}"></vs-pager>
                     <div layout flex horizontal wrap around-justified>
-                        <template repeat="{{eventvs in eventVSData.eventVS}}">
+                        <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
                                 <div class='eventSubjectDiv'>
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
@@ -95,6 +98,12 @@
     </template>
     <script>
         Polymer('eventvs-election-list', {
+            publish: {
+                eventsVSMap: {value: {}}
+            },
+            eventsVSMapChanged:function() {
+                this.loading = false
+            },
             ready :  function(e) {
                 console.log(this.tagName + " - ready")
                 this.loading = true
@@ -106,8 +115,15 @@
                 console.log(this.tagName + " - closeEventVSDetails")
                 this.page = 0;
             },
-            pagerEvent:function(e) {
-                console.log(this.tagName + " - pagerEvent" + e.detail)
+            pagerChange:function(e) {
+                var optionSelected = this.$.eventVSStateSelect.value
+                console.log("eventVSStateSelect: " + optionSelected)
+                targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" +
+                        optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
+                history.pushState(null, null, targetURL);
+                this.$.ajax.url = targetURL
+                this.$.ajax.go()
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
@@ -145,6 +161,7 @@
                 targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" + optionSelected
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
+                this.$.ajax.go()
             },
             ajaxComplete:function() {
                 this.loading = false

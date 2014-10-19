@@ -207,7 +207,7 @@ public class OperationVS {
         }
     }
 
-    public static OperationVS parse (Map dataMap) {
+    public static OperationVS parse (Map dataMap) throws Exception {
         if(dataMap == null) return null;
         OperationVS operationVS = new OperationVS();
         if (dataMap.containsKey("operation")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operation")));
@@ -230,7 +230,7 @@ public class OperationVS {
         }
         if (dataMap.containsKey("objectId")) operationVS.setCallerCallback((String)dataMap.get("objectId"));
         if (dataMap.containsKey("eventVS")) {
-            EventVS eventVS = EventVS.populate((Map) dataMap.get("eventVS"));
+            EventVS eventVS = EventVS.parse((Map) dataMap.get("eventVS"));
             operationVS.setEventVS(eventVS);
         }
 
