@@ -33,7 +33,7 @@ Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersW
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
                          userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"CANCELLED",
-                         backupRequestEmail:"", event:eventDataMap,
+                         backupRequestEmail:"jgzornoza@gmail.com", event:eventDataMap,
                          dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
                          timer:[active:false, time:"00:00:10"]]
 
@@ -110,7 +110,7 @@ private void waitForVoteResponses() throws Exception {
         }
     }
     if(simulationData.getEventStateWhenFinished() != null) changeEventState(publisherNIF);
-    else if(simulationData.getBackupRequestEmail() != null) requestBackup(eventVS, publisherNIF);
+    if(simulationData.getBackupRequestEmail() != null) requestBackup(eventVS, publisherNIF);
     TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
 }
 

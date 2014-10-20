@@ -72,7 +72,6 @@ class SearchController {
     def eventVS () {
         List<EventVS> eventvsList = null
         def resultList = []
-        int totalEventvs = 0;
         EventVS.withTransaction {
             Date dateBeginFrom = null
             Date dateBeginTo = null
@@ -121,7 +120,6 @@ class SearchController {
                     }
                 }
             }
-            totalEventvs = eventvsList.totalCount
             eventvsList.each {eventvsItem ->
                 switch(eventvsType) {
                     case EventVS.Type.MANIFEST:
@@ -136,7 +134,7 @@ class SearchController {
                 }
             }
         }
-        def resultMap = [eventVS:resultList, totalEventVS: totalEventvs]
+        def resultMap = [eventVS:resultList, offset:params.offset, max:params.max, totalCount: eventvsList.totalCount]
         render resultMap as JSON
     }
 	

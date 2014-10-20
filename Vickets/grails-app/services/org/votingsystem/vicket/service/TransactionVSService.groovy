@@ -1,7 +1,6 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import grails.orm.PagedResultList
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import static org.springframework.context.i18n.LocaleContextHolder.*
@@ -14,7 +13,6 @@ import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.CoreSignal
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
-
 import java.math.RoundingMode
 
 /**
@@ -23,8 +21,6 @@ import java.math.RoundingMode
 */
 @Transactional
 class TransactionVSService {
-
-    private static final CLASS_NAME = TransactionVSService.class.getSimpleName()
 
     private final Set<String> listenerSet = Collections.synchronizedSet(new HashSet<String>());
 
@@ -99,8 +95,7 @@ class TransactionVSService {
             log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
                     "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
         } else {
-            accountTo.balance = accountTo.balance.add(transactionVS.amount)
-            accountTo.save()
+            accountTo.setBalance(accountTo.balance.add(transactionVS.amount)).save()
         }
         return accountTo
     }
@@ -108,8 +103,7 @@ class TransactionVSService {
     private void updateUserVSAccountFrom(TransactionVS transactionVS) {
         if(!transactionVS.accountFromMovements) throw new ExceptionVS("TransactionVS without accountFromMovements")
         transactionVS.accountFromMovements.each { userAccountFrom, amount->
-            userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
-            userAccountFrom.save()
+            userAccountFrom.setBalance(userAccountFrom.balance.subtract(amount)).save()
         }
     }
 
@@ -150,7 +144,7 @@ class TransactionVSService {
     }
 
     @Transactional
-    public PagedResultList getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
+    public List getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             if(fromUserVS instanceof GroupVS) {
                 or {
@@ -192,6 +186,19 @@ class TransactionVSService {
         return transactionList
     }
 
+    @Transactional public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
+        if(userVS instanceof  BankVS) {
+            return ((BankVSService)grailsApplication.mainContext.getBean("bankVSService")).getDataWithBalancesMap(
+                    userVS, timePeriod)
+        } else if(userVS instanceof GroupVS) {
+            return ((GroupVSService)grailsApplication.mainContext.getBean("groupVSService")).getDataWithBalancesMap(
+                    userVS, timePeriod)
+        } else {
+            return ((UserVSService)grailsApplication.mainContext.getBean("userVSService")).getDataWithBalancesMap(
+                    userVS, timePeriod)
+        }
+    }
+
     @Transactional
     public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = getTransactionFromList(fromUserVS, timePeriod)
@@ -213,7 +220,7 @@ class TransactionVSService {
     }
 
     @Transactional
-    public PagedResultList getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
+    public List getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('toUserVS', toUserVS)
             eq('state', TransactionVS.State.OK)

@@ -77,6 +77,14 @@ class UrlMappings {
             }
         }
 
+        "/groupVS/$id/balance"{
+            controller = "groupVS"
+            action = "balance"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
         "/groupVS/$id/subscribe"{
             controller = "groupVS"
             action = "subscribe"

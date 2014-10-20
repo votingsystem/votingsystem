@@ -11,13 +11,13 @@ import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.ExceptionVS
 
-Map userBaseData = [numUsers: 10, userIndex:100]
-Map simulationDataMap = [groupId:16, serverURL:"http://vickets:8086/Vickets", userBaseData:userBaseData]
+Map userBaseData = [userIndex:300]
+Map simulationDataMap = [groupId:5, serverURL:"http://vickets:8086/Vickets", numRequestsProjected: 5, userBaseData:userBaseData]
+isWithUserValidation = Boolean.TRUE
+
 
 log = TestUtils.init(GroupVS_addUserVS.class, simulationDataMap)
 SimulationData simulationData = TestUtils.getSimulationData()
-isWithUserValidation = Boolean.TRUE
-
 SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService()
 
 log.debug("initializeServer")

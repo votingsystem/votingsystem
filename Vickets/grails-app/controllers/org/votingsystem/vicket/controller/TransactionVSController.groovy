@@ -41,7 +41,6 @@ class TransactionVSController {
         Map.Entry sortParam
         if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
         List<TransactionVS> transactionList = null
-        int totalTransactions = 0;
         TransactionVS.withTransaction {
             if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
                 TransactionVS.Type transactionType = null
@@ -71,21 +70,19 @@ class TransactionVSController {
                         else if(dateTo) {le("dateCreated", dateTo)}
                     }
                 }
-                totalTransactions = transactionList.totalCount
             } else {
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value){
                     isNull('transactionParent')
                 };
-                totalTransactions = transactionList.totalCount
             }
         }
         def resultList = []
         transactionList.each {transactionItem ->
             resultList.add(transactionVSService.getTransactionMap(transactionItem))
         }
-        def resultMap = [transactionRecords:resultList, queryRecordCount: totalTransactions,
-                         numTotalTransactions:totalTransactions ]
+        def resultMap = [transactionRecords:resultList, offset:params.offset, max: params.max,
+                         totalCount:transactionList.totalCount ]
         if(request.contentType?.contains("json")) {
             render resultMap as JSON
         } else render(view:'index', model: [transactionsMap:resultMap])

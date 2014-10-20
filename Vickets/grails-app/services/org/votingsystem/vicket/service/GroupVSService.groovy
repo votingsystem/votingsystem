@@ -90,8 +90,10 @@ class GroupVSService {
                 messageSMIMEReq.getSmimeMessage(), subject)
         log.debug("${metaInf}")
         messageSMIMEReq.setSmimeMessage(smimeMessageResp)
-        Map resultMap = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg', args:[groupVS.name]),
-                     URL:"${grailsLinkGenerator.link(controller:"groupVS", absolute:true)}/${groupVS.id}"]
+
+        Map resultMap = [statusCode:ResponseVS.SC_OK,
+                 message:messageSource.getMessage('newVicketGroupOKMsg', [groupVS.name].toArray(), locale),
+                 URL:"${grailsLinkGenerator.link(controller:"groupVS", absolute:true)}/${groupVS.id}"]
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:resultMap,
                 contentType:ContentTypeVS.JSON)
     }
@@ -153,7 +155,7 @@ class GroupVSService {
         Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
         resultMap.userVS = getGroupVSDataMap(groupVS)
 
-        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(groupVS, timePeriod)
+        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(((UserVS)groupVS), timePeriod)
         resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList
         resultMap.balancesFrom = transactionsFromWithBalancesMap.balancesFrom
 

@@ -33,6 +33,7 @@ class SimulationData {
     private boolean timerBased = false;
     private Long durationInMillis;
     private Long eventId;
+    private Long groupId;
 
     private String durationStr = null;
     private String backupRequestEmail = null;
@@ -111,7 +112,9 @@ class SimulationData {
         if (dataJSON.containsKey("eventId")) {
             simulationData.setEventId(dataJSON.getLong("eventId"));
         }
-
+        if (dataJSON.containsKey("groupId")) {
+            simulationData.setGroupId(dataJSON.getLong("groupId"));
+        }
         if (dataJSON.containsKey("backupRequestEmail")) {
             String email = dataJSON.getString("backupRequestEmail");
             if(email != null && !email.trim().isEmpty()) simulationData.setBackupRequestEmail(email);
@@ -303,6 +306,14 @@ class SimulationData {
 
     public void setEventId(Long eventId) {
         this.eventId = eventId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
     }
 
 }

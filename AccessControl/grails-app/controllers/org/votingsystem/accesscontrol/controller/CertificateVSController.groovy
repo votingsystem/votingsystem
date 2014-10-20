@@ -196,7 +196,7 @@ class CertificateVSController {
                     resultList.add(certificateVSService.getCertificateVSDataMap(certItem))
                 }
                 def resultMap = [certList:resultList, type:type.toString(), state:state.toString(),
-                                 queryRecordCount: certList.totalCount, numTotalCerts:certList.totalCount]
+                        offset:params.offset, max: params.max, totalCount:certList.totalCount]
                 render resultMap as JSON
             }
             return false

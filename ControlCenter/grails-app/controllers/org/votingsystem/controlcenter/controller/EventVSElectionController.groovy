@@ -62,8 +62,6 @@ class EventVSElectionController {
             }
         } else if(request.contentType?.contains("json")) {
             def resultList
-            def eventsVSMap = new HashMap()
-            eventsVSMap.eventVS = []
             params.sort = "dateBegin"
             EventVS.State eventVSState
             try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
@@ -87,8 +85,7 @@ class EventVSElectionController {
                     }
                 }
             }
-            eventsVSMap.totalEventVS = resultList?.totalCount
-            eventsVSMap.offset = params.long('offset')
+            def eventsVSMap = [eventVS:[], offset:params.offset, max:params.max, totalCount:resultList?.totalCount]
             resultList.each {eventVSItem ->
                 eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem, request.locale).eventVS
                 eventsVSMap.eventVS.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))

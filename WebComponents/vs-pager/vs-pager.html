@@ -34,7 +34,6 @@
                 if(typeof this.total === 'undefined') return
                 this.pageCount = Math.ceil(this.total/this.max) -1
                 this.currentRange = this.range();
-                console.log(this.tagName  + " - total: " + this.total + " - pageCount: " + this.pageCount)
             },
             firstPage: function () {
                 this.currentpage = 0;
@@ -78,10 +77,12 @@
                 for ( var i = start; i < start + end; i++ ) {
                     paginations.push(i);
                 }
-                console.log("paginations: " + paginations)
+                if(paginations.length == 0) this.style.display = 'none'
+                else this.style.display = 'block'
+                console.log(this.tagName + " - total: " + this.total +" - offset: "  + this.offset +
+                        " - max: " + this.max  +  " - paginations: " + paginations + " - pageCount: " + this.getPageCount())
                 return paginations;
-            },
-            ready: function () { }
+            }
         });
     </script>
 </polymer-element>

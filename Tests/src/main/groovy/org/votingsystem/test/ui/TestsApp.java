@@ -30,7 +30,8 @@ public class TestsApp extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        SimulationData simulationData = new SimulationData();
+        TestsApp.getInstance().init(simulationData);
     }
 
     public void init(SimulationData simulationData) {
@@ -41,6 +42,8 @@ public class TestsApp extends Application {
     public void start(Stage myStage) {
         myStage.setTitle("TestsApp");
         GridPane rootNode = new GridPane();
+        rootNode.setPrefWidth(500);
+        rootNode.setPrefHeight(200);
         rootNode.setHgap(10);
         rootNode.setVgap(10);
         rootNode.setPadding(new Insets(10, 10, 10, 10));
@@ -54,8 +57,9 @@ public class TestsApp extends Application {
 
         progressBox = new HBox();
         progressBox.setSpacing(5);
-        progressBox.setAlignment(Pos.CENTER);
         progressBox.getChildren().addAll(progressLabel, progressBar);
+        progressBox.setAlignment(Pos.CENTER);
+        progressBox.setStyle("-fx-alignment: center;");
 
         SimulationDataTask task = new SimulationDataTask(simulationData);
         progressBar.setProgress(0);
@@ -66,8 +70,10 @@ public class TestsApp extends Application {
         rootNode.add(infoLbl, 0 , 0);
 
         rootNode.setHalignment(infoLbl, HPos.CENTER);
+        rootNode.setHalignment(progressBox, HPos.CENTER);
 
         rootNode.add(progressBox, 0 , 1);
+        rootNode.setAlignment(Pos.CENTER);
         myStage.show();
     }
 

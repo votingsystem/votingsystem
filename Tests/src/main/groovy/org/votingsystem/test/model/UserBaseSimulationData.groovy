@@ -358,21 +358,18 @@ class UserBaseSimulationData extends SimulationData {
         List<String> tempList = new ArrayList<String>(this.representativeNifList);
         if(getNumRepresentativesWithVote() > 0) {
             for(int i = 0; i < getNumRepresentativesWithVote(); i++) {
-                int randomRep = new Random().nextInt(tempList.size());
-                result.add(tempList.remove(randomRep));
+                result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
             }
             log.debug("getElectorList - '" + getNumRepresentativesWithVote() + "' representatives with vote");
         }
         tempList = new ArrayList<String>(this.usersWithRepresentativeList);
         for(int i = 0; i < getNumUsersWithRepresentativeWithVote(); i++) {
-            int randomUser = new Random().nextInt(tempList.size());
-            result.add(tempList.remove(randomUser));
+            result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
         }
         log.debug("getElectorList - '" +  getNumUsersWithRepresentativeWithVote() + "' users WITH representative and vote");
         tempList = new ArrayList<String>(this.usersWithoutRepresentativeList);
         for(int i = 0; i < getNumUsersWithoutRepresentativeWithVote(); i++) {
-            int randomUser = new Random().nextInt(tempList.size());
-            result.add(tempList.remove(randomUser));
+            result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
         }
         log.debug("getElectorList - '" + getNumUsersWithoutRepresentativeWithVote() +
                 "' users WITHOUT representative and vote");
@@ -381,9 +378,8 @@ class UserBaseSimulationData extends SimulationData {
 
     private String getRandomRepresentative() {
         if(representativeNifList.isEmpty()) return null;
-        // In real life, the Random object should be rather more shared than this
-        int randomSelected = new Random().nextInt(representativeNifList.size());
-        return representativeNifList.get(randomSelected);
+        // ThreadLocalRandom are not cryptographically secure
+        return representativeNifList.get(ThreadLocalRandom.current().nextInt(representativeNifList.size()));
     }
 
     public static UserBaseSimulationData parse (JSONObject dataJSON) {

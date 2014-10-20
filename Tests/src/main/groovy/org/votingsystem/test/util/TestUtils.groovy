@@ -38,11 +38,16 @@ class TestUtils {
         Logger log = init(clazz)
         simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
         simulationData.init(System.currentTimeMillis());
-
-        new Thread(new Runnable() {  @Override void run() { TestsApp.getInstance().init(simulationData)  } }).start()
         return log;
     }
 
+    public static Logger initWithUI(Class clazz, Map simulationDataMap) {
+        Logger log = init(clazz)
+        new Thread(new Runnable() {  @Override void run() { TestsApp.getInstance().init(simulationData)  } }).start()
+        simulationData = SimulationData.parse(JSONSerializer.toJSON(simulationDataMap))
+        simulationData.init(System.currentTimeMillis());
+        return log;
+    }
 
     public static Logger init(Class clazz, SimulationData simulationData) {
         Logger log = init(clazz)
@@ -96,8 +101,7 @@ class TestUtils {
     public static JSONObject getGroupVSSubscriptionData(String groupVSURL) throws ExceptionVS {
         ResponseVS responseVS = HttpHelper.getInstance().getData(groupVSURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
-            JSONObject groupDataJSON =  dataJSON.getJSONObject("userVS")
+            JSONObject groupDataJSON = JSONSerializer.toJSON(responseVS.getMessage())
             JSONObject representativeDataJSON = groupDataJSON.getJSONObject("representative")
             //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
             JSONObject subscriptionData = new JSONObject([operation:"VICKET_GROUP_SUBSCRIBE"])

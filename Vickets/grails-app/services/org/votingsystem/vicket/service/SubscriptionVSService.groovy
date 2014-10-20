@@ -137,8 +137,12 @@ class SubscriptionVSService {
         subscription.dateCancelled = Calendar.getInstance().getTime()
         messageSMIMEReq.setSubscriptionVS(subscription)
         log.debug("deActivateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
-        return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_DEACTIVATE, statusCode:ResponseVS.SC_OK,
-                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"), data:subscription)
+
+        Map responseMap = [statusCode:ResponseVS.SC_OK, message:messageSource.getMessage('vicketGroupUserdeActivatedMsg',
+                [subscription.userVS.nif, subscription.groupVS.name].toArray(), locale)]
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_USER_DEACTIVATE,
+                contentType: ContentTypeVS.JSON, data:responseMap,
+                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"))
     }
 
     public UserVSAccount checkUserVSAccount(UserVS userVS){
@@ -188,8 +192,12 @@ class SubscriptionVSService {
         subscription.dateActivated = Calendar.getInstance().getTime()
         messageSMIMEReq.setSubscriptionVS(subscription)
         log.debug("activateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
-        return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_ACTIVATE, message:msg, statusCode:ResponseVS.SC_OK,
-                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"), data:subscription)
+
+        Map responseMap = [statusCode:ResponseVS.SC_OK, message:messageSource.getMessage('vicketGroupUserActivatedMsg',
+                [subscription.userVS.nif, subscription.groupVS.name].toArray(), locale)]
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_USER_ACTIVATE,
+                contentType: ContentTypeVS.JSON, data:responseMap,
+                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"))
     }
 
     private static class SubscriptionVSRequest {

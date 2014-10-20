@@ -58,7 +58,6 @@ class UserVSController {
             Map.Entry sortParam
             if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
             List<UserVS> userList = null
-            int totalUsers = 0;
             UserVS.withTransaction {
                 if(params.searchText || params.searchFrom || params.searchTo || params.type || params.state) {
                     UserVS.Type userType = null
@@ -88,19 +87,17 @@ class UserVSController {
                             else if(dateTo) {le("dateCreated", dateTo)}
                         }
                     }
-                    totalUsers = userList.totalCount
                 } else {
                     userList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
                             sort:sortParam?.key, order:sortParam?.value){
                     };
-                    totalUsers = userList.totalCount
                 }
             }
             def resultList = []
             userList.each {userItem ->
                 resultList.add(userVSService.getUserVSDataMap(userItem, false))
             }
-            def resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+            def resultMap = [userVSList:resultList, offset: params.offset, max:params.max, totalCount:userList.totalCount]
             render resultMap as JSON
         }
     }
@@ -126,8 +123,8 @@ class UserVSController {
                     userList.each {userItem ->
                         resultList.add(userVSService.getUserVSDataMap(userItem, false))
                     }
-                    int totalUsers = userList.totalCount
-                    Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+                    Map resultMap = [userVSList:resultList, offset:params.offset, max:params.max,
+                             totalCount:userList.totalCount]
                     render resultMap as JSON
                 }
 
@@ -167,8 +164,8 @@ class UserVSController {
                 subscriptionList.each {userSubscriptionItem ->
                     resultList.add(userVSService.getUserVSDataMap(userSubscriptionItem.userVS, false))
                 }
-                int totalUsers = subscriptionList.totalCount
-                Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+                Map resultMap = [userVSList:resultList, offset:params.offset, max:params.max,
+                         totalCount:subscriptionList.totalCount]
                 render resultMap as JSON
             }
         }
@@ -176,18 +173,16 @@ class UserVSController {
 
     def bankVSList() {
         List<BankVS> bankVSList = null
-        int numTotalBankVSs = 0;
         BankVS.withTransaction {
             bankVSList = BankVS.createCriteria().list(max: params.max, offset: params.offset,
                     sort:'dateCreated', order:'desc'){
             };
-            numTotalBankVSs = bankVSList.totalCount
         }
         def resultList = []
         bankVSList.each {userItem ->
             resultList.add(userVSService.getUserVSDataMap(userItem, false))
         }
-        def resultMap = [bankVSList:resultList, queryRecordCount: numTotalBankVSs, numTotalBankVSs:numTotalBankVSs ]
+        def resultMap = [bankVSList:resultList, offset:params.offset, max:params.max, totalCount:bankVSList.totalCount]
         if(request.contentType?.contains('json')) render resultMap as JSON
         else render(view:'bankVSList', model: [bankVSMap:resultMap])
     }
@@ -248,7 +243,7 @@ class UserVSController {
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIME = request.messageSMIMEReq
             if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-            return [responseVS:userVSService.saveUser(messageSMIMEReq)]
+            return [responseVS:userVSService.saveUser(messageSMIME)]
         } else render(view:'newUser')
     }
 
@@ -266,7 +261,7 @@ class UserVSController {
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIME = request.messageSMIMEReq
             if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-            return [responseVS:bankVSService.saveBankVS(messageSMIMEReq)]
+            return [responseVS:bankVSService.saveBankVS(messageSMIME)]
         }
     }
 

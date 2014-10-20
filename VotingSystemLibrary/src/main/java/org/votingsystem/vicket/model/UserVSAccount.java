@@ -57,8 +57,9 @@ public class UserVSAccount implements Serializable {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) {
+    public UserVSAccount setBalance(BigDecimal balance) {
         this.balance = balance;
+        return this;
     }
 
     public UserVS getUserVS() {

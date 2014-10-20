@@ -35,11 +35,8 @@ class BalanceController {
         } else {
             DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(RequestUtils.getCalendar(params))
             Map resultMap = balanceService.genBalance(uservs, timePeriod)
-            if(request.contentType?.contains("json")) {
-                render resultMap as JSON
-            } else {
-                render(view:"userVS", model:[balanceMap:resultMap])
-            }
+            if(request.contentType?.contains("json")) render resultMap as JSON
+            else render(view:"userVS", model:[balanceMap:resultMap])
         }
     }
 

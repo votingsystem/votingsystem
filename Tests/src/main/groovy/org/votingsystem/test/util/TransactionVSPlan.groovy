@@ -62,6 +62,10 @@ public class TransactionVSPlan {
     public Map runBankVSTransactions(String smimeMessageSubject) {
         Map currencyResultMap = [:]
         for(TransactionVS transactionVS :bankVSTransacionList) {
+            if(UserVS.Type.BANKVS != transactionVS.fromUserVS.type) throw new ExceptionVS("UserVS: " +
+                    transactionVS.fromUserVS.nif + " type is '" + transactionVS.fromUserVS.type.toString() +
+                    "' not a 'BANKVS'");
+
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     transactionVS.fromUserVS.nif, UserVS.Type.BANKVS)
             SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(transactionVS.fromUserVS.nif,

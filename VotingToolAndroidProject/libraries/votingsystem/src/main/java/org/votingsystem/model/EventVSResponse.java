@@ -59,22 +59,22 @@ public class EventVSResponse implements Serializable {
         switch(eventType)  {
             case VOTING_EVENT:
                 eventVSResponse.setNumEventsVSElection(eventsArray.length());
-                eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("totalEventVS"));
+                eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("totalCount"));
                 break;
             case CLAIM_EVENT:
                 eventVSResponse.setNumEventsVSClaim(eventsArray.length());
-                eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("totalEventVS"));
+                eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("totalCount"));
                 break;
             case MANIFEST_EVENT:
                 eventVSResponse.setNumEventsVSManifest(eventsArray.length());
-                eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("totalEventVS"));
+                eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("totalCount"));
                 break;
             default:
                 Log.d(TAG + ".parse(...)", "unknown eventType: " + eventType.toString());
 
         }
         eventVSResponse.setNumEventVSInRequest(eventsArray.length());
-        eventVSResponse.setNumEventVSInSystem(jsonObject.getInt("totalEventVS"));
+        eventVSResponse.setNumEventVSInSystem(jsonObject.getInt("totalCount"));
         if (jsonObject.has("offset")) eventVSResponse.setOffset(jsonObject.getInt("offset"));
         eventVSResponse.setEvents(eventList);
         return eventVSResponse;

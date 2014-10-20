@@ -51,7 +51,7 @@ public class ResponseVS<T> implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="statusCode") private Integer statusCode;
-    @Column(name="reason") private String reason;
+    @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="metaInf") private String metaInf;
     @Column(name="url") private String url;
     @Column(name="message", columnDefinition="TEXT") private String message;
@@ -295,8 +295,9 @@ public class ResponseVS<T> implements Serializable {
         return messageSMIME;
     }
 
-    public static ResponseVS getExceptionResponse(String controller, Map action, Exception exception,
+    public static ResponseVS getExceptionResponse(String controller, Map actionMap, Exception exception,
           Throwable rootCause) {
+        String action = (String) actionMap.values().iterator().next();
         log.error("controller: " + controller + " - action: " + action + " - exception:" + rootCause.getMessage(), rootCause);
         String metaInf = null;
         if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)

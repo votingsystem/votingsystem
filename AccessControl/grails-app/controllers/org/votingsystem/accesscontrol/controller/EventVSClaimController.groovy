@@ -84,7 +84,7 @@ class EventVSClaimController {
                         }
                     }
                 }
-                eventsVSMap.totalEventVS = resultList.totalCount
+                eventsVSMap.totalCount = resultList.totalCount
             }
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->

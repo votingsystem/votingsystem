@@ -2,9 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
-
 <link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
-
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype">
     <template>
@@ -58,7 +56,7 @@
                     <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}"
                               next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
                               first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
-                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalEventVS}}"></vs-pager>
+                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>

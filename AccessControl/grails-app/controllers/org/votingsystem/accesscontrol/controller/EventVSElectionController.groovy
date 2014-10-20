@@ -82,7 +82,7 @@ class EventVSElectionController {
         if(!eventVSState) eventVSState = EventVS.State.ACTIVE
         EventVSElection.withTransaction {
             resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
-                    sort:params.sort, order:params.order) {
+                    sort:params.sort, order:'desc') {
                 if(eventVSState == EventVS.State.TERMINATED) {
                     or{
                         eq("state", EventVS.State.TERMINATED)
@@ -93,7 +93,7 @@ class EventVSElectionController {
                 }
             }
         }
-        eventsVSMap.totalEventVS = resultList?.totalCount
+        eventsVSMap.totalCount = resultList?.totalCount
         eventsVSMap.offset = params.long('offset')
         resultList.each {eventVSItem ->
             eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS

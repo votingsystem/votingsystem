@@ -25,7 +25,7 @@ public enum KeyGeneratorVS {
     
     public void init(String signName, String provider, int keySize, String algorithmRNG) throws
     		NoSuchAlgorithmException, NoSuchProviderException {
-    	keyPairGenerator  = KeyPairGenerator.getInstance(signName, provider);
+        keyPairGenerator  = KeyPairGenerator.getInstance(signName, provider);
         keyPairGenerator.initialize(keySize, new SecureRandom());
         random = SecureRandom.getInstance(algorithmRNG);
     }

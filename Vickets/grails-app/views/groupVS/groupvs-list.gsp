@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-
+<link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
 
 <polymer-element name="groupvs-list" attributes="url state">
     <template>
@@ -20,8 +20,7 @@
         </style>
         <g:include view="/include/styles.gsp"/>
         <asset:stylesheet src="vickets_groupvs.css"/>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json"
-                   contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
+        <core-ajax id="ajax" url="{{url}}" handleAs="json" contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
@@ -35,8 +34,13 @@
                             <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
                         </select>
                     </div>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="{{groupVSListMap.max}}"
+                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                              offset="{{groupVSListMap.offset}}" total="{{groupVSListMap.totalCount}}"></vs-pager>
+
                     <div layout flex horizontal wrap around-justified>
-                        <template repeat="{{groupvs in groupvsData.groupvsList}}">
+                        <template repeat="{{groupvs in groupvsList}}">
                             <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
@@ -61,13 +65,29 @@
     </template>
     <script>
         Polymer('groupvs-list', {
+            publish: {
+                groupVSListMap: {value: {}}
+            },
+            groupVSListMapChanged:function() {
+                this.groupvsList = this.groupVSListMap.groupvsList
+                this.loading = false
+            },
             ready :  function(e) {
                 console.log(this.tagName + " - ready - state: " + this.state)
                 if(this.state) this.$.groupvsTypeSelect.value = this.state
                 this.loading = true
-                this.groupvsData = {}
                 this.page = 0;
                 this.subpage = 0;
+            },
+            pagerChange:function(e) {
+                var optionSelected = this.$.groupvsTypeSelect.value
+                console.log("groupvsTypeSelect: " + optionSelected)
+                targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType + "&state=" +
+                        optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
+                history.pushState(null, null, targetURL);
+                this.$.ajax.url = targetURL
+                this.$.ajax.go()
             },
             closeGroupDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeGroupDetails")
@@ -98,6 +118,7 @@
                 }
             },
             ajaxComplete:function() {
+                this.groupVSListMap = this.$.ajax.response
                 this.loading = false
             }
         });

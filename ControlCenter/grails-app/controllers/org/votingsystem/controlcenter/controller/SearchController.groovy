@@ -69,7 +69,6 @@ class SearchController {
     def eventVSElection () {
         List<EventVSElection> eventvsList = null
         def resultList = []
-        int totalEventvs = 0;
         EventVSElection.withTransaction {
             Date dateBeginFrom = null
             Date dateBeginTo = null
@@ -95,13 +94,12 @@ class SearchController {
                     eq("state", EventVS.State.TERMINATED)
                 }
             }
-            totalEventvs = eventvsList.totalCount
             eventvsList.each {eventvsItem ->
                 resultList.add(eventVSElectionService.getEventVSElectionMap(eventvsItem))
             }
         }
-        def resultMap = [eventsVSElection:resultList, queryRecordCount: totalEventvs,
-                         numTotalTransactions:totalEventvs ]
+        def resultMap = [eventsVSElection:resultList, max: params.max, offset:params.offset,
+                 totalCount:eventvsList.totalCount]
         render resultMap as JSON
     }
 

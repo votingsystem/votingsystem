@@ -92,8 +92,9 @@ class ReportsController {
                     if(item.type.equals(params.transactionvsType)) { return item }
                 }
             }
-            messageJSON.numTotalTransactions = messageJSON.transactionRecords.size()
-            messageJSON.queryRecordCount = messageJSON.transactionRecords.size()
+            messageJSON.offset = 0
+            messageJSON.max = messageJSON.transactionRecords.size()
+            messageJSON.totalCount = messageJSON.transactionRecords.size()
             render messageJSON as JSON
             return false
         } else {

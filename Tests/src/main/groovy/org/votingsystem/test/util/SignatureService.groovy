@@ -254,11 +254,11 @@ class SignatureService {
 
     private List<MockDNI> subscribeUsers(JSONObject subscriptionData, SimulationData simulationData,
               VicketServer vicketServer) throws ExceptionVS {
-        log.debug("subscribeUser - Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
+        log.debug("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
         List<MockDNI> userList = new ArrayList<MockDNI>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
         int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
-                simulationData.getUserBaseSimulationData().getNumUsers()
+                simulationData.getNumRequestsProjected()
         for(int i = fromFirstUser; i < toLastUser; i++ ) {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
@@ -277,9 +277,9 @@ class SignatureService {
             ResponseVS responseVS = worker.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
-            } else simulationData.getUserBaseSimulationData().getAndIncrementnumUserRequestsOK();
+            } else simulationData.getAndIncrementNumRequestsOK();
             if((i % 50) == 0) log.debug("Subscribed " + i + " of " +
-                    simulationData.getUserBaseSimulationData().getNumUsers() + " users to groupVS");
+                    simulationData.getUserBaseSimulationData().getNumRequestsProjected() + " users to groupVS");
         }
         log.debug("subscribeUser - '" + userList.size() + "' user subscribed")
         return userList
