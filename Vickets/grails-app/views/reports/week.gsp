@@ -7,19 +7,18 @@
 <head>
     <title><g:message code="weekReportsPageTitle"/></title>
     <g:render template="/template/pagevs"/>
+    <link rel="import" href="${resource(dir: '/bower_components/juicy-jsoneditor/src', file: 'juicy-jsoneditor.html')}">
+    <!-- josdejong/jsoneditor#104 workaround-->
     <link rel="stylesheet" type="text/css" href="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.css')}">
-    <script type="text/javascript" src="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.js')}"></script>
-    <!-- ace editor -->
-    <script type="text/javascript" src="${resource(dir: '/bower_components/jsoneditor/asset/ace', file: 'ace.js')}"></script>
-    <!-- json lint -->
-    <script type="text/javascript" src="${resource(dir: '/bower_components/jsoneditor/asset/jsonlint', file: 'jsonlint.js')}"></script>
 </head>
 <body>
+    <vs-innerpage-signal title="<g:message code="reportsPageTitle"/>"></vs-innerpage-signal>
     <div class="pageContentDiv" style="max-width:1000px; margin: 20px auto 0px auto;">
         <div class="pageHeader" style="margin:0px auto; text-align: center;">
             <g:message code="periodLbl"/>: ${dateFrom} - ${dateTo}
         </div>
-        <div id="reportsFile" style="width:100%; height:1000px;"></div>
+        <juicy-jsoneditor json="${reportsFile}" id="jsoneditor" modes="['code', 'form', 'text', 'tree', 'view']"
+                      style="width:100%; height:1000px;"></juicy-jsoneditor>
     </div>
 </body>
 </html>
@@ -27,9 +26,9 @@
     var options = { mode: 'code', modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
             error: function (err) { alert(err.toString());}
         };
-    var reportsFileEditor = new JSONEditor(document.querySelector("#reportsFile"),options);
-    <g:applyCodec encodeAs="none">var reportsJSON = ${reportsFile}</g:applyCodec>
-    reportsFileEditor.set(reportsJSON);
-    reportsFileEditor.expandAll()
+
+    document.addEventListener('innerPageSignal', function() {
+        document.querySelector('#jsoneditor').editor.expandAll();
+    });
 </asset:script>
 <asset:deferredScripts/>

@@ -11,6 +11,8 @@ import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
 
+import java.time.Duration
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal
@@ -29,19 +31,19 @@ class TestingController {
     def balanceService
     def systemService
     def groupVSService
-
     def transactionVS_UserVSService
 
     def index() {
-        render(view:"localStorage")
+        ResponseVS responseVS = balanceService.calculatePeriod(DateUtils.currentWeekPeriod)
+        render "$responseVS.statusCode - $responseVS.message"
     }
 
     def balance() {
         Map balanceTo = [EUR:[HIDROGENO:[total:new BigDecimal(880.5), timeLimited:new BigDecimal(700.5)],
-                              NITROGENO:[total:new BigDecimal(100), timeLimited:new BigDecimal(50.5)]],
+                        NITROGENO:[total:new BigDecimal(100), timeLimited:new BigDecimal(50.5)]],
                         DOLLAR:[WILDTAG:[total:new BigDecimal(1454), timeLimited:new BigDecimal(400.5)]]]
         Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
-                           YEN:[WILDTAG1:new BigDecimal(8000)]]
+                        YEN:[WILDTAG1:new BigDecimal(8000)]]
 
         Map result = transactionVSService.balancesCash(balanceTo, balanceFrom)
         Map allResults = [balanceTo:balanceTo, balanceFrom:balanceFrom, result:result]
@@ -49,7 +51,9 @@ class TestingController {
     }
 
     def newWeek() {
-        balanceService.initWeekPeriod()
+        Calendar nextWeek = Calendar.getInstance()
+        nextWeek.set(Calendar.WEEK_OF_YEAR, (nextWeek.get(Calendar.WEEK_OF_YEAR) + 1))
+        balanceService.initWeekPeriod(nextWeek)
         /*List transactionList
         TransactionVS.withTransaction {
             //transactionList = TransactionVS.findAllWhere(type:[TransactionVS.Type.VICKET_INIT_PERIOD,

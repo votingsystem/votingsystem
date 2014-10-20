@@ -41,24 +41,20 @@ class BalanceController {
     }
 
     /*
-     * /balance/weekReport/$requestFile/$year/$month/$day"
+     * /balance/weekReport/$year/$month/$day
      */
     def weekReport() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map<String, File> filesMap = filesService.getWeekReportFiles(timePeriod, null)
         File reportsFile = filesMap.reportsFile
-        if(reportsFile.exists()) {
-            def messageJSON = JSON.parse(reportsFile.text)
-            if(request.contentType?.contains("json")) {
-                render messageJSON as JSON
-            } else {
-                render(view:'balancesWeek', model: [balancesMap:messageJSON])
-            }
-        } else {
+        if(!reportsFile.exists()) {
             response.status = ResponseVS.SC_NOT_FOUND
             render message(code: 'reportsForWeekNotFoundMsg', args:[DateUtils.getDateStr(timePeriod.getDateFrom(), "dd MMM yyyy")])
-            return false
+        } else {
+            def messageJSON = JSON.parse(reportsFile.text)
+            if(request.contentType?.contains("json")) render messageJSON as JSON
+            else render(view:'balancesWeek', model: [balancesMap:messageJSON])
         }
     }
 

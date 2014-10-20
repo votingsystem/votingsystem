@@ -195,11 +195,13 @@ public class DateUtils {
     }
 
     public static Calendar getMonday(Calendar calendar) {
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar;
+        Calendar result = (Calendar) calendar.clone();
+        result.add(Calendar.DAY_OF_YEAR, -7);
+        result.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        result.set(Calendar.HOUR_OF_DAY, 0);
+        result.set(Calendar.MINUTE, 0);
+        result.set(Calendar.SECOND, 0);
+        return result;
     }
 
     public static TimePeriod getWeekPeriod(Calendar selectedDate) {

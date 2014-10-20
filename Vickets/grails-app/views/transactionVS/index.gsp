@@ -4,7 +4,6 @@
     <g:render template="/template/pagevs"/>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
 </head>
 <body>
 <vs-innerpage-signal title="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>

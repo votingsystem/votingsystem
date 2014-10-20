@@ -183,7 +183,7 @@
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
-<vs-socket id="socketvs" socketservice="${grailsApplication.config.webSocketURL}"></vs-socket>
+<!--<vs-socket id="socketvs" socketservice="${grailsApplication.config.webSocketURL}"></vs-socket>-->
 </body>
 </html>
 <asset:script>
@@ -203,7 +203,8 @@
         document.querySelector('#loadingDiv').style.display = 'none';
     });
 
-    document.querySelector('#socketvs').addEventListener('on-message', function(e) {
+
+    if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {
         console.log("main.gsp - socketvs - message: " + e.detail)
         var socketMessage = e.detail
         if(200 != socketMessage.status) {

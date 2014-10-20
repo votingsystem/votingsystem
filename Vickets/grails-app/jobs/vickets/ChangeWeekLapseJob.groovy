@@ -15,7 +15,7 @@ class ChangeWeekLapseJob {
 
     def execute() {
         checkCancelledVickets();
-        BalanceService.initWeekPeriod()
+        BalanceService.initWeekPeriod(Calendar.getInstance())
     }
 
 

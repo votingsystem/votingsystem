@@ -129,12 +129,12 @@
                 <balance-uservs-details balance="{{balances.userBalances.systemBalance}}"></balance-uservs-details>
             </div>
             <div layout flex horizontal wrap around-justified>
-                <template repeat="{{groupBalance in balances.userBalances.groupBalanceList}}">
+                <template repeat="{{groupBalance in balances.userBalances.groupVSBalanceList}}">
                     <balance-uservs-details balance="{{groupBalance}}"></balance-uservs-details>
                 </template>
             </div>
             <div layout flex horizontal wrap around-justified>
-                <template repeat="{{userBalance in balances.userBalances.userBalanceList}}">
+                <template repeat="{{userBalance in balances.userBalances.userVSBalanceList}}">
                     <balance-uservs-details balance="{{userBalance}}"></balance-uservs-details>
                 </template>
             </div>

@@ -8,6 +8,7 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 //@Transactional
 class BalanceService {
@@ -35,17 +36,16 @@ class BalanceService {
         return tagMap[tagName]
     }
 
-    public initWeekPeriod() {
+    public initWeekPeriod(Calendar requestDate) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long beginCalc = System.currentTimeMillis()
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.addDays(Calendar.getInstance().getTime(), -3)
-        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
-        DateUtils.TimePeriod currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-        String currentWeekStr = DateUtils.getDateStr(currentWeekPeriod.getDateFrom(), "dd MMM yyyy")
-        String transactionMsgSubject =  messageSource.getMessage('initWeekMsg', [currentWeekStr].toArray(),
-                systemService.getDefaultLocale())
-
+        Calendar lastWeek = ((Calendar)requestDate.clone())
+        lastWeek.set(Calendar.WEEK_OF_YEAR, (requestDate.get(Calendar.WEEK_OF_YEAR) -1))
+        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(lastWeek)
+        String transactionMsgSubject =  messageSource.getMessage('initWeekMsg',
+                [DateUtils.getDayWeekDateStr(timePeriod.getDateFrom())].toArray(), locale)
+        log.debug("$methodName - $timePeriod")
         Map globalDataMap = [:]
         int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
         log.debug("$methodName - Initializing week '$transactionMsgSubject' - numTotalUsers: '$numTotalUsers'")
@@ -56,7 +56,7 @@ class BalanceService {
                 gt("dateCancelled", timePeriod.getDateFrom())
                 isNull("dateCancelled")
             }
-            inList("type", [UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.REPRESENTATIVE])
+            inList("type", [UserVS.Type.USER, UserVS.Type.GROUP])
         }
 
         while (scrollableResults.next()) {
@@ -99,7 +99,7 @@ class BalanceService {
                     BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended)
 
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
-                            [tagVSEntry.getKey()].toArray(), systemService.getDefaultLocale())
+                            [tagVSEntry.getKey()].toArray(), locale)
                     Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:amountResult, tag:tagVSEntry.getKey(),
                                timeLimitedNotExpended:timeLimitedNotExpended, toUserVS: userVS.name, toUserNIF:userVS.nif,
                                toUserId:userVS.id, toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
@@ -171,8 +171,8 @@ class BalanceService {
         Map<String, File> weekReportFiles = filesService.getWeekReportFiles(timePeriod, null)
         File reportsFile = weekReportFiles.reportsFile
 
-        List groupBalanceList = []
-        List userBalanceList = []
+        List groupVSBalanceList = []
+        List userVSBalanceList = []
         List bankVSBalanceList = []
 
         ScrollableResults scrollableResults = UserVS.createCriteria().scroll {//Check active users and users cancelled last week period
@@ -181,15 +181,15 @@ class BalanceService {
                 ge("dateCancelled", timePeriod.getDateFrom())
             }
             and {
-                inList("type", [UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.REPRESENTATIVE])
+                inList("type", [UserVS.Type.USER, UserVS.Type.GROUP])
             }
         }
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
 
             if(userVS instanceof BankVS) bankVSBalanceList.add(bankVSService.getDataWithBalancesMap(userVS, timePeriod))
-            else if(userVS instanceof GroupVS) groupBalanceList.add(groupVSService.getDataWithBalancesMap(userVS, timePeriod))
-            else userBalanceList.add(userVSService.getDataWithBalancesMap(userVS, timePeriod))
+            else if(userVS instanceof GroupVS) groupVSBalanceList.add(groupVSService.getDataWithBalancesMap(userVS, timePeriod))
+            else userVSBalanceList.add(userVSService.getDataWithBalancesMap(userVS, timePeriod))
 
             if((scrollableResults.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
@@ -205,8 +205,8 @@ class BalanceService {
         }
 
         Map systemBalance = systemService.genBalanceForSystem(timePeriod)
-        Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
-                        userBalanceList:userBalanceList, bankVSBalanceList:bankVSBalanceList]
+        Map userBalances = [systemBalance:systemBalance, groupVSBalanceList:groupVSBalanceList,
+                        userVSBalanceList:userVSBalanceList, bankVSBalanceList:bankVSBalanceList]
         Map resultMap = [userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
         JSON userBalancesJSON = new JSON(resultMap)
@@ -214,7 +214,7 @@ class BalanceService {
 
         String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
                 ["[${DateUtils.getDateStr(timePeriod.getDateFrom())} - ${DateUtils.getDateStr(timePeriod.getDateTo())}]"].toArray(),
-                systemService.getDefaultLocale())
+                locale)
         ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
                 "", userBalancesJSON.toString(),subject)
         responseVS.getSmimeMessage().writeTo(new FileOutputStream(weekReportFiles.systemReceipt))

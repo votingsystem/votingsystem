@@ -22,7 +22,7 @@ File walletFir = new File(ContextVS.getInstance().config.walletDir)
 File[] vicketFiles = walletFir.listFiles(new FilenameFilter() {
     public boolean accept(File dir, String fileName) { return !fileName.startsWith("EXPENDED_"); }
 });
-if(vicketFiles.length == 0) throw new ExceptionVS(" --- Wallet empty ---")
+if(!vicketFiles || vicketFiles.length == 0) throw new ExceptionVS(" --- Empty wallet ---")
 //we have al the Vickets initialized, now we can make de transactions
 VicketTransactionBatch transactionBatch = new VicketTransactionBatch()
 transactionBatch.addVicket(vicketFiles[0])

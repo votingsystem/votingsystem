@@ -23,7 +23,6 @@ class RequestUtils {
             calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         }
-        calendar.getTime()
         return calendar
     }
 
