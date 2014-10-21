@@ -11,7 +11,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.votingsystem.test.model.SimulationData;
+import org.votingsystem.test.util.SimulationData;
 
 
 public class TestsApp extends Application {

@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -426,13 +427,15 @@ public class UserVS implements Serializable {
                 break;
             case GROUP:
                 userVS = new GroupVS();
-                ((GroupVS)userVS).setRepresentative(UserVS.parse((Map) userVSDataMap.get("representative")));
+                if(userVSDataMap.containsKey("representative")) ((GroupVS)userVS).setRepresentative(
+                        UserVS.parse((Map) userVSDataMap.get("representative")));
                 break;
             default:
                 userVS = new UserVS();
         }
         if(userVSDataMap.containsKey("id")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());
-        if(userVSDataMap.containsKey("nif")) userVS.setNif((String) userVSDataMap.get("nif"));
+        if(!JSONNull.getInstance().equals(userVSDataMap.get("nif")) && userVSDataMap.containsKey("nif"))
+            userVS.setNif((String) userVSDataMap.get("nif"));
         if(userVSDataMap.containsKey("IBAN")) userVS.setIBAN((String) userVSDataMap.get("IBAN"));
         if(userVSDataMap.containsKey("name")) userVS.setName((String) userVSDataMap.get("name"));
         if(userVSDataMap.containsKey("email")) userVS.setEmail((String) userVSDataMap.get("email"));

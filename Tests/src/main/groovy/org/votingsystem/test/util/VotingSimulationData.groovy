@@ -1,4 +1,4 @@
-package org.votingsystem.test.model
+package org.votingsystem.test.util
 
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject

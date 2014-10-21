@@ -6,17 +6,15 @@ import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.test.callable.ClaimSignedSender
 import org.votingsystem.test.callable.SignTask
 import org.votingsystem.test.callable.VoteSender
-import org.votingsystem.test.model.SimulationData
-import org.votingsystem.test.model.UserBaseSimulationData
-import org.votingsystem.test.model.VotingSimulationData
+import org.votingsystem.test.util.SimulationData
+import org.votingsystem.test.util.UserBaseSimulationData
+import org.votingsystem.test.util.VotingSimulationData
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.*
 
-import java.security.KeyStore
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Executors

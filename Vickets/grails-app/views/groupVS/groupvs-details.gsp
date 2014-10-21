@@ -237,8 +237,7 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
-            this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id + "/user"
-            this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.userVS.id
+            this.$.userList.url = "${createLink(controller: 'groupVS', action:'')}/" + this.groupvs.userVS.id + "/users"
             this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
         },
         configGroup:function(e) {

@@ -115,7 +115,8 @@
                 balance: {value: {}}
             },
             formatAmount: function(amount) {
-                return amount.toFixed(2)
+                if(Object.prototype.toString.call(amount) !== '[object String]') return amount.toFixed(2)
+                else return amount
             },
             tagDescription: function(tagName) {
                 switch (tagName) {

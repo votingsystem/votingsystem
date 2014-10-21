@@ -352,6 +352,20 @@ function getParameterByName(name) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+function setURLParameter(baseURL, name,value){
+    var result;
+    if(getParameterByName(name)){
+        result = baseURL.replace(new RegExp('([?|&]'+name + '=)' + '(.+?)(&|$)'),"$1"+encodeURIComponent(value)+"$3");
+    }else if(baseURL.length){
+        if(baseURL.indexOf("?") < 0) baseURL = baseURL + "?"
+        result = baseURL +'&'+name + '=' +encodeURIComponent(value);
+    } else {
+        result = '?'+name + '=' +encodeURIComponent(value);
+    }
+    return result
+}
+
+
 function VotingSystemClient () { }
 
 VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {

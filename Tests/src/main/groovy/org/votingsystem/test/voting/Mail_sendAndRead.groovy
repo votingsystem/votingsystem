@@ -3,7 +3,7 @@ package org.votingsystem.test.voting
 import com.sun.mail.pop3.POP3Store
 import net.sf.json.JSONSerializer
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.test.model.POP3SimulationData
+import org.votingsystem.test.util.POP3SimulationData
 import org.votingsystem.test.util.TestUtils
 
 import javax.mail.*

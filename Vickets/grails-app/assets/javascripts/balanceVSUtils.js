@@ -71,13 +71,13 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
     return seriesData
 }
 
-function checkBalanceMap(calculatedBalanceMap, serverBalanceMap) {
+function checkBalanceMap(transactionVSListBalanceMap, serverBalanceMap) {
     console.log("checkBalanceMap")
-    Object.keys(calculatedBalanceMap).forEach(function(entry) {
+    Object.keys(transactionVSListBalanceMap).forEach(function(entry) {
         if(serverBalanceMap[entry] == null) {
             throw new Error("Calculated currency: '" + entry + "' not found on server balance map")
         }
-        var tagDataMap = calculatedBalanceMap[entry]
+        var tagDataMap = transactionVSListBalanceMap[entry]
         Object.keys(tagDataMap).forEach(function(tagEntry) {
             var calculatedAmount = tagDataMap[tagEntry].amount
             var amount = (serverBalanceMap[entry][tagEntry].total)?serverBalanceMap[entry][tagEntry].total:
@@ -90,7 +90,7 @@ function checkBalanceMap(calculatedBalanceMap, serverBalanceMap) {
     });
 }
 
-function getCurrencyInfoMap(transactionVSList) {
+function getCurrencyMap(transactionVSList) {
     var currencyInfoMap = {}
     for(idx in transactionVSList) {
         var transactionvs = transactionVSList[idx]

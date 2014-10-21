@@ -6,6 +6,7 @@ import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.vicket.model.TransactionVS
@@ -18,10 +19,17 @@ public class TransactionVSPlan {
 
     private static Logger log = Logger.getLogger(TransactionVSPlan.class);
 
+
+    private DateUtils.TimePeriod timePeriod;
     private VicketServer vicketServer;
     private List<TransactionVS> bankVSTransacionList = new ArrayList<>();
     private List<TransactionVS> groupVSTransacionList = new ArrayList<>();
     private List<TransactionVS> userVSTransacionList = new ArrayList<>();
+
+
+    public TransactionVSPlan() {
+
+    }
 
     public TransactionVSPlan(File transactionVSPlanFile, VicketServer vicketServer) {
         this.vicketServer = vicketServer;
@@ -107,12 +115,40 @@ public class TransactionVSPlan {
         return currencyMap;
     }
 
+    public DateUtils.TimePeriod getTimePeriod() {
+        return timePeriod;
+    }
+
     public List<TransactionVS> getBankVSTransacionList() {
         return bankVSTransacionList;
     }
 
     public List<TransactionVS> getGroupVSTransacionList() {
         return groupVSTransacionList;
+    }
+
+    public List<TransactionVS> getUserVSTransacionList() {
+        return userVSTransacionList;
+    }
+
+    public List<TransactionVS> getTransacionList() {
+        List<TransactionVS> result = new ArrayList<>();
+        result.addAll(getBankVSTransacionList());
+        result.addAll(getGroupVSTransacionList());
+        result.addAll(getUserVSTransacionList());
+        return result;
+    }
+
+
+    public Map getReport() {
+        List<TransactionVS> transactionsVSList = getTransacionList();
+        Map<String, TransactionVSCounter> resultMap = new HashMap<>()
+        for(TransactionVS transactionVS : transactionsVSList) {
+            if(resultMap.containsKey(transactionVS.getType().toString()))
+                resultMap.get(transactionVS.getType().toString()).addTransaction(transactionVS.amount)
+            else resultMap.put(transactionVS.getType().toString(), new TransactionVSCounter(transactionVS));
+        }
+        return resultMap
     }
 
     public BigDecimal getTotalAmount() {

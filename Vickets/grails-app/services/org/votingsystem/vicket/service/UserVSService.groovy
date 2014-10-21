@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -162,7 +163,11 @@ class UserVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
+
         if(UserVS.Type.SYSTEM != userVS.type) userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
+        resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesFrom)
+        resultMap.balancesTo = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesTo)
+        resultMap.balancesCash = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesCash)
         return resultMap
     }
 }

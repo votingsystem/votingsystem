@@ -47,6 +47,16 @@ class UrlMappings {
             }
         }
 
+        "/balance/weekdb/$year/$month/$day" {
+            controller = "balance"
+            action = "weekdb"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
 
         "/certificateVS/cert/$serialNumber"{
             controller = "certificateVS"

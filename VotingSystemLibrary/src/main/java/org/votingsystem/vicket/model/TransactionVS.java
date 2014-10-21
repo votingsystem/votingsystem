@@ -29,9 +29,12 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
+    public enum Source {FROM, TO}
+
     public enum Type {FROM_BANKVS, FROM_USERVS, FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER,
         FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD, VICKET_INIT_PERIOD_TIME_LIMITED, VICKET_REQUEST,
-        VICKET_SEND, VICKET_CANCELLATION, CANCELLATION;}
+        VICKET_SEND, VICKET_CANCELLATION, CANCELLATION;
+    }
 
     public enum State { OK, REPEATED, CANCELLED;}
 

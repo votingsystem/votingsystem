@@ -105,8 +105,8 @@
                     this.infoName = "<g:message code="systemLbl"/>"
                     this.name = this.balance.userVS.name
                 }
-                this.transactionFromInfoMap = getCurrencyInfoMap(this.balance.transactionFromList)
-                this.transactionToInfoMap = getCurrencyInfoMap(this.balance.transactionToList)
+                this.transactionFromInfoMap = getCurrencyMap(this.balance.transactionFromList)
+                this.transactionToInfoMap = getCurrencyMap(this.balance.transactionToList)
 
                 //calculatedBalanceMap, serverBalanceMap
                 try {

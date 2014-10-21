@@ -8,7 +8,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.callable.ClaimSignedSender
 import org.votingsystem.test.callable.SignTask
-import org.votingsystem.test.model.SimulationData
+import org.votingsystem.test.util.SimulationData
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.*

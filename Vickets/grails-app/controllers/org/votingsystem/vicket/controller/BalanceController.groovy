@@ -58,6 +58,14 @@ class BalanceController {
         }
     }
 
+    /*
+    * /balance/weekdb/$year/$month/$day
+    */
+    def weekdb() {
+        Calendar calendar = RequestUtils.getCalendar(params)
+        return [responseVS:balanceService.calculatePeriod(DateUtils.getWeekPeriod(calendar))]
+    }
+
     /**
      * Invoked if any method in this controller throws an Exception.
      */

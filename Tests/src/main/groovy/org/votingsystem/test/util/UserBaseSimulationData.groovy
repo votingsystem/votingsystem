@@ -1,4 +1,4 @@
-package org.votingsystem.test.model
+package org.votingsystem.test.util
 
 import net.sf.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
@@ -7,7 +7,6 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.test.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.test.callable.RepresentativeTestDataSender
-import org.votingsystem.test.util.SignatureService
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper

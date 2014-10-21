@@ -29,14 +29,19 @@ class GroupVSController {
             GroupVS.withTransaction {
                 result = GroupVS.get(params.long('id'))
             }
-            if(result) resultMap = groupVSService.getGroupVSDataMap(result)
+            if(result)
+                if(request.contentType?.contains("json")) {
+                    resultMap = groupVSService.getGroupVSDataMap(result)
+                    render resultMap as JSON
+                } else {
+                    resultMap = groupVSService.getDataWithBalancesMap(result, DateUtils.getCurrentWeekPeriod())
+                    render(view:'groupvs', model: [groupvsMap:resultMap])
+                }
             else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_NOT_FOUND,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
             }
-            if(request.contentType?.contains("json")) {
-                render resultMap as JSON
-            } else render(view:'groupvs', model: [groupvsMap:resultMap])
+            return false
         }
         List<GroupVS> groupVSList = null
         GroupVS.withTransaction {

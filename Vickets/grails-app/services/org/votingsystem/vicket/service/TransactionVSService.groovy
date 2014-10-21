@@ -3,6 +3,8 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.votingsystem.groovy.util.TransactionVSUtils
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
@@ -248,12 +250,12 @@ class TransactionVSService {
             if(currencyMap[transactionVS.tag.name]) {
                 if(transactionVS.validTo){
                     currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
-                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                            transactionVS.amount)
                     currencyMap[transactionVS.tag.name].timeLimited = currencyMap[transactionVS.tag.name].timeLimited.add(
-                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                            transactionVS.amount)
                 } else {
                     currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
-                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                            transactionVS.amount)
                 }
             } else {
                 Map tagDataMap

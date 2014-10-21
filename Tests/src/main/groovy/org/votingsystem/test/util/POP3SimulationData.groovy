@@ -1,4 +1,4 @@
-package org.votingsystem.test.model
+package org.votingsystem.test.util
 
 import net.sf.json.JSONObject
 import org.slf4j.Logger

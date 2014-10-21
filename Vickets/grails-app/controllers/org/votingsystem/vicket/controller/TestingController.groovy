@@ -35,7 +35,7 @@ class TestingController {
 
     def index() {
         ResponseVS responseVS = balanceService.calculatePeriod(DateUtils.currentWeekPeriod)
-        render "$responseVS.statusCode - $responseVS.message"
+        return [responseVS:responseVS]
     }
 
     def balance() {

@@ -3,9 +3,11 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import static org.springframework.context.i18n.LocaleContextHolder.*
@@ -13,7 +15,6 @@ import static org.springframework.context.i18n.LocaleContextHolder.*
 //@Transactional
 class BalanceService {
 
-    private static final CLASS_NAME = BalanceService.class.getSimpleName()
 
     def systemService
     def messageSource
@@ -207,7 +208,7 @@ class BalanceService {
         Map systemBalance = systemService.genBalanceForSystem(timePeriod)
         Map userBalances = [systemBalance:systemBalance, groupVSBalanceList:groupVSBalanceList,
                         userVSBalanceList:userVSBalanceList, bankVSBalanceList:bankVSBalanceList]
-        Map resultMap = [userBalances:userBalances]
+        Map resultMap = [timePeriod:timePeriod.toJSON(),userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
         JSON userBalancesJSON = new JSON(resultMap)
         reportsFile.write(userBalancesJSON.toString())
@@ -221,7 +222,9 @@ class BalanceService {
         String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
                 System.currentTimeMillis() - beginCalc)
         log.debug("$methodName - numTotalUsers: '${numTotalUsers}' - finished in '${elapsedTimeStr}'")
-        return responseVS
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.OK, data:resultMap, contentType: ContentTypeVS.JSON,
+                metaInf:MetaInfMsg.getOKMsg(methodName, timePeriod.toString()))
     }
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {

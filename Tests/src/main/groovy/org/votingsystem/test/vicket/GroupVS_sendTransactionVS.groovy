@@ -12,7 +12,7 @@ Logger log = TestUtils.init(GroupVS_sendTransactionVS.class, simulationDataMap)
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
 ContextVS.getInstance().setDefaultServer(vicketServer)
 TransactionVSPlan transactionVSPlan = new TransactionVSPlan(
-        TestUtils.getFileFromResources("groupVS_transactionPlan.json"), vicketServer)
+        TestUtils.getFileFromResources("transactionsPlan/groupVS.json"), vicketServer)
 
 Map currencyResultMap = transactionVSPlan.runGroupVSTransactions("TEST_GROUPVS_SEND_TRANSACTIONVS")
 

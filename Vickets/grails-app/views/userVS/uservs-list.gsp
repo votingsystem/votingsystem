@@ -1,8 +1,9 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
 
-<polymer-element name="uservs-list" attributes="url userURLPrefix menuType">
+<polymer-element name="uservs-list" attributes="url menuType">
     <template>
         <style>
         .nifColumn {
@@ -55,11 +56,16 @@
                         <div style="width:170px;">{{uservs.lastUpdated}}</div>
                     </div>
                 </template>
+                <vs-pager on-pager-change="{{pagerChange}}" max="{{userList.max}}"
+                          next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                          first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                          offset="{{userList.offset}}" total="{{userList.totalCount}}"></vs-pager>
             </div>
         </div>
     </template>
     <script>
         Polymer('uservs-list', {
+            baseURL:null,
             ready: function() {console.log(this.tagName + " - ready") },
             userSelected: function(e) {
                 console.log(this.tagName + " - userSelected - userId: " + e.target.templateInstance.model.uservs.uservs.id)
@@ -67,6 +73,9 @@
             },
             refreshUserList: function(state) {
                 this.$.ajax.go()
+            },
+            urlChanged:function() {
+
             },
             userState: function(state) {
                 var userState
@@ -84,6 +93,11 @@
                         userState = jsonSubscriptionData.state
                 }
                 return userState
+            },
+            pagerChange: function(e) {
+                var newURL = setURLParameter(this.$.ajax.url, "offset",  e.detail.offset)
+                newURL = setURLParameter(newURL, "max", e.detail.max)
+                this.$.ajax.url = newURL
             }
         });
     </script>

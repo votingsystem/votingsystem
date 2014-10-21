@@ -2,6 +2,8 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
+import org.votingsystem.groovy.util.TransactionVSUtils
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
@@ -124,7 +126,7 @@ class SystemService {
                     "transactionVSService")).getTransactionMap(transaction))
         }
         resultMap.transactionFromList = transactionFromList
-        resultMap.balancesFrom = balancesMap
+        resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(balancesMap)
 
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
@@ -148,7 +150,7 @@ class SystemService {
                     "transactionVSService")).getTransactionMap(transaction))
         }
         resultMap.transactionToList = transactionToList
-        resultMap.balancesTo = balancesMap
+        resultMap.balancesTo = TransactionVSUtils.setBigDecimalToPlainString(balancesMap)
         return resultMap
     }
 

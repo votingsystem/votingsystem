@@ -1,5 +1,9 @@
 package org.votingsystem.groovy.util
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 class RequestUtils {
 
     // 1=ASCENDING, -1=DESCENDING

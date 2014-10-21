@@ -2,7 +2,7 @@ package org.votingsystem.test.ui;
 
 import javafx.concurrent.Task;
 import org.apache.log4j.Logger;
-import org.votingsystem.test.model.SimulationData;
+import org.votingsystem.test.util.SimulationData;
 
 /**
  * Created by jgzornoza on 19/10/14.

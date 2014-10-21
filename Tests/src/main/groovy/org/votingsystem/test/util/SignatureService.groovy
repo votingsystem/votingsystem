@@ -12,7 +12,6 @@ import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.test.model.SimulationData
 import org.votingsystem.util.*
 
 import javax.mail.Header
