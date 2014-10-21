@@ -37,9 +37,9 @@ class UrlMappings {
             }
         }
 
-        "/balance/weekReport/$year/$month/$day" {
+        "/balance/week/$year/$month/$day" {
             controller = "balance"
-            action = "weekReport"
+            action = "week"
             constraints {
                 year(matches:/\d*/)
                 month(matches:/\d*/)

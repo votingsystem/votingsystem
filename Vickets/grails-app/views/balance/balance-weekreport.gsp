@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <asset:javascript src="balanceVSUtils.js"/>
 
-<polymer-element name="balance-uservs-details" attributes="balance">
+<polymer-element name="balance-uservs-details" attributes="balance type">
     <template>
         <style>
             .movemenType{
@@ -25,7 +25,7 @@
         </style>
         <div class="card" layout vertical>
             <div class="errorMessage" style="display:{{errorMessage?'block':'none'}}">{{errorMessage}}</div>
-            <div class="userVS">{{balance.nif}} - {{balance.name}}</div>
+            <div class="userVS">{{infoName}} - {{name}}</div>
             <div layout horizontal center center-justified>
                 <g:message code="numExpensesLbl"/>: {{balance.transactionFromList.length}} ---
                 <g:message code="numIncomesLbl"/>: {{balance.transactionToList.length}}
@@ -89,10 +89,21 @@
                 return tagVSList
             },
             balanceChanged:function() {
-
-                if(this.balance.userVS) {
-                    this.balance.nif = this.balance.userVS.nif
-                    this.balance.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
+                if(!this.balance) {
+                    console.log("balanceChanged - balance null")
+                    return
+                }
+                if(this.type === "userVS") {
+                    this.infoName = this.balance.userVS.nif
+                    this.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
+                }
+                if(this.type === "groupVS") {
+                    this.infoName = "<g:message code="groupLbl"/>"
+                    this.name = this.balance.userVS.name
+                }
+                if(this.type === "systemVS") {
+                    this.infoName = "<g:message code="systemLbl"/>"
+                    this.name = this.balance.userVS.name
                 }
                 this.transactionFromInfoMap = getCurrencyInfoMap(this.balance.transactionFromList)
                 this.transactionToInfoMap = getCurrencyInfoMap(this.balance.transactionToList)
@@ -108,8 +119,6 @@
                 } catch(e) {
                     this.errorMessage = "transactionTo - " + e
                 }
-
-                this.currencyInfoMapStr = JSON.stringify(this.transactionFromInfoMap)
             }
         });
     </script>
@@ -122,20 +131,20 @@
         <style>
 
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{balances}}" handleAs="json" method="get" contentType="json"></core-ajax>
+        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" method="get" contentType="json"></core-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div layout center center-justified style="margin: 0px auto 0px auto;">
             <div layout flex horizontal wrap around-justified>
-                <balance-uservs-details balance="{{balances.userBalances.systemBalance}}"></balance-uservs-details>
+                <balance-uservs-details type="systemVS" balance="{{balances.userBalances.systemBalance}}"></balance-uservs-details>
             </div>
             <div layout flex horizontal wrap around-justified>
                 <template repeat="{{groupBalance in balances.userBalances.groupVSBalanceList}}">
-                    <balance-uservs-details balance="{{groupBalance}}"></balance-uservs-details>
+                    <balance-uservs-details type="groupVS" balance="{{groupBalance}}"></balance-uservs-details>
                 </template>
             </div>
             <div layout flex horizontal wrap around-justified>
                 <template repeat="{{userBalance in balances.userBalances.userVSBalanceList}}">
-                    <balance-uservs-details balance="{{userBalance}}"></balance-uservs-details>
+                    <balance-uservs-details  type="userVS" balance="{{userBalance}}"></balance-uservs-details>
                 </template>
             </div>
 
@@ -148,6 +157,9 @@
                 balances: {value: {}}
             },
             ready: function() {},
+            stringify:function(e) {
+                return JSON.stringify(e)
+            },
             balancesChanged: function() {
                 console.log("balancesChanged")
                 this.balancesStr = JSON.stringify(this.balances)

@@ -41,9 +41,9 @@ class BalanceController {
     }
 
     /*
-     * /balance/weekReport/$year/$month/$day
+     * /balance/week/$year/$month/$day
      */
-    def weekReport() {
+    def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map<String, File> filesMap = filesService.getWeekReportFiles(timePeriod, null)
@@ -54,7 +54,7 @@ class BalanceController {
         } else {
             def messageJSON = JSON.parse(reportsFile.text)
             if(request.contentType?.contains("json")) render messageJSON as JSON
-            else render(view:'balancesWeek', model: [balancesMap:messageJSON])
+            else render(view:'week', model: [balancesJSON:messageJSON as JSON])
         }
     }
 

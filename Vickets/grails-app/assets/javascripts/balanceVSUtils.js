@@ -80,7 +80,9 @@ function checkBalanceMap(calculatedBalanceMap, serverBalanceMap) {
         var tagDataMap = calculatedBalanceMap[entry]
         Object.keys(tagDataMap).forEach(function(tagEntry) {
             var calculatedAmount = tagDataMap[tagEntry].amount
-            var serverAmount = new Number(serverBalanceMap[entry][tagEntry]).toFixed(2)
+            var amount = (serverBalanceMap[entry][tagEntry].total)?serverBalanceMap[entry][tagEntry].total:
+                serverBalanceMap[entry][tagEntry]
+            var serverAmount = new Number(amount).toFixed(2)
             if(calculatedAmount !== serverAmount)
                 throw new Error("ERROR currency: '" + entry + "' tag: '" + tagEntry +
                     "' calculated amount: '" + calculatedAmount + "' server amount: ''" + serverAmount + "''")
@@ -92,7 +94,7 @@ function getCurrencyInfoMap(transactionVSList) {
     var currencyInfoMap = {}
     for(idx in transactionVSList) {
         var transactionvs = transactionVSList[idx]
-        var tagName = transactionvs.tags[0].name
+        var tagName = transactionvs.tags[0]
         if(currencyInfoMap[transactionvs.currency]) {
             if(currencyInfoMap[transactionvs.currency][tagName] != null){
                 var tagVSInfoMap = currencyInfoMap[transactionvs.currency][tagName]
