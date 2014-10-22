@@ -6,14 +6,12 @@ import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CMSUtils
-import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
@@ -30,10 +28,10 @@ import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
+
 @Transactional
 class  SignatureVSService {
-
-    private static final CLASS_NAME = SignatureVSService.class.getSimpleName()
 
     //static transactional = false
 	
@@ -198,42 +196,35 @@ class  SignatureVSService {
         return trustedCerts;
     }
 
-	public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
-		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header header) {
+		log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		return getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header);
+		return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header);
 	}
 
-    public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+    public ResponseVS getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
             Header... headers) {
-        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+        log.debug "getSMIMETimeStamped - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
+        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(
                 fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        smimeMessage = timeStamper.getSmimeMessage();
         responseVS = new ResponseVS(ResponseVS.SC_OK)
-        responseVS.setSmimeMessage(smimeMessage)
+        responseVS.setSMIME(timeStamper.getSMIME())
         return responseVS;
     }
 		
-	public synchronized SMIMEMessage getMultiSignedMimeMessage (
+	public synchronized SMIMEMessage getSMIMEMultiSigned (
 		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
-		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-		if(fromUser) {
-			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setFrom(new InternetAddress(fromUser))
-		} 
-		if(toUser) {
-			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setHeader("To", toUser)
-		}
-		SMIMEMessage multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+		log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+		if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")))
+		if(toUser) smimeMessage.setHeader("To", toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", ""))
+		SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
 		return multiSignedMessage
 	}
 
@@ -325,7 +316,7 @@ class  SignatureVSService {
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         MessageSMIME messageSMIMEReq = responseVS.data
         UserVS fromUser = messageSMIMEReq.getUserVS()
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         String msg = null
         String toUserNIFValidated = org.votingsystem.util.NifUtils.validate(messageVSJSON.toUserNIF)
         if(!fromUser || ! toUserNIFValidated || !messageVSJSON.encryptedDataList || !messageVSJSON.encryptedDataInfo) {

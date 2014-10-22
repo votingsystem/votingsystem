@@ -20,7 +20,7 @@ ContextVS.getInstance().setDefaultServer(vicketServer)
 SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER)
 UserVS fromUserVS = representativeSignatureService.getUserVS()
 String messageSubject = "TEST_ADD_GROUPVS";
-SMIMEMessage smimeMessage = representativeSignatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,
+SMIMEMessage smimeMessage = representativeSignatureService.getSMIMETimeStamped(fromUserVS.nif,
         vicketServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
         vicketServer.getSaveGroupVSServiceURL())

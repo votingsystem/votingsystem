@@ -267,7 +267,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     (X509Certificate) keyEntry.getCertificateChain()[0],
                     SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
+            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
                     textToSign, subject);
             //we can't timestamp here because of android.os.NetworkOnMainThreadException
             responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);

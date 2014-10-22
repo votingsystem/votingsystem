@@ -55,7 +55,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         Log.d(TAG + ".call()", "");
         ResponseVS responseVS = null;
         try {
-            SMIMEMessage signedMessage = certificationRequest.genMimeMessage(fromUser, toUser,
+            SMIMEMessage signedMessage = certificationRequest.getSMIME(fromUser, toUser,
                     textToSign, subject, header);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, contextVS);
             responseVS = timeStamper.call();
@@ -63,14 +63,14 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
                 return responseVS;
             }
-            signedMessage = timeStamper.getSmimeMessage();
+            signedMessage = timeStamper.getSMIME();
             byte[] messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
             responseVS = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage receipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
-                responseVS.setSmimeMessage(receipt);
+                responseVS.setSMIME(receipt);
             } else return responseVS;
         } catch(Exception ex) {
             ex.printStackTrace();

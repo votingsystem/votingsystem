@@ -45,7 +45,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            representativeDataSmimeMessage = timeStamper.getSmimeMessage();
+            representativeDataSmimeMessage = timeStamper.getSMIME();
             byte[] representativeEncryptedDataBytes = Encryptor.encryptSMIME(
                     representativeDataSmimeMessage, accesRequestServerCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();

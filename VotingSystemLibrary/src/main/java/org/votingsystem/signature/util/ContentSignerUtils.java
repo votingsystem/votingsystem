@@ -18,16 +18,16 @@ import static org.votingsystem.model.ContextVS.*;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ContentSignerHelper {
+public class ContentSignerUtils {
 
-    private static Logger log = Logger.getLogger(ContentSignerHelper.class);
+    private static Logger log = Logger.getLogger(ContentSignerUtils.class);
 
     public enum CryptoToken {DNIe, JKS_KEYSTORE}
 
-    public static SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
+    public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
              char[] password, String subject, Header... headers) throws Exception {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
-        log.debug("genMimeMessage - CryptoToken: " + cryptoTokenStr);
+        log.debug("getSMIME - CryptoToken: " + cryptoTokenStr);
         CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
         switch(cryptoToken) {
             case JKS_KEYSTORE:
@@ -35,9 +35,9 @@ public class ContentSignerHelper {
                 java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
                 SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password, ContextVS.DNIe_SIGN_MECHANISM);
-                return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject, headers);
+                return signedMailGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
             case DNIe:
-                return DNIeContentSigner.genMimeMessage(fromUser,
+                return DNIeContentSigner.getSMIME(fromUser,
                         toUser, textToSign, password, subject, headers);
             default: return null;
         }
@@ -61,17 +61,5 @@ public class ContentSignerHelper {
         }
     }
 
-    public static String getPasswordRequestMsg() {
-        String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
-        CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
-        switch(cryptoToken) {
-            case JKS_KEYSTORE:
-                return ContextVS.getMessage("passwordDialogKeyStoreMsg");
-            case DNIe:
-                return ContextVS.getMessage("passwordDialogDNIeMsg");
-            default:
-                return null;
-        }
-    }
 
 }

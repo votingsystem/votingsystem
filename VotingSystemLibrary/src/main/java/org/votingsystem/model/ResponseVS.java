@@ -52,7 +52,7 @@ public class ResponseVS<T> implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="statusCode") private Integer statusCode;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
-    @Column(name="metaInf") private String metaInf;
+    @Column(name="metaInf", columnDefinition="TEXT") private String metaInf;
     @Column(name="url") private String url;
     @Column(name="message", columnDefinition="TEXT") private String message;
     @Column(name="typeVS") @Enumerated(EnumType.STRING) private TypeVS type;
@@ -203,7 +203,7 @@ public class ResponseVS<T> implements Serializable {
 
     public byte[] getMessageBytes() throws Exception {
         if(contentType.isSigned() && messageBytes == null && messageSMIME != null)
-            return messageSMIME.getSmimeMessage().getBytes();
+            return messageSMIME.getSMIME().getBytes();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
@@ -212,11 +212,11 @@ public class ResponseVS<T> implements Serializable {
         this.messageBytes = messageBytes;
     }
 
-    public SMIMEMessage getSmimeMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 
-    public void setSmimeMessage(SMIMEMessage smimeMessage) {
+    public void setSMIME(SMIMEMessage smimeMessage) {
         this.smimeMessage = smimeMessage;
     }
 
@@ -286,8 +286,8 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public MessageSMIME refreshMessageSMIME() throws Exception {
-        messageSMIME.getSmimeMessage().setMessageID("/messageSMIME/" + messageSMIME.getId());
-        messageSMIME.setContent(messageSMIME.getSmimeMessage().getBytes());
+        messageSMIME.getSMIME().setMessageID("/messageSMIME/" + messageSMIME.getId());
+        messageSMIME.setContent(messageSMIME.getSMIME().getBytes());
         if(eventVS != null) messageSMIME.setEventVS(eventVS);
         if(type != null) messageSMIME.setType(type);
         if(reason != null) messageSMIME.setReason(reason);
@@ -298,12 +298,11 @@ public class ResponseVS<T> implements Serializable {
     public static ResponseVS getExceptionResponse(String controller, Map actionMap, Exception exception,
           Throwable rootCause) {
         String action = (String) actionMap.values().iterator().next();
-        log.error("controller: " + controller + " - action: " + action + " - exception:" + rootCause.getMessage(), rootCause);
-        String metaInf = null;
-        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
-            metaInf = ((ExceptionVS)exception).getMetInf();
-        else metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
+        String metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
                 rootCause.getClass().getSimpleName();
+        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
+            metaInf = metaInf + "_" +((ExceptionVS)exception).getMetInf();
+        log.error(metaInf, rootCause);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, rootCause.getMessage());
         responseVS.setReason(rootCause.getMessage());
         responseVS.setMetaInf(metaInf);

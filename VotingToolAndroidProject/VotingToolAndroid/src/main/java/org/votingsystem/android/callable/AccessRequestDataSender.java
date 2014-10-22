@@ -54,7 +54,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequest, contextVS);
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            accessRequest = timeStamper.getSmimeMessage();
+            accessRequest = timeStamper.getSMIME();
 
             byte[] csrEncryptedBytes = Encryptor.encryptMessage(certificationRequest.
             		getCsrPEM(), destinationCert);

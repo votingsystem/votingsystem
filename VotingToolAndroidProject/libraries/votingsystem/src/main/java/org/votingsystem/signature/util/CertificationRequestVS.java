@@ -148,9 +148,9 @@ public class CertificationRequestVS implements java.io.Serializable {
         this.signedCsr = signedCsr;
     }
 
-    public SMIMEMessage genMimeMessage(String fromUser, String toUser,
+    public SMIMEMessage getSMIME(String fromUser, String toUser,
           String textToSign, String subject, Header header) throws Exception {
-        return getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject);
+        return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject);
     }
 
     private SignedMailGenerator getSignedMailGenerator() throws Exception {

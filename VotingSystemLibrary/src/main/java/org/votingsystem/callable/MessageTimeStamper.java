@@ -61,7 +61,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
                 timeStampToken.validate(timeStampSignerInfoVerifier);
             } else log.debug("TIMESTAMP RESPONSE NOT VALIDATED");
             if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
-            responseVS.setSmimeMessage(smimeMessage);
+            responseVS.setSMIME(smimeMessage);
         }
         return responseVS;
     }
@@ -87,7 +87,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         return digestToken;
     }
     
-    public SMIMEMessage getSmimeMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 

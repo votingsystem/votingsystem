@@ -295,7 +295,7 @@ public class DNIeContentSigner implements ContentSigner {
 
     }
 
-    public static SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
+    public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
                      char[] password, String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";

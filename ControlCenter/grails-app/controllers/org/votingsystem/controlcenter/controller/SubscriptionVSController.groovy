@@ -39,7 +39,7 @@ class SubscriptionVSController {
 	def index() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-		SMIMEMessage smimeMessageReq = messageSMIME.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIME.getSMIME()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 		if (messageJSON.serverURL) {
             String serverURL = StringUtils.checkURL(messageJSON.serverURL)

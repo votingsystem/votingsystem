@@ -48,7 +48,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
     public VicketRequestBatch(byte[] vicketBatchRequest, MessageSMIME messageSMIME, String localServer) throws Exception {
         this.messageSMIME = messageSMIME;
-        SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage();
+        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         JSONObject vicketRequest = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         if(TypeVS.VICKET_REQUEST != TypeVS.valueOf(vicketRequest.getString("operation"))) throw new ExceptionVS(
                 "Request operation '" + vicketRequest.getString("operation") + "' doesn't match VICKET_REQUEST");

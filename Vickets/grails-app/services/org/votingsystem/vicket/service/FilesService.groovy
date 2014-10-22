@@ -16,8 +16,6 @@ import java.util.concurrent.Executors
 @Transactional
 class FilesService {
 
-    private static final CLASS_NAME = CsrService.class.getSimpleName()
-
 	def grailsApplication
 	def messageSource
 

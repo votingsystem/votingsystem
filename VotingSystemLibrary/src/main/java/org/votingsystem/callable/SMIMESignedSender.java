@@ -44,7 +44,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServerURL);
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        smimeMessage = timeStamper.getSmimeMessage();
+        smimeMessage = timeStamper.getSMIME();
         byte[] messageToSendBytes = null;
         if(cotentType.isEncrypted()) messageToSendBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
         else if(cotentType.isSigned()) messageToSendBytes = smimeMessage.getBytes();
@@ -55,14 +55,14 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             if(responseContentType != null && responseContentType.isSignedAndEncrypted()) {
                 SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
-                responseVS.setSmimeMessage(signedMessage);
+                responseVS.setSMIME(signedMessage);
             } else if(responseContentType != null && responseContentType.isEncrypted()) {
                 byte[] decryptedBytes = Encryptor.decryptMessage(
                         responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                 responseVS.setMessageBytes(decryptedBytes);
             } else if(responseContentType != null && ResponseVS.SC_OK == responseVS.getStatusCode() &&
                     (responseContentType == ContentTypeVS.VOTE || responseContentType == ContentTypeVS.JSON_SIGNED)) {
-                responseVS.setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes())));
+                responseVS.setSMIME(new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes())));
             }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);

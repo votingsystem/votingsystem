@@ -47,7 +47,7 @@ class EventVSElectionService {
 		log.debug("saveEvent --- signer: ${userSigner?.nif}")
 		String msg = null
 		ResponseVS responseVS = null
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
                 controlCenterVS:systemService.getControlCenter(),
                 dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
@@ -97,10 +97,10 @@ class EventVSElectionService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = eventVS.controlCenterVS.getName()
         String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
-        responseVS = signatureVSService.getTimestampedSignedMimeMessage(
+        responseVS = signatureVSService.getSMIMETimeStamped(
                 fromUser, toUser, messageJSON.toString(), subject, header)
         if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
-        SMIMEMessage smimeMessage = responseVS.getSmimeMessage()
+        SMIMEMessage smimeMessage = responseVS.getSMIME()
         responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(),
                 ContentTypeVS.JSON_SIGNED, "${eventVS.controlCenterVS.serverURL}/eventVSElection")
         if(ResponseVS.SC_OK != responseVS.statusCode) {

@@ -54,7 +54,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
             KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            smimeMessage = signedMailGenerator.genMimeMessage(fromUser, toUser,textToSign, subject);
+            smimeMessage = signedMailGenerator.getSMIME(fromUser, toUser,textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -63,7 +63,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
                 responseVS.setNotificationMessage(responseVS.getMessage());
                 return responseVS;
             }
-            mapToSend.put(signedFileName, timeStamper.getSmimeMessage().getBytes());
+            mapToSend.put(signedFileName, timeStamper.getSMIME().getBytes());
             responseVS = HttpHelper.sendObjectMap(mapToSend, serviceURL);
         } catch(ExceptionVS ex) {
             ex.printStackTrace();

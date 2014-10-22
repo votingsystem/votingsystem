@@ -164,14 +164,14 @@ public class MessageSMIME implements Serializable {
 		this.base64ContentDigest = base64ContentDigest;
 	}
 
-    @Transient public SMIMEMessage getSmimeMessage() throws Exception {
+    @Transient public SMIMEMessage getSMIME() throws Exception {
 		if(smimeMessage == null && content != null) {
 			smimeMessage = new SMIMEMessage(new ByteArrayInputStream(content));
 		}
 		return smimeMessage;
 	}
 
-	public MessageSMIME setSmimeMessage(SMIMEMessage smimeMessage) throws Exception {
+	public MessageSMIME setSMIME(SMIMEMessage smimeMessage) throws Exception {
 		this.smimeMessage = smimeMessage;
         this.content = smimeMessage.getBytes();
         return this;
@@ -236,10 +236,10 @@ public class MessageSMIME implements Serializable {
 
     public void beforeInsert() {
         try {
-            setSignedContent(getSmimeMessage().getSignedContent());
-            setMessageSubject(getSmimeMessage().getSubject());
-            setContent(getSmimeMessage().getBytes());
-            setBase64ContentDigest(getSmimeMessage().getContentDigestStr());
+            setSignedContent(getSMIME().getSignedContent());
+            setMessageSubject(getSMIME().getSubject());
+            setContent(getSMIME().getBytes());
+            setBase64ContentDigest(getSMIME().getContentDigestStr());
         }catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

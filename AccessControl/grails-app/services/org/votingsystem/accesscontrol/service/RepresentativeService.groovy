@@ -448,7 +448,7 @@ class RepresentativeService {
 	}
 	
     ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, byte[] imageBytes) {
-		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		log.debug("saveRepresentativeData - userVS: ${userVS.nif}")
 		String msg
@@ -583,7 +583,7 @@ class RepresentativeService {
 	
 	ResponseVS processVotingHistoryRequest(MessageSMIME messageSMIMEReq) {
 		log.debug("processVotingHistoryRequest")
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		def messageJSON
 		String msg
@@ -656,7 +656,7 @@ class RepresentativeService {
 	
 	ResponseVS processRevoke(MessageSMIME messageSMIMEReq) {
 		String msg = null;
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage();
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME();
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processRevoke - user ${userVS.nif}")
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
@@ -724,9 +724,9 @@ class RepresentativeService {
         String subject = messageSource.getMessage(
                 'unsubscribeRepresentativeValidationSubject', null, locale)
 
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 smimeMessage, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
 
         msg =  messageSource.getMessage('representativeRevokeMsg', [userVS.getNif()].toArray(), locale)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIMEReq, userVS:userVS,
@@ -737,7 +737,7 @@ class RepresentativeService {
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
 	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq) {
 		String msg = null
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
 		RepresentationDocumentVS representationDocument = null

@@ -19,7 +19,7 @@ class EventVSClaimSignatureCollectorService {
 
     ResponseVS save (MessageSMIME messageSMIMEReq) {
         UserVS userVS = messageSMIMEReq.getUserVS()
-        SignatureRequest request = new SignatureRequest(messageSMIMEReq.getSmimeMessage().getSignedContent(),
+        SignatureRequest request = new SignatureRequest(messageSMIMEReq.getSMIME().getSignedContent(),
                 userVS.getTimeStampToken()?.getTimeStampInfo().getGenTime())
         SignatureVS signatureVS = SignatureVS.findWhere(eventVS:request.eventVS, userVS:userVS)
         if(signatureVS && EventVS.Cardinality.EXCLUSIVE.equals(request.eventVS.cardinality))  throw new ExceptionVS(
@@ -35,9 +35,9 @@ class EventVSClaimSignatureCollectorService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimSignatureValidated', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage (fromUser, toUser,
-                messageSMIMEReq.getSmimeMessage(), subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp).setEventVS(request.eventVS)
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned (fromUser, toUser,
+                messageSMIMEReq.getSMIME(), subject)
+        messageSMIMEReq.setSMIME(smimeMessageResp).setEventVS(request.eventVS)
         log.debug("save - claim signature OK - signer: ${userVS.nif}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEReq, eventVS:request.eventVS,
                 messageSMIME: messageSMIMEReq, type:TypeVS.CLAIM_EVENT_SIGN, contentType:ContentTypeVS.JSON_SIGNED)

@@ -145,7 +145,7 @@ public class Vicket implements Serializable  {
         if(!vicketRequest.getCurrencyCode().equals(currencyCode))  throw new ExceptionVS("checkRequestWithDB_currencyCode");
         if(!vicketRequest.getSignedTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(vicketRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
-        this.smimeMessage = vicketRequest.getSMIMEMessage();
+        this.smimeMessage = vicketRequest.getSMIME();
         this.x509AnonymousCert = vicketRequest.getX509AnonymousCert();
         this.toUserVS = vicketRequest.getToUserVS();
         this.toUserIBAN = vicketRequest.getToUserIBAN();
@@ -231,11 +231,11 @@ public class Vicket implements Serializable  {
         return CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
     }
 
-    public SMIMEMessage getSMIMEMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 
-    public void setSMIMEMessage(SMIMEMessage smimeMessage) {
+    public void setSMIME(SMIMEMessage smimeMessage) {
         this.smimeMessage = smimeMessage;
     }
 

@@ -33,7 +33,7 @@ class EventVSClaimService {
 		EventVSClaim eventVS
         UserVS signerVS = messageSMIMEReq.getUserVS()
         log.debug("saveEvent - signerVS: ${signerVS.nif}")
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME().getSignedContent())
         Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
         if(dateFinish.before(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('publishDocumentDateErrorMsg',
@@ -67,9 +67,9 @@ class EventVSClaimService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = signerVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimEventValidated', null, locale)
-        SMIMEMessage smimeMessage = signatureVSService.getMultiSignedMimeMessage(
-                fromUser, toUser,  messageSMIMEReq.getSmimeMessage(), subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessage).setEventVS(eventVS)
+        SMIMEMessage smimeMessage = signatureVSService.getSMIMEMultiSigned(
+                fromUser, toUser,  messageSMIMEReq.getSMIME(), subject)
+        messageSMIMEReq.setSMIME(smimeMessage).setEventVS(eventVS)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, messageSMIME: messageSMIMEReq,
                 type:TypeVS.CLAIM_EVENT, contentType: ContentTypeVS.JSON_SIGNED)
     }

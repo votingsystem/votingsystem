@@ -55,7 +55,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            smimeMessage = signedMailGenerator.genMimeMessage(fromUser, toUser,textToSign, subject);
+            smimeMessage = signedMailGenerator.getSMIME(fromUser, toUser,textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -64,7 +64,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 responseVS.setNotificationMessage(responseVS.getMessage());
                 return responseVS;
             }
-            smimeMessage = timeStamper.getSmimeMessage();
+            smimeMessage = timeStamper.getSMIME();
             byte[] messageToSend = null;
             if(contentType.isEncrypted())
                 messageToSend = Encryptor.encryptSMIME(smimeMessage, receiverCert);
@@ -75,7 +75,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
                             responseVS.getMessageBytes(), keyEntry.getCertificate().getPublicKey(),
                             keyEntry.getPrivateKey());
-                    responseVS.setSmimeMessage(signedMessage);
+                    responseVS.setSMIME(signedMessage);
                 } else {
                     byte[] decryptedMessageBytes = Encryptor.decryptCMS(keyEntry.getPrivateKey(),
                             responseVS.getMessageBytes());
@@ -92,7 +92,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         } finally {return responseVS;}
     }
 
-    public SMIMEMessage getSMIMEMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 

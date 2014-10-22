@@ -274,7 +274,8 @@
             this.fire('operation-finished')
         },
         init:function(operation, userName, userIBAN, targetGroupId) {
-            console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage)
+            console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage +
+                    " - toUserIBAN: " + userIBAN)
             this.operation = operation
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN
@@ -304,9 +305,9 @@
                     this.operationMsg = "<g:message code='transactionVSFromUserVS'/>"
                     this.fromUserName = null
                     this.fromUserIBAN = null
+                    this.isWithUserSelector = false
                     this.toUserName = userName
-                    this.$.receptorBox.uservsList[0] = {name:userName, IBAN:userIBAN}
-
+                    this.$.receptorBox.uservsList= [{name:userName, IBAN:userIBAN}]
                     break;
             }
             this.selectedTags = []

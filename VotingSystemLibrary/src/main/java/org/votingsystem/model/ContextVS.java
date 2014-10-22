@@ -356,7 +356,7 @@ public class ContextVS {
         PrivateKey privateKey = (PrivateKey)keyStore.getKey(END_ENTITY_ALIAS, PASSWORD.toCharArray());
         Certificate[] chain = keyStore.getCertificateChain(END_ENTITY_ALIAS);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(privateKey, chain, DNIe_SIGN_MECHANISM);
-        return signedMailGenerator.genMimeMessage(userTest.getEmail(),toUser, textToSign, subject);
+        return signedMailGenerator.getSMIME(userTest.getEmail(),toUser, textToSign, subject);
     }
 
     public void setSessionUser(UserVS userVS) {

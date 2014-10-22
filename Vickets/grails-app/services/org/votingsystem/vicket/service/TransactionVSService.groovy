@@ -3,19 +3,20 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.groovy.util.TransactionVSUtils
-
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.CoreSignal
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
 import java.math.RoundingMode
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
@@ -35,33 +36,27 @@ class TransactionVSService {
     def transactionVS_BankVSService
     def transactionVS_UserVSService
 
-    public void addTransactionListener (String listenerId) {
-        listenerSet.add(listenerId)
-    }
-
     public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
-        if(messageJSON.toUserIBAN instanceof JSONArray) {
-            messageJSON.toUserIBAN.each { it ->IbanVSUtil.validate(it);}
-        } else if(messageJSON.toUserIBAN) {
-            IbanVSUtil.validate(messageJSON.toUserIBAN);
-        }
-        TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
-        switch(transactionType) {
+        TransactionVSRequest request = new TransactionVSRequest(messageSMIMEReq)
+        switch(request.operation) {
             case TypeVS.FROM_BANKVS:
-                return transactionVS_BankVSService.processTransactionVS(messageSMIMEReq, messageJSON)
+                return transactionVS_BankVSService.processTransactionVS(request.getBankVSRequest())
             case TypeVS.FROM_GROUP_TO_MEMBER:
             case TypeVS.FROM_GROUP_TO_MEMBER_GROUP:
             case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON)
+                return transactionVS_GroupVSService.processTransactionVS(request.getGroupVSRequest())
             case TypeVS.FROM_USERVS:
-                return transactionVS_UserVSService.processTransactionVS(messageSMIMEReq, messageJSON)
+                return transactionVS_UserVSService.processTransactionVS(request.getUserVSRequest())
             default:
                 throw new ExceptionVS(messageSource.getMessage('unknownTransactionErrorMsg',
-                        [transactionType.toString()].toArray(), locale),
+                        [request.operation.toString()].toArray(), locale),
                         MetaInfMsg.getErrorMsg(methodName, "UNKNOWN_TRANSACTION"))
         }
+    }
+
+    public void addTransactionListener (String listenerId) {
+        listenerSet.add(listenerId)
     }
 
     public void notifyListeners(TransactionVS transactionVS) {
@@ -69,12 +64,13 @@ class TransactionVSService {
         Map messageMap = getTransactionMap(transactionVS)
         messageMap.coreSignal = CoreSignal.NEW_TRANSACTIONVS;
         if(!listenerSet.isEmpty()) { //notify websocket clients listening transactions
+            log.debug("${methodName} - sending websocket message to listeners")
             ResponseVS broadcastResult = webSocketService.broadcastList(messageMap, listenerSet);
             if(ResponseVS.SC_OK != broadcastResult.statusCode) {
                 def errorList = broadcastResult.data
                 errorList.each {listenerSet.remove(it)}
             }
-        } else log.debug("${methodName} - NO websocket listeners")
+        }
         LoggerVS.logTransactionVS(transactionVS.id, transactionVS.state.toString(), transactionVS.type.toString(),
                 transactionVS.fromUserIBAN, transactionVS.toUserIBAN, transactionVS.getCurrencyCode(),
                 transactionVS.amount, transactionVS.tag, transactionVS.dateCreated, transactionVS.validTo,
@@ -317,4 +313,98 @@ class TransactionVSService {
         return typeDescription
     }
 
+    private class TransactionVSRequest {
+        Boolean isTimeLimited;
+        BigDecimal amount;
+        UserVS fromUserVS;
+        UserVS toUserVS;
+        List<UserVS> toUserVSList = []
+        GroupVS groupVS
+        TagVS tag;
+        String currencyCode, fromUser, fromUserIBAN, subject;
+        TypeVS operation;
+        TransactionVS.Type transactionType;
+        Date validTo;
+        MessageSMIME messageSMIME
+        JSONObject messageJSON;
+
+        public TransactionVSRequest(MessageSMIME messageSMIMEReq) {
+            this.messageSMIME = messageSMIMEReq
+            this.fromUserVS = messageSMIME.userVS
+            messageJSON = JSON.parse(messageSMIMEReq.getSMIME().getSignedContent())
+            if(messageJSON.toUserIBAN instanceof JSONArray) {
+                messageJSON.toUserIBAN.each { it ->IbanVSUtil.validate(it);}
+            } else if(messageJSON.toUserIBAN) IbanVSUtil.validate(messageJSON.toUserIBAN);
+            operation = TypeVS.valueOf(messageJSON.operation)
+            if(!messageJSON.amount)  throw new ValidationExceptionVS(this.getClass(), "missing param 'amount'");
+            amount = new BigDecimal(messageJSON.amount)
+            if(!messageJSON.currencyCode)  throw new ValidationExceptionVS(this.getClass(), "missing param 'currencyCode'");
+            currencyCode = messageJSON.currencyCode
+            if(!messageJSON.subject)  throw new ValidationExceptionVS(this.getClass(), "missing param 'subject'");
+            subject = messageJSON.subject
+            isTimeLimited = messageJSON.isTimeLimited
+            if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().dateTo
+            if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
+                tag = TagVS.findWhere(name:messageJSON.tags[0])
+                if(!tag) throw new ValidationExceptionVS(this.getClass(), "Unknown tag '${messageJSON.tags[0]}'")
+            } else throw new ValidationExceptionVS(this.getClass(), "Invalid number of tags: '${messageJSON.tags}'")
+        }
+
+        public TransactionVSRequest getUserVSRequest() {
+            if(TypeVS.FROM_USERVS != operation) throw new ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'FROM_USERVS' - operation found: " + operation.toString())
+            if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
+                    "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
+            toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
+            if(!toUserVS) throw new ValidationExceptionVS(this.getClass(), "invalid 'toUserIBAN': '${messageJSON.toUserIBAN}'");
+            return this;
+        }
+
+        public TransactionVSRequest getBankVSRequest() {
+            if(TypeVS.FROM_BANKVS != operation) throw new ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'FROM_BANKVS' - operation found: " + operation.toString())
+            if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
+                    "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
+            toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
+            if(!toUserVS) throw new ValidationExceptionVS(this.getClass(), "invalid 'toUserIBAN': '${messageJSON.toUserIBAN}'");
+            //This is for banks clients
+            fromUserIBAN =  messageJSON.fromUserIBAN
+            if(!fromUserIBAN)  throw new ValidationExceptionVS(this.getClass(), "missing param 'fromUserIBAN'");
+            fromUser = messageJSON.fromUser
+            if(!fromUser)  throw new ValidationExceptionVS(this.getClass(), "missing param 'fromUser'");
+            return this;
+        }
+
+        public TransactionVSRequest getGroupVSRequest(JSONObject messageJSON, UserVS messageSigner) {
+            if(!messageJSON.operation) throw new ValidationExceptionVS(this.getClass(), "missing param 'operation'");
+            operation = TransactionVS.Type.valueOf(messageJSON.operation)
+            this.messageJSON = messageJSON
+            fromUserVS = messageSigner
+            groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
+            if(!groupVS) {
+                throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage('groupNotFoundByIBANErrorMsg',
+                        [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale))
+            }
+            if(operation != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+                messageJSON.toUserIBAN?.each { it ->
+                    UserVS userVS = getUserFromGroup(groupVS, it)
+                    if(!userVS) {
+                        throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
+                                'groupUserNotFoundByIBANErrorMsg',  [it, groupVS.name].toArray(), locale))
+                    } else toUserVSList.add(userVS)
+                }
+                if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),
+                        "Transaction without valid receptors")
+            }
+            return this;
+        }
+
+        JSONObject getReceptorData(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
+            messageJSON.messageSMIMEParentId = messageSMIMEReqId? messageSMIMEReqId : null
+            messageJSON.toUser = toUserNif? toUserNif : null
+            messageJSON.numUsers = numReceptors?numReceptors:null
+            messageJSON.toUserAmount = userPart?userPart.toString():null
+            return messageJSON;
+        }
+    }
 }

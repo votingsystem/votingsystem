@@ -32,7 +32,7 @@ class RepresentativeDelegationService {
 		//def future = callAsync {}
 		//return future.get(30, TimeUnit.SECONDS)
 		MessageSMIME messageSMIME = null
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
 		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg = null
@@ -72,9 +72,9 @@ class RepresentativeDelegationService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
                 fromUser, toUser, smimeMessage, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEReq,
                 type:TypeVS.REPRESENTATIVE_SELECTION)
 	}
@@ -104,7 +104,7 @@ class RepresentativeDelegationService {
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
@@ -146,7 +146,7 @@ class RepresentativeDelegationService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName)
         MessageSMIME messageSMIME = null
-        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
         X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
                 type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK)
@@ -164,9 +164,9 @@ class RepresentativeDelegationService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = certificateVS.hashCertVSBase64
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
                 fromUser, toUser, smimeMessage, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
         certificateVS.state = CertificateVS.State.USED
         certificateVS.messageSMIME = messageSMIMEReq
         certificateVS.save()
@@ -180,7 +180,7 @@ class RepresentativeDelegationService {
     }
 
     public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq) {
-        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
@@ -214,7 +214,7 @@ class RepresentativeDelegationService {
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
 	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq) {
 		String msg = null
-		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
 		RepresentationDocumentVS representationDocument = null

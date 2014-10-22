@@ -343,7 +343,7 @@ public class RepresentativeService extends IntentService {
             KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userVS,
+            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS,
                     contextVS.getAccessControl().getNameNormalized(),contentToSign, messageSubject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     (AppContextVS)getApplicationContext());
@@ -352,7 +352,7 @@ public class RepresentativeService extends IntentService {
                 caption = getString(R.string.timestamp_service_error_caption);
                 message = responseVS.getMessage();
             } else {
-                smimeMessage = timeStamper.getSmimeMessage();
+                smimeMessage = timeStamper.getSMIME();
                 byte[] representativeEncryptedDataBytes = Encryptor.encryptSMIME(
                         smimeMessage, contextVS.getAccessControl().getCertificate());
                 Map<String, Object> fileMap = new HashMap<String, Object>();

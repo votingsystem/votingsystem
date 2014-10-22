@@ -58,8 +58,8 @@ class EncryptorController {
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-			fromUser, toUser, messageSMIME.getSmimeMessage(), subject)
+		SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
+			fromUser, toUser, messageSMIME.getSMIME(), subject)
         return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: smimeMessageResp.getBytes(),
                 type:TypeVS.TEST, contentType: ContentTypeVS.JSON_SIGNED)]
 	}

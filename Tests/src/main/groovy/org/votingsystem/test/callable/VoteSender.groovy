@@ -31,14 +31,14 @@ public class VoteSender implements Callable<ResponseVS> {
         String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(electorNIF)
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-        SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(electorNIF, toUser,
+        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(electorNIF, toUser,
                 JSONSerializer.toJSON(voteVS.getAccessRequestDataMap()).toString(), smimeMessageSubject)
 
         AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
         ResponseVS responseVS = accessRequestDataSender.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = responseVS.getData();
-            smimeMessage = certificationRequest.genMimeMessage(voteVS.getHashCertVSBase64(), toUser,
+            smimeMessage = certificationRequest.getSMIME(voteVS.getHashCertVSBase64(), toUser,
                     JSONSerializer.toJSON(voteVS.getVoteDataMap()).toString(), "voteVSMsgSubject", null);
             SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL(),
@@ -47,7 +47,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     ContextVS.getInstance().getControlCenter().getX509Certificate());
             responseVS = sender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage voteReceipt = responseVS.getSmimeMessage();
+                SMIMEMessage voteReceipt = responseVS.getSMIME();
                 voteVS.setReceipt(voteReceipt);
                 //_ TODO _ validate receipt
             }

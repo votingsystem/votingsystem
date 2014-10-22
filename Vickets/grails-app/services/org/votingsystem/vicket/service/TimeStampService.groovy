@@ -14,7 +14,6 @@ import org.bouncycastle.operator.DigestCalculator
 import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
 import org.codehaus.groovy.grails.web.json.JSONObject
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.ExceptionVS
@@ -25,10 +24,10 @@ import org.votingsystem.util.StringUtils
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
+
 @Transactional
 class TimeStampService {
-
-    private static final CLASS_NAME = TimeStampService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource

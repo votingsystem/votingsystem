@@ -6,13 +6,13 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
+
 import java.security.cert.X509Certificate
-import static org.springframework.context.i18n.LocaleContextHolder.*
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 //@Transactional
 class CertificateVSService {
-
-    private static final CLASS_NAME = CertificateVSService.class.getSimpleName()
 
     def signatureVSService
     def messageSource
@@ -43,7 +43,7 @@ class CertificateVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         if (!messageJSON.info || !messageJSON.certChainPEM ||
                 (TypeVS.CERT_CA_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
@@ -104,7 +104,7 @@ class CertificateVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         CertificateVS.State changeCertToState = CertificateVS.State.valueOf(messageJSON.changeCertToState)
         if (!messageJSON.serialNumber ||(TypeVS.CERT_EDIT != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)

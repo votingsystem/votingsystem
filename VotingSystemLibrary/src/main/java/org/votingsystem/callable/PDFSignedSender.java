@@ -19,7 +19,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.ContentSignerHelper;
+import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.signature.util.ContentSignerVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PDFContentSigner;
@@ -83,7 +83,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
         } else {
             log.debug("Generating System VotingSystemSignedGenerator");
-            pdfSigner = ContentSignerHelper.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
+            pdfSigner = ContentSignerUtils.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
             signerCertChain = pdfSigner.getCertificateChain();
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");

@@ -215,7 +215,7 @@ public class Encryptor {
         //log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
         smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-        responseVS.setSmimeMessage(smimeMessageReq);
+        responseVS.setSMIME(smimeMessageReq);
         return responseVS;
     }
 

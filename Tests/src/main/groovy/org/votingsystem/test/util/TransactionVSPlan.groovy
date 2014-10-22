@@ -76,7 +76,7 @@ public class TransactionVSPlan {
 
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     transactionVS.fromUserVS.nif, UserVS.Type.BANKVS)
-            SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(transactionVS.fromUserVS.nif,
+            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.fromUserVS.nif,
                     vicketServer.getNameNormalized(), JSONSerializer.toJSON(
                     TransactionVSUtils.getBankVSTransactionVS(transactionVS)).toString(), smimeMessageSubject)
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
@@ -93,7 +93,7 @@ public class TransactionVSPlan {
             UserVS representative = ((GroupVS)transactionVS.fromUserVS).representative
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     representative.nif, UserVS.Type.GROUP)
-            SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(representative.nif,
+            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.nif,
                     vicketServer.getNameNormalized(), JSONSerializer.toJSON(
                     TransactionVSUtils.getGroupVSTransactionVS(transactionVS, transactionVS.fromUserVS)).toString(),
                     smimeMessageSubject)

@@ -12,7 +12,7 @@
         .subjectColumn {
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
         }
-        .amountColumn {width:110px;text-align: right; font-size: 0.9em;}
+        .amountColumn {width:130px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
         <div layout vertical justified style="display: block; height: 100%;">

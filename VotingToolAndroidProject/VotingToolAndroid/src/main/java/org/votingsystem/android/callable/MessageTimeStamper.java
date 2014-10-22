@@ -81,7 +81,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         return timeStampToken;
     }
         
-    public SMIMEMessage getSmimeMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 

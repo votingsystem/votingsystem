@@ -193,11 +193,11 @@ public class SignAndSendService extends IntentService {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setOperation(operationVS);
             } else {
-                SMIMEMessage smimeMessage = responseVS.getSmimeMessage();
+                SMIMEMessage smimeMessage = responseVS.getSMIME();
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                         targetServer.getTimeStampServiceURL(), contextVS);
                 responseVS = timeStamper.call();
-                smimeMessage = timeStamper.getSmimeMessage();
+                smimeMessage = timeStamper.getSMIME();
                 String base64ResultDigest = new String(Base64.encode(smimeMessage.getBytes()));
                 operationVS.getDocumentToSignJSON().put("smimeMessage", base64ResultDigest);
                 operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));

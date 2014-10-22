@@ -111,7 +111,7 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
 
-    public SMIMEMessage genMimeMessage(String fromUser, String toUser,
+    public SMIMEMessage getSMIME(String fromUser, String toUser,
             String textToSign, String subject, Header... headers) throws Exception {
         if (subject == null) throw new IllegalArgumentException("Subject null");
         if (textToSign == null) throw new IllegalArgumentException("Content null");
@@ -139,7 +139,7 @@ public class SignedMailGenerator {
         return body;
     }
      
-     public synchronized SMIMEMessage genMultiSignedMessage(
+     public synchronized SMIMEMessage getSMIMEMultiSigned(
     		 SMIMEMessage smimeMessage, String mailSubject) throws Exception {
  		 MimeMultipart mimeMultipart = (MimeMultipart)smimeMessage.getContent();
  		 MimeBodyPart bodyPart = (MimeBodyPart) mimeMultipart.getBodyPart(0);    	 

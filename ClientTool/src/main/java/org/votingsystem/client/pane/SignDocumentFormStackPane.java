@@ -26,7 +26,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.ContentSignerHelper;
+import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
@@ -282,7 +282,7 @@ public class SignDocumentFormStackPane extends StackPane {
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
                         log.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
-                        smimeMessage = ContentSignerHelper.genMimeMessage(null, toUser,
+                        smimeMessage = ContentSignerUtils.getSMIME(null, toUser,
                                 textToSignJSON.toString(), password.toCharArray(), messageSubject, null);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
                         updateProgress(40, 100);

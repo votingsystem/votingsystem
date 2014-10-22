@@ -314,27 +314,21 @@ class SignatureVSService {
                       extensionChecker:validatorResult.getChecker()])
     }
 
-    public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject,Header header) {
-        log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+    public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject,Header header) {
+        log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
+        SMIMEMessage mimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header)
         return mimeMessage;
     }
 
-    public synchronized SMIMEMessage getMultiSignedMimeMessage (
+    public synchronized SMIMEMessage getSMIMEMultiSigned (
             String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
-        log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-        if(fromUser) {
-            fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-            smimeMessage.setFrom(new InternetAddress(fromUser))
-        }
-        if(toUser) {
-            toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-            smimeMessage.setHeader("To", toUser)
-        }
-        return getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+        log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+        if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")))
+        if(toUser) smimeMessage.setHeader("To", toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", ""))
+        return getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
     }
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {

@@ -8,8 +8,10 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.NifUtils
-import static org.springframework.context.i18n.LocaleContextHolder.*
+
 import java.security.cert.X509Certificate
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
@@ -17,8 +19,6 @@ import java.security.cert.X509Certificate
 */
 @Transactional
 class UserVSService {
-
-    private static final CLASS_NAME = UserVSService.class.getSimpleName()
 
     def signatureVSService
 	def grailsApplication
@@ -52,7 +52,7 @@ class UserVSService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
 
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         if (!messageJSON.info || !messageJSON.certChainPEM ||
                 (TypeVS.CERT_USER_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)

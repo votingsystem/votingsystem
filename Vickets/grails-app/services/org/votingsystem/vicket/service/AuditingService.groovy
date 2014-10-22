@@ -13,8 +13,6 @@ import java.text.SimpleDateFormat
 @Transactional
 class AuditingService {
 
-    private static final CLASS_NAME = AuditingService.class.getSimpleName()
-
     def grailsApplication
     def transactionVSService
     def grailsLinkGenerator

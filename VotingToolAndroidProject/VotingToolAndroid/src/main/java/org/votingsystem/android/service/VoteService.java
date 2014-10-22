@@ -104,7 +104,7 @@ public class VoteService extends IntentService {
                         break;
                     case CANCEL_VOTE:
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            SMIMEMessage cancelReceipt = responseVS.getSmimeMessage();
+                            SMIMEMessage cancelReceipt = responseVS.getSMIME();
                             vote.setCancelVoteReceipt(cancelReceipt);
                             message = getString(R.string.cancel_vote_result_msg,
                                     vote.getEventVS().getSubject());

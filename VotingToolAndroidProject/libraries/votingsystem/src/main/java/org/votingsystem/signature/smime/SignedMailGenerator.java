@@ -88,7 +88,7 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
     
-    public SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
+    public SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
             String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";

@@ -3,14 +3,14 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
-import static org.springframework.context.i18n.LocaleContextHolder.*
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 //@Transactional
 class BalanceService {
@@ -104,16 +104,16 @@ class BalanceService {
                     Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:amountResult, tag:tagVSEntry.getKey(),
                                timeLimitedNotExpended:timeLimitedNotExpended, toUserVS: userVS.name, toUserNIF:userVS.nif,
                                toUserId:userVS.id, toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
-                    ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
+                    ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name,
                             userVS.getNif(), new JSONObject(transactionData).toString(), "${transactionMsgSubject} - ${signedMessageSubject}")
 
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(
                             "${methodName} - error signing system transaction - ${responseVS.getMessage()}")
 
                     MessageSMIME messageSMIME = new MessageSMIME(userVS:systemService.getSystemUser(),
-                            smimeMessage:responseVS.getSmimeMessage(), type:TypeVS.VICKET_INIT_PERIOD,
-                            content:responseVS.getSmimeMessage().getBytes(),
-                            base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
+                            smimeMessage:responseVS.getSMIME(), type:TypeVS.VICKET_INIT_PERIOD,
+                            content:responseVS.getSMIME().getBytes(),
+                            base64ContentDigest:responseVS.getSMIME().getContentDigestStr())
                     messageSMIME.save()
 
                    new TransactionVS(amount: amountResult, fromUserVS:userVS, fromUserIBAN: userVS.IBAN,
@@ -131,7 +131,7 @@ class BalanceService {
                         transactionVS.addAccountFromMovement(account, timeLimitedNotExpended)
                     }
                     File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${tagVSEntry.getKey()}.p7s")
-                    responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
+                    responseVS.getSMIME().writeTo(new FileOutputStream(tagReceiptFile))
                 }
             }
 
@@ -216,9 +216,9 @@ class BalanceService {
         String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
                 ["[${DateUtils.getDateStr(timePeriod.getDateFrom())} - ${DateUtils.getDateStr(timePeriod.getDateTo())}]"].toArray(),
                 locale)
-        ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
+        ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name,
                 "", userBalancesJSON.toString(),subject)
-        responseVS.getSmimeMessage().writeTo(new FileOutputStream(weekReportFiles.systemReceipt))
+        responseVS.getSMIME().writeTo(new FileOutputStream(weekReportFiles.systemReceipt))
         String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
                 System.currentTimeMillis() - beginCalc)
         log.debug("$methodName - numTotalUsers: '${numTotalUsers}' - finished in '${elapsedTimeStr}'")

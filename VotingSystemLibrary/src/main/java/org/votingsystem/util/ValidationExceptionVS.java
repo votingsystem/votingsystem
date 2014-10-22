@@ -7,11 +7,11 @@ package org.votingsystem.util;
 public class ValidationExceptionVS extends ExceptionVS {
 
     public ValidationExceptionVS(Class clazz, String message) {
-        super(clazz.getSimpleName() + "_ExceptionVS: " + message);
+        super(message, clazz.getSimpleName() + "_ExceptionVS: ");
     }
 
     public ValidationExceptionVS(Class clazz, String message, String metaInf) {
-        super(clazz.getSimpleName() + "_ExceptionVS: " + message, metaInf);
+        super(message, clazz.getSimpleName() + "_" + metaInf);
     }
 
     public ValidationExceptionVS(String message, String metaInf) {

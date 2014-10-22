@@ -2,8 +2,6 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import org.votingsystem.groovy.util.TransactionVSUtils
-
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
@@ -12,17 +10,18 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.*
 
 import java.security.cert.X509Certificate
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 class VicketService {
-
-    private static final CLASS_NAME = VicketService.class.getSimpleName()
 
     def messageSource
     def transactionVSService
@@ -36,7 +35,7 @@ class VicketService {
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         UserVS signer = messageSMIMEReq.userVS
         def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
@@ -52,9 +51,9 @@ class VicketService {
             String toUser = smimeMessageReq.getFrom().toString()
             String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
             vicket.setState(Vicket.State.CANCELLED)
-            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+            SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                     smimeMessageReq, subject)
-            messageSMIMEReq.setSmimeMessage(receipt)
+            messageSMIMEReq.setSMIME(receipt)
             vicket.cancelMessage = messageSMIMEReq
             vicket.save()
             TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
@@ -81,25 +80,23 @@ class VicketService {
                 messageBytes = messageSource.getMessage("vicketLapsedErrorMsg",
                         [vicket.serialNumber].toArray(), locale).getBytes()
             }
-            return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
-                    type:TypeVS.ERROR)
             return new ResponseVS(type:TypeVS.ERROR, messageBytes: messageBytes, contentType: contentType,
-                    metaInf:MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "VicketState_" + vicket.getState().toString()),
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+                    metaInf:MetaInfMsg.getErrorMsg(this.getClass().getSimpleName(), methodName,
+                    "VicketState_" + vicket.getState().toString()), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
     public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
+        //messageSMIMEReq?.getSMIME()?.getSigner()?.certificate
         log.debug(smimeMessageReq.getSignedContent())
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = smimeMessageReq.getFrom().toString()
         String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 smimeMessageReq, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEReq,
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
@@ -129,8 +126,8 @@ class VicketService {
         for(Vicket vicket: validatedVicketList) {
             Date validTo = null
             if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
-            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser().getName(),
-                    vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
+            SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(systemService.getSystemUser().getName(),
+                    vicket.getHashCertVS(), vicket.getSMIME(), vicket.getSubject())
             MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.VICKET_SEND).save()
             TransactionVS transactionVS = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIME,
                     toUserIBAN:vicket.getToUserIBAN(), state:TransactionVS.State.OK, validTo: validTo,
@@ -149,7 +146,7 @@ class VicketService {
 
     public Vicket validateVicket(Vicket vicket) throws ExceptionVS {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessage = vicket.getSMIMEMessage()
+        SMIMEMessage smimeMessage = vicket.getSMIME()
         Vicket vicketDB =  Vicket.findWhere(serialNumber:vicket.getX509AnonymousCert().serialNumber.longValue(),
                 hashCertVS:vicket.getHashCertVS())
         if(!vicketDB) throw new ExceptionVS(messageSource.getMessage('hashCertVSVicketInvalidErrorMsg',
@@ -184,12 +181,9 @@ class VicketService {
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
                 walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTagVS(),
                 vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
-        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
-            log.error "${methodName} - ${accountFromMovements.getMessage()}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
-                    reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
-                    metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
-        }
+        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
+                message:accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
+
         vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
         TransactionVS userTransaction = vicketBatch.getTransactionVS(messageSource.getMessage(
                 'vicketRequestLbl', null, locale), accountFromMovements.data).save()

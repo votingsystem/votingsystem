@@ -21,7 +21,7 @@ SignatureService superUserSignatureService = SignatureService.getUserVSSignature
 UserVS fromUserVS = superUserSignatureService.getUserVS()
 
 String messageSubject = "TEST_ADD_BANKVS";
-SMIMEMessage smimeMessage = superUserSignatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,
+SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.nif,
         vicketServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
         vicketServer.getSaveBankServiceURL())

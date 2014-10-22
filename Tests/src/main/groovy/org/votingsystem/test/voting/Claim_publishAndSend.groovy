@@ -102,7 +102,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     log.debug("publishEvent");
     eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()));
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(publisherNIF,
+    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(publisherNIF,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
             JSONSerializer.toJSON(eventVS.getDataMap()).toString(), smimeMessageSubject)
     SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
@@ -139,7 +139,7 @@ private void changeEventState(String publisherNIF) throws Exception {
             TestUtils.simulationData.getEventStateWhenFinished());
     String smimeMessageSubject ="cancelEventMsgSubject"
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(publisherNIF,
+    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(publisherNIF,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
             JSONSerializer.toJSON(cancelDataMap).toString(), smimeMessageSubject)
     SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,

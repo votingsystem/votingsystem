@@ -230,7 +230,7 @@ public class ResponseVS<T> implements Parcelable {
 		this.messageBytes = messageBytes;
 	}
 
-    public SMIMEMessage getSmimeMessage() {
+    public SMIMEMessage getSMIME() {
         if(smimeMessage == null && smimeMessageBytes != null) {
             try {
                 smimeMessage = new SMIMEMessage(null,
@@ -242,7 +242,7 @@ public class ResponseVS<T> implements Parcelable {
         return smimeMessage;
     }
 
-	public void setSmimeMessage(SMIMEMessage smimeMessage) {
+	public void setSMIME(SMIMEMessage smimeMessage) {
 		this.smimeMessage = smimeMessage;
 	}
 

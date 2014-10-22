@@ -55,7 +55,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
 
             JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
-            SMIMEMessage accessRequest = signedMailGenerator.genMimeMessage(
+            SMIMEMessage accessRequest = signedMailGenerator.getSMIME(
                     userVS, contextVS.getAccessControl().getNameNormalized(),
                     accessRequestJSON.toString(), subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(accessRequest,
@@ -66,7 +66,7 @@ public class VoteSender implements Callable<ResponseVS> {
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
             CertificationRequestVS certificationRequest =
                     accessRequestDataSender.getCertificationRequest();
-            SMIMEMessage signedVote = certificationRequest.genMimeMessage(
+            SMIMEMessage signedVote = certificationRequest.getSMIME(
                     vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
                     voteJSON.toString(), contextVS.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, contextVS);
@@ -75,7 +75,7 @@ public class VoteSender implements Callable<ResponseVS> {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
                 return responseVS;
             }
-            signedVote = timeStamper.getSmimeMessage();
+            signedVote = timeStamper.getSMIME();
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     vote.getEventVS().getControlCenter().getCertificate());
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);

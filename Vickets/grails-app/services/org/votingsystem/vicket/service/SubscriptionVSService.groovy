@@ -3,7 +3,6 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.ExceptionVS
@@ -13,6 +12,8 @@ import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
@@ -112,7 +113,7 @@ class SubscriptionVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("$methodName - signer: ${userSigner?.nif}")
-        SubscriptionVSRequest request = new SubscriptionVSRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        SubscriptionVSRequest request = new SubscriptionVSRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         GroupVS groupVS = GroupVS.findWhere(name:request.groupvsName, id:Long.valueOf(request.id))
         if(!groupVS) {
             throw new ExceptionVS(messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(),
@@ -162,7 +163,7 @@ class SubscriptionVSService {
         log.debug("activateUser - signer: ${userSigner?.nif}")
         String msg = null
         SubscriptionVSRequest request = SubscriptionVSRequest.getUserVSActivationRequest(
-                messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+                messageSMIMEReq.getSMIME()?.getSignedContent())
         GroupVS groupVS = GroupVS.get(request.id)
         if(!groupVS || !request.groupvsName.equals(groupVS.name)) {
             msg = messageSource.getMessage('itemNotFoundMsg', [request.id].toArray(), locale)

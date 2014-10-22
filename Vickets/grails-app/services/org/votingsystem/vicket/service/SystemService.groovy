@@ -3,11 +3,9 @@ package org.votingsystem.vicket.service
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
 import org.votingsystem.groovy.util.TransactionVSUtils
-
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.UserVS
 import org.votingsystem.model.TagVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -19,10 +17,10 @@ import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
+
 @Transactional
 class SystemService {
-
-    private static final CLASS_NAME = SystemService.class.getSimpleName()
 
     private UserVS systemUser
     private TagVS wildTag

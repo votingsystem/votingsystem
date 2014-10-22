@@ -232,43 +232,37 @@ class SignatureVSService {
         }
     }
 
-    public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
-        log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+    public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header header) {
+        log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
+        SMIMEMessage mimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header)
         return mimeMessage;
     }
 
-    public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
-                                                       Header... headers) {
-        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+    public ResponseVS getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
+           Header... headers) {
+        log.debug "getSMIMETimeStamped - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
+        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(
                 fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        smimeMessage = timeStamper.getSmimeMessage();
+        smimeMessage = timeStamper.getSMIME();
         responseVS = new ResponseVS(ResponseVS.SC_OK)
-        responseVS.setSmimeMessage(smimeMessage)
+        responseVS.setSMIME(smimeMessage)
         return responseVS;
     }
 
-    public synchronized SMIMEMessage getMultiSignedMimeMessage (
+    public synchronized SMIMEMessage getSMIMEMultiSigned (
             String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
-        log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-        if(fromUser) {
-            fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-            smimeMessage.setFrom(new InternetAddress(fromUser))
-        }
-        if(toUser) {
-            toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-            smimeMessage.setHeader("To", toUser)
-        }
-        SMIMEMessage multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+        log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+        if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")))
+        if(toUser) smimeMessage.setHeader("To", toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", ""))
+        SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
         return multiSignedMessage
     }
 

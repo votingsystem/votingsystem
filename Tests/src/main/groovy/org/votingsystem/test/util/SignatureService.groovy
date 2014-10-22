@@ -139,31 +139,31 @@ class SignatureService {
         return keyStore
     }
 
-    public SMIMEMessage getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+    public SMIMEMessage getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
                        Header... headers) {
-        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+        log.debug "getSMIMETimeStamped - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
+        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(
                 fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${ContextVS.getInstance().config.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        return timeStamper.getSmimeMessage();
+        return timeStamper.getSMIME();
     }
 		
-	public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
-		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
+		log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, headers)
+        SMIMEMessage mimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers)
 		return mimeMessage
 	}
 		
-	public synchronized SMIMEMessage getMultiSignedMimeMessage (
+	public synchronized SMIMEMessage getSMIMEMultiSigned (
 		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
-		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+		log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setFrom(new InternetAddress(fromUser))
@@ -172,7 +172,7 @@ class SignatureService {
 			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setHeader("To", toUser)
 		}
-		SMIMEMessage multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+		SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
 		return multiSignedMessage
 	}
 
@@ -268,7 +268,7 @@ class SignatureService {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             userList.add(new MockDNI(userNif, mockDnie, signedMailGenerator));
-            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
+            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
                     subscriptionData.toString(), subject);
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                     vicketServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
@@ -314,7 +314,7 @@ class SignatureService {
         String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS"
         UserVS userVS = UserVS.getUserVS(certSigner)
         for(JSONObject request:requests) {
-            SMIMEMessage smimeMessage = getTimestampedSignedMimeMessage(userVS.nif,
+            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.nif,
                     vicketServer.getNameNormalized(), request.toString(), messageSubject)
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     vicketServer.getGroupVSUsersActivationServiceURL())

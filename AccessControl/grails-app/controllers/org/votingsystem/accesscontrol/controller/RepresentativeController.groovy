@@ -317,7 +317,7 @@ if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(messa
     def anonymousDelegation() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-        //return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        //return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSMIME()?.getSigner()?.certificate]
         return [responseVS : representativeDelegationService.saveAnonymousDelegation(messageSMIME)]
     }
 

@@ -60,7 +60,7 @@ public class SignedFile {
         return name;
     }
 
-    public SMIMEMessage getSMIMEMessage() {
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
     

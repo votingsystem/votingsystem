@@ -34,11 +34,6 @@
                             <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
                         </select>
                     </div>
-                    <vs-pager on-pager-change="{{pagerChange}}" max="{{groupVSListMap.max}}"
-                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
-                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
-                              offset="{{groupVSListMap.offset}}" total="{{groupVSListMap.totalCount}}"></vs-pager>
-
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{groupvs in groupvsList}}">
                             <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
@@ -52,6 +47,10 @@
                             </div>
                         </template>
                     </div>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="{{groupVSListMap.max}}"
+                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                              offset="{{groupVSListMap.offset}}" total="{{groupVSListMap.totalCount}}"></vs-pager>
                 </div>
             </section>
 

@@ -303,15 +303,12 @@ public class SMIMEMessage extends MimeMessage {
 
     public void setTimeStampToken(TimeStampToken timeStampToken) throws Exception {
         if(timeStampToken == null ) throw new Exception("NULL_TIME_STAMP_TOKEN");
-        DERObject derObject = new ASN1InputStream(timeStampToken.
-                getEncoded()).readObject();
+        DERObject derObject = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
         DERSet derset = new DERSet(derObject);
-        Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.
-                id_aa_signatureTimeStampToken, derset);
+        Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
 
         Hashtable hashTable = new Hashtable();
-        hashTable.put(PKCSObjectIdentifiers.
-                id_aa_signatureTimeStampToken, timeStampAsAttribute);
+        hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
         AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
 
         byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
@@ -337,8 +334,7 @@ public class SMIMEMessage extends MimeMessage {
                             id_aa_signatureTimeStampToken, timeStampAsAttribute);
                     attributeTable = new AttributeTable(hashTable);
                 }
-                updatedSigner = signer.replaceUnsignedAttributes(
-                        signer, timeStampAsAttributeTable);
+                updatedSigner = signer.replaceUnsignedAttributes(signer, timeStampAsAttributeTable);
                 newSigners.add(updatedSigner);
             } else newSigners.add(signer);
         }
@@ -360,13 +356,7 @@ public class SMIMEMessage extends MimeMessage {
     }
 
     public TimeStampRequest getTimeStampRequest() {
-        if(smimeSigned == null) return null;
-        SignerInformation signerInformation = ((SignerInformation)
-                smimeSigned.getSignerInfos().getSigners().iterator().next());
-        if(signerInformation == null) {
-            log.debug("signerInformation null");
-            return null;
-        }
+        SignerInformation signerInformation = ((SignerInformation)smimeSigned.getSignerInfos().getSigners().iterator().next());
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));

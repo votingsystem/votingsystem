@@ -33,7 +33,7 @@ class EventVSElectionService {
 	ResponseVS saveEvent(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		ResponseVS responseVS
-		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		String msg
         AccessControlVS accessControl = subscriptionVSService.checkAccessControl(
                 smimeMessageReq.getHeader("serverURL")[0])
@@ -184,7 +184,7 @@ class EventVSElectionService {
 	}
 	
 	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq) {
-		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
@@ -228,8 +228,8 @@ class EventVSElectionService {
         String toUser = eventVS.accessControlVS.serverURL
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.
-                getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+                getSMIMEMultiSigned(fromUser, toUser, smimeMessageReq, subject)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
         eventVS.state = newState
         eventVS.dateCanceled = Calendar.getInstance().getTime();
         eventVS.save()

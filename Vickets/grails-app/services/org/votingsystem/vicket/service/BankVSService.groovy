@@ -2,7 +2,6 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -14,10 +13,10 @@ import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
+
 @Transactional
 class BankVSService {
-
-    private static final CLASS_NAME = BankVSService.class.getSimpleName()
 
     private class SaveBankRequest {
         String info, certChainPEM, IBAN;
@@ -47,7 +46,7 @@ class BankVSService {
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
-        SaveBankRequest request = new SaveBankRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        SaveBankRequest request = new SaveBankRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         if(!systemService.isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                                          TypeVS.BANKVS_NEW.toString()].toArray(), locale)
@@ -75,7 +74,7 @@ class BankVSService {
                 IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
-        String metaInfMsg = MetaInfMsg.getOKMsg(CLASS_NAME, methodName,
+        String metaInfMsg = MetaInfMsg.getOKMsg(this.class.getSimpleName(), methodName,
                 "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
         String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"
         log.debug("${metaInfMsg}")

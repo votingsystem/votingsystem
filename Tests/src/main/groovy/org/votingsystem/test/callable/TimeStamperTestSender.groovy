@@ -32,7 +32,7 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         String subject = "Message from MultiSignTestSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif)
-        SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(nif,
+        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
                 StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject)
         String timeStampTestServiceURL = serverURL + "/timeStamp/validateTestMessage"
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, timeStampTestServiceURL,

@@ -3,8 +3,6 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.groovy.util.TransactionVSUtils
-
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -13,6 +11,8 @@ import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
@@ -40,7 +40,7 @@ class GroupVSService {
                     TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), locale),
                     MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
-        GroupVSRequest request = GroupVSRequest.getCancelRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVSRequest request = GroupVSRequest.getCancelRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         groupVS.setState(UserVS.State.CANCELLED)
         groupVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL,
@@ -56,7 +56,7 @@ class GroupVSService {
                     TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), locale),
                     MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        GroupVSRequest request = GroupVSRequest.getEditRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVSRequest request = GroupVSRequest.getEditRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         if(request.id != groupVS.id) {
             throw new ExceptionVS(messageSource.getMessage('identifierErrorMsg', [groupVS.id, request.id].toArray(),
                 locale), MetaInfMsg.getErrorMsg(methodName, "groupVS_${groupVS?.id}"))
@@ -72,7 +72,7 @@ class GroupVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("saveGroup - signer: ${userSigner?.nif}")
-        GroupVSRequest request = new GroupVSRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVSRequest request = new GroupVSRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         GroupVS groupVS = GroupVS.findWhere(name:request.groupvsName.trim())
         if(groupVS) {
             throw new ExceptionVS(messageSource.getMessage('nameGroupRepeatedMsg', [request.groupvsName].toArray(),
@@ -88,10 +88,10 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                messageSMIMEReq.getSmimeMessage(), subject)
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
+                messageSMIMEReq.getSMIME(), subject)
         log.debug("${metaInf}")
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
 
         Map resultMap = [statusCode:ResponseVS.SC_OK,
                  message:messageSource.getMessage('newVicketGroupOKMsg', [groupVS.name].toArray(), locale),
@@ -106,7 +106,7 @@ class GroupVSService {
         SubscriptionVS subscriptionVS = null
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("$methodName - signer: ${userSigner?.nif}")
-        GroupVSRequest request = GroupVSRequest.getSubscribeRequest(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        GroupVSRequest request = GroupVSRequest.getSubscribeRequest(messageSMIMEReq.getSMIME()?.getSignedContent())
         GroupVS groupVS = GroupVS.get(request.id)
         if(groupVS.getRepresentative().nif.equals(userSigner.nif)) {
             throw new ExceptionVS(messageSource.getMessage('representativeSubscribedErrorMsg',

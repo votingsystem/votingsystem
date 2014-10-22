@@ -27,7 +27,7 @@ class AccessRequestVSService {
     ResponseVS saveRequest(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		UserVS signerVS = messageSMIMEReq.getUserVS()
-        AccessRequest request = new AccessRequest(messageSMIMEReq.getSmimeMessage().getSignedContent(),
+        AccessRequest request = new AccessRequest(messageSMIMEReq.getSMIME().getSignedContent(),
                 signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime())
 		String msg
         AccessRequestVS accessRequestVS = AccessRequestVS.findWhere(

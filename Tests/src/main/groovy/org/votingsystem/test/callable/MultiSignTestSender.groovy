@@ -33,7 +33,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         String subject = "Message from MultiSignTestSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif)
-        SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(nif,
+        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
                 StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject)
         SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,
                 ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL(),

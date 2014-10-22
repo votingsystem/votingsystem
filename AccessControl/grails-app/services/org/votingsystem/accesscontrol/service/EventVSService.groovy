@@ -104,7 +104,7 @@ class EventVSService {
     }
 	
 	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq) {
-		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS signer = messageSMIMEReq.userVS
         EventVSCancelRequest request = new EventVSCancelRequest(smimeMessageReq.getSignedContent())
         if(!(request.eventVS.userVS?.nif.equals(signer.nif) || isUserAdmin(signer.nif))) throw new ExceptionVS(
@@ -117,7 +117,7 @@ class EventVSService {
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
         if(request.eventVS instanceof EventVSElection) {
             String toUser = ((EventVSElection)request.eventVS).getControlCenterVS()?.name
-            smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+            smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
                     fromUser, toUser, smimeMessageReq, subject)
             String controlCenterUrl = ((EventVSElection)request.eventVS).getControlCenterVS().serverURL
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
@@ -131,9 +131,9 @@ class EventVSService {
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                         type:TypeVS.ERROR, message:msg, eventVS:request.eventVS)
             }
-        } else smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        } else smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
                 fromUser, signer.getNif(), smimeMessageReq, subject)
-        messageSMIMEReq.setSmimeMessage(smimeMessageResp)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
         request.eventVS.state = request.state
         request.eventVS.dateCanceled = Calendar.getInstance().getTime()
         request.eventVS.save()

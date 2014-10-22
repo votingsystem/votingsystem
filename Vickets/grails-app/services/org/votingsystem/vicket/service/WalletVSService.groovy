@@ -14,8 +14,6 @@ import org.votingsystem.vicket.util.WalletVS
 @Transactional
 class WalletVSService {
 
-    private static final CLASS_NAME = WalletVSService.class.getSimpleName()
-
 	def grailsApplication
 	def messageSource
     def systemService

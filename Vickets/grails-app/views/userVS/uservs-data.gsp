@@ -21,19 +21,21 @@
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
              transitions="cross-fade-all">
         <section id="page1">
-            <template if="{{uservs.name}}">
+            <template if="{{uservs.name}}" on-template-bound="{{templateBound}}">
                 <div>
-                    {{uservs | setType}}
-                    <div layout horizontal center center-justified>
-                        <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                            <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservsType}} - {{uservs.name}}</div>
+                    {{uservs | templateBound}}
+                    <div layout horizontal center center-justified style="margin: 0 0 15px 0;">
+                        <div flex>
+                            <template if="{{uservs.firstName}}">
+                                <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
+                            </template>
                         </div>
-                    </div>
-                    <div layout flex horizontal wrap around-justified style="color: #888; margin: 0 0 0 0;">
-                        <template if="{{uservs.firstName}}">
-                            <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
-                        </template>
-                        <div style="margin: 0 0 0 0; font-size: 0.8em;"><b>IBAN: </b>{{uservs.IBAN}}</div>
+                        <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                            <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
+                        </div>
+                        <div flex style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
+                            <b>IBAN: </b>{{uservs.IBAN}}
+                        </div>
                     </div>
 
                     <template if="{{uservs.state != 'ACTIVE'}}">
@@ -121,13 +123,16 @@
                 this.page = 0;
             }.bind(this))
         },
-        setType:function() {
-            console.log(this.tagName + " - setType")
-            if('BANKVS' == this.uservs.type) this.uservsType = "<g:message code="bankVSLbl"/>"
-            if('USER' == this.uservs.type) this.uservsType = "<g:message code="userLbl"/>"
+        templateBound:function() {
+            console.log(this.tagName + " - templateBound")
+            var uservsType
+            if('BANKVS' == this.uservs.type) uservsType = "<g:message code="bankVSLbl"/>"
+            if('USER' == this.uservs.type) uservsType = "<g:message code="userLbl"/>"
+            if('SYSTEM' == this.uservs.type) uservsType = "<g:message code="systemLbl"/>"
+            this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:uservsType}});
         },
         userVSDataChanged:function() {
-            console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))
+            //console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {

@@ -8,7 +8,6 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.MessageVS
-import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
 * @author jgzornoza
@@ -16,8 +15,6 @@ import static org.springframework.context.i18n.LocaleContextHolder.*
 */
 @Transactional
 class MessageVSService {
-
-    private static final CLASS_NAME = MessageVSService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource

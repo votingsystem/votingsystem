@@ -85,7 +85,7 @@ public class Utils {
         java.util.List<File> fileList = new ArrayList<File>();
         File smimeTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentTypeVS.SIGNED.getExtension());
         smimeTempFile.deleteOnExit();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getSmimeMessage().getBytes()), smimeTempFile);
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getSMIME().getBytes()), smimeTempFile);
         File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");
         certVSDataFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(messageJSON.toString().getBytes("UTF-8")), certVSDataFile);

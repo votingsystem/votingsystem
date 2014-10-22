@@ -116,14 +116,14 @@ public class WebSocketService extends Service {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         SMIMEMessage smimeMessage = null;
         try {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSmimeMessage(),
+            MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
                     contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
                 return responseVS;
             }
-            smimeMessage = timeStamper.getSmimeMessage();
+            smimeMessage = timeStamper.getSMIME();
         } catch(Exception ex) {
             ex.printStackTrace();
             new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());

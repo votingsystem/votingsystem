@@ -67,17 +67,17 @@ class MessageSMIMEController {
         def signedContentJSON
         if(request.messageSMIME) {
             smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
-            SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
+            SMIMEMessage smimeMessage = request.messageSMIME.getSMIME()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }
             if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
                 signedContentJSON = JSON.parse(AsciiDocUtil.getMetaInfVS(
-                        request.messageSMIME.getSmimeMessage()?.getSignedContent()))
-                signedContentJSON.asciiDoc = request.messageSMIME.getSmimeMessage()?.getSignedContent()
-                signedContentJSON.asciiDocHTML = AsciiDocUtil.getHTML(request.messageSMIME.getSmimeMessage()?.getSignedContent())
+                        request.messageSMIME.getSMIME()?.getSignedContent()))
+                signedContentJSON.asciiDoc = request.messageSMIME.getSMIME()?.getSignedContent()
+                signedContentJSON.asciiDocHTML = AsciiDocUtil.getHTML(request.messageSMIME.getSMIME()?.getSignedContent())
             } else {
-                signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
+                signedContentJSON = JSON.parse(request.messageSMIME.getSMIME()?.getSignedContent())
             }
             TypeVS operation = TypeVS.valueOf(signedContentJSON.operation)
             if(TypeVS.VICKET_SEND != operation) {

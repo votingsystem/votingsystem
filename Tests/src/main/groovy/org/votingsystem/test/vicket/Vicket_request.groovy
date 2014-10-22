@@ -28,7 +28,7 @@ VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount
 String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
 Map<String, Object> mapToSend = new HashMap<String, Object>();
 mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(), vicketBatch.getVicketCSRRequest().toString().getBytes());
-SMIMEMessage smimeMessage = signatureService.getTimestampedSignedMimeMessage(fromUserVS.nif,
+SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.nif,
         vicketServer.getNameNormalized(), vicketBatch.getRequestDataToSignJSON().toString(), messageSubject)
 mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
         smimeMessage.getBytes());

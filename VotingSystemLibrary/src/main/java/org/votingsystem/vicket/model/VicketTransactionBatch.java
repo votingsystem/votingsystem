@@ -66,20 +66,20 @@ public class VicketTransactionBatch {
                  Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
         for(Vicket vicket:vicketList) {
             JSONObject transactionRequest = vicket.getTransaction(toUserName, toUserIBAN, subject, isTimeLimited);
-            SMIMEMessage smimeMessage = vicket.getCertificationRequest().genMimeMessage(vicket.getHashCertVS(),
+            SMIMEMessage smimeMessage = vicket.getCertificationRequest().getSMIME(vicket.getHashCertVS(),
                     StringUtils.getNormalized(vicket.getToUserName()),
                     transactionRequest.toString(), vicket.getSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-            vicket.setSMIMEMessage(timeStamper.getSmimeMessage());
+            vicket.setSMIME(timeStamper.getSMIME());
         }
     }
 
     public JSONArray getTransactionVSRequest() throws Exception {
         List<String> vicketTransactionBatch = new ArrayList<String>();
         for(Vicket vicket:vicketList) {
-            vicketTransactionBatch.add(java.util.Base64.getEncoder().encodeToString(vicket.getSMIMEMessage().getBytes()));
+            vicketTransactionBatch.add(java.util.Base64.getEncoder().encodeToString(vicket.getSMIME().getBytes()));
         }
         return (JSONArray) JSONSerializer.toJSON(vicketTransactionBatch);
     }

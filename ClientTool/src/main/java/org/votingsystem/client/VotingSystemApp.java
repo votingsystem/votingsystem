@@ -121,12 +121,12 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     };
 
 
-    public String getSmimeMessage(String smimeMessageURL) {
+    public String getSMIME(String smimeMessageURL) {
         if(smimeMessageMap ==  null) return null;
         else return smimeMessageMap.get(smimeMessageURL);
     }
 
-    public void setSmimeMessage(String smimeMessageURL, String smimeMessageStr) {
+    public void setSMIME(String smimeMessageURL, String smimeMessageStr) {
         if(smimeMessageMap ==  null) {
             smimeMessageMap = new HashMap<String, String>();
         }

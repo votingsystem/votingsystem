@@ -55,8 +55,8 @@ class EncryptorController {
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                messageSMIME.getSmimeMessage(), subject)
+		SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
+                messageSMIME.getSMIME(), subject)
 		return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TEST,
                 contentType:ContentTypeVS.JSON_SIGNED, messageBytes:smimeMessageResp.getBytes())]
 	}
@@ -68,7 +68,7 @@ class EncryptorController {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIME.getSMIME()
 		UserVS userVS = messageSMIME.getUserVS()
 		//Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
 		def msgJSON = JSON.parse(smimeMessage.getSignedContent())

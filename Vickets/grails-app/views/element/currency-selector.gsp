@@ -6,11 +6,14 @@
         <style>
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
         </style>
-        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" selected="EUR">
-            <template repeat="{{currencyCodes}}">
-                <paper-item id="{{code}}" label="{{name}}"></paper-item>
-            </template>
-        </paper-dropdown-menu>
+        <div id="selectorContainer">
+            <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" selected="EUR" relatedTarget="{{$.selectorContainer}}">
+                <template repeat="{{currencyCodes}}">
+                    <paper-item id="{{code}}" label="{{name}}"></paper-item>
+                </template>
+            </paper-dropdown-menu>
+        </div>
+
     </template>
     <script>
         Polymer('currency-selector', {

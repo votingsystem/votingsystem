@@ -17,7 +17,7 @@ import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.ContentSignerHelper;
+import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 
 import javax.websocket.*;
@@ -259,12 +259,12 @@ public class WebSocketService extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = ContentSignerHelper.genMimeMessage(null, targetServer.getNameNormalized(),
+                SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null, targetServer.getNameNormalized(),
                         documentToSignJSON.toString(), password.toCharArray(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
                 responseVS = timeStamper.call();
-                smimeMessage = timeStamper.getSmimeMessage();
+                smimeMessage = timeStamper.getSMIME();
                 connectionMessage = getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString();
                 WebSocketService.this.restart();
             } catch(Exception ex) {

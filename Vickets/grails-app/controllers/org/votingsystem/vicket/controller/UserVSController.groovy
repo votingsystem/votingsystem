@@ -202,7 +202,7 @@ class UserVSController {
     def userInfo() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-        SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIME.getSMIME()
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIME.getUserVS()
         if(!messageJSON.NIF.equals(userVS.getNif())) {
@@ -218,7 +218,7 @@ class UserVSController {
         }
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
-        //X509Certificate cert = messageSMIME?.getSmimeMessage()?.getSigner()?.certificate
+        //X509Certificate cert = messageSMIME?.getSMIME()?.getSigner()?.certificate
         return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
                 contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]
     }

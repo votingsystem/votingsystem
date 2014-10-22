@@ -1,7 +1,6 @@
 package org.votingsystem.vicket.service
 
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -11,9 +10,9 @@ import org.votingsystem.vicket.util.LoggerVS
 
 import java.security.cert.X509Certificate
 
-class CsrService {
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
-    private static final CLASS_NAME = CsrService.class.getSimpleName()
+class CsrService {
 
     private LinkGenerator grailsLinkGenerator
 	def grailsApplication

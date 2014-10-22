@@ -100,7 +100,7 @@ public class VicketService extends IntentService {
                     vicket.setLocalId(vicketCursorPosition.longValue());
                     responseVS = cancelVicket(vicket);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        vicket.setCancellationReceipt(responseVS.getSmimeMessage());
+                        vicket.setCancellationReceipt(responseVS.getSMIME());
                         vicket.setState(Vicket.State.CANCELLED);
                         ContentValues values = VicketContentProvider.populateVicketContentValues(
                                 contextVS, vicket);
@@ -114,12 +114,12 @@ public class VicketService extends IntentService {
                         responseVS.setNotificationMessage(getString(R.string.vicket_cancellation_error_msg_subject));
                         responseVS.setIconId(R.drawable.cancel_22);
                         if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED) {
-                            SMIMEMessage signedMessage = responseVS.getSmimeMessage();
+                            SMIMEMessage signedMessage = responseVS.getSMIME();
                             Log.d(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
                             JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
                             operation = TypeVS.valueOf(jsonResponse.getString("operation"));
                             if(TypeVS.VICKET_CANCEL == operation) {
-                                vicket.setCancellationReceipt(responseVS.getSmimeMessage());
+                                vicket.setCancellationReceipt(responseVS.getSMIME());
                                 vicket.setState(Vicket.State.LAPSED);
                                 vicket.setLocalId(vicketId);
                                 VicketContentProvider.updateVicket(contextVS, vicket);
@@ -159,7 +159,7 @@ public class VicketService extends IntentService {
                 responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
                         vicket.getCancellationRequest().toString(),
                         getString(R.string.vicket_cancellation_msg_subject));
-                cancellationList.add(new String(Base64.encode(responseVS.getSmimeMessage().getBytes())));
+                cancellationList.add(new String(Base64.encode(responseVS.getSMIME().getBytes())));
             }
             Map requestMap = new HashMap();
             requestMap.put("vicketCancellationList", cancellationList);
@@ -210,7 +210,7 @@ public class VicketService extends IntentService {
 
             for(Vicket vicket : vicketsToSend) {
                 String textToSign = vicket.getTransaction(toUserName, toUserIBAN, tagVS, null).toString();
-                SMIMEMessage smimeMessage = vicket.getCertificationRequest().genMimeMessage(
+                SMIMEMessage smimeMessage = vicket.getCertificationRequest().getSMIME(
                         vicket.getHashCertVS(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);
 

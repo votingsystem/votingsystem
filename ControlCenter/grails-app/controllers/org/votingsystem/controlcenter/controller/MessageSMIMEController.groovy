@@ -50,11 +50,11 @@ class MessageSMIMEController {
         def signedContentJSON
         if(request.messageSMIME) {
             smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
-            SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
+            SMIMEMessage smimeMessage = request.messageSMIME.getSMIME()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }
-            signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
+            signedContentJSON = JSON.parse(request.messageSMIME.getSMIME()?.getSignedContent())
             if(signedContentJSON.operation) {
                 TypeVS operationType = TypeVS.valueOf(signedContentJSON.operation)
                 switch(operationType) {
