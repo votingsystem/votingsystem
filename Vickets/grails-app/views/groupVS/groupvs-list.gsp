@@ -80,12 +80,12 @@
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.groupvsTypeSelect.value
-                console.log("groupvsTypeSelect: " + optionSelected)
                 targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType + "&state=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
+                console.log(this.tagName + "targetURL: " + targetURL)
                 this.$.ajax.go()
             },
             closeGroupDetails:function(e, detail, sender) {
@@ -109,11 +109,12 @@
             },
             groupvsTypeSelect: function() {
                 var optionSelected = this.$.groupvsTypeSelect.value
-                console.log("groupvsTypeSelect: " + optionSelected + " - menuType: " + menuType)
                 if("" != optionSelected) {
                     targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType + "&state=" + optionSelected
                     history.pushState(null, null, targetURL);
                     this.$.ajax.url = targetURL
+                    this.$.ajax.go()
+                    console.log(this.tagName + " - groupvsTypeSelect: " + targetURL)
                 }
             },
             ajaxComplete:function() {

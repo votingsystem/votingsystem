@@ -344,17 +344,18 @@ function updateMenuLink(urlToUpdate, param) {
     return result
 }
 
+
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-function getParameterByName(name) {
+function getParameterByName(name, url) {
+    if(!url) url = location.search
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),  results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-function setURLParameter(baseURL, name,value){
+function setURLParameter(baseURL, name, value){
     var result;
-    if(getParameterByName(name)){
+    if(getParameterByName(name, baseURL)){
         result = baseURL.replace(new RegExp('([?|&]'+name + '=)' + '(.+?)(&|$)'),"$1"+encodeURIComponent(value)+"$3");
     }else if(baseURL.length){
         if(baseURL.indexOf("?") < 0) baseURL = baseURL + "?"
@@ -364,7 +365,6 @@ function setURLParameter(baseURL, name,value){
     }
     return result
 }
-
 
 function VotingSystemClient () { }
 

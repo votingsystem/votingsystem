@@ -97,6 +97,7 @@
             pagerChange: function(e) {
                 var newURL = setURLParameter(this.$.ajax.url, "offset",  e.detail.offset)
                 newURL = setURLParameter(newURL, "max", e.detail.max)
+                console.log(this.tagName + " - pagerChange - newURL: " + newURL)
                 this.$.ajax.url = newURL
             }
         });

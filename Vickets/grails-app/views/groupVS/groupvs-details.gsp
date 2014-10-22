@@ -66,16 +66,15 @@
                 </div>
 
                 <template if="{{isUserView}}">
-                    <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;">
+                    <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
                         <vs-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
                         </vs-button>
-                        <vs-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                        <vs-button style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
                             <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
                         </vs-button>
                     </div>
                 </template>
-
                 <div id="pageHeader" layout horizontal center center-justified>
                     <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
                         <template if="{{groupvs.userVS.tags.length > 0}}">
@@ -118,7 +117,7 @@
                 <g:message code="usersLbl"/>
             </div>
 
-            <div id="userList">
+            <div id="userList" style="margin: 0 0 100px 0;">
                 <uservs-list id="userList" menuType="${params.menu}"></uservs-list>
             </div>
 
@@ -157,6 +156,13 @@
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
+
+        },
+        makeTransactionVS:function() {
+            console.log(this.tagName + " - makeTransactionVS")
+            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.userVS.name, this.groupvs.userVS.IBAN ,
+                    this.groupvs.userVS.id)
+            this.page = 1;
         },
         messagedialog:function(e, detail, sender) {
             console.log("messagedialog signal - cancelgroup: " + detail)
@@ -239,6 +245,9 @@
             }
             this.$.userList.url = "${createLink(controller: 'groupVS', action:'')}/" + this.groupvs.userVS.id + "/users"
             this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
+
+            console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
+                " - menuType: " + menuType)
         },
         configGroup:function(e) {
             //e.detail.isSelected = false

@@ -88,11 +88,11 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
+        SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 messageSMIMEReq.getSMIME(), subject)
-        log.debug("${metaInf}")
-        messageSMIMEReq.setSMIME(smimeMessageResp)
+        messageSMIMEReq.setSMIME(receipt)
 
+        log.debug("${metaInf}")
         Map resultMap = [statusCode:ResponseVS.SC_OK,
                  message:messageSource.getMessage('newVicketGroupOKMsg', [groupVS.name].toArray(), locale),
                  URL:"${grailsLinkGenerator.link(controller:"groupVS", absolute:true)}/${groupVS.id}"]

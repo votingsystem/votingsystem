@@ -139,8 +139,7 @@ public class SignedMailGenerator {
         return body;
     }
      
-     public synchronized SMIMEMessage getSMIMEMultiSigned(
-    		 SMIMEMessage smimeMessage, String mailSubject) throws Exception {
+     public synchronized SMIMEMessage getSMIMEMultiSigned(SMIMEMessage smimeMessage, String subject) throws Exception {
  		 MimeMultipart mimeMultipart = (MimeMultipart)smimeMessage.getContent();
  		 MimeBodyPart bodyPart = (MimeBodyPart) mimeMultipart.getBodyPart(0);    	 
     	 SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
@@ -154,11 +153,11 @@ public class SignedMailGenerator {
          smimeSignedGenerator.getGeneratedDigests();
          MimeMultipart newMimeMultipart = smimeSignedGenerator.generate(bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
          /*MimeMessage multiSignedMessage = new MimeMessage(ContextVS.MAIL_SESSION);
- 		 multiSignedMessage.setSubject(mailSubject);
+ 		 multiSignedMessage.setSubject(subject);
  		 multiSignedMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
  		 multiSignedMessage.saveChanges();
  		 return multiSignedMessage;*/
-         smimeMessage.setSubject(mailSubject);
+         if(subject != null) smimeMessage.setSubject(subject);
          smimeMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
          smimeMessage.updateChanges();
          return smimeMessage;

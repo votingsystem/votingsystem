@@ -214,7 +214,7 @@
             if(!this.$.amount.validity.valid) {
                 //this.$.amount.classList.add("formFieldError")
                 this.$.amount.style.background = '#f6ccd0'
-                this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+                this.setMessage(500, "<g:message code='enterValidAmountMsg'/>")
                 return
             }
 

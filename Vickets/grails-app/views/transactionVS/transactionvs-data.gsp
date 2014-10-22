@@ -136,6 +136,9 @@
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
                 console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
                 switch (this.transactionvs.type) {
+                    case 'FROM_USERVS':
+                        this.caption = "<g:message code="transactionVSFromUserVS"/>"
+                        break;
                     case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
                         break;
