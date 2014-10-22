@@ -2,6 +2,8 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.votingsystem.groovy.util.TransactionVSUtils
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -163,7 +165,7 @@ class GroupVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
 
-        resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
+        resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
         userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
     }

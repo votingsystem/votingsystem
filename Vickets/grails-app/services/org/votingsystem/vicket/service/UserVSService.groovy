@@ -162,7 +162,7 @@ class UserVSService {
         Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
-        resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
+        resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
         if(UserVS.Type.SYSTEM != userVS.type) userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesFrom)

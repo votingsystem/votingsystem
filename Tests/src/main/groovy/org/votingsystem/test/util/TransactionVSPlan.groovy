@@ -105,6 +105,12 @@ public class TransactionVSPlan {
         return currencyResultMap
     }
 
+    public Map runTransactionsVS(String smimeMessageSubject) {
+        Map bankVSCurrencyResult = runBankVSTransactions(smimeMessageSubject)
+        Map groupVSCurrencyResult = runGroupVSTransactions(smimeMessageSubject)
+        return [bankVSCurrencyResult:bankVSCurrencyResult, groupVSCurrencyResult:groupVSCurrencyResult]
+    }
+
     public static Map updateCurrencyMap(Map currencyMap, TransactionVS transactionVS) {
         if(currencyMap[transactionVS.currencyCode]) {
             if(currencyMap[transactionVS.currencyCode][transactionVS.tag.name]) {

@@ -19,6 +19,7 @@ class TransactionVSBatch {
 
     private UserVS.Type type;
     private TransactionVS.Source source;
+    private String currencyCode;
 
     public UserVS.Type getType() {
         return type;
@@ -34,7 +35,17 @@ class TransactionVSBatch {
         transacionVSList = new ArrayList<>()
     }
 
+    public BigDecimal getTotalAmount() {
+        BigDecimal result = BigDecimal.ZERO;
+        for(TransactionVS transaction : transacionVSList) result = result.add(transaction.amount)
+        return result;
+    }
+
     public void addTransaction(TransactionVS transacionVS) {
+        if(currencyCode == null) currencyCode = transacionVS.getCurrencyCode();
+        else if(!currencyCode.equals(transacionVS.getCurrencyCode())) throw new ExceptionVS("TransactionVSBatch - type:" +
+            type.toString() + "' - source '" + source.toString() + "' expected currency: " + currencyCode + " - found '" +
+                transacionVS.getCurrencyCode() + "'");
         transacionVSList.add(transacionVS)
     }
 
@@ -77,8 +88,30 @@ class TransactionVSBatch {
         return currencyInfoMap
     }
 
-    private void checkBalanceMap() {
+    /*public class Report {
+        private int numTotal;
+        private BigDecimal totalAmount;
+        private UserVS.Type type;
+        private TransactionVS.Source source;
+        private String currencyCode;
 
+    }*/
+
+    public Map getReport() {
+        return [numTotal:transacionVSList.size(), totalAmount:getTotalAmount(), userType:type.toString(),
+                source:source.toString(), currencyCode: currencyCode,
+                currencyMap:TransactionVSUtils.getCurrencyMap(transacionVSList)]
+    }
+
+    public static Map sumReport(Map reportMap, Map newReport) throws ExceptionVS {
+        if(reportMap.userType != newReport.userType)
+            throw new ExceptionVS("Expected '${reportMap.userType.toString()}' found '${newReport.userType.toString()}'")
+        if(reportMap.source != newReport.source)
+            throw new ExceptionVS("Expected '${reportMap.source.toString()}' found '${newReport.source.toString()}'")
+        reportMap.numTotal = reportMap.numTotal + newReport.numTotal
+        reportMap.totalAmount = reportMap.totalAmount.add(newReport.totalAmount)
+        reportMap.currencyMap = TransactionVSUtils.sumCurrencyMap(reportMap.currencyMap , newReport.currencyMap)
+        return reportMap
     }
 
 }

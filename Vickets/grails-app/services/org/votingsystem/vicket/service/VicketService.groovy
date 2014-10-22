@@ -1,6 +1,8 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import org.votingsystem.groovy.util.TransactionVSUtils
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -139,8 +141,8 @@ class VicketService {
             responseList.add([(vicket.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
         Map resultMap = [statusCode:ResponseVS.SC_OK, message: messageSource.getMessage('vicketSendResultMsg',
-                [toUserVS.name, transactionVSService.getBalancesMapMsg(
-                        transactionVSService.getBalancesMap(transactionVSList))].toArray(),
+                [toUserVS.name, TransactionVSUtils.getBalancesMapMsg(messageSource.getMessage('forLbl', null, locale),
+                        TransactionVSUtils.getBalancesMap(transactionVSList))].toArray(),
                 locale), receiptList:responseList]
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)
     }

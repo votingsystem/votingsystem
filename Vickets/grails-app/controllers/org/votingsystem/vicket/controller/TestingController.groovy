@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
+import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
@@ -45,7 +46,7 @@ class TestingController {
         Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
                         YEN:[WILDTAG1:new BigDecimal(8000)]]
 
-        Map result = transactionVSService.balancesCash(balanceTo, balanceFrom)
+        Map result = TransactionVSUtils.balancesCash(balanceTo, balanceFrom)
         Map allResults = [balanceTo:balanceTo, balanceFrom:balanceFrom, result:result]
         render allResults as JSON
     }

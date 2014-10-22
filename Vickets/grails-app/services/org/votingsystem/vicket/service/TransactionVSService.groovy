@@ -237,108 +237,11 @@ class TransactionVSService {
         def transactionToList = []
         Map<String, Map> balancesMap = [:]
         for(TransactionVS transaction : transactionList) {
-            addTransactionVSToBalance(balancesMap, transaction)
+            TransactionVSUtils.addTransactionVSToBalance(balancesMap, transaction)
             transactionToList.add(getTransactionMap(transaction))
         }
         return [transactionToList:transactionToList, balancesTo:balancesMap]
     }
-
-
-    private void addTransactionVSToBalance(Map<String, Map> balancesMap, TransactionVS transactionVS) {
-        if(balancesMap[transactionVS.currencyCode]) {
-            Map<String, Map> currencyMap = balancesMap[transactionVS.currencyCode]
-            if(currencyMap[transactionVS.tag.name]) {
-                if(transactionVS.validTo){
-                    currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
-                            transactionVS.amount)
-                    currencyMap[transactionVS.tag.name].timeLimited = currencyMap[transactionVS.tag.name].timeLimited.add(
-                            transactionVS.amount)
-                } else {
-                    currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
-                            transactionVS.amount)
-                }
-            } else {
-                Map tagDataMap
-                if(transactionVS.validTo){
-                    tagDataMap = [total:transactionVS.amount, timeLimited:transactionVS.amount]
-                } else tagDataMap = [total:transactionVS.amount, timeLimited:BigDecimal.ZERO]
-                currencyMap[(transactionVS.tag.name)] = tagDataMap
-            }
-        } else {
-            Map tagDataMap
-            if(transactionVS.validTo){
-                tagDataMap = [(transactionVS.tag.name):[total:transactionVS.amount, timeLimited:transactionVS.amount]]
-            } else tagDataMap = [(transactionVS.tag.name):[total:transactionVS.amount, timeLimited:BigDecimal.ZERO]]
-            balancesMap[(transactionVS.currencyCode)] = tagDataMap
-        }
-    }
-
-
-    private Map<String, Map> filterBalanceTo(Map<String, Map> balanceTo) {
-        Map result = [:]
-        for(String currency : balanceTo.keySet()) {
-            Map currencyMap = [:]
-            balanceTo[currency].each { tagEntry ->
-                currencyMap[(tagEntry.key)]= tagEntry.value.total
-            }
-            result[(currency)] = currencyMap
-        }
-        return result
-    }
-
-    public Map<String, BigDecimal> balancesCash(Map<String, Map> balancesTo, Map<String, Map> balancesFrom) {
-        Map<String, Map> balancesCash = filterBalanceTo(balancesTo);
-        for(String currency: balancesFrom.keySet()) {
-            if(balancesCash [currency]) {
-                for(String tag : balancesFrom[currency].keySet()) {
-                    if(balancesCash [currency][tag]) {
-                        balancesCash [currency][tag] =  balancesCash [currency][tag].subtract( balancesFrom[currency][tag])
-                        if(balancesCash [currency][tag].compareTo(BigDecimal.ZERO) < 0) {
-                            balancesCash [currency][TagVS.WILDTAG] =
-                                    balancesCash[currency][TagVS.WILDTAG].add( balancesCash [currency][tag])
-                            balancesCash [currency][tag] = BigDecimal.ZERO
-                        }
-                    } else balancesCash [currency][TagVS.WILDTAG] =
-                            balancesCash[currency][TagVS.WILDTAG].subtract( balancesFrom[currency][tag])
-                }
-            } else {
-                balancesCash[(currency)] = [:]
-                balancesCash[(currency)].putAll(balancesFrom[currency])
-                for(String tag : balancesCash[(currency)].keySet()) {
-                    balancesCash[currency][tag] = balancesCash[currency][tag].negate()
-                }
-            }
-        }
-        return balancesCash
-    }
-
-    public Map<String, Map> getBalancesMap(Collection<TransactionVS> transactionVSCollection) {
-        Map resultMap = [:]
-        for(TransactionVS transactionVS : transactionVSCollection) {
-            if(resultMap[transactionVS.getCurrencyCode()]) {
-                if(resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()]) {
-                    resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()] =
-                            resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()].add(transactionVS.amount)
-                } else resultMap[transactionVS.getCurrencyCode()][transactionVS.getTag().getName()] = transactionVS.amount
-            } else {
-                resultMap[(transactionVS.getCurrencyCode())] = [(transactionVS.getTag().getName()): transactionVS.amount]
-            }
-        }
-        return resultMap
-    }
-
-    public String getBalancesMapMsg(Map<String, Map> balancesMap) {
-        StringBuilder sb = new StringBuilder()
-        String forLbl = messageSource.getMessage('forLbl', null, locale);
-        for(String currency: balancesMap.keySet()) {
-            for(String tag : balancesMap[currency].keySet()) {
-                if(sb.length() == 0) sb.append("${balancesMap[currency][tag]} $currency $forLbl $tag")
-                else sb.append(", ${balancesMap[currency][tag]} $currency $forLbl $tag")
-            }
-        }
-        sb.toString()
-    }
-
 
     @Transactional
     public Map getTransactionMap(TransactionVS transaction) {

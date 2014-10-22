@@ -20,60 +20,15 @@ public class TransactionVSAnalizer {
     private static Logger log = Logger.getLogger(TransactionVSAnalizer.class);
 
     private DateUtils.TimePeriod timePeriod;
-    private VicketServer vicketServer;
     private UserVSTransactionBatch systemVSBatch;
     private List<UserVSTransactionBatch> groupVSListBatch;
     private List<UserVSTransactionBatch> userVSListBatch;
-
 
     public TransactionVSAnalizer() { }
 
     public DateUtils.TimePeriod getTimePeriod() {
         return timePeriod;
     }
-
-
-    public Map getReport() {
-        List<TransactionVS> transactionsVSList = getTransacionList();
-        Map<String, TransactionType> resultMap = new HashMap<>()
-        for(TransactionVS transactionVS : transactionsVSList) {
-            if(resultMap.containsKey(transactionVS.getType().toString()))
-                resultMap.get(transactionVS.getType().toString()).addTransaction(transactionVS.amount)
-            else resultMap.put(transactionVS.getType().toString(), new TransactionType(transactionVS));
-        }
-        return resultMap
-    }
-
-    public BigDecimal getTotalAmount() {
-        BigDecimal result = BigDecimal.ZERO;
-        for(TransactionVS transactionVS : bankVSTransacionList) {
-            result.add(transactionVS.getAmount());
-        }
-        return result;
-    }
-
-    public class TransactionType {
-        BigDecimal amount = BigDecimal.ZERO;
-        Integer numTransactions = 0;
-        TransactionVS.Type type;
-
-        public TransactionType(TransactionVS transactionVS) {
-            this.type = transactionVS.type;
-            this.amount = transactionVS.amount;
-            this.numTransactions = 1
-        }
-
-        public void addTransaction(BigDecimal amount) {
-            numTransactions++;
-            this.amount = this.amount.add(amount)
-        }
-
-        @Override public String toString() {
-            return type.toString() + " - '" + numTransactions + "' transactions - total: " + amount.toString()
-        }
-    }
-
-    private void validateUserVSTransactions(JSONObject userData) { }
 
     public static TransactionVSAnalizer parse(JSONObject requestJSON) {
         TransactionVSAnalizer transactionVSAnalizer = new TransactionVSAnalizer()
@@ -85,7 +40,7 @@ public class TransactionVSAnalizer {
         JSONArray userVSArray = requestJSON.getJSONObject("userBalances").getJSONArray("groupVSBalanceList")
         List<UserVSTransactionBatch> groupListBatch = new ArrayList<>()
         for(int i = 0; i < userVSArray.size(); i++) {
-            UserVSTransactionBatch groupBatch = UserVSTransactionBatch.parse(UserVS.Type.GROUP,userVSArray.get(i))
+            UserVSTransactionBatch groupBatch = UserVSTransactionBatch.parse(UserVS.Type.GROUP, userVSArray.get(i))
             groupListBatch.add(groupBatch)
         }
         transactionVSAnalizer.groupVSListBatch = groupListBatch
@@ -96,9 +51,27 @@ public class TransactionVSAnalizer {
             UserVSTransactionBatch userBatch = UserVSTransactionBatch.parse(UserVS.Type.USER,userVSArray.get(i))
             userListBatch.add(userBatch)
         }
-        transactionVSAnalizer.groupVSListBatch = userListBatch
+        transactionVSAnalizer.userVSListBatch = userListBatch
 
         return transactionVSAnalizer
+    }
+
+    public Map getReport(UserVS.Type userType) {
+        Map resultReport = null
+        List<UserVSTransactionBatch> batchList
+        switch(userType) {
+            case UserVS.Type.USER:
+                batchList = userVSListBatch;
+                break;
+            case UserVS.Type.GROUP:
+                batchList = groupVSListBatch;
+                break;
+        }
+        for(UserVSTransactionBatch transactionBatch : batchList) {
+            if(!resultReport) resultReport = transactionBatch.getReport()
+            else resultReport = UserVSTransactionBatch.sumReport(resultReport, transactionBatch.getReport())
+        }
+        return resultReport
     }
 
 }
