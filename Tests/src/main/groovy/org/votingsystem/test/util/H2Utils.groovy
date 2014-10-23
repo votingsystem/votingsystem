@@ -1,15 +1,11 @@
 package org.votingsystem.test.util
 
 import org.apache.log4j.Logger
+import org.h2.tools.DeleteDbFiles
 import org.votingsystem.model.ContextVS
 import org.votingsystem.util.FileUtils
 
-import java.sql.Connection;
-import java.sql.DriverManager
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import org.h2.tools.DeleteDbFiles;
+import java.sql.*
 
 /**
  * @author jgzornoza

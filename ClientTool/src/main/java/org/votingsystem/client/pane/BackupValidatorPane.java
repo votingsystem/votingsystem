@@ -16,6 +16,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.backup.ClaimBackupValidator;
 import org.votingsystem.client.backup.ValidationEvent;
 import org.votingsystem.client.backup.ValidatorListener;
@@ -83,7 +84,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
             @Override public void handle(ActionEvent actionEvent) {
                 runningTask.cancel();
             }});
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
 
         buttonHBox.getChildren().addAll(errorsButton, spacer, cancelButton);
 
@@ -172,12 +173,9 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
                 break;
             case MANIFEST_FINISIH:
                 String message = null;
-                ImageView icon = null;
                 if(errorList == null || errorList.isEmpty()) {
-                    icon = new ImageView(Utils.getImage(this, "accept_32"));
                     message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
                 } else {
-                    icon = new ImageView(Utils.getImage(this, "cancel_32"));
                     message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
                 cancelButton.setText(ContextVS.getMessage("closeLbl"));
@@ -200,12 +198,9 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
                 break;
             case CLAIM_FINISH:
                 String message = null;
-                ImageView icon = null;
                 if(errorList == null || errorList.isEmpty()) {
-                    icon = new ImageView(Utils.getImage(this, "accept_32"));
                     message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
                 } else {
-                    icon = new ImageView(Utils.getImage(this, "cancel_32"));
                     message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
                 cancelButton.setText(ContextVS.getMessage("closeLbl"));

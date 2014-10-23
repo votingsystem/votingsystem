@@ -3,24 +3,30 @@ package org.votingsystem.client;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
@@ -53,7 +59,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.controlsfx.glyphfont.FontAwesome;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -67,10 +73,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private VBox votingSystemOptionsBox;
     private VBox vicketOptionsBox;
     private SettingsDialog settingsDialog;
-    private HBox headerButtonsBox;
+    private GridPane headerButtonsPane;
     private Button connectButton;
     private Text messageText;
-    private Button vicketAdminProceduresButton;
     private Stage primaryStage;
     private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
@@ -146,7 +151,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         this.primaryStage = primaryStage;
-        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
         browserVS = new BrowserVS();
         new Thread(new Runnable() {
             @Override public void run() {
@@ -197,7 +201,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         mainBox = new VBox();
 
         connectButton = new Button(ContextVS.getMessage("connectLbl"));
-        connectButton.setGraphic(new ImageView(Utils.getImage(this, "disconnected")));
+        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_BUTTON_ERROR));
         connectButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 connectButton.setDisable(true);
@@ -213,18 +217,21 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         VBox.setMargin(messageText, new Insets(0, 0, 0, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
 
-        headerButtonsBox = new HBox(10);
+        headerButtonsPane = new GridPane();
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        headerButtonsBox.getChildren().addAll(connectButton, spacer, messageText);
-        VBox.setMargin(headerButtonsBox, new Insets(0, 0, 10, 0));
+        headerButtonsPane.getChildren().addAll(connectButton, messageText);
+        headerButtonsPane.setColumnSpan(headerButtonsPane, 2);
+
+        VBox.setMargin(headerButtonsPane, new Insets(0, 0, 10, 0));
 
         votingSystemOptionsBox = new VBox(10);
 
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
-        voteButton.setGraphic(new ImageView(Utils.getImage(this, "fa-envelope")));
+
+        voteButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE));
         voteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVotingPage();
@@ -232,25 +239,18 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         voteButton.setPrefWidth(500);
 
         Button selectRepresentativeButton = new Button(ContextVS.getMessage("selectRepresentativeButtonLbl"));
-        selectRepresentativeButton.setGraphic(new ImageView(Utils.getImage(this, "fa-hand-o-right")));
+        selectRepresentativeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.HAND_ALT_RIGHT));
         selectRepresentativeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openSelectRepresentativePage();
             }});
         selectRepresentativeButton.setPrefWidth(500);
 
-        Button votingSystemProceduresButton = new Button(ContextVS.getMessage("votingSystemProceduresLbl"));
-        votingSystemProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-cogs")));
-        votingSystemProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                openVotingSystemProceduresPage();
-            }});
-        votingSystemProceduresButton.setPrefWidth(500);
-        votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton, votingSystemProceduresButton);
+        votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
 
 
         Button openFileButton = new Button(ContextVS.getMessage("openFileButtonLbl"));
-        openFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
+        openFileButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         openFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 DocumentVSBrowserStackPane.showDialog(null, null);
@@ -259,7 +259,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         openFileButton.setPrefWidth(500);
 
         Button signDocumentButton = new Button(ContextVS.getMessage("signDocumentButtonLbl"));
-        signDocumentButton.setGraphic(new ImageView(Utils.getImage(this, "pencil")));
+        signDocumentButton.setGraphic(Utils.getImage(FontAwesome.Glyph.PENCIL));
         signDocumentButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 SignDocumentFormPane.showDialog();
@@ -269,48 +269,61 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
         vicketOptionsBox = new VBox(10);
         Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("vicketUsersLbl"));
-        vicketUsersProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
+        vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVicketUserProcedures();
             }});
         vicketUsersProceduresButton.setPrefWidth(500);
 
-
-        vicketAdminProceduresButton = new Button(ContextVS.getMessage("vicketAdminLbl"));
-        vicketAdminProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
-        vicketAdminProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                openVicketAdminProcedures();
-            }});
-        vicketAdminProceduresButton.setPrefWidth(500);
-
-        vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, vicketAdminProceduresButton);
-
-        Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"));
-        settingsButton.setGraphic(new ImageView(Utils.getImage(this, "fa-wrench")));
-        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
+        Button walletButton = new Button(ContextVS.getMessage("settingsLbl"));
+        walletButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CREDIT_CARD));
+        walletButton.setPrefWidth(500);
+        walletButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openSettings();
             }});
 
+        vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, walletButton);
+        vicketOptionsBox.setStyle("-fx-alignment: center;");
         HBox footerButtonsBox = new HBox(10);
+        ChoiceBox choiceBox = new ChoiceBox();
+        choiceBox.setPrefWidth(200);
+        final String[] adminOptions = new String[]{ContextVS.getMessage("adminLbl"),
+                ContextVS.getMessage("settingsLbl"),
+                ContextVS.getMessage("vicketAdminLbl"),
+                ContextVS.getMessage("votingSystemProceduresLbl")};
+        choiceBox.getItems().addAll(adminOptions);
+        choiceBox.getSelectionModel().selectFirst();
+        choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue ov, Number value, Number new_value) {
+                    log.debug("value: " + value + " -new_value: " + new_value + " - option: " + adminOptions[new_value.intValue()]);
+                    String selectedOption = adminOptions[new_value.intValue()];
+                    if(ContextVS.getMessage("settingsLbl").equals(selectedOption)) {
+                        openSettings();
+                    } else if(ContextVS.getMessage("vicketAdminLbl").equals(selectedOption)) {
+                        openVicketAdminProcedures();
+                    } else if(ContextVS.getMessage("votingSystemProceduresLbl").equals(selectedOption)) {
+                        openVotingSystemProceduresPage();
+                    }
+                choiceBox.getSelectionModel().select(0);
+
+                }
+            });
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 VotingSystemApp.this.stop();
             }});
 
-        footerButtonsBox.getChildren().addAll(settingsButton, spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(choiceBox, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 10));
 
         mainBox.getChildren().addAll(openFileButton, signDocumentButton, footerButtonsBox);
-
-
         mainBox.getStyleClass().add("modal-dialog");
-        mainBox.setStyle("-fx-max-width: 1000px;");
+        mainBox.setPrefWidth(550);
 
         primaryStage.setScene(new Scene(mainBox));
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
@@ -351,14 +364,14 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             @Override public void run() {
                 if(available) {
                     mainBox.getChildren().add((mainBox.getChildren().size() - 1), vicketOptionsBox);
-                    mainBox.getChildren().add(0, headerButtonsBox);
+                    mainBox.getChildren().add(0, headerButtonsPane);
 
                 } else {
                     if(mainBox.getChildren().contains(vicketOptionsBox)) {
                         mainBox.getChildren().remove(vicketOptionsBox);
                     }
-                    if(mainBox.getChildren().contains(headerButtonsBox)) {
-                        mainBox.getChildren().remove(headerButtonsBox);
+                    if(mainBox.getChildren().contains(headerButtonsPane)) {
+                        mainBox.getChildren().remove(headerButtonsPane);
                     }
                 }
                 primaryStage.sizeToScene();
@@ -485,7 +498,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
                         messageText.setText(WebSocketService.getInstance().getSessionUser().getName());
-                        connectButton.setGraphic(new ImageView(Utils.getImage(VotingSystemApp.this, "connected")));
+                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FLASH));
                         connectButton.setText(ContextVS.getMessage("disConnectLbl"));
                         connectButton.setDisable(false);
                     }
@@ -502,7 +515,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
                         messageText.setText("");
-                        connectButton.setGraphic(new ImageView(Utils.getImage(this, "disconnected")));
+                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_BUTTON_ERROR));
                         connectButton.setText(ContextVS.getMessage("connectLbl"));
                         connectButton.setDisable(false);
                     }
@@ -535,6 +548,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     public static void main(String[] args) {
+        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
+
         launch(args);
     }
 

@@ -9,6 +9,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertificationRequestVS
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.util.StringUtils
+
 import java.util.concurrent.Callable
 
 /**

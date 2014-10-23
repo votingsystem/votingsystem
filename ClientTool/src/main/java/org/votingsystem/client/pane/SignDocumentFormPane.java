@@ -22,6 +22,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
@@ -65,7 +66,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         GridPane.setVgrow(textArea, Priority.ALWAYS);
 
         signButton = new Button(ContextVS.getMessage("signLbl"));
-        signButton.setGraphic((new ImageView(Utils.getImage(this, "pencil"))));
+        signButton.setGraphic((Utils.getImage(FontAwesome.Glyph.PENCIL)));
         signButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 documentSignerHelper.processOperation(SignDocumentFormStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
@@ -74,7 +75,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         });
 
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
-        saveButton.setGraphic((new ImageView(Utils.getImage(this, "save_data"))));
+        saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 saveMessage(smimeMessage);
@@ -97,7 +98,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         HBox.setMargin(serviceURLTextField, new Insets(0, 0, 0, 30));
         HBox.setHgrow(serviceURLTextField, Priority.ALWAYS);
         Button sendButton = new Button(ContextVS.getMessage("sendLbl"));
-        sendButton.setGraphic((new ImageView(Utils.getImage(this, "upload"))));
+        sendButton.setGraphic((Utils.getImage(FontAwesome.Glyph.UPLOAD)));
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 sendDocumentToService();
@@ -128,7 +129,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic((new ImageView(Utils.getImage(this, "cancel"))));
+        cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR)));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 SignDocumentFormPane.this.getScene().getWindow().hide();

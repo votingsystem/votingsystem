@@ -257,7 +257,8 @@ public class ContextVS {
     public static void initSignatureClient (String logPropertiesFile,
             String localizatedMessagesFileName, String locale){
         try {
-            log.debug("------------- initSignatureClient ----------------- ");
+            java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.INFO,
+                    "------------- initSignatureClient ----------------- ");
             init(logPropertiesFile,localizatedMessagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));

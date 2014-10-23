@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
@@ -76,14 +77,14 @@ public class PasswordDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.close();
             }});
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 checkPasswords();
             }});
-        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {

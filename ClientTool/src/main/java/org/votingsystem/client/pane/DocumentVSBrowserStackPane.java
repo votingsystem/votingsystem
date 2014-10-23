@@ -19,6 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
@@ -88,14 +89,14 @@ public class DocumentVSBrowserStackPane extends StackPane {
             }
         });
 
-        nextButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-right")));
+        nextButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
         Button prevButton =  new Button(ContextVS.getMessage("buttonPreviousLbl"));
         prevButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 goPrevious();
             }
         });
-        prevButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-left")));
+        prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         navigateButtonsHBox.getChildren().addAll(prevButton, nextButton);
 
         Region spacer = new Region();
@@ -107,10 +108,11 @@ public class DocumentVSBrowserStackPane extends StackPane {
                 BackupValidatorPane.showDialog(decompressedBackupBaseDir, metaInf);
             }
         });
-        validateBackupButton.setGraphic(new ImageView(Utils.getImage(this, "document-properties")));
+
+        validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
 
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
-        saveButton.setGraphic((new ImageView(Utils.getImage(this, "save_data"))));
+        saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 saveMessage();

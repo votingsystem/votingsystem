@@ -20,6 +20,7 @@ import javafx.scene.layout.Priority;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.JSONFormDialog;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.DocumentVS;
@@ -104,7 +105,7 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         setHalignment(vicketTagLbl, HPos.CENTER);
 
         sendVicketButton = new Button();
-        sendVicketButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        sendVicketButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         sendVicketButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {

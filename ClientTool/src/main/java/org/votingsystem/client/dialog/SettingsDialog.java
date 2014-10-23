@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.ContentSignerUtils;
@@ -68,7 +69,7 @@ public class SettingsDialog {
         keyStoreVBox = new VBox(10);
 
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
-        selectKeyStoreButton.setGraphic(new ImageView(Utils.getImage(this, "fa-key")));
+        selectKeyStoreButton.setGraphic(Utils.getImage(FontAwesome.Glyph.KEY));
         selectKeyStoreButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 selectKeystoreFile();
@@ -82,7 +83,7 @@ public class SettingsDialog {
         HBox footerButtonsBox = new HBox(10);
 
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.close();
@@ -90,7 +91,7 @@ public class SettingsDialog {
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 validateForm();

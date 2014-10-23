@@ -368,6 +368,16 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
 }
 
+VotingSystemClient.call = function (messageJSON) {
+    try {
+        clientTool
+        var messageToSignatureClient = JSON.stringify(messageJSON);
+        return clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+    } catch(e) {
+        console.log(e)
+    }
+}
+
 window['isClientToolConnected'] = false
 
 function notifiyClientToolConnection() {

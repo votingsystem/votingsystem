@@ -17,6 +17,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -49,7 +50,7 @@ public class PEMCertValidatorPane extends GridPane {
         add(textArea, 0, 1);
 
         acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setGraphic((new ImageView(Utils.getImage(this, "accept"))));
+        acceptButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CHECK)));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 validatePublicKey();
@@ -59,7 +60,7 @@ public class PEMCertValidatorPane extends GridPane {
 
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic((new ImageView(Utils.getImage(this, "cancel"))));
+        cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR)));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 PEMCertValidatorPane.this.getScene().getWindow().hide();

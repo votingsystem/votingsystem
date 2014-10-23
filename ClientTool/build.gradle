@@ -8,6 +8,11 @@ sourceCompatibility = 8
 
 mainClassName = "org.votingsystem.client.VotingSystemApp"
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
 dependencies {
 
     compile (project(':VotingSystemLibrary')) {
@@ -26,7 +31,10 @@ dependencies {
 		'javax.activation:activation:1.1.1',
 		'org.bouncycastle:bctsp-jdk16:1.46',
 		'log4j:log4j:1.2.12',
+        'org.controlsfx:controlsfx:8.20.8',
         'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.6')
+
+
 
 	//compile files('../libs/plugin-1.3.jar')
 	

@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -64,7 +65,7 @@ public class MessageDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.hide();
             }});
-        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         HBox footerButtonsBox = new HBox(10);
         Region spacer = new Region();
@@ -115,8 +116,8 @@ public class MessageDialog {
     public void showMessage(int statusCode, String message) {
         messageLabel.setText(message);
         if(ResponseVS.SC_OK == statusCode) {
-            messageLabel.setGraphic( new ImageView(Utils.getImage(MessageDialog.this, "accept_32")));
-        } else messageLabel.setGraphic( new ImageView(Utils.getImage(MessageDialog.this, "cancel_32")));
+            messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
+        } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR, 32));
         stage.centerOnScreen();
         stage.show();
         stage.toFront();

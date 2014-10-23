@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
@@ -58,7 +59,7 @@ public class SignatureInfoPane extends GridPane {
 
             add(signatureDateValueLabel, 1, 1);
             Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
-            timeStampButton.setGraphic((new ImageView(Utils.getImage(this, "clock"))));
+            timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
             timeStampButton.setOnAction(new EventHandler<ActionEvent>() {
                 @Override public void handle(ActionEvent actionEvent) {
                     TimeStampPane.showDialog(signer.getTimeStampToken());

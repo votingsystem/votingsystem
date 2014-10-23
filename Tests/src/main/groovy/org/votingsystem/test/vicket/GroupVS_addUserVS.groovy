@@ -5,9 +5,9 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
-import org.votingsystem.test.util.SimulationData
 import org.votingsystem.test.util.MockDNI
 import org.votingsystem.test.util.SignatureService
+import org.votingsystem.test.util.SimulationData
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.ExceptionVS
 

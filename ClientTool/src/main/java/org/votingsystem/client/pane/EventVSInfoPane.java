@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -60,7 +61,7 @@ public class EventVSInfoPane extends GridPane {
                     HTMLMessageDialog messageDialog = new HTMLMessageDialog();
                     messageDialog.showMessage(metaInf.getRepresentativesHTML(), ContextVS.getMessage("representativesDetailsLbl"));
                 }});
-            representativesButton.setGraphic(new ImageView(Utils.getImage(this, "group")));
+            representativesButton.setGraphic(Utils.getImage(FontAwesome.Glyph.GROUP));
         }
     }
 

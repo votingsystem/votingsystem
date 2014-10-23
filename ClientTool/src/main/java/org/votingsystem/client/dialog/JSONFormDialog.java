@@ -20,6 +20,7 @@ import javafx.stage.WindowEvent;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
@@ -72,14 +73,14 @@ public class JSONFormDialog {
                 else log.debug("No listeners to send JSON form");
                 stage.hide();
             }});
-        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.hide();
             }});
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
 
         HBox footerButtonsBox = new HBox(10);
         Region spacer = new Region();

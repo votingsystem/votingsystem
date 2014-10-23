@@ -18,6 +18,7 @@ import javafx.scene.text.TextAlignment;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
@@ -111,14 +112,14 @@ public class SignDocumentFormStackPane extends StackPane {
             @Override public void handle(ActionEvent actionEvent) {
                 setPasswordDialogVisible(false);
             }});
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 checkPasswords();
             }});
-        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {

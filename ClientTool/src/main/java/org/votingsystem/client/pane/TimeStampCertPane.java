@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -40,7 +41,7 @@ public class TimeStampCertPane extends GridPane {
                 showPEMCert();
             }
         });
-        showPEMcertButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
+        showPEMcertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         add(showPEMcertButton, 0, 1);
 
         WebView certInfoWebView = new WebView();

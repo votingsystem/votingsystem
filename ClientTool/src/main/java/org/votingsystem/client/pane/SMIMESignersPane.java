@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -39,7 +40,7 @@ public class SMIMESignersPane extends GridPane {
         setStyle("-fx-max-width: 900px;");
 
         Button closeButton = new Button(ContextVS.getMessage("closeLbl"));
-        closeButton.setGraphic((new ImageView(Utils.getImage(this, "save_data"))));
+                closeButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 SMIMESignersPane.this.setVisible(false);

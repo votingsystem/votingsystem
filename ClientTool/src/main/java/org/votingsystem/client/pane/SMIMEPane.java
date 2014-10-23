@@ -15,6 +15,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
@@ -58,10 +59,10 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         signatureContentWebView = new WebView();
         signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         if (signedFile.isValidSignature()) {
-            openSignatureInfoButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
+            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureOKLbl"));
         } else {
-            openSignatureInfoButton.setGraphic(new ImageView(Utils.getImage(this, "cancel")));
+            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureERRORLbl"));
         }
         String contentStr = null;
@@ -78,7 +79,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
 
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
-        timeStampButton.setGraphic((new ImageView(Utils.getImage(this, "clock"))));
+        timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
         timeStampButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 TimeStampPane.showDialog(timeStampToken);

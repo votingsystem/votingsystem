@@ -2,14 +2,9 @@ package org.votingsystem.test.util
 
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.HttpHelper
-import org.votingsystem.vicket.model.TransactionVS
 
 /**
  * @author jgzornoza

@@ -1,9 +1,14 @@
 package org.votingsystem.client.util;
 
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.model.*;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
@@ -19,7 +24,30 @@ import java.util.Map;
  */
 public class Utils {
 
+    public static final String COLOR_BUTTON_OK = "#388746";
+    public static final String COLOR_BUTTON_ERROR = "#6c0404";
+
+
     private static Logger log = Logger.getLogger(Utils.class);
+
+    private static GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+
+
+    public static Glyph getImage(FontAwesome.Glyph font) {
+        return fontAwesome.create(font).color(Color.web(COLOR_BUTTON_OK));
+    }
+
+    public static Glyph getImage(FontAwesome.Glyph font, double size) {
+        return fontAwesome.create(font).color(Color.web(COLOR_BUTTON_OK)).size(size);
+    }
+
+    public static Glyph getImage(FontAwesome.Glyph font, String color) {
+        return fontAwesome.create(font).color(Color.web(color));
+    }
+
+    public static Glyph getImage(FontAwesome.Glyph font, String color, double size) {
+        return fontAwesome.create(font).color(Color.web(color)).size(size);
+    }
 
     public static Image getImage(Object baseObject, String key) {
         String iconPath = null;

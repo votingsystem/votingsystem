@@ -38,6 +38,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
@@ -143,8 +144,7 @@ public class BrowserVS extends Region {
         final Button forwardButton = new Button();
         final Button prevButton = new Button();
         final Button reloadButton = new Button();
-
-        forwardButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-right")));
+        forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
@@ -156,7 +156,7 @@ public class BrowserVS extends Region {
             }
         });
 
-        prevButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-left")));
+        prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
@@ -168,7 +168,7 @@ public class BrowserVS extends Region {
             }
         });
 
-        reloadButton.setGraphic(new ImageView(Utils.getImage(this, "fa-refresh")));
+        reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
         reloadButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 webView.getEngine().load(locationField.getText());

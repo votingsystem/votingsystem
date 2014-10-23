@@ -21,6 +21,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -139,7 +140,7 @@ public class TimeStampPane extends GridPane {
 
 
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
-        certValidationButton.setGraphic(new ImageView(Utils.getImage(this, "accept_16")));
+        certValidationButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         certValidationButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 TimeStampCertValidationPane.showDialog(timeStampToken);
@@ -148,7 +149,7 @@ public class TimeStampPane extends GridPane {
 
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {

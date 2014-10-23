@@ -19,6 +19,7 @@ import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -51,7 +52,7 @@ public class TimeStampCertValidationPane extends GridPane {
         add(textArea, 0, 1);
 
         validateTimeStampButton = new Button(ContextVS.getMessage("validateLbl"));
-        validateTimeStampButton.setGraphic((new ImageView(Utils.getImage(this, "accept"))));
+        validateTimeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CHECK)));
         validateTimeStampButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 validateTimeStamp();
@@ -60,7 +61,7 @@ public class TimeStampCertValidationPane extends GridPane {
 
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic((new ImageView(Utils.getImage(this, "cancel"))));
+        cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR)));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 TimeStampCertValidationPane.this.getScene().getWindow().hide();
