@@ -25,13 +25,18 @@ class TestUtils {
     private static Class initClass;
 
     public static Logger init(Class clazz) {
+        init(clazz, "./TestDir");
+    }
+
+    public static Logger init(Class clazz, String testDir) {
         initClass = clazz;
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("log4jTests.properties"),
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"),"TestDir");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"), testDir);
         log =  Logger.getLogger(TestUtils.class);
         return Logger.getLogger(clazz);
     }
+
 
     public static Logger init(Class clazz, Map simulationDataMap) {
         Logger log = init(clazz)
@@ -114,10 +119,11 @@ class TestUtils {
     }
 
     public static void finish(String resultMessage) {
-        simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
+        if(simulationData) simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
         log.debug("------------------------------------------------");
         log.debug("--- ${initClass.getSimpleName()} finished ---");
-        log.debug("Begin: ${DateUtils.getDateStr(simulationData.getBeginDate())} - Duration: ${simulationData.getDurationStr()}")
+        if(simulationData) log.debug("Begin: ${DateUtils.getDateStr(simulationData.getBeginDate())} - " +
+                "Duration: ${simulationData.getDurationStr()}")
         if(resultMessage) log.debug(resultMessage)
         System.exit(0)
     }

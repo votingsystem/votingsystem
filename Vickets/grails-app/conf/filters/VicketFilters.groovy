@@ -136,9 +136,7 @@ class VicketFilters {
                             break;
                         case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
-                            responseVS =  signatureVSService.decryptCMS(requestBytes)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                params.requestBytes = responseVS.messageBytes
+                            params.requestBytes =  signatureVSService.decryptCMS(requestBytes)
                             break;
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:

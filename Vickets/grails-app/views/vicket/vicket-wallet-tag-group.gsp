@@ -4,7 +4,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-progress', file: 'paper-progress.html')}">
 
-<polymer-element name="vicket-tag-group" attributes="tag, vicketArray">
+<polymer-element name="vicket-wallet-tag-group" attributes="tag, vicketArray">
     <template>
         <style>
             .tagHeader {font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;
@@ -53,7 +53,7 @@
 
     </template>
     <script>
-        Polymer('vicket-tag-group', {
+        Polymer('vicket-wallet-tag-group', {
             //Info inside vicket: vicketServerURL, vicketValue, currencyCode, tag, notBefore, notAfter, hashCertVS
             currencyMsgs:[],
             publish: {
@@ -89,7 +89,6 @@
             vicketArrayChanged:function() {
                 console.log(this.tagName + " - vicketArrayChanged")
                 var tagGroupMap = {}
-
                 this.currencyMsgs = []
                 for(vicketIdx in this.vicketArray) {
                     var vicket = this.vicketArray[vicketIdx]

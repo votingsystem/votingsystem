@@ -202,7 +202,7 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public byte[] getMessageBytes() throws Exception {
-        if(contentType.isSigned() && messageBytes == null && messageSMIME != null)
+        if(contentType!= null && contentType.isSigned() && messageBytes == null && messageSMIME != null)
             return messageSMIME.getSMIME().getBytes();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;

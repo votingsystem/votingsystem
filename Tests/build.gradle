@@ -34,7 +34,11 @@ dependencies {
             'javax.activation:activation:1.1.1',
             'org.bouncycastle:bctsp-jdk16:1.46',
             'org.slf4j:slf4j-log4j12:1.7.5',
-            'log4j:log4j:1.2.12')
+            'log4j:log4j:1.2.12',
+            'com.h2database:h2:1.4.182')
+
+    runtime 'com.h2database:h2:1.4.182'
+
 
     testCompile 'junit:junit:4.11'
 
@@ -75,5 +79,10 @@ task testRequestVickets(type: JavaExec) {
 
 task testClaims(type: JavaExec) {
     main = 'org.votingsystem.test.voting.Claim_publishAndSend'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task testH2(type: JavaExec) {
+    main = 'org.votingsystem.test.misc.TestH2'
     classpath = sourceSets.main.runtimeClasspath
 }

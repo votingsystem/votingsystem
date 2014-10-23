@@ -467,7 +467,7 @@ public class BrowserVS extends Region {
                     default:
                         return "Unknown operation: '" + operationVS.getType() + "'";
                 }
-            } catch (UnsupportedEncodingException ex) {
+            } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
                 result = ex.getMessage();
             } finally {

@@ -391,7 +391,7 @@ VotingSystemClient.call = function (messageJSON) {
     try {
         clientTool
         var messageToSignatureClient = JSON.stringify(messageJSON);
-        return clientTool.call(window.btoa(messageToSignatureClient))
+        return clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } catch(e) {
         console.log(e)
     }

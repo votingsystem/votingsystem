@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet-tag-group']"/>">
 
 
 <polymer-element name="vicket-wallet"  on-core-select="{{selectAction}}">
@@ -36,9 +36,8 @@
         <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
 
         <template repeat="{{tag in tagArray}}">
-            <vicket-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-tag-group>
+            <vicket-wallet-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-wallet-tag-group>
         </template>
-
     </template>
     <script>
         Polymer('vicket-wallet', {
@@ -56,14 +55,14 @@
                 console.log(this.tagName + " - vicketsWalletChanged")
                 this.tagGroups = {}
                 this.vicketsWalletArray = JSON.parse(this.vicketsWallet)
+                this.testWallet = JSON.stringify({wallet:this.vicketsWalletArray})
+
                 for(vicketIdx in this.vicketsWalletArray) {
                     var vicket = this.vicketsWalletArray[vicketIdx]
-                    console.log("### vicketsWalletChanged - vicket.tag: " + vicket.tag)
                     if(this.tagGroups[vicket.tag]) this.tagGroups[vicket.tag].push(vicket)
                     else this.tagGroups[vicket.tag] = [vicket]
                 }
                 this.tagArray = Object.keys(this.tagGroups)
-                console.log("### vicketsWalletChanged - this.tagGroups: " + JSON.stringify(this.tagGroups))
             },
             valueChanged:function() {
                 this.amountValue = this.value * 10;

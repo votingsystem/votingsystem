@@ -79,12 +79,12 @@ public class Encryptor {
 	public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
 		Log.d(TAG + ".encryptSMIMEFile(...) ", " #### encryptSMIMEFile ");
-    	/* Create the encrypter */
-    	SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-    	encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+    	/* Create the encryptor */
+    	SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
+    	encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
     			receiverCert).setProvider(ContextVS.PROVIDER));
         /* Encrypt the message */
-        MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
+        MimeBodyPart encryptedPart = encryptor.generate(msgToEncrypt,
                 new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         /* Set all original MIME headers in the encrypted message */
@@ -121,11 +121,11 @@ public class Encryptor {
         }
 		// set the Date: header
 		//mimeMessage.setSentDate(new Date());
-		SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-		encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+		SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
+		encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
 		        receiverCert).setProvider(ContextVS.PROVIDER));
 		/* Encrypt the message */
-		MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+		MimeBodyPart encryptedPart = encryptor.generate(mimeMessage,
 		        new JceCMSContentEncryptorBuilder(
 		        CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -151,11 +151,11 @@ public class Encryptor {
         }
         // set the Date: header
         //mimeMessage.setSentDate(new Date());
-        SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-        encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+        SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
+        encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
                         receiverCert).setProvider(ContextVS.PROVIDER));
         /* Encrypt the message */
-        MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+        MimeBodyPart encryptedPart = encryptor.generate(mimeMessage,
                 new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         return encryptedPart;

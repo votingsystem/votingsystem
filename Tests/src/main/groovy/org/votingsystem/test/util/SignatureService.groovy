@@ -178,57 +178,36 @@ class SignatureService {
 
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug("encryptToCMS ${new String(dataToEncrypt)}")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
+    public byte[] decryptCMS (byte[] encryptedFile, Locale locale) {
+        return getEncryptor().decryptCMS(encryptedFile);
+    }
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        log.debug("encryptMessage(...) - ");
-        try {
-            return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS("dataToEncryptErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
+        return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug "decryptMessage"
-        try {
-            return getEncryptor().decryptMessage(encryptedFile);
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            return new ResponseVS("encryptedMessageErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
+        return getEncryptor().decryptMessage(encryptedFile);
     }
 
     /**
      * Method to encrypt SMIME signed messages
      */
     ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug("encryptSMIME(...) ");
-        try {
-            return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            return new ResponseVS("dataToEncryptErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
+        return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
     }
 
     /**
      * Method to decrypt SMIME signed messages
      */
     ResponseVS decryptSMIME(byte[] encryptedMessageBytes) {
-        try {
-            return getEncryptor().decryptSMIME(encryptedMessageBytes);
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            return new ResponseVS("encryptedMessageErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
+        return getEncryptor().decryptSMIME(encryptedMessageBytes);
     }
 
     private Encryptor getEncryptor() {

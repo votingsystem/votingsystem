@@ -360,7 +360,7 @@ public class SignatureService extends Service<ResponseVS> {
             }
             ResponseVS responseVS = null;
             if(encryptedData != null) {
-                responseVS = Encryptor.decryptCMS(encryptedData.getBytes(), privateKey);
+                responseVS = new ResponseVS(ResponseVS.SC_OK, Encryptor.decryptCMS(encryptedData.getBytes(), privateKey)) ;
                 responseVS.setContentType(ContentTypeVS.JSON);
                 Map editDataMap = new HashMap();
                 editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
