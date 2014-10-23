@@ -1,6 +1,6 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 
 <polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
@@ -34,9 +34,9 @@
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
-                        <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
-                        </vs-button>
+                        </paper-button>
                     </div>
                     <div flex></div>
                 </div>

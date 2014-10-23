@@ -6,7 +6,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 
 import javax.mail.Header;
 import java.security.KeyStore;
@@ -33,9 +33,9 @@ public class ContentSignerUtils {
             case JKS_KEYSTORE:
                 KeyStore keyStore = ContextVS.getUserKeyStore(password);
                 java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-                SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyStore,
+                SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password, ContextVS.DNIe_SIGN_MECHANISM);
-                return signedMailGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
+                return SMIMESignedGeneratorVS.getSMIME(fromUser, toUser, textToSign, subject, headers);
             case DNIe:
                 return DNIeContentSigner.getSMIME(fromUser,
                         toUser, textToSign, password, subject, headers);

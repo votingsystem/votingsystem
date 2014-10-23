@@ -68,9 +68,9 @@
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div style="margin:10px 0px 10px 0px;">
-                        <vs-button on-click="{{checkControlCenter}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{checkControlCenter}}" style="margin: 0px 0px 0px 5px;">
                             <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
-                        </vs-button>
+                        </paper-button>
                     </div>
                 </div>
 

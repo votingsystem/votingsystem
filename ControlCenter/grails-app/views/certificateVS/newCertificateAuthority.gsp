@@ -32,9 +32,9 @@
 
         <div style="margin:10px 10px 60px 0px;height:20px;">
             <div style="float:right;">
-                <vs-button onclick="submitForm()">
+                <paper-button raised onclick="submitForm()">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="addCALbl"/>
-                </vs-button>
+                </paper-button>
             </div>
         </div>
 

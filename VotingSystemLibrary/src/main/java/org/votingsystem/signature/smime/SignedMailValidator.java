@@ -74,12 +74,12 @@ public class SignedMailValidator
      *            the signed MimeMessage
      * @param param
      *            the parameters for the certificate path validation
-     * @throws org.votingsystem.signature.smime.SignedMailValidatorException
+     * @throws ExceptionVSSMIME
      *             if the message is no signed message or if an exception occurs
      *             reading the message
      */
     public SignedMailValidator(MimeMessage message, PKIXParameters param)
-        throws SignedMailValidatorException
+        throws ExceptionVSSMIME
     {
         this(message, param, DEFAULT_CERT_PATH_REVIEWER);
     }
@@ -104,7 +104,7 @@ public class SignedMailValidator
      *            a subclass of {@link org.votingsystem.signature.util.PKIXCertPathReviewer}. The SignedMailValidator
      *            uses objects of this type for the cert path vailidation. The class must
      *            have an empty constructor.
-     * @throws org.votingsystem.signature.smime.SignedMailValidatorException
+     * @throws ExceptionVSSMIME
      *             if the message is no signed message or if an exception occurs
      *             reading the message
      * @throws IllegalArgumentException if the certPathReviewerClass is not a
@@ -112,7 +112,7 @@ public class SignedMailValidator
      *             certPathReviewerClass can not be instantiated
      */
     public SignedMailValidator(MimeMessage message, PKIXParameters param, Class certPathReviewerClass)
-            throws SignedMailValidatorException
+            throws ExceptionVSSMIME
     {
         this.certPathReviewerClass = certPathReviewerClass;
         boolean isSubclass = DEFAULT_CERT_PATH_REVIEWER.isAssignableFrom(certPathReviewerClass);
@@ -134,7 +134,7 @@ public class SignedMailValidator
             }
             else {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.noSignedMessage");
-                throw new SignedMailValidatorException(msg);
+                throw new ExceptionVSSMIME(msg);
             }
 
             // save certstore and signerInformationStore
@@ -164,13 +164,13 @@ public class SignedMailValidator
             results = new HashMap();
         }
         catch (Exception e) {
-            if (e instanceof SignedMailValidatorException) {
-                throw (SignedMailValidatorException) e;
+            if (e instanceof ExceptionVSSMIME) {
+                throw (ExceptionVSSMIME) e;
             }
             // exception reading message
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.exceptionReadingMessage",
                     new Object[] { e.getMessage(), e , e.getClass().getName()});
-            throw new SignedMailValidatorException(msg, e);
+            throw new ExceptionVSSMIME(msg, e);
         }
 
         // validate signatues
@@ -780,7 +780,7 @@ public class SignedMailValidator
     }
 
     public ValidationResult getValidationResult(SignerInformation signer)
-            throws SignedMailValidatorException
+            throws ExceptionVSSMIME
     {
         if (signers.getSigners(signer.getSID()).isEmpty())
         {
@@ -788,7 +788,7 @@ public class SignedMailValidator
             // he has not signed the message
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.wrongSigner");
-            throw new SignedMailValidatorException(msg);
+            throw new ExceptionVSSMIME(msg);
         }
         else
         {

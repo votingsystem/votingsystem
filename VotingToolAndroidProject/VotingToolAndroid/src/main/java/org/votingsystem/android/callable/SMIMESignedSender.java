@@ -72,7 +72,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             responseVS  = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(responseVS.getContentType() != null && responseVS.getContentType().isEncrypted()) {
                 if(responseVS.getContentType().isSigned()) {
-                    SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
+                    SMIMEMessage signedMessage = Encryptor.decryptSMIME(
                             responseVS.getMessageBytes(), keyEntry.getCertificate().getPublicKey(),
                             keyEntry.getPrivateKey());
                     responseVS.setSMIME(signedMessage);

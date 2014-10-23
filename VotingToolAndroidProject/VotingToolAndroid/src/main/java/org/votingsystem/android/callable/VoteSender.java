@@ -80,7 +80,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     vote.getEventVS().getControlCenter().getCertificate());
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage voteReceipt = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage voteReceipt = Encryptor.decryptSMIME(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
                 try {

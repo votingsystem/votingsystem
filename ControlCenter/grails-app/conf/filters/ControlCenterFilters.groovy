@@ -65,7 +65,7 @@ class ControlCenterFilters {
                     switch(request.contentTypeVS) {
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                            responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes)
+                            responseVS =  signatureVSService.decryptSMIME(requestBytes)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = processSMIMERequest(responseVS.smimeMessage,request.contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
@@ -105,7 +105,7 @@ class ControlCenterFilters {
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                        ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
+                        ResponseVS encryptResponse =  signatureVSService.encryptSMIME(
                                 responseVS.getMessageBytes(), model.receiverCert)
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                             encryptResponse.setContentType(responseVS.getContentType())

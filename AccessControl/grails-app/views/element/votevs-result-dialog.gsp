@@ -47,15 +47,15 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
                             <div flex></div>
                             <div style="margin:10px 0px 10px 0px;">
-                                <vs-button on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
+                                <paper-button raised on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-times" style="margin:0 10px 0 0;"></i> <g:message code="cancelVoteLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
                         </div>
                     </template>
@@ -64,9 +64,9 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
                             <div flex></div>
                         </div>

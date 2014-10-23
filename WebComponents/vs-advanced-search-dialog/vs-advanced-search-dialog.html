@@ -4,7 +4,7 @@
 <link href="../paper-dialog/paper-dialog.html" rel="import">
 <link href="../paper-input/paper-input.html" rel="import">
 <link href="../core-icons/core-icons.html" rel="import">
-<link href="../vs-button/vs-button.html" rel="import">
+<link href="../paper-button/paper-button.html" rel="import">
 <link href="../vs-dialog/vs-dialog.html" rel="import">
 <link rel="import" href="../vs-i18n/vs-i18n.html">
 
@@ -88,9 +88,9 @@
         </div>
         <div layout horizontal center center-justified >
             <div flex></div>
-            <vs-button on-click="{{submitForm}}">
+            <paper-button raised on-click="{{submitForm}}">
                 {{messages.acceptLbl}}
-            </vs-button>
+            </paper-button>
         </div>
     </vs-dialog>
 </template>

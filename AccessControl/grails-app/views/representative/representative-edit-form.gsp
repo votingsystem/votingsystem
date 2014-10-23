@@ -17,14 +17,14 @@
 
         <div style="display:{{step == 'operationSelection'?'block':'none'}}">
             <div layout horizontal center center-justified>
-                <vs-button type="button" on-click="{{representativeCancel}}"
+                <paper-button raised type="button" on-click="{{representativeCancel}}"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-times" style="margin:0 5px 0 2px;"></i> <g:message code="removeRepresentativeLbl"/>
-                </vs-button>
-                <vs-button type="button" on-click="{{representativeEdit}}"
+                </paper-button>
+                <paper-button raised type="button" on-click="{{representativeEdit}}"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-hand-o-right" style="margin:0 5px 0 2px;"></i> <g:message code="editRepresentativeLbl"/>
-                </vs-button>
+                </paper-button>
             </div>
         </div>
 
@@ -38,9 +38,9 @@
                 <div>
                     <div layout horizontal style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                         <div flex></div>
-                        <vs-button on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                        </vs-button>
+                        </paper-button>
                     </div>
                 </div>
             </div>

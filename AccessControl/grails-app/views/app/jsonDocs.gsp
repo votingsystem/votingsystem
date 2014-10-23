@@ -12,9 +12,9 @@
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
             <div layout horizontal center center-justified>
-                <vs-button onclick="publishControlCenter()" style="margin: 0px 0px 0px 5px;">
+                <paper-button raised onclick="publishControlCenter()" style="margin: 0px 0px 0px 5px;">
                     <g:message code="publishControlCenterLbl"/>
-                </vs-button>
+                </paper-button>
                 <g:message code="operationForAdminSystemLbl"/>
             </div>
             <div id="publishControlCenter" style="width: 500px; height: 300px;"></div>

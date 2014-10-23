@@ -32,9 +32,9 @@ import java.util.List;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class SignedMailGenerator {
+public class SMIMESignedGeneratorVS {
 
-    private static Logger log = Logger.getLogger(SignedMailGenerator.class);
+    private static Logger log = Logger.getLogger(SMIMESignedGeneratorVS.class);
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
     private PrivateKey key;
@@ -42,14 +42,14 @@ public class SignedMailGenerator {
     private Store jcaCertStore;
     private SignerInfoGenerator signerInfoGenerator;
     
-    public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, 
-    		char[] password, String signMechanism) throws Exception {                               
+    public SMIMESignedGeneratorVS(byte[] keyStoreBytes, String keyAlias,
+                                  char[] password, String signMechanism) throws Exception {
         KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
         init(keyStore, keyAlias, password, signMechanism);
     }
     
-    public SignedMailGenerator(KeyStore keyStore, String keyAlias, 
-    		char[] password, String signMechanism) throws Exception {                             
+    public SMIMESignedGeneratorVS(KeyStore keyStore, String keyAlias,
+                                  char[] password, String signMechanism) throws Exception {
     	init(keyStore, keyAlias, password, signMechanism);
     }
     
@@ -63,9 +63,10 @@ public class SignedMailGenerator {
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond        
         caps.addCapability(SMIMECapability.dES_EDE3_CBC);
+
         caps.addCapability(SMIMECapability.rC2_CBC, 128);
         caps.addCapability(SMIMECapability.dES_CBC);
-        signedAttrs.add(new SMIMECapabilitiesAttribute(caps));        
+        signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         // add a signer to the generator - this specifies we are using SHA1 and
         // adding the smime attributes above to the signed attributes that
         // will be generated as part of the signature. The encryption algorithm
@@ -84,12 +85,12 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(jcaCertStore);
     }
     
-    public SignedMailGenerator (PrivateKey key, Certificate[] chain, String signatureMechanism) 
+    public SMIMESignedGeneratorVS(PrivateKey key, Certificate[] chain, String signatureMechanism)
             throws CertificateEncodingException, OperatorCreationException {
         this(key, Arrays.asList(chain), signatureMechanism);
     }
 
-    public SignedMailGenerator (PrivateKey key, List<Certificate> chain, String signatureMechanism)
+    public SMIMESignedGeneratorVS(PrivateKey key, List<Certificate> chain, String signatureMechanism)
             throws CertificateEncodingException, OperatorCreationException {
         log.debug("SignedMailGenerator");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();

@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageVS/messagevs-send-dialog']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
@@ -45,31 +45,31 @@
                     <template if="{{uservs.state == 'ACTIVE'}}">
                         <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
                             <div>
-                                <vs-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
+                                <paper-button raised id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
 
                             <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                                <vs-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
+                                <paper-button raised id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
 
                             <div>
-                                <vs-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
+                                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
                                                      style="margin:10px 20px 0px 0px;">
                                     <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
-                                </vs-button>
+                                </paper-button>
                             </div>
 
                             <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
-                                <vs-button id="blockUserVSButton" type="submit"
+                                <paper-button raised id="blockUserVSButton" type="submit"
                                                      style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
                                     <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
-                                </vs-button>
+                                </paper-button>
                             </div>
                         </div>
                     </template>

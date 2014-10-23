@@ -11,7 +11,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
@@ -37,7 +37,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     private static Logger log = Logger.getLogger(CertificationRequestVS.class);
 
     private transient PKCS10CertificationRequest csr;
-    private transient SignedMailGenerator signedMailGenerator;
+    private transient SMIMESignedGeneratorVS SMIMESignedGeneratorVS;
     private KeyPair keyPair;
     private String signatureMechanism;
     private X509Certificate certificate;
@@ -117,14 +117,14 @@ public class CertificationRequestVS implements java.io.Serializable {
         certificate = certificates.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
-        signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+        SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyPair.getPrivate(), arrayCerts, signatureMechanism);
     }
     
     public SMIMEMessage getSMIME(String fromUser, String toUser,
             String textToSign, String subject, Header header) throws Exception {
-        if (signedMailGenerator == null) signedMailGenerator = new SignedMailGenerator(
+        if (SMIMESignedGeneratorVS == null) SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(
                 keyPair.getPrivate(), Arrays.asList(certificate), signatureMechanism);
-        return signedMailGenerator.getSMIME(fromUser, toUser, textToSign, subject);
+        return SMIMESignedGeneratorVS.getSMIME(fromUser, toUser, textToSign, subject);
     }
 
     public X509Certificate getCertificate() {

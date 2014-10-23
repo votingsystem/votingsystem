@@ -15,9 +15,9 @@
 <div class="pageContentDiv">
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superuser".equals(params.menu)}">
-            <vs-button onclick="document.querySelector('#reasonDialog').toggle()">
+            <paper-button raised onclick="document.querySelector('#reasonDialog').toggle()">
                 <g:message code="cancelCertLbl"/>
-            </vs-button>
+            </paper-button>
         </g:if>
     </div>
     <div>

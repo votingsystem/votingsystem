@@ -182,7 +182,7 @@ class VicketService {
                 walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTagVS(),
                 vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
-                message:accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
+                accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
 
         vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
         TransactionVS userTransaction = vicketBatch.getTransactionVS(messageSource.getMessage(

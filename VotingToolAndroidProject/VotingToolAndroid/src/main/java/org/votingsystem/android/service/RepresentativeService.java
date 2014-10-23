@@ -259,7 +259,7 @@ public class RepresentativeService extends IntentService {
                 responseVS = anonymousSender.call();
                 //Encryptor.encryptMessage(base64EncodedKey, userCert);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessage delegationReceipt = Encryptor.decryptSMIMEMessage(
+                    SMIMEMessage delegationReceipt = Encryptor.decryptSMIME(
                             responseVS.getMessageBytes(),
                             anonymousDelegation.getCertificationRequest().getKeyPair().getPublic(),
                             anonymousDelegation.getCertificationRequest().getKeyPair().getPrivate());

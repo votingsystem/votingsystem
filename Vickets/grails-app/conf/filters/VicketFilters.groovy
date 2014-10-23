@@ -74,7 +74,7 @@ class VicketFilters {
                         switch(contentTypeVS) {
                             case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                             case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                                responseVS = signatureVSService.decryptSMIMEMessage(fileMap.get(key)?.getBytes())
+                                responseVS = signatureVSService.decryptSMIME(fileMap.get(key)?.getBytes())
                                 if(ResponseVS.SC_OK == responseVS.statusCode) smimeMessageReq = responseVS.smimeMessage
                                 break;
                             case ContentTypeVS.ENCRYPTED:
@@ -128,7 +128,7 @@ class VicketFilters {
                         case ContentTypeVS.VICKET:
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                            responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes)
+                            responseVS =  signatureVSService.decryptSMIME(requestBytes)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = signatureVSService.processSMIMERequest(responseVS.smimeMessage,
                                         request.contentTypeVS)
@@ -174,7 +174,7 @@ class VicketFilters {
                     switch(responseVS.getContentType()) {
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                            ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
+                            ResponseVS encryptResponse =  signatureVSService.encryptSMIME(
                                     responseVS.getMessageBytes(), model.receiverCert)
                             if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                                 encryptResponse.setStatusCode(responseVS.getStatusCode())

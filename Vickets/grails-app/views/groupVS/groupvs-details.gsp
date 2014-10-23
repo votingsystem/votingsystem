@@ -8,6 +8,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-user']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 
 
 <polymer-element name="groupvs-details" attributes="selectedItem subpage">
@@ -67,12 +68,12 @@
 
                 <template if="{{isUserView}}">
                     <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
-                        <vs-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                        <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
-                        </vs-button>
-                        <vs-button style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
+                        </paper-button raised>
+                        <paper-button raised style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
                             <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
-                        </vs-button>
+                        </paper-button raised>
                     </div>
                 </template>
                 <div id="pageHeader" layout horizontal center center-justified>
@@ -101,9 +102,9 @@
 
         <div layout horizontal>
             <div style="margin: 5px 0 0 0;">
-                <vs-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
+                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
                     <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
-                </vs-button>
+                </paper-button raised>
             </div>
             <div flex></div>
             <div id="" style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">

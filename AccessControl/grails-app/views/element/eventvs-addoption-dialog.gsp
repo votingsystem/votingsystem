@@ -51,9 +51,9 @@
 
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
                     <div flex></div>
-                    <vs-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                    </vs-button>
+                    </paper-button>
                 </div>
                <content></content>
             </div>

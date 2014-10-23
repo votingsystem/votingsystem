@@ -187,10 +187,10 @@ public class Encryptor {
     /**
     * Method to decrypt SMIME signed messages
     */
-   public static SMIMEMessage decryptSMIMEMessage(
+   public static SMIMEMessage decryptSMIME(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
-	   Log.d(TAG + ".decryptSMIMEMessage(...) ", "decryptSMIMEMessage(...) ");
+	   Log.d(TAG + ".decryptSMIME(...) ", "decryptSMIME(...) ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
         return new SMIMEMessage(null, inputStream, null);
@@ -353,7 +353,7 @@ public class Encryptor {
 				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
 				break;
 			case SMIME_MESSAGE:
-				SMIMEMessage smimeMessage = decryptSMIMEMessage(
+				SMIMEMessage smimeMessage = decryptSMIME(
 						encryptedBundleVS.getEncryptedMessageBytes(),
                         publicKey, receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);

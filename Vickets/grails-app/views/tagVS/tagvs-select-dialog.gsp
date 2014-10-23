@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-i18n', file: 'vs-i18n.html')}">
@@ -46,9 +46,9 @@
                 <div flex layout horizontal center center-justified>
                     <input id="tagSearchInput" class="form-control" required autofocus
                            title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                    <vs-button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
+                    <paper-button raised on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-search" style="margin:0 5px 0 2px;"></i>  {{messages.tagSearchLbl}}
-                    </vs-button>
+                    </paper-button>
                 </div>
             </div>
 
@@ -69,9 +69,9 @@
 
             <div layout horizontal style="margin:20px 0 0 0;">
                 <div flex></div>
-                <vs-button on-click="{{processTags}}">
+                <paper-button raised on-click="{{processTags}}">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> {{messages.acceptLbl}}
-                </vs-button>
+                </paper-button>
             </div>
         </div>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"

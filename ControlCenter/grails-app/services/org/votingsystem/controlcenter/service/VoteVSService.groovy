@@ -61,7 +61,7 @@ class VoteVSService {
                 ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
         if (ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(messageSource.getMessage(
                 'accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale))
-        //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes)
+        //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIME(responseVS.messageBytes)
         //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSMIME();
         SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
         if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {

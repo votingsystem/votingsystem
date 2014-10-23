@@ -67,7 +67,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             byte[] messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
             responseVS = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage receipt = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage receipt = Encryptor.decryptSMIME(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
                 responseVS.setSMIME(receipt);

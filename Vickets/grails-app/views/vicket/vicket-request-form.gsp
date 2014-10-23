@@ -4,8 +4,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/currency-selector']"/>">
 
 
@@ -55,9 +57,9 @@
                 <div layout vertical center center-justified>
                 <div horizontal layout center center-justified style="">
                     <div style="width: 200px;">
-                        <vs-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                             <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
-                        </vs-button>
+                        </paper-button>
                     </div>
                     <div><g:message code="transactionvsWithTagAdvertMsg"/></div>
                 </div>
@@ -91,6 +93,17 @@
             </div>
 
             <div horizontal layout style="margin: 20px auto;width: 600px;">
+                <div>
+                    <div style="color: #ff0000; font-size: 2.5em;">
+
+                    </div>
+
+
+                    <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <i class="fa fa-eur" style="margin:0 5px 0 2px;"></i> <g:message code="vicketWalletLbl"/>
+                    </paper-button>
+                </div>
+
                 <div flex></div>
                 <paper-fab icon="done" class="green" on-click="{{submit}}"></paper-fab>
             </div>

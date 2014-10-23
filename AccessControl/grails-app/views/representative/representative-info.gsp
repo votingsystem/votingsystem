@@ -69,16 +69,16 @@
                         <template if="{{'admin' == menuType}}">
                             <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
                                 <div style="display:table-cell;">
-                                    <vs-button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                    <paper-button raised id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
                                              on-click="{{requestVotingHistory}}">
                                         <g:message code="requestVotingHistoryLbl"/>
-                                    </vs-button>
+                                    </paper-button>
                                 </div>
                                 <div style="display:table-cell;">
-                                    <vs-button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                    <paper-button raised id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
                                             on-click="{{requestAccreditations}}">
                                         <g:message code="requestRepresentativeAcreditationsLbl"/>
-                                    </vs-button>
+                                    </paper-button>
                                 </div>
                             </div>
                         </template>

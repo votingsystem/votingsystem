@@ -1,6 +1,6 @@
 package org.votingsystem.test.util;
 
-import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 
 import java.security.KeyStore;
 
@@ -12,9 +12,9 @@ public class MockDNI {
 
     private String nif;
     private KeyStore keyStore;
-    private SignedMailGenerator messageSigner;
+    private SMIMESignedGeneratorVS messageSigner;
 
-    public MockDNI(String nif, KeyStore keyStore, SignedMailGenerator messageSigner) {
+    public MockDNI(String nif, KeyStore keyStore, SMIMESignedGeneratorVS messageSigner) {
         this.nif = nif;
         this.keyStore = keyStore;
         this.messageSigner = messageSigner;
@@ -28,7 +28,7 @@ public class MockDNI {
         return keyStore;
     }
 
-    public SignedMailGenerator getMessageSigner() {
+    public SMIMESignedGeneratorVS getMessageSigner() {
         return messageSigner;
     }
 }

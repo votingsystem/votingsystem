@@ -23,9 +23,9 @@
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div>
-                        <vs-button on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                        </vs-button>
+                        </paper-button>
                     </div>
                 </div>
             </div>

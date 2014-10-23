@@ -53,7 +53,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         ContentTypeVS responseContentType = responseVS.getContentType();
         try {
             if(responseContentType != null && responseContentType.isSignedAndEncrypted()) {
-                SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage signedMessage = Encryptor.decryptSMIME(
                         responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                 responseVS.setSMIME(signedMessage);
             } else if(responseContentType != null && responseContentType.isEncrypted()) {

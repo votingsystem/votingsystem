@@ -15,7 +15,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">

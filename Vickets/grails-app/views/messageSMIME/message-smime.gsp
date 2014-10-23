@@ -1,6 +1,6 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
 
@@ -89,9 +89,9 @@
             <div layout horizontal style="margin:0px 20px 0px 0px;">
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;">
-                    <vs-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                    <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkSignatureLbl"/>
-                    </vs-button>
+                    </paper-button>
                 </div>
             </div>
         </template>

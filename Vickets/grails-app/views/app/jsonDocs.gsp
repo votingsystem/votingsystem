@@ -11,15 +11,15 @@
 <body>
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
-            <vs-button onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
+            <paper-button raised onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
                 TransactionVS from BankVS
-            </vs-button>
+            </paper-button>
             <div id="transactionvsFromBankVS" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
             <div layout horizontal center center-justified>
-                <vs-button style="margin: 0px 0px 0px 5px;">TransactionVS </vs-button>
+                <paper-button raised style="margin: 0px 0px 0px 5px;">TransactionVS </paper-button>
                 - http://vickets:8086/Vickets/transaction
             </div>
             <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>

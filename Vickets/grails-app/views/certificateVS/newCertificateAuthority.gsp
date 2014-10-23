@@ -33,9 +33,9 @@
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <vs-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
+                    <paper-button raised onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
                         <g:message code="addCALbl"/> <i class="fa fa-check"></i>
-                    </vs-button>
+                    </paper-button>
                 </div>
             </div>
 

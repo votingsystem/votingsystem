@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-button', file: 'vs-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
@@ -17,9 +17,9 @@
 
                     <div layout horizontal style="padding:20px 20px 20px 20px;">
                         <div flex></div>
-                        <vs-button on-click="{{sendMessage}}">
+                        <paper-button raised on-click="{{sendMessage}}">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl" />
-                        </vs-button>
+                        </paper-button>
                     </div>
                 </div>
             </div>

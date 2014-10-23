@@ -10,7 +10,7 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.KeyGeneratorVS;
@@ -355,8 +355,8 @@ public class ContextVS {
         KeyStore keyStore = userTest.getKeyStore();
         PrivateKey privateKey = (PrivateKey)keyStore.getKey(END_ENTITY_ALIAS, PASSWORD.toCharArray());
         Certificate[] chain = keyStore.getCertificateChain(END_ENTITY_ALIAS);
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(privateKey, chain, DNIe_SIGN_MECHANISM);
-        return signedMailGenerator.getSMIME(userTest.getEmail(),toUser, textToSign, subject);
+        SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(privateKey, chain, DNIe_SIGN_MECHANISM);
+        return SMIMESignedGeneratorVS.getSMIME(userTest.getEmail(),toUser, textToSign, subject);
     }
 
     public void setSessionUser(UserVS userVS) {

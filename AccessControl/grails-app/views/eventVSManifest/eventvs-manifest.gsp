@@ -53,9 +53,9 @@
 
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                 <div flex></div>
-                <vs-button on-click="{{submitManifest}}" style="margin: 0px 0px 0px 5px;">
+                <paper-button raised on-click="{{submitManifest}}" style="margin: 0px 0px 0px 5px;">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="signLbl"/>
-                </vs-button>
+                </paper-button>
             </div>
         </div>
         <eventvs-admin-dialog id="eventVSAdminDialog"></eventvs-admin-dialog>

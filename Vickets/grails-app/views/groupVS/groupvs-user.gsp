@@ -24,18 +24,18 @@
             </div>
             <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
                 <template if="{{isClientToolConnected}}">
-                    <vs-button type="button" on-click="{{activateUser}}"
+                    <paper-button raised type="button" on-click="{{activateUser}}"
                                          style="margin:0 10px;display:{{isActive?'none':'block'}}">
                         <i class="fa fa-thumbs-o-up" style="margin:0 5px 0 2px;"></i> <g:message code="activateUserLbl"/>
-                    </vs-button>
-                    <vs-button on-click="{{initCancellation}}"
+                    </paper-button>
+                    <paper-button raised on-click="{{initCancellation}}"
                                          style="margin:0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                         <i class="fa fa-thumbs-o-down" style="margin:0 5px 0 2px;"></i> <g:message code="deActivateUserLbl"/>
-                    </vs-button>
+                    </paper-button>
                 </template>
-                <vs-button type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
+                <paper-button raised type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
                     <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> <g:message code="userVSPageLbl"/>
-                </vs-button>
+                </paper-button>
             </div>
             <div id="receipt" style="display:none;"> </div>
         </div>

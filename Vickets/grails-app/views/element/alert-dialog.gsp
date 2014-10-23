@@ -19,9 +19,9 @@
                         <input type="text" id="keyEnterListener" style="width: 0px;background-color:white; border: none;" autofocus/>
                     </div>
                     <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
-                        <vs-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
-                        </vs-button>
+                        </paper-button>
                     </div>
                 </div>
             </div>

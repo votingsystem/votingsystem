@@ -8,7 +8,7 @@ import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
@@ -30,7 +30,7 @@ class SignatureService {
 
     private static ConcurrentHashMap<String, SignatureService> signatureServices	= new ConcurrentHashMap<>()
 
-    private SignedMailGenerator signedMailGenerator;
+    private SMIMESignedGeneratorVS signedMailGenerator;
 	private X509Certificate certSigner;
     private Certificate[] certSignerChain;
     private X500PrivateCredential rootCAPrivateCredential;
@@ -48,7 +48,7 @@ class SignatureService {
         log.debug("init")
         this.keyStore = keyStore
         certSignerChain = keyStore.getCertificateChain(keyAlias);
-        signedMailGenerator = new SignedMailGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
+        signedMailGenerator = new SMIMESignedGeneratorVS(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
         byte[] pemCertsArray
         for (int i = 0; i < certSignerChain.length; i++) {
             log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${certSignerChain[i].getSubjectDN()}'"
@@ -209,10 +209,10 @@ class SignatureService {
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug("encryptSMIMEMessage(...) ");
+    ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
+        log.debug("encryptSMIME(...) ");
         try {
-            return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
+            return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             return new ResponseVS("dataToEncryptErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
@@ -222,9 +222,9 @@ class SignatureService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
+    ResponseVS decryptSMIME(byte[] encryptedMessageBytes) {
         try {
-            return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
+            return getEncryptor().decryptSMIME(encryptedMessageBytes);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             return new ResponseVS("encryptedMessageErrorMsg", statusCode:ResponseVS.SC_ERROR_REQUEST)
@@ -236,7 +236,7 @@ class SignatureService {
         return encryptor;
     }
 
-	private SignedMailGenerator getSignedMailGenerator() {
+	private SMIMESignedGeneratorVS getSignedMailGenerator() {
 		if(signedMailGenerator == null) signedMailGenerator = init().signedMailGenerator
 		return signedMailGenerator
 	}
@@ -265,7 +265,7 @@ class SignatureService {
             String toUser = vicketServer.getNameNormalized();
             String subject = "subscribeToGroupMsg - subscribeToGroupMsg"
             subscriptionData.put("UUID", UUID.randomUUID().toString())
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
+            SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             userList.add(new MockDNI(userNif, mockDnie, signedMailGenerator));
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,

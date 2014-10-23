@@ -1,7 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
@@ -17,16 +16,9 @@
             .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
                 background-color: #0f9d58;
             }
-            .messageToUser {
-                font-weight: bold;
-                margin:10px auto 30px auto;
-                background: #f9f9f9;
-                padding:10px 20px 10px 20px;
-                max-width:400px;
+            .messageToUser {font-weight: bold;margin:10px auto 30px auto;
+                background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;
             }
-            paper-fab.green {
-                background: #259b24;
-                color: #f0f0f0;            }
         </style>
         <div vertical layout>
             <template if="{{messageToUser}}">
@@ -63,8 +55,6 @@
             vicketsWalletChanged:function() {
                 console.log(this.tagName + " - vicketsWalletChanged")
                 this.tagGroups = {}
-                console.log(this.tagName + "vicketsWalletChanged: " + this.vicketsWallet + "'")
-
                 this.vicketsWalletArray = JSON.parse(this.vicketsWallet)
                 for(vicketIdx in this.vicketsWalletArray) {
                     var vicket = this.vicketsWalletArray[vicketIdx]

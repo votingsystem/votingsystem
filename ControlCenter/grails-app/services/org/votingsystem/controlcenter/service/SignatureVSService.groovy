@@ -3,8 +3,7 @@ package org.votingsystem.controlcenter.service
 import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.signature.util.CertExtensionCheckerVS
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
@@ -13,7 +12,6 @@ import org.votingsystem.util.MetaInfMsg
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -34,7 +32,7 @@ class SignatureVSService {
     private File serverCertChainFile;
     private X509Certificate serverCert;
     private Encryptor encryptor;
-    private SignedMailGenerator signedMailGenerator;
+    private SMIMESignedGeneratorVS signedMailGenerator;
     private static Set<X509Certificate> trustedCerts;
     private static Set<TrustAnchor> trustAnchors;
     private static HashMap<Long, CertificateVS> trustedCertsHashMap;
@@ -46,7 +44,7 @@ class SignatureVSService {
                 grailsApplication.config.VotingSystem.keyStorePath).getFile()
         String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
         String password = grailsApplication.config.VotingSystem.signKeysPassword
-        signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile),
+        signedMailGenerator = new SMIMESignedGeneratorVS(FileUtils.getBytesFromFile(keyStoreFile),
                 keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
@@ -358,9 +356,9 @@ class SignatureVSService {
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
+    ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         try {
-            return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
+            return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             return new ResponseVS(message: messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
@@ -371,9 +369,9 @@ class SignatureVSService {
     /**
      * Method to decrypt SMIME signed messages
      */
-    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) {
+    ResponseVS decryptSMIME(byte[] encryptedMessageBytes) {
         try {
-            return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
+            return getEncryptor().decryptSMIME(encryptedMessageBytes);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
@@ -412,7 +410,7 @@ class SignatureVSService {
         return encryptor;
     }
 
-    private SignedMailGenerator getSignedMailGenerator() {
+    private SMIMESignedGeneratorVS getSignedMailGenerator() {
         if(signedMailGenerator == null) signedMailGenerator = init().signedMailGenerator;
         return signedMailGenerator
     }

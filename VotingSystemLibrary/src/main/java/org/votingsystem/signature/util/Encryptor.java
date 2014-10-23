@@ -148,7 +148,7 @@ public class Encryptor {
     /**
      * Method to encrypt SMIME signed messages
      */
-    public ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
+    public ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         //If the message isn't recreated there can be problems with multipart boundaries. TODO
         SMIMEMessage msgToEncrypt = new SMIMEMessage(new ByteArrayInputStream(bytesToEncrypt));
         SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
@@ -182,11 +182,11 @@ public class Encryptor {
     /**
      * Method to decrypt SMIME signed messages
      */
-    public ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) throws Exception {
+    public ResponseVS decryptSMIME(byte[] encryptedMessageBytes) throws Exception {
         SMIMEMessage smimeMessageReq = null;
         MimeMessage msg = new MimeMessage(ContextVS.MAIL_SESSION, new ByteArrayInputStream(encryptedMessageBytes));
         //String encryptedMessageBytesStr = new String(encryptedMessageBytes);
-        //log.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
+        //log.debug("- decryptSMIME - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
         RecipientInformation recipientInfo = recipients.get(recipientId);
@@ -341,7 +341,7 @@ public class Encryptor {
     /**
     * Method to decrypt SMIME signed messages
     */
-   public static SMIMEMessage decryptSMIMEMessage(
+   public static SMIMEMessage decryptSMIME(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
         InputStream inputStream = new ByteArrayInputStream(decryptMessage(
