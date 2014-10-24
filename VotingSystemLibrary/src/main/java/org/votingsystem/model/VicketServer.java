@@ -70,6 +70,10 @@ public class VicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/groupVS/" + String.valueOf(groupId) + "/subscribe";
     }
 
+    public String getWalletURL() {
+        return getServerURL() + "/vicket/wallet";
+    }
+
     public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
                 SubscriptionVS.State subscriptionState, UserVS.State userVSState) {
         return getServerURL() + "/groupVS/" + String.valueOf(groupId) + "/users" +

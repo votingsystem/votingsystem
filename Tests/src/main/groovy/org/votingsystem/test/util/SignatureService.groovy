@@ -181,6 +181,10 @@ class SignatureService {
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt) throws Exception {
+        return getEncryptor().encryptToCMS(dataToEncrypt, certSigner);
+    }
+
     public byte[] decryptCMS (byte[] encryptedFile, Locale locale) {
         return getEncryptor().decryptCMS(encryptedFile);
     }

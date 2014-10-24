@@ -68,7 +68,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     private static Logger log = Logger.getLogger(VotingSystemApp.class);
 
-    private BrowserVS browserVS;
     private VBox mainBox;
     private VBox votingSystemOptionsBox;
     private VBox vicketOptionsBox;
@@ -76,7 +75,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private GridPane headerButtonsPane;
     private Button connectButton;
     private Text messageText;
-    private Stage primaryStage;
     private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
@@ -150,8 +148,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
-        this.primaryStage = primaryStage;
-        browserVS = new BrowserVS();
         new Thread(new Runnable() {
             @Override public void run() {
                 boolean loadedFromJar = false;
@@ -182,7 +178,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 try {
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        setVotingSystemAvailable(true);
+                        setVotingSystemAvailable(true, primaryStage);
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
                     }
                 }
@@ -190,7 +186,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 try {
                     responseVS = Utils.checkServer(vicketsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        setVicketServerAvailable(true);
+                        setVicketServerAvailable(true, primaryStage);
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
                     }
                 }
@@ -234,7 +230,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         voteButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE));
         voteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openVotingPage();
+                openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
+                        ContextVS.getMessage("voteButtonLbl"));
             }});
         voteButton.setPrefWidth(500);
 
@@ -242,7 +239,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         selectRepresentativeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.HAND_ALT_RIGHT));
         selectRepresentativeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openSelectRepresentativePage();
+                openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
+                        ContextVS.getMessage("selectRepresentativeButtonLbl"));
             }});
         selectRepresentativeButton.setPrefWidth(500);
 
@@ -250,7 +248,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
 
         Button openFileButton = new Button(ContextVS.getMessage("openFileButtonLbl"));
-        openFileButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
+        openFileButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FOLDER_OPEN));
         openFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 DocumentVSBrowserStackPane.showDialog(null, null);
@@ -259,7 +257,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         openFileButton.setPrefWidth(500);
 
         Button signDocumentButton = new Button(ContextVS.getMessage("signDocumentButtonLbl"));
-        signDocumentButton.setGraphic(Utils.getImage(FontAwesome.Glyph.PENCIL));
+        signDocumentButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         signDocumentButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 SignDocumentFormPane.showDialog();
@@ -272,16 +270,18 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openVicketUserProcedures();
+                openVicketURL(ContextVS.getInstance().getVicketServer().getUserProceduresPageURL(),
+                        ContextVS.getMessage("vicketUsersLbl"));
             }});
         vicketUsersProceduresButton.setPrefWidth(500);
 
-        Button walletButton = new Button(ContextVS.getMessage("settingsLbl"));
+        Button walletButton = new Button(ContextVS.getMessage("walletLbl"));
         walletButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CREDIT_CARD));
         walletButton.setPrefWidth(500);
         walletButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openSettings();
+                openVicketURL(ContextVS.getInstance().getVicketServer().getWalletURL(),
+                        ContextVS.getMessage("walletLbl"));
             }});
 
         vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, walletButton);
@@ -302,9 +302,11 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     if(ContextVS.getMessage("settingsLbl").equals(selectedOption)) {
                         openSettings();
                     } else if(ContextVS.getMessage("vicketAdminLbl").equals(selectedOption)) {
-                        openVicketAdminProcedures();
+                        openVicketURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
+                                ContextVS.getMessage("vicketAdminLbl"));
                     } else if(ContextVS.getMessage("votingSystemProceduresLbl").equals(selectedOption)) {
-                        openVotingSystemProceduresPage();
+                        openVotingSystemURL(ContextVS.getInstance().getAccessControl().getProceduresPageURL(),
+                                ContextVS.getMessage("votingSystemProceduresLbl"));
                     }
                 choiceBox.getSelectionModel().select(0);
 
@@ -359,7 +361,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         WebSocketService.getInstance().setConnectionEnabled(!wsConnected.get());
     }
 
-    private void setVicketServerAvailable(final boolean available) {
+    private void setVicketServerAvailable(final boolean available, Stage primaryStage) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
@@ -380,7 +382,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
 
-    private void setVotingSystemAvailable(final boolean available) {
+    private void setVotingSystemAvailable(final boolean available, Stage primaryStage) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
@@ -390,83 +392,27 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         mainBox.getChildren().remove(votingSystemOptionsBox);
                     }
                 }
-                primaryStage.sizeToScene();
             }
         });
 
     }
 
-    private void openVotingSystemProceduresPage() {
-        log.debug("openVotingSystemProceduresPage");
+    private void openVotingSystemURL(final String URL, final String caption) {
+        log.debug("openVotingSystemURL: " + URL);
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                new BrowserVS().loadURL(ContextVS.getInstance().getAccessControl().getProceduresPageURL(),
-                        ContextVS.getMessage("votingSystemProceduresLbl"));
-            }
-        });
+        Platform.runLater(new Runnable() { @Override public void run() { new BrowserVS().loadURL(URL, caption); } });
     }
 
-    private void openVotingPage() {
-        log.debug("openVotingPage");
-        if(ContextVS.getInstance().getAccessControl() == null) {
-            showMessage(ContextVS.getMessage("connectionErrorMsg"));
-            return;
-        }
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                browserVS.loadURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
-                        ContextVS.getMessage("voteButtonLbl"));
-            }
-        });
-    }
-
-    private void openSelectRepresentativePage() {
-        log.debug("openSelectRepresentativePage");
-        if(ContextVS.getInstance().getAccessControl() == null) {
-            showMessage(ContextVS.getMessage("connectionErrorMsg"));
-            return;
-        }
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                browserVS.loadURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
-                        ContextVS.getMessage("selectRepresentativeButtonLbl"));
-            }
-        });
-    }
-
-    private void openVicketUserProcedures() {
-        log.debug("openVicketUserProcedures");
+    private void openVicketURL(final String URL, final String caption) {
+        log.debug("openVicketURL: " + URL);
         if(ContextVS.getInstance().getVicketServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                browserVS.loadURL(ContextVS.getInstance().getVicketServer().getUserProceduresPageURL(),
-                        ContextVS.getMessage("vicketUsersLbl"));
-            }
-        });
-    }
-
-    private void openVicketAdminProcedures() {
-        log.debug("openVicketAdminProcedures");
-
-        if(ContextVS.getInstance().getVicketServer() == null) {
-            showMessage(ContextVS.getMessage("connectionErrorMsg"));
-            return;
-        }
-
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                new BrowserVS().loadURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
-                        ContextVS.getMessage("vicketAdminLbl"));
-
-            }
-        });
+        Platform.runLater(new Runnable() {@Override public void run() { new BrowserVS().loadURL(URL, caption); }});
     }
 
     private void openSettings() {
@@ -479,15 +425,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         });
     }
 
-    MessageDialog messageDialog;
     public void showMessage(final String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if (messageDialog == null) messageDialog = new MessageDialog();
-                messageDialog.showMessage(message);
-            }
-        });
+        PlatformImpl.runLater(new Runnable() { @Override public void run() { new MessageDialog().showMessage(message);}});
     }
 
     @Override public void consumeWebSocketMessage(JSONObject messageJSON) {
@@ -549,7 +488,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     public static void main(String[] args) {
         ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
-
         launch(args);
     }
 
