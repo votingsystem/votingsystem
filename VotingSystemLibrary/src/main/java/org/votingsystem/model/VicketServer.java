@@ -3,8 +3,8 @@ package org.votingsystem.model;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.io.Serializable;
 import javax.xml.bind.DatatypeConverter;
+import java.io.Serializable;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

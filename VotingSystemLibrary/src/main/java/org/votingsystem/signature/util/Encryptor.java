@@ -2,7 +2,10 @@ package org.votingsystem.signature.util;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.*;
-import org.bouncycastle.cms.jcajce.*;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
@@ -14,7 +17,6 @@ import org.votingsystem.util.FileUtils;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.crypto.SecretKey;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.Multipart;
@@ -51,7 +53,7 @@ public class Encryptor {
         recipient = new JceKeyTransEnvelopedRecipient(localPrivateKey).setProvider(ContextVS.PROVIDER);
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         MimeBodyPart mimeMessage = new MimeBodyPart();
         mimeMessage.setText(new String(bytesToEncrypt));
         //mimeMessage.setSentDate(new Date());// set the Date: header
@@ -63,13 +65,11 @@ public class Encryptor {
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         encryptedPart.writeTo(baos);
-        byte[] result = baos.toByteArray();
         baos.close();
-        return new ResponseVS(ResponseVS.SC_OK, result);
+        return baos.toByteArray();
     }
 
     public static byte[] encryptMessage(byte[] text, X509Certificate receiverCert, Header... headers) throws Exception {
-        log.debug("encryptMessage");
         MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
         mimeMessage.setText(new String(text, "UTF-8"));
         // set the Date: header
@@ -88,9 +88,8 @@ public class Encryptor {
                         CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         encryptedPart.writeTo(baos);
-        byte[] result = baos.toByteArray();
         baos.close();
-        return result;
+        return  baos.toByteArray();
     }
 
     /**
@@ -217,21 +216,19 @@ public class Encryptor {
         return responseVS;
     }
 
-    public static ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
+    public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
         dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receptorCert).
                 setProvider(ContextVS.PROVIDER));
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = dataStreamGen.open(bOut,
-                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+        OutputStream out = dataStreamGen.open(bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
                         setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        byte[] result = bOut.toByteArray();
-        return new ResponseVS(ResponseVS.SC_OK, Base64.getEncoder().encode(result), null);
+        return Base64.getEncoder().encode(bOut.toByteArray());
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
         dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator("".getBytes(), receptorPublicKey).
                 setProvider(ContextVS.PROVIDER));
@@ -241,8 +238,7 @@ public class Encryptor {
                         setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        byte[] result = bOut.toByteArray();
-        return new ResponseVS(ResponseVS.SC_OK, Base64.getEncoder().encode(result));
+        return Base64.getEncoder().encode(bOut.toByteArray());
     }
 
     public byte[] decryptCMS(byte[] base64EncryptedData) throws Exception {
@@ -397,29 +393,6 @@ public class Encryptor {
             //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
         }
         return result;
-    }
-        
-    public static byte[] encryptCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
-        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-        		receptorCert).setProvider(ContextVS.PROVIDER));
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = edGen.open(bOut, new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.DES_EDE3_CBC).setProvider(
-        		ContextVS.PROVIDER).build());
-        out.write(dataToEncrypt);
-        out.close();
-        return bOut.toByteArray();
-    }    
-        
-    public static byte[] encryptCMS(byte[] dataToEncrypt, SecretKey secretKey) throws Exception {
-        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-        RecipientInfoGenerator rig = new JceKEKRecipientInfoGenerator(kekId, secretKey) ;
-        edGen.addRecipientInfoGenerator(rig);
-        CMSEnvelopedData ed = edGen.generate(new CMSProcessableByteArray(dataToEncrypt),
-                CMSEnvelopedDataGenerator.DES_EDE3_CBC, ContextVS.PROVIDER);
-        return ed.getEncoded();
     }
     
     public static byte[] decryptFile (byte[] encryptedFile, PublicKey publicKey, PrivateKey receiverPrivateKey)

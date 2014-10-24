@@ -3,6 +3,7 @@ package org.votingsystem.client.service;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -119,6 +120,9 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case VICKET_REQUEST:
                             responseVS = sendVicketRequest(operationVS);
+                            break;
+                        case WALLET_OPEN:
+                            responseVS = openWallet(operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
@@ -290,6 +294,20 @@ public class SignatureService extends Service<ResponseVS> {
             return responseVS;
         }
 
+        private ResponseVS openWallet(OperationVS operationVS) throws Exception {
+            log.debug("openWallet");
+            try {
+                JSONObject responseJSON = new JSONObject();
+                responseJSON.put("statusCode", ResponseVS.SC_OK);
+                JSON walletJSON = WalletUtils.getWallet(password);
+                responseJSON.put("message", walletJSON);
+                return ResponseVS.getJSONResponse(ResponseVS.SC_OK, responseJSON);
+            } catch(Exception ex) {
+                log.error(ex.getMessage(), ex);
+                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            }
+        }
+
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
             log.debug("sendMessageVS");
@@ -300,7 +318,8 @@ public class SignatureService extends Service<ResponseVS> {
             for(Map receiverCertDataMap : targetCertList) {
                 X509Certificate receiverCert = CertUtils.fromPEMToX509Cert(((String) receiverCertDataMap.get("pemCert")).getBytes());
                 JSONObject documentToEncrypt = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToEncrypt());
-                ResponseVS responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
+                ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, Encryptor.encryptToCMS(
+                        documentToEncrypt.toString().getBytes(), receiverCert));
                 String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");
                 String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr, ContextVS.VOTING_DATA_DIGEST);
                 Map signedMap = new HashMap<>();

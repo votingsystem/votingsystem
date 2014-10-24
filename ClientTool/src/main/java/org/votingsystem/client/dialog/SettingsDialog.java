@@ -6,7 +6,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -16,6 +15,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.ContentSignerUtils;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 
@@ -136,10 +136,10 @@ public class SettingsDialog {
     public void show() {
         log.debug("show");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                ContentSignerUtils.CryptoToken.DNIe.toString());
-        ContentSignerUtils.CryptoToken cryptoToken = ContentSignerUtils.CryptoToken.valueOf(cryptoTokenStr);
+                CryptoTokenVS.DNIe.toString());
+        CryptoTokenVS cryptoTokenVS = CryptoTokenVS.valueOf(cryptoTokenStr);
         gridPane.getChildren().remove(keyStoreVBox);
-        switch(cryptoToken) {
+        switch(cryptoTokenVS) {
             case DNIe:
                 signWithDNIeRb.setSelected(true);
                 break;
@@ -182,9 +182,9 @@ public class SettingsDialog {
     private void validateForm() {
         log.debug("validateForm");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                ContentSignerUtils.CryptoToken.DNIe.toString());
-        ContentSignerUtils.CryptoToken cryptoToken = ContentSignerUtils.CryptoToken.valueOf(cryptoTokenStr);
-        if(signWithKeystoreRb.isSelected() &&  ContentSignerUtils.CryptoToken.JKS_KEYSTORE != cryptoToken) {
+                CryptoTokenVS.DNIe.toString());
+        CryptoTokenVS cryptoTokenVS = CryptoTokenVS.valueOf(cryptoTokenStr);
+        if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
                 MessageDialog messageDialog = new MessageDialog();
                 messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
@@ -200,7 +200,7 @@ public class SettingsDialog {
                     String password = passwordDialog.getPassword();
                     ContextVS.saveUserKeyStore(userKeyStore, password);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                            ContentSignerUtils.CryptoToken.JKS_KEYSTORE.toString());
+                            CryptoTokenVS.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
                     MessageDialog messageDialog = new MessageDialog();
                     messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
@@ -211,7 +211,7 @@ public class SettingsDialog {
         }
         if(signWithDNIeRb.isSelected()) {
             ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                    ContentSignerUtils.CryptoToken.DNIe.toString());
+                    CryptoTokenVS.DNIe.toString());
         }
         stage.close();
     }

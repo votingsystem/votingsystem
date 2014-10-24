@@ -154,7 +154,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         documentSignerHelper = new SignDocumentFormStackPane(this);
         documentSignerHelper.getChildren().add(0, this);
         stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));
-        stage.setTitle(ContextVS.getMessage("documentSignerDialogCaption"));
+        stage.setTitle(ContextVS.getMessage("signDocumentButtonLbl"));
     }
 
     private void showMessage(final int statusCode, final String message) {

@@ -87,7 +87,6 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         setHgap(10);
         setVgap(10);
         setPadding(new Insets(10, 10, 10, 10));
-
         vicketStatusLbl = new Label();
         vicketStatusLbl.setWrapText(true);
         setHalignment(vicketStatusLbl, HPos.CENTER);

@@ -209,10 +209,11 @@ class AccessControlFilters {
                         if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
                             int statusCode = responseVS.getStatusCode()
                             if(model.receiverPublicKey) {
-                                responseVS =  signatureVSService.encryptMessage(
-                                        responseVS.messageBytes, model.receiverPublicKey)
+                                responseVS = new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptMessage(
+                                        responseVS.messageBytes, model.receiverPublicKey))
                             } else if(model.receiverCert) {
-                                responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
+                                responseVS = new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptToCMS(
+                                        responseVS.messageBytes,model.receiverCert));
                             }
                             responseVS.setStatusCode(statusCode)
                             responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)

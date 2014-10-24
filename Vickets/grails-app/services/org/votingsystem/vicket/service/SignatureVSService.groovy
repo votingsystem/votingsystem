@@ -381,11 +381,11 @@ class  SignatureVSService {
         }
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
         return getEncryptor().encryptToCMS(dataToEncrypt, receptorPublicKey);
     }
 
@@ -393,13 +393,12 @@ class  SignatureVSService {
         return getEncryptor().decryptCMS(encryptedFile)
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
-        byte[] result = getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
-        new ResponseVS(ResponseVS.SC_OK, result);
+    public byte[] encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
+        return getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
     }
 
     public ResponseVS decryptMessage (byte[] encryptedFile) {

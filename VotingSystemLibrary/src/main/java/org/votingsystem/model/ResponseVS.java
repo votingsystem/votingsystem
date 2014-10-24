@@ -320,6 +320,12 @@ public class ResponseVS<T> implements Serializable {
         return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message);
     }
 
+    public static ResponseVS getJSONResponse(Integer status, JSON messageJSON) {
+        ResponseVS responseVS = new ResponseVS(status, ContentTypeVS.JSON);
+        responseVS.setMessageJSON(messageJSON);
+        return responseVS;
+    }
+
     public static ResponseVS getAlert(String message, String metaInf) {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message);
         responseVS.setMetaInf(metaInf);

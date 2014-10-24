@@ -1,5 +1,6 @@
 package org.votingsystem.test.util
 
+import net.sf.json.JSON
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
@@ -10,6 +11,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
 import org.votingsystem.signature.util.CertUtils
+import org.votingsystem.signature.util.CryptoTokenVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.*
@@ -23,6 +25,8 @@ import java.security.PublicKey
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import java.util.concurrent.ConcurrentHashMap
+
+import static org.votingsystem.model.ContextVS.getMessage
 
 class SignatureService {
 
@@ -177,33 +181,33 @@ class SignatureService {
 	}
 
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt) throws Exception {
         return getEncryptor().encryptToCMS(dataToEncrypt, certSigner);
     }
 
-    public byte[] decryptCMS (byte[] encryptedFile, Locale locale) {
+    public byte[] decryptCMS (byte[] encryptedFile) {
         return getEncryptor().decryptCMS(encryptedFile);
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
+    public ResponseVS decryptMessage (byte[] encryptedFile) {
         return getEncryptor().decryptMessage(encryptedFile);
     }
 
     /**
      * Method to encrypt SMIME signed messages
      */
-    ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
+    ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
     }
 

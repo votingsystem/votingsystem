@@ -1,7 +1,10 @@
 package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 
 import javax.persistence.*;
 import java.io.Serializable;

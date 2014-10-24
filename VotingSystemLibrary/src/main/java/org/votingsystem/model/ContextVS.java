@@ -12,8 +12,8 @@ import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
 import org.votingsystem.vicket.model.TransactionVS;
 
@@ -72,6 +72,7 @@ public class ContextVS {
 
     public static String SETTINGS_FILE_NAME = "settings.properties";
     public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
+    public static String WALLET_FILE_NAME = "wallet.wvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
@@ -290,7 +291,7 @@ public class ContextVS {
 
     public void initTestEnvironment(InputStream logPropertiesStream, InputStream configPropertiesStream, String appDir)
             throws Exception {
-        log.debug("initTestEnvironment - appDir: " + appDir);
+        java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.INFO, "initTestEnvironment - appDir: " + appDir);
         if(appDir != null) initDirs(appDir);
         try {
             Properties props = new Properties();
@@ -446,19 +447,19 @@ public class ContextVS {
         FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
     }
 
-    public static KeyStore getUserKeyStore(char[] password) throws Exception{
+    public static KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS{
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {
             keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
         } catch(Exception ex) {
-            throw new Exception(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }
         try {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStoreFile), password);
         } catch(Exception ex) {
-            throw new Exception(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
         }
         return keyStore;
     }

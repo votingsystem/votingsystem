@@ -123,10 +123,11 @@ class ControlCenterFilters {
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
                         if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
                             if(model.receiverPublicKey) {
-                                responseVS =  signatureVSService.encryptMessage(responseVS.messageBytes,
-                                        model.receiverPublicKey)
+                                responseVS =  new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptMessage(
+                                        responseVS.messageBytes,model.receiverPublicKey))
                             } else if(model.receiverCert) {
-                                responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
+                                responseVS = new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptToCMS(
+                                        responseVS.messageBytes,model.receiverCert))
                             }
                             if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
                         }

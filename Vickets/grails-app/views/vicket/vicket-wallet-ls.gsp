@@ -2,10 +2,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet-tag-group']"/>">
 
-
-<polymer-element name="vicket-wallet"  on-core-select="{{selectAction}}">
+<!--Test with wallet inside browser localstorage--->
+<polymer-element name="vicket-wallet-ls"  on-core-select="{{selectAction}}">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -32,12 +33,14 @@
                 </div>
             </template>
         </div>
+        <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
+
         <template repeat="{{tag in tagArray}}">
             <vicket-wallet-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-wallet-tag-group>
         </template>
     </template>
     <script>
-        Polymer('vicket-wallet', {
+        Polymer('vicket-wallet-ls', {
             selectedTags: [],
             currencyCode:null,
             vicketsWalletArray:[],
@@ -47,23 +50,13 @@
 
             ready: function() {
                 console.log(this.tagName + " - ready")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.WALLET_OPEN)
-                webAppMessage.setCallback(function(appMessage) {
-                    var appMessageJSON = JSON.parse(appMessage)
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        this.loadWallet(appMessageJSON.message)
-                    } else {
-                        var caption = '<g:message code="vicketRequestERRORCaption"/>'
-                        showMessageVS(appMessageJSON.message, caption)
-                    }
-                }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
-            loadWallet:function(vicketsWalletArray) {
-                console.log(this.tagName + " - loadWallet")
-                this.walletStr = JSON.stringify(vicketsWalletArray)
+            vicketsWalletChanged:function() {
+                console.log(this.tagName + " - vicketsWalletChanged")
                 this.tagGroups = {}
-                this.vicketsWalletArray = vicketsWalletArray
+                this.vicketsWalletArray = JSON.parse(this.vicketsWallet)
+                this.testWallet = JSON.stringify({wallet:this.vicketsWalletArray})
+
                 for(vicketIdx in this.vicketsWalletArray) {
                     var vicket = this.vicketsWalletArray[vicketIdx]
                     if(this.tagGroups[vicket.tag]) this.tagGroups[vicket.tag].push(vicket)

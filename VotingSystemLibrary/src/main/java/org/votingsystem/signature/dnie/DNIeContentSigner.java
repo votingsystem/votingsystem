@@ -25,13 +25,17 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
+
 import javax.mail.Address;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

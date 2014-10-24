@@ -189,11 +189,11 @@ class VicketFilters {
                             ResponseVS encryptResponse
                             if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
                                 if(model.receiverPublicKey) {
-                                    encryptResponse =  signatureVSService.encryptToCMS(
-                                            responseVS.messageBytes, model.receiverPublicKey)
+                                    encryptResponse = new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptToCMS(
+                                            responseVS.messageBytes, model.receiverPublicKey))
                                 } else if(model.receiverCert) {
-                                    encryptResponse = signatureVSService.encryptToCMS(
-                                            responseVS.messageBytes,model.receiverCert)
+                                    encryptResponse = new ResponseVS(ResponseVS.SC_OK, signatureVSService.encryptToCMS(
+                                            responseVS.messageBytes, model.receiverCert))
                                 }
                                 if(ResponseVS.SC_OK == encryptResponse.getStatusCode()) {
                                     encryptResponse.setStatusCode(responseVS.getStatusCode())

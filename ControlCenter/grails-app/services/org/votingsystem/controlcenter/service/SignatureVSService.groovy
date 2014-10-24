@@ -329,7 +329,7 @@ class SignatureVSService {
         return getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 

@@ -425,15 +425,15 @@ class SignatureVSService {
                 smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTE)
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+    public byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
-    public byte[] decryptCMS (byte[] encryptedFile, Locale locale) {
+    public byte[] decryptCMS (byte[] encryptedFile) {
         return getEncryptor().decryptCMS(encryptedFile);
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 

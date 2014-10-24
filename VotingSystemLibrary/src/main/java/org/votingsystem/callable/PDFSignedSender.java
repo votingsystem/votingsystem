@@ -83,7 +83,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
         } else {
             log.debug("Generating System VotingSystemSignedGenerator");
-            pdfSigner = ContentSignerUtils.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
+            pdfSigner = ContentSignerUtils.getPDFContentSigner(password);
             signerCertChain = pdfSigner.getCertificateChain();
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");

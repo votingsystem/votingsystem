@@ -111,6 +111,7 @@ public enum TypeVS {
 
     WEB_SOCKET_INIT,
     WEB_SOCKET_MESSAGE,
-    WEB_SOCKET_ADD_SESSION;
-    
+    WEB_SOCKET_ADD_SESSION,
+
+    WALLET_OPEN;
 }
