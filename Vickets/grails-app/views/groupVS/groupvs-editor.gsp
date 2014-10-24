@@ -23,7 +23,7 @@
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
                 <paper-button raised on-click="{{submitForm}}">
-                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="saveChangesLbl"/>
+                    <i class="fa fa-check"></i> <g:message code="saveChangesLbl"/>
                 </paper-button>
             </div>
         </div>

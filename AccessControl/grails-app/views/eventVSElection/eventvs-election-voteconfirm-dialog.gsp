@@ -24,7 +24,7 @@
                     <div flex></div>
                     <div>
                         <paper-button raised on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
+                            <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                         </paper-button>
                     </div>
                 </div>

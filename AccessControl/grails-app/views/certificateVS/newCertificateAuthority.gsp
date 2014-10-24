@@ -33,7 +33,7 @@
         <div style="margin:10px 10px 60px 0px;height:20px;">
             <div style="float:right;">
                 <paper-button raised onclick="submitForm()">
-                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="addCALbl"/>
+                    <i class="fa fa-check"></i> <g:message code="addCALbl"/>
                 </paper-button>
             </div>
         </div>

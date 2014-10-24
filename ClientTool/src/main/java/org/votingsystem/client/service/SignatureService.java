@@ -4,6 +4,7 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -284,10 +285,12 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
                 vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
+                JSONArray storedWalletJSON = (JSONArray) WalletUtils.getWallet(password);
+                storedWalletJSON.addAll(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
+                WalletUtils.saveWallet(storedWalletJSON, password);
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));
-                responseMap.put("vicketList", WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
                 responseVS.setContentType(ContentTypeVS.JSON);
                 responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
             }

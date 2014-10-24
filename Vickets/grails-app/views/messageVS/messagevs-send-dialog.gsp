@@ -18,7 +18,7 @@
                     <div layout horizontal style="padding:20px 20px 20px 20px;">
                         <div flex></div>
                         <paper-button raised on-click="{{sendMessage}}">
-                            <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl" />
+                            <i class="fa fa-check"></i> <g:message code="acceptLbl" />
                         </paper-button>
                     </div>
                 </div>

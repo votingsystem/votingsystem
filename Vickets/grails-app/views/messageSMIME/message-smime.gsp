@@ -90,7 +90,7 @@
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;">
                     <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkSignatureLbl"/>
+                        <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
                     </paper-button>
                 </div>
             </div>

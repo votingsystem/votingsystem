@@ -47,21 +47,21 @@
                             <div>
                                 <paper-button raised id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
                                                      style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
+                                    <i class="fa fa-envelope-square"></i> <g:message code="sendMessageVSLbl"/>
                                 </paper-button>
                             </div>
 
                             <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
                                 <paper-button raised id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
                                                      style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
+                                    <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
                                 </paper-button>
                             </div>
 
                             <div>
                                 <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
                                                      style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
+                                    <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
                                 </paper-button>
                             </div>
 

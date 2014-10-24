@@ -65,7 +65,7 @@ public class WalletUtils {
             byte[] walletBytes = Encryptor.decryptCMS(FileUtils.getBytesFromFile(walletFile), privateKey);
             return JSONSerializer.toJSON(new String(walletBytes, "UTF-8"));
         } catch(Exception ex) {
-            throw new ExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+            throw new ExceptionVS(ContextVS.getMessage("keyStorePasswordError"), ex);
         }
     }
 

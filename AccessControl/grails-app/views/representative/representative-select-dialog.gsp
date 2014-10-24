@@ -89,7 +89,7 @@
                         <div flex></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <paper-button raised on-click="{{showConfirm}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
+                                <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                             </paper-button>
                         </div>
                     </div>
@@ -100,12 +100,12 @@
                         <div flex></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <paper-button raised on-click="{{submit}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
+                                <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                             </paper-button>
                         </div>
                         <div style="margin:10px 0px 10px 0px;">
                             <paper-button raised on-click="{{cancel}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times" style="margin:0 5px 0 2px;"></i> <g:message code="cancelLbl"/>
+                                <i class="fa fa-times"></i> <g:message code="cancelLbl"/>
                             </paper-button>
                         </div>
                     </div>

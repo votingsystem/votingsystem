@@ -56,9 +56,10 @@
             <div style="max-width: 600px; margin:15px auto; border-bottom: 1px solid #6c0404;border-top: 1px solid #6c0404;">
                 <div layout vertical center center-justified>
                 <div horizontal layout center center-justified style="">
-                    <div style="width: 200px;">
-                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                            <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
+                    <div style="width: 250px;">
+                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.7em;margin:10px 10px 10px 10px;
+                            display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                            <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
                         </paper-button>
                     </div>
                     <div><g:message code="transactionvsWithTagAdvertMsg"/></div>
@@ -98,9 +99,9 @@
 
                     </div>
 
-
-                    <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                        <i class="fa fa-eur" style="margin:0 5px 0 2px;"></i> <g:message code="vicketWalletLbl"/>
+                    <paper-button raised on-click="{{showWallet}}" style="font-size: 0.8em;margin:10px 0px 10px 10px;
+                        display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <i class="fa fa-money"></i> <g:message code="vicketWalletLbl"/>
                     </paper-button>
                 </div>
 
@@ -130,6 +131,9 @@
             showTagDialog: function() {
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
+            showWallet: function() {
+                loadURL_VS("${createLink( controller:'vicket', action:"wallet")}")
+            },
             removeTag: function(e) {
                 var tagToDelete = e.target.templateInstance.model.tag
                 for(tagIdx in this.selectedTags) {
@@ -137,16 +141,6 @@
                         this.selectedTags.splice(tagIdx, 1)
                     }
                 }
-            },
-            updateLocalStorage:function(appMessageJSON) {
-                if(this.vicketsWallet) {
-                    console.log("updateLocalStorage")
-                    var vicketsWalletJSON
-                    try {vicketsWalletJSON = JSON.parse(this.vicketsWallet)} catch(ex) {console.log(ex)}
-                    if(Array.isArray(vicketsWalletJSON)) vicketsWalletJSON = vicketsWalletJSON.concat(appMessageJSON.vicketList)
-                    else vicketsWalletJSON = appMessageJSON.vicketList
-                    this.vicketsWallet = JSON.stringify(vicketsWalletJSON)
-                } else this.vicketsWallet = JSON.stringify(appMessageJSON.vicketList)
             },
             submit:function() {
                 console.log("submit")
@@ -175,7 +169,6 @@
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='vicketRequestOKCaption'/>"
-                        this.updateLocalStorage(appMessageJSON)
                     } else caption = '<g:message code="vicketRequestERRORCaption"/>'
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))

@@ -46,8 +46,8 @@
                 <div flex layout horizontal center center-justified>
                     <input id="tagSearchInput" class="form-control" required autofocus
                            title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                    <paper-button raised on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-search" style="margin:0 5px 0 2px;"></i>  {{messages.tagSearchLbl}}
+                    <paper-button raised on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 130px; font-size: 0.9em;">
+                        <i class="fa fa-search"></i>  {{messages.tagSearchLbl}}
                     </paper-button>
                 </div>
             </div>
@@ -69,8 +69,8 @@
 
             <div layout horizontal style="margin:20px 0 0 0;">
                 <div flex></div>
-                <paper-button raised on-click="{{processTags}}">
-                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> {{messages.acceptLbl}}
+                <paper-button raised on-click="{{processTags}}" style="font-size: 0.9em;">
+                    <i class="fa fa-check"></i> {{messages.acceptLbl}}
                 </paper-button>
             </div>
         </div>

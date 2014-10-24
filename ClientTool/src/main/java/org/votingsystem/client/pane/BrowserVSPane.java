@@ -160,6 +160,8 @@ public class BrowserVSPane extends StackPane {
 
     public void setPasswordDialogVisible(boolean isVisible) {
         setMessage(ContextVS.getMessage("passwordMissing"));
+        password1Field.setText("");
+        password2Field.setText("");
         passwordVBox.setVisible(isVisible);
         passwordRegion.setVisible(isVisible);
     }

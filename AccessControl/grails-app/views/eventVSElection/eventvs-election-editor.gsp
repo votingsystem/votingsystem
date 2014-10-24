@@ -78,7 +78,7 @@
                 </div>
                 <div flex></div>
                 <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
-                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="publishLbl"/>
+                    <i class="fa fa-check"></i> <g:message code="publishLbl"/>
                 </paper-button>
             </div>
         </form>

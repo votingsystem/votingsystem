@@ -77,7 +77,7 @@
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
                             <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;
                                 margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                                <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
+                                <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
                             </paper-button>
                         </div>
                         <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
@@ -94,7 +94,7 @@
                 <div style="display:{{isWithUserSelector?'block':'none'}}">
                     <div>
                         <paper-button raised on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
-                            <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
+                            <i class="fa fa-user"></i> {{selectReceptorMsg}}
                         </paper-button>
                         <div style="margin:10px 0 0 0;">
                             <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
@@ -109,7 +109,7 @@
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
                     <paper-button raised on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
-                        <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
+                        <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                     </paper-button>
                 </div>
             </div>

@@ -69,10 +69,10 @@
                 <template if="{{isUserView}}">
                     <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
                         <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
-                            <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
+                            <i class="fa fa-sign-in"></i> <g:message code="subscribeGroupVSLbl"/>
                         </paper-button raised>
                         <paper-button raised style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
-                            <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
+                            <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
                         </paper-button raised>
                     </div>
                 </template>
@@ -102,8 +102,8 @@
 
         <div layout horizontal>
             <div style="margin: 5px 0 0 0;">
-                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
-                    <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
+                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}" style="font-size: 0.8em;">
+                    <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
                 </paper-button raised>
             </div>
             <div flex></div>

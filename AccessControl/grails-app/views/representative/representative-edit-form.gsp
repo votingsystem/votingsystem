@@ -19,11 +19,11 @@
             <div layout horizontal center center-justified>
                 <paper-button raised type="button" on-click="{{representativeCancel}}"
                         style="margin:15px 20px 15px 0px;">
-                    <i class="fa fa-times" style="margin:0 5px 0 2px;"></i> <g:message code="removeRepresentativeLbl"/>
+                    <i class="fa fa-times"></i> <g:message code="removeRepresentativeLbl"/>
                 </paper-button>
                 <paper-button raised type="button" on-click="{{representativeEdit}}"
                         style="margin:15px 20px 15px 0px;">
-                    <i class="fa fa-hand-o-right" style="margin:0 5px 0 2px;"></i> <g:message code="editRepresentativeLbl"/>
+                    <i class="fa fa-hand-o-right"></i> <g:message code="editRepresentativeLbl"/>
                 </paper-button>
             </div>
         </div>
@@ -39,7 +39,7 @@
                     <div layout horizontal style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                         <div flex></div>
                         <paper-button raised on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
+                            <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                         </paper-button>
                     </div>
                 </div>

@@ -26,15 +26,15 @@
                 <template if="{{isClientToolConnected}}">
                     <paper-button raised type="button" on-click="{{activateUser}}"
                                          style="margin:0 10px;display:{{isActive?'none':'block'}}">
-                        <i class="fa fa-thumbs-o-up" style="margin:0 5px 0 2px;"></i> <g:message code="activateUserLbl"/>
+                        <i class="fa fa-thumbs-o-up"></i> <g:message code="activateUserLbl"/>
                     </paper-button>
                     <paper-button raised on-click="{{initCancellation}}"
                                          style="margin:0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
-                        <i class="fa fa-thumbs-o-down" style="margin:0 5px 0 2px;"></i> <g:message code="deActivateUserLbl"/>
+                        <i class="fa fa-thumbs-o-down"></i> <g:message code="deActivateUserLbl"/>
                     </paper-button>
                 </template>
                 <paper-button raised type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
-                    <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> <g:message code="userVSPageLbl"/>
+                    <i class="fa fa-user"></i> <g:message code="userVSPageLbl"/>
                 </paper-button>
             </div>
             <div id="receipt" style="display:none;"> </div>

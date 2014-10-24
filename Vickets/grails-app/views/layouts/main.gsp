@@ -118,12 +118,13 @@
                 this.loadURL(this.url)
             },
             innerPageSignal:function(e, detail, sender) {
-                console.log("innerPageSignal - title:" + detail.title)
+                console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
                 var sufix = ""
                 if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
                 if(detail.title) this.appTitle = detail.title + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
+                if(detail.url) this.url = detail.url
                 document.dispatchEvent( new Event('innerPageSignal'));
             },
             loadURL: function(urlToLoad) {

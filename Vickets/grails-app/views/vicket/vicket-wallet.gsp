@@ -44,9 +44,10 @@
             tagGroups:{},
             tagArray:[],
             messageToUser:null,
-
             ready: function() {
                 console.log(this.tagName + " - ready")
+            },
+            domReady: function(){
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.WALLET_OPEN)
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
@@ -61,7 +62,6 @@
             },
             loadWallet:function(vicketsWalletArray) {
                 console.log(this.tagName + " - loadWallet")
-                this.walletStr = JSON.stringify(vicketsWalletArray)
                 this.tagGroups = {}
                 this.vicketsWalletArray = vicketsWalletArray
                 for(vicketIdx in this.vicketsWalletArray) {

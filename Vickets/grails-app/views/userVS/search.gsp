@@ -20,7 +20,7 @@
             </div>
         </div>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
-        background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+            background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
         <uservs-selector id="userVSSelector" style="width:800px; margin:10px 0px 0px 0px;"></uservs-selector>
     </div>
 

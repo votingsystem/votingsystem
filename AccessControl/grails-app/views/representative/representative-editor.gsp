@@ -39,11 +39,11 @@
 
         <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
             <paper-button raised on-click="{{selectImage}}" style="margin: 0px 0px 0px 5px;">
-                <i class="fa fa-file-image-o" style="margin:0 5px 0 2px;"></i> <g:message code="selectImageLbl"/>
+                <i class="fa fa-file-image-o"></i> <g:message code="selectImageLbl"/>
             </paper-button>
             <div flex></div>
             <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
-                <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="publishLbl"/>
+                <i class="fa fa-check"></i> <g:message code="publishLbl"/>
             </paper-button>
         </div>
         <div style="margin:10px 10px 40px 10px;">{{selectedImagePath}}</div>
