@@ -80,7 +80,7 @@ public class JSONFormDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.hide();
             }});
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         HBox footerButtonsBox = new HBox(10);
         Region spacer = new Region();

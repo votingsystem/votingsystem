@@ -1,7 +1,15 @@
 package org.votingsystem.client.util;
 
+import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -21,6 +29,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -30,7 +39,7 @@ import java.util.Map;
 public class Utils {
 
     public static final String COLOR_BUTTON_OK = "#388746";
-    public static final String COLOR_BUTTON_ERROR = "#6c0404";
+    public static final String COLOR_RED_DARK = "#6c0404";
 
 
     private static Logger log = Logger.getLogger(Utils.class);
@@ -75,6 +84,13 @@ public class Utils {
                     "/resources/icon_32/button_default.png"));
         }
         return image;
+    }
+
+
+    public static Node createSpacer() {
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        return spacer;
     }
 
     public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
@@ -139,4 +155,110 @@ public class Utils {
     public static String getTagForDescription(String tagName) {
         return ContextVS.getMessage("forLbl") + " " + getTagDescription(tagName);
     }
+
+    public static void saveReceiptAnonymousDelegation(OperationVS operation, WebKitHost webKitHost) throws Exception{
+        log.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
+                " - callbackId: " + operation.getCallerCallback());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
+                if (responseVS == null) {
+                    log.error("Missing receipt data for hash: " + operation.getMessage());
+                    webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
+                } else {
+                    File fileToSave = null;
+                    try {
+                        fileToSave = Utils.getReceiptBundle(responseVS);
+                        FileChooser fileChooser = new FileChooser();
+                        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
+                                "*" + ContentTypeVS.ZIP.getExtension());
+                        fileChooser.getExtensionFilters().add(extFilter);
+                        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                        fileChooser.setInitialFileName(ContextVS.getMessage("anonymousDelegationReceiptFileName"));
+                        File file = fileChooser.showSaveDialog(new Stage());
+                        if (file != null) {
+                            FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
+                            webKitHost.sendMessageToBrowser(ResponseVS.SC_OK, null, operation.getCallerCallback());
+                        } else
+                            webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
+                    } catch (Exception ex) {
+                        log.error(ex.getMessage(), ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public static void selectImage(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
+        PlatformImpl.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    FileChooser fileChooser = new FileChooser();
+                    FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter(
+                            "JPG (*.jpg)", Arrays.asList("*.jpg", "*.JPG"));
+                    FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter(
+                            "PNG (*.png)", Arrays.asList("*.png", "*.PNG"));
+                    fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                    File selectedImage = fileChooser.showOpenDialog(null);
+                    if (selectedImage != null) {
+                        byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
+                        log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+                        if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
+                            log.debug(" - MAX_FILE_SIZE exceeded ");
+                            webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR,
+                                    ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB),
+                                    operationVS.getCallerCallback());
+                        } else webKitHost.sendMessageToBrowser(ResponseVS.SC_OK, selectedImage.getAbsolutePath(),
+                                operationVS.getCallerCallback());
+                    } else webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                    webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback());
+                }
+            }
+        });
+    }
+
+    public static void receiptCancellation(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
+        log.debug("receiptCancellation");
+        switch(operationVS.getType()) {
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() {
+                        FileChooser fileChooser = new FileChooser();
+                        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
+                                "*" + ContentTypeVS.ZIP.getExtension());
+                        fileChooser.getExtensionFilters().add(extFilter);
+                        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                        File file = fileChooser.showSaveDialog(new Stage());
+                        if(file != null){
+                            operationVS.setFile(file);
+                            webKitHost.processOperationVS(operationVS);
+                        } else webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
+                    }
+                });
+                break;
+            default:
+                log.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
+        }
+    }
+
+    public static void saveReceipt(OperationVS operation, WebKitHost webKitHost) throws Exception{
+        log.debug("saveReceipt");
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+        File file = fileChooser.showSaveDialog(new Stage());
+        if(file != null){
+            FileUtils.copyStringToFile(operation.getMessage(), file);
+            webKitHost.sendMessageToBrowser(ResponseVS.SC_OK, null, operation.getCallerCallback());
+        } else webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
+    }
+
 }

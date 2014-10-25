@@ -12,7 +12,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -21,6 +20,7 @@ import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.controller.VicketPaneController;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
@@ -30,7 +30,6 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.vicket.model.Vicket;
@@ -188,21 +187,6 @@ public class DocumentVSBrowserStackPane extends StackPane {
         }
     }
 
-    private void openVicket(Vicket vicket) {
-        Tab newTab = new Tab();
-        newTab.setText(ContextVS.getMessage("vicketLbl"));
-        try {
-            VicketPane vicketPane = new VicketPane(vicket);
-            newTab.setContent(vicketPane);
-            tabPane.getTabs().add(newTab);
-            tabPane.getSelectionModel().select(newTab);
-        } catch(ExceptionVS ex) {
-            log.error(ex.getMessage(), ex);
-            showMessage(ex.getMessage(), Boolean.TRUE);
-        }
-    }
-
-
     public void showMessage(final String message, Boolean isHtml) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
@@ -217,12 +201,12 @@ public class DocumentVSBrowserStackPane extends StackPane {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
-                Stage primaryStage = new Stage();
-                primaryStage.setScene(new Scene(documentVSBrowserStackPane));
+                Stage stage = new Stage();
+                stage.setScene(new Scene(documentVSBrowserStackPane));
                 documentVSBrowserStackPane.init();
-                primaryStage.initModality(Modality.WINDOW_MODAL);
-                primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
-                primaryStage.setResizable(true);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
+                stage.setResizable(true);
                 File file = null;
                 if(signedDocumentStr == null) {
                     FileChooser fileChooser = new FileChooser();
@@ -231,7 +215,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
                     fileChooser.getExtensionFilters().add(extFilter);*/
                     fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                     //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                    file = fileChooser.showOpenDialog(primaryStage);
+                    file = fileChooser.showOpenDialog(stage);
                 } else file = FileUtils.getFileFromString(signedDocumentStr);
                 if(file != null){
                     try {
@@ -240,11 +224,12 @@ public class DocumentVSBrowserStackPane extends StackPane {
                             return;
                         }
                         if(file.getName().endsWith(ContentTypeVS.VICKET.getExtension())) {
-                            Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file));
-                            documentVSBrowserStackPane.openVicket(vicket);
-                        } else documentVSBrowserStackPane.openFile(file, operationDocument);
-                        primaryStage.centerOnScreen();
-                        primaryStage.show();
+                            VicketPaneController.show((Vicket)ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
+                        } else {
+                            documentVSBrowserStackPane.openFile(file, operationDocument);
+                            stage.centerOnScreen();
+                            stage.show();
+                        }
                     } catch (IOException ex) {
                         log.error(ex.getMessage(), ex);
                     }
@@ -253,22 +238,6 @@ public class DocumentVSBrowserStackPane extends StackPane {
         });
     }
 
-    public static void showDialog(final Vicket vicket) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
-                Stage primaryStage = new Stage();
-                primaryStage.setScene(new Scene(documentVSBrowserStackPane));
-                documentVSBrowserStackPane.init();
-                primaryStage.initModality(Modality.WINDOW_MODAL);
-                primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
-                primaryStage.setResizable(true);
-                documentVSBrowserStackPane.openVicket(vicket);
-                primaryStage.centerOnScreen();
-                primaryStage.show();
-            }
-        });
-    }
 
     public void saveMessage () {
         try {

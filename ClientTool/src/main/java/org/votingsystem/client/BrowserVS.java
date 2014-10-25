@@ -5,15 +5,20 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -39,11 +44,13 @@ import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.controller.VicketPaneController;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -55,7 +62,6 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
@@ -65,27 +71,26 @@ import java.util.*;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVS extends Region {
+public class BrowserVS extends Region implements WebKitHost {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
 
     private Stage browserStage;
     private HBox toolBar;
-    private MessageDialog messageDialog;
-    private WebView webView;
+    private Map<String, WebView> webViewMap = new HashMap<>();
     private VBox mainVBox;
     private TextField locationField = new TextField("");
     private final BrowserVSPane browserHelper;
-    private String caption;
+    private TabPane tabPane;
+    private Button prevButton;
+    private static final BrowserVS INSTANCE = new BrowserVS();
 
-    public BrowserVS() {
-        this(new WebView());
+    public static BrowserVS getInstance() {
+        return INSTANCE;
     }
 
-    private BrowserVS(WebView webView) {
+    private BrowserVS() {
         browserHelper = new BrowserVSPane();
-        this.webView = webView;
-        this.webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
@@ -96,9 +101,9 @@ public class BrowserVS extends Region {
                         if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                             log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                         } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                            sendMessageToBrowserApp(responseVS.getMessageJSON(),
+                            sendMessageToBrowser(responseVS.getMessageJSON(),
                                     browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-                        } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
+                        } else sendMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage(),
                                 browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                     }
                 });
@@ -120,20 +125,15 @@ public class BrowserVS extends Region {
                 log.debug("signatureService - OnFailed");
             }
         });
-        PlatformImpl.startup(new Runnable() {
-            @Override
-            public void run() {
-                initComponents();
-            }
-        });
+        initComponents();
     }
 
     public void processResponseVS(OperationVS operationVS) {
-        sendMessageToBrowserApp(operationVS.getStatusCode(), operationVS.getMessage(), operationVS.getCallerCallback());
+        sendMessageToBrowser(operationVS.getStatusCode(), operationVS.getMessage(), operationVS.getCallerCallback());
     }
 
     private void initComponents() {
-        final WebHistory history = webView.getEngine().getHistory();
+        log.debug("initComponents");
         browserStage = new Stage();
         browserStage.initModality(Modality.WINDOW_MODAL);
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -145,47 +145,41 @@ public class BrowserVS extends Region {
                 log.debug("browserStage.setOnCloseRequest");
             }
         });
-
         mainVBox = new VBox();
-        VBox.setVgrow(webView, Priority.ALWAYS);
-
+        prevButton = new Button();
         final Button forwardButton = new Button();
-        final Button prevButton = new Button();
         final Button reloadButton = new Button();
         forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
-                    history.go(1);
+                    ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
                     prevButton.setDisable(false);
                 } catch(Exception ex) {
                     forwardButton.setDisable(true);
                 }
             }
         });
-
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
-                    history.go(-1);
+                    ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
                     forwardButton.setDisable(false);
                 } catch(Exception ex) {
                     prevButton.setDisable(true);
                 }
             }
         });
-
         reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
         reloadButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
-                webView.getEngine().load(locationField.getText());
+                //webView.getEngine().load(locationField.getText());
+                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(locationField.getText());
             }
         });
-
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
-
         locationField.setPrefWidth(400);
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -196,40 +190,52 @@ public class BrowserVS extends Region {
                         if(locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
                             targetURL = locationField.getText().trim();
                         } else targetURL = "http://" + locationField.getText().trim();
-                        loadURL(targetURL, null);
+                        //loadURL(targetURL, null);
+                        ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
                     }
                 }
             }
         });
-
-        webView.getEngine().locationProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                locationField.setText(newValue);
-            }
-        });
-
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , createSpacer());
+        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
 
-        //handle popup windows
-        webView.getEngine().setCreatePopupHandler(
-                new Callback<PopupFeatures, WebEngine>() {
-                    @Override
-                    public WebEngine call(PopupFeatures config) {
-                        WebView smallView = new WebView();
-                        //smallView.setFontScale(0.8);
-                        new BrowserVS(smallView).show(700, 700, false);
-                        return smallView.getEngine();
+        //mainVBox.getChildren().addAll(toolBar, webView);
+        tabPane = new TabPane();
+        tabPane.setRotateGraphic(false);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
+        tabPane.setSide(Side.TOP);
+        HBox.setHgrow(tabPane, Priority.ALWAYS);
+        VBox.setVgrow(tabPane, Priority.ALWAYS);
+        mainVBox.getChildren().addAll(toolBar, tabPane);
+        browserHelper.getChildren().add(0, mainVBox);
+        browserStage.setScene(new Scene(browserHelper, Color.web("#666970")));
+        browserStage.setWidth(1200);
+        browserStage.setHeight(1000);
+        getChildren().addListener(new ListChangeListener<Node>() {
+            @Override public void onChanged(Change<? extends Node> c) {}
+        });
+    }
+
+    public WebView newTab(String URL, String tabCaption, String jsCommand) {
+        final WebView webView = new WebView();
+        if(jsCommand != null) {
+            webView.getEngine().getLoadWorker().stateProperty().addListener(
+                new ChangeListener<Worker.State>() {
+                    @Override public void changed(ObservableValue<? extends Worker.State> ov,
+                        Worker.State oldState, Worker.State newState) {
+                        //log.debug("newState: " + newState);
+                        if (newState == Worker.State.SUCCEEDED) {
+                            webView.getEngine().executeScript(jsCommand.toString());
+                        }
                     }
                 }
-        );
-
-
+            );
+        }
+        final WebHistory history = webView.getEngine().getHistory();
         history.getEntries().addListener(new ListChangeListener<WebHistory.Entry>(){
-        @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
+            @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
                 if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
                 //log.debug("==== currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
@@ -238,65 +244,99 @@ public class BrowserVS extends Region {
                     params = locationField.getText().substring(locationField.getText().indexOf("?"),
                             locationField.getText().length());
                 }
-                String newURL = history.getEntries().get(history.getEntries().size() - 1).getUrl();
+                WebHistory.Entry selectedEntry = history.getEntries().get(history.getEntries().size() - 1);
+                log.debug("selectedEntry: " + selectedEntry);
+                String newURL = selectedEntry.getUrl();
                 if(!newURL.contains("?")) newURL = newURL + params;
+                tabPane.getSelectionModel().getSelectedItem().setText(selectedEntry.getTitle() == null? "     " :
+                        selectedEntry.getTitle());
                 locationField.setText(newURL);
             }
         });
-
-        // process page loading
-        webView.getEngine().getLoadWorker().stateProperty().addListener(
-                new ChangeListener<Worker.State>() {
-                    Document document;
-                    @Override
-                    public void changed(ObservableValue<? extends Worker.State> ov,
-                                        Worker.State oldState, Worker.State newState) {
-                        //log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
-                        if (newState == Worker.State.SUCCEEDED) {
-                            Document doc = webView.getEngine().getDocument();
-                            Element element = doc.getElementById("voting_system_page");
-                            if(element != null) {
-                                JSObject win = (JSObject) webView.getEngine().executeScript("window");
-                                win.setMember("clientTool", new JavafxClient());
-                                webView.getEngine().executeScript("notifiyClientToolConnection()");
-                            }
-                        } else if (newState.equals(Worker.State.FAILED)) {
-                            showMessage(ContextVS.getMessage("connectionErrorMsg"));
-                        } else if (newState.equals(Worker.State.SCHEDULED)) { }
-                        if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {
-
-
-                        }
+        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
+        webView.getEngine().locationProperty().addListener(new ChangeListener<String>() {
+            @Override public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                locationField.setText(newValue);
+            }
+        });
+        webView.getEngine().setCreatePopupHandler(//handle popup windows
+                new Callback<PopupFeatures, WebEngine>() {
+                    @Override public WebEngine call(PopupFeatures config) {
+                        //WebView newView = new WebView();
+                        //newView.setFontScale(0.8);
+                        //new BrowserVS(newView).show(700, 700, false);
+                        return newTab(null, null, null).getEngine();
                     }
                 }
         );
-        mainVBox.getChildren().addAll(toolBar, webView);
-        browserHelper.getChildren().add(0, mainVBox);
-
-        Scene scene = new Scene(browserHelper, Color.web("#666970"));
-        browserStage.setScene(scene);
-        browserStage.setWidth(1200);
-        browserStage.setHeight(1000);
-
-        getChildren().addListener(new ListChangeListener<Node>() {
-            @Override public void onChanged(Change<? extends Node> c) {}
+        webView.getEngine().getLoadWorker().stateProperty().addListener(
+            new ChangeListener<Worker.State>() {
+                @Override public void changed(ObservableValue<? extends Worker.State> ov,
+                                    Worker.State oldState, Worker.State newState) {
+                    //log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
+                    if (newState == Worker.State.SUCCEEDED) {
+                        Document doc = webView.getEngine().getDocument();
+                        Element element = doc.getElementById("voting_system_page");
+                        if(element != null) {
+                            JSObject win = (JSObject) webView.getEngine().executeScript("window");
+                            win.setMember("clientTool", new JavafxClient(webView));
+                            webView.getEngine().executeScript("notifiyClientToolConnection()");
+                        }
+                    } else if (newState.equals(Worker.State.FAILED)) {
+                        showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
+                    } else if (newState.equals(Worker.State.SCHEDULED)) { }
+                    if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {  }
+                }
+            }
+        );
+        VBox.setVgrow(webView, Priority.ALWAYS);
+        Tab newTab = new Tab();
+        newTab.setOnSelectionChanged(new EventHandler < Event > (){
+            @Override public void handle(Event event) {
+                int selectedIdx = tabPane.getSelectionModel().getSelectedIndex();
+                ObservableList<WebHistory.Entry> entries = ((WebView)tabPane.getSelectionModel().getSelectedItem().
+                        getContent()).getEngine().getHistory().getEntries();
+                if(entries.size() > 0){
+                    WebHistory.Entry selectedEntry = entries.get(entries.size() -1);
+                    String location = selectedEntry.getUrl();
+                    newTab.setText(selectedEntry.getTitle() == null? "     " : selectedEntry.getTitle());
+                    log.debug("selectedIdx: " + selectedIdx + "- selectedEntry: " + selectedEntry);
+                    locationField.setText(location);
+                }
+            }
         });
-
+        if(tabCaption != null) newTab.setText(tabCaption);
+        else newTab.setText("          ");
+        newTab.setContent(webView);
+        tabPane.getTabs().add(newTab);
+        tabPane.getSelectionModel().select(newTab);
+        if(URL != null) {
+            PlatformImpl.runLater(new Runnable() {
+                @Override public void run() {
+                    webView.getEngine().load(URL);
+                    if(tabCaption != null) browserStage.setTitle(tabCaption);
+                    browserStage.show();
+                }
+            });
+        }
+        return webView;
     }
 
-    public void sendMessageToBrowserApp(int statusCode, String message, String callerCallback) {
+    @Override
+    public void sendMessageToBrowser(int statusCode, String message, String callerCallback) {
         String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
-        log.debug("sendMessageToBrowserApp - statusCode: " + statusCode + " - message: " + logMsg);
+        log.debug("sendMessageToBrowser - statusCode: " + statusCode + " - message: " + logMsg);
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         try {
+            WebView operationWebView = webViewMap.remove(callerCallback);
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
-                    webView.getEngine().executeScript(jsCommand);
+                    operationWebView.getEngine().executeScript(jsCommand);
                 }
             });
         } catch(Exception ex) {
@@ -304,17 +344,18 @@ public class BrowserVS extends Region {
         }
     }
 
-
-    public void sendMessageToBrowserApp(JSON messageJSON, String callerCallback) {
+    @Override
+    public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
         String message = messageJSON.toString();
         String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
-        log.debug("sendMessageToBrowserApp - messageJSON: " + logMsg);
+        log.debug("sendMessageToBrowser - messageJSON: " + logMsg);
         try {
+            WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     new String(Base64.getEncoder().encode(message.getBytes("UTF8")), "UTF8") + "')";
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
-                    webView.getEngine().executeScript(jsCommand);
+                    operationWebView.getEngine().executeScript(jsCommand);
                 }
             });
         } catch(Exception ex) {
@@ -322,32 +363,19 @@ public class BrowserVS extends Region {
         }
     }
 
+    @Override public void processOperationVS(OperationVS operationVS) {
+        browserHelper.processOperationVS(operationVS);
+    }
+
     public void showMessage(ResponseVS responseVS) {
-        String finalMsg = responseVS.getMessage() == null? "":responseVS.getMessage();
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) finalMsg = responseVS.getMessage();
-        else finalMsg = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
-        showMessage(finalMsg);
-    }
-
-    public void showMessage(final String message) {
+        String message = responseVS.getMessage() == null? "":responseVS.getMessage();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
+        else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
+        final String msg = message;
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
-                if(messageDialog == null) messageDialog = new MessageDialog();
-                messageDialog.showMessage(message);
-            }
-        });
-    }
-
-
-    public void loadURL(final String urlToLoad, String caption) {
-        final StringBuilder browserCaption = new StringBuilder();
-        if(caption == null && this.caption != null) browserCaption.append(this.caption);
-        else if(caption != null) browserCaption.append(caption);
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                webView.getEngine().load(urlToLoad);
-                if(browserCaption != null) browserStage.setTitle(browserCaption.toString());
-                browserStage.show();
+                MessageDialog messageDialog = new MessageDialog();
+                messageDialog.showMessage(msg);
             }
         });
     }
@@ -359,57 +387,14 @@ public class BrowserVS extends Region {
         if(callback != null && callbackMsg != null) jsCommand.append(callback + "(" + callbackMsg + ")");
         else if(callback != null) jsCommand.append(callback + "()");;
         log.debug("jsCommand: " + jsCommand.toString());
-        if(!"".equals(jsCommand.toString())) {
-            webView.getEngine().getLoadWorker().stateProperty().addListener(
-                    new ChangeListener<Worker.State>() {
-                        @Override
-                        public void changed(ObservableValue<? extends Worker.State> ov,
-                                            Worker.State oldState, Worker.State newState) {
-                            //log.debug("newState: " + newState);
-                            if (newState == Worker.State.SUCCEEDED) {
-                                webView.getEngine().executeScript(jsCommand.toString());
-                            }
-                        }
-                    }
-            );
+        newTab(urlToLoad, caption, "".equals(jsCommand.toString()) ? null : jsCommand.toString());
+    }
+
+    public class JavafxClient {    // JavaScript interface object
+        private WebView webView;
+        public JavafxClient(WebView webView) {
+            this.webView = webView;
         }
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if(!isToolbarVisible) mainVBox.getChildren().removeAll(toolBar);
-                webView.getEngine().load(urlToLoad);
-                if(caption != null) browserStage.setTitle(caption);
-                browserStage.show();
-            }
-        });
-    }
-
-    public void executeScript (String jsCommand) {
-        webView.getEngine().executeScript(jsCommand);
-    }
-
-    public void loadBackgroundURL(final String urlToLoad) {
-        log.debug("loadBackgroundURL: " + urlToLoad);
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                webView.getEngine().load(urlToLoad);
-            }
-        });
-    }
-
-    private void show(final int width, final int height, final boolean isToolbarVisible) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                browserStage.setWidth(width);
-                browserStage.setHeight(height);
-                if(!isToolbarVisible) mainVBox.getChildren().removeAll(toolBar);
-                browserStage.show();
-            }
-        });
-    }
-
-    // JavaScript interface object
-    public class JavafxClient {
-
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
             try {
                 String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
@@ -417,28 +402,31 @@ public class BrowserVS extends Region {
                 log.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
                 OperationVS operationVS = OperationVS.parse(jsonObject);
+                webViewMap.put(operationVS.getCallerCallback(), this.webView);
                 switch (operationVS.getType()) {
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
-                        receiptCancellation(operationVS);
+                        Utils.receiptCancellation(operationVS, BrowserVS.this);
                         break;
                     case SELECT_IMAGE:
-                        selectImage(operationVS);
+                        Utils.selectImage(operationVS, BrowserVS.this);
                         break;
                     case OPEN_SMIME:
-                        openReceipt(operationVS);
+                        String smimeMessageStr = new String(Base64.getDecoder().decode(
+                                operationVS.getMessage().getBytes()), "UTF-8");
+                        DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operationVS.getDocument());
                         break;
                     case OPEN_VICKET:
-                        Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(((String)operationVS.getDocument().get("object")).getBytes());
-                        DocumentVSBrowserStackPane.showDialog(vicket);
+                        VicketPaneController.show((Vicket) ObjectUtils.deSerializeObject((
+                                (String) operationVS.getDocument().get("object")).getBytes()));
                         break;
                     case OPEN_SMIME_FROM_URL:
                         browserHelper.processOperationVS(null, operationVS);
                         break;
                     case SAVE_SMIME:
-                        saveReceipt(operationVS);
+                        Utils.saveReceipt(operationVS, BrowserVS.this);
                         break;
                     case SAVE_SMIME_ANONYMOUS_DELEGATION:
-                        saveReceiptAnonymousDelegation(operationVS);
+                        Utils.saveReceiptAnonymousDelegation(operationVS, BrowserVS.this);
                         break;
                     case MESSAGEVS_GET:
                         JSONObject documentJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocument());
@@ -449,7 +437,8 @@ public class BrowserVS extends Region {
                 }
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                showMessage(ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
+                showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("errorLbl") + " - " +
+                        ex.getMessage()));
             }
         }
 
@@ -482,118 +471,6 @@ public class BrowserVS extends Region {
                 return result;
             }
         }
-    }
-
-    private void saveReceiptAnonymousDelegation(OperationVS operation) throws Exception{
-        log.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
-                " - callbackId: " + operation.getCallerCallback());
-        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
-        if(responseVS == null) {
-            log.error("Missing receipt data for hash: " + operation.getMessage());
-            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
-        } else {
-            File fileToSave = Utils.getReceiptBundle(responseVS);
-            FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
-                    "*" + ContentTypeVS.ZIP.getExtension());
-            fileChooser.getExtensionFilters().add(extFilter);
-            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-            fileChooser.setInitialFileName(ContextVS.getMessage("anonymousDelegationReceiptFileName"));
-            File file = fileChooser.showSaveDialog(browserStage);
-            if(file != null){
-                FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                sendMessageToBrowserApp(ResponseVS.SC_OK, null, operation.getCallerCallback());
-            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
-        }
-    }
-
-    private void saveReceipt(OperationVS operation) throws Exception{
-        log.debug("saveReceipt");
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
-        fileChooser.getExtensionFilters().add(extFilter);
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-        File file = fileChooser.showSaveDialog(browserStage);
-        if(file != null){
-            FileUtils.copyStringToFile(operation.getMessage(), file);
-            sendMessageToBrowserApp(ResponseVS.SC_OK, null, operation.getCallerCallback());
-        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
-    }
-
-    private void openReceipt(OperationVS operation) throws Exception {
-        log.debug("openReceipt");
-        String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage().getBytes()), "UTF-8");
-        DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operation.getDocument());
-    }
-
-    private void selectImage(final OperationVS operationVS) throws Exception {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    FileChooser fileChooser = new FileChooser();
-                    FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter(
-                            "JPG (*.jpg)", Arrays.asList("*.jpg", "*.JPG"));
-                    FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter(
-                            "PNG (*.png)", Arrays.asList("*.png", "*.PNG"));
-                    fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                    File selectedImage = fileChooser.showOpenDialog(null);
-                    if(selectedImage != null){
-                        byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
-                        log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
-                        if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                            log.debug(" - MAX_FILE_SIZE exceeded ");
-                            sendMessageToBrowserApp(ResponseVS.SC_ERROR,
-                                    ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB),
-                                    operationVS.getCallerCallback());
-                        } else sendMessageToBrowserApp(ResponseVS.SC_OK, selectedImage.getAbsolutePath(),
-                                operationVS.getCallerCallback());
-                    } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
-                } catch(Exception ex) {
-                    sendMessageToBrowserApp(ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback());
-                }
-            }
-        });
-    }
-
-    private void receiptCancellation(final OperationVS operationVS) throws Exception {
-        log.debug("receiptCancellation");
-        switch(operationVS.getType()) {
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
-                PlatformImpl.runLater(new Runnable() {
-                    @Override public void run() {
-                        FileChooser fileChooser = new FileChooser();
-                        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
-                                "*" + ContentTypeVS.ZIP.getExtension());
-                        fileChooser.getExtensionFilters().add(extFilter);
-                        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                        File file = fileChooser.showSaveDialog(browserStage);
-                        if(file != null){
-                            operationVS.setFile(file);
-                            browserHelper.processOperationVS(operationVS);
-                        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
-                    }
-                });
-                break;
-            default:
-                log.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
-        }
-    }
-
-    private Node createSpacer() {
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        return spacer;
-    }
-
-    @Override protected void layoutChildren() {
-        double w = getWidth();
-        double h = getHeight();
-        double tbHeight = toolBar.prefHeight(w);
-        layoutInArea(webView,0,0,w,h-tbHeight,0, HPos.CENTER, VPos.CENTER);
-        layoutInArea(toolBar,0,h-tbHeight,w,tbHeight,0,HPos.CENTER,VPos.CENTER);
     }
 
     @Override protected double computeMinWidth(double height) {

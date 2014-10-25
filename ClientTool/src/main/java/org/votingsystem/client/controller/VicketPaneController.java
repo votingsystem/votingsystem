@@ -1,22 +1,27 @@
-package org.votingsystem.client.pane;
+package org.votingsystem.client.controller;
 
 import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Side;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -45,18 +50,29 @@ import java.util.Calendar;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.Listener {
+public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listener {
 
-    private static Logger log = Logger.getLogger(VicketPane.class);
+    private static Logger log = Logger.getLogger(VicketPaneController.class);
 
     private Vicket vicket;
     private VicketServer vicketServer;
-    private Label vicketStatusLbl;
-    private Button sendVicketButton;
+    @FXML private GridPane mainPane;
+    @FXML private Label vicketServerLbl;
+    @FXML private Label vicketHashLbl;
+    @FXML private Label vicketValueLbl;
+    @FXML private Label vicketTagLbl;
+    @FXML private Label dateInfoLbl;
+    @FXML private Label currencyLbl;
+    @FXML private Label vicketStatusLbl;
+    @FXML private ContextMenu contextMenu;
+    @FXML private HBox progressBox;
+    @FXML private ProgressBar progressBar;
+    @FXML private Label progressLbl;
+    @FXML private Label operationsLbl;
     private MessageDialog messageDialog;
-    private HBox progressBox;
-    private ProgressBar progressBar;
-    private Label progressLabel;
+
+    private MenuItem sendMenuItem;
+
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
             try {
@@ -66,12 +82,12 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
                     responseVS = HttpHelper.getInstance().getData(
                             vicketServer.getVicketStatusServiceURL(vicket.getHashCertVS()), null);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        sendVicketButton.setText(responseVS.getMessage());
-                        sendVicketButton.setVisible(true);
+                        sendMenuItem.setText(responseVS.getMessage());
+                        sendMenuItem.setVisible(true);
                     } else {
                         vicketStatusLbl.getStyleClass().add("statusLbl");
                         vicketStatusLbl.setText(responseVS.getMessage());
-                        sendVicketButton.setVisible(false);
+                        sendMenuItem.setVisible(false);
                     }
 
                 }
@@ -81,75 +97,49 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
         }
     };
 
-    public VicketPane(final Vicket vicket) throws ExceptionVS {
-        super();
+    public VicketPaneController(Vicket vicket) {
         this.vicket = vicket;
-        setHgap(10);
-        setVgap(10);
-        setPadding(new Insets(10, 10, 10, 10));
-        vicketStatusLbl = new Label();
-        vicketStatusLbl.setWrapText(true);
-        setHalignment(vicketStatusLbl, HPos.CENTER);
+    }
 
-        Label serverLbl = new Label(vicket.getCertSubject().getVicketServerURL());
-        Label hashLbl = new Label(vicket.getHashCertVS());
-        serverLbl.getStyleClass().add("server");
-        hashLbl.getStyleClass().add("server");
+    public Vicket getVicket () {
+        return vicket;
+    }
 
-        Label vicketValueLbl = new Label(vicket.getAmount().toString() + " " + vicket.getCurrencyCode());
-        vicketValueLbl.getStyleClass().add("vicketValue");
-        setHalignment(vicketValueLbl, HPos.CENTER);
-        Label vicketTagLbl = new Label(Utils.getTagForDescription(vicket.getTag().getName()));
-        vicketTagLbl.getStyleClass().add("tag");
-        setHalignment(vicketTagLbl, HPos.CENTER);
-
-        sendVicketButton = new Button();
-        sendVicketButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-        sendVicketButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                log.debug("sendVicketButton");
+    @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
+        log.debug("initialize");
+        sendMenuItem = new MenuItem("");
+        sendMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        sendMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                 showForm(new Vicket.TransactionVSData("", "", "", true).getJSON());
             }
         });
-        sendVicketButton.setPrefWidth(200);
-        sendVicketButton.setVisible(false);
-
-        ColumnConstraints column1 = new ColumnConstraints();
-        column1.setHgrow(Priority.ALWAYS);
-        ColumnConstraints column2 = new ColumnConstraints();
-        getColumnConstraints().addAll(column1, column2);
-        setHalignment(sendVicketButton, HPos.RIGHT);
-
-        Label vicketDateInfoLbl = new Label(ContextVS.getMessage("dateInfoLbl", DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
-                DateUtils.getDayWeekDateStr(vicket.getValidTo())));
-        vicketDateInfoLbl.getStyleClass().add("dateInfo");
-
-        progressLabel = new Label();
-        progressLabel.setStyle("-fx-font-size: 12;-fx-font-weight: bold;");
-        progressBar = new ProgressBar(0);
-
-        progressBox = new HBox();
-        progressBox.setSpacing(5);
-        progressBox.setAlignment(Pos.CENTER);
-        progressBox.getChildren().addAll(progressLabel, progressBar);
-        progressBox.setVisible(false);
-
-        add(serverLbl, 0, 0);
-        add(hashLbl, 1,0);
-        add(vicketStatusLbl, 0,1);
-        add(vicketValueLbl, 0, 2);
-        add(vicketTagLbl, 0, 3);
-        add(vicketDateInfoLbl, 0, 5);
-        add(progressBox, 0, 6);
-        add(sendVicketButton, 1, 6);
-        setColumnSpan(vicketDateInfoLbl, 2);
-        setColumnSpan(vicketValueLbl, 2);
-        setColumnSpan(vicketTagLbl, 2);
-        setColumnSpan(vicketStatusLbl, 2);
-        setColumnSpan(vicketDateInfoLbl, 2);
-        setColumnSpan(progressBox, 2);
-
+        MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
+        saveMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                System.out.println("saveMenuItem");
+            }
+        });
+        contextMenu.getItems().addAll(sendMenuItem, saveMenuItem);
+        contextMenu.show(vicketValueLbl, Side.BOTTOM, 0, 0);
+        setProgressVisible(false, true);
+        PlatformImpl.runLater(statusChecker);
+        vicketServerLbl.setText(vicket.getVicketServerURL());
+        vicketHashLbl.setText(vicket.getHashCertVS());
+        vicketValueLbl.setText(vicket.getAmount().toPlainString());
+        currencyLbl.setText(vicket.getCurrencyCode());
+        vicketTagLbl.setText(vicket.getTag().getName());
+        operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
+        operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED_DARK));
+        String vicketDateInfoLbl = ContextVS.getMessage("dateInfoLbl", DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
+                DateUtils.getDayWeekDateStr(vicket.getValidTo()));
+        dateInfoLbl.setText(vicketDateInfoLbl);
+        operationsLbl.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                 @Override public void handle(MouseEvent event) {
+                     contextMenu.show(vicketValueLbl, Side.BOTTOM, 0, 0);
+                 }
+             }
+        );
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getVicketServer().getTrustAnchors(), false, Arrays.asList(
@@ -173,37 +163,45 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
             }
             showMessage(msg, Boolean.TRUE);
         }
-
-        PlatformImpl.runLater(statusChecker);
-    }
-
-    public void showMessage(final String message, Boolean isHtml) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if (messageDialog == null) messageDialog = new MessageDialog();
-                if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
-                else messageDialog.showMessage(message);
-            }
-        });
     }
 
     public void showForm(JSONObject formData) {
         PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 JSONFormDialog formDialog = new JSONFormDialog();
-                formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, VicketPane.this);
+                formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, VicketPaneController.this);
             }
         });
     }
 
-    public Vicket getVicket () {
-        return vicket;
+    public static void show(final Vicket vicket) {
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                try {
+                    VicketPaneController vicketPaneController = new VicketPaneController(vicket);
+                    Stage stage = new Stage();
+                    stage.centerOnScreen();
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Vicket.fxml"));
+                    fxmlLoader.setController(vicketPaneController);
+                        stage.setScene(new Scene(fxmlLoader.load()));
+                    stage.setTitle("Vicket - " + vicket.getAmount().toPlainString() + " " + vicket.getCurrencyCode() +
+                            " " + Utils.getTagForDescription(vicket.getTag().getName()));
+                    stage.initModality(Modality.WINDOW_MODAL);
+                    //stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
+                    stage.show();
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+            }
+        });
     }
 
-    private void setProgressVisible(final boolean isProgressVisible, final boolean isButtonVisible) {
+    private void setProgressVisible(final boolean isProgressVisible, final boolean isSendItemVisible) {
         PlatformImpl.runLater(new Runnable() { @Override public void run() {
-            sendVicketButton.setVisible(isButtonVisible);
-            progressBox.setVisible(isProgressVisible);  }
+            progressBox.setVisible(isProgressVisible);
+            sendMenuItem.setVisible(isSendItemVisible);
+        }
         });
     }
 
@@ -213,6 +211,16 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
 
     @Override public ContentTypeVS getContentTypeVS() {
         return ContentTypeVS.VICKET;
+    }
+
+    public void showMessage(final String message, Boolean isHtml) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                messageDialog = new MessageDialog();
+                if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
+                else messageDialog.showMessage(message);
+            }
+        });
     }
 
     @Override public void processJSONForm(JSONObject jsonForm) {
@@ -246,7 +254,7 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
             progressBar.progressProperty().bind(transactionTask.progressProperty());
             transactionTask.messageProperty().addListener(new ChangeListener<String>() {
                 public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                    PlatformImpl.runLater(new Runnable() { @Override public void run() { progressLabel.setText(newValue);}});
+                    PlatformImpl.runLater(new Runnable() { @Override public void run() { progressLbl.setText(newValue);}});
                 }
             });
             new Thread(transactionTask).start();
@@ -256,5 +264,4 @@ public class VicketPane extends GridPane implements DocumentVS, JSONFormDialog.L
             setProgressVisible(false, true);
         }
     }
-
 }

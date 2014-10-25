@@ -83,7 +83,7 @@ public class SettingsDialog {
         HBox footerButtonsBox = new HBox(10);
 
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.close();

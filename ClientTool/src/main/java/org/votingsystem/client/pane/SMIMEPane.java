@@ -62,7 +62,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureOKLbl"));
         } else {
-            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureERRORLbl"));
         }
         String contentStr = null;

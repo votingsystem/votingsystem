@@ -101,10 +101,8 @@
         </div>
 
         <div layout horizontal>
-            <div style="margin: 5px 0 0 0;">
-                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}" style="font-size: 0.8em;">
-                    <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
-                </paper-button raised>
+            <div class="linkVS" style="margin: 5px 0 0 0;" on-click="{{goToWeekBalance}}">
+                <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
             </div>
             <div flex></div>
             <div id="" style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">

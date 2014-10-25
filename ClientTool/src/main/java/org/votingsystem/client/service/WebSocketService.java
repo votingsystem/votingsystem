@@ -180,8 +180,7 @@ public class WebSocketService extends Service<ResponseVS> {
                     final String callback = "updateMessageVSList";
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
-                            browserVS = new BrowserVS();
-                            browserVS.loadURL(targetServer.getMessageVSInboxURL(), callback,
+                            BrowserVS.getInstance().loadURL(targetServer.getMessageVSInboxURL(), callback,
                                     callbackMsg, ContextVS.getMessage("messageVSInboxCaption"), false);
                         }
                     });
@@ -199,7 +198,8 @@ public class WebSocketService extends Service<ResponseVS> {
                 else {
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
-                            browserVS.executeScript("updateMessageVSList(" + message + ")");
+                            log.debug("TODO - SEND MESSAGE TO BROWSER");
+                            //browserVS.executeScript("updateMessageVSList(" + message + ")");
                         }
                     });
                 }

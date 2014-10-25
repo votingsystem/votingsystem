@@ -112,7 +112,7 @@ public class SignDocumentFormStackPane extends StackPane {
             @Override public void handle(ActionEvent actionEvent) {
                 setPasswordDialogVisible(false);
             }});
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {

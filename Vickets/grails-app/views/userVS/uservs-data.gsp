@@ -122,10 +122,7 @@
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {
-            this.asyncFire('core-signal', {name: "votingsystem-innerpage", data: {
-                url:"${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id}});
-            console.log("======== asyncFire")
-            //loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
+            loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))

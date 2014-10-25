@@ -84,7 +84,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
             @Override public void handle(ActionEvent actionEvent) {
                 runningTask.cancel();
             }});
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         buttonHBox.getChildren().addAll(errorsButton, spacer, cancelButton);
 

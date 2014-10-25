@@ -127,7 +127,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         }
     };
 
-
     public String getSMIME(String smimeMessageURL) {
         if(smimeMessageMap ==  null) return null;
         else return smimeMessageMap.get(smimeMessageURL);
@@ -167,7 +166,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 } catch (GeneralSecurityException ex) {
                     log.error(ex.getMessage(), ex);
                 }
-
                 String accessControlServerURL = null;
                 String vicketsServerURL = null;
                 if(loadedFromJar) {
@@ -197,11 +195,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }
         }).start();
-
         mainBox = new VBox();
-
         connectButton = new Button(ContextVS.getMessage("connectLbl"));
-        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_BUTTON_ERROR));
+        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_RED_DARK));
         connectButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 connectButton.setDisable(true);
@@ -210,22 +206,17 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 }
                 toggleConnection();
             }});
-
         messageText = new Text();
         messageText.setWrappingWidth(320);
         messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
         VBox.setMargin(messageText, new Insets(0, 0, 0, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
-
         headerButtonsPane = new GridPane();
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         headerButtonsPane.getChildren().addAll(connectButton, messageText);
         headerButtonsPane.setColumnSpan(headerButtonsPane, 2);
         VBox.setMargin(headerButtonsPane, new Insets(0, 0, 10, 0));
-
         ChoiceBox documentChoiceBox = new ChoiceBox();
         documentChoiceBox.setPrefWidth(150);
         final String[] documentOptions = new String[]{ContextVS.getMessage("documentsLbl"),
@@ -274,7 +265,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         ContextVS.getMessage("vicketUsersLbl"));
             }});
         vicketUsersProceduresButton.setPrefWidth(500);
-
         Button walletButton = new Button(ContextVS.getMessage("walletLbl"));
         walletButton.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         walletButton.setPrefWidth(500);
@@ -283,7 +273,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 openVicketURL(ContextVS.getInstance().getVicketServer().getWalletURL(),
                         ContextVS.getMessage("walletLbl"));
             }});
-
         vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, walletButton);
         vicketOptionsBox.setStyle("-fx-alignment: center;");
         HBox footerButtonsBox = new HBox(10);
@@ -308,31 +297,25 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         openVotingSystemURL(ContextVS.getInstance().getAccessControl().getProceduresPageURL(),
                                 ContextVS.getMessage("votingSystemProceduresLbl"));
                     }
-                adminChoiceBox.getSelectionModel().select(0);
-
+                    adminChoiceBox.getSelectionModel().select(0);
                 }
             });
-
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 VotingSystemApp.this.stop();
             }});
-
         footerButtonsBox.getChildren().addAll(adminChoiceBox, documentChoiceBox, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 10));
-
         mainBox.getChildren().addAll(footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");
         mainBox.setPrefWidth(550);
-
         primaryStage.setScene(new Scene(mainBox));
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
                 "/css/modal-dialog.css").toExternalForm());
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
-
         // allow the UNDECORATED Stage to be dragged around.
         final Node root = primaryStage.getScene().getRoot();
         final Delta dragDelta = new Delta();
@@ -403,7 +386,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() { @Override public void run() { new BrowserVS().loadURL(URL, caption); } });
+        Platform.runLater(new Runnable() {
+            @Override public void run() { BrowserVS.getInstance().newTab(URL, caption, null); }});
     }
 
     private void openVicketURL(final String URL, final String caption) {
@@ -412,7 +396,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() {@Override public void run() { new BrowserVS().loadURL(URL, caption); }});
+        Platform.runLater(new Runnable() {
+            @Override public void run() { BrowserVS.getInstance().newTab(URL, caption, null); }});
     }
 
     private void openSettings() {
@@ -454,7 +439,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
                         messageText.setText("");
-                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_BUTTON_ERROR));
+                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_RED_DARK));
                         connectButton.setText(ContextVS.getMessage("connectLbl"));
                         connectButton.setDisable(false);
                     }
@@ -465,16 +450,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         }
 
     }
-
-    /*private void clickShow(ActionEvent event) {
-        Stage stage = new Stage();
-        Parent root = FXMLLoader.load(YourClassController.class.getResource("YourClass.fxml"));
-        stage.setScene(new Scene(root));
-        stage.setTitle("My modal window");
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
-        stage.show();
-    }*/
 
     class Delta { double x, y; }
 

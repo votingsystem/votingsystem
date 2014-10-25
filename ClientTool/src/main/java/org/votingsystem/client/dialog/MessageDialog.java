@@ -117,7 +117,7 @@ public class MessageDialog {
         messageLabel.setText(message);
         if(ResponseVS.SC_OK == statusCode) {
             messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
-        } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR, 32));
+        } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
         stage.centerOnScreen();
         stage.show();
         stage.toFront();

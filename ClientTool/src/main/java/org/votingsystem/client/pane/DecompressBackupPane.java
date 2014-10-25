@@ -72,7 +72,7 @@ public class DecompressBackupPane extends StackPane {
             @Override public void handle(ActionEvent actionEvent) {
                 runningTask.cancel();
             }});
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_BUTTON_ERROR));
+        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         progressBox.setMargin(cancelButton, new Insets(30, 20, 0, 20));
 
