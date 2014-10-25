@@ -20,6 +20,7 @@ import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.ResponseVS;
 
 
 /**
@@ -135,8 +136,7 @@ public class BrowserVSPane extends StackPane {
 
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
-        passwordVBox.getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
-
+        passwordVBox.getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
         passwordVBox.getStyleClass().add("message-lbl-bold");
         passwordVBox.getStyleClass().add("modal-dialog");
         passwordVBox.setStyle("-fx-background-color: #f9f9f9; -fx-max-height:280px;-fx-max-width:350px;");

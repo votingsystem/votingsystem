@@ -44,32 +44,19 @@
 
                     <template if="{{uservs.state == 'ACTIVE'}}">
                         <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                            <div>
-                                <paper-button raised id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
-                                                     style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-envelope-square"></i> <g:message code="sendMessageVSLbl"/>
-                                </paper-button>
+                            <div class="linkVS" on-click="{{showMessageVSDialog}}">
+                                <i class="fa fa-envelope-square"></i> <g:message code="sendMessageVSLbl"/>
                             </div>
-
-                            <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                                <paper-button raised id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
-                                                     style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
-                                </paper-button>
+                            <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}" class="linkVS"
+                                 on-click="{{makeTransactionVS}}">
+                                <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
                             </div>
-
-                            <div>
-                                <paper-button raised id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
-                                                     style="margin:10px 20px 0px 0px;">
-                                    <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
-                                </paper-button>
+                            <div class="linkVS" on-click="{{goToWeekBalance}}">
+                                <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
                             </div>
-
-                            <div style="display: {{'superuser' == menuType ? 'block':'none'}}">
-                                <paper-button raised id="blockUserVSButton" type="submit"
-                                                     style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
-                                    <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
-                                </paper-button>
+                            <div style="display: {{'superuser' == menuType ? 'block':'none'}}" class="linkVS"
+                                 on-click="{{blockUser}}">
+                                <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
                             </div>
                         </div>
                     </template>
@@ -105,7 +92,6 @@
     <messagevs-send-dialog id="sendMessageDialog" on-message-response="{{sendMessageDialogResponse}}"></messagevs-send-dialog>
 </template>
 <script>
-
     Polymer('uservs-data', {
         isActive:false,
         menuType:null,
@@ -136,7 +122,10 @@
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {
-            loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
+            this.asyncFire('core-signal', {name: "votingsystem-innerpage", data: {
+                url:"${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id}});
+            console.log("======== asyncFire")
+            //loadURL_VS("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))
@@ -147,7 +136,7 @@
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.uservs.name, this.uservs.IBAN , this.uservs.id)
+            this.$.transactionvsForm.init(Operation.FROM_USERVS_TO_USERVS, this.uservs.name, this.uservs.IBAN , this.uservs.id)
             this.page = 1;
         },
         showByIBAN:function(IBAN) {

@@ -138,7 +138,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
 
     public void init() {
         getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                "/resources/css/vicket-pane.css").toExternalForm());
+                "/css/vicket-pane.css").toExternalForm());
     }
 
     private void goNext() {

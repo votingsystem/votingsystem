@@ -2,7 +2,6 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet']"/>">
 </head>
 <body>

@@ -7,13 +7,8 @@
         <style>
             /*Android browser doesn't fetch this properties from vickets.css*/
             .tableHeadervs {
-                margin: 0px 0px 0px 0px;
-                color:#6c0404;
-                border-bottom: 1px solid #6c0404;
-                background: white;
-                font-weight: bold;
-                padding:5px 0px 5px 0px;
-                width: 100%;
+                margin: 0px 0px 0px 0px; color:#6c0404; border-bottom: 1px solid #6c0404;
+                background: white; font-weight: bold; padding:5px 0px 5px 0px; width: 100%;
             }
             .tableHeadervs div { text-align:center; }
             .rowvs { border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px;  width: 100%; }

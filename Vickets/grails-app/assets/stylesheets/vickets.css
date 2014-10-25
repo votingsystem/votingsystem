@@ -295,3 +295,6 @@ fieldset[disabled] .form-control {
 textarea.form-control {
     height: auto;
 }
+
+.linkVS {cursor: pointer; color:#6c0404; margin: 10px;}
+.linkVS:hover {text-decoration: underline;}

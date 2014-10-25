@@ -159,7 +159,7 @@ public class SignDocumentFormStackPane extends StackPane {
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
         passwordVBox.getStylesheets().add(getClass().getResource(
-                "/resources/css/documentSignerPasswordDialog.css").toExternalForm());
+                "/css/documentSignerPasswordDialog.css").toExternalForm());
 
         passwordVBox.getStyleClass().add("message-lbl-bold");
         passwordVBox.getStyleClass().add("modal-dialog");

@@ -31,6 +31,13 @@
                     </div>
                 </div>
             </template>
+            <template if="{{!walletLoaded}}">
+                <div horizontal layout center center-justified>
+                    <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
+                        <i class="fa fa-money"></i> <g:message code="accessToWalletMsg"/>
+                    </paper-button>
+                </div>
+            </template>
         </div>
         <template repeat="{{tag in tagArray}}">
             <vicket-wallet-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-wallet-tag-group>
@@ -44,10 +51,14 @@
             tagGroups:{},
             tagArray:[],
             messageToUser:null,
+            walletLoaded:false,
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
             domReady: function(){
+                this.showPasswdDialog()
+            },
+            showPasswdDialog: function(){
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.WALLET_OPEN)
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
@@ -70,9 +81,7 @@
                     else this.tagGroups[vicket.tag] = [vicket]
                 }
                 this.tagArray = Object.keys(this.tagGroups)
-            },
-            valueChanged:function() {
-                this.amountValue = this.value * 10;
+                this.walletLoaded = true
             }
         });
     </script>

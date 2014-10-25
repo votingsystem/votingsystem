@@ -124,7 +124,7 @@ public class PasswordDialog {
                 footerButtonsBox);
         dialogVBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
 
         dialogVBox.getStyleClass().add("message-lbl-bold");
 

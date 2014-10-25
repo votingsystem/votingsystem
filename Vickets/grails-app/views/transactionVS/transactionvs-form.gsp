@@ -299,7 +299,7 @@
                     this.operationMsg = "<g:message code='transactionVSFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
-                case Operation.FROM_USERVS:
+                case Operation.FROM_USERVS_TO_USERVS:
                     console.log("== FROM_USERVS - isClientToolConnected: " + window['isClientToolConnected'] +
                         " - isAndroid: " + isAndroid())
                     this.operationMsg = "<g:message code='transactionVSFromUserVS'/>"

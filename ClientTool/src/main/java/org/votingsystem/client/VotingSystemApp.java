@@ -245,34 +245,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 documentChoiceBox.getSelectionModel().select(0);
             }
         });
-
-
-
-        /*
-        Button openFileButton = new Button(ContextVS.getMessage("openFileButtonLbl"));
-        openFileButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FOLDER_OPEN));
-        openFileButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                DocumentVSBrowserStackPane.showDialog(null, null);
-
-            }});
-        openFileButton.setPrefWidth(225);
-
-        Button signDocumentButton = new Button(ContextVS.getMessage("signDocumentButtonLbl"));
-        signDocumentButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
-        signDocumentButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                SignDocumentFormPane.showDialog();
-
-            }});
-        signDocumentButton.setPrefWidth(225);
-        GridPane fileOptionsPane = new GridPane();
-        fileOptionsPane.setHgap(10);
-        fileOptionsPane.setStyle("-fx-border-width: 1px; -fx-border-color: #888; -fx-padding: 10px; -fx-border-radius: 2;");
-
-        fileOptionsPane.add(openFileButton, 0, 0);
-        fileOptionsPane.add(signDocumentButton, 2, 0);*/
-
         votingSystemOptionsBox = new VBox(10);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE));
@@ -357,7 +329,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
         primaryStage.setScene(new Scene(mainBox));
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                "/resources/css/modal-dialog.css").toExternalForm());
+                "/css/modal-dialog.css").toExternalForm());
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
 

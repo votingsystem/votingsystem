@@ -95,14 +95,11 @@
 
             <div horizontal layout style="margin: 20px auto;width: 600px;">
                 <div>
-                    <div style="color: #ff0000; font-size: 2.5em;">
+                    <div style="color: #ff0000; font-size: 2.5em;"></div>
 
-                    </div>
-
-                    <paper-button raised on-click="{{showWallet}}" style="font-size: 0.8em;margin:10px 0px 10px 10px;
-                        display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                    <div class="linkVS" on-click="{{showWallet}}" style=" font-size: 1.2em;">
                         <i class="fa fa-money"></i> <g:message code="vicketWalletLbl"/>
-                    </paper-button>
+                    </div>
                 </div>
 
                 <div flex></div>

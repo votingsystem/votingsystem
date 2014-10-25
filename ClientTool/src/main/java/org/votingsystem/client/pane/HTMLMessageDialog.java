@@ -49,7 +49,7 @@ public class HTMLMessageDialog {
         verticalBox.getChildren().addAll(webView, acceptButton);
         verticalBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

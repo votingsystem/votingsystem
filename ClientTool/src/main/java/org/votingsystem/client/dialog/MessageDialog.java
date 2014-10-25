@@ -75,7 +75,7 @@ public class MessageDialog {
         mainBox.getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(mainBox, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

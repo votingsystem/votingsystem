@@ -104,7 +104,7 @@ public class SettingsDialog {
         gridPane.add(footerButtonsBox,0,6);
         gridPane.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(gridPane, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

@@ -90,7 +90,7 @@
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
-            <content id="content"></content>
+            <content></content>
         </vs-navbar>
         <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
@@ -124,7 +124,7 @@
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
                 if(detail.title) this.appTitle = detail.title + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
-                if(detail.url) this.url = detail.url
+                if(detail.url) this.loadURL(detail.url)
                 document.dispatchEvent( new Event('innerPageSignal'));
             },
             loadURL: function(urlToLoad) {
@@ -143,9 +143,7 @@
                     this.fire('item-selected', this.coreSelectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                         window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
-                    } else {
-                        this.loadURL(this.coreSelectorValue)
-                    }
+                    } else this.loadURL(this.coreSelectorValue)
                     this.coreSelectorValue = null
                 }
             },
@@ -153,14 +151,30 @@
                 this.appTitle = appTitle
             },
             ajaxResponse: function(xhrResponse, xhr) {
-                //console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
-                console.log(this.tagName + " - ajax-response - newURL: "  + this.ajaxOptions.url + " - status: " + xhr.status)
-                //this.asyncFire('ajax-response', this.$.ajax.response)
-                if(200 == xhr.status) this.asyncFire('ajax-response', xhrResponse)
-                else {
-                    this.loading = false
-                    showMessageVS(xhrResponse.body.innerHTML, '<g:message code="errorLbl"/>')
+                var ajaxDocument = xhrResponse
+                var links = ajaxDocument.querySelectorAll('link')
+                var numImports = 0
+                for (var i = 0; i < links.length; i++) {
+                    console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
+                    if('import' == links[i].rel) {
+                        ++numImports
+                        if(i == (links.length - 1)) {
+                            links[i].onload = function() {
+                                document.querySelector('#navBar').loading = false;
+                            };
+                        }
+                        document.head.appendChild(links[i]);
+                    }
                 }
+                if(numImports == 0) document.querySelector('#navBar').loading = false;
+                for (var i = 0; i < ajaxDocument.scripts.length; i++) {
+                    var script = document.createElement("script");
+                    script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+                    console.log("script.src: " + script.src)
+                    document.head.appendChild(script);
+                }
+                this.innerHTML = ajaxDocument.body.innerHTML
+                updateLinksVS(document.querySelectorAll("#navBar a"))
             },
             ajaxError: function(e) {
                 console.log(this.tagName + " - ajaxError")
@@ -173,7 +187,6 @@
         });
     </script>
 </polymer-element>
-
 <nav-bar id="navBar" style="display:none;" class="">
     <g:layoutBody/>
 </nav-bar>
@@ -205,7 +218,6 @@
         document.querySelector('#loadingDiv').style.display = 'none';
     });
 
-
     if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {
         console.log("main.gsp - socketvs - message: " + e.detail)
         var socketMessage = e.detail
@@ -218,36 +230,7 @@
     function sendSocketVSMessage(dataJSON) {
         console.log ("sendSocketVSMessage")
         dataJSON.locale = navigator.language
-        document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
+        if(document.querySelector("#socketvs")) document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
     }
-
-    document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
-        var ajaxDocument = e.detail
-        var links = ajaxDocument.querySelectorAll('link')
-        var numImports = 0
-        for (var i = 0; i < links.length; i++) {
-            console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
-            if('import' == links[i].rel) {
-                ++numImports
-                if(i == (links.length - 1)) {
-                    links[i].onload = function() {
-                      document.querySelector('#navBar').loading = false;
-                    };
-                }
-                document.head.appendChild(links[i]);
-            }
-        }
-        if(numImports == 0) document.querySelector('#navBar').loading = false;
-
-        for (var i = 0; i < ajaxDocument.scripts.length; i++) {
-            var script = document.createElement("script");
-            script.innerHTML = ajaxDocument.scripts[i].innerHTML;
-            console.log("script.src: " + script.src)
-            document.head.appendChild(script);
-        }
-        document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
-
-        updateLinksVS(document.querySelectorAll("#navBar a"))
-    });
 </asset:script>
 <asset:deferredScripts/>

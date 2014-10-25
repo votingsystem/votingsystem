@@ -110,7 +110,11 @@ public class BrowserVS extends Region {
                 log.debug("signatureService - OnRunning");
             }
         });
-
+        browserHelper.getSignatureService().setOnCancelled(new EventHandler<WorkerStateEvent>() {
+            @Override public void handle(WorkerStateEvent t) {
+                log.debug("signatureService - OnCancelled");
+            }
+        });
         browserHelper.getSignatureService().setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 log.debug("signatureService - OnFailed");
@@ -122,6 +126,10 @@ public class BrowserVS extends Region {
                 initComponents();
             }
         });
+    }
+
+    public void processResponseVS(OperationVS operationVS) {
+        sendMessageToBrowserApp(operationVS.getStatusCode(), operationVS.getMessage(), operationVS.getCallerCallback());
     }
 
     private void initComponents() {

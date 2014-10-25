@@ -360,6 +360,16 @@ class TransactionVSService {
             return this;
         }
 
+        public TransactionVSRequest getUserVSToUserVSRequest() {
+            if(TypeVS.FROM_USERVS_TO_USERVS != operation) throw new ValidationExceptionVS(this.getClass(),
+                    "Operation expected: 'FROM_USERVS_TO_USERVS' - operation found: " + operation.toString())
+            if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
+                    "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
+            toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
+            if(!toUserVS) throw new ValidationExceptionVS(this.getClass(), "invalid 'toUserIBAN': '${messageJSON.toUserIBAN}'");
+            return this;
+        }
+
         public TransactionVSRequest getBankVSRequest() {
             if(TypeVS.FROM_BANKVS != operation) throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'FROM_BANKVS' - operation found: " + operation.toString())
