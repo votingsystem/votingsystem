@@ -62,7 +62,7 @@ class BackupVSController {
                     BackupRequestVS.withTransaction {backupRequest.save()}
                     mailSenderService.sendBackupMsg(backupRequest)
                     return [responseVS:new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())]
-                }
+                } else return [responseVS:backupGenResponseVS]
             } else {
                 final EventVS event = eventVS
                 final String emailRequest = email

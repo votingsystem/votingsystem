@@ -21,7 +21,7 @@ import java.util.concurrent.Future
 
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"Claim subject", content:"<p>Election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/10/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/11/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
                        numRepresentatives:0, numRepresentativesWithVote:0,
@@ -29,7 +29,7 @@ Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersW
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
-                         userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"CANCELLED",
+                         userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
                          backupRequestEmail:"jgzornoza@gmail.com", event:eventDataMap,
                          dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
                          timer:[active:false, time:"00:00:10"]]

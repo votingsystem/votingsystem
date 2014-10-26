@@ -10,6 +10,7 @@
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
+    <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
@@ -31,6 +32,10 @@
 </body>
 </html>
 <asset:script>
+    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
+        sendSignalVS(e.detail)
+    });
+
     document.addEventListener('polymer-ready', function() {
         document.querySelector('#pageLayoutDiv').style.display = 'block';
         document.querySelector('#loadingDiv').style.display = 'none';

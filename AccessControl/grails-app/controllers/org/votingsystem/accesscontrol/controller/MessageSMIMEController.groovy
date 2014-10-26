@@ -65,6 +65,9 @@ class MessageSMIMEController {
                     case TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST:
                         viewer = "message-smime-representative-anonymousdelegation-request"
                         break;
+                    case TypeVS.ACCESS_REQUEST:
+                        viewer = "message-smime-access-request"
+                        break;
                 }
                 params.operation = signedContentJSON.operation
             }

@@ -29,16 +29,13 @@
                         <template if="{{(eventvstype == 'election')}}">
                             <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
                                     on-change="{{eventVSStateSelect}}" class="form-control">
-
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
                                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-                                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
                             </select>
                         </template>
                         <template if="{{eventvstype == 'claim'}}">
                             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
-                                <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
                                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
@@ -46,17 +43,12 @@
                         </template>
                         <template if="{{eventvstype == 'manifest'}}">
                             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
-                                <option value="" style="color:black;"> - <g:message code="selectManifestsLbl"/> - </option>
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenManifestsLbl"/> - </option>
                                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedManifestsLbl"/> - </option>
                             </select>
                         </template>
                     </div>
-                    <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}"
-                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
-                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
-                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
@@ -83,6 +75,10 @@
                             </div>
                         </template>
                     </div>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}" style="margin: 0 0 100px 0;"
+                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
                 </div>
             </section>
 

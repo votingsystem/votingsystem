@@ -8,6 +8,7 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style></style>
+        <vs-innerpage-signal title="<g:message code="pollLbl"/>"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <template if="{{'admin' == menuType}}">
                 <div class="text-center" style="">
@@ -59,12 +60,14 @@
                         <legend><g:message code="pollFieldLegend"/></legend>
                         <div>
                             <template if="{{'ACTIVE' == eventvs.state}}">
-                                <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
-                                    <div class="btn btn-default btn-lg" on-click="{{showConfirmDialog}}"
-                                         style="width: 90%;margin: 10px auto 30px auto; border: 2px solid #6c0404; padding: 10px; font-size: 1.2em;" >
-                                        {{optionvs.content}}
-                                    </div>
-                                </template>
+                                <div vertical layout>
+                                    <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
+                                        <paper-button raised on-click="{{showConfirmDialog}}"
+                                                      style="margin: 30px 0px 0px 5px;font-size: 1.2em; border: 1px solid #6c0404;">
+                                            {{optionvs.content}}
+                                        </paper-button>
+                                    </template>
+                                </div>
                             </template>
                             <template if="{{'ACTIVE' != eventvs.state}}">
                                 <template repeat="{{optionvs in eventvs.fieldsEventVS}}">

@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 
-<polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-access-request" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -16,8 +16,14 @@
         }
         </style>
         <div layout vertical style="margin: 10px 30px; max-width:1000px;">
-            <div class="pageHeader"  layout horizontal center center-justified>
-                <h3>{{smimeMessageContent.operation}}</h3>
+            <div layout horizontal center center-justified>
+                <div flex></div>
+                <div class="pageHeader"><h3><g:message code="accessRequestLbl"/></h3></div>
+                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
+                    <paper-button raised on-click="{{checkReceipt}}">
+                        <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                    </paper-button>
+                </div>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
@@ -30,22 +36,20 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <vs-html-echo html="{{smimeMessageContentStr}}"></vs-html-echo>
+            <div><b><g:message code="eventVSLbl"/>: </b>
+                <a href="{{smimeMessageContent.eventURL}}?mode=simplePage">{{smimeMessageContent.eventURL}}</a>
+            </div>
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
-                    <div style="margin:10px 0px 10px 0px;">
-                        <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
-                        </paper-button>
-                    </div>
+
                     <div flex></div>
                 </div>
             </template>
         </div>
     </template>
     <script>
-        Polymer('message-smime', {
+        Polymer('message-smime-access-request', {
             publish: {
                 smimeMessageContent: {value: {}}
             },
@@ -64,7 +68,6 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                this.smimeMessageContentStr = JSON.stringify(this.smimeMessageContent)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)

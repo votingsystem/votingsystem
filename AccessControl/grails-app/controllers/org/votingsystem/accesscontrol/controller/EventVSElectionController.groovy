@@ -4,7 +4,6 @@ import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 /**
@@ -71,6 +70,7 @@ class EventVSElectionController {
                     render(view:"eventVSElection", model: [eventMap: eventVSService.getEventVSMap(eventVS)])
                 }
             }
+            return false
         }
         def resultList
         def eventsVSMap = new HashMap()

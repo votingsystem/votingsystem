@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
@@ -53,15 +54,15 @@ class EventVSElectionService {
                 dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
                 dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
         responseVS = eventVSService.setEventDatesState(eventVS)
-        if(ResponseVS.SC_OK != responseVS.statusCode) {
-            log.error "$methodName - EVENT DATES ERROR - ${responseVS.message}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
-                    type:TypeVS.ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
-        } else eventVS.setState(null)
+        if(ResponseVS.SC_OK != responseVS.statusCode) throw new ValidationExceptionVS(
+                responseVS.message, MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
+        else if(EventVS.State.TERMINATED ==  eventVS.state) throw new ValidationExceptionVS(
+                messageSource.getMessage('eventFinishedErrorMsg', [DateUtils.getDayWeekDateStr(eventVS.dateFinish)].toArray(),
+                locale), MetaInfMsg.getErrorMsg(methodName, "eventVSFinished"))
         eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
         messageJSON.controlCenterURL = systemService.getControlCenter().serverURL
         messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
-                                     name:grailsApplication.config.VotingSystem.serverName] as JSONObject
+                 name:grailsApplication.config.VotingSystem.serverName] as JSONObject
         if (messageJSON.tags) {
             Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
             if(tagSet) eventVS.setTagVSSet(tagSet)
