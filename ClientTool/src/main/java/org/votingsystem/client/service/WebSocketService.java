@@ -180,7 +180,7 @@ public class WebSocketService extends Service<ResponseVS> {
                     final String callback = "updateMessageVSList";
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
-                            BrowserVS.getInstance().loadURL(targetServer.getMessageVSInboxURL(), callback,
+                            BrowserVS.getInstance().newTab(targetServer.getMessageVSInboxURL(), callback,
                                     callbackMsg, ContextVS.getMessage("messageVSInboxCaption"), false);
                         }
                     });

@@ -18,16 +18,12 @@ import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -40,7 +36,6 @@ public class Utils {
 
     public static final String COLOR_BUTTON_OK = "#388746";
     public static final String COLOR_RED_DARK = "#6c0404";
-
 
     private static Logger log = Logger.getLogger(Utils.class);
 

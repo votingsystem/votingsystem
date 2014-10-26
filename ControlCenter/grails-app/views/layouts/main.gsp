@@ -24,6 +24,7 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->

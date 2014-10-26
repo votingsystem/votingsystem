@@ -10,17 +10,14 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -32,7 +29,6 @@ import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -56,16 +52,17 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -74,11 +71,12 @@ import java.util.*;
 public class BrowserVS extends Region implements WebKitHost {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
+    private static final int BROWSER_WIDTH = 1200;
+    private static final int BROWSER_HEIGHT = 1000;
+    private static final String TAB_EMPTY_CAPTION = "          ";
 
     private Stage browserStage;
-    private HBox toolBar;
     private Map<String, WebView> webViewMap = new HashMap<>();
-    private VBox mainVBox;
     private TextField locationField = new TextField("");
     private final BrowserVSPane browserHelper;
     private TabPane tabPane;
@@ -109,7 +107,6 @@ public class BrowserVS extends Region implements WebKitHost {
                 });
             }
         });
-
         browserHelper.getSignatureService().setOnRunning(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 log.debug("signatureService - OnRunning");
@@ -128,10 +125,6 @@ public class BrowserVS extends Region implements WebKitHost {
         initComponents();
     }
 
-    public void processResponseVS(OperationVS operationVS) {
-        sendMessageToBrowser(operationVS.getStatusCode(), operationVS.getMessage(), operationVS.getCallerCallback());
-    }
-
     private void initComponents() {
         log.debug("initComponents");
         browserStage = new Stage();
@@ -145,7 +138,7 @@ public class BrowserVS extends Region implements WebKitHost {
                 log.debug("browserStage.setOnCloseRequest");
             }
         });
-        mainVBox = new VBox();
+        VBox mainVBox = new VBox();
         prevButton = new Button();
         final Button forwardButton = new Button();
         final Button reloadButton = new Button();
@@ -190,18 +183,15 @@ public class BrowserVS extends Region implements WebKitHost {
                         if(locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
                             targetURL = locationField.getText().trim();
                         } else targetURL = "http://" + locationField.getText().trim();
-                        //loadURL(targetURL, null);
                         ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
                     }
                 }
             }
         });
-        toolBar = new HBox();
+        HBox toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
-
-        //mainVBox.getChildren().addAll(toolBar, webView);
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -210,9 +200,9 @@ public class BrowserVS extends Region implements WebKitHost {
         VBox.setVgrow(tabPane, Priority.ALWAYS);
         mainVBox.getChildren().addAll(toolBar, tabPane);
         browserHelper.getChildren().add(0, mainVBox);
-        browserStage.setScene(new Scene(browserHelper, Color.web("#666970")));
-        browserStage.setWidth(1200);
-        browserStage.setHeight(1000);
+        browserStage.setScene(new Scene(browserHelper));
+        browserStage.setWidth(BROWSER_WIDTH);
+        browserStage.setHeight(BROWSER_HEIGHT);
         getChildren().addListener(new ListChangeListener<Node>() {
             @Override public void onChanged(Change<? extends Node> c) {}
         });
@@ -245,11 +235,11 @@ public class BrowserVS extends Region implements WebKitHost {
                             locationField.getText().length());
                 }
                 WebHistory.Entry selectedEntry = history.getEntries().get(history.getEntries().size() - 1);
-                log.debug("selectedEntry: " + selectedEntry);
+                log.debug("history change - selectedEntry: " + selectedEntry);
                 String newURL = selectedEntry.getUrl();
                 if(!newURL.contains("?")) newURL = newURL + params;
-                tabPane.getSelectionModel().getSelectedItem().setText(selectedEntry.getTitle() == null? "     " :
-                        selectedEntry.getTitle());
+                if(history.getEntries().size() > 1) tabPane.getSelectionModel().getSelectedItem().setText(
+                        selectedEntry.getTitle() == null? TAB_EMPTY_CAPTION : selectedEntry.getTitle());
                 locationField.setText(newURL);
             }
         });
@@ -298,15 +288,14 @@ public class BrowserVS extends Region implements WebKitHost {
                         getContent()).getEngine().getHistory().getEntries();
                 if(entries.size() > 0){
                     WebHistory.Entry selectedEntry = entries.get(entries.size() -1);
-                    String location = selectedEntry.getUrl();
-                    newTab.setText(selectedEntry.getTitle() == null? "     " : selectedEntry.getTitle());
-                    log.debug("selectedIdx: " + selectedIdx + "- selectedEntry: " + selectedEntry);
-                    locationField.setText(location);
+                    if(entries.size() > 1) newTab.setText(
+                            selectedEntry.getTitle() == null? TAB_EMPTY_CAPTION : selectedEntry.getTitle());
+                    log.debug("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
+                    locationField.setText(selectedEntry.getUrl());
                 }
             }
         });
-        if(tabCaption != null) newTab.setText(tabCaption);
-        else newTab.setText("          ");
+        newTab.setText((tabCaption != null)?tabCaption:TAB_EMPTY_CAPTION);
         newTab.setContent(webView);
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);
@@ -314,7 +303,6 @@ public class BrowserVS extends Region implements WebKitHost {
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     webView.getEngine().load(URL);
-                    if(tabCaption != null) browserStage.setTitle(tabCaption);
                     browserStage.show();
                 }
             });
@@ -322,8 +310,7 @@ public class BrowserVS extends Region implements WebKitHost {
         return webView;
     }
 
-    @Override
-    public void sendMessageToBrowser(int statusCode, String message, String callerCallback) {
+    @Override public void sendMessageToBrowser(int statusCode, String message, String callerCallback) {
         String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
         log.debug("sendMessageToBrowser - statusCode: " + statusCode + " - message: " + logMsg);
         Map resultMap = new HashMap();
@@ -344,8 +331,7 @@ public class BrowserVS extends Region implements WebKitHost {
         }
     }
 
-    @Override
-    public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
+    @Override public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
         String message = messageJSON.toString();
         String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
         log.debug("sendMessageToBrowser - messageJSON: " + logMsg);
@@ -367,6 +353,10 @@ public class BrowserVS extends Region implements WebKitHost {
         browserHelper.processOperationVS(operationVS);
     }
 
+    public void processResponseVS(OperationVS operationVS) {
+        sendMessageToBrowser(operationVS.getStatusCode(), operationVS.getMessage(), operationVS.getCallerCallback());
+    }
+
     public void showMessage(ResponseVS responseVS) {
         String message = responseVS.getMessage() == null? "":responseVS.getMessage();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
@@ -380,17 +370,16 @@ public class BrowserVS extends Region implements WebKitHost {
         });
     }
 
-    public void loadURL(final String urlToLoad, String callback, String callbackMsg, final String caption,
+    public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,
             final boolean isToolbarVisible) {
-        log.debug("loadURL: " + urlToLoad);
         final StringBuilder jsCommand = new StringBuilder();
         if(callback != null && callbackMsg != null) jsCommand.append(callback + "(" + callbackMsg + ")");
         else if(callback != null) jsCommand.append(callback + "()");;
-        log.debug("jsCommand: " + jsCommand.toString());
+        log.debug("newTab - urlToLoad: " + urlToLoad + " - jsCommand: " + jsCommand.toString());
         newTab(urlToLoad, caption, "".equals(jsCommand.toString()) ? null : jsCommand.toString());
     }
 
-    public class JavafxClient {    // JavaScript interface object
+    public class JavafxClient {// JavaScript interface object
         private WebView webView;
         public JavafxClient(WebView webView) {
             this.webView = webView;
@@ -471,14 +460,6 @@ public class BrowserVS extends Region implements WebKitHost {
                 return result;
             }
         }
-    }
-
-    @Override protected double computeMinWidth(double height) {
-        return 1000;
-    }
-
-    @Override protected double computeMinHeight(double width) {
-        return 1000;
     }
 
 }

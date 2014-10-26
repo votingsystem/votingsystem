@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
