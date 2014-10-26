@@ -73,7 +73,6 @@ public class BrowserVS extends Region implements WebKitHost {
     private static Logger log = Logger.getLogger(BrowserVS.class);
     private static final int BROWSER_WIDTH = 1200;
     private static final int BROWSER_HEIGHT = 1000;
-    private static final String TAB_EMPTY_CAPTION = "          ";
 
     private Stage browserStage;
     private Map<String, WebView> webViewMap = new HashMap<>();
@@ -199,6 +198,7 @@ public class BrowserVS extends Region implements WebKitHost {
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
         mainVBox.getChildren().addAll(toolBar, tabPane);
+        mainVBox.getStylesheets().add(((Object)this).getClass().getResource("/css/browservs.css").toExternalForm());
         browserHelper.getChildren().add(0, mainVBox);
         browserStage.setScene(new Scene(browserHelper));
         browserStage.setWidth(BROWSER_WIDTH);
@@ -238,8 +238,8 @@ public class BrowserVS extends Region implements WebKitHost {
                 log.debug("history change - selectedEntry: " + selectedEntry);
                 String newURL = selectedEntry.getUrl();
                 if(!newURL.contains("?")) newURL = newURL + params;
-                if(history.getEntries().size() > 1) tabPane.getSelectionModel().getSelectedItem().setText(
-                        selectedEntry.getTitle() == null? TAB_EMPTY_CAPTION : selectedEntry.getTitle());
+                if(history.getEntries().size() > 1 && selectedEntry.getTitle() != null) tabPane.getSelectionModel().
+                        getSelectedItem().setText(selectedEntry.getTitle());
                 locationField.setText(newURL);
             }
         });
@@ -288,14 +288,13 @@ public class BrowserVS extends Region implements WebKitHost {
                         getContent()).getEngine().getHistory().getEntries();
                 if(entries.size() > 0){
                     WebHistory.Entry selectedEntry = entries.get(entries.size() -1);
-                    if(entries.size() > 1) newTab.setText(
-                            selectedEntry.getTitle() == null? TAB_EMPTY_CAPTION : selectedEntry.getTitle());
+                    if(entries.size() > 1 &&  selectedEntry.getTitle() != null) newTab.setText(selectedEntry.getTitle());
                     log.debug("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
                     locationField.setText(selectedEntry.getUrl());
                 }
             }
         });
-        newTab.setText((tabCaption != null)?tabCaption:TAB_EMPTY_CAPTION);
+        if(tabCaption != null) newTab.setText(tabCaption);
         newTab.setContent(webView);
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);
@@ -351,6 +350,12 @@ public class BrowserVS extends Region implements WebKitHost {
 
     @Override public void processOperationVS(OperationVS operationVS) {
         browserHelper.processOperationVS(operationVS);
+    }
+
+    @Override public void processSignalVS(Map signalData) {//{title:, url:}
+        log.debug("processSignalVS - title: " + signalData.get("title"));
+        if(signalData.containsKey("title")) tabPane.getSelectionModel().getSelectedItem().setText(
+                (String)signalData.get("title"));
     }
 
     public void processResponseVS(OperationVS operationVS) {
@@ -450,6 +455,9 @@ public class BrowserVS extends Region implements WebKitHost {
                                 (String) operationVS.getDocument().get("stringFormat"));
                         else result = DateUtils.getDayWeekDateStr(dateToFormat);
                         return result;
+                    case SIGNAL_VS:
+                        processSignalVS(operationVS.getDocument());
+                        break;
                     default:
                         return "Unknown operation: '" + operationVS.getType() + "'";
                 }

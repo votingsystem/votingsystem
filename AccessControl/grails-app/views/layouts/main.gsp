@@ -126,6 +126,7 @@
             },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
+                sendSignalVS(detail)
                 var sufix = ""
                 if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'

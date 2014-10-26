@@ -15,6 +15,7 @@ var Operation = {
     TERMINATED: "TERMINATED",
     ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION",
     EVENT_CANCELLATION: "EVENT_CANCELLATION",
+    SIGNAL_VS:"SIGNAL_VS",
     NEW_REPRESENTATIVE:"NEW_REPRESENTATIVE",
     REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION",
     ANONYMOUS_REPRESENTATIVE_SELECTION:"ANONYMOUS_REPRESENTATIVE_SELECTION",
@@ -376,6 +377,16 @@ VotingSystemClient.call = function (messageJSON) {
     } catch(e) {
         console.log(e)
     }
+}
+
+function sendSignalVS(signalData, callback) {
+    var result
+    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SIGNAL_VS)
+    webAppMessage.document = signalData
+    webAppMessage.setCallback(callback)
+    try {
+        result = VotingSystemClient.call(webAppMessage);
+    } catch(ex) { } finally { return result;}
 }
 
 window['isClientToolConnected'] = false
