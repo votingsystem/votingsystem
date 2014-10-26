@@ -24,11 +24,11 @@ class EventVSElectionController {
      * @return La página principal de la aplicación web de votación.
      */
     def elections() {
-        render(view:"elections" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+        render(view:"elections")
     }
 
     def editor() {
-        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+        render(view:"editor")
     }
 
     /**
@@ -68,8 +68,7 @@ class EventVSElectionController {
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     render eventVSService.getEventVSMap(eventVS) as JSON
                 } else {
-                    render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
-                            eventMap: eventVSService.getEventVSMap(eventVS)])
+                    render(view:"eventVSElection", model: [eventMap: eventVSService.getEventVSMap(eventVS)])
                 }
             }
         }
@@ -101,7 +100,7 @@ class EventVSElectionController {
         }
         if(request.contentType?.contains("json")) {
             render eventsVSMap as JSON
-        } else render(view:"index" , model:[eventsVSMap:eventsVSMap, selectedSubsystem:SubSystemVS.VOTES.toString()])
+        } else render(view:"index" , model:[eventsVSMap:eventsVSMap])
 	}
 	
 	/**

@@ -54,8 +54,7 @@ class EventVSClaimController {
 					return [responseVS: new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                             data:eventVSService.getEventVSMap(eventVS))]
 				} else {
-					render(view:"eventVSClaim", model: [selectedSubsystem:SubSystemVS.CLAIMS.toString(),
-						eventMap: eventVSService.getEventVSMap(eventVS)])
+					render(view:"eventVSClaim", model: [eventMap: eventVSService.getEventVSMap(eventVS)])
 				}
 			}
         } else if(request.contentType?.contains("json")){
@@ -92,11 +91,11 @@ class EventVSClaimController {
                 eventsVSMap.eventVS.add(eventVSService.getEventVSClaimMap(eventVSItem))
             }
             render eventsVSMap as JSON
-        } else render(view:"main" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+        } else render(view:"main")
     }
 
     def editor() {
-        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+        render(view:"editor")
     }
     
 	/**

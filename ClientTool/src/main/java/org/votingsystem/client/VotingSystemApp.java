@@ -246,8 +246,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
 
         vicketOptionsBox = new VBox(10);
-        Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("vicketUsersLbl"));
-        vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CREDIT_CARD));
+        Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
+
+        vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
         vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVicketURL(ContextVS.getInstance().getVicketServer().getUserProceduresPageURL(),
@@ -339,7 +340,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 if(available) {
                     mainBox.getChildren().add((mainBox.getChildren().size() - 1), vicketOptionsBox);
                     mainBox.getChildren().add(0, headerButtonsPane);
-
                 } else {
                     if(mainBox.getChildren().contains(vicketOptionsBox)) {
                         mainBox.getChildren().remove(vicketOptionsBox);
@@ -358,15 +358,15 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
-                    mainBox.getChildren().add(1, votingSystemOptionsBox);
+                    mainBox.getChildren().add(0, votingSystemOptionsBox);
                 } else {
                     if(mainBox.getChildren().contains(votingSystemOptionsBox)) {
                         mainBox.getChildren().remove(votingSystemOptionsBox);
                     }
                 }
+                primaryStage.sizeToScene();
             }
         });
-
     }
 
     private void openVotingSystemURL(final String URL, final String caption) {

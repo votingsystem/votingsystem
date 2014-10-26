@@ -56,8 +56,7 @@ class EventVSElectionController {
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     render eventVSElectionService.getEventVSElectionMap(eventVS) as JSON
                 } else {
-                    render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
-                                   eventMap: eventVSElectionService.getEventVSMap(eventVS)])
+                    render(view:"eventVSElection", model: [eventMap: eventVSElectionService.getEventVSElectionMap(eventVS)])
                 }
             }
         } else if(request.contentType?.contains("json")) {
@@ -87,7 +86,7 @@ class EventVSElectionController {
             }
             def eventsVSMap = [eventVS:[], offset:params.offset, max:params.max, totalCount:resultList?.totalCount]
             resultList.each {eventVSItem ->
-                eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem, request.locale).eventVS
+                eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem).eventVS
                 eventsVSMap.eventVS.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
             }
             render eventsVSMap as JSON

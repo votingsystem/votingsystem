@@ -18,7 +18,7 @@ class RepresentativeController {
 	 * @return Página a partir de la que se pueden crear representantes.
 	 */
 	def newRepresentative() {
-		render(view:"newRepresentative" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+		render(view:"newRepresentative")
 	}
 	
 	/**
@@ -49,7 +49,7 @@ class RepresentativeController {
                     render resultMap as JSON
                 }
             }
-        } else render(view:"editRepresentative" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+        } else render(view:"editRepresentative")
 	}
 
 	/**
@@ -57,7 +57,7 @@ class RepresentativeController {
 	 * @return Página de la sección de administración PARA representantes.
 	 */
 	def representativeAdmin() {
-		render(view:"representativeAdmin" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+		render(view:"representativeAdmin")
 	}
 	
 	/**
@@ -81,8 +81,7 @@ class RepresentativeController {
 				if(request.contentType?.contains('json')) {
 					render representativeMap as JSON
 				} else {
-					render(view:"representative", model: [selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString(),
-                                  representativeMap:representativeMap])
+					render(view:"representative", model: [representativeMap:representativeMap])
 				}
 			} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR,
                         message(code:'representativeIdErrorMsg', args:[params.id]))]
@@ -102,7 +101,7 @@ class RepresentativeController {
                 representativeMap.representatives.add(representativeService.getRepresentativeDetailedMap(representative))
             }
             render representativeMap as JSON
-		} else render(view:"index" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+		} else render(view:"index")
 	}
 	
 	/**

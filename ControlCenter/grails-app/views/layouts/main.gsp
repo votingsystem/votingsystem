@@ -28,7 +28,7 @@
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->
-        <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
+        <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}"></core-signals>
         <vs-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
@@ -49,7 +49,7 @@
                     </core-selector>
                 </core-menu>
             </core-header-panel>
-            <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
+            <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content id="content"></content>
         </vs-navbar>
         <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
@@ -74,14 +74,21 @@
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
             },
             innerPageSignal:function(e, detail, sender) {
-                this.url = detail;
+                console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
+                var sufix = ""
+                if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
+                if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
+                if(detail.title) this.appTitle = detail.title + sufix
+                if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
+                if(detail.url) this.loadURL(detail.url)
+                document.dispatchEvent( new Event('innerPageSignal'));
             },
             urlChanged: function() {
                 this.loadURL(this.url)
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
-                history.pushState(null, null, this.url);
+                history.pushState(null, null, urlToLoad);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 this.ajaxOptions.url = newURL
                 this.ajaxOptions.callback = this.ajaxResponse.bind(this)
@@ -107,14 +114,30 @@
                 this.appTitle = appTitle
             },
             ajaxResponse: function(xhrResponse, xhr) {
-                //console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
-                console.log(this.tagName + " - ajax-response - newURL: "  + this.ajaxOptions.url + " - status: " + xhr.status)
-                //this.asyncFire('ajax-response', this.$.ajax.response)
-                if(200 == xhr.status) this.asyncFire('ajax-response', xhrResponse)
-                else {
-                    this.loading = false
-                    showMessageVS(xhrResponse.body.innerHTML, '<g:message code="errorLbl"/>')
+                var ajaxDocument = xhrResponse
+                var links = ajaxDocument.querySelectorAll('link')
+                var numImports = 0
+                for (var i = 0; i < links.length; i++) {
+                    console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
+                    if('import' == links[i].rel) {
+                        ++numImports
+                        if(i == (links.length - 1)) {
+                            links[i].onload = function() {
+                                document.querySelector('#navBar').loading = false;
+                            };
+                        }
+                        document.head.appendChild(links[i]);
+                    }
                 }
+                if(numImports == 0) document.querySelector('#navBar').loading = false;
+                for (var i = 0; i < ajaxDocument.scripts.length; i++) {
+                    var script = document.createElement("script");
+                    script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+                    console.log("script.src: " + script.src)
+                    document.head.appendChild(script);
+                }
+                this.innerHTML = ajaxDocument.body.innerHTML
+                updateLinksVS(document.querySelectorAll("#navBar a"))
             },
             ajaxError: function(e) {
                 console.log(this.tagName + " - ajaxError")
@@ -142,34 +165,8 @@
 </body>
 </html>
 <asset:script>
-    var selectedSubsystem = "${selectedSubsystem}"
-    console.log("selectedSubsystem : " + selectedSubsystem)
-    if(SubSystem.VOTES == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSElection')}"
-        selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
-    } else if(SubSystem.CLAIMS == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSClaim')}"
-        selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
-    } else if(SubSystem.MANIFESTS == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSManifest')}"
-        selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
-    } else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'representative')}"
-        selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
-    } else if(SubSystem.FEEDS == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'subscriptionVS', action: 'feeds')}"
-        selectedSubsystemText = "<g:message code="subscriptionsPageLbl"/>"
-    } else {
-        console.log("### unknown subsytem -> " + selectedSubsystem)
-        selectedSubsystemText = "<g:message code="votingsystemPageLbl"/>"
-    }
-
-    document.addEventListener('votingsystem-signal-innerPage', function(e) {
-        console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
-        document.querySelector('#navBar').url = e.detail
-    });
-
     window.addEventListener('WebComponentsReady', function(e) {  });
+    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {});
 
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
@@ -179,35 +176,6 @@
     document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
         document.querySelector('#navBar').style.display = 'block';
         document.querySelector('#loadingDiv').style.display = 'none';
-    });
-
-    document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
-        var ajaxDocument = e.detail
-        var links = ajaxDocument.querySelectorAll('link')
-        var numImports = 0
-        for (var i = 0; i < links.length; i++) {
-            console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
-            if('import' == links[i].rel) {
-                ++numImports
-                if(i == (links.length - 1)) {
-                    links[i].onload = function() {
-                      document.querySelector('#navBar').loading = false;
-                    };
-                }
-                document.head.appendChild(links[i]);
-            }
-        }
-        if(numImports == 0) document.querySelector('#navBar').loading = false;
-
-        for (var i = 0; i < ajaxDocument.scripts.length; i++) {
-            var script = document.createElement("script");
-            script.innerHTML = ajaxDocument.scripts[i].innerHTML;
-            console.log("script.src: " + script.src)
-            document.head.appendChild(script);
-        }
-        document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
-
-        updateLinksVS(document.querySelectorAll("#navBar a"))
     });
 </asset:script>
 <asset:deferredScripts/>

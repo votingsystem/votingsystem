@@ -243,7 +243,7 @@
                 this.isAdminView = false
             }
             this.$.userList.url = "${createLink(controller: 'groupVS', action:'')}/" + this.groupvs.userVS.id + "/users"
-            this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
+            this.fire('core-signal', {name: "vs-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
 
             console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
                 " - menuType: " + menuType)

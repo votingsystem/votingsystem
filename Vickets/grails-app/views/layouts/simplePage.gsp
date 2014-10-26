@@ -39,7 +39,7 @@
         updateMenuLinks()
     });
 
-    document.querySelector('#coreSignals').addEventListener('core-signal-votingsystem-innerpage', function(e) {
+    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
         if(e.detail.title) document.querySelector('#appTitle').innerHTML = e.detail.title
         document.dispatchEvent( new Event('innerPageSignal'));
     });

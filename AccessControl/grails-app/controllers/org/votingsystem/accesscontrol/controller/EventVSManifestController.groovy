@@ -50,8 +50,7 @@ class EventVSManifestController {
                         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                                 data:eventVSService.getEventVSMap(eventVS))]
                     } else {
-                        render(view:"eventVSManifest", model: [ selectedSubsystem:SubSystemVS.MANIFESTS.toString(),
-                                eventMap:eventVSService.getEventVSMap(eventVS)])
+                        render(view:"eventVSManifest", model: [eventMap:eventVSService.getEventVSMap(eventVS)])
                     }
                 } else {
                     return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
@@ -62,7 +61,7 @@ class EventVSManifestController {
 	}
 
     def editor() {
-        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+        render(view:"editor")
     }
 
 	/**
@@ -277,7 +276,7 @@ class EventVSManifestController {
                 eventVSItem = eventVSService.checkEventVSDates(eventVSItem).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
             render eventsVSMap as JSON
-        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+        } else render(view:"index")
     }
 	
 	

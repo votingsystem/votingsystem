@@ -17,7 +17,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
 
@@ -31,7 +31,7 @@
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->
-        <core-signals on-core-signal-votingsystem-innerpage="{{innerPageSignal}}"></core-signals>
+        <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}"></core-signals>
         <vs-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
@@ -203,11 +203,7 @@
 </html>
 <asset:script>
     window.addEventListener('WebComponentsReady', function(e) {  });
-    document.querySelector('#coreSignals').addEventListener('core-signal-votingsystem-innerpage', function(e) {
-        console.log("simplePage.gsp - innerPageSignal: " + e.detail)
-        var message = e.detail
-
-    });
+    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {});
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
         updateLinksVS(document.getElementsByTagName('a'))

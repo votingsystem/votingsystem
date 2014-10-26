@@ -254,7 +254,7 @@ class SubscriptionVSController {
 	}
 
     def feeds() {
-        render(view:"feeds" , model:[selectedSubsystem:SubSystemVS.FEEDS.toString()])
+        render(view:"feeds")
     }
 
     /**

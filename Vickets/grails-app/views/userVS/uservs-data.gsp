@@ -115,7 +115,7 @@
             if('BANKVS' == this.uservs.type) uservsType = "<g:message code="bankVSLbl"/>"
             if('USER' == this.uservs.type) uservsType = "<g:message code="userLbl"/>"
             if('SYSTEM' == this.uservs.type) uservsType = "<g:message code="systemLbl"/>"
-            this.fire('core-signal', {name: "votingsystem-innerpage", data: {title:uservsType}});
+            this.fire('core-signal', {name: "vs-innerpage", data: {title:uservsType}});
         },
         userVSDataChanged:function() {
             //console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))

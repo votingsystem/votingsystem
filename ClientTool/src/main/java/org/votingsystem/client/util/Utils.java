@@ -39,11 +39,16 @@ public class Utils {
 
     private static Logger log = Logger.getLogger(Utils.class);
 
-    private static GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+    private static GlyphFont fontAwesome = new GlyphFont("FontAwesome", 16,
+           Utils.class.getResourceAsStream("/css/fontawesome-webfont.ttf"));
 
 
     public static Glyph getImage(FontAwesome.Glyph font) {
         return fontAwesome.create(font).color(Color.web(COLOR_BUTTON_OK));
+    }
+
+    public static Glyph getImage(String unicode) {
+        return fontAwesome.create(unicode).color(Color.web(COLOR_BUTTON_OK));
     }
 
     public static Glyph getImage(FontAwesome.Glyph font, double size) {
