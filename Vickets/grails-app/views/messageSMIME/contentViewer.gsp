@@ -34,6 +34,7 @@
     document.addEventListener('polymer-ready', function() {
         console.log("receiptViewer - polymer-ready")
         viewer = document.createElement('${viewer}');
+        sendSignalVS({title:"<g:message code="signedDocumentLbl"/>"})
         document.querySelector("#voting_system_page").appendChild(viewer)
         loadContent()
     });

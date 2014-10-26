@@ -58,7 +58,6 @@
                                 <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'editor')}">
                                     <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
                                 </paper-item>-->
-
                                 <paper-item data-href="${createLink(controller: 'representative')}">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
                                 </paper-item>
@@ -68,7 +67,6 @@
                                 <paper-item data-href="${createLink(controller: 'representative', action:'edit')}">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="editRepresentativeLbl"/>
                                 </paper-item>
-
                             <!--</template>-->
                         </g:if>
                         <g:else>
@@ -88,14 +86,12 @@
                             <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
                                 <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
-
                             <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
                                 <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
                                 <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
                             </paper-item>-->
-
                         </g:else>
                     </core-selector>
                 </core-menu>

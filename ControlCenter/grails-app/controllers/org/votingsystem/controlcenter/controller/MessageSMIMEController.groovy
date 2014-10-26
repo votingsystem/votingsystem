@@ -27,20 +27,18 @@ class MessageSMIMEController {
 	 */
     def index () {
         def messageSMIME
-        MessageSMIME.withTransaction{
-            messageSMIME = MessageSMIME.get(params.long('id'))
-        }
+        MessageSMIME.withTransaction{ messageSMIME = MessageSMIME.get(params.long('id')) }
         if (messageSMIME) {
             if(ContentTypeVS.TEXT != request.contentTypeVS) {
-                params.messageSMIME = messageSMIME
-                forward(controller:"receipt")
-                return false
+                request.messageSMIME = messageSMIME
+                forward(action:"contentViewer")
             } else {
                 return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
                         messageBytes:messageSMIME.content)]
             }
         } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'messageSMIMENotFound', args:[params.id]))]
+        return false
     }
 
     def contentViewer() {

@@ -114,12 +114,12 @@ class VoteVSService {
                 fromUser, toUser, smimeMessageReq, subject)
         messageSMIMEReq.setSMIME(smimeMessageResp)
         VoteVSCanceller voteVSCanceller = new VoteVSCanceller(voteVS:voteVS, certificateVS:certificateVS,
-                eventVSElection:eventVS, state:VoteVSCanceller.State.CANCELLATION_OK, messageSMIME:messageSMIMEResp,
+                eventVSElection:eventVS, state:VoteVSCanceller.State.CANCELLATION_OK, messageSMIME:messageSMIMEReq,
                 originHashCertVSBase64:originHashCertVote, hashCertVSBase64:hashCertVSBase64).save()
         if (!voteVSCanceller) { voteVSCanceller.errors.each { log.error("processCancel - ${it}") } }
         log.debug("$methodName - voteVSCanceller.id: ${voteVSCanceller.id}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-                type:TypeVS.CANCEL_VOTE, contentType: ContentTypeVS.JSON_SIGNED, messageSMIME: messageSMIMEResp)
+                type:TypeVS.CANCEL_VOTE, contentType: ContentTypeVS.JSON_SIGNED, messageSMIME: messageSMIMEReq)
     }
 			
 	public Map getVoteVSMap(VoteVS voteVS) {

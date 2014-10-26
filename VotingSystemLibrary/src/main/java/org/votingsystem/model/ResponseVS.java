@@ -297,7 +297,7 @@ public class ResponseVS<T> implements Serializable {
 
     public static ResponseVS getExceptionResponse(String controller, Map actionMap, Exception exception,
           Throwable rootCause) {
-        String action = (String) actionMap.values().iterator().next();
+        String action = (actionMap == null)?null:(String) actionMap.values().iterator().next();
         String metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
                 rootCause.getClass().getSimpleName();
         if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
@@ -306,6 +306,7 @@ public class ResponseVS<T> implements Serializable {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, rootCause.getMessage());
         responseVS.setReason(rootCause.getMessage());
         responseVS.setMetaInf(metaInf);
+        responseVS.setType(TypeVS.EXCEPTION);
         return responseVS;
     }
 

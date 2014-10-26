@@ -19,8 +19,17 @@
         }
         </style>
         <div layout vertical style="margin: 0px auto; max-width:800px;">
-            <div class="pageHeader"  layout horizontal center center-justified
-                 style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}</div>
+            <div  layout horizontal center center-justified>
+                <div flex></div>
+                <div class="pageHeader"><h3>{{caption}}</h3></div>
+                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
+                    <template if="{{isClientToolConnected}}">
+                        <paper-button raised on-click="{{checkReceipt}}">
+                            <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                        </paper-button>
+                    </template>
+                </div>
+            </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
             </div>
@@ -85,16 +94,6 @@
                 </div>
             </template>
         </div>
-        <template if="{{isClientToolConnected}}">
-            <div layout horizontal style="margin:0px 20px 0px 0px;">
-                <div flex></div>
-                <div style="margin:10px 0px 10px 0px;">
-                    <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
-                    </paper-button>
-                </div>
-            </div>
-        </template>
         <vs-dialog id="xDialog" style="top: 30px; left:100px;" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="userLbl"/>">
             <uservs-data id="uservsData"></uservs-data>
         </vs-dialog>

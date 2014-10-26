@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
+isWithVoteCancellation = true
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"Claim subject", content:"<p>Election content</p>", UUID:UUID.randomUUID().toString(),
                     dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/11/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
@@ -30,7 +31,7 @@ Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersW
 // whenFinishChangeEventStateTo: one of EventVS.State,
 Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
                          userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
-                         backupRequestEmail:"jgzornoza@gmail.com", event:eventDataMap,
+                         backupRequestEmail:"", event:eventDataMap,
                          dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
                          timer:[active:false, time:"00:00:10"]]
 
@@ -48,11 +49,8 @@ if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.ge
 ContextVS.getInstance().setAccessControl(actorVS);
 eventVS = publishEvent(TestUtils.simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
 simulatorExecutor = Executors.newFixedThreadPool(100);
-
 CountDownLatch userBaseDataLatch = new CountDownLatch(1);
-
 ((VotingSimulationData)TestUtils.simulationData).userBaseData.sendData(userBaseDataLatch)
-
 userBaseDataLatch.await()
 
 sendVotes(((VotingSimulationData)TestUtils.simulationData).userBaseData)
@@ -99,6 +97,7 @@ private void waitForVoteResponses() throws Exception {
             nifFrom = responseVS.getData()?.userVS?.getNif();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 VoteVS voteReceipt = responseVS.getData().voteVS;
+                if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom)
                 simulationData.getAndIncrementNumVotingRequestsOK();
             } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.simulationData.getNumRequestsOK())
         } catch(Exception ex) {
@@ -181,4 +180,24 @@ private void requestBackup(EventVS eventVS, String nif) throws Exception {
             log.debug("BackupRequestWorker - status: " + responseVS.getStatusCode());*/
         }
     } else throw new ExceptionVS(responseVS.getMessage())
+}
+
+private void cancelVote(VoteVS voteVS, String nif) {
+    Map cancelDataMap = new HashMap<String, String>();
+    cancelDataMap.put("operation", TypeVS.CANCEL_VOTE.toString());
+    cancelDataMap.put("originHashAccessRequest", voteVS.getOriginHashAccessRequest());
+    cancelDataMap.put("hashAccessRequestBase64", voteVS.getAccessRequestHashBase64());
+    cancelDataMap.put("originHashCertVote", voteVS.getOriginHashCertVote());
+    cancelDataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
+    cancelDataMap.put("UUID", UUID.randomUUID().toString());
+    SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER)
+    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
+            ContextVS.getInstance().getAccessControl().getNameNormalized(),
+            JSONSerializer.toJSON(cancelDataMap).toString(), "cancelVote")
+    SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
+            ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL(),
+            ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+            ContentTypeVS.JSON_SIGNED, null, null);
+    ResponseVS responseVS = worker.call();
+    if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
 }

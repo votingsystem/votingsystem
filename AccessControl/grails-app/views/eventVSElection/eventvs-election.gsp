@@ -42,7 +42,7 @@
                     <div><b><g:message code="dateBeginLbl"/>: </b>
                         {{eventvs.dateBeginStr}}</div>
                 </template>
-                <div style="margin:0px 30px 0px 30px;"><b><g:message code="dateLimitLbl"/>: </b>
+                <div style="margin:0px 30px 0px 30px; color: #888;"><b><g:message code="dateLimitLbl"/>: </b>
                     {{eventvs.dateFinishStr}}</div>
             </div>
 
@@ -51,7 +51,7 @@
                     <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
                 </div>
 
-                <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
+                <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px; color:#888;">
                     <b><g:message code="publishedByLbl"/>: </b>{{eventvs.userVS}}
                 </div>
 

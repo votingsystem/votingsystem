@@ -40,7 +40,10 @@ public class AccessRequestVS implements Serializable {
 
     public EventVSElection getEventVSElection() { return eventVSElection; }
 
-    public void setState(State state) { this.state = state; }
+    public AccessRequestVS setState(State state) {
+        this.state = state;
+        return this;
+    }
 
     public State getState() { return state; }
 

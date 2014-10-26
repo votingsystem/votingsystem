@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.transaction.Transactional
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
+import org.votingsystem.util.MetaInfMsg
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.callable.MessageTimeStamper
@@ -285,6 +286,7 @@ class SignatureVSService {
     }
 
     public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
                 messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
@@ -293,17 +295,21 @@ class SignatureVSService {
         UserVS anonymousSigner = null
         CertUtils.CertValidatorResultVS validatorResult
         String signerNIF = smimeMessage.getSigner().getNif()
+        boolean isTimeStamped = false
         for(UserVS userVS: signersVS) {
             try {
-                timeStampService.validateToken(userVS.getTimeStampToken())
+                if(userVS.getTimeStampToken()) {
+                    timeStampService.validateToken(userVS.getTimeStampToken())
+                    isTimeStamped = true
+                }
                 validatorResult = CertUtils.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
-                log.debug("validateSignersCerts - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                log.debug("$methodName - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
                 ResponseVS responseVS = null
                 if(validatorResult.getChecker().isAnonymousSigner()) {
-                    log.debug("validateSignersCerts - anonymous signer")
+                    log.debug("$methodName - anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)
@@ -322,6 +328,8 @@ class SignatureVSService {
                 return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
             }
         }
+        if(!isTimeStamped) throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
+                locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
         return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
                       extensionChecker:validatorResult.getChecker()])

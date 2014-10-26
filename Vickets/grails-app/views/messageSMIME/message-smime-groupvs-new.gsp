@@ -6,14 +6,23 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-        .messageToUser { font-weight: bold; margin:10px auto 10px auto;
-            background: #f9f9f9;  padding:10px 20px 10px 20px;
-        }
-        .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
+            .messageToUser { font-weight: bold; margin:10px auto 10px auto;
+                background: #f9f9f9;  padding:10px 20px 10px 20px;
+            }
+            .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         </style>
         <div layout vertical style="margin: 0px auto; max-width:800px;">
-            <div class="pageHeader"  layout horizontal center center-justified
-                 style="margin:0 0 10px 0;font-size: 1.2em;"><g:message code="newGroupVSMsgSubject"/></div>
+            <div  layout horizontal center center-justified>
+                <div flex></div>
+                <div class="pageHeader"><h3><g:message code="newGroupVSMsgSubject"/></h3></div>
+                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
+                    <template if="{{isClientToolConnected}}">
+                        <paper-button raised on-click="{{checkReceipt}}">
+                            <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                        </paper-button>
+                    </template>
+                </div>
+            </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
             </div>

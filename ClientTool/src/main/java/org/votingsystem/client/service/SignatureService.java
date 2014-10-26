@@ -196,7 +196,6 @@ public class SignatureService extends Service<ResponseVS> {
             updateProgress(90, 100);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage validatedVote = responseVS.getSMIME();
-                Map validatedVoteDataMap = (JSONObject) JSONSerializer.toJSON(validatedVote.getSignedContent());
                 eventVS.getVoteVS().setReceipt(validatedVote);
                 ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK, ContentTypeVS.VOTE);
                 voteResponse.setType(TypeVS.VOTEVS);
@@ -208,7 +207,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseJSON.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
                 responseJSON.put("hashCertVSBase64", eventVS.getVoteVS().getHashCertVSBase64());
                 responseJSON.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
-                responseJSON.put("voteVSReceipt", new String(validatedVote.getBytes(), "UTF-8"));
+                responseJSON.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
                 //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
                 //String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
                 responseVS.setContentType(ContentTypeVS.JSON);

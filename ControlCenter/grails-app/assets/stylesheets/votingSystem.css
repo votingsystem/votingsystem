@@ -662,3 +662,8 @@ fieldset[disabled] .form-control {
 textarea.form-control {
     height: auto;
 }
+
+paper-button {
+    font-size: 0.8em;
+    color: #6c0404;
+}

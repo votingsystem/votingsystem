@@ -298,3 +298,8 @@ textarea.form-control {
 
 .linkVS {cursor: pointer; color:#6c0404; margin: 10px;}
 .linkVS:hover {text-decoration: underline;}
+
+paper-button {
+    font-size: 0.8em;
+    color: #6c0404;
+}

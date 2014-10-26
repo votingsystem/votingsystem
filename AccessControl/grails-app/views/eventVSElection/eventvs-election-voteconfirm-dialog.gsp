@@ -18,12 +18,12 @@
                 </div>
                 <p style="text-align: center;">
                     <g:message code="confirmOptionDialogMsg"/>:<br>
-                    <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
+                    <div style="font-size: 1.3em; text-align: center;"><b>{{optionSelected}}</b></div>
                 </p>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div>
-                        <paper-button raised on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
+                        <paper-button raised on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px; font-size: 1em;">
                             <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                         </paper-button>
                     </div>

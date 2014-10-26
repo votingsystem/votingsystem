@@ -100,7 +100,8 @@ class ControlCenterFilters {
                 if(responseVS.messageSMIME){
                     MessageSMIME.withTransaction { responseVS.refreshMessageSMIME().save() }
                     log.debug "after - MessageSMIME - id '${responseVS.messageSMIME.id}' - type '${responseVS.messageSMIME.type}'"
-                }
+                } else if (request.messageSMIMEReq) MessageSMIME.withTransaction {
+                    responseVS.setMessageSMIME(request.messageSMIMEReq).refreshMessageSMIME().save()}
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:

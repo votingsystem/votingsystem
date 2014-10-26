@@ -47,14 +47,14 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <paper-button raised on-click="{{checkReceipt}}">
                                     <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
                                 </paper-button>
                             </div>
                             <div flex></div>
                             <div style="margin:10px 0px 10px 0px;">
                                 <paper-button raised on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-times" style="margin:0 10px 0 0;"></i> <g:message code="cancelVoteLbl"/>
+                                    <i class="fa fa-times"></i> <g:message code="cancelVoteLbl"/>
                                 </paper-button>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                     this.statusCode = appMessageJSON.statusCode
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         this.messageType = "VOTE_CANCELLATION_RESULT"
-                        this.voteVSCancellationReceipt = appMessageJSON.message
+                        this.voteVSCancellationReceipt = window.btoa(appMessageJSON.message);
                         this.message = "<g:message code="voteVSCancellationOKMsg"/>"
                         this.caption =  "<g:message code="voteVSCancellationCaption"/>"
                     } else  showMessageVS(appMessageJSON.message, '<g:message code="voteVSCancellationErrorCaption"/>')

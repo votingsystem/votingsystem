@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-bar-chart-o.png')}" type="image/x-icon">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-bolt.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="serverNameLbl"/></title>
     <asset:stylesheet src="votingSystem.css"/>
@@ -35,7 +35,6 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        {{ "<g:message code="serverNameLbl"/>" | setTitle}}
                         <paper-item data-href="${createLink(controller: 'eventVSElection')}">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
                         </paper-item>
@@ -45,7 +44,6 @@
                         <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                         </paper-item>
-
                     </core-selector>
                 </core-menu>
             </core-header-panel>
@@ -70,6 +68,7 @@
                 window.addEventListener('popstate', function(event) {
                     navBar.url = document.location.href
                 });
+                this.appTitle = "<g:message code="serverNameLbl"/>"
                 this.isClientToolConnected = window['isClientToolConnected']
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
             },
@@ -110,9 +109,6 @@
             },
             searchVisible: function(isVisible) {
                 this.$._navbar.searchVisible(isVisible)
-            },
-            setTitle: function(appTitle) {
-                this.appTitle = appTitle
             },
             ajaxResponse: function(xhrResponse, xhr) {
                 var ajaxDocument = xhrResponse

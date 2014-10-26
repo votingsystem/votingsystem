@@ -361,12 +361,18 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
     } catch(e) {
         console.log(e)
+        if(isAndroid ()) {
+            var encodedData = window.btoa(JSON.stringify(messageJSON));
+            window.sendAndroidURIMessage(encodedData)
+            return
+        }
         window.alert(e)
         return
     }
-    var messageToSignatureClient = JSON.stringify(messageJSON)
-    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
-    clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+    var messageToSignatureClient = JSON.stringify(messageJSON);
+//    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
+    //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
+    clientTool.setJSONMessageToSignatureClient(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
 }
 
 VotingSystemClient.call = function (messageJSON) {

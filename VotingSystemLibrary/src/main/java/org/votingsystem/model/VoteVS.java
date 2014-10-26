@@ -145,8 +145,9 @@ public class VoteVS implements Serializable {
 		return state;
 	}
 
-	public void setState(State state) {
+	public VoteVS setState(State state) {
 		this.state = state;
+        return this;
 	}
 
 	public CertificateVS getCertificateVS() {
