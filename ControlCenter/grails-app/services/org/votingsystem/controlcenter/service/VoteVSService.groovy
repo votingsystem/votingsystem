@@ -46,7 +46,7 @@ class VoteVSService {
                 validFrom:voteVS.getX509Certificate().getNotBefore(),
                 validTo:voteVS.getX509Certificate().getNotAfter()).save()
         String signedVoteDigest = messageSMIMEReq.getSMIME().getContentDigestStr()
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.accessControlVS.name
         String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
         messageSMIMEReq.getSMIME().setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
@@ -107,7 +107,7 @@ class VoteVSService {
         voteVS.save()
         certificateVS.state = CertificateVS.State.CANCELLED
         certificateVS.save()
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = messageSMIMEReq.getUserVS()?.getNif()
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(

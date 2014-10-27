@@ -2,6 +2,7 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.groovy.util.TransactionVSUtils
@@ -35,7 +36,7 @@ class TestingController {
     def transactionVS_UserVSService
 
     def index() {
-        ResponseVS responseVS = balanceService.calculatePeriod(DateUtils.currentWeekPeriod)
+        ResponseVS responseVS = balanceService.initWeekPeriod(Calendar.getInstance())
         return [responseVS:responseVS]
     }
 
@@ -138,5 +139,13 @@ class TestingController {
     def webView() {}
 
     def polymer() {}
+
+    /**
+     * Invoked if any method in this controller throws an Exception.
+     */
+    def exceptionHandler(final Exception exception) {
+        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))]
+    }
 
 }

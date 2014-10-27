@@ -28,15 +28,15 @@ class ServerInfoController {
 	def index() {
         HashMap serverInfo = new HashMap()
         File certChainFile = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certChainPath).getFile();
+                grailsApplication.config.vs.certChainPath).getFile();
         serverInfo.certChainPEM = certChainFile.text
         serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
-        serverInfo.name = grailsApplication.config.VotingSystem.serverName
+        serverInfo.name = grailsApplication.config.vs.serverName
         serverInfo.serverType = ActorVS.Type.VICKETS.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
         serverInfo.webSocketURL = "${grailsApplication.config.webSocketURL}"
 		serverInfo.state = ActorVS.State.OK.toString()
-        serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        serverInfo.urlTimeStampServer="${grailsApplication.config.vs.urlTimeStampServer}"
         byte [] signingCertPEMBytes = timeStampService.getSigningCertPEMBytes()
         if(signingCertPEMBytes) serverInfo.timeStampCertPEM = new String(signingCertPEMBytes)
         serverInfo.environmentMode = grails.util.Environment.current.toString()

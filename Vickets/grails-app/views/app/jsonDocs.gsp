@@ -45,7 +45,7 @@
             amount:"30000", tags:["HIDROGENO"], isTimeLimited:true, subject:"BankVS transactionvs" },
         serviceURL:"${createLink( controller:'transactionVS', action:" ", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
-        urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
+        urlTimeStampServer:"${grailsApplication.config.vs.urlTimeStampServer}",
         }
     //fromUserIBAN -> IBAN external to Vicket System controlled by BankVS
     //if validTo present -> change to limited in time Vickets

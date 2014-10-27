@@ -69,7 +69,7 @@ class EventVSService {
 	
 	boolean isUserAdmin(String nif) {
 		if(!systemAdmins) {
-			systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
+			systemAdmins = grailsApplication.config.vs.adminsDNI
 		}
 		return systemAdmins.contains(nif)
 	}
@@ -113,7 +113,7 @@ class EventVSService {
                 'eventCancelled', [request.eventVS.id].toArray(), locale) : messageSource.getMessage(
                 'eventDeleted', [request.eventVS.id].toArray(),  locale)
         SMIMEMessage smimeMessageResp
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
         if(request.eventVS instanceof EventVSElection) {
             String toUser = ((EventVSElection)request.eventVS).getControlCenterVS()?.name
@@ -168,7 +168,7 @@ class EventVSService {
             dateFinishStr:DateUtils.getDateStr(eventVSItem.getDateFinish(),"dd/MMM/yyyy HH:mm")]
 		if(eventVSItem.userVS) eventVSMap.userVS = "${eventVSItem.userVS?.name} ${eventVSItem.userVS?.firstName}"
 		def accessControlMap = [serverURL:grailsApplication.config.grails.serverURL,
-				name:grailsApplication.config.VotingSystem.serverName]
+				name:grailsApplication.config.vs.serverName]
 		eventVSMap.accessControl = accessControlMap
 		eventVSMap.fieldsEventVS = eventVSItem.fieldsEventVS?.collect {opcion ->
 				return [id:opcion.id, content:opcion.content]}
@@ -225,7 +225,7 @@ class EventVSService {
 			eventVSMap.numSignatures = SignatureVS.countByEventVS(eventVSItem)
 		}
 		def accessControlMap = [serverURL:grailsApplication.config.grails.serverURL,
-				name:grailsApplication.config.VotingSystem.serverName]
+				name:grailsApplication.config.vs.serverName]
 		eventVSMap.accessControl = accessControlMap
 		eventVSMap.fieldsEventVS = eventVSItem.fieldsEventVS?.collect {campoItem ->
 				return [id:campoItem.id, content:campoItem.content]}

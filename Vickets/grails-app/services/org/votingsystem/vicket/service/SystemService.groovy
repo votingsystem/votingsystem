@@ -35,13 +35,13 @@ class SystemService {
         log.debug("init")
         systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM)
         if(!systemUser) {
-            systemUser = new UserVS(nif:grailsApplication.config.VotingSystem.systemNIF, type:UserVS.Type.SYSTEM,
-                    name:grailsApplication.config.VotingSystem.serverName).save()
+            systemUser = new UserVS(nif:grailsApplication.config.vs.systemNIF, type:UserVS.Type.SYSTEM,
+                    name:grailsApplication.config.vs.serverName).save()
             systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
             systemUser.save()
             wildTag = new TagVS(name:TagVS.WILDTAG).save()
             String[] defaultTags = grailsApplication.mainContext.getResource(
-                    grailsApplication.config.VotingSystem.defaulTagsFilePath).getFile()?.text.split(",")
+                    grailsApplication.config.vs.defaulTagsFilePath).getFile()?.text.split(",")
             for(String tag: defaultTags) {
                 TagVS newTagVS = new TagVS(name:tag).save()
                 new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
@@ -58,7 +58,7 @@ class SystemService {
     public JSONArray updateAdmins() {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         File directory = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
+                grailsApplication.config.vs.certAuthoritiesDirPath).getFile()
         File[] adminCerts = directory.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String fileName) {
                 return fileName.startsWith("ADMIN_") && fileName.endsWith(".pem");
@@ -172,7 +172,7 @@ class SystemService {
     }
 
     public Locale getDefaultLocale() {
-        if(defaultLocale == null) defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+        if(defaultLocale == null) defaultLocale = new Locale(grailsApplication.config.vs.defaultLocale)
         return defaultLocale
     }
 

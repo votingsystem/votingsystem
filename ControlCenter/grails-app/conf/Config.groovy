@@ -204,21 +204,21 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
-VotingSystem.backupCopyPath='./VotingSystem/backup'
-VotingSystem.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
-VotingSystem.errorsBaseDir='./VotingSystem/errors'
-VotingSystem.keyStorePath='WEB-INF/cms/ControlCenter.jks'
-VotingSystem.signKeysAlias='ControlCenterKeys'
-VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
-VotingSystem.signKeysPassword='PemPass'
+vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
+vs.backupCopyPath='./VotingSystem/backup'
+vs.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
+vs.errorsBaseDir='./VotingSystem/errors'
+vs.keyStorePath='WEB-INF/cms/ControlCenter.jks'
+vs.signKeysAlias='ControlCenterKeys'
+vs.certAuthoritiesDirPath='WEB-INF/cms/'
+vs.certChainPath='WEB-INF/cms/certChain.pem'
+vs.signKeysPassword='PemPass'
 //milliseconds
-VotingSystem.requestTimeOut = 500
+vs.requestTimeOut = 500
 //Name decriptivo del servidor
-VotingSystem.serverName='Voting System Control Center'
-VotingSystem.blogURL ='http://www.sistemavotacion.org/blog.html'
-VotingSystem.emailAdmin='jgzornoza@gmail.com'
-VotingSystem.defaultLocale = 'en'
+vs.serverName='Voting System Control Center'
+vs.blogURL ='http://www.sistemavotacion.org/blog.html'
+vs.emailAdmin='jgzornoza@gmail.com'
+vs.defaultLocale = 'en'
 //_ TODO _
-VotingSystem.adminsDNI=['07553172H']
+vs.adminsDNI=['07553172H']

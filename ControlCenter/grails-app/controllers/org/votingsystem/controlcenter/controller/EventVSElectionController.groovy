@@ -288,7 +288,7 @@ class EventVSElectionController {
                     args:[event.id, event.subject]))]
 		} else {
 			String datePathPart = DateUtils.getDateStr(event.getDateFinish(), "yyyy/MM/dd")
-			String baseDirPath = "${grailsApplication.config.VotingSystem.errorsBaseDir}" +
+			String baseDirPath = "${grailsApplication.config.vs.errorsBaseDir}" +
 				"/${datePathPart}/Event_${event.id}"
 			errors.each { messageSMIME ->
 				File errorFile = new File("${baseDirPath}/MessageSMIME_${messageSMIME.id}")

@@ -32,7 +32,7 @@ class EventVSClaimSignatureCollectorService {
                 new FieldValueEventVS(value:claimField.value, signatureVS:signatureVS, fieldEventVS:fieldEventVS).save()
             } else throw new ExceptionVS("Signature with unknown fields '${claimField}'")
         }
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimSignatureValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned (fromUser, toUser,

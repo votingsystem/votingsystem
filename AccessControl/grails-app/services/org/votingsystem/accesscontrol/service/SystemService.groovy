@@ -38,7 +38,7 @@ class SystemService {
     }
 
     public Locale getLocale() {
-        if(!defaultLocale) defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+        if(!defaultLocale) defaultLocale = new Locale(grailsApplication.config.vs.defaultLocale)
         return defaultLocale
     }
 

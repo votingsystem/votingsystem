@@ -43,10 +43,10 @@ class CsrController {
 				response.status = ResponseVS.SC_OK
 				X509Certificate certX509 = CertUtils.loadCertificate(certificate.content)
 				File keyStoreFile = grailsApplication.mainContext.getResource(
-					grailsApplication.config.VotingSystem.keyStorePath).getFile()
+					grailsApplication.config.vs.keyStorePath).getFile()
 				
-				String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
-				String password = grailsApplication.config.VotingSystem.signKeysPassword
+				String keyAlias = grailsApplication.config.vs.signKeysAlias
+				String password = grailsApplication.config.vs.signKeysPassword
 				KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 					FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 				Certificate[] certsServer =  keyStore.getCertificateChain(keyAlias);
@@ -105,7 +105,7 @@ class CsrController {
         }
 		MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-		List<String> admins = grailsApplication.config.VotingSystem.adminsDNI
+		List<String> admins = grailsApplication.config.vs.adminsDNI
 		UserVS userVS = messageSMIME.getUserVS()
 		def docValidacionJSON = JSON.parse(messageSMIME.getSMIME().getSignedContent())
 		SMIMEMessage smimeMessageReq = messageSMIME.getSMIME()

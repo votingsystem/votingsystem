@@ -62,7 +62,7 @@ class EventVSElectionService {
         eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
         messageJSON.controlCenterURL = systemService.getControlCenter().serverURL
         messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
-                 name:grailsApplication.config.VotingSystem.serverName] as JSONObject
+                 name:grailsApplication.config.vs.serverName] as JSONObject
         if (messageJSON.tags) {
             Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
             if(tagSet) eventVS.setTagVSSet(tagSet)
@@ -89,13 +89,13 @@ class EventVSElectionService {
         }
         messageJSON.certCAVotacion = new String(CertUtils.getPEMEncoded (responseVS.data))
         File certChain = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certChainPath).getFile();
+                grailsApplication.config.vs.certChainPath).getFile();
         messageJSON.certChain = new String(certChain.getBytes())
         X509Certificate certUsuX509 = userSigner.getCertificate()
         messageJSON.userVS = new String(CertUtils.getPEMEncoded (certUsuX509))
 
         Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.controlCenterVS.getName()
         String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
         responseVS = signatureVSService.getSMIMETimeStamped(

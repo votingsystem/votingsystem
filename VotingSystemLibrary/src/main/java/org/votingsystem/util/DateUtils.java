@@ -219,6 +219,12 @@ public class DateUtils {
         throw new ExceptionVS("Unsupported Lapse period: '" + timePeriodLapse + "'");
     }
 
+    public static Calendar getDayFromPreviousWeek(Calendar requestDate) {
+        Calendar result = ((Calendar)requestDate.clone());
+        result.set(Calendar.WEEK_OF_YEAR, (requestDate.get(Calendar.WEEK_OF_YEAR) -1));
+        return result;
+    }
+
     public static class TimePeriod {
 
         public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}

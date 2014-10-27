@@ -231,19 +231,20 @@ log4j = {
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 
-VotingSystem.IBAN_bankCode = "7878"
-VotingSystem.IBAN_branchCode = "8989"
-VotingSystem.systemNIF = "VICKET_SYSTEM_NIF"
-VotingSystem.serverName='Voting System Vicket Server'
-VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
-VotingSystem.backupCopyPath='./Vickets/backups'
-VotingSystem.errorsBaseDir='./Vickets/errors'
-VotingSystem.keyStorePath='WEB-INF/cms/VicketServer.jks'
-VotingSystem.signKeysAlias='VicketServerKeys'
-VotingSystem.signKeysPassword='PemPass'
-VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.defaulTagsFilePath='WEB-INF/docs/defaultTags.txt'
+vs.IBAN_bankCode = "7878"
+vs.IBAN_branchCode = "8989"
+vs.systemNIF = "VICKET_SYSTEM_NIF"
+vs.serverName='Voting System Vicket Server'
+vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
+vs.backupCopyPath='./Vickets/backups'
+vs.weekReportsPath = vs.backupCopyPath + '/weekReports'
+vs.errorsBaseDir='./Vickets/errors'
+vs.keyStorePath='WEB-INF/cms/VicketServer.jks'
+vs.signKeysAlias='VicketServerKeys'
+vs.signKeysPassword='PemPass'
+vs.certAuthoritiesDirPath='WEB-INF/cms/'
+vs.defaulTagsFilePath='WEB-INF/docs/defaultTags.txt'
 
-VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
-VotingSystem.requestTimeOut = 500
-VotingSystem.defaultLocale = 'en'
+vs.certChainPath='WEB-INF/cms/certChain.pem'
+vs.requestTimeOut = 500
+vs.defaultLocale = 'en'

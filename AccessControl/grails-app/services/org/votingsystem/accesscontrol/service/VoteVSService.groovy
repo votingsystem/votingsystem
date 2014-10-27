@@ -29,7 +29,7 @@ class VoteVSService {
         FieldEventVS optionSelected = eventVS.checkOptionId(smimeMessageReq.getVoteVS().getOptionSelected().getId())
         if (!optionSelected) throw new ExceptionVS(messageSource.getMessage('voteOptionNotFoundErrorMsg',
                     [smimeMessageReq.getVoteVS().getOptionSelected().getId()].toArray(), locale))
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.controlCenterVS.serverURL
         String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
@@ -64,7 +64,7 @@ class VoteVSService {
                 'timestampDateErrorMsg', [timeStampDate, certificateVS.eventVSElection.dateBegin,
                 certificateVS.eventVSElection.getDateFinish()].toArray(), locale),
                 MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationOutOfDate"))
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = certificateVS.eventVSElection.controlCenterVS.serverURL
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
         smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIME.id}")

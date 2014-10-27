@@ -27,11 +27,11 @@ class ServerInfoController {
      */
     def index() {
         HashMap serverInfo = new HashMap()
-        serverInfo.name = grailsApplication.config.VotingSystem.serverName
+        serverInfo.name = grailsApplication.config.vs.serverName
         serverInfo.serverType = ActorVS.Type.CONTROL_CENTER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
-        serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        serverInfo.urlBlog = grailsApplication.config.VotingSystem.blogURL
+        serverInfo.urlTimeStampServer="${grailsApplication.config.vs.urlTimeStampServer}"
+        serverInfo.urlBlog = grailsApplication.config.vs.blogURL
         serverInfo.state = ActorVS.State.OK.toString()
         serverInfo.certChainURL = "${createLink(controller: 'certificateVS', action:'certChain', absolute:true)}"
         serverInfo.certChainPEM = signatureVSService.getServerCertChain().text

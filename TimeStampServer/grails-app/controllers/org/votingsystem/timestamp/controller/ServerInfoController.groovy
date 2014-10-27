@@ -27,7 +27,7 @@ class ServerInfoController {
         HashMap serverInfo = new HashMap()
         serverInfo.certChainPEM = new String(timeStampService.getSigningCertChainPEMBytes())
         serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
-        serverInfo.name = grailsApplication.config.VotingSystem.serverName
+        serverInfo.name = grailsApplication.config.vs.serverName
         serverInfo.serverType = ActorVS.Type.TIMESTAMP_SERVER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
 		serverInfo.state = ActorVS.State.OK.toString()

@@ -41,9 +41,9 @@ class SignatureVSService {
     private synchronized Map init() {
         log.debug "init"
         File keyStoreFile = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.keyStorePath).getFile()
-        String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
-        String password = grailsApplication.config.VotingSystem.signKeysPassword
+                grailsApplication.config.vs.keyStorePath).getFile()
+        String keyAlias = grailsApplication.config.vs.signKeysAlias
+        String password = grailsApplication.config.vs.signKeysPassword
         signedMailGenerator = new SMIMESignedGeneratorVS(FileUtils.getBytesFromFile(keyStoreFile),
                 keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
         KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -57,7 +57,7 @@ class SignatureVSService {
             else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
         }
         serverCertChainFile = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certChainPath)?.getFile();
+                grailsApplication.config.vs.certChainPath)?.getFile();
         PrivateKey serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
         serverCertChainFile.createNewFile()
         serverCertChainFile.setBytes(pemCertsArray)
@@ -98,7 +98,7 @@ class SignatureVSService {
     private synchronized Map initCertAuthorities() {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         File directory=  grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
+                grailsApplication.config.vs.certAuthoritiesDirPath).getFile()
         File[] acFiles = directory.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String fileName) {
                 return fileName.startsWith("AC_") && fileName.endsWith(".pem");

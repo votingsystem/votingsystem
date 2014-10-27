@@ -78,9 +78,9 @@ class TimeStampService {
 		log.debug("init");
         try {
             File keyStoreFile = grailsApplication.mainContext.getResource(
-                    grailsApplication.config.VotingSystem.keyStorePath).getFile()
-            String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
-            String password = grailsApplication.config.VotingSystem.signKeysPassword
+                    grailsApplication.config.vs.keyStorePath).getFile()
+            String keyAlias = grailsApplication.config.vs.signKeysAlias
+            String password = grailsApplication.config.vs.signKeysPassword
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
                     FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
             PrivateKey signingKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());

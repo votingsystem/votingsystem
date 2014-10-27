@@ -45,9 +45,9 @@ class CsrService {
 		KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS()
 		//TODO ==== vote keystore -- this is for developement
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreVS.bytes,
-			grailsApplication.config.VotingSystem.signKeysPassword.toCharArray());
+			grailsApplication.config.vs.signKeysPassword.toCharArray());
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyStoreVS.keyAlias,
-			grailsApplication.config.VotingSystem.signKeysPassword.toCharArray());
+			grailsApplication.config.vs.signKeysPassword.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyStoreVS.keyAlias);
         DERTaggedObject representativeExtension = null
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
@@ -218,9 +218,9 @@ class CsrService {
 	public synchronized ResponseVS signCertUserVS (UserRequestCsrVS requestCSR) {
 		log.debug("signCertUserVS");
 		File keyStoreFile = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.keyStorePath).getFile()
-		String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
-		String password = grailsApplication.config.VotingSystem.signKeysPassword
+			grailsApplication.config.vs.keyStorePath).getFile()
+		String keyAlias = grailsApplication.config.vs.signKeysAlias
+		String password = grailsApplication.config.vs.signKeysPassword
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());

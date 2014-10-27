@@ -208,19 +208,19 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
-//VotingSystem.urlTimeStampServer='http://timestampserver.org/TimeStampServer'
-VotingSystem.backupCopyPath='./VotingSystem/backups'
-VotingSystem.errorsBaseDir='./VotingSystem/errors'
-VotingSystem.keyStorePath='WEB-INF/cms/AccessControl.jks'
-VotingSystem.signKeysAlias='AccessControlKeys'
-VotingSystem.signKeysPassword='PemPass'
-VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
-VotingSystem.requestTimeOut = 500
-VotingSystem.serverName='Voting System Access Control'
-VotingSystem.blogURL = 'http://www.sistemavotacion.org/blog.html'
-VotingSystem.emailAdmin='jgzornoza@gmail.com'
-VotingSystem.defaultLocale = 'en'
+vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
+//vs.urlTimeStampServer='http://timestampserver.org/TimeStampServer'
+vs.backupCopyPath='./VotingSystem/backups'
+vs.errorsBaseDir='./VotingSystem/errors'
+vs.keyStorePath='WEB-INF/cms/AccessControl.jks'
+vs.signKeysAlias='AccessControlKeys'
+vs.signKeysPassword='PemPass'
+vs.certAuthoritiesDirPath='WEB-INF/cms/'
+vs.certChainPath='WEB-INF/cms/certChain.pem'
+vs.requestTimeOut = 500
+vs.serverName='Voting System Access Control'
+vs.blogURL = 'http://www.sistemavotacion.org/blog.html'
+vs.emailAdmin='jgzornoza@gmail.com'
+vs.defaultLocale = 'en'
 //_ TODO _
-VotingSystem.adminsDNI=['07553172H']
+vs.adminsDNI=['07553172H']

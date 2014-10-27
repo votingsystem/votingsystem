@@ -11,9 +11,9 @@
         this.signedContent;
         this.serviceURL;
         this.documentURL;
-        this.receiverName = "${grailsApplication.config.VotingSystem.serverName}";
+        this.receiverName = "${grailsApplication.config.vs.serverName}";
         this.serverURL = "${grailsApplication.config.grails.serverURL}";
-        this.urlTimeStampServer = "${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        this.urlTimeStampServer = "${grailsApplication.config.vs.urlTimeStampServer}"
         this.objectId = Math.random().toString(36).substring(7);
     }
 

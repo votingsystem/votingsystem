@@ -224,7 +224,7 @@ class EventVSElectionService {
             log.error("cancelEvent new state error - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg, eventVS:eventVS)
         }
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.accessControlVS.serverURL
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.
@@ -257,7 +257,7 @@ class EventVSElectionService {
 			def accessControlMap = [serverURL:eventVS.accessControlVS?.serverURL, name:eventVS.accessControlVS?.name]
 			eventVSMap.accessControl = accessControlMap
             def controlCenterMap = [serverURL:"${grailsApplication.config.grails.serverURL}",
-                    name:"${grailsApplication.config.VotingSystem.serverName}"]
+                    name:"${grailsApplication.config.vs.serverName}"]
             eventVSMap.controlCenter = controlCenterMap
 			if(eventVS.userVS) eventVSMap.userVS = "${eventVS.userVS?.name} ${eventVS.userVS?.firstName}"
 			else eventVSMap.userVS = null

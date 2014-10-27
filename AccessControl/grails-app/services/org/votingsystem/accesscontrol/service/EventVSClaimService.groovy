@@ -61,10 +61,10 @@ class EventVSClaimService {
             fieldsArray.add(new JSONObject([id:fieldEventVS.id, content:fieldEventVS.content]))
         }
         messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
-                                     name:grailsApplication.config.VotingSystem.serverName]  as JSONObject
+                                     name:grailsApplication.config.vs.serverName]  as JSONObject
         messageJSON.fieldsEventVS = fieldsArray
 
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = signerVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimEventValidated', null, locale)
         SMIMEMessage smimeMessage = signatureVSService.getSMIMEMultiSigned(

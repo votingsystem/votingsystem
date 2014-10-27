@@ -36,7 +36,7 @@ class TimeStampService {
 	public synchronized Map init() {
 		log.debug(" - init - init - init");
         try {
-            String serverURL = StringUtils.checkURL(grailsApplication.config.VotingSystem.urlTimeStampServer)
+            String serverURL = StringUtils.checkURL(grailsApplication.config.vs.urlTimeStampServer)
             ActorVS timeStampServer = ActorVS.findWhere(serverURL:serverURL)
             X509Certificate x509TimeStampServerCert = null;
             CertificateVS timeStampServerCert = null;

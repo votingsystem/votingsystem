@@ -5,6 +5,7 @@ import groovy.io.FileType
 import org.apache.log4j.Logger
 import org.apache.log4j.RollingFileAppender
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -29,7 +30,7 @@ class ReportsController {
 
     //main web page
     def index() {
-        String weekReportsBaseDir = "${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports"
+        String weekReportsBaseDir = "${grailsApplication.config.vs.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
         List<DateUtils.TimePeriod> periods = []
         if(dir.exists()) {
@@ -62,18 +63,17 @@ class ReportsController {
     def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        Map<String, File> reportFiles
-        reportFiles = filesService.getWeekReportFiles(timePeriod, null)
+        ReportFiles reportFiles = new ReportFiles(timePeriod, "$grailsApplication.config.vs.weekReportsPath", null)
         if(request.contentType?.contains("json")) {
-            if(reportFiles.reportsFile.exists()) {
-                render JSON.parse(reportFiles.reportsFile.text) as JSON
+            if(reportFiles.jsonFile.exists()) {
+                render JSON.parse(reportFiles.jsonFile.text) as JSON
             } else {
                 response.status = ResponseVS.SC_NOT_FOUND
                 render [:] as JSON
             }
             return false
         } else {
-            if(!reportFiles.reportsFile.exists()) {
+            if(!reportFiles.jsonFile.exists()) {
                 response.status = ResponseVS.SC_PRECONDITION_FAILED
                 render(view:'/error412',  model: [message:message(code:'reportsForPeriodMissingMsg',
                         args:[timePeriod.toString()])])

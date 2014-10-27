@@ -14,8 +14,8 @@ class FilesService {
 	def messageSource
 
 	public void init() {
-		new File("${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}").mkdirs()
-		new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
+		new File("${grailsApplication.config.vs.eventsMetaInfBaseDir}").mkdirs()
+		new File("${grailsApplication.config.vs.errorsBaseDir}").mkdirs()
         File polymerPlatform = grailsApplication.mainContext.getResource("bower_components/polymer/polymer.js").getFile()
         if(!polymerPlatform.exists()) {
             log.error "Have you executed 'bower install' from web-app dir ???"
@@ -24,7 +24,7 @@ class FilesService {
 
 	 public File getEventMetaInf(EventVS event) {
 		 String datePathPart = DateUtils.getDateStr(event.dateBegin, "yyyy/MM/dd")
-		 String eventsMetaInfBaseDirPath = "${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}" +
+		 String eventsMetaInfBaseDirPath = "${grailsApplication.config.vs.eventsMetaInfBaseDir}" +
 			 "/${datePathPart}"
 		 File metaInfFile = new File("${eventsMetaInfBaseDirPath}/meta_event_${event.id}.inf")
 		 return metaInfFile

@@ -24,8 +24,8 @@ class IBANController {
     def index() {
         Iban iban = Iban.valueOf(params.IBANCode);
         List result = []
-        if(iban.getBankCode().equals(grailsApplication.config.VotingSystem.IBAN_bankCode) &&
-                iban.getBranchCode().equals(grailsApplication.config.VotingSystem.IBAN_branchCode)) {
+        if(iban.getBankCode().equals(grailsApplication.config.vs.IBAN_bankCode) &&
+                iban.getBranchCode().equals(grailsApplication.config.vs.IBAN_branchCode)) {
             log.debug "External IBAN"
             TransactionVS.withTransaction {
                 def transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset) {

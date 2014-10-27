@@ -386,7 +386,7 @@ class RepresentativeService {
 		def selectedDateStr = DateUtils.getDateStr(selectedDate,"yyyy/MM/dd")
 		String serviceURLPart = messageSource.getMessage('representativeAcreditationsBackupPath',
                 [representative.nif].toArray(), locale)
-		def basedir = "${grailsApplication.config.VotingSystem.backupCopyPath}" +
+		def basedir = "${grailsApplication.config.vs.backupCopyPath}" +
 			"/AccreditationsBackup/${selectedDateStr}/${serviceURLPart}"
 			
 		String backupURL = "/backup/${selectedDateStr}/${serviceURLPart}.zip"
@@ -521,7 +521,7 @@ class RepresentativeService {
 		
 		String serviceURLPart = messageSource.getMessage(
 			'representativeVotingHistoryBackupPartPath', [representative.nif].toArray(), locale)
-		def basedir = "${grailsApplication.config.VotingSystem.backupCopyPath}" +
+		def basedir = "${grailsApplication.config.vs.backupCopyPath}" +
 			"/RepresentativeHistoryVoting/${dateFromStr}_${dateToStr}/${serviceURLPart}"
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
 		File zipResult = new File("${basedir}.zip")
@@ -719,7 +719,7 @@ class RepresentativeService {
             userVS.save()
         }
 
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage(
                 'unsubscribeRepresentativeValidationSubject', null, locale)

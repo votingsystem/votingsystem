@@ -36,7 +36,7 @@ class UserVSService {
 
     boolean isUserAdmin(String nif) {
         nif = NifUtils.validate(nif);
-        return grailsApplication.config.VotingSystem.adminsDNI.contains(nif)
+        return grailsApplication.config.vs.adminsDNI.contains(nif)
     }
 
 }

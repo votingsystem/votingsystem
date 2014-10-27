@@ -47,7 +47,7 @@ class VicketService {
         Vicket vicket = Vicket.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
                 serialNumber:Long.valueOf(requestJSON.vicketCertSerialNumber))
         if(Vicket.State.OK == vicket.getState()) {
-            String fromUser = grailsApplication.config.VotingSystem.serverName
+            String fromUser = grailsApplication.config.vs.serverName
             String toUser = smimeMessageReq.getFrom().toString()
             String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
             vicket.setState(Vicket.State.CANCELLED)
@@ -91,7 +91,7 @@ class VicketService {
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         //messageSMIMEReq?.getSMIME()?.getSigner()?.certificate
         log.debug(smimeMessageReq.getSignedContent())
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = smimeMessageReq.getFrom().toString()
         String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,

@@ -2,12 +2,14 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.vicket.service.FilesService
 
 class BalanceController {
 
@@ -46,13 +48,12 @@ class BalanceController {
     def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        Map<String, File> filesMap = filesService.getWeekReportFiles(timePeriod, null)
-        File reportsFile = filesMap.reportsFile
-        if(!reportsFile.exists()) {
+        ReportFiles reportFiles = new ReportFiles(timePeriod, "$grailsApplication.config.vs.weekReportsPath" , null)
+        if(!reportFiles.jsonFile) {
             response.status = ResponseVS.SC_NOT_FOUND
             render message(code: 'reportsForWeekNotFoundMsg', args:[DateUtils.getDateStr(timePeriod.getDateFrom(), "dd MMM yyyy")])
         } else {
-            def messageJSON = JSON.parse(reportsFile.text)
+            def messageJSON = JSON.parse(reportFiles.jsonFile.text)
             if(request.contentType?.contains("json")) render messageJSON as JSON
             else render(view:'week', model: [balancesJSON:messageJSON as JSON])
         }

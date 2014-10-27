@@ -66,7 +66,7 @@ class AuditingService {
         String lapsePath = DateUtils.getDirPath(timePeriod.getDateFrom())
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         lapsePath = "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
-        File backupDir = new File("${grailsApplication.config.VotingSystem.backupCopyPath}/userTransactionHistory${lapsePath}")
+        File backupDir = new File("${grailsApplication.config.vs.backupCopyPath}/userTransactionHistory${lapsePath}")
         backupDir.mkdirs()
         log.debug("$methodName - backupDir.absolutePath: ${backupDir.absolutePath}")
         //Expenses

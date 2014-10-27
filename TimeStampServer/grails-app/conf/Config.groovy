@@ -216,15 +216,15 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.backupCopyPath='./VotingSystem/backups'
-VotingSystem.errorsBaseDir='./VotingSystem/errors'
-VotingSystem.keyStorePath='WEB-INF/cms/TimeStampServer.jks'
-VotingSystem.signKeysAlias='TimeStampServerKeys'
-VotingSystem.signKeysPassword='PemPass'
-VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
-VotingSystem.requestTimeOut = 500
-VotingSystem.serverName='Voting System TimeStamp Server'
-VotingSystem.defaultLocale = 'en'
+vs.backupCopyPath='./VotingSystem/backups'
+vs.errorsBaseDir='./VotingSystem/errors'
+vs.keyStorePath='WEB-INF/cms/TimeStampServer.jks'
+vs.signKeysAlias='TimeStampServerKeys'
+vs.signKeysPassword='PemPass'
+vs.certAuthoritiesDirPath='WEB-INF/cms/'
+vs.certChainPath='WEB-INF/cms/certChain.pem'
+vs.requestTimeOut = 500
+vs.serverName='Voting System TimeStamp Server'
+vs.defaultLocale = 'en'
 //_ TODO _
-VotingSystem.adminsDNI=['07553172H']
+vs.adminsDNI=['07553172H']

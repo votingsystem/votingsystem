@@ -103,7 +103,7 @@ class SubscriptionVSController {
 			news.add(newFeed);
 		}
 		String feedsTitle = "${message(code: 'electionFeedsTitle')}" +
-		" -${grailsApplication.config.VotingSystem.serverName}-"
+		" -${grailsApplication.config.vs.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType, title: feedsTitle,
 				link: "${grailsApplication.config.grails.serverURL}/app/home#VOTACIONES",
 				description: message(code: 'subscriptionVS.descripcionSubscripcionVotaciones'), entries: news);

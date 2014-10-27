@@ -1,6 +1,7 @@
 package org.votingsystem.groovy.util
 
 import org.votingsystem.model.TagVS
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
@@ -132,4 +133,15 @@ class TransactionVSUtils {
         sb.toString()
     }
 
+
+    public static BigDecimal checkRemainingForTag(Map balancesFrom, Map balancesTo, String tagName, String currencyCode) {
+        BigDecimal result = BigDecimal.ZERO;
+        if(balancesTo[currencyCode] && balancesTo[currencyCode][tagName]?.timeLimited)
+            result = result.add(new BigDecimal(balancesTo[currencyCode][tagName].timeLimited))
+        if(balancesFrom[currencyCode] && balancesFrom[currencyCode][tagName])
+            result = result.subtract(new BigDecimal(balancesFrom[currencyCode][tagName]))
+        if(result.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Negative period balance for tag '$tagName' " +
+                "'$currencyCode': ${result.toString()} ")
+        return result;
+    }
 }

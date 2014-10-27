@@ -69,7 +69,7 @@ class RepresentativeDelegationService {
                 [messageJSON.representativeName, userVS.nif].toArray(), locale)
         log.debug "saveDelegation - ${msg}"
 
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
@@ -161,7 +161,7 @@ class RepresentativeDelegationService {
         if(!representative) throw new ExceptionVS(
                 messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale))
 
-        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String fromUser = grailsApplication.config.vs.serverName
         String toUser = certificateVS.hashCertVSBase64
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(

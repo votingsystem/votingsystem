@@ -30,7 +30,7 @@ class CertificateVSController {
 	 */
 	def certChain () {
         File certChainPEMFile = grailsApplication.mainContext.getResource(
-                grailsApplication.config.VotingSystem.certChainPath).getFile();
+                grailsApplication.config.vs.certChainPath).getFile();
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                 messageBytes:certChainPEMFile.getBytes())]
 	}

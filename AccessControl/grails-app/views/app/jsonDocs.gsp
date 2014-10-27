@@ -27,12 +27,12 @@
 
     var publishControlCenterEditor = new JSONEditor(document.querySelector("#publishControlCenter"));
     var jsonPublishControlCenter = {operation:"CONTROL_CENTER_ASSOCIATION",
-        receiverName:"${grailsApplication.config.VotingSystem.serverName}",
+        receiverName:"${grailsApplication.config.vs.serverName}",
         signedMessageSubject:"<g:message code="addControlCenterMsgSubject"/>",
         signedContent:{operation:"CONTROL_CENTER_ASSOCIATION", serverURL: "http://www.sistemavotacion.org/ControlCenter"},
         serviceURL:"${createLink( controller:'subscriptionVS', absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
-        urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
+        urlTimeStampServer:"${grailsApplication.config.vs.urlTimeStampServer}",
     }
     publishControlCenterEditor.set(jsonPublishControlCenter);
 

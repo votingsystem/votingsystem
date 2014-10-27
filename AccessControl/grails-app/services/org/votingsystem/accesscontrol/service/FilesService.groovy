@@ -16,8 +16,8 @@ class FilesService {
 	def messageSource
 
 	public void init() {
-        new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
-        new File("${grailsApplication.config.VotingSystem.backupCopyPath}").mkdirs()
+        new File("${grailsApplication.config.vs.errorsBaseDir}").mkdirs()
+        new File("${grailsApplication.config.vs.backupCopyPath}").mkdirs()
         File polymerPlatform = grailsApplication.mainContext.getResource("bower_components/polymer/polymer.js").getFile()
         if(!polymerPlatform.exists()) {
             log.error "Have you executed 'bower install' from web-app dir ???"
@@ -28,7 +28,7 @@ class FilesService {
 		 String servicePathPart = null
 		 Map<String, File> result = new HashMap<String, File>()
 		 String datePathPart = DateUtils.getDateStr(event.getDateFinish(), "yyyy/MM/dd")
-		 String baseDirPath ="${grailsApplication.config.VotingSystem.backupCopyPath}/${datePathPart}/Event_${event.id}"
+		 String baseDirPath ="${grailsApplication.config.vs.backupCopyPath}/${datePathPart}/Event_${event.id}"
 		 String filesDirPath = null
 		 String zipFilesDirPath = "${baseDirPath}/zip"
 		 new File(zipFilesDirPath).mkdirs()
