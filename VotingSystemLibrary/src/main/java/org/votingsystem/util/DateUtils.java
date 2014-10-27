@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
 * @author jgzornoza
@@ -166,6 +168,21 @@ public class DateUtils {
         return getWeekPeriod(selectedDateCalendar);
     }
 
+    public static TimePeriod addHours(Calendar baseCal, Integer numHours){
+        Calendar cal = (Calendar) baseCal.clone();
+        cal.add(Calendar.HOUR, numHours);
+        Date dateFrom = null;
+        Date dateTo = null;
+        if(baseCal.getTime().after(cal.getTime())) {
+            dateFrom = cal.getTime();
+            dateTo = baseCal.getTime();
+        } else {
+            dateFrom = baseCal.getTime();
+            dateTo = cal.getTime();
+        }
+        return new DateUtils.TimePeriod(dateFrom, dateTo);
+    }
+
     public static DateUtils.TimePeriod getDayPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.HOUR_OF_DAY, 0);
@@ -253,9 +270,16 @@ public class DateUtils {
 
         public JSONObject toJSON() throws JSONException {
             JSONObject jsonData = new JSONObject();
-            jsonData.put("dateFrom", DateUtils.getDateStr(dateFrom, "dd MMM yyyy' 'HH:mm"));
-            jsonData.put("dateTo", DateUtils.getDateStr(dateTo, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("dateFrom", dateFrom);
+            jsonData.put("dateTo", dateTo);
             return jsonData;
+        }
+
+        public Map getMap() throws JSONException {
+            Map dataMap = new HashMap();
+            dataMap.put("dateFrom", DateUtils.getDateStr(dateFrom, "dd MMM yyyy' 'HH:mm"));
+            dataMap.put("dateTo", DateUtils.getDateStr(dateTo, "dd MMM yyyy' 'HH:mm"));
+            return dataMap;
         }
 
         @Override public String toString() {

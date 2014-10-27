@@ -87,7 +87,7 @@ class SystemService {
     private Map genBalanceForSystem(DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod()?.getName();
         log.debug("$methodName - timePeriod [${timePeriod.toString()}]")
-        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        Map resultMap = [timePeriod:timePeriod.getMap()]
         //to avoid circular references
         resultMap.userVS = ((UserVSService)grailsApplication.mainContext.getBean("userVSService")).getUserVSDataMap(
                 getSystemUser(), false)

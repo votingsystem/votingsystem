@@ -1,13 +1,14 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-user-box', file: 'vs-user-box.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-currency-selector', file: 'vs-currency-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/currency-selector']"/>">
+
 
 <polymer-element name="transactionvs-form" attributes="subpage">
 <template>
@@ -61,7 +62,7 @@
                     <div horizontal layout center center-justified>
                         <input type="text" id="amount" class="form-control" style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
                                title="<g:message code="amountLbl"/>" placeholder="<g:message code="amountLbl"/>"/>
-                        <currency-selector id="currencySelector"></currency-selector>
+                        <vs-currency-selector id="currencySelector"></vs-currency-selector>
                     </div>
                     <input type="text" id="transactionvsSubject" class="form-control" style="" required
                            title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/>"/>

@@ -10,6 +10,14 @@ class UrlMappings {
         "/"(controller:"/app")
         "500"(view:'/error')
 
+        "/app/userVS/last/$numHours" {
+            controller = "app"
+            action = "user"
+            constraints {
+                numHours(matches:/\d*/)
+            }
+        }
+
         "/balance/userVS/$userId" {
             controller = "balance"
             action = "userVS"

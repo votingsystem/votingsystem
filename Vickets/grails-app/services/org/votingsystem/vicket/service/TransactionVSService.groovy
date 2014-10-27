@@ -11,6 +11,7 @@ import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
+import static org.votingsystem.vicket.model.TransactionVS.*
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.CoreSignal
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -237,6 +238,33 @@ class TransactionVSService {
             transactionToList.add(getTransactionMap(transaction))
         }
         return [transactionToList:transactionToList, balancesTo:balancesMap]
+    }
+
+    @Transactional public Map getDashBoardInfo(DateUtils.TimePeriod timePeriod) {
+        Map result = [timePeriod:timePeriod.getMap()]
+        result.numTransFromBankVS = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.FROM_BANKVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransFromUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.FROM_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransFromUserVSToUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.FROM_USERVS_TO_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransFromGroupVSToMemberGroup = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransFromGroupVSToAllMembers = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.FROM_GROUP_TO_ALL_MEMBERS, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransVicketInitPeriod = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.VICKET_INIT_PERIOD, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransVicketInitPeriodTimeLimited = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.VICKET_INIT_PERIOD_TIME_LIMITED, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransVicketRequest = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.VICKET_REQUEST, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransVicketSend = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.VICKET_SEND, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransVicketCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.VICKET_CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.numTransCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
+                Type.CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        return result
     }
 
     @Transactional

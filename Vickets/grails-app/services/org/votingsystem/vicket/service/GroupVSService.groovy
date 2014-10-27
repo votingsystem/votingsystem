@@ -147,14 +147,14 @@ class GroupVSService {
 
     @Transactional
     public Map getDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = getGroupVSDataMap(groupVS)
         return resultMap
     }
 
     @Transactional
     public Map getDataWithBalancesMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = getGroupVSDataMap(groupVS)
 
         Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(((UserVS)groupVS), timePeriod)

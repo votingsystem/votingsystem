@@ -1,7 +1,7 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
+<link href="../polymer/polymer.html" rel="import">
+<link href="../paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
 
-<polymer-element name="currency-selector" on-core-select="{{selectAction}}">
+<polymer-element name="vs-currency-selector" on-core-select="{{selectAction}}">
     <template>
         <style>
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
@@ -16,7 +16,7 @@
 
     </template>
     <script>
-        Polymer('currency-selector', {
+        Polymer('vs-currency-selector', {
             currencyCodes: [
                 {name: 'Euro', code: 'EUR'},
                 {name: 'Dollar', code: 'USD'},
@@ -29,7 +29,7 @@
             selectAction: function(e, details) {
                 if(details.isSelected) {
                     this.fire("selected", details.item.id)
-                    this.fire('core-signal', {name: "currency-selector-selected", data: details.item.id});
+                    this.fire('core-signal', {name: "vs-currency-selector-selected", data: details.item.id});
                 }
             }
         });

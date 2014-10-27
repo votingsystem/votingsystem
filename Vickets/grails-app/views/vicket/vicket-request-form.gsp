@@ -6,10 +6,9 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-currency-selector', file: 'vs-currency-selector.html')}">
 
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/currency-selector']"/>">
-
 
 <polymer-element name="vicket-request-form">
     <template>
@@ -88,7 +87,7 @@
                     <div layout horizontal center center-justified>
                         <div style="font-size: 2.2em; width: 50px;">{{amountValue}}</div>
 
-                        <currency-selector id="currencySelector" style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;"></currency-selector>
+                        <vs-currency-selector id="currencySelector" style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;"></vs-currency-selector>
                     </div>
                 </div>
             </div>

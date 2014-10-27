@@ -1,8 +1,10 @@
 package org.votingsystem.vicket.controller
 
+import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.util.DateUtils
 
 /**
  * @infoController Aplicación
@@ -14,6 +16,7 @@ import org.votingsystem.model.TypeVS
 class AppController {
 
 	def grailsApplication;
+    def transactionVSService
 
     def index() {}
 
@@ -38,7 +41,15 @@ class AppController {
 
     def admin() {}
 
-    def user() {}
+    def user() {
+        DateUtils.TimePeriod timePeriod
+        Integer numHours = params.int("numHours") ? -params.int("numHours"):-1; //default to 1 hour
+        timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours)
+        def result = [transactionVSData:transactionVSService.getDashBoardInfo(timePeriod)]
+        if(!request.contentType?.contains("json")) render(view:'user', model:[dataMap:(result as JSON)])
+        else render result as JSON
+        return false
+    }
 
     def contact() {}
 

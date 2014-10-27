@@ -83,7 +83,7 @@ class BankVSService {
     }
 
     public Map getDataWithBalancesMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = userVSService.getUserVSDataMap(bankVS, false)
         Map transactionsWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(bankVS, timePeriod)
         resultMap.transactionFromList = transactionsWithBalancesMap.transactionFromList
