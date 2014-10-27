@@ -29,7 +29,7 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
-        <core-xhr id="ajax" ></core-xhr>
+        <core-xhr id="ajax" handleAs=""></core-xhr>
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}"></core-signals>
         <vs-navbar id="_navbar" style="display: none;">
@@ -137,7 +137,7 @@
                 this.ajaxOptions.callback = this.ajaxResponse.bind(this)
                 this.$.ajax.request(this.ajaxOptions)
                 /*if(this.$.ajax.url == newURL)  this.$.ajax.go()
-                else this.$.ajax.url = newURL*/
+                 else this.$.ajax.url = newURL*/
             },
             drawerItemSelected: function(e) {
                 if(e.detail.isSelected) {
@@ -151,8 +151,14 @@
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
             },
-            ajaxResponse: function(xhrResponse, xhr) {
-                var ajaxDocument = xhrResponse
+            ajaxResponse: function(ajaxDocument, xhr) {
+                console.log("ajaxResponse")
+                if(400 === xhr.status) {//missing method to access response text from errors
+                    this.loading = false
+                    showMessageVS('<g:message code="errorLoadingResourceMsg"/>' , '<g:message code="errorLbl"/>')
+                    return
+                }
+                if(!ajaxDocument) return
                 var links = ajaxDocument.querySelectorAll('link')
                 var numImports = 0
                 for (var i = 0; i < links.length; i++) {
@@ -188,12 +194,9 @@
         });
     </script>
 </polymer-element>
-<nav-bar id="navBar" style="display:none;" class="">
+<nav-bar id="navBar">
     <g:layoutBody/>
 </nav-bar>
-<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;z-index: 10;">
-    <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
-</div>
 
 <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
@@ -208,11 +211,6 @@
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
         updateLinksVS(document.getElementsByTagName('a'))
-    });
-
-    document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
-        document.querySelector('#navBar').style.display = 'block';
-        document.querySelector('#loadingDiv').style.display = 'none';
     });
 
     if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {

@@ -43,6 +43,7 @@
             },
             addUser:function(userToAdd) {
                 var isNewUser = true
+                if(!this.uservsList) this.uservsList = []
                 for(userIdx in this.uservsList) {
                     if(userToAdd.id == this.uservsList[userIdx].id) isNewUser = false
                 }

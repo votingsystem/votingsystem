@@ -147,14 +147,9 @@
         });
     </script>
 </polymer-element>
-
-<nav-bar id="navBar" style="display:none;" class="">
+<nav-bar id="navBar">
     <g:layoutBody/>
 </nav-bar>
-<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;z-index: 10;">
-    <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
-</div>
-
 <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
 </div>
@@ -162,17 +157,13 @@
 </body>
 </html>
 <asset:script>
-    window.addEventListener('WebComponentsReady', function(e) {  });
+    window.addEventListener('WebComponentsReady', function(e) {});
     document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {});
+    document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {});
 
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
         updateLinksVS(document.getElementsByTagName('a'))
-    });
-
-    document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
-        document.querySelector('#navBar').style.display = 'block';
-        document.querySelector('#loadingDiv').style.display = 'none';
     });
 </asset:script>
 <asset:deferredScripts/>
