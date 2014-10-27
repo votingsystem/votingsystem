@@ -83,9 +83,10 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
                         sendMenuItem.setText(responseVS.getMessage());
                         sendMenuItem.setVisible(true);
                     } else {
-                        vicketStatusLbl.getStyleClass().add("statusLbl");
-                        vicketStatusLbl.setText(responseVS.getMessage());
+                        mainPane.getStyleClass().add("vicket-error");
+                        vicketStatusLbl.setText(ContextVS.getMessage("invalidVicket"));
                         sendMenuItem.setVisible(false);
+                        showMessage(responseVS.getMessage(), Boolean.FALSE);
                     }
 
                 }
@@ -216,7 +217,7 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
             @Override public void run() {
                 messageDialog = new MessageDialog();
                 if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
-                else messageDialog.showMessage(message);
+                else messageDialog.showMessage(null, message);
             }
         });
     }
@@ -235,13 +236,15 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
                     transactionBatch.initTransactionVSRequest(transactionData.getToUserName(), transactionData.getToUserIBAN(),
                             transactionData.getSubject(), false, vicketServer.getTimeStampServiceURL());
                     updateProgress(3, 10);
-                    ResponseVS responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVSRequest().toString().getBytes(),
+                    ResponseVS responseVS = HttpHelper.getInstance().sendData(
+                            transactionBatch.getTransactionVSRequest().toString().getBytes(),
                             ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
                     updateProgress(8, 10);
                     log.debug("Vicket Transaction result: " + responseVS.getStatusCode());
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
                     JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
-                    transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"), vicketServer.getTrustAnchors());
+                    transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"),
+                            vicketServer.getTrustAnchors());
                     Thread.sleep(3000);
                     setProgressVisible(false, false);
                     showMessage(responseJSON.getString("message"), Boolean.FALSE);

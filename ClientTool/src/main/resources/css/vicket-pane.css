@@ -12,10 +12,14 @@
     -fx-background-color: #fff;
 }
 
+.vicket-error {
+    -fx-background-color: rgba(186,0,17, 0.45) ;
+}
+
 .statusLbl {
     -fx-font: bold 20pt "LucidaBrightDemiBold";
     -fx-font-weight: bold;
-    -fx-text-fill: #6c0404;
+    -fx-text-fill: #fff;
 }
 
 .infoLabel {

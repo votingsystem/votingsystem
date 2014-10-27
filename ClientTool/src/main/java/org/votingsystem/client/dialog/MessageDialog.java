@@ -34,7 +34,7 @@ public class MessageDialog {
     private static Logger log = Logger.getLogger(MessageDialog.class);
 
     private final Stage stage;
-    private HBox messageBox;
+    private VBox mainBox;
     private Label messageLabel;
     private WebView messageWebView;
 
@@ -45,12 +45,9 @@ public class MessageDialog {
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }
         });
-
-        VBox mainBox = new VBox(10);
-        messageBox = new HBox(10);
+        mainBox  = new VBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
-
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         messageWebView.setPrefHeight(270);
@@ -58,7 +55,6 @@ public class MessageDialog {
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");
-        messageBox.getChildren().add(messageLabel);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
@@ -93,30 +89,38 @@ public class MessageDialog {
         });
     }
 
-    public void showMessage(String message) {
-        messageWebView.setVisible(false);
-        messageLabel.setText(message);
-        messageLabel.setGraphic(null);
-        stage.centerOnScreen();
-        stage.show();
-        stage.toFront();
-        messageLabel.setVisible(true);
+    private void isHTMLView(boolean isHTMLView) {
+        if(isHTMLView) {
+            if(!mainBox.getChildren().contains(messageWebView)) {
+                mainBox.getChildren().add(messageWebView);
+            } if(mainBox.getChildren().contains(messageLabel)) {
+                mainBox.getChildren().remove(messageLabel);
+            }
+        } else {
+            if(mainBox.getChildren().contains(messageWebView)) {
+                mainBox.getChildren().remove(messageWebView);
+            }if(!mainBox.getChildren().contains(messageLabel)) {
+                mainBox.getChildren().add(messageLabel);
+            }
+        }
     }
 
     public void showHtmlMessage(String htmlMessage) {
-        messageLabel.setVisible(false);
         messageWebView.getEngine().loadContent(htmlMessage);
-        messageWebView.setVisible(true);
+        isHTMLView(true);
         stage.centerOnScreen();
         stage.show();
         stage.toFront();
     }
 
-    public void showMessage(int statusCode, String message) {
+    public void showMessage(Integer statusCode, String message) {
         messageLabel.setText(message);
-        if(ResponseVS.SC_OK == statusCode) {
-            messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
-        } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+        isHTMLView(false);
+        if(statusCode != null) {
+            if(ResponseVS.SC_OK == statusCode) {
+                messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
+            } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+        }
         stage.centerOnScreen();
         stage.show();
         stage.toFront();

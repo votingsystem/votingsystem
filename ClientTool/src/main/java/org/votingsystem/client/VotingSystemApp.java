@@ -276,7 +276,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         adminChoiceBox.getSelectionModel().selectFirst();
         adminChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                    log.debug("value: " + value + " -new_value: " + new_value + " - option: " + adminOptions[new_value.intValue()]);
+                    log.debug("value: " + value + " - new_value: " + new_value + " - option: " +
+                            adminOptions[new_value.intValue()]);
                     String selectedOption = adminOptions[new_value.intValue()];
                     if(ContextVS.getMessage("settingsLbl").equals(selectedOption)) {
                         openSettings();
@@ -400,7 +401,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     public void showMessage(final String message) {
-        PlatformImpl.runLater(new Runnable() { @Override public void run() { new MessageDialog().showMessage(message);}});
+        PlatformImpl.runLater(new Runnable() { @Override public void run() {
+            new MessageDialog().showMessage(null, message);}});
     }
 
     @Override public void consumeWebSocketMessage(JSONObject messageJSON) {

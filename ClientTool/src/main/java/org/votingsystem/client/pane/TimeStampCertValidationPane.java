@@ -76,7 +76,7 @@ public class TimeStampCertValidationPane extends GridPane {
 
     private void showMessage(String message) {
         MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(message);
+        messageDialog.showMessage(null, message);
     }
 
     private void validateTimeStamp() {

@@ -166,7 +166,7 @@ public class TimeStampPane extends GridPane {
 
     private void showMessage(String message) {
         MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(message);
+        messageDialog.showMessage(null, message);
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {

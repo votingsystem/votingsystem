@@ -370,7 +370,7 @@ public class BrowserVS extends Region implements WebKitHost {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(msg);
+                messageDialog.showMessage(null, msg);
             }
         });
     }

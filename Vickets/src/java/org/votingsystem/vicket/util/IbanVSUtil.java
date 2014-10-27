@@ -16,9 +16,9 @@ public class IbanVSUtil {
 
     private IbanVSUtil() {
         bankCode = (String) ((ConfigObject) ((GrailsApplication) ApplicationContextHolder.getBean("grailsApplication")).
-                getConfig().getProperty("VotingSystem")).get("IBAN_bankCode");
+                getConfig().getProperty("vs")).get("IBAN_bankCode");
         branchCode = (String) ((ConfigObject) ((GrailsApplication) ApplicationContextHolder.getBean("grailsApplication")).
-                getConfig().getProperty("VotingSystem")).get("IBAN_branchCode");
+                getConfig().getProperty("vs")).get("IBAN_branchCode");
     }
 
     public String getIBAN(Long userId) {

@@ -192,7 +192,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
             @Override public void run() {
                 if (messageDialog == null) messageDialog = new MessageDialog();
                 if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
-                else messageDialog.showMessage(message);
+                else messageDialog.showMessage(null, message);
             }
         });
     }

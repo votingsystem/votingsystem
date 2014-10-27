@@ -163,7 +163,7 @@ public class SettingsDialog {
                     userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                 } catch(Exception ex) {
                     MessageDialog messageDialog = new MessageDialog();
-                    messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
+                    messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("keyStoreNotValidErrorMsg"));
                 }
                 //PrivateKey privateKeySigner = (PrivateKey)userKeyStore.getKey("UserTestKeysStore", null);
@@ -186,7 +186,7 @@ public class SettingsDialog {
         if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
                 MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
+                messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                         ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
                 return;
             }
@@ -202,7 +202,7 @@ public class SettingsDialog {
                             CryptoTokenVS.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
                     MessageDialog messageDialog = new MessageDialog();
-                    messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
+                    messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }
