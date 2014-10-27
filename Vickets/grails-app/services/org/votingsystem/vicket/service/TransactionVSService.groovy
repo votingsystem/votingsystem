@@ -242,7 +242,7 @@ class TransactionVSService {
 
     @Transactional public Map getDashBoardInfo(DateUtils.TimePeriod timePeriod) {
         Map result = [timePeriod:timePeriod.getMap()]
-        result.numTransFromBankVS = TransactionVS.countByTypeAndDateCreatedBetween(
+        result.numTransFromBankVS = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 Type.FROM_BANKVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
                 Type.FROM_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())

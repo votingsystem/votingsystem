@@ -8,6 +8,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -20,10 +21,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
@@ -191,13 +189,31 @@ public class BrowserVS extends Region implements WebKitHost {
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
+
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         tabPane.setSide(Side.TOP);
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
-        mainVBox.getChildren().addAll(toolBar, tabPane);
+        final AnchorPane root = new AnchorPane();
+        final Button addButton = new Button("+");
+        addButton.getStyleClass().add("newtab-button");
+        AnchorPane.setTopAnchor(tabPane, 0.0);
+        AnchorPane.setLeftAnchor(tabPane, 0.0);
+        AnchorPane.setRightAnchor(tabPane, 0.0);
+        AnchorPane.setBottomAnchor(tabPane, 0.0);
+        AnchorPane.setTopAnchor(addButton, 1.0);
+        AnchorPane.setLeftAnchor(addButton, 5.0);
+        addButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                newTab(null, null, null);
+            }
+        });
+        root.getChildren().addAll(tabPane, addButton);
+        VBox.setVgrow(root, Priority.ALWAYS);
+
+        mainVBox.getChildren().addAll(toolBar, root);
         mainVBox.getStylesheets().add(((Object)this).getClass().getResource("/css/browservs.css").toExternalForm());
         browserHelper.getChildren().add(0, mainVBox);
         browserStage.setScene(new Scene(browserHelper));

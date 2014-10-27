@@ -12,7 +12,7 @@ import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.ExceptionVS
 
 Map userBaseData = [userIndex:300]
-Map simulationDataMap = [groupId:5, serverURL:"http://vickets:8086/Vickets", numRequestsProjected: 5, userBaseData:userBaseData]
+Map simulationDataMap = [groupId:6, serverURL:"http://vickets:8086/Vickets", numRequestsProjected: 5, userBaseData:userBaseData]
 isWithUserValidation = Boolean.TRUE
 
 

@@ -31,7 +31,7 @@ class TransactionVS_BankVSService {
                 transactionParent, transactionParent.amount, request.toUserVS, request.toUserVS.IBAN).save();
         //transaction?.errors.each { log.error("processTransactionVSFromBankVS - error - ${it}")}
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${triggeredTransaction.id}")
-        log.debug("${metaInfMsg} - from BankVS '${bankVS.id}' to userVS '${request.toUser.id}' ")
+        log.debug("${metaInfMsg} - from BankVS '${bankVS.id}' to userVS '${request.toUserVS.id}' ")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
                 type:TypeVS.FROM_BANKVS)
     }

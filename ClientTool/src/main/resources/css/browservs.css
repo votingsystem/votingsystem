@@ -1,4 +1,11 @@
 .tab {
     -fx-background-radius: 5 5 0 0, 4 4 0 0, 3 3 0 0;
-    -fx-tab-min-width: 150;
+    -fx-pref-width: 130;
+}
+.tab-header-area {
+    -fx-padding: 0 0 0 35;
+}
+
+.newtab-button {
+    -fx-padding: 4px 6px 4px 6px;
 }
