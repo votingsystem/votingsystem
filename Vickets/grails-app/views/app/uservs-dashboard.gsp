@@ -29,43 +29,43 @@
                 <div class="numTrans">{{transactionVSData.numTransFromBankVS}}</div>
                 <div class="transDesc">TransFromBankVS</div>
             </div>
-            <div id="FROM_USERVS" class="transBlock">
+            <div id="FROM_USERVS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromUserVS}}</div>
                 <div class="transDesc">TransFromUserVS</div>
             </div>
-            <div id="FROM_USERVS_TO_USERVS" class="transBlock">
+            <div id="FROM_USERVS_TO_USERVS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromUserVSToUserVS}}</div>
                 <div class="transDesc">TransFromUserVSToUserVS</div>
             </div>
-            <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock">
+            <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromGroupVSToMemberGroup}}</div>
                 <div class="transDesc">TransFromGroupVSToMemberGroup</div>
             </div>
-            <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock">
+            <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromGroupVSToAllMembers}}</div>
                 <div class="transDesc">TransFromGroupVSToAllMembers</div>
             </div>
-            <div id="VICKET_INIT_PERIOD" class="transBlock">
+            <div id="VICKET_INIT_PERIOD" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketInitPeriod}}</div>
                 <div class="transDesc">TransVicketInitPeriod</div>
             </div>
-            <div id="VICKET_INIT_PERIOD_TIME_LIMITED" class="transBlock">
+            <div id="VICKET_INIT_PERIOD_TIME_LIMITED" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketInitPeriodTimeLimited}}</div>
                 <div class="transDesc">TransVicketInitPeriodTimeLimited</div>
             </div>
-            <div id="VICKET_REQUEST" class="transBlock">
+            <div id="VICKET_REQUEST" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketRequest}}</div>
                 <div class="transDesc">TransVicketRequest</div>
             </div>
-            <div id="VICKET_SEND" class="transBlock">
+            <div id="VICKET_SEND" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketSend}}</div>
                 <div class="transDesc">TransVicketSend</div>
             </div>
-            <div id="VICKET_CANCELLATION" class="transBlock">
+            <div id="VICKET_CANCELLATION" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketCancellation}}</div>
                 <div class="transDesc">TransVicketCancellation</div>
             </div>
-            <div id="CANCELLATION" class="transBlock">
+            <div id="CANCELLATION" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransCancellation}}</div>
                 <div class="transDesc">TransCancellation</div>
             </div>
@@ -86,10 +86,6 @@
             this.transactionVSData = this.dataMap.transactionVSData
             this.dateFrom = this.$.dateVS.parseDayWeekDate(this.dataMap.transactionVSData.timePeriod.dateFrom)
             this.dateTo = this.$.dateVS.parseDayWeekDate(this.dataMap.transactionVSData.timePeriod.dateTo)
-            console.log(this.tagName + " - dateFrom: " + this.dateFrom)
-            console.log(this.tagName + " - dateFromURL: " + this.$.dateVS.formatURLParam(this.dateFrom))
-
-
         },
         selectAction: function(e, details) {
             if(!this.initialized) {
@@ -108,8 +104,6 @@
             }
         },
         transBlockSelected: function(e) {
-            //http://vickets:8086/Vickets/transactionVS/index?transactionvsType=FROM_BANKVS
-            ///$dateFrom/to/$dateTo
             var targetURL = "${createLink( controller:'transactionVS', action:"from", absolute:true)}/" +
                     this.$.dateVS.formatURLParam(this.dateFrom) + "/to/" + this.$.dateVS.formatURLParam(this.dateTo) +
                     "?transactionvsType=" + e.target.parentNode.id

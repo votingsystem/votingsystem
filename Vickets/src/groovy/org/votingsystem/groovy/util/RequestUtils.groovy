@@ -1,10 +1,5 @@
 package org.votingsystem.groovy.util
 
-import org.votingsystem.util.DateUtils
-
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

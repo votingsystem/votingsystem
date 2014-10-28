@@ -32,7 +32,7 @@
 
     document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
         var transactionvsType = e.detail
-        console.log("transactionvsType: " + transactionvsType)
+        console.log("index.gsp - transactionvsType: " + transactionvsType)
         targetURL = "${createLink(controller: 'transactionVS', action: 'index')}";
         if("" != transactionvsType) {
             targetURL = targetURL + "?transactionvsType=" + transactionvsType

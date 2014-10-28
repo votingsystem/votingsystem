@@ -48,6 +48,9 @@
         publish: {
             transactionsMap: {value: {}}
         },
+        urlChanged:function() {
+            console.log(this.tagName + " - urlChanged: " + this.url)
+        },
         transactionListChanged:function() {
             console.log("transactionListChanged")
         },
@@ -88,7 +91,7 @@
             return amount
         },
         ajaxComplete: function() {
-            this.transactionList = this.responseData.transactionRecords
+            this.transactionsMap = this.responseData
         },
         addTransaction:function(transactionvs) {
             this.transactionList.push(transactionvs)
