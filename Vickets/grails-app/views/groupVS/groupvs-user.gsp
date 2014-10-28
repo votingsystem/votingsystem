@@ -5,20 +5,19 @@
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <vs-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 540px;">
+        <vs-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
             <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
-            <div id="" style="width: 450px;margin:auto; padding: 15px;">
+            <div id="" style="width: 480px;margin:auto; padding: 15px;">
                 <div layout horizontal style="font-size: 0.8em;">
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
                     <template if="{{subscriptionData.uservs.IBAN}}">
                         <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>
                     </template>
                 </div>
-
-                <div id="nameDiv" style="font-size: 1.2em;font-weight: bold; margin:5px 0px 5px 0px;">{{subscriptionData.uservs.name}}</div>
+                <div id="nameDiv" style="font-size: 1.15em;font-weight: bold; margin:5px 0px 5px 0px;">{{subscriptionData.uservs.name}}</div>
                 <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>:
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>

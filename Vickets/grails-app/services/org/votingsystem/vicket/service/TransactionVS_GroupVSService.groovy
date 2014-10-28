@@ -62,17 +62,6 @@ class TransactionVS_GroupVSService {
     }
 
     @Transactional
-    private UserVS getUserFromGroup (GroupVS groupVS, String IBAN) {
-        List subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
-            eq("groupVS", groupVS)
-            eq("state", SubscriptionVS.State.ACTIVE)
-            userVS { eq("IBAN", IBAN)}
-        }
-        if(subscriptionList.isEmpty()) return null
-        else return subscriptionList?.iterator()?.next().userVS
-    }
-
-    @Transactional
     private ResponseVS processTransactionVSForAllMembers(TransactionVSService.TransactionVSRequest request,
              Map<UserVSAccount, BigDecimal> accountFromMovements) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();

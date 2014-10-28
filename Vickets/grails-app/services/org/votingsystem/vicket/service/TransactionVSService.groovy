@@ -413,24 +413,27 @@ class TransactionVSService {
             return this;
         }
 
-        public TransactionVSRequest getGroupVSRequest(JSONObject messageJSON, UserVS messageSigner) {
+        public TransactionVSRequest getGroupVSRequest() {
             if(!messageJSON.operation) throw new ValidationExceptionVS(this.getClass(), "missing param 'operation'");
-            operation = TransactionVS.Type.valueOf(messageJSON.operation)
+            transactionType = TransactionVS.Type.valueOf(messageJSON.operation)
             this.messageJSON = messageJSON
-            fromUserVS = messageSigner
-            groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
+            groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:this.fromUserVS)
             if(!groupVS) {
                 throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage('groupNotFoundByIBANErrorMsg',
-                        [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale))
+                        [messageJSON.fromUserIBAN, this.fromUserVS.nif].toArray(), locale))
             }
-            if(operation != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-                messageJSON.toUserIBAN?.each { it ->
-                    UserVS userVS = getUserFromGroup(groupVS, it)
-                    if(!userVS) {
-                        throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
-                                'groupUserNotFoundByIBANErrorMsg',  [it, groupVS.name].toArray(), locale))
-                    } else toUserVSList.add(userVS)
+            if(transactionType != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+                for(int i = 0; i < messageJSON.toUserIBAN.size(); i++) {
+                    List subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+                        eq("groupVS", groupVS)
+                        eq("state", SubscriptionVS.State.ACTIVE)
+                        userVS { eq("IBAN", messageJSON.toUserIBAN.get(i))}
+                    };
+                    if(subscriptionList.isEmpty()) throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
+                            'groupUserNotFoundByIBANErrorMsg',  [messageJSON.toUserIBAN.get(i), groupVS.name].toArray(), locale))
+                    toUserVSList.add(subscriptionList.iterator().next())
                 }
+
                 if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),
                         "Transaction without valid receptors")
             }

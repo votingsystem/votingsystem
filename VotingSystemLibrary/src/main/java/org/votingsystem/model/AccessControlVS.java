@@ -107,7 +107,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/voteVS";
     }
 
-    public String getProceduresPageURL() {
+    public String getDashBoardURL() {
         return getServerURL() + "/app/admin?menu=admin";
     }
 

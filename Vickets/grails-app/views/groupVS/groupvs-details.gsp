@@ -24,75 +24,72 @@
          transitions="cross-fade-all">
     <section id="page1">
     <div cross-fade style="max-width: 900px; margin:0 auto;">
-        <div horizontal layout center center-justified>
-            <template if="{{subpage}}">
-                <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
-                    <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+        <div vertical layout flex>
+            <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
+            </div>
+
+            <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
+                <div layout horizontal center center-justified style="margin:0 0 20px 0;">
+                    <div layout horizontal center center-justified>
+                        <i class="fa fa-cogs optionsIcon"></i>
+                        <paper-dropdown-menu id="configGroupDropDown" valueattr="label"
+                                     label="<g:message code="configGroupvsLbl"/>" style="width: 200px;">
+                            <core-selector target="{{$.groupOptions}}" valueattr="id" on-core-select="{{configGroup}}">
+                                <div id="groupOptions" style="padding:0 10px 0 10px;">
+                                    <core-item id="editGroup" label="<g:message code="editDataLbl"/>"></core-item>
+                                    <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>"></core-item>
+                                </div>
+                            </core-selector>
+                        </paper-dropdown-menu>
+                    </div>
+
+                    <div layout horizontal center center-justified style="margin:0 0 0 60px;">
+                        <i class="fa fa-money optionsIcon"></i>
+                        <paper-dropdown-menu id="selectTransactionVSDropDown" valueattr="label"
+                                         label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
+                            <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
+                                <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
+                                    <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
+                                    <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
+                                    <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
+                                </div>
+                            </core-selector>
+                        </paper-dropdown-menu>
+                    </div>
+                </div>
+            </div>
+
+            <template if="{{isUserView}}">
+                <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
+                    <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                        <i class="fa fa-sign-in"></i> <g:message code="subscribeGroupVSLbl"/>
+                    </paper-button raised>
+                    <paper-button raised style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
+                        <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
+                    </paper-button raised>
                 </div>
             </template>
-
-            <div vertical layout flex>
-                <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
-                </div>
-
-                <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
-                    <div layout horizontal center center-justified style="margin:0 0 20px 0;">
+            <div id="pageHeader" layout horizontal center center-justified>
+                <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
+                    <template if="{{subpage}}">
+                        <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
+                            <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        </div>
+                    </template>
+                    <template if="{{groupvs.userVS.tags.length > 0}}">
                         <div layout horizontal center center-justified>
-                            <i class="fa fa-cogs optionsIcon"></i>
-                            <paper-dropdown-menu id="configGroupDropDown" valueattr="label"
-                                         label="<g:message code="configGroupvsLbl"/>" style="width: 200px;">
-                                <core-selector target="{{$.groupOptions}}" valueattr="id" on-core-select="{{configGroup}}">
-                                    <div id="groupOptions" style="padding:0 10px 0 10px;">
-                                        <core-item id="editGroup" label="<g:message code="editDataLbl"/>"></core-item>
-                                        <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>"></core-item>
-                                    </div>
-                                </core-selector>
-                            </paper-dropdown-menu>
+                            <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
+                            <template repeat="{{tag in groupvs.userVS.tags}}">
+                                <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
+                            </template>
                         </div>
-
-                        <div layout horizontal center center-justified style="margin:0 0 0 60px;">
-                            <i class="fa fa-money optionsIcon"></i>
-                            <paper-dropdown-menu id="selectTransactionVSDropDown" valueattr="label"
-                                             label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
-                                <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
-                                    <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
-                                        <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
-                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
-                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
-                                    </div>
-                                </core-selector>
-                            </paper-dropdown-menu>
-                        </div>
-                    </div>
+                    </template>
                 </div>
-
-                <template if="{{isUserView}}">
-                    <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
-                        <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
-                            <i class="fa fa-sign-in"></i> <g:message code="subscribeGroupVSLbl"/>
-                        </paper-button raised>
-                        <paper-button raised style="margin:0 20px 0 0;" on-click="{{makeTransactionVS}}">
-                            <i class="fa fa-money"></i> <g:message code="makeTransactionVSLbl"/>
-                        </paper-button raised>
-                    </div>
-                </template>
-                <div id="pageHeader" layout horizontal center center-justified>
-                    <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
-                        <template if="{{groupvs.userVS.tags.length > 0}}">
-                            <div layout horizontal center center-justified>
-                                <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
-                                <template repeat="{{tag in groupvs.userVS.tags}}">
-                                    <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                    <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
-                    </div>
-                    <div flex style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right;">
-                        <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
-                    </div>
+                <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                    <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
+                </div>
+                <div flex style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
+                    <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
                 </div>
             </div>
         </div>
@@ -138,7 +135,6 @@
     </core-animated-pages>
 
     <groupvs-user id="userDescription"></groupvs-user>
-
 </template>
 <script>
     Polymer('groupvs-details', {

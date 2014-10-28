@@ -251,7 +251,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
         vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openVicketURL(ContextVS.getInstance().getVicketServer().getUserProceduresPageURL(),
+                openVicketURL(ContextVS.getInstance().getVicketServer().getUserDashBoardURL(),
                         ContextVS.getMessage("vicketUsersLbl"));
             }});
         vicketUsersProceduresButton.setPrefWidth(500);
@@ -282,10 +282,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     if(ContextVS.getMessage("settingsLbl").equals(selectedOption)) {
                         openSettings();
                     } else if(ContextVS.getMessage("vicketAdminLbl").equals(selectedOption)) {
-                        openVicketURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
+                        openVicketURL(ContextVS.getInstance().getVicketServer().getAdminDashBoardURL(),
                                 ContextVS.getMessage("vicketAdminLbl"));
                     } else if(ContextVS.getMessage("votingSystemProceduresLbl").equals(selectedOption)) {
-                        openVotingSystemURL(ContextVS.getInstance().getAccessControl().getProceduresPageURL(),
+                        openVotingSystemURL(ContextVS.getInstance().getAccessControl().getDashBoardURL(),
                                 ContextVS.getMessage("votingSystemProceduresLbl"));
                     }
                     adminChoiceBox.getSelectionModel().select(0);

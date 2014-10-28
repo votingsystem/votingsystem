@@ -6,7 +6,9 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.groovy.util.TransactionVSUtils
+import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.LoggerVS
@@ -36,8 +38,16 @@ class TestingController {
     def transactionVS_UserVSService
 
     def index() {
-        ResponseVS responseVS = balanceService.initWeekPeriod(Calendar.getInstance())
-        return [responseVS:responseVS]
+        int result
+        SubscriptionVS.withTransaction {
+            List subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+                eq("groupVS", GroupVS.get(6L))
+                eq("state", SubscriptionVS.State.ACTIVE)
+                userVS { eq("IBAN", "ES0878788989450000000007")}
+            }
+            result = subscriptionList.totalCount
+        }
+        render "result: $result"
     }
 
     def balance() {

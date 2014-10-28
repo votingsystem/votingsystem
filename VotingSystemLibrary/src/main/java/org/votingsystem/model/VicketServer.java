@@ -50,11 +50,11 @@ public class VicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/transactionVS/vicket";
     }
 
-    public String getUserProceduresPageURL() {
-        return getServerURL() + "/app/user?menu=user";
+    public String getUserDashBoardURL() {
+        return getServerURL() + "/app/userVS?menu=user";
     }
 
-    public String getAdminProceduresPageURL() {
+    public String getAdminDashBoardURL() {
         return getServerURL() + "/app/admin?menu=admin";
     }
 

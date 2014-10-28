@@ -58,17 +58,19 @@
                     <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
                     <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
-                <div>
+                <div style="padding: 5px;display: block;">
                     <div horizontal layout center center-justified>
                         <input type="text" id="amount" class="form-control" style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
                                title="<g:message code="amountLbl"/>" placeholder="<g:message code="amountLbl"/>"/>
                         <vs-currency-selector id="currencySelector"></vs-currency-selector>
                     </div>
-                    <input type="text" id="transactionvsSubject" class="form-control" style="" required
-                           title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/>"/>
+                    <div>
+                        <input type="text" id="transactionvsSubject" class="form-control" required
+                               title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/>"/>
+                    </div>
                 </div>
 
-                <div  layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
+                <div layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div layout horizontal style="font-size: 0.8em; display: inline-block;">
@@ -281,6 +283,8 @@
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN
             this.groupId = targetGroupId
+            this.$.transactionvsSubject.value = ""
+            this.$.amount.value = ""
             this.isWithUserSelector = true
             this.toUserName = null
             this.$.timeLimitedRButton.checked = false
