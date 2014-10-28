@@ -42,7 +42,7 @@ class TransactionVSController {
         if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
         List<TransactionVS> transactionList = null
         TransactionVS.withTransaction {
-            if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
+            if(params.searchText || params.dateFrom || params.dateTo || params.transactionvsType) {
                 TransactionVS.Type transactionType = null
                 BigDecimal amount = null
                 Date dateFrom = null
@@ -51,9 +51,8 @@ class TransactionVSController {
                     if(params.transactionvsType) transactionType = TransactionVS.Type.valueOf(params.transactionvsType)
                     else transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
                 try {amount = new BigDecimal(params.searchText)} catch(Exception ex) {}
-                //searchFrom:2014/04/14 00:00:00, max:100, searchTo
-                if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
-                if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+                if(params.dateFrom) try {dateFrom = DateUtils.getURLDate(params.dateFrom)} catch(Exception ex) {}
+                if(params.dateTo) try {dateTo = DateUtils.getURLDate(params.dateTo)} catch(Exception ex) {}
 
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value) {
@@ -85,7 +84,7 @@ class TransactionVSController {
                          totalCount:transactionList.totalCount ]
         if(request.contentType?.contains("json")) {
             render resultMap as JSON
-        } else render(view:'index', model: [transactionsMap:resultMap])
+        } else render(view:'index', model: [transactionsMap:resultMap as JSON])
     }
 
     /**

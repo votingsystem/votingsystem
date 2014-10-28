@@ -38,6 +38,9 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
+                        <paper-item data-href="${createLink(controller: 'app', action:"userVS", absolute: true)}">
+                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> <g:message code="dashBoardLbl"/>
+                        </paper-item>
                         <paper-item data-href="${createLink(controller: 'groupVS', absolute: true)}">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
                         </paper-item>

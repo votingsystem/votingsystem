@@ -1,5 +1,4 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/message-smime-dialog']"/>">
 
 <polymer-element name="transactionvs-table" attributes="url transactionList userNif isUserVSTable">
 <template>
@@ -41,7 +40,6 @@
             </template>
         </div>
     </div>
-    <message-smime-dialog id="transactionViewer"></message-smime-dialog>
 </template>
 <script>
     Polymer('transactionvs-table', {
@@ -78,10 +76,7 @@
             return result? result.toUpperCase() + transactionTypeLbl : transactionTypeLbl
         },
         showTransactionDetails: function(e) {
-            var messageSMIMEURL = e.target.templateInstance.model.transaction.messageSMIMEURL
-            if(messageSMIMEURL == null) messageSMIMEURL = "${createLink( controller:'messageSMIME', action:"transactionVS")}/" +
-                    e.target.templateInstance.model.transaction.id
-            this.$.transactionViewer.show(messageSMIMEURL)
+            loadURL_VS(e.target.templateInstance.model.transaction.messageSMIMEURL, "_blank")
         },
         newRecordChanged: function(e) {
             console.log("newRecordChanged: " + this.newRecord)

@@ -20,6 +20,8 @@ public class DateUtils {
 
     private static Logger log = Logger.getLogger(DateUtils.class);
 
+    private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
+
     public static Date addDays(Date date, int days){
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -47,6 +49,11 @@ public class DateUtils {
 
     public static Date getDateFromString (String dateString) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        return formatter.parse(dateString);
+    }
+
+    public static Date getDateFromURL (String dateString) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmm");
         return formatter.parse(dateString);
     }
 
@@ -240,6 +247,16 @@ public class DateUtils {
         Calendar result = ((Calendar)requestDate.clone());
         result.set(Calendar.WEEK_OF_YEAR, (requestDate.get(Calendar.WEEK_OF_YEAR) -1));
         return result;
+    }
+
+    public static DateUtils.TimePeriod getURLTimePeriod(String dateFromStr, String dateToStr) throws ParseException {
+        Date dateFrom = urlDateFormatter.parse(dateFromStr);
+        Date dateTo = urlDateFormatter.parse(dateToStr);
+        return new DateUtils.TimePeriod(dateFrom, dateTo);
+    }
+
+    public static Date getURLDate(String dateStr) throws ParseException {
+        return urlDateFormatter.parse(dateStr);
     }
 
     public static class TimePeriod {

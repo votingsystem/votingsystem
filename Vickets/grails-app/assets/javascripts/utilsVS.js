@@ -331,9 +331,13 @@ function updateMenuLinks() {
     }
 }
 
-function loadURL_VS(urlToLoad) {
-    if(document.querySelector('#navBar')) document.querySelector('#navBar').loadURL(urlToLoad)
-    else window.location.href = updateMenuLink(urlToLoad, "&mode=simplePage")
+function loadURL_VS(urlToLoad, target) {
+    if(target) {
+        window.open(updateMenuLink(urlToLoad), target);
+    } else {
+        if(document.querySelector('#navBar')) document.querySelector('#navBar').loadURL(urlToLoad)
+        else window.location.href = updateMenuLink(urlToLoad, "&mode=simplePage")
+    }
 }
 
 function updateMenuLink(urlToUpdate, param) {

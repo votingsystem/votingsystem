@@ -48,7 +48,7 @@
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <paper-button raised on-click="{{checkReceipt}}">
-                                    <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                                    <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
                                 </paper-button>
                             </div>
                             <div flex></div>
@@ -65,7 +65,7 @@
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                                    <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
                                 </paper-button>
                             </div>
                             <div flex></div>

@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 
-<polymer-element name="transactionvs-selector">
+<polymer-element name="transactionvs-selector" attributes="transactionvsType">
     <template>
         <g:include view="/include/styles.gsp"/>
         <select id="transactionvsTypeSelect" style="margin:0px auto 10px auto;color:black; max-width: 400px;" class="form-control"
@@ -20,7 +20,10 @@
     </template>
     <script>
         Polymer('transactionvs-selector', {
-            ready: function() { console.log(this.tagName + " - ready")},
+            ready: function() {
+                console.log(this.tagName + " - ready")
+                if(this.transactionvsType) this.$.transactionvsTypeSelect.value = this.transactionvsType
+            },
             transactionvsTypeSelect:function() {
                 this.fire("selected", this.$.transactionvsTypeSelect.value)
                 this.fire('core-signal', {name: "transactionvs-selector-selected", data: this.$.transactionvsTypeSelect.value});

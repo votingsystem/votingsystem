@@ -2,11 +2,13 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/app/uservs-home']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/app/uservs-dashboard']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="max-width: 1300px;">
-<uservs-home dataMap="${dataMap}"></uservs-home>
+    <vs-innerpage-signal title="<g:message code="dashBoardLbl"/>"></vs-innerpage-signal>
+    <div class="pageContentDiv" style="max-width: 1300px;">
+    <uservs-dashboard dataMap="${dataMap}"></uservs-dashboard>
+    <vs-date></vs-date>
 </div>
 </body>
 </html>

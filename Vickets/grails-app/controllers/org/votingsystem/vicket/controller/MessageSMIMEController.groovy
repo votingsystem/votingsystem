@@ -88,6 +88,9 @@ class MessageSMIMEController {
                 case TypeVS.VICKET_GROUP_NEW:
                     viewer = "message-smime-groupvs-new"
                     break;
+                case TypeVS.FROM_BANKVS:
+                    viewer = "message-smime-transactionvs-from-bankvs"
+                    break;
             }
             params.operation = signedContentJSON.operation
         }

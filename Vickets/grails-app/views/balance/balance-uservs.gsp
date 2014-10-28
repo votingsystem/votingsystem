@@ -14,7 +14,7 @@
 <polymer-element name="balance-uservs" attributes="url balance">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <vs-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
+        <vs-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <transactionvs-data id="transactionViewer"></transactionvs-data>
         </vs-dialog>
         <style no-shim>

@@ -25,7 +25,7 @@
                 <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
                     <template if="{{isClientToolConnected}}">
                         <paper-button raised on-click="{{checkReceipt}}">
-                            <i class="fa fa-certificate"></i>  <g:message code="checkReceiptLbl"/>
+                            <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
                         </paper-button>
                     </template>
                 </div>

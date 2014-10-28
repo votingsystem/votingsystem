@@ -1,14 +1,16 @@
 <link rel="import" href="../polymer/polymer.html">
 
+
 <!--based on http://github.com/addyosmani/page-er -->
 <polymer-element name="vs-pager" attributes="offset total max next previous first last rangeSize">
     <template>
         <link rel="stylesheet" href="vs-pager.css">
+        <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" type="text/css"/>
         <div class="pagination">
             <ul>
-                <li><button on-click="{{firstPage}}">{{first}}</button></li>
+                <li><button on-click="{{firstPage}}"><i class="fa fa-angle-double-left"></i></button></li>
                 <li class='{{currentpage === 0 ? "disabled" : ""}}'>
-                    <button on-click="{{prevPage}}">{{previous}}</button>
+                    <button on-click="{{prevPage}}"><i class="fa fa-angle-left"></i></button>
                 </li>
                 <template repeat="{{n in currentRange}}">
                     <li class="{{n == currentpage ? 'active' : ''}}" data-item="{{n}}" on-click="{{setPage}}">
@@ -16,9 +18,9 @@
                     </li>
                 </template>
                 <li class='{{currentpage === pageCount? "disabled" : ""}}'>
-                    <button on-click="{{nextPage}}">{{next}}</button>
+                    <button on-click="{{nextPage}}"><i class="fa fa-angle-right"></i></button>
                 </li>
-                <li><button on-click="{{lastPage}}">{{last}}</button></li>
+                <li><button on-click="{{lastPage}}"><i class="fa fa-angle-double-right"></i></button></li>
             </ul>
         </div>
     </template>

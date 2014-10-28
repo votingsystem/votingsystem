@@ -41,10 +41,9 @@ class AppController {
 
     def admin() {}
 
-    def user() {
-        DateUtils.TimePeriod timePeriod
+    def userVS() {
         Integer numHours = params.int("numHours") ? -params.int("numHours"):-1; //default to 1 hour
-        timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours)
+        DateUtils.TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours)
         def result = [transactionVSData:transactionVSService.getDashBoardInfo(timePeriod)]
         if(!request.contentType?.contains("json")) render(view:'user', model:[dataMap:(result as JSON)])
         else render result as JSON

@@ -12,7 +12,7 @@ class UrlMappings {
 
         "/app/userVS/last/$numHours" {
             controller = "app"
-            action = "user"
+            action = "userVS"
             constraints {
                 numHours(matches:/\d*/)
             }
@@ -220,6 +220,11 @@ class UrlMappings {
             action = "post"
         }
 
+        "/transactionVS/from/$dateFrom/to/$dateTo"{
+            controller = "transactionVS"
+            action = "index"
+        }
+
         "/userVS" {
             controller = "userVS"
             action = [POST:"save"]
@@ -247,6 +252,13 @@ class UrlMappings {
             controller = "userVS"
             action = "index"
         }
+
+        "/userVS/$userType/IBAN/$IBAN"{
+            controller = "userVS"
+            action = "index"
+        }
+
+
 
         "/userVS/$id/balance"{
             controller = "userVSAccount"

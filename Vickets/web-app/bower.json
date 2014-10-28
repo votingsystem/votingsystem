@@ -4,7 +4,7 @@
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "Moneda electrónica",
+  "description": "Digital currency",
   "keywords": [
     "vickets",
     "voting-system"
@@ -52,7 +52,7 @@
       "core-tooltip":"Polymer/core-tooltip",
       "core-tests":"Polymer/core-tests",
       "core-signals":"Polymer/core-signals",
-
+      "moment":"moment#~2.8.3",
       "polymer-layout":"Polymer/polymer-layout",
       "polymer-flex-layout":"Polymer/polymer-flex-layout",
       "polymer-localstorage":"Polymer/polymer-localstorage",

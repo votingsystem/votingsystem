@@ -16,7 +16,7 @@
     line-height: 20px;
 }
 .pagination li.active button {
-    background: #6c0404;
+    background: #ba0011;
     color: #fff;
 }
 .pagination li.disabled button {
@@ -36,7 +36,7 @@
 .pagination li  button {
     background-color: #fff;
     border: 1px solid #eeeeee;
-    color: #6c0404;
+    color: #ba0011;
     cursor: pointer;
     float: left;
     min-width: 40px;

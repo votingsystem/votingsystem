@@ -20,7 +20,7 @@
         <div layout vertical style="margin: 0px auto; max-width:800px; min-width: 300px; min-height: 200px;">
 
             <div class="pageHeader"  layout horizontal center center-justified
-                 style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}
+                 style="margin:0 0 10px 0;font-size: 1.5em;">{{caption}}
             </div>
             <template if="{{transactionvs.tags.length > 0}}">
                 <core-tooltip label="<g:message code="tagLbl"/>" position="top">
@@ -74,7 +74,10 @@
                 <div>
                     <template if="{{!receptorMsg}}">
                         <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
-                        <div on-click="{{showToUserIBAN}}" class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs.toUserVS.IBAN}}</div>
+                        <div horizontal layout>
+                            <b><g:message code="IBANLbl"/>: </b>
+                            <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.IBAN}}</div>
+                        </div>
                     </template>
                     <template if="{{receptorMsg}}">{{receptorMsg}}</template>
                 </div>
@@ -134,7 +137,8 @@
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
-                console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
+                console.log(this.tagName + " - transactionvsChanged - transactionvs.messageSMIMEURL: " +
+                        this.transactionvs.messageSMIMEURL)
                 switch (this.transactionvs.type) {
                     case 'FROM_USERVS':
                         this.caption = "<g:message code="transactionVSFromUserVS"/>"

@@ -25,12 +25,17 @@ class UserVSController {
             if(params.long('id')) {
                 UserVS.withTransaction { uservs = UserVS.get(params.long('id'))  }
                 if(!uservs) msg = message(code: 'itemNotFoundMsg', args:[params.long('id')])
-            }
-            else if (params.IBAN) {
-                UserVSAccount.withTransaction {
-                    UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:params.IBAN)
-                    if(userAccount) uservs = userAccount.userVS
-                    else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+            } else if (params.IBAN) {
+                if(params.userType) {
+                    UserVS.withTransaction {
+                        uservs = UserVS.findWhere(type:UserVS.Type.valueOf(params.userType), IBAN:params.IBAN)
+                    }
+                } else {
+                    UserVSAccount.withTransaction {
+                        UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:params.IBAN)
+                        if(userAccount) uservs = userAccount.userVS
+                        else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+                    }
                 }
             }
             String view = null

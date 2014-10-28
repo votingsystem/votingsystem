@@ -189,14 +189,13 @@ public class BrowserVS extends Region implements WebKitHost {
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
-
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         tabPane.setSide(Side.TOP);
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
-        final AnchorPane root = new AnchorPane();
+        final AnchorPane tabPainContainer = new AnchorPane();
         final Button addButton = new Button("+");
         addButton.getStyleClass().add("newtab-button");
         AnchorPane.setTopAnchor(tabPane, 0.0);
@@ -210,10 +209,9 @@ public class BrowserVS extends Region implements WebKitHost {
                 newTab(null, null, null);
             }
         });
-        root.getChildren().addAll(tabPane, addButton);
-        VBox.setVgrow(root, Priority.ALWAYS);
-
-        mainVBox.getChildren().addAll(toolBar, root);
+        tabPainContainer.getChildren().addAll(tabPane, addButton);
+        VBox.setVgrow(tabPainContainer, Priority.ALWAYS);
+        mainVBox.getChildren().addAll(toolBar, tabPainContainer);
         mainVBox.getStylesheets().add(((Object)this).getClass().getResource("/css/browservs.css").toExternalForm());
         browserHelper.getChildren().add(0, mainVBox);
         browserStage.setScene(new Scene(browserHelper));
@@ -311,6 +309,7 @@ public class BrowserVS extends Region implements WebKitHost {
             }
         });
         if(tabCaption != null) newTab.setText(tabCaption);
+        else newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
         newTab.setContent(webView);
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);
@@ -322,6 +321,7 @@ public class BrowserVS extends Region implements WebKitHost {
                 }
             });
         }
+        browserStage.toFront();
         return webView;
     }
 

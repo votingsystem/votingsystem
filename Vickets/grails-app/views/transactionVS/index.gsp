@@ -9,13 +9,13 @@
 <vs-innerpage-signal title="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div layout horizontal center center-justified>
-        <transactionvs-selector id="transactionSelector"></transactionvs-selector>
+        <transactionvs-selector id="transactionSelector" transactionvsType="${params.transactionvsType}"></transactionvs-selector>
     </div>
 
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <transactionvs-table id="vicketTransactionTable" transactionsMap="${transactionsMap as grails.converters.JSON}"/>
+    <transactionvs-table id="vicketTransactionTable" transactionsMap="${transactionsMap}"/>
 </div>
 </body>
 
