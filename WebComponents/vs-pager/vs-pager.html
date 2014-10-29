@@ -80,7 +80,7 @@
                 for ( var i = start; i < start + end; i++ ) {
                     paginations.push(i);
                 }
-                if(paginations.length == 0) this.style.display = 'none'
+                if(this.getPageCount() === 0) this.style.display = 'none'
                 else this.style.display = 'block'
                 console.log(this.tagName + " - total: " + this.total +" - offset: "  + this.offset +
                         " - max: " + this.max  +  " - paginations: " + paginations + " - pageCount: " + this.getPageCount())

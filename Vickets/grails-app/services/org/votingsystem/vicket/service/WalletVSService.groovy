@@ -35,12 +35,10 @@ class WalletVSService {
     }
 
     @Transactional
-    public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(String fromUserIBAN,
+    public Map<UserVSAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
             TagVS tag, BigDecimal amount, String currencyCode) {
         WalletVS transactionWallet = getWalletVSForTransactionVS(fromUserIBAN, tag, currencyCode)
-        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                transactionWallet.getAccountMovementsForTransaction(tag, amount, currencyCode)
-        return accountFromMovements
+        return transactionWallet.getAccountMovementsForTransaction(tag, amount, currencyCode)
     }
 
 }

@@ -178,15 +178,11 @@ class VicketService {
         UserVS fromUserVS = vicketBatch.messageSMIME.userVS
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         //Check cash available for user
-        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTagVS(),
-                vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
-        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
-                accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
-
+        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+                fromUserVS.IBAN, vicketBatch.getTagVS(), vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
         vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
         TransactionVS userTransaction = vicketBatch.getTransactionVS(messageSource.getMessage(
-                'vicketRequestLbl', null, locale), accountFromMovements.data).save()
+                'vicketRequestLbl', null, locale), accountFromMovements).save()
         String message = messageSource.getMessage('withdrawalMsg', [vicketBatch.getRequestAmount().toString(),
                 vicketBatch.getCurrencyCode()].toArray(), locale) + " " + systemService.getTagMessage(vicketBatch.getTag())
 

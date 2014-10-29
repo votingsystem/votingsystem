@@ -57,14 +57,14 @@
                     <div style="margin: 0 0 0 15px;"><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
                 </template>
             </div>
-
-            <template if="{isSenderVisible}}">
+            <template if="{{isSenderVisible}}">
                 <div style="margin-left: 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                         <g:message code="senderLbl"/></div>
                     <div id="fromUserDiv">
                         <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
-                        <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
+                        <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>
+                            {{transactionvs | getFromUserIBAN}}</div>
                     </div>
                 </div>
             </template>
@@ -116,15 +116,18 @@
             getFromUserName: function (transactionvs) {
                 var result
                 if(transactionvs.fromUserVS) {
-                    if(transactionvs.fromUserVS.sender.fromUser != null) result = transactionvs.fromUserVS.sender.fromUser
+                    if(transactionvs.fromUserVS.sender != null && transactionvs.fromUserVS.sender.fromUser != null)
+                        result = transactionvs.fromUserVS.sender.fromUser
                     else result = transactionvs.fromUserVS.name
                 }
+                console.log("========== result: " + JSON.stringify(transactionvs))
                 return result
             },
             getFromUserIBAN: function (transactionvs) {
                 var result
                 if(transactionvs.fromUserVS) {
-                    if(transactionvs.fromUserVS.sender.fromUserIBAN != null) result = transactionvs.fromUserVS.sender.fromUserIBAN
+                    if(transactionvs.fromUserVS.sender != null && transactionvs.fromUserVS.sender.fromUserIBAN != null)
+                        result = transactionvs.fromUserVS.sender.fromUserIBAN
                     else result = transactionvs.fromUserVS.IBAN
                 }
                 return result
@@ -132,7 +135,7 @@
             transactionvsChanged:function() {
                 this.messageToUser = null
                 this.receptorMsg = null
-                this.isReceptorVisible = true
+                this.isSenderVisible = true
                 this.isReceptorVisible = true
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'

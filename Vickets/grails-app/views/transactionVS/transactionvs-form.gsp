@@ -280,11 +280,12 @@
         },
         init:function(operation, userName, userIBAN, targetGroupId) {
             console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage +
-                    " - toUserIBAN: " + userIBAN)
+                    " - userIBAN: " + userIBAN)
             this.reset()
             this.operation = operation
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN
+            this.toUserIBAN = null
             this.groupId = targetGroupId
             this.$.transactionvsSubject.value = ""
             this.$.amount.value = ""
@@ -307,10 +308,10 @@
                     this.operationMsg = "<g:message code='transactionVSFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
+                case Operation.FROM_USERVS:
                 case Operation.FROM_USERVS_TO_USERVS:
-                    console.log("== FROM_USERVS - isClientToolConnected: " + window['isClientToolConnected'] +
-                        " - isAndroid: " + isAndroid())
-                    this.operationMsg = "<g:message code='transactionVSFromUserVS'/>"
+                    this.operationMsg = "<g:message code='transactionVSFromUserVS'/> <g:message code='forLbl'/> '" +
+                            userName + "'"
                     this.fromUserName = null
                     this.fromUserIBAN = null
                     this.isWithUserSelector = false

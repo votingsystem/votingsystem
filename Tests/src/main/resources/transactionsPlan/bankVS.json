@@ -1,12 +1,7 @@
 {
     "userVSList":[],
-    "groupVSList":[
-        {"fromUserVSId":5, "toUserVSList":[],"operation":"FROM_GROUP_TO_ALL_MEMBERS", "subject":"GroupVS Transaction Test",
-            "amount":"10000", "currencyCode": "EUR", "tags":["HIDROGENO"], "isTimeLimited":true}
-
-    ],
     "bankVSList":[
-        {"fromUserVSId":4, "toUserVSId":6, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs",
+        {"fromUserVSId":4, "toUserVSId":3, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs to userVS",
          "fromUser": "ClientBankVS App1 App2", "fromUserIBAN":"ES8477777777450000012345",
          "amount":"10000", "currencyCode": "EUR", "tags":["HIDROGENO"], "isTimeLimited":true}
     ]

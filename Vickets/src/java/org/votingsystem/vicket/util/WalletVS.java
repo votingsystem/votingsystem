@@ -3,6 +3,7 @@ package org.votingsystem.vicket.util;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.ValidationExceptionVS;
 import org.votingsystem.vicket.model.UserVSAccount;
 import org.votingsystem.model.TagVS;
 import java.math.BigDecimal;
@@ -28,11 +29,10 @@ public class WalletVS {
         }
     }
 
-    public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(
+    public Map<UserVSAccount, BigDecimal> getAccountMovementsForTransaction(
             TagVS tag, BigDecimal amount, String currencyCode) throws Exception {
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
                 ApplicationContextHolder.getMessage("negativeAmountRequestedErrorMsg", amount.toString()));
-
         Map<UserVSAccount, BigDecimal> result = new HashMap<UserVSAccount, BigDecimal>();
         UserVSAccount wildTagAccount = tagDataMap.get(TagVS.WILDTAG);
         if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
@@ -48,7 +48,7 @@ public class WalletVS {
                 } else {
                     BigDecimal tagAccountAvailable = (tagAccount != null) ? tagAccount.getBalance():BigDecimal.ZERO;
                     BigDecimal available = tagAccountAvailable.add(wildTagAccount.getBalance());
-                    return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
+                    throw new ValidationExceptionVS(this.getClass(), ApplicationContextHolder.getMessage(
                             "lowBalanceForTagErrorMsg", tag.getName(), available.toString() + " " + currencyCode,
                             amount.toString() + " " + currencyCode));
                 }
@@ -56,12 +56,11 @@ public class WalletVS {
         } else {
             if(wildTagAccount.getBalance().compareTo(amount) > 0) {
                 result.put(wildTagAccount, amount);
-            } else {
-                return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
-                        "wildTagLowBalanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
-            }
+            } else throw new ValidationExceptionVS(this.getClass(), ApplicationContextHolder.getMessage(
+                    "wildTagLowBalanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " +
+                    currencyCode));
         }
-        return new ResponseVS<Map<UserVSAccount, BigDecimal>>(ResponseVS.SC_OK, null, result);
+        return result;
     }
 
     public BigDecimal getTagBalance(String tagName) {

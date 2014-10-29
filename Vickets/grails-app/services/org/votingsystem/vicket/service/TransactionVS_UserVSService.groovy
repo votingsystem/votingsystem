@@ -18,27 +18,23 @@ class TransactionVS_UserVSService {
     def signatureVSService
     def grailsApplication
 
-  //  @Transactional
+  //@Transactional
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
                 request.fromUserVS.IBAN, request.tag, request.amount, request.currencyCode)
-        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
-                accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
-        TransactionVS transactionParent = new TransactionVS(amount:request.amount, messageSMIME:request.messageSMIME,
+        //Transactions from users doesn't need parent transaction
+        TransactionVS transactionVS = new TransactionVS(amount:request.amount, messageSMIME:request.messageSMIME,
+                toUserVS:request.toUserVS, toUserIBAN:request.toUserVS.IBAN,
                 fromUserVS:request.fromUserVS, state:TransactionVS.State.OK, validTo: request.validTo,
-                subject:request.subject, type:TransactionVS.Type.FROM_USERVS, currencyCode: request.getCurrencyCode(),
-                accountFromMovements: accountFromMovements.data, tag:request.tag).save()
-        TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
-                transactionParent, request.amount, request.toUserVS,  request.toUserVS.IBAN).save()
-
+                subject:request.subject, type:request.transactionType, currencyCode: request.getCurrencyCode(),
+                accountFromMovements: accountFromMovements, tag:request.tag).save()
         String fromUser = grailsApplication.config.mail.error.to
         String toUser = request.fromUserVS.getNif()
         SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 request.messageSMIME.getSMIME(), request.messageSMIME.getSMIME().subject)
         request.messageSMIME.setSMIME(receipt)
-
-        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${request.operation.toString()}")
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionVS.id}_${request.operation.toString()}")
         log.debug(metaInfMsg)
         String msg = messageSource.getMessage('transactionVSFromUserVSOKMsg',
                 ["${request.amount} ${request.currencyCode}", request.toUserVS.name].toArray(), locale)

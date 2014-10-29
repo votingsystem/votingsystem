@@ -59,7 +59,7 @@ public class ResponseVS<T> implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @Column(name="messageBytes") @Lob private byte[] messageBytes;
-    private MessageSMIME messageSMIME;
+    @OneToOne private MessageSMIME messageSMIME;
     @Transient private StatusVS<?> status;
     @Transient private JSON messageJSON;
     @Transient private SMIMEMessage smimeMessage;

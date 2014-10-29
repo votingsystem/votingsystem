@@ -49,6 +49,7 @@ class TransactionVSService {
             case TypeVS.FROM_GROUP_TO_MEMBER_GROUP:
             case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVS_GroupVSService.processTransactionVS(request.getGroupVSRequest())
+            case TypeVS.FROM_USERVS_TO_USERVS:
             case TypeVS.FROM_USERVS:
                 return transactionVS_UserVSService.processTransactionVS(request.getUserVSRequest())
             default:
@@ -119,6 +120,8 @@ class TransactionVSService {
                     updateUserVSAccountFrom(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
+                case TransactionVS.Type.FROM_USERVS:
+                case TransactionVS.Type.FROM_USERVS_TO_USERVS:
                 case TransactionVS.Type.VICKET_REQUEST:
                     updateUserVSAccountFrom(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
@@ -178,7 +181,8 @@ class TransactionVSService {
                         eq('state', TransactionVS.State.OK)
                         isNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-                        inList("type", [TransactionVS.Type.VICKET_REQUEST] )
+                        inList("type", [TransactionVS.Type.VICKET_REQUEST, TransactionVS.Type.FROM_USERVS,
+                                        TransactionVS.Type.FROM_USERVS_TO_USERVS] )
                     }
                 }
 
@@ -246,8 +250,8 @@ class TransactionVSService {
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
-            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.name,
-                type:transaction.fromUserVS.type.toString(), id:transaction.fromUserVS.id]
+            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, type:transaction.fromUserVS.type.toString(),
+                 name:transaction.fromUserVS.name, id:transaction.fromUserVS.id, IBAN:transaction.fromUserVS.IBAN]
             if(transaction.fromUserIBAN) {
                 transactionMap.fromUserVS.sender = [fromUserIBAN: transaction.fromUserIBAN, fromUser:transaction.fromUser]
             }
@@ -339,6 +343,7 @@ class TransactionVSService {
                 messageJSON.toUserIBAN.each { it ->IbanVSUtil.validate(it);}
             } else if(messageJSON.toUserIBAN) IbanVSUtil.validate(messageJSON.toUserIBAN);
             operation = TypeVS.valueOf(messageJSON.operation)
+            transactionType = TransactionVS.Type.valueOf(messageJSON.operation)
             if(!messageJSON.amount)  throw new ValidationExceptionVS(this.getClass(), "missing param 'amount'");
             amount = new BigDecimal(messageJSON.amount)
             if(!messageJSON.currencyCode)  throw new ValidationExceptionVS(this.getClass(), "missing param 'currencyCode'");
@@ -354,7 +359,8 @@ class TransactionVSService {
         }
 
         public TransactionVSRequest getUserVSRequest() {
-            if(TypeVS.FROM_USERVS != operation) throw new ValidationExceptionVS(this.getClass(),
+            if(!(TypeVS.FROM_USERVS == operation || TypeVS.FROM_USERVS_TO_USERVS == operation))
+                    throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'FROM_USERVS' - operation found: " + operation.toString())
             if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
                     "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
@@ -390,7 +396,6 @@ class TransactionVSService {
 
         public TransactionVSRequest getGroupVSRequest() {
             if(!messageJSON.operation) throw new ValidationExceptionVS(this.getClass(), "missing param 'operation'");
-            transactionType = TransactionVS.Type.valueOf(messageJSON.operation)
             this.messageJSON = messageJSON
             groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:this.fromUserVS)
             if(!groupVS) {

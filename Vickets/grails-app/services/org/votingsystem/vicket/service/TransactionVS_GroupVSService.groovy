@@ -26,13 +26,10 @@ class TransactionVS_GroupVSService {
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         String msg
-        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
                 request.groupVS.IBAN, request.tag, request.amount, request.currencyCode)
-        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
-                accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
-
         if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            return processTransactionVSForAllMembers(request, accountFromMovements.data)
+            return processTransactionVSForAllMembers(request, accountFromMovements)
         } else {
             BigDecimal userPart = request.amount.divide(request.numReceptors, 4, RoundingMode.FLOOR)
             String metaInfMsg
@@ -47,7 +44,7 @@ class TransactionVS_GroupVSService {
             TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:request.messageSMIME,
                     fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
                     validTo: request.validTo, subject:request.subject, type:request.transactionType,
-                    accountFromMovements: accountFromMovements.data, currencyCode: request.currencyCode,
+                    accountFromMovements: accountFromMovements, currencyCode: request.currencyCode,
                     tag:request.tag).save()
             for(UserVS toUser: request.toUserVSList) {
                 TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
