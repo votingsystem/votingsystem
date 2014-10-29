@@ -3,7 +3,6 @@ package org.votingsystem.groovy.util
 import org.votingsystem.model.TagVS
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
-
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**

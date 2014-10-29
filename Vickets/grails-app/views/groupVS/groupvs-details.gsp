@@ -60,7 +60,7 @@
             </div>
 
             <template if="{{isUserView}}">
-                <div layout horizontal center center-justified style="margin:10px 0px 20px 30px;">
+                <div layout horizontal center center-justified style="margin:0px 0px 10px 10px; font-size: 0.9em;">
                     <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                         <i class="fa fa-sign-in"></i> <g:message code="subscribeGroupVSLbl"/>
                     </paper-button raised>
@@ -102,7 +102,7 @@
                 <i class="fa fa-bar-chart"></i> <g:message code="goToWeekBalanceLbl"/>
             </div>
             <div flex></div>
-            <div id="" style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
+            <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
                 <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
             </div>
         </div>

@@ -120,7 +120,6 @@
                         result = transactionvs.fromUserVS.sender.fromUser
                     else result = transactionvs.fromUserVS.name
                 }
-                console.log("========== result: " + JSON.stringify(transactionvs))
                 return result
             },
             getFromUserIBAN: function (transactionvs) {
@@ -143,6 +142,7 @@
                 console.log(this.tagName + " - transactionvsChanged - transactionvs.messageSMIMEURL: " +
                         this.transactionvs.messageSMIMEURL)
                 switch (this.transactionvs.type) {
+                    case 'FROM_USERVS_TO_USERVS':
                     case 'FROM_USERVS':
                         this.caption = "<g:message code="transactionVSFromUserVS"/>"
                         break;

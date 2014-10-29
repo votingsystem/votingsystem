@@ -95,7 +95,7 @@
             </div>
             <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display: inline-block;">
                 <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
-                                      title="<g:message code="userVSBalancesLbl"/>"
+                                    title="<g:message code="userVSBalancesLbl"/>"
                                       xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
                 '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
                 </balance-uservs-chart>
@@ -193,7 +193,6 @@
                     var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
                     var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
                     var balancesCashMap = this.balance.balancesCash == null ? {}: this.balance.balancesCash.EUR || {}
-
                     var chartSeries = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balancesCashMap)
                     if(chartSeries.length === 0) {
                         this.$.userBalanceChartDiv.style.display = 'none'

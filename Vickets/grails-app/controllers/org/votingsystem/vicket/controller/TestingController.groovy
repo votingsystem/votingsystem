@@ -38,16 +38,9 @@ class TestingController {
     def transactionVS_UserVSService
 
     def index() {
-        int result
-        SubscriptionVS.withTransaction {
-            List subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
-                eq("groupVS", GroupVS.get(6L))
-                eq("state", SubscriptionVS.State.ACTIVE)
-                userVS { eq("IBAN", "ES0878788989450000000007")}
-            }
-            result = subscriptionList.totalCount
-        }
-        render "result: $result"
+        TransactionVSUtils tu = new TransactionVSUtils();
+        render tu.testService()
+        return false
     }
 
     def balance() {

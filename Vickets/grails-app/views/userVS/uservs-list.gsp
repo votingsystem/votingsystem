@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
 
-<polymer-element name="uservs-list" attributes="url menuType">
+<polymer-element name="uservs-list" attributes="url menuType isNifVisible">
     <template>
         <style>
         .nifColumn {
@@ -38,7 +38,9 @@
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div layout horizontal center class="tableHeadervs">
-                <div style="width: 110px;"><g:message code="nifLbl"/></div>
+                <template if="{{isNifVisible}}">
+                    <div style="width: 110px;"><g:message code="nifLbl"/></div>
+                </template>
                 <!--<div style="width:200px;">IBAN</div>-->
                 <div flex><g:message code="nameLbl"/></div>
                 <div style="width:100px;"><g:message code="stateLbl"/></div>
@@ -47,9 +49,11 @@
             <div>
                 <template repeat="{{uservs in userList.userVSList}}">
                     <div class="rowvs" on-click="{{userSelected}}" layout horizontal center center justified>
-                        <div class="nifColumn" style="width: 110px;">
-                            {{uservs.uservs.NIF}}
-                        </div>
+                        <template if="{{isNifVisible}}">
+                            <div class="nifColumn" style="width: 110px;">
+                                {{uservs.uservs.NIF}}
+                            </div>
+                        </template>
                         <!--<div style="width:200px;">{{uservs.uservs.IBAN}}</div>-->
                         <div flex>{{uservs.uservs.name}}</div>
                         <div style="width:100px;">{{uservs.state | userState}}</div>
@@ -66,6 +70,7 @@
     <script>
         Polymer('uservs-list', {
             baseURL:null,
+            isNifVisible:false,
             ready: function() {console.log(this.tagName + " - ready") },
             userSelected: function(e) {
                 console.log(this.tagName + " - userSelected - userId: " + e.target.templateInstance.model.uservs.uservs.id)

@@ -78,7 +78,7 @@
                 this.opened = this.$.xDialog.opened
             },
             goToUserVSPage:function() {
-                loadURL_VS("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.userId)
+                loadURL_VS("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.userId, "_blank")
                 this.$.xDialog.opened = false
             },
             openedChanged:function() {
