@@ -250,6 +250,10 @@ class TransactionVSService {
                 Type.FROM_USERVS_TO_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromGroupVSToMember = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 Type.FROM_GROUP_TO_MEMBER, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        result.transFromGroupVSToMemberGroup = [numTrans:TransactionVS.countByToUserVSIsNullAndTypeAndDateCreatedBetween(
+                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo()),
+                numUsers:TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
+                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())]
         result.numTransFromGroupVSToMemberGroup = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromGroupVSToAllMembers = TransactionVS.countByTypeAndDateCreatedBetween(
@@ -433,10 +437,8 @@ class TransactionVSService {
                     };
                     if(subscriptionList.isEmpty()) throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
                             'groupUserNotFoundByIBANErrorMsg',  [messageJSON.toUserIBAN.get(i), groupVS.name].toArray(), locale))
-
-                    toUserVSList.add(toUserVS)
+                    toUserVSList.add(((SubscriptionVS)subscriptionList.iterator().next()).userVS)
                 }
-
                 if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),
                         "Transaction without valid receptors")
             }

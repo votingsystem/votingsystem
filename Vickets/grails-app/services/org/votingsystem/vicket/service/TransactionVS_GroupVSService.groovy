@@ -36,11 +36,11 @@ class TransactionVS_GroupVSService {
             BigDecimal numUsersBigDecimal = new BigDecimal(request.toUserVSList.size())
             BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 4, RoundingMode.FLOOR)
             String metaInfMsg
-            if(request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
+            if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
                         ["${request.amount} ${request.currencyCode}", request.toUserVSList.iterator().next().nif].toArray(),
                         locale)
-            } else if (request.operation == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
+            } else if (request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${request.amount} ${request.currencyCode}"].toArray(), locale)
             }

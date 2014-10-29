@@ -42,7 +42,13 @@
                 <div class="transDesc">numTransFromGroupVSToMember</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
-                <div class="numTrans">{{transactionVSData.numTransFromGroupVSToMemberGroup}}</div>
+                <template if="{{transactionVSData.transFromGroupVSToMemberGroup.numTrans > 0}}">
+                    <div class="numTrans">{{transactionVSData.transFromGroupVSToMemberGroup.numTrans}} trans -
+                    {{transactionVSData.transFromGroupVSToMemberGroup.numUsers}} users</div>
+                </template>
+                <template if="{{transactionVSData.transFromGroupVSToMemberGroup.numTrans === 0}}">
+                    <div class="numTrans">0</div>
+                </template>
                 <div class="transDesc">TransFromGroupVSToMemberGroup</div>
             </div>
             <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="{{transBlockSelected}}">

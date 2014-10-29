@@ -118,7 +118,12 @@
             this.fire('core-signal', {name: "vs-innerpage", data: {title:uservsType}});
         },
         userVSDataChanged:function() {
-            //console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))
+            console.log(this.tagName + " - userVSDataChanged - userVSData: " + Object.prototype.toString.call(this.userVSData))
+            if("[object String]" === Object.prototype.toString.call(this.userVSData)) {
+                this.userVSData = JSON.parse(this.userVSData)
+                return
+            }
+            console.log(this.tagName + " - userVSDataChanged" + JSON.stringify(this.userVSData))
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {

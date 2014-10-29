@@ -281,6 +281,7 @@
         init:function(operation, userName, userIBAN, targetGroupId) {
             console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage +
                     " - toUserIBAN: " + userIBAN)
+            this.reset()
             this.operation = operation
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN

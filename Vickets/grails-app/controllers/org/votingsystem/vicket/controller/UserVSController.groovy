@@ -53,11 +53,9 @@ class UserVSController {
             } else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)]
             }
-            if(request.contentType?.contains("json")) {
-                render resultMap?.values()?.iterator().next() as JSON
-            } else {
-                render(view:view, model: resultMap)
-            }
+            if(request.contentType?.contains("json")) render resultMap?.values()?.iterator().next() as JSON
+            else render(view:view, model: resultMap)
+
         } else {
             Map sortParamsMap = RequestUtils.getSortParamsMap(params)
             Map.Entry sortParam

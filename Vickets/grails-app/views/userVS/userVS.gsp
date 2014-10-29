@@ -5,11 +5,8 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="max-width: 900px;">
-    <uservs-data id="userData" userVSData="${uservsMap as grails.converters.JSON}"></uservs-data>
-</div>
+    <div class="pageContentDiv" style="max-width: 900px;">
+        <uservs-data userVSData="${uservsMap as grails.converters.JSON}"></uservs-data>
+    </div>
 </body>
 </html>
-<asset:script>
-</asset:script>
-<asset:deferredScripts/>

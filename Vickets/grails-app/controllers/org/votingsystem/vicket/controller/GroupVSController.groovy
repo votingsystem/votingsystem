@@ -34,8 +34,8 @@ class GroupVSController {
                     resultMap = groupVSService.getGroupVSDataMap(result)
                     render resultMap as JSON
                 } else {
-                    resultMap = groupVSService.getDataWithBalancesMap(result, DateUtils.getCurrentWeekPeriod())
-                    render(view:'groupvs', model: [groupvsMap:(resultMap as JSON)])
+                    resultMap = groupVSService.getDataMap(result, DateUtils.getCurrentWeekPeriod())
+                    render(view:'groupvs', model: [groupvsMap:resultMap])
                 }
             else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_NOT_FOUND,
