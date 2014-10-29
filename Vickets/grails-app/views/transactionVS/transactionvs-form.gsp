@@ -73,9 +73,9 @@
                 <div layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div layout horizontal style="font-size: 0.8em; display: inline-block;">
-                            <div>
-                                <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em; width: 200px ;
+                        <div layout horizontal center center-justified style="font-size: 0.8em;">
+                            <div style="width: 180px; margin:0 10px 0 0;">
+                                <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;
                                 margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                                     <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
                                 </paper-button>
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <uservs-selector-dialog id="searchDialog"></uservs-selector-dialog>
+        <uservs-selector-dialog id="userVSSelectorDialog" groupVSId="{{groupId}}"></uservs-selector-dialog>
     <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
             <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
@@ -155,7 +155,7 @@
 
         },
         openSearchUserDialog:function(){
-            this.$.searchDialog.show()
+            this.$.userVSSelectorDialog.show()
         },
         showTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)

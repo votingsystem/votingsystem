@@ -4,6 +4,7 @@
     <g:render template="/template/pagevs"/>
     <asset:stylesheet src="vickets_groupvs.css"/>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-list']"/>">
+
 </head>
 <body>
 <vs-innerpage-signal title="<g:message code="groupvsLbl"/>"></vs-innerpage-signal>

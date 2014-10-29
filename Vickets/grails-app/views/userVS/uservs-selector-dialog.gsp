@@ -2,16 +2,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 
-<polymer-element name="uservs-selector-dialog" attributes="transactionvsURL opened">
+<polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
     <template>
         <vs-dialog id="xDialog" class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}" style="overflow: auto;">
         <style no-shim>
-            .uservsSearchDialog {
-                width: 600px;
-                min-height: 300px;
-                padding: 10px 20px;
-            }
+            .uservsSearchDialog {  width: 600px;  min-height: 300px; padding: 10px 20px; }
         </style>
         <g:include view="/include/styles.gsp"/>
             <div id="main">
@@ -50,28 +46,17 @@
                     }.bind(this));
                 }
             },
-            reset: function() {
-                console.log(this.id + " - reset")
-                this.removeErrorStyle(this.$.formDataDiv)
-                this.isTransactionVSFromGroupToAllMembers = false
-                this.$.userSearchInput.value = ""
-                this.$.amount.value = ""
-                this.$.transactionvsSubject.value = ""
-                this.$.userVSSelector.url = ""
-                this.setMessage(200, null)
-                this.$.receptorBox.removeUsers()
-                this.$.userVSSelector.reset()
-                this.$.tagDialog.reset()
-            },
             show: function() {
                 console.log(this.tagName + " - show")
+                this.$.receptorBox.removeUsers()
                 this.$.xDialog.opened = true
             },
             searchUser: function() {
                 var textToSearch = this.$.userSearchInput.value
                 if(textToSearch.trim() == "") return
                 var targetURL
-                if(this.groupId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" + textToSearch + "&groupId=" + this.groupId
+                if(this.groupVSId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" +
+                        textToSearch + "&groupVSId=" + this.groupVSId + "&groupVSState=" + this.groupVSState
                 else targetURL = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
                 this.$.userVSSelector.url = targetURL
             },

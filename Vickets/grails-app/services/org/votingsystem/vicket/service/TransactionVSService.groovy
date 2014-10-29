@@ -250,7 +250,7 @@ class TransactionVSService {
                 Type.FROM_USERVS_TO_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromGroupVSToMember = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 Type.FROM_GROUP_TO_MEMBER, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromGroupVSToMemberGroup = TransactionVS.countByTypeAndDateCreatedBetween(
+        result.numTransFromGroupVSToMemberGroup = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromGroupVSToAllMembers = TransactionVS.countByTypeAndDateCreatedBetween(
                 Type.FROM_GROUP_TO_ALL_MEMBERS, timePeriod.getDateFrom(), timePeriod.getDateTo())
@@ -431,9 +431,9 @@ class TransactionVSService {
                         eq("state", SubscriptionVS.State.ACTIVE)
                         userVS { eq("IBAN", messageJSON.toUserIBAN.get(i))}
                     };
-                    UserVS toUserVS = ((SubscriptionVS)subscriptionList.iterator().next()).userVS
                     if(subscriptionList.isEmpty()) throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
                             'groupUserNotFoundByIBANErrorMsg',  [messageJSON.toUserIBAN.get(i), groupVS.name].toArray(), locale))
+
                     toUserVSList.add(toUserVS)
                 }
 

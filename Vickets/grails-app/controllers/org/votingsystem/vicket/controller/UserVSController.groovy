@@ -111,6 +111,7 @@ class UserVSController {
         if(request.contentType?.contains('json')) {
             if(params.searchText) {
                 def userList
+                def resultList = []
                 UserVS.withTransaction {
                     userList = UserVS.createCriteria().list(max: params.max, offset: params.offset) {
                         or {
@@ -124,7 +125,6 @@ class UserVSController {
                             eq("type", UserVS.Type.USER)
                         }
                     }
-                    def resultList = []
                     userList.each {userItem ->
                         resultList.add(userVSService.getUserVSDataMap(userItem, false))
                     }
@@ -139,16 +139,18 @@ class UserVSController {
 
     def searchGroup() {
         if(request.contentType?.contains('json')) {
-            if(params.searchText && params.long('groupId')) {
+            if(params.searchText && params.long('groupVSId')) {
                 GroupVS groupVS = null
                 GroupVS.withTransaction {
-                    groupVS = GroupVS.get(params.long('groupId'))
+                    groupVS = GroupVS.get(params.long('groupVSId'))
                 }
                 if(!groupVS) {
                     return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-                            message: message(code: 'groupNotFoundMsg', args:[params.long('groupId')]))]
+                            message: message(code: 'groupNotFoundMsg', args:[params.long('groupVSId')]))]
                 }
                 def subscriptionList
+                SubscriptionVS.State state = SubscriptionVS.State.ACTIVE
+                if(params.groupVSState) try {state = SubscriptionVS.State.valueOf(params.groupVSState)} catch(Exception ex) {}
                 SubscriptionVS.withTransaction {
                     subscriptionList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
                         eq("groupVS", groupVS)
@@ -163,6 +165,7 @@ class UserVSController {
                                 eq("state", UserVS.State.ACTIVE)
                             }
                         }
+                        eq("state", state)
                     }
                 }
                 def resultList = []
