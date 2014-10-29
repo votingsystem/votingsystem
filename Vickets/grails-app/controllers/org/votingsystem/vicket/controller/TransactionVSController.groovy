@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
@@ -76,14 +77,14 @@ class TransactionVSController {
                 };
             }
         }
-        def resultList = []
+        List<Map> resultList = []
         transactionList.each {transactionItem ->
             resultList.add(transactionVSService.getTransactionMap(transactionItem))
         }
         def resultMap = [transactionRecords:resultList, offset:params.offset, max: params.max,
                          totalCount:transactionList.totalCount ]
         if(request.contentType?.contains("json")) render resultMap as JSON
-        else render(view:'index', model: [transactionsMap:(resultMap as JSON)])
+        else render(view:'index', model: [transactionsMap: (resultMap as JSON)])
         return false
     }
 

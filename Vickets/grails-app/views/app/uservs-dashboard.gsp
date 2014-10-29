@@ -52,8 +52,14 @@
                 <div class="transDesc">TransFromGroupVSToMemberGroup</div>
             </div>
             <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="{{transBlockSelected}}">
-                <div class="numTrans">{{transactionVSData.numTransFromGroupVSToAllMembers}}</div>
-                <div class="transDesc">TransFromGroupVSToAllMembers</div>
+                <template if="{{transactionVSData.numTransFromGroupVSToAllMembers.numTrans > 0}}">
+                    <div class="numTrans">{{transactionVSData.numTransFromGroupVSToAllMembers.numTrans}} trans -
+                    {{transactionVSData.numTransFromGroupVSToAllMembers.numUsers}} users</div>
+                </template>
+                <template if="{{transactionVSData.numTransFromGroupVSToAllMembers.numTrans === 0}}">
+                    <div class="numTrans">0</div>
+                </template>
+                <div class="transDesc">numTransFromGroupVSToAllMembers</div>
             </div>
             <div id="VICKET_INIT_PERIOD" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransVicketInitPeriod}}</div>

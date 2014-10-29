@@ -6,6 +6,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
@@ -29,6 +30,7 @@ class TransactionVSService {
     private final Set<String> listenerSet = Collections.synchronizedSet(new HashSet<String>());
 
     def systemService
+    def signatureVSService
     def messageSource
     def grailsLinkGenerator
     def grailsApplication
@@ -240,39 +242,6 @@ class TransactionVSService {
         return [transactionToList:transactionToList, balancesTo:balancesMap]
     }
 
-    @Transactional public Map getDashBoardInfo(DateUtils.TimePeriod timePeriod) {
-        Map result = [timePeriod:timePeriod.getMap()]
-        result.numTransFromBankVS = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
-                Type.FROM_BANKVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.FROM_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromUserVSToUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.FROM_USERVS_TO_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromGroupVSToMember = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
-                Type.FROM_GROUP_TO_MEMBER, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.transFromGroupVSToMemberGroup = [numTrans:TransactionVS.countByToUserVSIsNullAndTypeAndDateCreatedBetween(
-                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo()),
-                numUsers:TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
-                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())]
-        result.numTransFromGroupVSToMemberGroup = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
-                Type.FROM_GROUP_TO_MEMBER_GROUP, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromGroupVSToAllMembers = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.FROM_GROUP_TO_ALL_MEMBERS, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransVicketInitPeriod = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.VICKET_INIT_PERIOD, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransVicketInitPeriodTimeLimited = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.VICKET_INIT_PERIOD_TIME_LIMITED, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransVicketRequest = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.VICKET_REQUEST, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransVicketSend = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.VICKET_SEND, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransVicketCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.VICKET_CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
-                Type.CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        return result
-    }
-
     @Transactional
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
@@ -349,7 +318,7 @@ class TransactionVSService {
 
     private class TransactionVSRequest {
         Boolean isTimeLimited;
-        BigDecimal amount;
+        BigDecimal amount, numReceptors;
         UserVS fromUserVS;
         UserVS toUserVS;
         List<UserVS> toUserVSList = []
@@ -441,16 +410,20 @@ class TransactionVSService {
                 }
                 if(toUserVSList.isEmpty()) throw new ValidationExceptionVS(this.getClass(),
                         "Transaction without valid receptors")
+                numReceptors = new BigDecimal(toUserVSList.size())
+            } else if (transactionType == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+                numReceptors = new BigDecimal(SubscriptionVS.countByGroupVSAndState(groupVS, SubscriptionVS.State.ACTIVE))
             }
             return this;
         }
 
-        JSONObject getReceptorData(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
+        SMIMEMessage signReceptorData(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
             messageJSON.messageSMIMEParentId = messageSMIMEReqId? messageSMIMEReqId : null
             messageJSON.toUser = toUserNif? toUserNif : null
             messageJSON.numUsers = numReceptors?numReceptors:null
             messageJSON.toUserAmount = userPart?userPart.toString():null
-            return messageJSON;
+            return signatureVSService.getSMIME(systemService.getSystemUser().getNif(),
+                    toUserNif, messageJSON.toString(), transactionType.toString(), null)
         }
     }
 }

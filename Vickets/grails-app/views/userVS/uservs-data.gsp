@@ -119,11 +119,7 @@
         },
         userVSDataChanged:function() {
             console.log(this.tagName + " - userVSDataChanged - userVSData: " + Object.prototype.toString.call(this.userVSData))
-            if("[object String]" === Object.prototype.toString.call(this.userVSData)) {
-                this.userVSData = JSON.parse(this.userVSData)
-                return
-            }
-            console.log(this.tagName + " - userVSDataChanged" + JSON.stringify(this.userVSData))
+            this.userVSData = toJSON(this.userVSData)
             this.uservs = this.userVSData.userVS
         },
         goToWeekBalance:function() {

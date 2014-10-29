@@ -17,6 +17,7 @@ class AppController {
 
 	def grailsApplication;
     def transactionVSService
+    def dashBoardService
 
     def index() {}
 
@@ -44,7 +45,7 @@ class AppController {
     def userVS() {
         Integer numHours = params.int("numHours") ? -params.int("numHours"):-1; //default to 1 hour
         DateUtils.TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours)
-        def result = [transactionVSData:transactionVSService.getDashBoardInfo(timePeriod)]
+        def result = [transactionVSData:dashBoardService.getUserVSInfo(timePeriod)]
         if(request.contentType?.contains("json")) render result as JSON
         else render(view:'user', model:[dataMap:(result as JSON)])
     }

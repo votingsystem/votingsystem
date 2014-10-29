@@ -4,6 +4,7 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
@@ -30,11 +31,10 @@ class TransactionVS_GroupVSService {
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) throw new ValidationExceptionVS(this.getClass(),
                 accountFromMovements.getMessage(), MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
 
-        if(request.operation == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+        if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             return processTransactionVSForAllMembers(request, accountFromMovements.data)
         } else {
-            BigDecimal numUsersBigDecimal = new BigDecimal(request.toUserVSList.size())
-            BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 4, RoundingMode.FLOOR)
+            BigDecimal userPart = request.amount.divide(request.numReceptors, 4, RoundingMode.FLOOR)
             String metaInfMsg
             if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
@@ -43,7 +43,7 @@ class TransactionVS_GroupVSService {
             } else if (request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${request.amount} ${request.currencyCode}"].toArray(), locale)
-            }
+            } else throw new ExceptionVS("Unknown transaction '${request.transactionType.toString()}'")
             TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:request.messageSMIME,
                     fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
                     validTo: request.validTo, subject:request.subject, type:request.transactionType,
@@ -65,12 +65,7 @@ class TransactionVS_GroupVSService {
     private ResponseVS processTransactionVSForAllMembers(TransactionVSService.TransactionVSRequest request,
              Map<UserVSAccount, BigDecimal> accountFromMovements) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
-            eq("groupVS", request.groupVS)
-            eq("state", SubscriptionVS.State.ACTIVE)
-        }
-        BigDecimal numUsersBigDecimal = new BigDecimal(subscriptionList.totalCount)
-        BigDecimal userPart = request.amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
+        BigDecimal userPart = request.amount.divide(request.numReceptors, 2, RoundingMode.FLOOR)
         TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS
         String msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
                 ["${request.amount.toString()} ${request.currencyCode}"].toArray(), locale)
@@ -78,13 +73,15 @@ class TransactionVS_GroupVSService {
                 fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
                 validTo: request.validTo, subject:request.subject, currencyCode: request.currencyCode,
                 type:transactionVSType, tag:request.tag, accountFromMovements: accountFromMovements).save()
+        def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+            eq("groupVS", request.groupVS)
+            eq("state", SubscriptionVS.State.ACTIVE)
+        }
         subscriptionList.each { it ->
-            JSONObject messageJSON = request.getReceptorData(request.messageSMIME.id, it.userVS.getNif(),
+            SMIMEMessage receipt = request.signReceptorData(request.messageSMIME.id, it.userVS.getNif(),
                     subscriptionList.totalCount, userPart)
-            SMIMEMessage receipt = signatureVSService.getSMIME(systemService.getSystemUser().getNif(),
-                    it.userVS.getNif(), messageJSON.toString(), request.operation.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:request.messageSMIME,
-                    type:TypeVS.FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
+                    type:TypeVS.FROM_GROUP_TO_ALL_MEMBERS, smimeMessage:receipt).save()
             TransactionVS.generateTriggeredTransaction(transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
         }
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName,

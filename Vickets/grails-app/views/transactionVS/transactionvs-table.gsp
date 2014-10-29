@@ -13,7 +13,8 @@
     .rowvs div { text-align:center; }
     .expenseRow { background: #fee; }
     </style>
-
+    <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
+               contentType="json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
     <!--JavaFX Webkit gives problems with tables and templates -->
     <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
         <div layout horizontal center center-justified class="tableHeadervs">
@@ -90,7 +91,10 @@
             return amount
         },
         transactionsMapChanged:function() {
-            this.transactionRecords = JSON.parse(this.transactionsMap).transactionRecords
+            console.log(this.tagName + " - transactionsMapChanged - transactionsMap: " +
+                    Object.prototype.toString.call(this.transactionsMap))
+            this.transactionsMap = toJSON(this.transactionsMap)
+            this.transactionRecords = this.transactionsMap.transactionRecords
         },
         ajaxComplete: function() {
             this.transactionsMap = this.responseData
