@@ -7,7 +7,7 @@
 <body>
     <vs-innerpage-signal title="<g:message code="balanceLbl"/>"></vs-innerpage-signal>
     <div style="max-width: 1200px; margin: 0 auto;">
-        <balance-uservs balance="${balanceMap as grails.converters.JSON}"></balance-uservs>
+        <balance-uservs balance="${balanceMap}"></balance-uservs>
     </div>
 </body>
 </html>

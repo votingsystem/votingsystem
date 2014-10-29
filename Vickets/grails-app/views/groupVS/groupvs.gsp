@@ -7,7 +7,7 @@
 <body>
     <vs-innerpage-signal title="<g:message code="groupLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv">
-        <groupvs-details balance="${groupvsMap as grails.converters.JSON}" groupvs="${groupvsMap as grails.converters.JSON}"></groupvs-details>
+        <groupvs-details groupvs="${groupvsMap}"></groupvs-details>
     </div>
 </body>
 </html>
