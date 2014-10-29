@@ -74,14 +74,16 @@
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div layout horizontal style="font-size: 0.8em; display: inline-block;">
+                            <div>
+                                <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em; width: 200px ;
+                                margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                                    <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
+                                </paper-button>
+                            </div>
                             <div style="display: {{selectedTags.length == 0? 'block':'none'}};">
                                 <g:message code="transactionvsWithTagAdvertMsg"/>
                             </div>
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
-                            <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;
-                                margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                                <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
-                            </paper-button>
                         </div>
                         <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
                             display: {{selectedTags.length == 0? 'none':'block'}};">

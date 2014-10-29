@@ -82,9 +82,9 @@ class TransactionVSController {
         }
         def resultMap = [transactionRecords:resultList, offset:params.offset, max: params.max,
                          totalCount:transactionList.totalCount ]
-        if(request.contentType?.contains("json")) {
-            render resultMap as JSON
-        } else render(view:'index', model: [transactionsMap:resultMap as JSON])
+        if(request.contentType?.contains("json")) render resultMap as JSON
+        else render(view:'index', model: [transactionsMap:(resultMap as JSON)])
+        return false
     }
 
     /**

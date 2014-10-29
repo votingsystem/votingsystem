@@ -44,9 +44,9 @@ class TransactionVS_GroupVSService {
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${request.amount} ${request.currencyCode}"].toArray(), locale)
             }
-            TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:messageSMIMEReq,
+            TransactionVS transactionParent = new TransactionVS(amount: request.amount, messageSMIME:request.messageSMIME,
                     fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
-                    validTo: request.validTo, subject:request.subject, type:request.operation,
+                    validTo: request.validTo, subject:request.subject, type:request.transactionType,
                     accountFromMovements: accountFromMovements.data, currencyCode: request.currencyCode,
                     tag:request.tag).save()
             for(UserVS toUser: request.toUserVSList) {

@@ -8,12 +8,6 @@
     <vs-innerpage-signal title="<g:message code="dashBoardLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv" style="max-width: 1300px;">
     <uservs-dashboard dataMap="${dataMap}"></uservs-dashboard>
-    <vs-date></vs-date>
 </div>
 </body>
 </html>
-<asset:script>
-
-
-</asset:script>
-

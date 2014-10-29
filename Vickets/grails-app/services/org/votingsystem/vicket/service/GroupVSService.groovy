@@ -165,8 +165,8 @@ class GroupVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
 
-        resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
-        userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
+        //resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
+        //userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
     }
 

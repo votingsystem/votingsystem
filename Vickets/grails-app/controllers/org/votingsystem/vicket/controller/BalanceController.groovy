@@ -16,6 +16,7 @@ class BalanceController {
     def balanceService
     def filesService
     def userVSAccountService
+    def groupVSService
 
     def index() { }
 
@@ -39,6 +40,7 @@ class BalanceController {
             Map resultMap = balanceService.genBalance(uservs, timePeriod)
             if(request.contentType?.contains("json")) render resultMap as JSON
             else render(view:"userVS", model:[balanceMap:resultMap])
+            return false
         }
     }
 

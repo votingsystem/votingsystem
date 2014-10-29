@@ -37,6 +37,10 @@
                 <div class="numTrans">{{transactionVSData.numTransFromUserVSToUserVS}}</div>
                 <div class="transDesc">TransFromUserVSToUserVS</div>
             </div>
+            <div id="FROM_GROUP_TO_MEMBER" class="transBlock" on-click="{{transBlockSelected}}">
+                <div class="numTrans">{{transactionVSData.numTransFromGroupVSToMember}}</div>
+                <div class="transDesc">numTransFromGroupVSToMember</div>
+            </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromGroupVSToMemberGroup}}</div>
                 <div class="transDesc">TransFromGroupVSToMemberGroup</div>
@@ -81,7 +85,7 @@
             dataMap: {value: {}}
         },
         dataMapChanged: function() {
-            console.log(this.tagName + " - dataMapChanged: " + JSON.stringify(this.dataMap))
+            console.log(this.tagName + " - dataMapChanged:" + JSON.stringify(this.dataMap))
             if(!this.dataMap) return;
             this.transactionVSData = this.dataMap.transactionVSData
             this.dateFrom = this.$.dateVS.parseDayWeekDate(this.dataMap.transactionVSData.timePeriod.dateFrom)

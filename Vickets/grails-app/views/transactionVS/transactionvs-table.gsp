@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 
-<polymer-element name="transactionvs-table" attributes="url transactionList userNif isUserVSTable">
+<polymer-element name="transactionvs-table" attributes="url userNif isUserVSTable transactionsMap">
 <template>
     <style>
     .tableHeadervs {
@@ -13,8 +13,7 @@
     .rowvs div { text-align:center; }
     .expenseRow { background: #fee; }
     </style>
-    <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
-               contentType="json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
+
     <!--JavaFX Webkit gives problems with tables and templates -->
     <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
         <div layout horizontal center center-justified class="tableHeadervs">
@@ -26,7 +25,7 @@
             <div flex style="width:240px;"><g:message code="subjectLbl"/></div>
         </div>
         <div>
-            <template repeat="{{transaction in transactionsMap.transactionRecords}}">
+            <template repeat="{{transaction in transactionRecords}}">
                 <div layout horizontal center center justified on-click="{{showTransactionDetails}}" class="rowvs {{getClass(transaction)}}">
                     <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
@@ -48,11 +47,11 @@
         publish: {
             transactionsMap: {value: {}}
         },
+        ready :  function(e) {
+            console.log(this.tagName + " - ready")
+        },
         urlChanged:function() {
             console.log(this.tagName + " - urlChanged: " + this.url)
-        },
-        transactionListChanged:function() {
-            console.log("transactionListChanged")
         },
         getClass: function(transactionvs) {
             if(!this.isUserVSTable) return
@@ -90,11 +89,15 @@
             else  amount = transaction.amount + " " + transaction.currency
             return amount
         },
+        transactionsMapChanged:function() {
+            this.transactionRecords = JSON.parse(this.transactionsMap).transactionRecords
+        },
         ajaxComplete: function() {
             this.transactionsMap = this.responseData
+            console.log(this.tagName + " - ajaxComplete")
         },
         addTransaction:function(transactionvs) {
-            this.transactionList.push(transactionvs)
+            this.transactionsMap.transactionRecords.push(transactionvs)
         }
     });</script>
 </polymer-element>

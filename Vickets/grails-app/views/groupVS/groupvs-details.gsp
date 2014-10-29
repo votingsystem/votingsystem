@@ -140,9 +140,7 @@
     Polymer('groupvs-details', {
         isSelected: false,
         subpage:false,
-        publish: {
-            groupvs: {value: {}}
-        },
+        publish: { groupvs: {} },
         isClientToolConnected:false,
         ready : function() {
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
@@ -218,6 +216,7 @@
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
         groupvsChanged:function() {
+            console.log("groupvsChanged - groupvs: " + Object.prototype.toString.call(this.groupvs))
             if(("admin" == menuType || "superuser" == menuType) && 'ACTIVE' == this.groupvs.userVS.state) this.isAdminView = true
             else {
                 this.isAdminView = false
