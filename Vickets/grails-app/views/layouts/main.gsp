@@ -11,7 +11,6 @@
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-navbar', file: 'vs-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
@@ -20,9 +19,12 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/layouts/vs-navbar']"/>">
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
     <g:layoutHead/>
+    <style>
+    </style>
 </head>
 <body id="voting_system_page" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar" attributes="url loading">
@@ -31,7 +33,8 @@
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" handleAs=""></core-xhr>
         <!-- put core signals names in lower case !!!-->
-        <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}"></core-signals>
+        <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}" on-core-signal-vs-session-data="{{sessionDataSignal}}"
+                      on-core-signal-vs-websocket-message="{{websocketSignal}}"></core-signals>
         <vs-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
@@ -119,6 +122,16 @@
             },
             urlChanged: function() { //for history navigation
                 this.loadURL(this.url)
+            },
+            sessionDataSignal:function(e, detail, sender) {
+                this.$._navbar.sessionData = detail
+            },
+            websocketSignal:function(e, detail, sender) {
+                console.log("websocketSignal - detail:" + JSON.stringify(detail))
+                if("OPEN" === detail.socketStatus && "INIT_VALIDATED_SESSION" === detail.operation)
+                    this.$._navbar.userVS = detail.userVS
+                if(detail.messageVSList && detail.messageVSList.length > 0) alert("You have pending messages")
+                //{"locale":"es","operation":"INIT_VALIDATED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
             },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
@@ -229,6 +242,10 @@
         console.log ("sendSocketVSMessage")
         dataJSON.locale = navigator.language
         if(document.querySelector("#socketvs")) document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
+    }
+
+    function updateSessionInfo(sessionData) {
+        if(sessionData.userVSList) document.querySelector("#userSelector").userVSList = sessionData.userVSList
     }
 </asset:script>
 <asset:deferredScripts/>

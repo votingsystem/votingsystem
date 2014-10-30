@@ -43,12 +43,11 @@ import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.client.util.WebSocketListener;
+import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
@@ -57,16 +56,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVS extends Region implements WebKitHost {
+public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
     private static final int BROWSER_WIDTH = 1200;
@@ -78,6 +79,7 @@ public class BrowserVS extends Region implements WebKitHost {
     private final BrowserVSPane browserHelper;
     private TabPane tabPane;
     private Button prevButton;
+    private AtomicBoolean wsConnected = new AtomicBoolean(false);
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
@@ -284,7 +286,8 @@ public class BrowserVS extends Region implements WebKitHost {
                         if(element != null) {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new JavafxClient(webView));
-                            webView.getEngine().executeScript("notifiyClientToolConnection()");
+                            webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
+                                    BrowserVSSessionUtils.getInstance().getSessionData()));
                         }
                     } else if (newState.equals(Worker.State.FAILED)) {
                         showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
@@ -353,7 +356,7 @@ public class BrowserVS extends Region implements WebKitHost {
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
-                    new String(Base64.getEncoder().encode(message.getBytes("UTF8")), "UTF8") + "')";
+                    Base64.getEncoder().encodeToString(message.getBytes("UTF8")) + "')";
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     operationWebView.getEngine().executeScript(jsCommand);
@@ -400,6 +403,40 @@ public class BrowserVS extends Region implements WebKitHost {
         newTab(urlToLoad, caption, "".equals(jsCommand.toString()) ? null : jsCommand.toString());
     }
 
+    @Override public void consumeWebSocketMessage(JSONObject messageJSON) {
+        TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
+        log.debug("consumeWebSocketMessage: " + operation.toString());
+        switch(operation) {
+            case INIT_VALIDATED_SESSION:
+                wsConnected.set(true);
+                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
+                break;
+        }
+    }
+
+    @Override public void setConnectionStatus(ConnectionStatus status) {
+        log.debug("setConnectionStatus - status: " + status.toString());
+        switch (status) {
+            case CLOSED:
+                wsConnected.set(false);
+                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.CLOSED));
+                break;
+            case OPEN:
+                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.OPEN));
+                break;
+        }
+    }
+
+    private void fireCoreSignal(String jsCommand) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                for(WebView webView : webViewMap.values()) {
+                    webView.getEngine().executeScript(jsCommand);
+                }
+            }
+        });
+    }
+
     public class JavafxClient {// JavaScript interface object
         private WebView webView;
         public JavafxClient(WebView webView) {
@@ -416,6 +453,18 @@ public class BrowserVS extends Region implements WebKitHost {
                 switch (operationVS.getType()) {
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                         Utils.receiptCancellation(operationVS, BrowserVS.this);
+                        break;
+                    case CONNECT:
+                        if(WebSocketService.getInstance() == null) {
+                            WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
+                                    getVotingSystemSSLCerts(), ContextVS.getInstance().getVicketServer());
+                            webSocketService.addListener(BrowserVS.this);
+                        }
+                        WebSocketService.getInstance().setConnectionEnabled(true);
+                        break;
+                    case DISCONNECT:
+                        if(WebSocketService.getInstance() != null)
+                            WebSocketService.getInstance().setConnectionEnabled(false);
                         break;
                     case SELECT_IMAGE:
                         Utils.selectImage(operationVS, BrowserVS.this);

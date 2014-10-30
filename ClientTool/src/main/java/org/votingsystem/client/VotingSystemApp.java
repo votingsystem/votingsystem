@@ -57,18 +57,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VotingSystemApp extends Application implements DecompressBackupPane.Listener, WebSocketListener {
+public class VotingSystemApp extends Application implements DecompressBackupPane.Listener {
 
     private static Logger log = Logger.getLogger(VotingSystemApp.class);
 
     private VBox mainBox;
     private VBox votingSystemOptionsBox;
     private VBox vicketOptionsBox;
+    private HBox headerButtonsBox;
     private SettingsDialog settingsDialog;
-    private GridPane headerButtonsPane;
-    private Button connectButton;
-    private Text messageText;
-    private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
@@ -185,27 +182,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }
         }).start();
         mainBox = new VBox();
-        connectButton = new Button(ContextVS.getMessage("connectLbl"));
-        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_RED_DARK));
-        connectButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                connectButton.setDisable(true);
-                if(!wsConnected.get()) {
-                    connectButton.setText(ContextVS.getMessage("connectionMsg") + "...");
-                }
-                toggleConnection();
-            }});
-        messageText = new Text();
-        messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
-        VBox.setMargin(messageText, new Insets(0, 0, 0, 0));
-        messageText.setTextAlignment(TextAlignment.CENTER);
-        headerButtonsPane = new GridPane();
+        headerButtonsBox = new HBox(10);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        headerButtonsPane.getChildren().addAll(connectButton, messageText);
-        headerButtonsPane.setColumnSpan(headerButtonsPane, 2);
-        VBox.setMargin(headerButtonsPane, new Insets(0, 0, 10, 0));
+        VBox.setMargin(headerButtonsBox, new Insets(0, 0, 20, 0));
         ChoiceBox documentChoiceBox = new ChoiceBox();
         documentChoiceBox.setPrefWidth(150);
         final String[] documentOptions = new String[]{ContextVS.getMessage("documentsLbl"),
@@ -225,7 +205,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 documentChoiceBox.getSelectionModel().select(0);
             }
         });
-        votingSystemOptionsBox = new VBox(10);
+        votingSystemOptionsBox = new VBox(15);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE));
         voteButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -245,7 +225,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         selectRepresentativeButton.setPrefWidth(500);
         votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
 
-        vicketOptionsBox = new VBox(10);
+        vicketOptionsBox = new VBox(15);
         Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
 
         vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
@@ -265,7 +245,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }});
         vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, walletButton);
         vicketOptionsBox.setStyle("-fx-alignment: center;");
-        HBox footerButtonsBox = new HBox(10);
         ChoiceBox adminChoiceBox = new ChoiceBox();
         adminChoiceBox.setPrefWidth(180);
         final String[] adminOptions = new String[]{ContextVS.getMessage("adminLbl"),
@@ -291,13 +270,15 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     adminChoiceBox.getSelectionModel().select(0);
                 }
             });
+        headerButtonsBox.getChildren().addAll(adminChoiceBox, documentChoiceBox);
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 VotingSystemApp.this.stop();
             }});
-        footerButtonsBox.getChildren().addAll(adminChoiceBox, documentChoiceBox, spacer, cancelButton);
+        HBox footerButtonsBox = new HBox(10);
+        footerButtonsBox.getChildren().addAll(spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 10));
         mainBox.getChildren().addAll(footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");
@@ -326,27 +307,18 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         primaryStage.show();
     }
 
-    private void toggleConnection() {
-        if(WebSocketService.getInstance() == null) {
-            WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
-                    getVotingSystemSSLCerts(), ContextVS.getInstance().getVicketServer());
-            webSocketService.addListener(VotingSystemApp.this);
-        }
-        WebSocketService.getInstance().setConnectionEnabled(!wsConnected.get());
-    }
-
     private void setVicketServerAvailable(final boolean available, Stage primaryStage) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
                     mainBox.getChildren().add((mainBox.getChildren().size() - 1), vicketOptionsBox);
-                    mainBox.getChildren().add(0, headerButtonsPane);
+                    mainBox.getChildren().add(0, headerButtonsBox);
                 } else {
                     if(mainBox.getChildren().contains(vicketOptionsBox)) {
                         mainBox.getChildren().remove(vicketOptionsBox);
                     }
-                    if(mainBox.getChildren().contains(headerButtonsPane)) {
-                        mainBox.getChildren().remove(headerButtonsPane);
+                    if(mainBox.getChildren().contains(headerButtonsBox)) {
+                        mainBox.getChildren().remove(headerButtonsBox);
                     }
                 }
                 primaryStage.sizeToScene();
@@ -403,43 +375,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() { @Override public void run() {
             new MessageDialog().showMessage(null, message);}});
-    }
-
-    @Override public void consumeWebSocketMessage(JSONObject messageJSON) {
-        TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
-        switch(operation) {
-            case INIT_VALIDATED_SESSION:
-                wsConnected.set(true);
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        messageText.setText(WebSocketService.getInstance().getSessionUser().getName());
-                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FLASH));
-                        connectButton.setText(ContextVS.getMessage("disConnectLbl"));
-                        connectButton.setDisable(false);
-                    }
-                });
-                break;
-        }
-    }
-
-    @Override public void setConnectionStatus(ConnectionStatus status) {
-        log.debug("setConnectionStatus - status: " + status.toString());
-        switch (status) {
-            case CLOSED:
-                wsConnected.set(false);
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        messageText.setText("");
-                        connectButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SQUARE, Utils.COLOR_RED_DARK));
-                        connectButton.setText(ContextVS.getMessage("connectLbl"));
-                        connectButton.setDisable(false);
-                    }
-                });
-                break;
-            case OPEN:
-                break;
-        }
-
     }
 
     class Delta { double x, y; }

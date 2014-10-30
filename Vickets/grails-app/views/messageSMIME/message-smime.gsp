@@ -50,7 +50,6 @@
                 </template>
             </div>
 
-
             <div id="fromUserDivContainer" style="margin-left: 20px;">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
                     <g:message code="senderLbl"/></div>

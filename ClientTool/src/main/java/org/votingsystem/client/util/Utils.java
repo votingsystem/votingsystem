@@ -24,8 +24,10 @@ import org.votingsystem.util.HttpHelper;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -188,6 +190,42 @@ public class Utils {
                 }
             }
         });
+    }
+
+
+    public static String getWebSocketCoreSignalJSCommand(
+            JSONObject messageJSON, WebSocketListener.ConnectionStatus status) {
+        JSONObject coreSignal = new JSONObject();
+        if(messageJSON == null) messageJSON = new JSONObject();
+        messageJSON.put("socketStatus", status.toString());
+        //this.fire('core-signal', {name: "vs-websocket-message", data: messageJSON});
+        coreSignal.put("name", "vs-websocket-message");
+        coreSignal.put("data", messageJSON);
+        String jsCommand = null;
+        try {
+            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
+                    coreSignal.toString().getBytes("UTF-8")) + "')";
+
+        } catch (UnsupportedEncodingException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+        return jsCommand;
+    }
+
+    public static String getSessionCoreSignalJSCommand(JSONObject sessionDataJSON) {
+        JSONObject coreSignal = new JSONObject();
+        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
+        coreSignal.put("name", "vs-session-data");
+        coreSignal.put("data", sessionDataJSON);
+        String jsCommand = null;
+        try {
+            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
+                    coreSignal.toString().getBytes("UTF-8")) + "')";
+
+        } catch (UnsupportedEncodingException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+        return jsCommand;
     }
 
     public static void selectImage(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {

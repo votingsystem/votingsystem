@@ -4,6 +4,7 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.scene.web.WebView;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -174,20 +176,12 @@ public class WebSocketService extends Service<ResponseVS> {
                 " - status: " + responseVS.getStatusCode());
         switch(responseVS.getType()) {
             case INIT_VALIDATED_SESSION:
-                if(((JSONObject)responseVS.getMessageJSON()).containsKey("messageVSList") &&
-                        ((JSONObject)responseVS.getMessageJSON()).getJSONArray("messageVSList").size() > 0) {
-                    final String callbackMsg = responseVS.getMessageJSON().toString();
-                    final String callback = "updateMessageVSList";
-                    Platform.runLater(new Runnable() {
-                        @Override public void run() {
-                            BrowserVS.getInstance().newTab(targetServer.getMessageVSInboxURL(), callback,
-                                    callbackMsg, ContextVS.getMessage("messageVSInboxCaption"), false);
-                        }
-                    });
-                }
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    broadcastConnectionStatus(WebSocketListener.ConnectionStatus.OPEN);
-                } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                try {
+                    JSONObject messageJSON = (JSONObject) responseVS.getMessageJSON();
+                    BrowserVSSessionUtils.getInstance().setUserVS(userVS);
+                    messageJSON.put("userVS", userVS.toJSON());
+                    responseVS.setMessageJSON(messageJSON);
+                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 break;
             case MESSAGEVS_EDIT:
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) showMessage(
@@ -266,7 +260,9 @@ public class WebSocketService extends Service<ResponseVS> {
                 responseVS = timeStamper.call();
                 smimeMessage = timeStamper.getSMIME();
                 connectionMessage = getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString();
-                WebSocketService.this.restart();
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() { WebSocketService.this.restart();}
+                });
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
                 broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
