@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -161,11 +162,9 @@ public class SettingsDialog {
                 try {
                     userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                 } catch(Exception ex) {
-                    MessageDialog messageDialog = new MessageDialog();
-                    messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
+                    showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("keyStoreNotValidErrorMsg"));
                 }
-                //PrivateKey privateKeySigner = (PrivateKey)userKeyStore.getKey("UserTestKeysStore", null);
                 X509Certificate certSigner = (X509Certificate) userKeyStore.getCertificate("UserTestKeysStore");
                 keyStoreLabel.setText(certSigner.getSubjectDN().toString());
             } else {
@@ -177,6 +176,11 @@ public class SettingsDialog {
         }
     }
 
+    public void showMessage(Integer statusCode, String message) {
+        PlatformImpl.runLater(new Runnable() { @Override public void run() {
+            new MessageDialog().showMessage(statusCode, message);}});
+    }
+
     private void validateForm() {
         log.debug("validateForm");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
@@ -184,8 +188,7 @@ public class SettingsDialog {
         CryptoTokenVS cryptoTokenVS = CryptoTokenVS.valueOf(cryptoTokenStr);
         if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
+                showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                         ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
                 return;
             }
@@ -200,8 +203,7 @@ public class SettingsDialog {
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             CryptoTokenVS.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
-                    MessageDialog messageDialog = new MessageDialog();
-                    messageDialog.showMessage(null, ContextVS.getMessage("errorLbl") + " " +
+                    showMessage(null, ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }

@@ -17,7 +17,10 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
@@ -25,6 +28,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -282,6 +287,45 @@ public class Utils {
             default:
                 log.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
         }
+    }
+
+    public static void selectKeystoreFile(OperationVS operationVS, WebKitHost webKitHost) {
+        log.debug("selectKeystoreFile");
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                try {
+                    final FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle(ContextVS.getMessage("selectKeyStore"));
+                    File file = fileChooser.showOpenDialog(new Stage());
+                    if (file != null) {
+                        File selectedKeystore = new File(file.getAbsolutePath());
+                        byte[] keystoreBytes = FileUtils.getBytesFromFile(selectedKeystore);
+                        try {
+                            KeyStore userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
+                            UserVS userVS = UserVS.getUserVS((X509Certificate)
+                                    userKeyStore.getCertificate("UserTestKeysStore"));
+                            PasswordDialog passwordDialog = new PasswordDialog();
+                            passwordDialog.show(ContextVS.getMessage("newKeyStorePasswordMsg"));
+                            String password = passwordDialog.getPassword();
+                            ContextVS.saveUserKeyStore(userKeyStore, password);
+                            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
+                                    CryptoTokenVS.JKS_KEYSTORE.toString());
+                            BrowserVSSessionUtils.getInstance().setUserVS(userVS, false);
+                            JSONObject userDataJSON = userVS.toJSON();
+                            userDataJSON.put("statusCode", ResponseVS.SC_OK);
+                            webKitHost.sendMessageToBrowser(userDataJSON, operationVS.getCallerCallback());
+                        } catch(Exception ex) {
+                            log.error(ex.getMessage(), ex);
+                            webKitHost.sendMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage(),
+                                    operationVS.getCallerCallback());
+                        }
+
+                    }
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+            }
+        });
     }
 
     public static void saveReceipt(OperationVS operation, WebKitHost webKitHost) throws Exception{

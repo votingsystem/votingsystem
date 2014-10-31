@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import java.math.BigInteger;
 import java.security.*;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  *
@@ -42,8 +43,13 @@ public enum KeyGeneratorVS {
         random.setSeed(new Date().getTime());
         final byte[] sernobytes = new byte[noOctets];
         random.nextBytes(sernobytes);
-        BigInteger serno = new BigInteger(sernobytes).abs();
-        return serno;
+        return new BigInteger(sernobytes).abs();
     }
 
+    public byte[] getSalt() {
+        random.setSeed(new Date().getTime());
+        final byte[] sernobytes = new byte[noOctets];
+        random.nextBytes(sernobytes);
+        return  sernobytes;
+    }
 }

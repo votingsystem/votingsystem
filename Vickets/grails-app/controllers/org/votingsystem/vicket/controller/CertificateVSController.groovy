@@ -21,6 +21,7 @@ class CertificateVSController {
 	def signatureVSService
     def certificateVSService
 
+    def certRequest() {}
 
 	/**
 	 * Servicio de consulta de certificates de vickets.

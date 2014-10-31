@@ -74,6 +74,7 @@ public class ContextVS {
     public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
     public static String WALLET_FILE_NAME = "wallet.wvs";
     public static String BROWSER_SESSION_FILE_NAME = "browser.bvs";
+    public static String USER_CSR_REQUEST_FILE_NAME = "user.csrvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
@@ -230,7 +231,7 @@ public class ContextVS {
         return votingSystemSSLTrustAnchors;
     }
 
-    private void initDirs(String baseDir) {
+    public void initDirs(String baseDir) {
         APPDIR =  baseDir + File.separator +  ".VotingSystem";
         WEBVIEWDIR =  APPDIR + File.separator + "webview";
         APPTEMPDIR =  APPDIR + File.separator + "temp";

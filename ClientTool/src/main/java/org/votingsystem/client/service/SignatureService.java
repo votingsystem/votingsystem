@@ -12,14 +12,12 @@ import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.WalletUtils;
+import org.votingsystem.util.*;
 import org.votingsystem.vicket.model.VicketRequestBatch;
 
 import java.io.ByteArrayInputStream;
@@ -30,6 +28,10 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
+
+import static org.votingsystem.model.ContextVS.PROVIDER;
+import static org.votingsystem.model.ContextVS.SIGN_MECHANISM;
+import static org.votingsystem.model.ContextVS.SIG_NAME;
 
 /**
  * @author jgzornoza
@@ -95,23 +97,26 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = sendVote(operationVS);
                             break;
                         case CANCEL_VOTE:
-                            responseVS = cancelVote(operationVS.getTargetServer(), operationVS);
+                            responseVS = cancelVote(operationVS);
+                            break;
+                        case CERT_USER_NEW:
+                            responseVS = sendCSRRequest(operationVS);
                             break;
                         case NEW_REPRESENTATIVE:
                             responseVS = processNewRepresentative(operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                            responseVS = processAnonymousDelegation(operationVS.getTargetServer(), operationVS);
+                            responseVS = processAnonymousDelegation(operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
-                            responseVS = processCancelAnonymousDelegation(operationVS.getTargetServer(), operationVS);
+                            responseVS = processCancelAnonymousDelegation(operationVS);
                             break;
                         case CLAIM_PUBLISHING:
                         case VOTING_PUBLISHING:
-                            responseVS = publishSMIME(operationVS.getTargetServer(), operationVS);
+                            responseVS = publishSMIME(operationVS);
                             break;
                         case MESSAGEVS:
-                            responseVS = sendMessageVS(operationVS.getTargetServer(), operationVS);
+                            responseVS = sendMessageVS(operationVS);
                             break;
                         case MESSAGEVS_DECRYPT:
                             responseVS = decryptMessageVS(operationVS);
@@ -126,7 +131,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = openWallet(operationVS);
                             break;
                         default:
-                            responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
+                            responseVS = sendSMIME(operationVS);
                     }
                     updateProgress(100, 100);
                     return responseVS;
@@ -160,6 +165,26 @@ public class SignatureService extends Service<ResponseVS> {
             }
             return responseVS;
         }
+
+        private ResponseVS sendCSRRequest(OperationVS operationVS) throws Exception {
+            CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
+                    ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER,
+                    (String)operationVS.getDocument().get("nif"), (String)operationVS.getDocument().get("email"),
+                    (String)operationVS.getDocument().get("phone"),
+                    UUID.randomUUID().toString(), (String)operationVS.getDocument().get("givenName"),
+                    (String)operationVS.getDocument().get("surname"));
+            byte[] csrBytes = certificationRequest.getCsrPEM();
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
+                    ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                Long requestId = Long.valueOf(responseVS.getMessage());
+                byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
+                Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
+                BrowserVSSessionUtils.setCSRRequest(requestId, bundle);
+            }
+            return responseVS;
+        }
+
 
         //we know this is done in a background thread
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
@@ -217,7 +242,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS cancelVote(ActorVS targetServer, OperationVS operationVS) throws Exception {
+        private ResponseVS cancelVote(OperationVS operationVS) throws Exception {
             log.debug("cancelVote");
             Map documentToSignMap = new HashMap<String, String>();
             documentToSignMap.put("operation", TypeVS.CANCEL_VOTE.toString());
@@ -229,7 +254,7 @@ public class SignatureService extends Service<ResponseVS> {
             documentToSignMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             operationVS.setDocumentToSignMap(documentToSignMap);
-            return sendSMIME(targetServer, operationVS);
+            return sendSMIME(operationVS);
         }
 
         //we know this is done in a background thread
@@ -311,7 +336,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
+        private ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
             log.debug("sendMessageVS");
             //operationVS.getContentType(); -> MessageVS
             List signedDataList = new ArrayList<>();
@@ -336,9 +361,10 @@ public class SignatureService extends Service<ResponseVS> {
             }
             operationVS.getDocumentToSignMap().put("encryptedDataInfo", signedDataList);
             JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null, targetServer.getNameNormalized(),
+            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null, operationVS.getTargetServer().getNameNormalized(),
                     documentToSignJSON.toString(), password.toCharArray(), operationVS.getSignedMessageSubject(), null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    operationVS.getTargetServer().getTimeStampServiceURL());
             ResponseVS responseVS = timeStamper.call();
             smimeMessage = timeStamper.getSMIME();
             try {
@@ -404,7 +430,7 @@ public class SignatureService extends Service<ResponseVS> {
 
 
         //we know this is done in a background thread
-        private ResponseVS processCancelAnonymousDelegation(ActorVS targetServer, OperationVS operationVS) throws Exception {
+        private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {
             String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
             FileUtils.unpackZip(operationVS.getFile(), new File(outputFolder));
             File cancelDataFile = new File(outputFolder + File.separator + ContextVS.CANCEL_DATA_FILE_NAME);
@@ -419,8 +445,9 @@ public class SignatureService extends Service<ResponseVS> {
                             operationVS.getNormalizedReceiverName(), documentToSignStr,
                             password.toCharArray(), operationVS.getSignedMessageSubject(), null);
                     SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
-                            targetServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
-                            targetServer.getX509Certificate());
+                            operationVS.getTargetServer().getTimeStampServiceURL(),
+                            ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
+                            operationVS.getTargetServer().getX509Certificate());
                     ResponseVS responseVS = senderWorker.call();
                     if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         if(responseVS.getContentType() != null && responseVS.getContentType().isSigned()) {
@@ -440,7 +467,7 @@ public class SignatureService extends Service<ResponseVS> {
 
 
         //we know this is done in a background thread
-        private ResponseVS processAnonymousDelegation(ActorVS targetServer, OperationVS operationVS) throws Exception {
+        private ResponseVS processAnonymousDelegation(OperationVS operationVS) throws Exception {
             String representativeName = (String) operationVS.getDocumentToSignMap().get("representativeName");
             String caption = operationVS.getCaption();
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
@@ -501,7 +528,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) throws Exception {
+        private ResponseVS sendSMIME(OperationVS operationVS, String... header) throws Exception {
             log.debug("sendSMIME");
             String documentToSignStr = null;
             if(operationVS.getAsciiDoc() != null) {
@@ -517,16 +544,16 @@ public class SignatureService extends Service<ResponseVS> {
                 smimeMessage.setHeader(SMIMEMessage.CONTENT_TYPE_VS, ContentTypeVS.ASCIIDOC.getName());
             }
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
-                    targetServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
-                    targetServer.getX509Certificate(), header);
+                    operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
+                    operationVS.getTargetServer().getX509Certificate(), header);
             return senderWorker.call();
         }
 
 
         //we know this is done in a background thread
-        private ResponseVS<ActorVS> publishSMIME(ActorVS targetServer, OperationVS operationVS) throws Exception {
+        private ResponseVS<ActorVS> publishSMIME(OperationVS operationVS) throws Exception {
             log.debug("publishPoll");
-            ResponseVS responseVS = sendSMIME(targetServer, operationVS, "eventURL");
+            ResponseVS responseVS = sendSMIME(operationVS, "eventURL");
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
                 operationVS.setDocumentURL(eventURL);

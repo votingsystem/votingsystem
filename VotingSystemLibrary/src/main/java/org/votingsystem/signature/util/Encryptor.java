@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
@@ -17,6 +18,10 @@ import org.votingsystem.util.FileUtils;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.Multipart;
@@ -24,9 +29,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -42,6 +49,9 @@ import java.util.Iterator;
 public class Encryptor {
  
     private static Logger log = Logger.getLogger(Encryptor.class);
+
+    private static final int ITERATION_COUNT = 1024;
+    private static final int KEY_LENGTH = 128; // 192 and 256 bits may not be available
 
     private Recipient recipient;
     private RecipientId recipientId;
@@ -414,5 +424,56 @@ public class Encryptor {
         byte[] result = recipientInfo.getContent(recipient);
         return result;
     }
-    
+
+    public static EncryptedBundle pbeAES_Encrypt(String password, byte[] bytesToEncrypt) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
+            UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        AlgorithmParameters params = cipher.getParameters();
+        byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+        return new EncryptedBundle(cipher.doFinal(bytesToEncrypt), iv, salt);
+    }
+
+    public static byte[] pbeAES_Decrypt(String password, EncryptedBundle bundle) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException,
+            UnsupportedEncodingException, InvalidKeySpecException, InvalidAlgorithmParameterException,
+            InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.salt, ITERATION_COUNT, KEY_LENGTH);
+        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.iv));
+        return cipher.doFinal(bundle.cipherText);
+    }
+
+    public static class EncryptedBundle {
+        byte[] iv, cipherText, salt;
+        public EncryptedBundle(byte[] cipherText, byte[] iv, byte[] salt) {
+            this.iv = iv;
+            this.cipherText = cipherText;
+            this.salt = salt;
+        }
+        public byte[] getIV() { return iv; }
+        public byte[] getCipherText() { return cipherText; }
+        public byte[] getSalt() { return salt; }
+        public JSONObject toJSON() {
+            JSONObject result = new JSONObject();
+            result.put("iv", Base64.getEncoder().encodeToString(iv));
+            result.put("salt", Base64.getEncoder().encodeToString(salt));
+            result.put("cipherText", Base64.getEncoder().encodeToString(cipherText));
+            return result;
+        }
+
+        public static EncryptedBundle parse(JSONObject jsonObject) {
+            byte[] iv = Base64.getDecoder().decode(jsonObject.getString("iv").getBytes());
+            byte[] cipherText = Base64.getDecoder().decode(jsonObject.getString("cipherText").getBytes());
+            byte[] salt = Base64.getDecoder().decode(jsonObject.getString("salt").getBytes());
+            return new EncryptedBundle(cipherText, iv, salt);
+        }
+    }
 }

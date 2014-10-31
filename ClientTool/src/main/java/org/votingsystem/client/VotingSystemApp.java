@@ -181,7 +181,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }
         }).start();
         mainBox = new VBox();
-        headerButtonsBox = new HBox(10);
+        headerButtonsBox = new HBox(20);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         VBox.setMargin(headerButtonsBox, new Insets(0, 0, 20, 0));
@@ -388,6 +388,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     public static void main(String[] args) {
         ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
+        if(args.length > 0) {
+            ContextVS.getInstance().initDirs(args[0]);
+        }
         launch(args);
     }
 

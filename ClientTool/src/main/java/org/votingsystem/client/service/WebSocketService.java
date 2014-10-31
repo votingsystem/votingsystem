@@ -183,7 +183,7 @@ public class WebSocketService extends Service<ResponseVS> {
             case INIT_VALIDATED_SESSION:
                 try {
                     JSONObject messageJSON = (JSONObject) responseVS.getMessageJSON();
-                    BrowserVSSessionUtils.getInstance().setUserVS(userVS);
+                    BrowserVSSessionUtils.getInstance().setUserVS(userVS, true);
                     messageJSON.put("userVS", userVS.toJSON());
                     responseVS.setMessageJSON(messageJSON);
                     wsConnected.set(true);

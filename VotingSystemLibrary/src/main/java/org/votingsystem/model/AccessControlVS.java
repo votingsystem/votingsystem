@@ -119,4 +119,12 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/index?menu=user";
     }
 
+    public String getUserCSRServiceURL (Long csrRequestId) {
+        return getServerURL() + "/csr?csrRequestId=" + csrRequestId;
+    }
+
+    public String getUserCSRServiceURL () {
+        return getServerURL() + "/csr/request";
+    }
+
 }

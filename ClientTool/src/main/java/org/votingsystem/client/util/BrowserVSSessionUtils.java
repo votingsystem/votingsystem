@@ -6,6 +6,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
@@ -32,7 +33,7 @@ public class BrowserVSSessionUtils {
                 sessionDataJSON = new JSONObject();
             } else sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
             sessionDataJSON.put("isConnected", false);
-            userVS = UserVS.parse((java.util.Map) sessionDataJSON.get("userVS"));
+            if(sessionDataJSON.get("userVS") != null) userVS = UserVS.parse((java.util.Map) sessionDataJSON.get("userVS"));
             flush();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -48,11 +49,20 @@ public class BrowserVSSessionUtils {
         flush();
     }
 
+    public void setCSRRequestId(Long id) {
+        sessionDataJSON.put("csrRequestId", id);
+        flush();
+    }
+
+    public Long getCSRRequestId() {
+        return sessionDataJSON.getLong("csrRequestId");
+    }
+
     public UserVS getUserVS() {
         return userVS;
     }
 
-    public void setUserVS(UserVS userVS) throws Exception {
+    public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
         this.userVS = userVS;
         JSONArray userVSList = null;
         if(sessionDataJSON.has("userVSList")) {
@@ -72,13 +82,23 @@ public class BrowserVSSessionUtils {
             userVSList.add(userVS.toJSON());
             sessionDataJSON.put("userVSList", userVSList);
         }
-        sessionDataJSON.put("isConnected", true);
+        sessionDataJSON.put("isConnected", isConnected);
         sessionDataJSON.put("userVS", userVS.toJSON());
         flush();
     }
 
     public JSONObject getSessionData() {
         return sessionDataJSON;
+    }
+
+    public static void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
+        try {
+            File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+            csrFile.createNewFile();
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes()), csrFile);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
     }
 
     private void flush() {

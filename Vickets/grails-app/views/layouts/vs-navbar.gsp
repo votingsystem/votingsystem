@@ -10,11 +10,7 @@
 <template>
     <g:include view="/include/styles.gsp"/>
   <style>
-    [drawer] {
-        background-color: #ba0011;
-        color: #f9f9f9;
-        box-shadow: 1px 0 1px rgba(0, 0, 0, 0.1);
-    }
+    [drawer] { background-color: #ba0011; color: #f9f9f9; box-shadow: 1px 0 1px rgba(0, 0, 0, 0.1); }
     [main] { height: 100%; background-color: #fefefe;  }
     core-toolbar { background-color: #ba0011; color: #fff; }
     core-header-panel #mainContainer { height: 1000px; }
@@ -68,18 +64,29 @@
     <paper-dialog id="userSelectorDialog" heading="<g:message code="selectUserVSLbl"/>" style="max-width: 400px;
             padding: 0px 0 0 0;">
             <div horizontal layout center center-justified>
-                <paper-radio-group id="userSelector" selected="{{lastSessionNif}}">
-                    <template repeat="{{user in userVSList}}">
-                        <paper-radio-button name="{{user.nif}}" label="{{user.nif}}" style="margin:0 0 10px 0;"></paper-radio-button><br/>
-                    </template>
-                </paper-radio-group>
+                <template if="{{userVSList.length >0}}">
+                    <paper-radio-group id="userSelector" selected="{{lastSessionNif}}">
+                        <template repeat="{{user in userVSList}}">
+                            <paper-radio-button name="{{user.nif}}" label="{{user.nif}}" style="margin:0 0 10px 0;"></paper-radio-button><br/>
+                        </template>
+                    </paper-radio-group>
+                </template>
+                <template if="{{userVSList == null || userVSList.length === 0}}">
+                    <div style="margin: 20px"><g:message code="certNeededMsg"/></div>
+                </template>
             </div>
         <div horizontal layout style="font-size: 0.9em; padding: 3px">
-            <div flex></div>
-            <paper-button raised label="<g:message code="acceptLbl"/>" affirmative autofocus
-                    on-click="{{connect}}" style="color: #008000; margin:0 0 0 30px;">
-                <i class="fa fa-check" style="margin:0px 10px 0px 0px;"></i>
+            <paper-button raised label="<g:message code="addUserVSLbl"/>" affirmative autofocus
+                          on-click="{{selectCertificate}}" style="color: #008000; margin:0 20px 0 0;">
+                <i class="fa fa-certificate"></i>
             </paper-button>
+            <div flex></div>
+            <template if="{{userVSList.length > 0}}">
+                <paper-button raised label="<g:message code="acceptLbl"/>" affirmative autofocus
+                              on-click="{{connect}}" style="color: #008000; margin:0 0 0 30px;">
+                    <i class="fa fa-check" style="margin:0px 10px 0px 0px;"></i>
+                </paper-button>
+            </template>
         </div>
     </paper-dialog>
 </template>
@@ -108,6 +115,17 @@
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.DISCONNECT)
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     },
+    selectCertificate: function(e) {
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.KEYSTORE_SELECT)
+        webAppMessage.setCallback(function(appMessage) {
+            var appMessageJSON = JSON.parse(appMessage)
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                if(this.userVSList != null && this.userVSList.length > 1) this.userVSList.push(appMessageJSON)
+                else this.userVSList = [appMessageJSON]
+            } else showMessageVS(appMessageJSON.message, '<g:message code="transactionvsERRORLbl"/>')
+        }.bind(this))
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    },
     connect: function(e) {
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CONNECT)
         var selectedUser = null
@@ -117,9 +135,11 @@
                     selectedUser = userVS
                 }
             }.bind(this));
+        } else if(this.userVSList != null && this.userVSList.length === 1) selectedUser = this.userVSList[0]
+        if(selectedUser != null) {
+            webAppMessage.document = selectedUser
+            console.log(this.tagName + " - connect - userVS: " + selectedUser.nif)
         }
-        if(selectedUser != null) webAppMessage.document = selectedUser
-        console.log(this.tagName + " - connect - userVS: " + selectedUser.nif)
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     },
     connectButtonClicked: function(e) {
@@ -129,9 +149,9 @@
         if(this.isConnected) {
             this.$.userInfoPanel.show = true
         } else {
-            if(this.userVSList != null && this.userVSList.length > 1) {
-                this.$.userSelectorDialog.toggle()
-            } else this.connect()
+            if(this.userVSList != null && this.userVSList.length === 1) {
+                this.connect()
+            } else this.$.userSelectorDialog.toggle()
         }
     },
     updateSession:function(userVS, sessionData) {

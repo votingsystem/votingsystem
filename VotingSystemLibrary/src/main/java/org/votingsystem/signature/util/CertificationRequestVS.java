@@ -86,6 +86,26 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
+    public static CertificationRequestVS getUserRequest (int keySize, String keyName,
+            String signatureMechanism, String provider, Object nif, Object email,
+            Object phone, String deviceId, Object givenName, Object surName) throws NoSuchAlgorithmException,
+            NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        Map extensionDataMap = new HashMap<String, String>();
+        extensionDataMap.put("deviceId", deviceId);
+        if (email != null) extensionDataMap.put("email", email);
+        if (phone != null) extensionDataMap.put("mobilePhone", phone);
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(extensionDataMap);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
+                new DERUTF8String(jsonObject.toString())));
+        X500Principal subject = new X500Principal(principal);
+        PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
+                keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
+        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+    }
+
     public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
               String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
               String amount, String currency, String tagVS) throws NoSuchAlgorithmException,

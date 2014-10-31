@@ -48,20 +48,17 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
+
+import static org.votingsystem.model.ContextVS.*;
 
 /**
  * @author jgzornoza
@@ -462,6 +459,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     case DISCONNECT:
                         if(WebSocketService.getInstance() != null)
                             WebSocketService.getInstance().setConnectionEnabled(false, null);
+                        break;
+                    case  KEYSTORE_SELECT:
+                        Utils.selectKeystoreFile(operationVS, BrowserVS.this);
                         break;
                     case SELECT_IMAGE:
                         Utils.selectImage(operationVS, BrowserVS.this);
