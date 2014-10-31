@@ -124,12 +124,16 @@
                 this.loadURL(this.url)
             },
             sessionDataSignal:function(e, detail, sender) {
-                this.$._navbar.sessionData = detail
+                console.log("sessionDataSignal")
+                this.$._navbar.updateSession(null, detail)
             },
             websocketSignal:function(e, detail, sender) {
-                console.log("websocketSignal - detail:" + JSON.stringify(detail))
-                if("OPEN" === detail.socketStatus && "INIT_VALIDATED_SESSION" === detail.operation)
-                    this.$._navbar.userVS = detail.userVS
+                if("OPEN" === detail.socketStatus && "INIT_VALIDATED_SESSION" === detail.operation) {
+                    this.$._navbar.updateSession(detail.userVS, null)
+                } else if("CLOSED" === detail.socketStatus) {
+                    this.$._navbar.updateSession(null, null)
+                } else console.log("userVS NOT updated")
+
                 if(detail.messageVSList && detail.messageVSList.length > 0) alert("You have pending messages")
                 //{"locale":"es","operation":"INIT_VALIDATED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
             },

@@ -3,7 +3,7 @@ package org.votingsystem.test.util
 import org.apache.log4j.PropertyConfigurator
 import org.votingsystem.util.FileUtils
 
-propertyValuesToLowerCase("messages_es.properties", "messages_es_out.properties")
+propertyValuesToLowerCase("clientToolMessages_es.properties", "clientToolMessages_es.properties_out.properties")
 System.exit(0)
 
 private void propertyValuesToLowerCase(String sourceFilePath, String destFilePath) {

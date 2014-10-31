@@ -443,9 +443,14 @@ public class ContextVS {
 
     public static void saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
         byte[] resultBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
-        File destFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
-        destFile.createNewFile();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
+        File mainKeyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+        mainKeyStoreFile.createNewFile();
+        Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
+        UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
+        File userVSKeyStoreFile = new File(APPDIR + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
+        userVSKeyStoreFile.createNewFile();
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), userVSKeyStoreFile);
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), mainKeyStoreFile);
     }
 
     public static KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS{
@@ -459,6 +464,24 @@ public class ContextVS {
         try {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStoreFile), password);
+        } catch(Exception ex) {
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+        }
+        return keyStore;
+    }
+
+    public static KeyStore getUserKeyStore(String nif, String password) throws KeyStoreExceptionVS{
+        if(nif == null) return getUserKeyStore(password.toCharArray());
+        File keyStoreFile = null;
+        KeyStore keyStore = null;
+        try {
+            keyStoreFile = new File(APPDIR + File.separator + nif + "_" + USER_KEYSTORE_FILE_NAME);
+        } catch(Exception ex) {
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
+        }
+        try {
+            keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
         }

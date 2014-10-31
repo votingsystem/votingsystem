@@ -9,6 +9,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.FileUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -16,6 +17,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.Serializable;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -420,7 +422,7 @@ public class UserVS implements Serializable {
         }
     }
 
-    public static UserVS parse (Map userVSDataMap) {
+    public static UserVS parse (Map userVSDataMap) throws Exception {
         UserVS userVS = null;
         switch (Type.valueOf((String) userVSDataMap.get("type"))) {
             case BANKVS:
@@ -449,6 +451,12 @@ public class UserVS implements Serializable {
         if(userVSDataMap.containsKey("type")) {
             Type type = Type.valueOf((String) userVSDataMap.get("type"));
             userVS.setType(type);
+        }
+        if(userVSDataMap.containsKey("certificateList")) {
+            JSONObject certData = (JSONObject) ((JSONArray) userVSDataMap.get("certificateList")).get(0);
+            Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
+                    certData.getString("pemCert").getBytes());
+            userVS.setCertificate(certCollection.iterator().next());
         }
         return userVS;
     }

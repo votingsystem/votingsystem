@@ -432,7 +432,7 @@ function fireCoreSignal(coreSignalDataBase64) {
 }
 
 document.addEventListener('polymer-ready', function() {
-    console.log("utilsVS.js - polymer-ready - coreSignalData: " + coreSignalData)
+    console.log("utilsVS.js - polymer-ready - sending missing core signal")
     if(coreSignalData != null) fireCoreSignal(coreSignalData)
     coreSignalData = null
 });

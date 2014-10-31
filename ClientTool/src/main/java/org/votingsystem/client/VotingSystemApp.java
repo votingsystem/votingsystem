@@ -65,7 +65,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private VBox votingSystemOptionsBox;
     private VBox vicketOptionsBox;
     private HBox headerButtonsBox;
-    private SettingsDialog settingsDialog;
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
@@ -366,7 +365,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         log.debug("openSettings");
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                if (settingsDialog == null) settingsDialog = new SettingsDialog();
+                SettingsDialog settingsDialog = new SettingsDialog();
                 settingsDialog.show();
             }
         });

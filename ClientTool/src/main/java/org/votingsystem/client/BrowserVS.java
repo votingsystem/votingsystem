@@ -79,7 +79,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private final BrowserVSPane browserHelper;
     private TabPane tabPane;
     private Button prevButton;
-    private AtomicBoolean wsConnected = new AtomicBoolean(false);
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
@@ -408,7 +407,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         log.debug("consumeWebSocketMessage: " + operation.toString());
         switch(operation) {
             case INIT_VALIDATED_SESSION:
-                wsConnected.set(true);
                 fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
                 break;
         }
@@ -418,7 +416,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         log.debug("setConnectionStatus - status: " + status.toString());
         switch (status) {
             case CLOSED:
-                wsConnected.set(false);
                 fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.CLOSED));
                 break;
             case OPEN:
@@ -460,11 +457,11 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                                     getVotingSystemSSLCerts(), ContextVS.getInstance().getVicketServer());
                             webSocketService.addListener(BrowserVS.this);
                         }
-                        WebSocketService.getInstance().setConnectionEnabled(true);
+                        WebSocketService.getInstance().setConnectionEnabled(true, operationVS.getDocument());
                         break;
                     case DISCONNECT:
                         if(WebSocketService.getInstance() != null)
-                            WebSocketService.getInstance().setConnectionEnabled(false);
+                            WebSocketService.getInstance().setConnectionEnabled(false, null);
                         break;
                     case SELECT_IMAGE:
                         Utils.selectImage(operationVS, BrowserVS.this);

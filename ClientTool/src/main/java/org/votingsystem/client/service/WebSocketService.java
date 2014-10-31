@@ -19,6 +19,7 @@ import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 
@@ -27,6 +28,7 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -47,6 +49,7 @@ public class WebSocketService extends Service<ResponseVS> {
     private BrowserVS browserVS;
     private Set<WebSocketListener> listeners = new HashSet<WebSocketListener>();
     private String connectionMessage = null;
+    private AtomicBoolean wsConnected = new AtomicBoolean(false);
 
     public WebSocketService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
@@ -72,20 +75,6 @@ public class WebSocketService extends Service<ResponseVS> {
             }
         } else log.debug("settings for INSECURE connection");
         instance = this;
-    }
-
-    public void initAuthenticatedSession() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                PasswordDialog passwordDialog = new PasswordDialog();
-                passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
-                String password = passwordDialog.getPassword();
-                if(password != null) {
-                    new Thread(new InitValidatedSessionTask(password,targetServer)).start();
-                } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
-            }
-        });
     }
 
     MessageDialog messageDialog;
@@ -133,6 +122,8 @@ public class WebSocketService extends Service<ResponseVS> {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                        wsConnected.set(false);
+                        BrowserVSSessionUtils.getInstance().setIsConnected(false);
                     }
 
                     @Override public void onError(Session session, Throwable thr) {
@@ -146,11 +137,25 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    public void setConnectionEnabled(boolean isConnectionEnabled){
-        if(isConnectionEnabled) initAuthenticatedSession();
-        if(!isConnectionEnabled && session != null && session.isOpen()) {
-            try {session.close();}
-            catch(Exception ex) {log.error(ex.getMessage(), ex);}
+    public void setConnectionEnabled(boolean isConnectionEnabled, Map connectionDataMap){
+        if(isConnectionEnabled) {
+            Platform.runLater(new Runnable() {
+                @Override public void run() {
+                    PasswordDialog passwordDialog = new PasswordDialog();
+                    passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+                    String password = passwordDialog.getPassword();
+                    if(password != null) {
+                        new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
+                                password,targetServer)).start();
+                    } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                }
+            });
+        }
+        if(!isConnectionEnabled) {
+            if(session != null && session.isOpen()) {
+                try {session.close();}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
         }
     }
 
@@ -181,6 +186,7 @@ public class WebSocketService extends Service<ResponseVS> {
                     BrowserVSSessionUtils.getInstance().setUserVS(userVS);
                     messageJSON.put("userVS", userVS.toJSON());
                     responseVS.setMessageJSON(messageJSON);
+                    wsConnected.set(true);
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 break;
             case MESSAGEVS_EDIT:
@@ -238,10 +244,11 @@ public class WebSocketService extends Service<ResponseVS> {
 
     public class InitValidatedSessionTask extends Task<ResponseVS> {
 
-        private String password;
+        private String password, nif;
         private ActorVS targetServer;
 
-        public InitValidatedSessionTask (String password, ActorVS targetServer) {
+        public InitValidatedSessionTask (String nif, String password, ActorVS targetServer) {
+            this.nif = nif;
             this.password = password;
             this.targetServer = targetServer;
         }
@@ -253,8 +260,11 @@ public class WebSocketService extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null, targetServer.getNameNormalized(),
-                        documentToSignJSON.toString(), password.toCharArray(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
+                KeyStore keyStore = ContextVS.getUserKeyStore(nif, password);
+                SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyStore,
+                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+                SMIMEMessage smimeMessage = SMIMESignedGeneratorVS.getSMIME(null, targetServer.getNameNormalized(),
+                        documentToSignJSON.toString(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
                 responseVS = timeStamper.call();

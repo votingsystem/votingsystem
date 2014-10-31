@@ -32,6 +32,7 @@ public class BrowserVSSessionUtils {
                 sessionDataJSON = new JSONObject();
             } else sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
             sessionDataJSON.put("isConnected", false);
+            userVS = UserVS.parse((java.util.Map) sessionDataJSON.get("userVS"));
             flush();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -40,6 +41,11 @@ public class BrowserVSSessionUtils {
 
     public static BrowserVSSessionUtils getInstance() {
         return INSTANCE;
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        sessionDataJSON.put("isConnected", isConnected);
+        flush();
     }
 
     public UserVS getUserVS() {
@@ -51,13 +57,16 @@ public class BrowserVSSessionUtils {
         JSONArray userVSList = null;
         if(sessionDataJSON.has("userVSList")) {
             userVSList = sessionDataJSON.getJSONArray("userVSList");
+            boolean updated = false;
             for(int i = 0; i < userVSList.size(); i++) {
                 JSONObject user = (JSONObject) userVSList.get(i);
                 if(user.getString("nif").equals(userVS.getNif())) {
                     userVSList.remove(i);
                     userVSList.add(userVS.toJSON());
+                    updated = true;
                 }
             }
+            if(!updated) userVSList.add(userVS.toJSON());
         } else {
             userVSList = new JSONArray();
             userVSList.add(userVS.toJSON());
@@ -72,7 +81,11 @@ public class BrowserVSSessionUtils {
         return sessionDataJSON;
     }
 
-    private void flush() throws Exception {
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataJSON.toString().getBytes()), sessionFile);
+    private void flush() {
+        try {
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataJSON.toString().getBytes()), sessionFile);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
     }
 }

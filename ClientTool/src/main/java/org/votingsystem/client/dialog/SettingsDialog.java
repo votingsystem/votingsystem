@@ -12,8 +12,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -46,12 +48,9 @@ public class SettingsDialog {
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }
         });
-
         gridPane = new GridPane();
         gridPane.setVgap(10);
-
         ToggleGroup tg = new ToggleGroup();
-
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
         signWithDNIeRb.setToggleGroup(tg);
         signWithDNIeRb.setOnAction(new EventHandler<ActionEvent>() {
@@ -66,7 +65,6 @@ public class SettingsDialog {
                 changeSignatureMode(actionEvent);
             }});
         keyStoreVBox = new VBox(10);
-
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
         selectKeyStoreButton.setGraphic(Utils.getImage(FontAwesome.Glyph.KEY));
         selectKeyStoreButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -75,12 +73,12 @@ public class SettingsDialog {
             }});
         keyStoreLabel = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLabel.setContentDisplay(ContentDisplay.LEFT);
+        UserVS lastAuthenticatedUser = BrowserVSSessionUtils.getInstance().getUserVS();
+        keyStoreLabel.setText(lastAuthenticatedUser.getCertificate().getSubjectDN().toString());
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLabel);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
-
         HBox footerButtonsBox = new HBox(10);
-
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -155,6 +153,7 @@ public class SettingsDialog {
         log.debug("selectKeystoreFile");
         try {
             final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle(ContextVS.getMessage("selectKeyStore"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
                 File selectedKeystore = new File(file.getAbsolutePath());

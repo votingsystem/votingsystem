@@ -180,6 +180,7 @@ public class PasswordDialog {
         setMessage(mainMessage);
         stage.sizeToScene();
         stage.centerOnScreen();
+        stage.toFront();
         stage.showAndWait();
     }
 
