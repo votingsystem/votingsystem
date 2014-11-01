@@ -17,12 +17,12 @@
         </div>
     </g:if>
     <g:else>
-        <div style="margin: 10px;"><g:message code="clientToolNeededMsg"/></div>
+        <div style="margin: 10px;"><g:message code="clientToolNeededMsg"
+              args="${["${grailsApplication.config.grails.serverURL}/tools/ClientTool.zip"]}"/>
+        </div>.
         <div style="margin: 10px;"><g:message code="javaRequirementsMsg"
-                        args="${["http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"]}"/></div>
-        <a href="${grailsApplication.config.grails.serverURL}/tools/ClientTool.zip" style="margin:40px 10px 10px 10px;">
-            <g:message code="downloadClientToolAppLbl"/>
-        </a>
+                        args="${["http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"]}"/>
+        </div>
     </g:else>
 </div>
 </body>

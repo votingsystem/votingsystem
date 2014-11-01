@@ -23,7 +23,9 @@ class CertificateVSController {
 	def signatureVSService
     def keyStoreService
     def certificateVSService
-	
+
+    def certRequest() {}
+
 	/**
 	 * @httpMethod [GET]
 	 * @return La cadena de certificación en formato PEM del servidor

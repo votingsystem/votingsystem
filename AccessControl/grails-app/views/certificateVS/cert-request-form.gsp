@@ -19,13 +19,20 @@
             </div>
         </div>
     </template>
-    <div style="margin: 10px auto 10px auto; text-align: center;"><g:message code="certRequestAdviceMsg"/></div>
+    <div style="margin: 20px auto 10px auto; text-align: center;width: 600px; ">
+        <g:message code="certRequestAdviceMsg"/>
+    </div>
     <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
         <div style="width: 600px; margin:10px auto;">
             <input type="text" id="nif" class="form-control" required style="margin: 0 0 10px 0;"
                    title="<g:message code="nifLbl"/>" placeholder="<g:message code="nifLbl"/>"/>
-            <input type="text" id="nameAndSurname" class="form-control" required style="margin: 0 0 10px 0;"
-                   title="<g:message code="nameAndSurnameLbl"/>" placeholder="<g:message code="nameAndSurnameLbl"/>"/>
+            <div horizontal layout>
+                <input type="text" id="name" class="form-control" required style="margin: 0 0 10px 0;"
+                       title="<g:message code="nameLbl"/>" placeholder="<g:message code="nameLbl"/>"/>
+                <input type="text" id="surname" class="form-control" required style="margin: 0 0 10px 10px;"
+                       title="<g:message code="surnameLbl"/>" placeholder="<g:message code="surnameLbl"/>"/>
+            </div>
+
             <input type="text" id="phone" class="form-control" required style="margin: 0 0 10px 0;"
                    title="<g:message code="phoneLbl"/>" placeholder="<g:message code="phoneLbl"/>"/>
             <input type="email" id="email" class="form-control" required style="margin: 0 0 10px 0;"
@@ -43,15 +50,21 @@
     Polymer('cert-request-form', {
         ready: function() { },
         submitForm: function () {
+            console.log("submitForm")
             this.removeErrorStyle(this.$.formDataDiv)
             this.messageToUser = null
-            if(!this.$.nif.validity.valid || validateNIF(his.$.nif.value) == null) {
-                this.$.email.classList.add("formFieldError")
-                this.messageToUser = "<g:message code='emailFieldErrorMsg'/>"
+            if(!this.$.nif.validity.valid || validateNIF(this.$.nif.value) == null) {
+                this.$.nif.classList.add("formFieldError")
+                this.messageToUser = "<g:message code='nifERRORMsg'/>"
                 return
             }
-            if(!this.$.nameAndSurname.validity.valid) {
-                this.$.nameAndSurname.classList.add("formFieldError")
+            if(!this.$.name.validity.valid) {
+                this.$.name.classList.add("formFieldError")
+                this.messageToUser = "<g:message code='emptyFieldMsg'/>"
+                return
+            }
+            if(!this.$.surname.validity.valid) {
+                this.$.surname.classList.add("formFieldError")
                 this.messageToUser = "<g:message code='emptyFieldMsg'/>"
                 return
             }
@@ -65,13 +78,30 @@
                 this.messageToUser = "<g:message code='emailFieldErrorMsg'/>"
                 return
             }
-            showMessageVS("<b><g:message code="nameAndSurnameLbl"/>:</b> " + this.$.nameAndSurname.value +
+            showMessageVS("<b><g:message code="nifLbl"/>:</b> " + this.$.nif.value +
+                    "<br/><b><g:message code="nameLbl"/>:</b> " + this.$.name.value.toUpperCase() +
+                    "<br/><b><g:message code="surnameLbl"/>:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b><g:message code="phoneLbl"/>:</b> " + this.$.phone.value +
                     "<br/><b><g:message code="emailLbl"/>:</b> " + this.$.email.value,
                     "<g:message code='checkInputMsg'/>", null, true)
         },
         messagedialogAccept: function () {
             console.log("messagedialogAccept")
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_USER_NEW)
+            webAppMessage.serviceURL = "${createLink(controller:'csr', action:'request',absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code="certRequestLbl"/>"
+            webAppMessage.document = {nif:this.$.nif.value, name:this.$.name.value.toUpperCase(),
+                surname:this.$.surname.value.toUpperCase(), phone:this.$.phone.value, email:this.$.email.value}
+            webAppMessage.setCallback(function(appMessage) {
+                var appMessageJSON = JSON.parse(appMessage)
+                var message = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    message = "<g:message code='certRequestOKMsg'/>"
+                }
+                showMessageVS(message, '<g:message code="certRequestLbl"/>')
+            })
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+
         },
         removeErrorStyle: function (element) {
             var formElements = element.children

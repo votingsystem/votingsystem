@@ -13,7 +13,7 @@ public class NifUtils {
         try {
             if(nif != null && nif.length() <= 9) {
                 String number = nif.substring(0, nif.length() -1);
-                String letter = nif.substring(nif.length() -1, nif.length());
+                String letter = nif.substring(nif.length() -1, nif.length()).toUpperCase();
                 if(letter.equals(getNifLetter(new Integer(number))))
                     result = String.format("%08d", Integer.valueOf(number)) + letter;
             }

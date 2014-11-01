@@ -120,7 +120,8 @@
         </div>
         <template if="{{!isClientToolConnected}}">
             <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
-                <g:message code="clientToolNeededMsg"/>.
+                <g:message code="clientToolNeededMsg"
+                           args="${["${grailsApplication.config.grails.serverURL}/tools/ClientTool.zip"]}"/>.
                 <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/>
             </div>
         </template>
@@ -169,14 +170,12 @@
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
-                    if(this.appMessageJSON != null) {
-                        var caption = '<g:message code="groupCancelERRORLbl"/>'
-                        if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
-                            caption = "<g:message code='groupCancelOKLbl'/>"
-                            loadURL_VS("${createLink(controller:'groupVS', action:'',absolute:true)}/" + this.groupvs.userVS.id)
-                        }
-                        showMessageVS(this.appMessageJSON.message, caption, this.tagName)
+                    var caption = '<g:message code="groupCancelERRORLbl"/>'
+                    if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
+                        caption = "<g:message code='groupCancelOKLbl'/>"
+                        loadURL_VS("${createLink(controller:'groupVS', action:'',absolute:true)}/" + this.groupvs.userVS.id)
                     }
+                    showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.appMessageJSON = null

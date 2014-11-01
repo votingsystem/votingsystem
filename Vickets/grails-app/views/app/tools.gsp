@@ -18,7 +18,8 @@
                 </div>
             </g:if>
             <g:else>
-                <div><g:message code="clientToolNeededMsg"/></div>
+                <div><g:message code="clientToolNeededMsg"
+                                args="${["${grailsApplication.config.grails.serverURL}/tools/ClientTool.zip"]}"/></div>
                 <div><g:message code="javaRequirementsMsg"
                                 args="${["http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"]}"/></div>
                 <a href="${grailsApplication.config.grails.serverURL}/tools/ClientTool.zip" class="downloadLink"

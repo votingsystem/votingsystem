@@ -406,9 +406,24 @@ function sendSignalVS(signalData, callback) {
 
 window['isClientToolConnected'] = false
 
-function notifiyClientToolConnection() {
+var coreSignalData = null
+function fireCoreSignal(coreSignalDataBase64) {
     window['isClientToolConnected'] = true
+    if(document.querySelector("#navBar") != null && document.querySelector("#navBar").fire != null) {
+        var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
+        document.querySelector("#navBar").fire('core-signal', toJSON(b64_to_utf8));
+        console.log("fireCoreSignal: " + b64_to_utf8)
+    } else {
+        coreSignalData = coreSignalDataBase64
+        console.log("fireCoreSignal - navBar not found")
+    }
 }
+
+document.addEventListener('polymer-ready', function() {
+    console.log("utilsVS.js - polymer-ready - sending missing core signal")
+    if(coreSignalData != null) fireCoreSignal(coreSignalData)
+    coreSignalData = null
+});
 
 //Message -> base64 encoded JSON
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8

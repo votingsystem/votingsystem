@@ -66,7 +66,9 @@ public class WebViewWrapper {
                                         if (element != null) {
                                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                                             win.setMember("clientTool", new JavafxClient());
-                                            webView.getEngine().executeScript("notifiyClientToolConnection()");
+                                            String jsCommand = "fireCoreSignal('" +
+                                                    Base64.getEncoder().encodeToString("{}".getBytes()) + "')";
+                                            webView.getEngine().executeScript(jsCommand);
                                         }
                                     } else if (newState.equals(Worker.State.FAILED)) {
                                         logger.error("Worker.State.FAILED");
