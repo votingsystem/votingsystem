@@ -84,8 +84,9 @@ public class UserRequestCsrVS implements Serializable {
 		return state;
 	}
 
-	public void setState(State state) {
+	public UserRequestCsrVS setState(State state) {
 		this.state = state;
+        return this;
 	}
 	
 	public DeviceVS getDeviceVS() {

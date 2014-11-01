@@ -170,9 +170,9 @@ public class SignatureService extends Service<ResponseVS> {
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER,
                     (String)operationVS.getDocument().get("nif"), (String)operationVS.getDocument().get("email"),
-                    (String)operationVS.getDocument().get("phone"),
-                    UUID.randomUUID().toString(), (String)operationVS.getDocument().get("givenName"),
-                    (String)operationVS.getDocument().get("surname"));
+                    (String)operationVS.getDocument().get("phone"), BrowserVSSessionUtils.getInstance().getDeviceId(),
+                    (String)operationVS.getDocument().get("givenname"),
+                    (String)operationVS.getDocument().get("surname"), DeviceVS.Type.PC);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
                     ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());
@@ -180,7 +180,7 @@ public class SignatureService extends Service<ResponseVS> {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
                 Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
-                BrowserVSSessionUtils.setCSRRequest(requestId, bundle);
+                BrowserVSSessionUtils.getInstance().setCSRRequest(requestId, bundle);
             }
             return responseVS;
         }

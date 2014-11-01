@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -13,9 +14,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -50,7 +53,7 @@ public class SettingsDialog {
             @Override public void handle(WindowEvent window) {      }
         });
         gridPane = new GridPane();
-        gridPane.setVgap(10);
+        gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
         signWithDNIeRb.setToggleGroup(tg);
@@ -75,10 +78,27 @@ public class SettingsDialog {
         keyStoreLabel = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLabel.setContentDisplay(ContentDisplay.LEFT);
         UserVS lastAuthenticatedUser = BrowserVSSessionUtils.getInstance().getUserVS();
-        keyStoreLabel.setText(lastAuthenticatedUser.getCertificate().getSubjectDN().toString());
+        if(lastAuthenticatedUser != null) keyStoreLabel.setText(
+                lastAuthenticatedUser.getCertificate().getSubjectDN().toString());
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLabel);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
+
+        Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
+        requestCertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE, Utils.COLOR_BUTTON_OK));
+        requestCertButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                if (ContextVS.getInstance().getAccessControl() != null) {
+                    Platform.runLater(new Runnable() {
+                        @Override public void run() {
+                            BrowserVS.getInstance().newTab(
+                                    ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
+                        }
+                    });
+                } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
+            }
+        });
+
         HBox footerButtonsBox = new HBox(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
@@ -96,10 +116,10 @@ public class SettingsDialog {
             }});
         footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
-
-        gridPane.add(signWithDNIeRb,0,0);
-        gridPane.add(signWithKeystoreRb,0,4);
-        gridPane.add(footerButtonsBox,0,6);
+        gridPane.add(requestCertButton,0,0);
+        gridPane.add(signWithDNIeRb,0,1);
+        gridPane.add(signWithKeystoreRb,0,2);
+        gridPane.add(footerButtonsBox,0,4);
         gridPane.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(gridPane, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
@@ -126,7 +146,7 @@ public class SettingsDialog {
         log.debug("changeSignatureMode");
         gridPane.getChildren().remove(keyStoreVBox);
         if(evt.getSource() == signWithKeystoreRb) {
-            gridPane.add(keyStoreVBox, 0, 5);
+            gridPane.add(keyStoreVBox, 0, 3);
         }
         stage.sizeToScene();
     }
@@ -143,7 +163,7 @@ public class SettingsDialog {
                 break;
             case JKS_KEYSTORE:
                 signWithKeystoreRb.setSelected(true);
-                gridPane.add(keyStoreVBox, 0, 5);
+                gridPane.add(keyStoreVBox, 0, 3);
                 break;
         }
         stage.centerOnScreen();
@@ -170,7 +190,6 @@ public class SettingsDialog {
             } else {
                 keyStoreLabel.setText(ContextVS.getMessage("selectKeyStoreLbl"));
             }
-
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }

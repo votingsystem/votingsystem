@@ -207,7 +207,8 @@ log4j = {
 }
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
-
+vs.dev.controlCenterURL='http://sistemavotacion.org:8082/ControlCenter'
+vs.prod.controlCenterURL='http://www.sistemavotacion.org/ControlCenter'
 vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 //vs.urlTimeStampServer='http://timestampserver.org/TimeStampServer'
 vs.systemNIF = "ACCESS_CONTROL_SYSTEM_NIF"

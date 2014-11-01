@@ -11,7 +11,7 @@
     <g:include view="/include/styles.gsp"/>
   <style>
     [drawer] { background-color: #ba0011; color: #f9f9f9; box-shadow: 1px 0 1px rgba(0, 0, 0, 0.1); }
-    [main] { height: 100%; background-color: #fefefe;  }
+    [main] { height: 100%; background-color: #fefefe;}
     core-toolbar { background-color: #ba0011; color: #fff; }
     core-header-panel #mainContainer { height: 1000px; }
     #drawerPanel:not([narrow]) #menuButton { display: none; }

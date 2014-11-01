@@ -16,26 +16,21 @@ public class DeviceVS implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+    public enum Type {MOBILE, PC}
+
 	@Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    
+    @Column(name="type") @Enumerated(EnumType.STRING) private Type type = Type.MOBILE;
     @Column(name="device" ) private String deviceId;
-    
     @Column(name="email" ) private String email;
-    
     @Column(name="phone" ) private String phone;
-
     @OneToOne private CertificateVS certificateVS;
-
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="deviceName") private String deviceName;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
@@ -67,16 +62,18 @@ public class DeviceVS implements Serializable {
 		return email;
 	}
 
-	public void setEmail(String email) {
+	public DeviceVS setEmail(String email) {
 		this.email = email;
+        return this;
 	}
 
 	public String getPhone() {
 		return phone;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	public DeviceVS setPhone(String phone) {
+        this.phone = phone;
+        return this;
 	}
 
 	public Date getDateCreated() {
@@ -118,4 +115,14 @@ public class DeviceVS implements Serializable {
     public void setCertificateVS(CertificateVS certificateVS) {
         this.certificateVS = certificateVS;
     }
+
+    public DeviceVS.Type getType() {
+        return type;
+    }
+
+    public DeviceVS setType(Type type) {
+        this.type = type;
+        return this;
+    }
+
 }

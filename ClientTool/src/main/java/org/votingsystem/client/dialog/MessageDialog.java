@@ -106,7 +106,8 @@ public class MessageDialog {
     }
 
     public void showHtmlMessage(String htmlMessage) {
-        messageWebView.getEngine().loadContent(htmlMessage);
+        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;'>" + htmlMessage + "</html>";
+        messageWebView.getEngine().loadContent(finalHTML);
         isHTMLView(true);
         stage.centerOnScreen();
         stage.show();

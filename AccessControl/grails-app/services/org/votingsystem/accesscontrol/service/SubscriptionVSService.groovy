@@ -74,25 +74,24 @@ class SubscriptionVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
     }
 
-    ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email, String deviceId) {
-        log.debug "checkDevice - givenname: ${givenname} - surname: ${surname} - nif:${nif} - phone:${phone} " +
-                "- email:${email} - deviceId:${deviceId}"
+    ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email, String deviceId,
+               String deviceType) {
+        log.debug "checkDevice - givenname: $givenname - surname: $surname - nif:$nif - phone:$phone " +
+                "- email:$email - deviceId:$deviceId - deviceType: $deviceType"
         if(!nif || !deviceId) {
-            log.debug "Missing params"
+            log.error "Missing params"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
                     messageSource.getMessage('requestWithoutData', null, locale))
         }
         String validatedNIF = org.votingsystem.util.NifUtils.validate(nif)
-        if(!validatedNIF) {
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-                    messageSource.getMessage('nifWithErrors', [nif].toArray(), locale))
-        }
         UserVS userVS = UserVS.findWhere(nif:validatedNIF)
         if (!userVS) userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,
                     name:givenname, firstName:givenname, lastName:surname).save()
         DeviceVS device = DeviceVS.findWhere(deviceId:deviceId)
+        DeviceVS.Type type = deviceType?DeviceVS.Type.valueOf(deviceType):null
         if (!device || (device.userVS.id != userVS.id)) device =
-                new DeviceVS(userVS:userVS, phone:phone, email:email, deviceId:deviceId).save()
+                new DeviceVS(userVS:userVS, phone:phone, email:email, deviceId:deviceId, type: type).save()
+        else device.setEmail(email).setPhone(phone).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:device)
     }
 

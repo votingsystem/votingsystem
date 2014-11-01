@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
@@ -88,7 +89,8 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getUserRequest (int keySize, String keyName,
             String signatureMechanism, String provider, Object nif, Object email,
-            Object phone, String deviceId, Object givenName, Object surName) throws NoSuchAlgorithmException,
+            Object phone, String deviceId, Object givenName, Object surName, DeviceVS.Type deviceType)
+            throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
@@ -97,6 +99,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         extensionDataMap.put("deviceId", deviceId);
         if (email != null) extensionDataMap.put("email", email);
         if (phone != null) extensionDataMap.put("mobilePhone", phone);
+        if (deviceType != null) extensionDataMap.put("deviceType", deviceType.toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(extensionDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
                 new DERUTF8String(jsonObject.toString())));

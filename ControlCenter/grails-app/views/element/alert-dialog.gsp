@@ -59,25 +59,26 @@
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
+                this.reset()
                 this.message = message
                 this.caption = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
             },
-
-            accept: function() {
-                this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
-            },
-
-            close: function() {
-                this.$.xDialog.opened = false
-                this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
+            reset: function() {
                 this.message = null
                 this.callerId = null
                 this.caption = null
                 this.isConfirmMessage = false
+            },
+            accept: function() {
+                this.close()
+                this.fire('core-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
+            },
+            close: function() {
+                this.$.xDialog.opened = false
+                this.fire('core-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
             }
         });
     </script>

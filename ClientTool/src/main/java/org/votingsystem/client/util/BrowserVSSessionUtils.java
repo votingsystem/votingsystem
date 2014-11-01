@@ -1,19 +1,30 @@
 package org.votingsystem.client.util;
 
+import com.sun.javafx.application.PlatformImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ObjectUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.UUID;
 
 /**
  * @author jgzornoza
@@ -34,6 +45,7 @@ public class BrowserVSSessionUtils {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE_NAME);
             if(sessionFile.createNewFile()) {
                 sessionDataJSON = new JSONObject();
+                sessionDataJSON.put("deviceId", UUID.randomUUID().toString());
             } else sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
             sessionDataJSON.put("isConnected", false);
             if(sessionDataJSON.get("userVS") != null) userVS = UserVS.parse((java.util.Map) sessionDataJSON.get("userVS"));
@@ -59,6 +71,10 @@ public class BrowserVSSessionUtils {
 
     public Long getCSRRequestId() {
         return sessionDataJSON.getLong("csrRequestId");
+    }
+
+    public String getDeviceId() {
+        return sessionDataJSON.getString("deviceId");
     }
 
     public UserVS getUserVS() {
@@ -94,35 +110,73 @@ public class BrowserVSSessionUtils {
         return sessionDataJSON;
     }
 
-    public static void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
+    public void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
         try {
             File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
             csrFile.createNewFile();
             JSONObject jsonData = bundle.toJSON();
             jsonData.put("requestId", requestId);
+            flush();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(jsonData.toString().getBytes()), csrFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }
 
-    public static ResponseVS checkCSRRequest() {
+
+    public void checkCSRRequest() {
+        PlatformImpl.runLater(new Runnable() { @Override public void run() { checkCSR(); } });
+    }
+
+    private void checkCSR() {
         File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) {
+            log.debug("csr request found");
             try {
                 JSONObject jsonData = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(csrFile));
                 String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(
                         jsonData.getLong("requestId"));
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                } else return responseVS;
+                    Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
+                            responseVS.getMessage().getBytes());
+                    X509Certificate userCert = certificates.iterator().next();
+                    UserVS user = UserVS.getUserVS(userCert);
+                    setUserVS(user, false);
+                    log.debug("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
+                    X509Certificate[] certsArray = new X509Certificate[certificates.size()];
+                    certificates.toArray(certsArray);
+                    PasswordDialog passwordDialog = new PasswordDialog();
+                    passwordDialog.show(ContextVS.getMessage("csrPasswMsg"));
+                    String password = passwordDialog.getPassword();
+                    Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(jsonData);
+                    byte[] serializedCertificationRequest = Encryptor.pbeAES_Decrypt(password, bundle);
+                    CertificationRequestVS certificationRequest =
+                            (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
+                    KeyStore userKeyStore = KeyStore.getInstance("JKS");
+                    userKeyStore.load(null);
+                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(), null, certsArray);
+                    /*ContextVS.saveUserKeyStore(userKeyStore, password);
+                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
+                            CryptoTokenVS.JKS_KEYSTORE.toString());*/
+                    log.debug("==========ok");
+                }
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                if(csrFile != null && csrFile.exists()) csrFile.delete();
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("checkCertRequestErrorMsg"));
+                //if(csrFile != null && csrFile.exists()) csrFile.delete();
+                showMessage(ContextVS.getMessage("errorLbl") + " " + ContextVS.getMessage("errorStoringKeyStoreMsg"));
             }
         }
-        return null;
+
+    }
+
+    public void showMessage(final String message) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override
+            public void run() {
+                new MessageDialog().showHtmlMessage(message);
+            }
+        });
     }
 
     private void flush() {

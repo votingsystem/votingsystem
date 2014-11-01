@@ -70,7 +70,7 @@ public class BrowserVSPane extends StackPane {
         passwordVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #888;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
 
@@ -157,7 +157,9 @@ public class BrowserVSPane extends StackPane {
     }
 
     public void setPasswordDialogVisible(boolean isVisible, String message) {
-        if(message == null) setMessage(ContextVS.getMessage("passwordMissing"));
+        if(message == null) mainMessage = ContextVS.getMessage("passwordMissing");
+        else mainMessage = message;
+        setMessage(mainMessage);
         password1Field.setText("");
         password2Field.setText("");
         passwordVBox.setVisible(isVisible);
@@ -166,7 +168,7 @@ public class BrowserVSPane extends StackPane {
 
     private void setCapsLockState (boolean pressed) {
         this.isCapsLockPressed = pressed;
-        setMessage(ContextVS.getMessage("passwordMissing"));
+        setMessage(mainMessage);
     }
 
     public String getPassword() {

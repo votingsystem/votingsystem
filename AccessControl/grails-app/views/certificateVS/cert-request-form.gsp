@@ -26,7 +26,7 @@
             <input type="text" id="nif" class="form-control" required style="margin: 0 0 10px 0;"
                    title="<g:message code="nifLbl"/>" placeholder="<g:message code="nifLbl"/>"/>
             <div horizontal layout>
-                <input type="text" id="name" class="form-control" required style="margin: 0 0 10px 0;"
+                <input type="text" id="givenname" class="form-control" required style="margin: 0 0 10px 0;"
                        title="<g:message code="nameLbl"/>" placeholder="<g:message code="nameLbl"/>"/>
                 <input type="text" id="surname" class="form-control" required style="margin: 0 0 10px 10px;"
                        title="<g:message code="surnameLbl"/>" placeholder="<g:message code="surnameLbl"/>"/>
@@ -47,7 +47,7 @@
 </template>
 <script>
     Polymer('cert-request-form', {
-        ready: function() { },
+        ready: function() {  },
         submitForm: function () {
             console.log("submitForm")
             this.removeErrorStyle(this.$.formDataDiv)
@@ -57,8 +57,8 @@
                 this.messageToUser = "<g:message code='nifERRORMsg'/>"
                 return
             }
-            if(!this.$.name.validity.valid) {
-                this.$.name.classList.add("formFieldError")
+            if(!this.$.givenname.validity.valid) {
+                this.$.givenname.classList.add("formFieldError")
                 this.messageToUser = "<g:message code='emptyFieldMsg'/>"
                 return
             }
@@ -77,30 +77,30 @@
                 this.messageToUser = "<g:message code='emailFieldErrorMsg'/>"
                 return
             }
-            showMessageVS("<b><g:message code="nifLbl"/>:</b> " + this.$.nif.value +
-                    "<br/><b><g:message code="nameLbl"/>:</b> " + this.$.name.value.toUpperCase() +
+            showMessageVS("<b><g:message code="nifLbl"/>:</b> " + validateNIF(this.$.nif.value) +
+                    "<br/><b><g:message code="nameLbl"/>:</b> " + this.$.givenname.value.toUpperCase() +
                     "<br/><b><g:message code="surnameLbl"/>:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b><g:message code="phoneLbl"/>:</b> " + this.$.phone.value +
                     "<br/><b><g:message code="emailLbl"/>:</b> " + this.$.email.value,
                     "<g:message code='checkInputMsg'/>", null, true)
         },
-        messagedialogAccept: function () {
-            console.log("messagedialogAccept")
+        messagedialogAccept: function (e, detail, sender) {
+            console.log("messagedialogAccept - callerId:" + detail.callerId)
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_USER_NEW)
             webAppMessage.serviceURL = "${createLink(controller:'csr', action:'request',absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code="certRequestLbl"/>"
-            webAppMessage.document = {nif:this.$.nif.value, name:this.$.name.value.toUpperCase(),
+            webAppMessage.document = {nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
                 surname:this.$.surname.value.toUpperCase(), phone:this.$.phone.value, email:this.$.email.value}
             webAppMessage.setCallback(function(appMessage) {
                 var appMessageJSON = JSON.parse(appMessage)
                 var message = appMessageJSON.message
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    loadURL_VS( "${grailsApplication.config.grails.serverURL}/certificationCenters.html")
                     message = "<g:message code='certRequestOKMsg'/>"
-                }
-                showMessageVS(message, '<g:message code="certRequestLbl"/>')
+                    showMessageVS(message, '<g:message code="certRequestLbl"/>', 'resultMessage',true)
+                } else showMessageVS(message, '<g:message code="certRequestLbl"/>')
             })
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-
         },
         removeErrorStyle: function (element) {
             var formElements = element.children

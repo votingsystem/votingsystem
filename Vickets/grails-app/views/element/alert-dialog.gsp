@@ -39,11 +39,18 @@
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
+                this.reset()
                 this.message = message
                 this.$.xDialog.title = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
+            },
+            reset: function() {
+                this.message = null
+                this.callerId = null
+                this.caption = null
+                this.isConfirmMessage = false
             },
             sendAndroidURIMessage:function(encodedData) {
                 this.uriData = "${createLink(controller:'app', action:'androidClient', absolute:'true')}?operationvs="+ encodedData
@@ -56,19 +63,12 @@
                 if(this.uriData != null) {
                     window.location.href = this.uriData.replace("\n","")
                 }
-                var coresignalData = {name: "messagedialog-accept", data: this.callerId} //when close -> reset values
                 this.close()
-                this.fire('core-signal', coresignalData);
-
+                this.fire('core-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
             },
             close: function() {
-                console.log(this.tagName + " - close")
                 this.$.xDialog.opened = false
-                this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
-                this.message = null
-                this.callerId = null
-                this.uriData = null
-                this.isConfirmMessage = false
+                this.fire('core-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
             }
         });
     </script>

@@ -165,14 +165,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true, primaryStage);
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
-
-                        responseVS = BrowserVSSessionUtils.checkCSRRequest();
-                        if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                            showMessage(responseVS.getMessage());
-                        }
-
-
-
+                        BrowserVSSessionUtils.getInstance().checkCSRRequest();
                     }
                 }
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}

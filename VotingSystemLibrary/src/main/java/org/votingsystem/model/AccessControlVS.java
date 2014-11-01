@@ -54,6 +54,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/backupVS";
     }
 
+    public String getCertRequestServiceURL() {
+        return getServerURL() + "/certificateVS/certRequest";
+    }
+
     public String getDownloadServiceURL(String param) {
         return getServerURL() + "/backupVS/download/" + param;
     }

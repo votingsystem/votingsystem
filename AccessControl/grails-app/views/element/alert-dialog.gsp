@@ -3,7 +3,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 
-
 <polymer-element name="alert-dialog">
     <template>
         <vs-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
@@ -13,13 +12,9 @@
                 -moz-box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
                 font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
                 overflow: auto;
                 background: white;
                 padding:10px 30px 30px 30px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
                 width: 500px;
             }
             </style>
@@ -59,25 +54,26 @@
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
+                this.reset()
                 this.message = message
                 this.caption = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
             },
-
-            accept: function() {
-                this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
-            },
-
-            close: function() {
-                this.$.xDialog.opened = false
-                this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
+            reset: function() {
                 this.message = null
                 this.callerId = null
                 this.caption = null
                 this.isConfirmMessage = false
+            },
+            accept: function() {
+                this.close()
+                this.fire('core-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
+            },
+            close: function() {
+                this.$.xDialog.opened = false
+                this.fire('core-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
             }
         });
     </script>

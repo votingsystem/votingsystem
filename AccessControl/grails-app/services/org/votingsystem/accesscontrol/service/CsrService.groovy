@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.NifUtils
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
@@ -108,7 +109,14 @@ class CsrService {
         def requestJSON = JSON.parse(messageSMIME.getSMIME().getSignedContent())
         if(!systemService.isUserAdmin(userVS.nif) && !userVS.nif.equals(requestJSON.nif)) throw new ExceptionVS(
                 messageSource.getMessage('userWithoutPrivilegesToValidateCSR', [userVS.nif].toArray(), locale))
-        DeviceVS deviceVS = DeviceVS.findWhere(deviceId: requestJSON.deviceId)
+        String validatedNif = NifUtils.validate(requestJSON.nif)
+        List deviceVSList = DeviceVS.where {
+            eq ("deviceId", requestJSON.deviceId)
+            userVS {eq ("nif",  validatedNif)}
+        }.list()
+        if(deviceVSList.isEmpty()) throw new ExceptionVS(messageSource.getMessage('deviceNotFoundErrorMsg',[requestJSON.deviceId,
+            validatedNif].toArray(), locale))
+        DeviceVS deviceVS = deviceVSList.iterator().next()
         UserRequestCsrVS csrRequest = UserRequestCsrVS.findWhere(userVS:deviceVS.userVS,
                 state:UserRequestCsrVS.State.PENDING);
         if (!csrRequest) throw new ExceptionVS(messageSource.getMessage('userWithoutPrivilegesToValidateCSR',null, locale))
@@ -121,13 +129,12 @@ class CsrService {
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.content);
         X509Certificate issuedCert = signatureVSService.signCSR(csr, null,dateBegin, dateFinish, null)
         if (!issuedCert) throw new ExceptionVS(messageSource.getMessage("csrValidationErrorMsg", null, locale))
-        csrRequest.state = UserRequestCsrVS.State.OK
         csrRequest.serialNumber = issuedCert.getSerialNumber().longValue()
-        csrRequest.save()
+        csrRequest.setState(UserRequestCsrVS.State.OK).save()
         CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber()?.longValue(),
                 content:issuedCert.getEncoded(), userVS:csrRequest.userVS, state:CertificateVS.State.OK,
                 userRequestCsrVS:csrRequest, type:CertificateVS.Type.USER).save()
-        log.debug("signCertUserVS - issued new cert id '${certificate.id}'");
+        log.debug("signCertUserVS - issued new CertificateVS id '${certificate.id}' for UserRequestCsrVS '$csrRequest.id'");
         return new ResponseVS(statusCode:ResponseVS.SC_OK)
     }
 
@@ -202,21 +209,14 @@ class CsrService {
 	public ResponseVS saveUserCSR(byte[] csrPEMBytes) {
 		PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        String givenname;
-        String surname;
-        String nif;
-		String email;
-		String phone;
-		String deviceId;
+        String givenname, surname, nif;
 		String subjectDN = info.getSubject().toString();
-		log.debug("saveUserCSR - subject: " + subjectDN)
         if(subjectDN.split("GIVENNAME=").length > 1)  givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0]
         if(subjectDN.split("SURNAME=").length > 1)  surname = subjectDN.split("SURNAME=")[1].split(",")[0]
 		if(subjectDN.split("SERIALNUMBER=").length > 1) {
 			nif = subjectDN.split("SERIALNUMBER=")[1];
 			if (nif.split(",").length > 1)  nif = nif.split(",")[0];
 		}
-
         Enumeration csrAttributes = info.getAttributes().getObjects()
         def deviceDataJSON
         while(csrAttributes.hasMoreElements()) {
@@ -227,24 +227,22 @@ class CsrService {
                     break;
             }
         }
-
 		ResponseVS responseVS = subscriptionVSService.checkDevice(givenname, surname, nif, deviceDataJSON?.mobilePhone,
-                deviceDataJSON?.email,  deviceDataJSON?.deviceId)
+                deviceDataJSON?.email,  deviceDataJSON?.deviceId, deviceDataJSON?.deviceType)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
-		UserRequestCsrVS requestCSR
 		def previousRequest = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(
 			responseVS.data, responseVS.userVS, UserRequestCsrVS.State.PENDING)
-		previousRequest.each {eventVSItem ->
-			eventVSItem.state = UserRequestCsrVS.State.CANCELLED
-			eventVSItem.save();
-		}
+        for(UserRequestCsrVS prevRequest: previousRequest) {
+            prevRequest.setState(UserRequestCsrVS.State.CANCELLED).save()
+        }
+        UserRequestCsrVS requestCSR
 		UserRequestCsrVS.withTransaction {
 			requestCSR = new UserRequestCsrVS(state:UserRequestCsrVS.State.PENDING,
 				content:csrPEMBytes, userVS:responseVS.userVS,deviceVS:responseVS.data).save()
 		}
+        log.debug("saveUserCSR - UserRequestCsrVS id '$requestCSR.id' - cert subject '$subjectDN'")
 		if(requestCSR) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:requestCSR.id)
 		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
 	}
-
 
 }

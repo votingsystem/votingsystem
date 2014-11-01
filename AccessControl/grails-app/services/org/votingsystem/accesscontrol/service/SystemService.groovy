@@ -10,8 +10,6 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
-import org.votingsystem.vicket.model.UserVSAccount
-
 import java.security.cert.X509Certificate
 
 @Transactional
@@ -20,8 +18,6 @@ class SystemService {
     private UserVS systemUser
     def grailsApplication
     private ControlCenterVS controlCenter
-    //def subscriptionVSService
-
 
     @Transactional public synchronized Map init() throws Exception {
         log.debug("init")
@@ -31,7 +27,13 @@ class SystemService {
                     name:grailsApplication.config.vs.serverName).save()
         }
         updateAdmins()
+        controlCenter = getControlCenter()
         return [systemUser:systemUser]
+    }
+
+    public ControlCenterVS getControlCenter() {
+        if(controlCenter == null) controlCenter = loadControlCenter()
+        return controlCenter
     }
 
     @Transactional public JSONArray updateAdmins() {
@@ -69,31 +71,35 @@ class SystemService {
         return getSystemUser().getMetaInfJSON()?.adminsDNI?.contains(nif)
     }
 
-    public ControlCenterVS getControlCenter() throws Exception {
+    private ControlCenterVS loadControlCenter() throws Exception {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName);
-        if(!controlCenter) {
-            List<ControlCenterVS> controlCenters = ControlCenterVS.createCriteria().list (offset: 0, order:'desc') {
-                eq("state", ActorVS.State.OK)
-            }
-            if(!controlCenters.isEmpty()) {
-                controlCenter = controlCenters.iterator().next()
-                ResponseVS responseVS = subscriptionVSService.checkControlCenter(controlCenter.serverURL)
-                if(ResponseVS.SC_OK == responseVS.statusCode) {
-                    log.debug("There are '${controlCenters.getTotalCount()}' with state 'OK' - fetching Control Center " +
-                            "with url: '${controlCenter.serverURL}' ")
-                } else {
-                    log.error("$methodName - ${responseVS.getMessage()}")
-                    controlCenter = null
-                    throw new ExceptionVS(responseVS.getMessage())
-                }
-            } else log.error("Missing Control Center!!!!")
+        List<ControlCenterVS> controlCenters = ControlCenterVS.createCriteria().list (offset: 0, order:'desc') {
+            eq("state", ActorVS.State.OK)
         }
-        return controlCenter;
+        if(!controlCenters.isEmpty()) {
+            ControlCenterVS controlCenterVS = controlCenters.iterator().next()
+            ResponseVS responseVS = ((SubscriptionVSService)grailsApplication.mainContext.getBean(
+                    "subscriptionVSService")).checkControlCenter(controlCenterVS.serverURL)
+            if(ResponseVS.SC_OK == responseVS.statusCode) {
+                log.debug("$methodName - There are '${controlCenters.size()}' with state 'OK' - fetching Control Center " +
+                        "with url: '${controlCenterVS.serverURL}' ")
+                return responseVS.data.controlCenterVS
+            } else throw new ExceptionVS(responseVS.getMessage())
+        }
+        log.error("Missing Control Center!!!!")
+        String targetURL = null
+        if(grails.util.Metadata.current.isWarDeployed()) {
+            targetURL = "${grailsApplication.config.vs.prod.controlCenterURL}"
+        } else  targetURL = "${grailsApplication.config.vs.dev.controlCenterURL}"
+        ResponseVS responseVS = ((SubscriptionVSService)grailsApplication.mainContext.getBean(
+                "subscriptionVSService")).checkControlCenter(targetURL)
+        if(ResponseVS.SC_OK == responseVS.statusCode) return responseVS.data.controlCenterVS
+        return null;
     }
 
     public UserVS getSystemUser() {
         if(!systemUser) systemUser = init().systemUser
         return systemUser;
     }
+
 }

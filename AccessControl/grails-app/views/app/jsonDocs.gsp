@@ -63,7 +63,7 @@
         receiverName:"${grailsApplication.config.vs.serverName}",
         signedMessageSubject:"<g:message code="validateCertLbl"/>",
         signedContent:{nif:"", deviceId: ""},
-        serviceURL:"${createLink( controller:'subscriptionVS', absolute:true)}",
+        serviceURL:"${createLink( controller:'csr', action:'validate', absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.vs.urlTimeStampServer}",
     }
@@ -77,7 +77,7 @@
         window[webAppMessage.objectId] = function(appMessage) {
             console.log("publishControlCenter - message: " + appMessage);
             var appMessageJSON = toJSON(appMessage)
-            showMessageVS(appMessageJSON.message, "publishControlCenter - status: " + appMessageJSON.statusCode)
+            showMessageVS(appMessageJSON.message, "validateCert - status: " + appMessageJSON.statusCode)
         }
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
