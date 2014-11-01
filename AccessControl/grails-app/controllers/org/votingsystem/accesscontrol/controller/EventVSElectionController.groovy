@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 /**

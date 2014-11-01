@@ -613,8 +613,11 @@ public class ContextVS {
         this.defaultServer = server;
     }
 
-    public ActorVS getDefaultServer() {
-        return this.defaultServer;
+    public ActorVS getDefaultServer() throws ExceptionVS {
+        if(defaultServer != null) return defaultServer;
+        if(accessControl != null) return accessControl;
+        if(vicketServer != null) return vicketServer;
+        throw new ExceptionVS("Missing default server");
     }
 
 }

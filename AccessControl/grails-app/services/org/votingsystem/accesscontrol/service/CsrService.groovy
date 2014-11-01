@@ -7,6 +7,8 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.votingsystem.signature.smime.SMIMEMessage
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
@@ -28,6 +30,7 @@ class CsrService {
 	def subscriptionVSService
 	def messageSource
     def signatureVSService
+    def systemService
 
     public static class CsrResponse {
         PublicKey publicKey
@@ -98,6 +101,34 @@ class CsrService {
                     locale))
         }
         return new CsrResponse(csr.getPublicKey(), null, certDataJSON.hashCertVS)
+    }
+
+    public ResponseVS signCertUserVS(MessageSMIME messageSMIME) throws Exception {
+        UserVS userVS = messageSMIME.getUserVS()
+        def requestJSON = JSON.parse(messageSMIME.getSMIME().getSignedContent())
+        if(!systemService.isUserAdmin(userVS.nif) && !userVS.nif.equals(requestJSON.nif)) throw new ExceptionVS(
+                messageSource.getMessage('userWithoutPrivilegesToValidateCSR', [userVS.nif].toArray(), locale))
+        DeviceVS deviceVS = DeviceVS.findWhere(deviceId: requestJSON.deviceId)
+        UserRequestCsrVS csrRequest = UserRequestCsrVS.findWhere(userVS:deviceVS.userVS,
+                state:UserRequestCsrVS.State.PENDING);
+        if (!csrRequest) throw new ExceptionVS(messageSource.getMessage('userWithoutPrivilegesToValidateCSR',null, locale))
+        return signCertUserVS(csrRequest)
+    }
+
+    public ResponseVS signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
+        Date dateBegin = Calendar.getInstance().getTime();
+        Date dateFinish = DateUtils.addDays(dateBegin, 365) //one year
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.content);
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null,dateBegin, dateFinish, null)
+        if (!issuedCert) throw new ExceptionVS(messageSource.getMessage("csrValidationErrorMsg", null, locale))
+        csrRequest.state = UserRequestCsrVS.State.OK
+        csrRequest.serialNumber = issuedCert.getSerialNumber().longValue()
+        csrRequest.save()
+        CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber()?.longValue(),
+                content:issuedCert.getEncoded(), userVS:csrRequest.userVS, state:CertificateVS.State.OK,
+                userRequestCsrVS:csrRequest, type:CertificateVS.Type.USER).save()
+        log.debug("signCertUserVS - issued new cert id '${certificate.id}'");
+        return new ResponseVS(statusCode:ResponseVS.SC_OK)
     }
 
     public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes) {
@@ -214,41 +245,6 @@ class CsrService {
 		if(requestCSR) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:requestCSR.id)
 		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
 	}
-	
-	public synchronized ResponseVS signCertUserVS (UserRequestCsrVS requestCSR) {
-		log.debug("signCertUserVS");
-		File keyStoreFile = grailsApplication.mainContext.getResource(
-			grailsApplication.config.vs.keyStorePath).getFile()
-		String keyAlias = grailsApplication.config.vs.signKeysAlias
-		String password = grailsApplication.config.vs.signKeysPassword
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
-			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
-		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
-		//log.debug("signCertUserVS - certSigner:${certSigner}");
-		Date today = DateUtils.getMonday(Calendar.getInstance()).getTime();
-		Calendar today_plus_year = Calendar.getInstance();
-		today_plus_year.add(Calendar.YEAR, 1);
-        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
-        today_plus_year.set(Calendar.MINUTE, 0);
-        today_plus_year.set(Calendar.SECOND, 0);
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestCSR.content);
-        X509Certificate issuedCert = CertUtils.signCSR(csr, null, privateKeySigner,
-                certSigner, today, today_plus_year.getTime())
 
-		if (!issuedCert) {
-			return new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    messageSource.getMessage("csrValidationErrorMsg", null, locale))
-		} else {
-			requestCSR.state = UserRequestCsrVS.State.OK
-			requestCSR.serialNumber = issuedCert.getSerialNumber().longValue()
-			requestCSR.save()
-			CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber()?.longValue(),
-				content:issuedCert.getEncoded(), userVS:requestCSR.userVS, state:CertificateVS.State.OK,
-				userRequestCsrVS:requestCSR, type:CertificateVS.Type.USER)
-			certificate.save()
-			return new ResponseVS(statusCode:ResponseVS.SC_OK)
-		}
-	}
 
 }

@@ -5,12 +5,15 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author jgzornoza
@@ -95,10 +98,31 @@ public class BrowserVSSessionUtils {
         try {
             File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
             csrFile.createNewFile();
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes()), csrFile);
+            JSONObject jsonData = bundle.toJSON();
+            jsonData.put("requestId", requestId);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(jsonData.toString().getBytes()), csrFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
+    }
+
+    public static ResponseVS checkCSRRequest() {
+        File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+        if(csrFile.exists()) {
+            try {
+                JSONObject jsonData = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(csrFile));
+                String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(
+                        jsonData.getLong("requestId"));
+                ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                } else return responseVS;
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex);
+                if(csrFile != null && csrFile.exists()) csrFile.delete();
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("checkCertRequestErrorMsg"));
+            }
+        }
+        return null;
     }
 
     private void flush() {

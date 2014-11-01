@@ -4,7 +4,6 @@ import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
-import org.votingsystem.util.ApplicationContextHolder
 
 /**
  * @infoController Solicitud de copias de seguridad

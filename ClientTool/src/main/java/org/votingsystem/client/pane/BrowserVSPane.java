@@ -86,7 +86,7 @@ public class BrowserVSPane extends StackPane {
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                setPasswordDialogVisible(false);
+                setPasswordDialogVisible(false, null);
             }});
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
@@ -139,7 +139,7 @@ public class BrowserVSPane extends StackPane {
         passwordVBox.getStyleClass().add("modal-dialog");
         passwordVBox.setStyle("-fx-background-color: #f9f9f9; -fx-max-height:280px;-fx-max-width:350px;");
         passwordVBox.autosize();
-        setPasswordDialogVisible(false);
+        setPasswordDialogVisible(false, null);
         getChildren().addAll(progressRegion, progressBox, passwordRegion, passwordVBox);
     }
 
@@ -147,17 +147,17 @@ public class BrowserVSPane extends StackPane {
         return this.signatureService;
     }
 
-    public void processOperationVS(OperationVS operationVS) {
+    public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
         PlatformImpl.runAndWait(new Runnable() {
             @Override public void run() {
-                setPasswordDialogVisible(true);
+                setPasswordDialogVisible(true, passwordDialogMessage);
             }
         });
     }
 
-    public void setPasswordDialogVisible(boolean isVisible) {
-        setMessage(ContextVS.getMessage("passwordMissing"));
+    public void setPasswordDialogVisible(boolean isVisible, String message) {
+        if(message == null) setMessage(ContextVS.getMessage("passwordMissing"));
         password1Field.setText("");
         password2Field.setText("");
         passwordVBox.setVisible(isVisible);
@@ -187,7 +187,7 @@ public class BrowserVSPane extends StackPane {
                 else {
                     if (password1.equals(password2)) {
                         password = password1;
-                        setPasswordDialogVisible(false);
+                        setPasswordDialogVisible(false, null);
                         signatureService.processOperationVS(password, operationVS);
                     } else {
                         setMessage(ContextVS.getMessage("passwordError"));

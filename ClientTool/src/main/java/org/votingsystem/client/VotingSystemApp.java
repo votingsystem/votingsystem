@@ -27,12 +27,10 @@ import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketListener;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 import javax.net.ssl.HttpsURLConnection;
@@ -166,7 +164,15 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true, primaryStage);
-                        ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
+                        ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
+
+                        responseVS = BrowserVSSessionUtils.checkCSRRequest();
+                        if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                            showMessage(responseVS.getMessage());
+                        }
+
+
+
                     }
                 }
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}
@@ -174,7 +180,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     responseVS = Utils.checkServer(vicketsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVicketServerAvailable(true, primaryStage);
-                        ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
+                        ContextVS.getInstance().setVicketServer((VicketServer) responseVS.getData());
                     }
                 }
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}
@@ -373,7 +379,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() { @Override public void run() {
-            new MessageDialog().showMessage(null, message);}});
+            new MessageDialog().showHtmlMessage(message);}});
     }
 
     class Delta { double x, y; }

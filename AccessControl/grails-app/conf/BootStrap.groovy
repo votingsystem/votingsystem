@@ -12,15 +12,15 @@ class BootStrap {
     def grailsApplication
     def filesService
     def signatureVSService
-    def timeStampService
     def systemService
 
     def init = { servletContext ->
-        JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
-        filesService.init()
         signatureVSService.init();
+        systemService.init()
+        filesService.init()
+        JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }
         JSON.registerObjectMarshaller(RepresentativeVS) {
             def returnMap = [:]
             returnMap['optionSelectedId'] = it.optionSelectedId

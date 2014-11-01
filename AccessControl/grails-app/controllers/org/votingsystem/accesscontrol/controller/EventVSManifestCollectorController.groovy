@@ -5,8 +5,6 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVSManifest
 import org.votingsystem.model.PDFDocumentVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
  * @infoController Recogida de firmas

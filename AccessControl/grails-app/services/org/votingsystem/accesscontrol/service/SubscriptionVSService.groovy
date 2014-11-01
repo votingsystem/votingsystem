@@ -19,7 +19,7 @@ class SubscriptionVSService {
     static transactional = true
     def grailsApplication
     def messageSource
-    def userVSService
+    def systemService
 
     ResponseVS checkUser(UserVS userVS) {
         log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
@@ -154,7 +154,7 @@ class SubscriptionVSService {
         log.debug(methodName);
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         String msg = null;
-        if(!userVSService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
+        if(!systemService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg',
                     [messageSMIMEReq.userVS.nif, methodName, locale].toArray())
             log.error "${methodName} - ${msg}"

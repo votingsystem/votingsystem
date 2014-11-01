@@ -114,7 +114,7 @@ class SignatureVSService {
      * Generate V3 Certificate from CSR
      */
     public X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit, Date dateBegin,
-                                   Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
+            Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
         X509Certificate issuedCert = CertUtils.signCSR(csr, organizationalUnit, getServerPrivateKey(),
                 getServerCert(), dateBegin, dateFinish, certExtensions)
         return issuedCert
@@ -283,6 +283,16 @@ class SignatureVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
         }
         return validateSignersCerts(smimeMessage)
+    }
+
+    public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {
+        CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                getTrustAnchors(), false, [userVS.getCertificate()])
+        X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
+        userVS.setCertificateCA(getTrustedCertsHashMap().get(certCaResult?.getSerialNumber()?.longValue()))
+        log.debug("verifyCertificate - user '${userVS.nif}' cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
+        return validatorResult
     }
 
     public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage) {

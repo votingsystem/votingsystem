@@ -19,13 +19,12 @@ import org.votingsystem.util.StringUtils
 class EventVSService {
 		
 	static transactional = true
-	
-	List<String> systemAdmins
+
 	def messageSource
 	def subscriptionVSService
 	def grailsApplication
 	def signatureVSService
-	def filesService
+	def systemService
 	
 	ResponseVS checkEventVSDates (EventVS eventVS) {
 		if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
@@ -66,13 +65,6 @@ class EventVSService {
 		if (todayDate.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.PENDING)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 	}
-	
-	boolean isUserAdmin(String nif) {
-		if(!systemAdmins) {
-			systemAdmins = grailsApplication.config.vs.adminsDNI
-		}
-		return systemAdmins.contains(nif)
-	}
 
     private class EventVSCancelRequest {
         String accessControlURL;
@@ -107,7 +99,7 @@ class EventVSService {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS signer = messageSMIMEReq.userVS
         EventVSCancelRequest request = new EventVSCancelRequest(smimeMessageReq.getSignedContent())
-        if(!(request.eventVS.userVS?.nif.equals(signer.nif) || isUserAdmin(signer.nif))) throw new ExceptionVS(
+        if(!(request.eventVS.userVS?.nif.equals(signer.nif) || systemService.isUserAdmin(signer.nif))) throw new ExceptionVS(
                 messageSource.getMessage('userWithoutPrivilege', null, locale))
         String msg = (request.state == EventVS.State.CANCELLED)? messageSource.getMessage(
                 'eventCancelled', [request.eventVS.id].toArray(), locale) : messageSource.getMessage(

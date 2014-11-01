@@ -4,8 +4,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubSystemVS
-import org.votingsystem.model.TypeVS
 
 /**
  * @infoController Aplicación

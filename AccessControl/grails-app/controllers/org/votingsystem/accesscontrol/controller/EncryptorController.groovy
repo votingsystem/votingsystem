@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
+
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec

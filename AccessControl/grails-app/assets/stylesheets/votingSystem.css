@@ -96,12 +96,6 @@ hr {
 	border: 1px solid #cccccc;
 }
 
-
-.formFieldError{
-    font-weight: bold;
-    background: #f6ccd0;
-}
-
 .errorMsgWrapper {
     width: 90%;
     margin: 10px 20px 0px 20px;
@@ -666,4 +660,9 @@ textarea.form-control {
 paper-button {
     font-size: 0.8em;
     color: #6c0404;
+}
+
+.formFieldError{
+    font-weight: bold;
+    background: #f6ccd0;
 }

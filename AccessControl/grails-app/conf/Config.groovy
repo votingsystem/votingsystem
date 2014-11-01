@@ -210,6 +210,7 @@ grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 //vs.urlTimeStampServer='http://timestampserver.org/TimeStampServer'
+vs.systemNIF = "ACCESS_CONTROL_SYSTEM_NIF"
 vs.backupCopyPath='./VotingSystem/backups'
 vs.errorsBaseDir='./VotingSystem/errors'
 vs.keyStorePath='WEB-INF/cms/AccessControl.jks'
@@ -221,6 +222,3 @@ vs.requestTimeOut = 500
 vs.serverName='Voting System Access Control'
 vs.blogURL = 'http://www.sistemavotacion.org/blog.html'
 vs.emailAdmin='jgzornoza@gmail.com'
-vs.defaultLocale = 'en'
-//_ TODO _
-vs.adminsDNI=['07553172H']

@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate
 //@Transactional
 class CertificateVSService {
 
-    def userVSService
+    def systemService
     def signatureVSService
     def messageSource
     def grailsLinkGenerator
@@ -34,7 +34,7 @@ class CertificateVSService {
         ResponseVS responseVS = null;
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(!userVSService.isUserAdmin(userSigner.getNif())) {
+        if(!systemService.isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_CA_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
@@ -95,7 +95,7 @@ class CertificateVSService {
         log.debug(methodName);
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(!userVSService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
+        if(!systemService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_EDIT.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"

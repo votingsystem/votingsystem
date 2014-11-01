@@ -76,9 +76,13 @@
                 </template>
             </div>
         <div horizontal layout style="font-size: 0.9em; padding: 3px">
-            <paper-button raised label="<g:message code="addUserVSLbl"/>" affirmative autofocus
+            <paper-button raised label="<g:message code="addCertUserVSLbl"/>" affirmative autofocus
                           on-click="{{selectCertificate}}" style="color: #008000; margin:0 20px 0 0;">
                 <i class="fa fa-certificate"></i>
+            </paper-button>
+            <paper-button raised label="<g:message code="requestCertLbl"/>" affirmative autofocus
+                          on-click="{{requestCert}}" style="color: #008000; margin:0 20px 0 0;">
+                <i class="fa fa-download"></i>
             </paper-button>
             <div flex></div>
             <template if="{{userVSList.length > 0}}">
@@ -109,6 +113,9 @@
         this.$.connectButton.onclick = function(e){
             e.stopPropagation();
         }
+    },
+    requestCert:function() {
+        window.open(window['accessControlURL'] + "/certificateVS/certRequest", "_blank");
     },
     disConnect: function(e) {
         this.$.userInfoPanel.show = false

@@ -228,8 +228,8 @@ log4j = {
 }
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
-
-
+vs.dev.accessControlURL='http://sistemavotacion.org/AccessControl'
+vs.prod.accessControlURL='http://www.sistemavotacion.org/AccessControl  '
 vs.IBAN_bankCode = "7878"
 vs.IBAN_branchCode = "8989"
 vs.systemNIF = "VICKET_SYSTEM_NIF"

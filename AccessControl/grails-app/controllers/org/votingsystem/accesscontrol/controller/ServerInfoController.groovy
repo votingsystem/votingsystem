@@ -3,11 +3,7 @@ package org.votingsystem.accesscontrol.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ActorVS
-import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.util.ApplicationContextHolder
-import org.votingsystem.util.ExceptionVS
 
 /**
  * @infoController Información de la aplicación

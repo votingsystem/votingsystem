@@ -105,9 +105,7 @@ class SystemService {
                     inList("type", [TransactionVS.Type.VICKET_SEND])
                 }
             }
-
         }
-
         def transactionFromList = []
         Map<String, Map> balancesMap = [:]
         transactionList.each { transaction ->
@@ -125,13 +123,11 @@ class SystemService {
         }
         resultMap.transactionFromList = transactionFromList
         resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(balancesMap)
-
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
             not{ inList("type", [TransactionVS.Type.VICKET_SEND])}
         }
-
         def transactionToList = []
         balancesMap = [:]
         transactionList.each { transaction ->
@@ -171,11 +167,6 @@ class SystemService {
         tagAccount.save()
     }
 
-    public Locale getDefaultLocale() {
-        if(defaultLocale == null) defaultLocale = new Locale(grailsApplication.config.vs.defaultLocale)
-        return defaultLocale
-    }
-
     public UserVS getSystemUser() {
         if(!systemUser) systemUser = init().systemUser
         return systemUser;
@@ -185,4 +176,5 @@ class SystemService {
         if(!wildTag) wildTag = TagVS.findWhere(name:TagVS.WILDTAG)
         return wildTag
     }
+
 }

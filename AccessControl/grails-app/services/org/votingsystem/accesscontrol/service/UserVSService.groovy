@@ -34,10 +34,5 @@ class UserVSService {
 			serverType:ActorVS.Type.CONTROL_CENTER.toString()]
 	}
 
-    boolean isUserAdmin(String nif) {
-        nif = NifUtils.validate(nif);
-        return grailsApplication.config.vs.adminsDNI.contains(nif)
-    }
-
 }
 

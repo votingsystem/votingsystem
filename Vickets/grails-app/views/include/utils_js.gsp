@@ -1,4 +1,8 @@
 <script>
+    if(${grails.util.Metadata.current.isWarDeployed()}) {
+        window['accessControlURL'] = "${grailsApplication.config.vs.prod.accessControlURL}"
+    } else  window['accessControlURL'] = "${grailsApplication.config.vs.dev.accessControlURL}"
+
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
     window.CKEDITOR_BASEPATH = '${grailsApplication.config.grails.serverURL}/bower_components/ckeditor/';
 

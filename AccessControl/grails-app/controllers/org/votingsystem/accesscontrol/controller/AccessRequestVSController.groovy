@@ -3,7 +3,6 @@ package org.votingsystem.accesscontrol.controller
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.accesscontrol.service.CsrService
 import org.votingsystem.model.*
-import org.votingsystem.util.ExceptionVS
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 

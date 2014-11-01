@@ -5,7 +5,6 @@
 <template>
     <g:include view="/include/styles.gsp"/>
     <style>
-    .formFieldError { background: #f6ccd0;  }
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccept}}"></core-signals>

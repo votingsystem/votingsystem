@@ -364,7 +364,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     @Override public void processOperationVS(OperationVS operationVS) {
-        browserHelper.processOperationVS(operationVS);
+        browserHelper.processOperationVS(operationVS, null);
     }
 
     @Override public void processSignalVS(Map signalData) {//{title:, url:}
@@ -488,8 +488,11 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         JSONObject documentJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocument());
                         WebSocketService.getInstance().sendMessage(documentJSON.toString());
                         break;
+                    case CERT_USER_NEW:
+                        browserHelper.processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
+                        break;
                     default:
-                        browserHelper.processOperationVS(operationVS);
+                        browserHelper.processOperationVS(operationVS, null);
                 }
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);

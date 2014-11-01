@@ -252,7 +252,6 @@ class  SignatureVSService {
         return validatorResult
     }
 
-
     public ResponseVS validateCertificates(List<X509Certificate> certificateList) {
         log.debug("validateCertificates")
         ResponseVS validationResponse = CertUtils.verifyCertificate(getTrustAnchors(), false, certificateList)
