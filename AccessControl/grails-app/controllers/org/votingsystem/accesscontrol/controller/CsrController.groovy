@@ -47,24 +47,16 @@ class CsrController {
     }
 	
 	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
 	 * Servicio para la creación de certificados de usuario.
 	 * 
 	 * @httpMethod [POST]
 	 * @param csr Solicitud de certificación con los datos de usuario.
-	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
-	 *         de la solicitud en la base de datos.
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador de la solicitud en la base de datos.
 	 */
 	def request() {
-        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
-        }
 		String csrRequest = "${request.getInputStream()}"
-		if (!csrRequest) {
-            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
-		} else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes())]
+		if (!csrRequest) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+		else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes())]
 	}
 	
 	/**

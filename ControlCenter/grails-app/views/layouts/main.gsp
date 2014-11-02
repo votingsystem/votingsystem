@@ -150,9 +150,7 @@
 <nav-bar id="navBar">
     <g:layoutBody/>
 </nav-bar>
-<div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
-    <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-</div>
+<alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
 <core-signals id="coreSignals"></core-signals>
 </body>
 </html>

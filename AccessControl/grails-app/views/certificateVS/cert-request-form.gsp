@@ -18,11 +18,11 @@
             </div>
         </div>
     </template>
-    <div style="margin: 20px auto 10px auto; text-align: center;width: 600px; ">
+    <div style="margin: 20px auto 10px auto; text-align: center;max-width: 600px; ">
         <g:message code="certRequestAdviceMsg"/>
     </div>
     <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
-        <div style="width: 600px; margin:10px auto;">
+        <div style="max-width: 600px; margin:10px auto;">
             <input type="text" id="nif" class="form-control" required style="margin: 0 0 10px 0;"
                    title="<g:message code="nifLbl"/>" placeholder="<g:message code="nifLbl"/>"/>
             <div horizontal layout>
@@ -47,7 +47,7 @@
 </template>
 <script>
     Polymer('cert-request-form', {
-        ready: function() {  },
+        ready: function() { },
         submitForm: function () {
             console.log("submitForm")
             this.removeErrorStyle(this.$.formDataDiv)

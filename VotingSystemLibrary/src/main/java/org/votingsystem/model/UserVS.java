@@ -397,10 +397,25 @@ public class UserVS implements Serializable {
         return metaInfJSON;
     }
 
+    public UserVS updateCertInfo (X509Certificate certificate) {
+        UserVS userVS = getUserVS(certificate.getSubjectDN().getName());
+        setFirstName(userVS.getFirstName());
+        setName(userVS.getFirstName());
+        setLastName(userVS.getLastName());
+        setNif(userVS.getNif());
+        setCountry(userVS.getCountry());
+        setCn(userVS.getCn());
+        return this;
+    }
+
     public static UserVS getUserVS (X509Certificate certificate) {
-        UserVS userVS = new UserVS();
+        UserVS userVS = getUserVS(certificate.getSubjectDN().getName());
         userVS.setCertificate(certificate);
-        String subjectDN = certificate.getSubjectDN().getName();
+        return userVS;
+    }
+
+    public static UserVS getUserVS (String subjectDN) {
+        UserVS userVS = new UserVS();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
         if (subjectDN.contains("SERIALNUMBER=")) userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
         if (subjectDN.contains("SURNAME=")) userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);

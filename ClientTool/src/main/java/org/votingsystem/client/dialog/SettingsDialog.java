@@ -93,6 +93,7 @@ public class SettingsDialog {
                         @Override public void run() {
                             BrowserVS.getInstance().newTab(
                                     ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
+                            stage.close();
                         }
                     });
                 } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));

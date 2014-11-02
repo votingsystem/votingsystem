@@ -466,7 +466,7 @@ public class ContextVS {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStoreFile), password);
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
         return keyStore;
     }
@@ -484,7 +484,7 @@ public class ContextVS {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
         return keyStore;
     }

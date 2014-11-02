@@ -119,11 +119,18 @@ class CsrService {
         DeviceVS deviceVS = deviceVSList.iterator().next()
         UserRequestCsrVS csrRequest = UserRequestCsrVS.findWhere(userVS:deviceVS.userVS,
                 state:UserRequestCsrVS.State.PENDING);
-        if (!csrRequest) throw new ExceptionVS(messageSource.getMessage('userWithoutPrivilegesToValidateCSR',null, locale))
-        return signCertUserVS(csrRequest)
+        if (!csrRequest) throw new ExceptionVS(messageSource.getMessage('userRequestCsrMissingErrorMsg',
+                [validatedNif, requestJSON.deviceId].toArray(), locale))
+        ResponseVS responseVS = signCertUserVS(csrRequest)
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            X509Certificate issuedCert = responseVS.data
+            deviceVS.userVS.updateCertInfo(issuedCert).save()
+            deviceVS.updateCertInfo(issuedCert).save()
+        }
+        return responseVS
     }
 
-    public ResponseVS signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
+    public ResponseVS<X509Certificate> signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
         Date dateBegin = Calendar.getInstance().getTime();
         Date dateFinish = DateUtils.addDays(dateBegin, 365) //one year
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.content);
@@ -135,7 +142,7 @@ class CsrService {
                 content:issuedCert.getEncoded(), userVS:csrRequest.userVS, state:CertificateVS.State.OK,
                 userRequestCsrVS:csrRequest, type:CertificateVS.Type.USER).save()
         log.debug("signCertUserVS - issued new CertificateVS id '${certificate.id}' for UserRequestCsrVS '$csrRequest.id'");
-        return new ResponseVS(statusCode:ResponseVS.SC_OK)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:issuedCert)
     }
 
     public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes) {
@@ -209,16 +216,10 @@ class CsrService {
 	public ResponseVS saveUserCSR(byte[] csrPEMBytes) {
 		PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        String givenname, surname, nif;
-		String subjectDN = info.getSubject().toString();
-        if(subjectDN.split("GIVENNAME=").length > 1)  givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0]
-        if(subjectDN.split("SURNAME=").length > 1)  surname = subjectDN.split("SURNAME=")[1].split(",")[0]
-		if(subjectDN.split("SERIALNUMBER=").length > 1) {
-			nif = subjectDN.split("SERIALNUMBER=")[1];
-			if (nif.split(",").length > 1)  nif = nif.split(",")[0];
-		}
+        String subjectDN = info.getSubject().toString()
+        UserVS userVS = UserVS.getUserVS(subjectDN)
         Enumeration csrAttributes = info.getAttributes().getObjects()
-        def deviceDataJSON
+        JSONObject deviceDataJSON
         while(csrAttributes.hasMoreElements()) {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
@@ -227,8 +228,8 @@ class CsrService {
                     break;
             }
         }
-		ResponseVS responseVS = subscriptionVSService.checkDevice(givenname, surname, nif, deviceDataJSON?.mobilePhone,
-                deviceDataJSON?.email,  deviceDataJSON?.deviceId, deviceDataJSON?.deviceType)
+		ResponseVS responseVS = subscriptionVSService.checkDevice(userVS.firstName, userVS.lastName, userVS.nif,
+                deviceDataJSON?.mobilePhone, deviceDataJSON?.email,  deviceDataJSON?.deviceId, deviceDataJSON?.deviceType)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		def previousRequest = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(
 			responseVS.data, responseVS.userVS, UserRequestCsrVS.State.PENDING)

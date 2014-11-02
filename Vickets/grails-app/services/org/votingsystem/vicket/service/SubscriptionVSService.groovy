@@ -28,23 +28,15 @@ class SubscriptionVSService {
 
     @Transactional public ResponseVS checkUser(UserVS userVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
+		log.debug "$methodName - nif  '${userVS.getNif()}'"
 		String msg
         CertificateVS certificate = null;
-		if(!userVS.getNif()) {
-			msg = messageSource.getMessage('userDataWithErrors', null, locale)
-			log.error("checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
-                metaInf: MetaInfMsg.getErrorMsg(methodName, "missingNif"))
-		}
+		if(!userVS.getNif()) throw new ExceptionVS(messageSource.getMessage('userDataWithErrors', null, locale),
+                MetaInfMsg.getErrorMsg(methodName, "missingNif"))
 		X509Certificate x509Cert = userVS.getCertificate()
-		if (!x509Cert) {
-			log.debug("Missing certificate!!!")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Missing certificate!!!",
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "missingCert"))
-		}
+		if (!x509Cert) throw new ExceptionVS("Missing certificate!!!", MetaInfMsg.getErrorMsg(methodName, "missingNif"))
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
-		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
+		UserVS userVSDB = UserVS.findByNif(validatedNIF)
         JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
         boolean isNewUser = false
 		if (!userVSDB) {
@@ -75,13 +67,14 @@ class SubscriptionVSService {
                     serialNumber:x509Cert?.getSerialNumber()?.longValue(),
                     authorityCertificateVS:userVS.getCertificateCA(), validFrom:x509Cert?.getNotBefore(),
                     validTo:x509Cert?.getNotAfter()).save();
+            userVS.updateCertInfo(x509Cert).save()
             if(deviceData) {
                 DeviceVS deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
                 if(!deviceVS) {
                     deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
                             phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
                     log.debug "saveUserCertificate - certificate id: '${certificate.id}' - new device with id '${deviceVS.id}'"
-                }
+                } else deviceVS.updateCertInfo(deviceData).save()
             } else log.debug "saveUserCertificate - certificate id: '${certificate.id}'"
             return certificate
         }

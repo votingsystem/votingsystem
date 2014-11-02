@@ -22,11 +22,7 @@
         <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
     </div>
 
-    <div layout horizontal center center-justified style="position:absolute; top:100px; width:1200px;">
-        <div>
-            <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-        </div>
-    </div>
+<alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
 <core-signals id="coreSignals"></core-signals>
 </body>
 </html>

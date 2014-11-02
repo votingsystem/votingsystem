@@ -1,10 +1,16 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONObject;
+import org.votingsystem.signature.util.CertUtils;
+
 import javax.persistence.*;
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.IDENTITY;
+import static javax.persistence.GenerationType.valueOf;
 
 /**
 * @author jgzornoza
@@ -125,4 +131,15 @@ public class DeviceVS implements Serializable {
         return this;
     }
 
+    public DeviceVS updateCertInfo (X509Certificate certificate) throws IOException {
+        return updateCertInfo(CertUtils.getCertExtensionData(certificate, ContextVS.DEVICEVS_OID));
+    }
+
+    public DeviceVS updateCertInfo (JSONObject jsonData) throws IOException {
+        setPhone(jsonData.getString("mobilePhone"));
+        setEmail(jsonData.getString("email"));
+        setDeviceId(jsonData.getString("deviceId"));
+        setType(Type.valueOf(jsonData.getString("deviceType")));
+        return this;
+    }
 }

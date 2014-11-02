@@ -65,7 +65,7 @@ public class WalletUtils {
             byte[] walletBytes = Encryptor.decryptCMS(FileUtils.getBytesFromFile(walletFile), privateKey);
             return JSONSerializer.toJSON(new String(walletBytes, "UTF-8"));
         } catch(Exception ex) {
-            throw new ExceptionVS(ContextVS.getMessage("keyStorePasswordError"), ex);
+            throw new ExceptionVS(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
     }
 
@@ -81,7 +81,7 @@ public class WalletUtils {
             byte[] encryptedWallet = Encryptor.encryptToCMS(walletJSON.toString().getBytes(), x509UserCert);
             FileUtils.copyStreamToFile(new ByteArrayInputStream(encryptedWallet), walletFile);
         } catch(Exception ex) {
-            throw new ExceptionVS(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+            throw new ExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
     }
 

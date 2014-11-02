@@ -24,7 +24,8 @@ dependencies {
         exclude module: 'groovy-all'
     }*/
 
-    compile ('org.votingsystem:votingsystemlibrary:0.2.0',
+    compile ('org.codehaus.groovy:groovy:2.3.7',
+            'org.votingsystem:votingsystemlibrary:0.2.0',
             'org.apache.httpcomponents:httpmime:4.3.5',
             'org.apache.httpcomponents:httpclient:4.3.5',
             'net.sf.json-lib:json-lib:2.4:jdk15',

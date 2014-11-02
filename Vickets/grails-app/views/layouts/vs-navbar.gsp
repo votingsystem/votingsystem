@@ -42,7 +42,7 @@
                 </core-icon-button>
                 <core-tooltip id="userInfoPanel" style="padding: 0px; font-size: 0.9em;" position="left">
                     <div vertical layout class="userInfoPanel" tip>
-                        <div style="height: 30px;"><g:message code="connectedWithLbl"/>: {{userVS.nif}}</div>
+                        <div style="height: 30px;"><g:message code="uservsLbl"/>: {{userVS.nif}}</div>
                         <paper-button raised label="<g:message code="disConnectLbl"/>" affirmative autofocus
                                       on-click="{{disConnect}}">
                         </paper-button>

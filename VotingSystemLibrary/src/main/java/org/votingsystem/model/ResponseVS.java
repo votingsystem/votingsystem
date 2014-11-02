@@ -300,9 +300,10 @@ public class ResponseVS<T> implements Serializable {
         String action = (actionMap == null)?null:(String) actionMap.values().iterator().next();
         String metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
                 rootCause.getClass().getSimpleName();
-        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
+        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null) {
             metaInf = metaInf + "_" +((ExceptionVS)exception).getMetInf();
-        log.error(metaInf, rootCause);
+            log.error(metaInf);
+        } else log.error(metaInf, rootCause);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, rootCause.getMessage());
         responseVS.setReason(rootCause.getMessage());
         responseVS.setMetaInf(metaInf);

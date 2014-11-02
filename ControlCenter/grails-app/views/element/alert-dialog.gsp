@@ -1,31 +1,25 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
-
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 <polymer-element name="alert-dialog">
     <template>
-        <vs-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <g:include view="/include/styles.gsp"/>
+        <paper-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .votingsystemMessageDialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
+                top: 150px;
+                box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px; overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 500px;
             }
             </style>
             <div>
                 <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                    <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;display:{{caption? 'block':'none'}}">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
@@ -36,26 +30,20 @@
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div flex>
-                        <input type="text" id="keyEnterListener" style="width: 0px;background-color:white; border: none;" autofocus/>
-                    </div>
-                    <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
-                        <paper-button raised on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
+                    <div flex></div>
+                    <div style="display:{{isConfirmMessage?'block':'none'}};">
+                        <paper-button raised on-click="{{accept}}">
                             <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                         </paper-button>
                     </div>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('alert-dialog', {
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
-                console.log(this.tagName + " - ready")
-                this.$.keyEnterListener.onkeypress = function(event){
-                    if (event.keyCode == 13) this.close()
-                }.bind(this)
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {

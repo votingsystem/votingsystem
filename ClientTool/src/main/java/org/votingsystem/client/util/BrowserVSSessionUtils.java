@@ -146,25 +146,39 @@ public class BrowserVSSessionUtils {
                     log.debug("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
                     X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                     certificates.toArray(certsArray);
-                    PasswordDialog passwordDialog = new PasswordDialog();
-                    passwordDialog.show(ContextVS.getMessage("csrPasswMsg"));
-                    String password = passwordDialog.getPassword();
-                    Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(jsonData);
-                    byte[] serializedCertificationRequest = Encryptor.pbeAES_Decrypt(password, bundle);
+                    String passwd = null;
+                    byte[] serializedCertificationRequest = null;
+                    while(passwd == null) {
+                        PasswordDialog passwordDialog = new PasswordDialog();
+                        passwordDialog.show(ContextVS.getMessage("csrPasswMsg"));
+                        passwd = passwordDialog.getPassword();
+                        if(passwd == null) {
+                            showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"));
+                            return;
+                        }
+                        Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(jsonData);
+                        try {
+                            serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
+                        } catch (Exception ex) {
+                            passwd = null;
+                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                        }
+                    }
+
                     CertificationRequestVS certificationRequest =
                             (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
                     KeyStore userKeyStore = KeyStore.getInstance("JKS");
                     userKeyStore.load(null);
-                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(), null, certsArray);
-                    /*ContextVS.saveUserKeyStore(userKeyStore, password);
+                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
+                            passwd.toCharArray(), certsArray);
+                    ContextVS.saveUserKeyStore(userKeyStore, passwd);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                            CryptoTokenVS.JKS_KEYSTORE.toString());*/
-                    log.debug("==========ok");
-                }
+                            CryptoTokenVS.JKS_KEYSTORE.toString());
+                    showMessage(ContextVS.getMessage("certInstallOKMsg"));
+                } else showMessage(ContextVS.getMessage("certPendingMsg"));
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                //if(csrFile != null && csrFile.exists()) csrFile.delete();
-                showMessage(ContextVS.getMessage("errorLbl") + " " + ContextVS.getMessage("errorStoringKeyStoreMsg"));
+                showMessage(ContextVS.getMessage("errorStoringKeyStoreMsg"));
             }
         }
 
