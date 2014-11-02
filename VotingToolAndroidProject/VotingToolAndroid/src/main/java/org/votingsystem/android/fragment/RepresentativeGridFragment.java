@@ -32,6 +32,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -209,6 +210,11 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     public void fetchItems(Long offset) {
+        if(contextVS.getAccessControl() == null) {
+            Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
+                    contextVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
+            return;
+        }
         Log.d(TAG +  ".fetchItems(...)", "offset: " + offset);
         if(((ActivityVS)getActivity()).isRefreshing()) return;
         ((ActivityVS)getActivity()).refreshingStateChanged(true);

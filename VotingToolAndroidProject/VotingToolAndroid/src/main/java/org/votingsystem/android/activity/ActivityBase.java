@@ -24,9 +24,11 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
@@ -35,6 +37,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -68,6 +71,7 @@ import org.votingsystem.android.util.LoginAndAuthHelper;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.StringUtils;
@@ -189,7 +193,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private static final TypeEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
 
     private String broadCastId = ActivityBase.class.getSimpleName();
-    /*private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
@@ -224,7 +228,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 
             }
         }
-    };*/
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -724,6 +728,11 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     protected void onResume() {
         super.onResume();
         // Watch for sync state changes
+        Log.d(TAG + ".onResume() ", "onResume");
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
         mSyncStatusObserver.onStatusChanged(0);
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
@@ -732,7 +741,10 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 
     @Override
     protected void onPause() {
+        Log.d(TAG + ".onPause() ", "onPause");
         super.onPause();
+        LocalBroadcastManager.getInstance(getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
         if (mSyncObserverHandle != null) {
             ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
             mSyncObserverHandle = null;

@@ -74,7 +74,7 @@ public class EventsVSActivity extends ActivityBase
     private Menu mainMenu;
     private String broadCastId = EventsVSActivity.class.getSimpleName();
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    /*private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
@@ -107,7 +107,7 @@ public class EventsVSActivity extends ActivityBase
 
             }
         }
-    };
+    };*/
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +

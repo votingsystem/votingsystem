@@ -44,6 +44,10 @@ public class SessionVSHelper {
         } else logger.debug("put - Session already in sessionMap");
     }
 
+    public List<Long> getConnectedUsers() {
+        return Collections.list(userSessionMap.keys());
+    }
+
     public SessionVS remove(Session session) {
         logger.debug("remove - Session id: " + session.getId());
         SessionVS removedSessionVS = sessionMap.remove(session.getId());
@@ -119,6 +123,11 @@ public class SessionVSHelper {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         responseVS.setData(errorList);
         return responseVS;
+    }
+
+    public void sendMessage(Long userId, String message) {
+        String sessionId = userSessionMap.get(userId);
+        sendMessage(sessionId, message);
     }
 
     public void sendMessage(String sessionId, String message) {

@@ -1,9 +1,11 @@
 package org.votingsystem.vicket.controller
 
+import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.vicket.model.MessageVS
+import org.votingsystem.vicket.websocket.SessionVSHelper
 
 /**
  * @infoController Aplicación
@@ -25,6 +27,17 @@ class MessageVSController {
 
     def inbox() {
         //render(view:'inbox', model: [messageVSList:"${messageVSList as JSON}"])
+    }
+
+    def connected() {
+        List<Long> connectedUsers = SessionVSHelper.getInstance().connectedUsers
+        render connectedUsers as JSON
+    }
+
+    def sendMessageByPhone() {
+        SessionVSHelper.getInstance().sendMessage(params.long("userId"), params.message)
+        render "OK"
+        return false
     }
 
     /**

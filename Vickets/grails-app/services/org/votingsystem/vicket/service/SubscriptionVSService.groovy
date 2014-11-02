@@ -73,9 +73,10 @@ class SubscriptionVSService {
                 if(!deviceVS) {
                     deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
                             phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
-                    log.debug "saveUserCertificate - certificate id: '${certificate.id}' - new device with id '${deviceVS.id}'"
+                    log.debug "saveUserCertificate - new device with id '${deviceVS.id}'"
                 } else deviceVS.updateCertInfo(deviceData).save()
-            } else log.debug "saveUserCertificate - certificate id: '${certificate.id}'"
+            }
+            log.debug "saveUserCertificate - new certificate with id: '${certificate.id}'"
             return certificate
         }
     }

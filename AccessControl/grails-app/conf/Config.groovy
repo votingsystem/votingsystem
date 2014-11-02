@@ -97,7 +97,7 @@ environments {
         } else {
             grails.logging.jul.usebridge = true
             grails.resources.debug = true// -> rendering problems
-            grails.serverURL = "http://sistemavotacion.org/AccessControl"
+            grails.serverURL = "http://vickets/AccessControl"
         }
     }
     production {
@@ -106,7 +106,7 @@ environments {
     }
     test {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://sistemavotacion.org/AccessControl"
+        grails.serverURL = "http://vickets/AccessControl"
     }
 }
 
@@ -183,7 +183,6 @@ log4j = {
             //debug   'org.hibernate'
             //debug   'org.apache'
 
-
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
                     'org.codehaus.groovy.grails.web.pages', //  GSP
                     'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -207,10 +206,9 @@ log4j = {
 }
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
-vs.dev.controlCenterURL='http://sistemavotacion.org:8082/ControlCenter'
+vs.dev.controlCenterURL='http://vickets:8082/ControlCenter'
 vs.prod.controlCenterURL='http://www.sistemavotacion.org/ControlCenter'
 vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
-//vs.urlTimeStampServer='http://timestampserver.org/TimeStampServer'
 vs.systemNIF = "ACCESS_CONTROL_SYSTEM_NIF"
 vs.backupCopyPath='./VotingSystem/backups'
 vs.errorsBaseDir='./VotingSystem/errors'

@@ -1,474 +1,411 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="content_error_msg">Contenido nulo</string>
-    <string name="vote_canceled_receipt_lbl">Recibo de anulación de voto</string>
-    <string name="loading_data_msg">Cargando datos...</string>
-    
-    <string name="wait_caption">Por favor, espere</string>
-    <string name="sending_data_lbl">Enviando datos ... </string>
-    <string name="back_to_cancel_lbl">Pulsar \'atrás\' para cancelar</string>
-    
-    <string name="manifest_pendind_lbl">Manifiesto pendiente de abrir</string>
-    <string name="claim_pending_lbl">Reclamacion pendiente de abrir</string>
-    <string name="voting_pending_lbl">Votación pendiente de abrir</string>
-    <string name="manifest_closed_lbl">Manifiesto cerrado</string>
-    <string name="claim_closed_lbl">Reclamación cerrada</string>
-    <string name="voting_closed_lbl">Votación cerrada</string>
-    <string name="manifest_open_lbl">Manifiesto abierto, quedan %1$s horas</string>
-    <string name="claim_open_lbl">Reclamación abierta, quedan %1$s horas</string>
-    <string name="voting_open_lbl">Votación abierta, quedan %1$s horas</string>
-    <string name="already_voted_lbl">Usted ha elegido en este asunto la opción \'%1$s\'</string>
-    
-    <string name="closed_upper_lbl">CERRADO</string>
-    <string name="author_lbl">Publicado por</string>
-    <string name="init_lbl">Inicio</string>
-    <string name="finish_lbl">Fin</string>
-    <string name="remain_lbl">Quedan %1$s horas</string>
-    <string name="option_selected_msg">Seleccionada opción \'%1$s\'</string>
-    
-    <string name="voting_system_lbl">Sistema de Votación</string>
-
-    <string name="subject_lbl">Asunto</string>
-    <string name="menuSync">Sincronizar</string>
-
-    <string name="processing_lbl">Procesando</string>
-    <string name="initializing_app_lbl">Preparando aplicación</string>
-    <string name="publish_voting_caption">Publicando votación</string>
-    <string name="publish_claim_caption">Publicando reclamación</string>
-    <string name="publish_manifest_caption">Publicando manifiesto</string>
-    <string name="publishing_document_msg">Publicando documento...</string>
-
-    <string name="publish_claim_OK_prefix_msg">La reclamación</string>
-    <string name="publish_voting_OK_prefix_msg">La votación</string>
-    <string name="publish_manifest_OK_prefix_msg">El manifiesto</string>
-
+    <string name="content_error_msg">contenido nulo</string>
+    <string name="vote_canceled_receipt_lbl">recibo de anulación de voto</string>
+    <string name="loading_data_msg">cargando datos...</string>
+    <string name="wait_caption">por favor, espere</string>
+    <string name="sending_data_lbl">enviando datos ... </string>
+    <string name="back_to_cancel_lbl">pulsar \'atrás\' para cancelar</string>
+    <string name="manifest_pendind_lbl">manifiesto pendiente de abrir</string>
+    <string name="claim_pending_lbl">reclamacion pendiente de abrir</string>
+    <string name="voting_pending_lbl">votación pendiente de abrir</string>
+    <string name="manifest_closed_lbl">manifiesto cerrado</string>
+    <string name="claim_closed_lbl">reclamación cerrada</string>
+    <string name="voting_closed_lbl">votación cerrada</string>
+    <string name="manifest_open_lbl">manifiesto abierto, quedan %1$s horas</string>
+    <string name="claim_open_lbl">reclamación abierta, quedan %1$s horas</string>
+    <string name="voting_open_lbl">votación abierta, quedan %1$s horas</string>
+    <string name="already_voted_lbl">usted ha elegido en este asunto la opción \'%1$s\'</string>
+    <string name="closed_upper_lbl">cerrado</string>
+    <string name="author_lbl">publicado por</string>
+    <string name="init_lbl">inicio</string>
+    <string name="finish_lbl">fin</string>
+    <string name="remain_lbl">quedan %1$s horas</string>
+    <string name="option_selected_msg">seleccionada opción \'%1$s\'</string>
+    <string name="voting_system_lbl">sistema de votación</string>
+    <string name="access_control_lbl">control de acceso</string>
+    <string name="subject_lbl">asunto</string>
+    <string name="menuSync">sincronizar</string>
+    <string name="processing_lbl">procesando</string>
+    <string name="initializing_app_lbl">preparando aplicación</string>
+    <string name="publish_voting_caption">publicando votación</string>
+    <string name="publish_claim_caption">publicando reclamación</string>
+    <string name="publish_manifest_caption">publicando manifiesto</string>
+    <string name="publishing_document_msg">publicando documento...</string>
+    <string name="publish_claim_OK_prefix_msg">la reclamación</string>
+    <string name="publish_voting_OK_prefix_msg">la votación</string>
+    <string name="publish_manifest_OK_prefix_msg">el manifiesto</string>
     <string name="publish_document_OK_sufix_msg">se ha publicado correctamente</string>    
-    <string name="publish_document_ERROR_msg">Error publicando el documento</string>
-
-    <string name="publish_document_lbl">Publicar documento</string>
-    <string name="publish_voting_lbl">Publicar votación</string>
-    <string name="publish_manifest_lbl">Publicar manifiesto</string>
-    <string name="publish_claim_lbl">Publicar reclamación</string>
-    <string name="loading_html_msg">Cargando página, por favor espere</string>
-
-    <string name="pdf_signed_by_lbl">Firmado electrónicamente por</string>
-    
-    <string name="CONTROL_CENTER_ASSOCIATION_SMIME">Asociando Centro de Control </string>
-    <string name="CONTROL_CENTER_CONNECTION_ERROR_MSG">Problemas conectando con el centro de control. Por favor, inténtelo mas tarde</string>
-    <string name="BACKUP_REQUEST">Solicitud de copia de seguridad</string>
-    <string name="MANIFEST_PUBLISHING">Publicación de documento para recoger firmas</string>
-    <string name="MANIFEST_SIGN">Firma de manifiesto</string>
-    <string name="CLAIM_PUBLISHING">Publicación de documento de reclamación</string>
-    <string name="SMIME_CLAIM_SIGNATURE">Enviando reclamación</string>
-    <string name="VOTING_PUBLISHING">Publicación de documento de votación</string>
-    <string name="EVENT_CANCELLATION">Cancelar evento</string>
-    <string name="operationNotFoundErrorMsg">Operación desconocida</string>
-    <string name="eventVSDataWithErrors">Errores en datos del evento</string>
-    <string name="statusCodeNotFoundErrorMsg">Falta código de estado</string>
-    <string name="errorEmail">Debe proporcionar una dirección de correo válida</string>
-    <string name="eventVsCancellationDataErrorMsg">Error en los datos de cancelación de evento</string>
-    <string name="receiverNotFoundErrorMsg">Falta el name de destinatario del documento firmado</string>
-
-
-    <string name="unknown_lbl">... UNKNOWN ...</string>
-    
-
-    <string name="panel_principal_lbl">Panel principal</string>
-    <string name="query_hint_lbl">Buscar...</string>
-    <string name="search_hint">Buscar...</string>
-   	
-	<string name="guardar_recibo_voto_label">Guardar recibo</string>
-	<string name="remove_receipt_lbl">Borrar recibo</string>
-	<string name="remove_receipt_msg">¿Seguro que desea borrar recibo?</string>
+    <string name="publish_document_ERROR_msg">error publicando el documento</string>
+    <string name="publish_document_lbl">publicar documento</string>
+    <string name="publish_voting_lbl">publicar votación</string>
+    <string name="publish_manifest_lbl">publicar manifiesto</string>
+    <string name="publish_claim_lbl">publicar reclamación</string>
+    <string name="loading_html_msg">cargando página, por favor espere</string>
+    <string name="pdf_signed_by_lbl">firmado electrónicamente por</string>
+    <string name="BACKUP_REQUEST">solicitud de copia de seguridad</string>
+    <string name="MANIFEST_PUBLISHING">publicación de documento para recoger firmas</string>
+    <string name="MANIFEST_SIGN">firma de manifiesto</string>
+    <string name="CLAIM_PUBLISHING">publicación de documento de reclamación</string>
+    <string name="SMIME_CLAIM_SIGNATURE">enviando reclamación</string>
+    <string name="VOTING_PUBLISHING">publicación de documento de votación</string>
+    <string name="EVENT_CANCELLATION">cancelar evento</string>
+    <string name="operationNotFoundErrorMsg">operación desconocida</string>
+    <string name="eventVSDataWithErrors">errores en datos del evento</string>
+    <string name="statusCodeNotFoundErrorMsg">falta código de estado</string>
+    <string name="errorEmail">debe proporcionar una dirección de correo válida</string>
+    <string name="eventVsCancellationDataErrorMsg">error en los datos de cancelación de evento</string>
+    <string name="receiverNotFoundErrorMsg">falta el name de destinatario del documento firmado</string>
+    <string name="panel_principal_lbl">panel principal</string>
+    <string name="search_hint">buscar...</string>
+	<string name="guardar_recibo_voto_label">guardar recibo</string>
+	<string name="remove_receipt_lbl">borrar recibo</string>
+	<string name="remove_receipt_msg">¿seguro que desea borrar recibo?</string>
     <string name="search_label"></string>
-    <string name="search_invoke">Búsquedas</string>
-    <string name="empty_search_lbl">Consulta sin resultados</string>
-    
-	<string name="lockscreen_sim_unlock_progress_dialog_message">lockscreen sim unlock progress dialog message</string>
-	<string name="keyguard_password_enter_pin_code">Introduzca el código PIN de votación</string>
-	<string name="keyguard_password_enter_first_pin_code">Introduzca el código PIN que deberá introducir en cada votación</string>
-	<string name="pin_dialog_caption">PIN de su certificado</string>
-	<string name="invalidPin">Código PIN inválido</string>
-	<string name="pin_short">Código PIN debe tener al menos %1$d caracteres</string>
-	<string name="enter_pin_import_cert_msg">Introduzca el PIN que eligió al solicitar el certificado</string>
-	
-	<string name="password_mismatch">Los códigos PIN no coinciden. Inténtelo de nuevo</string>
-	<string name="repeat_password">Vuelva a introducir el código PIN</string>
-	
-	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
-	<string name="givenname_missing_msg">Introduzca el nombre</string>
-	<string name="surname_missing_msg">Introduzca los apellidos</string>
-	<string name="searchLabel">Buscar</string>
-	<string name="app_unstable_msg">La aplicación tiene errores graves, por favor, vuelva a instalarla</string>
-	
-	<string name="vote_cert_request_error_msg">No existe ningún certificado de voto</string>
-    <string name="operations_lbl">Operaciones</string>
-    <string name="app_name">Votaciones</string>
-
-    <string name="request_cert_msg">Tramitando solicitud</string>
-    <string name="exception_lbl">Excepción</string>
-    <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
-    <string name="connecting_caption">Conectando...</string>
-    <string name="getting_representatives_lbl">Obteniendo representantes...</string>
-    <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
-    <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
-    
-    <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
-    <string name="vote_msg_subject">[VOTO]</string>
-    <string name="cancel_vote_msg_subject">[ANULACION VOTO]</string>
-    <string name="canceled_lbl">ANULADO</string>
-
-
-    <string name="cancel_vote_result_msg">Su voto para el asunto \'%1$s\' ha sido anulado.
-	Puede volver votar de nuevo.</string>
-    <string name="saved_cancel_vote_recepit_msg">Puede encontrar el recibo de la cancelación
-	de este voto en la lista de recibos.</string>
-    <string name="open_cancel_vote_receipt_lbl">Abrir recibo de cancelación</string>
-
-
-    <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
-    <string name="low_memory_msg">Memoria baja</string>
-    
-    <string name="sign_send_msg">Firmar y enviar</string>
-    <string name="select_representative_button">Seleccionar como representante</string>
-    
-    <string name="voted_lbl">Seleccionada opción</string>
-    <string name="cancel_vote_lbl">Anular voto</string>
-    <string name="open_recepit_lbl">Abrir recibo</string>
-    <string name="cancel_vote_msg">Si continua anulará su voto</string>
-    <string name="save_receipt_lbl">Guardar recibo</string>
-    <string name="app_name_lbl">Aplicación de votación</string>
-    <string name="eventsVS_label">Eventos</string>
-    <string name="eventVS_label">Evento</string>
-    <string name="solicitud_csr">Solicitud CSR</string>
-    <string name="enviarVoto">Enviar Voto</string>
-    <string name="receipt_error_msg">Error validando recibo de voto</string>
-    <string name="cert_not_found_caption">Falta certificado</string>
-
-    <string name="update_lbl">Actualizar</string>
-    <string name="request_certificate_menu">Solicitar certificado</string>
-    <string name="receipts_lbl">Recibos</string>
-    <string name="receipt_lbl">Recibo</string>
-    <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
-    <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo</string>
-    <string name="canceling_vote_caption">Anulando voto</string>
-    <string name="canceling_access_request_msg">Problemas con el servicio, por favor inténtelo mas tarde.</string>
-    <string name="no_receipts">No tiene guardado ningún recibo</string>
-    <string name="options_lbl">Opciones</string>
-    
-    <string name="uservs_cert_request_activity_text">No dispone de ningún
-        certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
-        un certificado de usuario. ¿Desea solicitar el certificado?</string>
-    <string name="cert_data_confirm_msg"><![CDATA[<b>Nombre: </b>%1$s<br/>
-        <b>Apellidos: </b>%2$s<br/>
-        <b>Nif: </b>%3$s<br/>
-        <b>Teléfono móvil: </b>%4$s<br/>
-        <b>Email: </b>%5$s<br/>]]></string>
-    <string name="request_cert_result_activity"><![CDATA[Para poder votar necesita tener
-        instalado un certificado.<br/><br/>Usted ya ha solicitado el certificado, ahora hace falta verificar
+    <string name="search_invoke">búsquedas</string>
+    <string name="empty_search_lbl">consulta sin resultados</string>
+	<string name="keyguard_password_enter_pin_code">introduzca el código PIN de votación</string>
+	<string name="keyguard_password_enter_first_pin_code">introduzca el código PIN que deberá introducir en cada votación</string>
+	<string name="pin_dialog_caption">pin de su certificado</string>
+	<string name="invalidPin">código pin inválido</string>
+	<string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
+	<string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
+	<string name="password_mismatch">los códigos pin no coinciden, inténtelo de nuevo</string>
+	<string name="repeat_password">vuelva a introducir el código pin</string>
+	<string name="nif_error">nif con errores, por favor vuelva a intentarlo</string>
+	<string name="givenname_missing_msg">introduzca el nombre</string>
+	<string name="surname_missing_msg">introduzca los apellidos</string>
+	<string name="searchLabel">buscar</string>
+	<string name="app_unstable_msg">la aplicación tiene errores graves, por favor, vuelva a instalarla</string>
+	<string name="vote_cert_request_error_msg">no existe ningún certificado de voto</string>
+    <string name="operations_lbl">operaciones</string>
+    <string name="app_name">votaciones</string>
+    <string name="request_cert_msg">tramitando solicitud</string>
+    <string name="exception_lbl">excepción</string>
+    <string name="cancel_back_msg">pulsar \'atrás\' para cancelar</string>
+    <string name="connecting_caption">conectando...</string>
+    <string name="getting_representatives_lbl">obteniendo representantes...</string>
+    <string name="cert_state_msg">comprobando el estado de la solicitud de certificado</string>
+    <string name="cert_downloaded_msg">el certificado de usuario está disponible</string>
+    <string name="request_msg_subject">[solicitud acceso]-%1$s</string>
+    <string name="vote_msg_subject">[voto]</string>
+    <string name="cancel_vote_msg_subject">[anulación de voto]</string>
+    <string name="canceled_lbl">anulado</string>
+    <string name="cancel_vote_result_msg">su voto para el asunto \'%1$s\' ha sido anulado, puede volver votar de nuevo</string>
+    <string name="saved_cancel_vote_recepit_msg">puede encontrar el recibo de la cancelación de este voto en la lista de recibos</string>
+    <string name="open_cancel_vote_receipt_lbl">abrir recibo de cancelación</string>
+    <string name="pin_error_msg">¿seguro que la contraseña es correcta?</string>
+    <string name="sign_send_msg">firmar y enviar</string>
+    <string name="select_representative_button">seleccionar como representante</string>
+    <string name="voted_lbl">seleccionada opción</string>
+    <string name="cancel_vote_lbl">anular voto</string>
+    <string name="open_recepit_lbl">abrir recibo</string>
+    <string name="cancel_vote_msg">si continua anulará su voto</string>
+    <string name="save_receipt_lbl">guardar recibo</string>
+    <string name="app_name_lbl">aplicación de votación</string>
+    <string name="eventsVS_label">eventos</string>
+    <string name="eventVS_label">evento</string>
+    <string name="solicitud_csr">solicitud csr</string>
+    <string name="enviarVoto">enviar Voto</string>
+    <string name="receipt_error_msg">error validando recibo de voto</string>
+    <string name="cert_not_found_caption">falta certificado</string>
+    <string name="update_lbl">actualizar</string>
+    <string name="request_certificate_menu">solicitar certificado</string>
+    <string name="receipts_lbl">recibos</string>
+    <string name="receipt_lbl">recibo</string>
+    <string name="receipt_list_screen_caption">recibos guardados por el usuario</string>
+    <string name="receipt_options_dialog_msg">opciones disponibles para el recibo</string>
+    <string name="canceling_vote_caption">anulando voto</string>
+    <string name="canceling_access_request_msg">problemas con el servicio, por favor inténtelo mas tarde</string>
+    <string name="no_receipts">no tiene guardado ningún recibo</string>
+    <string name="options_lbl">opciones</string>
+    <string name="uservs_cert_request_activity_text">no dispone de ningún
+        certificado con el que poder acceder a los servicios, para poder votar debe solicitar
+        un certificado de usuario, ¿desea solicitar el certificado?</string>
+    <string name="cert_data_confirm_msg"><![CDATA[<b>nombre: </b>%1$s<br/>
+        <b>apellidos: </b>%2$s<br/>
+        <b>nif: </b>%3$s<br/>
+        <b>teléfono móvil: </b>%4$s<br/>
+        <b>email: </b>%5$s<br/>]]></string>
+    <string name="request_cert_result_activity"><![CDATA[para poder votar necesita tener
+        instalado un certificado<br/><br/>usted ya ha solicitado el certificado, ahora hace falta verificar
         su identidad, para ello puede presentarse en cualquiera de <br/><br/>
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
-        
-    <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
-        
-    <string name="access_request_repeated_msg"><![CDATA[Usted ya ha votado en el asunto \'%1$s\' <br/><br/>
-	Puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
-    <string name="access_request_repeated_caption">Error, voto repetido</string>
-
-   <string name="access_request_repeated_url_msg"><![CDATA[
-        <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este subject]]></string>
-
-    <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
-    <string name="request_cert_result_activity_ok">El certificado se
-        ha importado correctamente.</string>
-    <string name="request_cert_again_button">Volver a solicitar el certificado</string>
-    <string name="install_cert_button">Instalar el certificado</string>
-    <string name="go_app_button">Ir a la aplicación</string>
-    <string name="request_cert_again_msg"><![CDATA[Si vuelve a solicitar el certificado deberá personarse
+    <string name="search_query_info_msg"><![CDATA[<b>resultado de la busqueda</b>: %1$s]]></string>
+    <string name="access_request_repeated_msg"><![CDATA[usted ya ha votado en el asunto \'%1$s\' <br/><br/>
+	puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
+    <string name="access_request_repeated_caption">error, voto repetido</string>
+    <string name="access_request_repeated_url_msg"><![CDATA[
+        <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
+    <string name="cert_install_error_msg">error instalando certificado de usuario</string>
+    <string name="request_cert_result_activity_ok">el certificado se ha importado correctamente</string>
+    <string name="request_cert_again_button">volver a solicitar el certificado</string>
+    <string name="install_cert_button">instalar el certificado</string>
+    <string name="go_app_button">ir a la aplicación</string>
+    <string name="request_cert_again_msg"><![CDATA[si vuelve a solicitar el certificado deberá personarse
         en las instalaciones que se le indiquen para verificar su identidad.<br/>
-        ¿Desea continuar?]]></string>
-    
-    <string name="documents_lbl">Documentos</string>
-    
-    <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
-    <string name="cancel_lbl">Cancelar</string>
-    <string name="continue_lbl">Continuar</string>
-    <string name="request_lbl">Solicitar</string>
-    <string name="nif_lbl">Introduzca su NIF</string>
-    <string name="representative_nif_lbl">Introduzca el NIF del representante que desee editar</string>
-    <string name="password_label">Contraseña del certificado</string>
-    <string name="dialogo_password_text_entry">Introducir contraseña</string>
-    <string name="repeat_password_label">Repita la contraseña</string>
-    <string name="close_lbl">Cerrar</string>
-    <string name="ok_lbl">OK</string>
-    <string name="accept_lbl">Aceptar</string>
-    <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
-	<string name="empty_fields_msg">Debe rellenar todos los campos</string>
-	<string name="password_error_msg">Las contraseñas no coinciden</string>
-	<string name="claim_fields_dialog_caption">Rellenar los campos</string>
-	<string name="error_lbl">Error</string>   
-	<string name="msg_lbl">Mensaje</string>   
-	<string name="operation_ok_msg">Operación completada con éxito</string>
-    <string name="operation_error_msg">Error en la operación</string>
-    <string name="operation_unknown_error_msg">El servicio no está preparado para la operación \'%1$s\'</string>
-    <string name="conn_timeout_msg">Problemas conectando con el servicio</string>
-	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
-	<string name="cert_not_found_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>
-	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>
-	<string name="error_password_msg">Contraseña inválida</string>
+        ¿desea continuar?]]></string>
+    <string name="documents_lbl">documentos</string>
+    <string name="request_user_cert_error_msg">error comprobando el estado de la solicitud</string>
+    <string name="cancel_lbl">cancelar</string>
+    <string name="continue_lbl">continuar</string>
+    <string name="request_lbl">solicitar</string>
+    <string name="nif_lbl">introduzca su nif</string>
+    <string name="representative_nif_lbl">introduzca el nif del representante que desee editar</string>
+    <string name="password_label">contraseña del certificado</string>
+    <string name="dialogo_password_text_entry">introducir contraseña</string>
+    <string name="repeat_password_label">repita la contraseña</string>
+    <string name="close_lbl">cerrar</string>
+    <string name="ok_lbl">ok</string>
+    <string name="accept_lbl">aceptar</string>
+    <string name="request_certificate_form_lbl">datos del certificado de usuario</string>
+	<string name="empty_fields_msg">debe rellenar todos los campos</string>
+	<string name="password_error_msg">las contraseñas no coinciden</string>
+	<string name="claim_fields_dialog_caption">rellenar los campos</string>
+	<string name="error_lbl">error</string>
+	<string name="msg_lbl">mensaje</string>
+	<string name="operation_ok_msg">operación completada con éxito</string>
+    <string name="operation_error_msg">error en la operación</string>
+    <string name="operation_unknown_error_msg">el servicio no está preparado para la operación \'%1$s\'</string>
+    <string name="conn_timeout_msg">problemas conectando con el servicio</string>
+	<string name="receipt_file_saved_msg">documento incorporado a la lista de recibos</string>
+	<string name="cert_not_found_msg">no tiene instalado ningún certificado con el que poder firmar la solicitud</string>
+	<string name="user_cert_request_form_message_label">cada vez que vote se le pedirá el código pin que introducirá a continuación, recuerdelo, si lo olvida tendrá que pedir otro certificado para poder votar</string>
+	<string name="error_password_msg">contraseña inválida</string>
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
-	<string name="connection_error_msg">Error de conexión</string>
-    <string name="server_connection_error_msg">Error de conexión con \'%1$s\'</string>
-
-   <string name="timestamp_service_error_caption">Error con el sellado de tiempo</string>
-	
-	<string name="given_name_lbl">Nombre</string>
-	<string name="surname_lbl">Apellidos</string>
-
-	<string name="encrypted_message_error_msg">Mensaje con errores de cifrado</string>
+	<string name="connection_error_msg">error de conexión</string>
+    <string name="server_connection_error_msg">error de conexión con \'%1$s\'</string>
+   <string name="timestamp_service_error_caption">error con el sellado de tiempo</string>
+	<string name="given_name_lbl">nombre</string>
+	<string name="surname_lbl">apellidos</string>
+	<string name="encrypted_message_error_msg">mensaje con errores de cifrado</string>
 	<string name="voting_service_error_msg"><![CDATA[
-	    Problemas con el servicio de voto.<br/>Por favor inténtelo más tarde]]></string>
-
-    <string name="drawer_open">Seleccionar sección</string>
-    <string name="drawer_close">Cerrar selector de secciones</string>
-
-    <string name="close_app_lbl">Cerrar aplicación</string>
-
-    <string name="get_cert_error_msg">Error obteniendo certificado de \'%1$s\'</string>
-
-    <string name="event_canceled">Evento cancelado</string>
-    <string name="info_lbl">Información</string>
-    <string name="manifest_info_lbl">Datos sobre el manifiesto</string>
-    <string name="claim_info_lbl">Datos sobre la reclamación</string>
-    <string name="voting_info_lbl">Datos sobre la votación</string>
-    <string name="eventfields_dialog_caption">Campos de la reclamación</string>
-
-
-    <string name="check_representative_button">Comprobar mi representante</string>
-    <string name="cancel_representative_button">Dar de baja como representante</string>
-    <string name="edit_representative_lbl">Editar datos de representante</string>
-    <string name="editor_empty_error_lbl">Debe rellenar el campo del editor</string>
-    <string name="signature_msg_subject">[Firma]-</string>
-    <string name="representative_lbl">Representante</string>
+	    problemas con el servicio de voto<br/>Por favor inténtelo más tarde]]></string>
+    <string name="drawer_open">seleccionar sección</string>
+    <string name="drawer_close">cerrar selector de secciones</string>
+    <string name="close_app_lbl">cerrar aplicación</string>
+    <string name="get_cert_error_msg">error obteniendo certificado de \'%1$s\'</string>
+    <string name="event_canceled">evento cancelado</string>
+    <string name="info_lbl">información</string>
+    <string name="manifest_info_lbl">datos sobre el manifiesto</string>
+    <string name="claim_info_lbl">datos sobre la reclamación</string>
+    <string name="voting_info_lbl">datos sobre la votación</string>
+    <string name="eventfields_dialog_caption">campos de la reclamación</string>
+    <string name="check_representative_button">comprobar mi representante</string>
+    <string name="cancel_representative_button">dar de baja como representante</string>
+    <string name="edit_representative_lbl">editar datos de representante</string>
+    <string name="editor_empty_error_lbl">debe rellenar el campo del editor</string>
+    <string name="signature_msg_subject">[firma]-</string>
+    <string name="representative_lbl">representante</string>
     <string name="num_representations_lbl">%1$s representaciones</string>
-    <string name="representative_data_lbl">Datos del representante</string>
-    <string name="rss_service_lbl">Servicio de subscripciones</string>
-    <string name="websocket_service_conn_lbl">Conectado mensajería del sistema de votación</string>
-    <string name="signature_ok_notification_msg">Documento firmado y enviado</string>
-    <string name="signature_error_notification_msg">Error firmando documento</string>
-    <string name="vote_ok_notification_msg">Voto enviado</string>
-    <string name="cancel_vote_ok_notification_msg">Voto cancelado</string>
-    <string name="vote_error_notification_msg">Error en votación</string>
-    <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
-    <string name="send_vote_caption">Enviando voto</string>
-    <string name="vote_option_mismatch">Problemas graves en el servicio de voto. Por favor, Inténtelo mas tarde</string>
-
-    <string name="cert_info_formated_msg"><![CDATA[<html><b>Asunto: </b>%1$s<br/><b>Emisor del certificado: </b> %2$s <br/> \n \
-    <b>Num. serie del certificado: </b> %3$s <br/><b>Valido desde: </b> %4$s<br/> \n \
-    <b>Valido hasta: </b> %5$s<br/></html>]]></string>
-    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>Fecha: </b>%1$s<br/><b>Num. serie del sello de tiempo:</b><br/> %2$s <br/> \n \
-    <br/><b>Certificado firmante:</b><br/> %3$s<br/><b>Num. serie de certificado: </b> %4$s ]]></string>
-
-    <string name="share_receipt_lbl">Compartir recibo</string>
-    <string name="check_receipt_lbl">Comprobar voto en el recuento</string>
-    <string name="delete_receipt_lbl">Borrar recibo</string>
-    <string name="open_receipt_lbl">Abrir recibo</string>
-    <string name="signers_part_lbl">Datos de los certificados firmantes:</string>
-    <string name="show_signers_info_lbl">Datos de los firmantes del recibo</string>
-    <string name="show_timestamp_info_lbl">Datos del sello de tiempo</string>
-
-    <string name="date_saved_lbl">Guardado</string>
-    <string name="date_updated_lbl">Actualizado</string>
-    <string name="cancel_vote_from_receipt_msg"><![CDATA[Si continua anulará el voto del asunto \'<b>%1$s</b>\'<br/> \n \
-        Una vez anulado el voto podrá volver a votar.<br/>¿Desea continuar?]]></string>
-    <string name="delete_receipt_msg"><![CDATA[¿Desea borrar el recibo con asunto \'<b>%1$s</b>\'?]]></string>
-    <string name="show_all_receipts_lbl">Mostrar todos los recibos</string>
-    <string name="vote_receipts_lbl">Recibos de voto</string>
-    <string name="show_vote_receipts_lbl">Mostrar sólo recibos de voto</string>
-    <string name="show_cancellations_vote_receipts_lbl">Mostrar sólo cancelaciones de voto</string>
-    <string name="cancellations_vote_receipts_lbl">Recibos de cancelaciones de voto</string>
-    <string name="check_vote_Cancellation_lbl">Comprobar la cancelación</string>
-    <string name="send_msg_lbl">Enviar mensaje</string>
-    <string name="save_editor_lbl">Guardar</string>
-    <string name="add_option_lbl">Añadir opción</string>
-    <string name="date_finish_lbl">Fecha finalización</string>
-    <string name="date_error_lbl">Debe seleccionar una fecha válida posterior a la fecha actual</string>
-    <string name="subject_error_lbl">Debe rellenar el campo asunto</string>
-    <string name="publish_claim_msg_subject">Solicitud de publicación de reclamación</string>
-    <string name="publish_election_msg_subject">Solicitud de publicación de votación</string>
-    <string name="publish_manifest_msg_subject">Solicitud de publicación de manifiesto</string>
-    <string name="date_begin_lbl">Fecha inicio</string>
-    <string name="date_init_after_finish_error_lbl">La fecha de inicio no puede ser posterior a la fecha de finalización</string>
-    <string name="select_control_center_lbl">Seleccione un centro de control</string>
-    <string name="control_center_missing_error_lbl">Debe seleccionar un centro de control</string>
-    <string name="empty_field_error_lbl">El contenido del campo no puede ir vacío</string>
-    <string name="add_vote_option_lbl">Añadir opción de votación</string>
-    <string name="add_claim_option_lbl">Añadir campo de reclamación</string>
-    <string name="add_vote_option_msg">Introduzca el texto que aparecerá como opción en la votación</string>
-    <string name="add_claim_option_msg">Introduzca el texto que aparecerá como campo de la reclamación</string>
-    <string name="delete_option_lbl">Borrar opción</string>
-    <string name="num_vote_options_error_msg">Debe añadir al menos un par de opciones en la votación</string>
-    <string name="vote_options_lbl">Opciones de la votación</string>
-    <string name="claim_options_lbl">Campos de la reclamación</string>
-    <string name="option_repeated_msg">Ya ha introducido una opción con el valor \'%1$s\'</string>
-    <string name="claim_published_ok_msg">La reclamación se ha publicado corréctamente</string>
-    <string name="election_published_ok_msg">La votación se ha publicado corréctamente</string>
-    <string name="representative_image_lbl">Imagen del representante</string>
-    <string name="new_representative_title">Dar de alta representante</string>
-    <string name="cancel_anonymouys_representation_lbl">Cancelar representación anónima</string>
-
-    <string name="representative_list_lbl">Lista de representantes</string>
-    <string name="receipt_list_lbl">Lista de recibos</string>
-    <string name="options_for_representatives_lbl">Opciones para representantes</string>
-    <string name="new_representative_lbl">Dar de alta como representante</string>
-    <string name="missing_representative_img_error_msg">Debe proporcionar una imagen que identifique al representante</string>
-    <string name="select_img_lbl">Seleccione una imagen</string>
-    <string name="select_representative_image_lbl">Seleccione una imagen asociada al representante</string>
-    <string name="new_representative_error_caption">Error dando de alta representante</string>
-    <string name="new_representative_ok_notification_msg">Usuario dado de alta como representante</string>
-    <string name="new_representative_progress_lbl">Dando de alta representante</string>
-
-    <string name="remove_representative_caption">Dar de baja como representante</string>
-    <string name="remove_representative_msg"> <![CDATA[Para darse de baja como representante deberá firmar
-        la solicitud con su certificado. La solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
-    <string name="revoke_representative_msg_subject">Dar de baja representante</string>
-    <string name="representative_revoke_ok_msg">El usuario ha sido dado de baja como representante</string>
-    <string name="confirm_selection_msg">Confirme la selección</string>
-    <string name="representative_delegation_lbl">Delegar en representante</string>
-    <string name="anonymous_delegation_lbl">Delegar de forma anónima</string>
+    <string name="representative_data_lbl">datos del representante</string>
+    <string name="rss_service_lbl">servicio de subscripciones</string>
+    <string name="websocket_service_conn_lbl">conectado mensajería del sistema de votación</string>
+    <string name="signature_ok_notification_msg">documento firmado y enviado</string>
+    <string name="signature_error_notification_msg">error firmando documento</string>
+    <string name="vote_ok_notification_msg">voto enviado</string>
+    <string name="cancel_vote_ok_notification_msg">voto cancelado</string>
+    <string name="vote_error_notification_msg">error en votación</string>
+    <string name="cancel_vote_error_notification_msg">error cancelando voto</string>
+    <string name="send_vote_caption">enviando voto</string>
+    <string name="vote_option_mismatch">problemas graves en el servicio de voto, por favor, inténtelo mas tarde</string>
+    <string name="cert_info_formated_msg"><![CDATA[<html><b>asunto: </b>%1$s<br/><b>emisor del certificado: </b> %2$s <br/> \n \
+    <b>num. serie del certificado: </b> %3$s <br/><b>valido desde: </b> %4$s<br/> \n \
+    <b>valido hasta: </b> %5$s<br/></html>]]></string>
+    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>fecha: </b>%1$s<br/><b>num. serie del sello de tiempo:</b><br/> %2$s <br/> \n \
+    <br/><b>certificado firmante:</b><br/> %3$s<br/><b>num. serie de certificado: </b> %4$s ]]></string>
+    <string name="share_receipt_lbl">compartir recibo</string>
+    <string name="check_receipt_lbl">comprobar voto en el recuento</string>
+    <string name="delete_receipt_lbl">borrar recibo</string>
+    <string name="open_receipt_lbl">abrir recibo</string>
+    <string name="signers_part_lbl">datos de los certificados firmantes:</string>
+    <string name="show_signers_info_lbl">datos de los firmantes del recibo</string>
+    <string name="show_timestamp_info_lbl">datos del sello de tiempo</string>
+    <string name="date_saved_lbl">guardado</string>
+    <string name="date_updated_lbl">actualizado</string>
+    <string name="cancel_vote_from_receipt_msg"><![CDATA[si continua anulará el voto del asunto \'<b>%1$s</b>\'<br/> \n \
+        una vez anulado el voto podrá volver a votar<br/>¿desea continuar?]]></string>
+    <string name="delete_receipt_msg"><![CDATA[¿desea borrar el recibo con asunto \'<b>%1$s</b>\'?]]></string>
+    <string name="show_all_receipts_lbl">mostrar todos los recibos</string>
+    <string name="vote_receipts_lbl">recibos de voto</string>
+    <string name="show_vote_receipts_lbl">mostrar sólo recibos de voto</string>
+    <string name="show_cancellations_vote_receipts_lbl">mostrar sólo cancelaciones de voto</string>
+    <string name="cancellations_vote_receipts_lbl">recibos de cancelaciones de voto</string>
+    <string name="check_vote_Cancellation_lbl">comprobar la cancelación</string>
+    <string name="send_msg_lbl">enviar mensaje</string>
+    <string name="save_editor_lbl">guardar</string>
+    <string name="add_option_lbl">añadir opción</string>
+    <string name="date_finish_lbl">fecha finalización</string>
+    <string name="date_error_lbl">debe seleccionar una fecha válida posterior a la fecha actual</string>
+    <string name="subject_error_lbl">debe rellenar el campo asunto</string>
+    <string name="publish_claim_msg_subject">solicitud de publicación de reclamación</string>
+    <string name="publish_election_msg_subject">solicitud de publicación de votación</string>
+    <string name="publish_manifest_msg_subject">solicitud de publicación de manifiesto</string>
+    <string name="date_begin_lbl">fecha inicio</string>
+    <string name="date_init_after_finish_error_lbl">la fecha de inicio no puede ser posterior a la fecha de finalización</string>
+    <string name="select_control_center_lbl">seleccione un centro de control</string>
+    <string name="control_center_missing_error_lbl">debe seleccionar un centro de control</string>
+    <string name="empty_field_error_lbl">el contenido del campo no puede ir vacío</string>
+    <string name="add_vote_option_lbl">añadir opción de votación</string>
+    <string name="add_claim_option_lbl">añadir campo de reclamación</string>
+    <string name="add_vote_option_msg">introduzca el texto que aparecerá como opción en la votación</string>
+    <string name="add_claim_option_msg">introduzca el texto que aparecerá como campo de la reclamación</string>
+    <string name="delete_option_lbl">borrar opción</string>
+    <string name="num_vote_options_error_msg">debe añadir al menos un par de opciones en la votación</string>
+    <string name="vote_options_lbl">opciones de la votación</string>
+    <string name="claim_options_lbl">campos de la reclamación</string>
+    <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
+    <string name="claim_published_ok_msg">la reclamación se ha publicado corréctamente</string>
+    <string name="election_published_ok_msg">la votación se ha publicado corréctamente</string>
+    <string name="representative_image_lbl">imagen del representante</string>
+    <string name="new_representative_title">dar de alta representante</string>
+    <string name="cancel_anonymouys_representation_lbl">cancelar representación anónima</string>
+    <string name="representative_list_lbl">lista de representantes</string>
+    <string name="receipt_list_lbl">lista de recibos</string>
+    <string name="options_for_representatives_lbl">opciones para representantes</string>
+    <string name="new_representative_lbl">dar de alta como representante</string>
+    <string name="missing_representative_img_error_msg">debe proporcionar una imagen que identifique al representante</string>
+    <string name="select_img_lbl">seleccione una imagen</string>
+    <string name="select_representative_image_lbl">seleccione una imagen asociada al representante</string>
+    <string name="new_representative_error_caption">error dando de alta representante</string>
+    <string name="new_representative_ok_notification_msg">usuario dado de alta como representante</string>
+    <string name="new_representative_progress_lbl">dando de alta representante</string>
+    <string name="remove_representative_caption">dar de baja como representante</string>
+    <string name="remove_representative_msg"> <![CDATA[para darse de baja como representante deberá firmar
+        la solicitud con su certificado, la solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
+    <string name="revoke_representative_msg_subject">dar de baja representante</string>
+    <string name="representative_revoke_ok_msg">el usuario ha sido dado de baja como representante</string>
+    <string name="confirm_selection_msg">confirme la selección</string>
+    <string name="representative_delegation_lbl">delegar en representante</string>
+    <string name="anonymous_delegation_lbl">delegar de forma anónima</string>
     <string name="anonymous_transactionvs_lbl">pago anónimo</string>
-    <string name="anonymous_delegation_caption">Delegación anónima</string>
-    <string name="public_delegation_lbl">Delegar de forma pública</string>
-    <string name="anonymous_delegation_time_msg">Indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
-    <string name="public_delegation_confirm_msg"><![CDATA[Va a delegar de forma pública en <b>\'%1$s\'</b>]]></string>
-    <string name="anonymous_delegation_confirm_msg"><![CDATA[Va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas.
-        <br/>Por su seguridad la operación será efectiva a partir del <b>\'%3$s\'</b> y terminará el
+    <string name="anonymous_delegation_caption">delegación anónima</string>
+    <string name="public_delegation_lbl">delegar de forma pública</string>
+    <string name="anonymous_delegation_time_msg">indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
+    <string name="public_delegation_confirm_msg"><![CDATA[va a delegar de forma pública en <b>\'%1$s\'</b>]]></string>
+    <string name="anonymous_delegation_confirm_msg"><![CDATA[va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas,
+        <br/>por su seguridad la operación será efectiva a partir del <b>\'%3$s\'</b> y terminará el
         <b>\'%4$s\'</b>]]></string>
-    <string name="anonymous_delegation_msg"><![CDATA[Ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
-    <string name="updating_representative_data_msg">Actualizando datos del representante</string>
-    <string name="download_lbl">Descargar copia</string>
-
-    <string name="smime_subject_msg">Asunto: %1$s</string>
+    <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
+    <string name="updating_representative_data_msg">actualizando datos del representante</string>
+    <string name="download_lbl">descargar copia</string>
+    <string name="smime_subject_msg">asunto: %1$s</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
-    Duración de la delegación: \'%1$s\' semanas<br/><br/>Delegación activa desde: \'%2$s\'
-    <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
-    <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
-    <string name="vicket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
-    %3$s Vickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
-
-    <string name="receipt_vote_subtitle">Voto</string>
-    <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
-    <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
-    <string name="last_updated_msg">Ultima actualización <b>\'%1$s\'</b></string>
-    <string name="vickets_drop_down_lbl">Vickets</string>
-    <string name="vickets_list_lbl">Ultimos movimientos</string>
-    <string name="vicket_lbl">Vickets</string>
-    <string name="save_vicket_lbl">Guardar Vicket</string>
-    <string name="delete_vicket_lbl">Borrar Vicket</string>
-    <string name="share_vicket_lbl">Compartir Vicket</string>
-    <string name="vicket_user_info_lbl">Información del usuario</string>
-    <string name="request_button">Retirar dinero</string>
-    <string name="uservs_accountvs_info_missing_caption">Faltan los datos del usuario</string>
-    <string name="uservs_accountvs_info_missing"><![CDATA[No ha actualizado los datos de la semana]]></string>
-    <string name="update_signers_info_lbl">Actualizar datos</string>
-    <string name="send_message_lbl">Enviar mensaje</string>
-    <string name="update_user_info_pin_msg">Para obtener los datos necesita firmar una solicitud</string>
-    <string name="vicket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
+    duración de la delegación: \'%1$s\' semanas<br/><br/>delegación activa desde: \'%2$s\'
+    <br/><br/>fecha fin de la delegación: \'%3$s\'<br/>
+    <br/>url de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
+    <string name="vicket_request_formatted"><![CDATA[importe total de la operación: <b>%1$s %2$ss</b><br/>
+    %3$s vickets de %4$s %2$ss<br/><br/>url de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
+    <string name="receipt_vote_subtitle">voto</string>
+    <string name="receipt_cancel_vote_subtitle">cancelación de voto</string>
+    <string name="receipt_anonimous_representative_request_subtitle">delegación anónima de representante</string>
+    <string name="last_updated_msg">última actualización <b>\'%1$s\'</b></string>
+    <string name="vickets_drop_down_lbl">vickets</string>
+    <string name="vickets_list_lbl">últimos movimientos</string>
+    <string name="vicket_lbl">vickets</string>
+    <string name="save_vicket_lbl">guardar vicket</string>
+    <string name="delete_vicket_lbl">borrar vicket</string>
+    <string name="share_vicket_lbl">compartir vicket</string>
+    <string name="vicket_user_info_lbl">información del usuario</string>
+    <string name="request_button">retirar dinero</string>
+    <string name="uservs_accountvs_info_missing_caption">faltan los datos del usuario</string>
+    <string name="uservs_accountvs_info_missing"><![CDATA[no ha actualizado los datos de la semana]]></string>
+    <string name="update_signers_info_lbl">actualizar datos</string>
+    <string name="send_message_lbl">enviar mensaje</string>
+    <string name="update_user_info_pin_msg">para obtener los datos necesita firmar una solicitud</string>
+    <string name="vicket_user_info_request_msg_subject">solicitud de información de cuentas</string>
     <string name="vicket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en caja]]></string>
     <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en efectivo en su móvil]]></string>
-    <string name="vicket_last_request_info_lbl"><![CDATA[Ultima actualización el <u><b>\'%1$s\'</b></u>]]></string>
-    <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del domingo a las 24:00 horas se repartirá
+    <string name="vicket_last_request_info_lbl"><![CDATA[última actualización el <u><b>\'%1$s\'</b></u>]]></string>
+    <string name="time_remaining_info_lbl"><![CDATA[lo que no gastes antes del domingo a las 24:00 horas se repartirá
         entre el resto de usuarios]]></string>
-    <string name="cash_request_dialog_caption">Retirar diner0</string>
-    <string name="cash_send_dialog_caption">Realizar pago</string>
-    <string name="cash_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
-    <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
-    <string name="vicket_request_msg_subject">Retirada de Vickets</string>
+    <string name="cash_request_dialog_caption">retirar dinero</string>
+    <string name="cash_send_dialog_caption">realizar pago</string>
+    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
+    <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
+    <string name="vicket_request_msg_subject">retirada de vickets</string>
     <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
-    <string name="transactionvs_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
+    <string name="transactionvs_send_pin_msg"><![CDATA[va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
-    <string name="vicket_request_ok_caption">Retirada de dinero con éxito</string>
-    <string name="vicket_request_error_caption">Error retirando dinero</string>
-    <string name="vicket_request_ok_msg"><![CDATA[Su disponible se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
-    <string name="insufficient_cash_for_tagvs_caption">Disponible insuficiente para \'%1$s\'</string>
-    <string name="insufficient_cash_caption">Disponible insuficiente</string>
-    <string name="insufficient_cash_msg"><![CDATA[Importe solicitado <b>\'%2$s\' %1$s</b><br/>
-    Disponible <b>\'%3$s\' %1$s</b>]]></string>
-    <string name="vicket_send_ok_caption">Pago realizado con éxito</string>
-    <string name="vicket_send_ok_msg"><![CDATA[Ha realizado un pago de <b>\'%1$s\' %2$s</b> bajo el
+    <string name="vicket_request_ok_caption">retirada de dinero con éxito</string>
+    <string name="vicket_request_error_caption">error retirando dinero</string>
+    <string name="vicket_request_ok_msg"><![CDATA[su disponible se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
+    <string name="insufficient_cash_for_tagvs_caption">disponible insuficiente para \'%1$s\'</string>
+    <string name="insufficient_cash_caption">disponible insuficiente</string>
+    <string name="insufficient_cash_msg"><![CDATA[importe solicitado <b>\'%2$s\' %1$s</b><br/>
+    disponible <b>\'%3$s\' %1$s</b>]]></string>
+    <string name="vicket_send_ok_caption">pago realizado con éxito</string>
+    <string name="vicket_send_ok_msg"><![CDATA[ha realizado un pago de <b>\'%1$s\' %2$s</b> bajo el
     concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>
-    <string name="vicket_send_error_caption">Error realizando pago</string>
-    <string name="vicket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
+    <string name="vicket_send_error_caption">error realizando pago</string>
+    <string name="vicket_send_error_msg"><![CDATA[problemas realizando el pago, \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s y %2$s</string>
     <string name="week_lbl">semana</string>
-    <string name="transactionvs_lbl">Transacción</string>
-    <string name="transactionsvs_lbl">Transacciones</string>
-    <string name="transactionvs_formatted"><![CDATA[Fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
-    <string name="transactionvs_from_user_lbl"><![CDATA[Usuario <b>emisor</b>:<br/><b>NIF:</b> %1$s<br/>
-    <b>Nombre:</b> %2$s]]></string>
-    <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
-        <b>Nombre:</b> %2$s]]></string>
-    <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
-    <string name="vicket_cancellation_msg_subject">Cancelación de Vicket</string>
-    <string name="open_vicket_grid_menu">Ver Vickets</string>
-    <string name="cert_info_lbl">Datos del certificado</string>
-    <string name="vicket_cert_caption">Datos del certificado del Vicket</string>
-    <string name="cancel_vicket_lbl">Cancelar Vicket</string>
-    <string name="vicket_data_info_lbl">Válido desde %1$s hasta %2$s</string>
-    <string name="cancel_vicket_dialog_msg">Va a firmar una solicitud de cancelación de Vicket</string>
-    <string name="cancellation_date_lbl"><b>Fecha de cancelación:</b> %1$s</string>
-    <string name="vicket_cancellation_msg">El vicket se ha cancellado correctamente</string>
-    <string name="vicket_cancellation_error_msg_subject">Error cancelando Vicket</string>
-    <string name="vicket_expended_send_error_msg">Los vickets ya habían sido consumidos</string>
-    <string name="vicket_repeated_error_msg">En la operación se han mezclado Vickets usados. Por favor, vuelva a intentarlo</string>
-    <string name="browswevs_lbl">Sistema de Votación</string>
-    <string name="test_lbl">Test</string>
-    <string name="enter_pin_signature_device_msg">Introduzca el PIN de su dispositivo de firma</string>
-    <string name="admin_vickets_menu_item">Administración de Vickets</string>
-    <string name="connecting_lbl">Conectando...</string>
-    <string name="phone_lbl">Teléfono móvil</string>
-    <string name="mail_lbl">Correo electrónico</string>
-    <string name="phone_missing_msg">Intorduzca un número de telefono móvil</string>
-    <string name="mail_missing_msg">Introduzca una dirección de correo electrónico válida</string>
-    <string name="publish_poll_lbl">Publicar votación</string>
+    <string name="transactionvs_lbl">transacción</string>
+    <string name="transactionsvs_lbl">transacciones</string>
+    <string name="transactionvs_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
+    <string name="transactionvs_from_user_lbl"><![CDATA[usuario <b>emisor</b>:<br/><b>nif:</b> %1$s<br/>
+    <b>nombre:</b> %2$s]]></string>
+    <string name="transactionvs_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
+        <b>nombre:</b> %2$s]]></string>
+    <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>justificante</a>]]></string>
+    <string name="vicket_cancellation_msg_subject">cancelación de vicket</string>
+    <string name="open_vicket_grid_menu">ver vickets</string>
+    <string name="cert_info_lbl">datos del certificado</string>
+    <string name="vicket_cert_caption">datos del certificado del vicket</string>
+    <string name="cancel_vicket_lbl">cancelar vicket</string>
+    <string name="vicket_data_info_lbl">válido desde %1$s hasta %2$s</string>
+    <string name="cancel_vicket_dialog_msg">va a firmar una solicitud de cancelación de vicket</string>
+    <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
+    <string name="vicket_cancellation_msg">el vicket se ha cancellado correctamente</string>
+    <string name="vicket_cancellation_error_msg_subject">error cancelando Vicket</string>
+    <string name="vicket_expended_send_error_msg">los vickets ya habían sido consumidos</string>
+    <string name="vicket_repeated_error_msg">en la operación se han mezclado vickets usados, por favor, vuelva a intentarlo</string>
+    <string name="browswevs_lbl">sistema de votación</string>
+    <string name="test_lbl">test</string>
+    <string name="enter_pin_signature_device_msg">introduzca el pin de su dispositivo de firma</string>
+    <string name="admin_vickets_menu_item">administración de vickets</string>
+    <string name="connecting_lbl">conectando...</string>
+    <string name="phone_lbl">teléfono móvil</string>
+    <string name="mail_lbl">correo electrónico</string>
+    <string name="phone_missing_msg">introduzca un número de telefono móvil</string>
+    <string name="mail_missing_msg">introduzca una dirección de correo electrónico válida</string>
+    <string name="publish_poll_lbl">publicar votación</string>
     <string name="hint_phone">teléfono móvil</string>
     <string name="hint_email">email</string>
-    <string name="hint_nif">NIF</string>
-    <string name="hint_surname">Apellidos</string>
-    <string name="hint_name">Nombre</string>
-    <string name="hint_pin">PIN</string>
-    <string name="connect_to_service_lbl">Conectar a servicio</string>
-    <string name="disconnect_from_service_lbl">Desconectar de servicio</string>
-    <string name="init_authenticated_session_msg_subject">Inicio de sesión websocket</string>
-    <string name="init_authenticated_session_pin_msg">Introduzca su contraseña para firmar la solicitud de conexión</string>
-    <string name="decrypt_cert_notfound_msg">Imposible descifrar desde este dispositivo</string>
-    <string name="enter_pin_to_decrypt_msg">Introduzca el PIN para descifrar el mensaje</string>
-    <string name="vickets_menu_user_lbl">Operaciones de Vickets</string>
-    <string name="connecting_to_service_msg">Conectando a servicio</string>
-    <string name="messagevs_send_ok_msg">El mensaje se ha enviado corréctamente</string>
-    <string name="anonymous_transactionvs_msg">Deseo que el pago sea anónimo</string>
-    <string name="FROM_USERVS_msg_subject">Ingreso de usuario</string>
-
+    <string name="hint_nif">nif</string>
+    <string name="hint_surname">apellidos</string>
+    <string name="hint_name">nombre</string>
+    <string name="hint_pin">pin</string>
+    <string name="connect_to_service_lbl">conectar a servicio</string>
+    <string name="disconnect_from_service_lbl">desconectar de servicio</string>
+    <string name="init_authenticated_session_msg_subject">inicio de sesión websocket</string>
+    <string name="init_authenticated_session_pin_msg">introduzca su contraseña para firmar la solicitud de conexión</string>
+    <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
+    <string name="enter_pin_to_decrypt_msg">introduzca el pin para descifrar el mensaje</string>
+    <string name="vickets_menu_user_lbl">operaciones de vickets</string>
+    <string name="connecting_to_service_msg">conectando a servicio</string>
+    <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
+    <string name="anonymous_transactionvs_msg">deseo que el pago sea anónimo</string>
+    <string name="FROM_USERVS_msg_subject">ingreso de usuario</string>
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
-        <b>VotingSystem, 2014. </b>Version %s<br><br>
-        <a href="http://www.sistemavotacion.org/termsOfService.html">Condiciones del  servicio</a><br><br>
-        <a href="http://www.sistemavotacion.org/privacyPolicy.html">Política de privacidad</a>
+        <b>votingsystem, 2014. </b>version %s<br><br>
+        <a href="http://www.sistemavotacion.org/termsOfService.html">condiciones del  servicio</a><br><br>
+        <a href="http://www.sistemavotacion.org/privacyPolicy.html">política de privacidad</a>
     ]]></string>
-    <string name="about_licenses">Open Source Licenses</string>
-    <string name="about_eula">End User License Agreement</string>
-    <string name="title_about">Acerca de</string>
-    <string name="eula_legal_text">EULA text</string>
-    <string name="day_title_today">Hoy</string>
-    <string name="day_title_yesterday">Ayer</string>
-    <string name="day_title_tomorrow">Mañana</string>
-    <string name="polls_lbl">Votaciones</string>
-    <string name="description_debug">Debug and tests</string>
+    <string name="about_licenses">open source licenses</string>
+    <string name="about_eula">end user license agreement</string>
+    <string name="title_about">acerca de</string>
+    <string name="eula_legal_text">eula text</string>
+    <string name="day_title_today">hoy</string>
+    <string name="day_title_yesterday">ayer</string>
+    <string name="day_title_tomorrow">mañana</string>
+    <string name="polls_lbl">votaciones</string>
+    <string name="description_debug">debug and tests</string>
     <string name="placeholder_lorem_ipsum">lorem ipsum ...</string>
-    <string name="navdrawer_item_settings">Ajustes</string>
-    <string name="user_cert_lbl">Certificado de usuario</string>
-    <string name="debug_tests">Pruebas depuración</string>
-    <string name="cert_request_lbl">Solicitud de certificado</string>
-
+    <string name="navdrawer_item_settings">ajustes</string>
+    <string name="user_cert_lbl">certificado de usuario</string>
+    <string name="debug_tests">pruebas depuración</string>
+    <string name="cert_request_lbl">solicitud de certificado</string>
 </resources>

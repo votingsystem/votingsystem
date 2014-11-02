@@ -175,6 +175,7 @@ public class BrowserVSSessionUtils {
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             CryptoTokenVS.JKS_KEYSTORE.toString());
                     showMessage(ContextVS.getMessage("certInstallOKMsg"));
+                    csrFile.delete();
                 } else showMessage(ContextVS.getMessage("certPendingMsg"));
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);

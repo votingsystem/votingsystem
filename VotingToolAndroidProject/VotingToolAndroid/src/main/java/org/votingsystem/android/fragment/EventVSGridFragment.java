@@ -177,10 +177,10 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        LOGD(TAG + ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
+        /*LOGD(TAG + ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
                 " - visibleItemCount: " + visibleItemCount + " - visibleItemCount: " +
                 visibleItemCount + " - groupPosition: " + groupPosition + " - eventState: " +
-                eventState);
+                eventState);*/
         if(contextVS.getAccessControl() == null) {
             LOGD(TAG +  ".onScroll(...)", "Missing Access Control. Waiting for data");
             return;
