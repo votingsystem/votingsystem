@@ -87,6 +87,12 @@ class UrlMappings {
             }
         }
 
+        "/deviceVS/$nif/list" {
+            controller = "deviceVS"
+            action = "list"
+        }
+
+
         "/groupVS/$id"{
             controller = "groupVS"
             action = "index"

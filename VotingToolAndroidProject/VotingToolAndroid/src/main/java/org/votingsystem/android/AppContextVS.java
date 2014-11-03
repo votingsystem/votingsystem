@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.BootStrapService;
@@ -164,8 +165,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public X509Certificate getTimeStampCert() {
-        if(accessControl == null) return null;
-        return getAccessControl().getTimeStampCert();
+        if(accessControl != null) return accessControl.getTimeStampCert();
+        if(vicketServer != null) return vicketServer.getTimeStampCert();
+        return null;
     }
 
     public UserVS getUserVS() {
@@ -174,6 +176,12 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public AccessControlVS getAccessControl() {
         return accessControl;
+    }
+
+    public String getTimeStampServiceURL() {
+        if(accessControl != null) return accessControl.getTimeStampServiceURL();
+        if(vicketServer != null) return vicketServer.getTimeStampServiceURL();
+        return null;
     }
 
     public void setAccessControlVS(AccessControlVS accessControl) {
@@ -301,7 +309,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void showNotification(ResponseVS responseVS){
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(this, MessageActivity.class);http://javapapers.com/core-java/java-email/
+        Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 VICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
@@ -351,6 +359,12 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                         setWebSocketSessionId(null);
                         setWebSocketUserId(null);
                     }
+                    break;
+                case MESSAGEVS_SIGN:
+                    intent = new Intent(this, SMIMESignerActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                    startActivity(intent);
                     break;
             }
         } else  LOGD(TAG + ".sendBroadcast(...) ", "broadcast response with null type!!!");

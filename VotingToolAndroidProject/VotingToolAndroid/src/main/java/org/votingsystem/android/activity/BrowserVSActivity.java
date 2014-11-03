@@ -91,7 +91,6 @@ public class BrowserVSActivity extends ActivityBase {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
-        broadCastId = BrowserVSActivity.class.getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);

@@ -88,8 +88,8 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public static CertificationRequestVS getUserRequest (int keySize, String keyName,
-            String signatureMechanism, String provider, Object nif, Object email,
-            Object phone, String deviceId, Object givenName, Object surName, DeviceVS.Type deviceType)
+            String signatureMechanism, String provider, String nif, String email, String phone, String deviceId,
+            String givenName, String surName, String deviceName, DeviceVS.Type deviceType)
             throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
@@ -97,6 +97,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map extensionDataMap = new HashMap<String, String>();
         extensionDataMap.put("deviceId", deviceId);
+        if(deviceName != null) extensionDataMap.put("deviceName", deviceName);
         if (email != null) extensionDataMap.put("email", email);
         if (phone != null) extensionDataMap.put("mobilePhone", phone);
         if (deviceType != null) extensionDataMap.put("deviceType", deviceType.toString());

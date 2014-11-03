@@ -41,27 +41,26 @@ class SubscriptionVSService {
         boolean isNewUser = false
 		if (!userVSDB) {
             userVSDB = userVS.save()
-			certificate = saveUserCertificate(userVS, deviceData);
+			setUserCertificate(userVS, deviceData);
             isNewUser = true
 			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
 		} else {
             userVSDB.setCertificateCA(userVS.getCertificateCA())
             userVSDB.setCertificate(userVS.getCertificate())
             userVSDB.setTimeStampToken(userVS.getTimeStampToken())
-			certificate = saveUserCertificate(userVSDB, deviceData);
+			setUserCertificate(userVSDB, deviceData);
 		}
-        userVS.setCertificateVS(certificate)
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser,certificateVS:certificate])
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser])
 	}
 
-    @Transactional
-    public CertificateVS saveUserCertificate(UserVS userVS, JSONObject deviceData) {
-        log.debug "saveUserCertificate - deviceData: ${deviceData}"
+    @Transactional  public void setUserCertificate(UserVS userVS, JSONObject deviceData) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug "$methodName - deviceData: ${deviceData}"
         X509Certificate x509Cert = userVS.getCertificate()
         CertificateVS certificate = CertificateVS.findWhere(userVS:userVS, state:CertificateVS.State.OK,
                 serialNumber:x509Cert.getSerialNumber()?.longValue(), authorityCertificateVS: userVS.getCertificateCA())
-        if(certificate) return certificate
-        else{
+        DeviceVS deviceVS = null;
+        if(!certificate){
             certificate = new CertificateVS(userVS:userVS, content:x509Cert?.getEncoded(),
                     state:CertificateVS.State.OK, type:CertificateVS.Type.USER,
                     serialNumber:x509Cert?.getSerialNumber()?.longValue(),
@@ -69,38 +68,18 @@ class SubscriptionVSService {
                     validTo:x509Cert?.getNotAfter()).save();
             userVS.updateCertInfo(x509Cert).save()
             if(deviceData) {
-                DeviceVS deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
+                deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
                 if(!deviceVS) {
                     deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
                             phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
-                    log.debug "saveUserCertificate - new device with id '${deviceVS.id}'"
+                    log.debug "$methodName - new device with id '${deviceVS.id}'"
                 } else deviceVS.updateCertInfo(deviceData).save()
             }
-            log.debug "saveUserCertificate - new certificate with id: '${certificate.id}'"
-            return certificate
-        }
+            log.debug "$methodName - new certificate with id: '${certificate.id}'"
+        } else if(deviceData?.deviceId) deviceVS = DeviceVS.findWhere(deviceId:deviceData.deviceId)
+        userVS.setCertificateVS(certificate)
+        userVS.setDeviceVS(deviceVS)
     }
-
-    public ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
-               String deviceId) {
-		log.debug "checkDevice - givenname: ${givenname} - surname: ${surname} - nif:${nif} - phone:${phone} " +
-                "- email:${email} - deviceId:${deviceId}"
-		if(!nif || !deviceId) {
-			log.debug "Missing params"
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-				messageSource.getMessage('requestWithoutData', null, locale))
-		}
-		String validatedNIF = org.votingsystem.util.NifUtils.validate(nif)
-		UserVS userVS = UserVS.findWhere(nif:validatedNIF)
-		if (!userVS) {
-			userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,
-                    name:givenname, firstName:givenname, lastName:surname).save()
-		}
-		DeviceVS device = DeviceVS.findWhere(deviceId:deviceId)
-		if (!device || (device.userVS.id != userVS.id)) device =
-                new DeviceVS(userVS:userVS, phone:phone, email:email, deviceId:deviceId).save()
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:device)
-	}
 
     @Transactional
     public ResponseVS deActivateUser(MessageSMIME messageSMIMEReq) {

@@ -105,7 +105,7 @@ class AccessControlFilters {
                         }
                         if(smimeMessageReq) {
                             responseVS = processSMIMERequest(smimeMessageReq, contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageSMIME
                             else params[fileName] = null
                         }
                         if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode())
@@ -152,7 +152,7 @@ class AccessControlFilters {
                             responseVS =  signatureVSService.decryptSMIME(requestBytes)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = processSMIMERequest(responseVS.smimeMessage,request.contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.messageSMIME
                             break;
                         case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
@@ -165,7 +165,7 @@ class AccessControlFilters {
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessage(
                                     new ByteArrayInputStream(requestBytes)), request.contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.messageSMIME
                             break;
                         default: return;
                     }
@@ -296,7 +296,7 @@ class AccessControlFilters {
                         base64ContentDigest:smimeMessageReq.getContentDigestStr())
                 MessageSMIME.withTransaction {messageSMIME.save()}
             }
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIME)
         } else if(smimeMessageReq) {
             log.error "**** Filter - processSMIMERequest - signature ERROR"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,

@@ -22,7 +22,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
@@ -48,17 +47,18 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import java.io.File;
-import java.util.*;
 
-import static org.votingsystem.model.ContextVS.*;
+import java.io.File;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -404,7 +404,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         log.debug("consumeWebSocketMessage: " + operation.toString());
         switch(operation) {
             case INIT_VALIDATED_SESSION:
-                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
+                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
                 break;
         }
     }
@@ -413,20 +413,28 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         log.debug("setConnectionStatus - status: " + status.toString());
         switch (status) {
             case CLOSED:
-                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.CLOSED));
+                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                fireCoreSignal(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.OPEN));
+                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.OPEN));
                 break;
         }
     }
 
-    private void fireCoreSignal(String jsCommand) {
+    public void execCommandJS(String jsCommand) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 for(WebView webView : webViewMap.values()) {
                     webView.getEngine().executeScript(jsCommand);
                 }
+            }
+        });
+    }
+
+    public void execCommandJSCurrentView(String jsCommand) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
             }
         });
     }

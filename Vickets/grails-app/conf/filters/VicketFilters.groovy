@@ -99,7 +99,7 @@ class VicketFilters {
                         }
                         if(smimeMessageReq) {
                             responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, contentTypeVS)
-                            if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageSMIME
                             else params[fileName] = null
                         }
                         if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode())
@@ -132,7 +132,7 @@ class VicketFilters {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = signatureVSService.processSMIMERequest(responseVS.smimeMessage,
                                         request.contentTypeVS)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.messageSMIME
                             break;
                         case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
@@ -142,7 +142,7 @@ class VicketFilters {
                         case ContentTypeVS.SIGNED:
                             responseVS = signatureVSService.processSMIMERequest(new SMIMEMessage(
                                     new ByteArrayInputStream(requestBytes)), request.contentTypeVS)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.messageSMIME
                             break;
                         case ContentTypeVS.MESSAGEVS:
                             responseVS = signatureVSService.processMessageVS(requestBytes, request.contentTypeVS)
@@ -235,7 +235,7 @@ class VicketFilters {
 
     private boolean printOutput(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
-        if(ResponseVS.SC_OK != responseVS.statusCode) responseVS.save()
+        if(ResponseVS.SC_OK != responseVS.statusCode && responseVS.messageSMIME) responseVS.save()
         response.setContentType(responseVS.getContentType()?.getName()+";charset=UTF-8")
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
         if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"

@@ -126,14 +126,16 @@ public class WebSocketService extends Service {
             smimeMessage = timeStamper.getSMIME();
         } catch(Exception ex) {
             ex.printStackTrace();
-            new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.WEB_SOCKET_BROADCAST_ID,
+                    getString(R.string.timestamp_service_error_caption),
+                    ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
         }
         try {
             session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
                     smimeMessage).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
-            new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }

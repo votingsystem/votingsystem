@@ -113,7 +113,7 @@ class WebSocketService {
                     messageJSON.remove("smimeMessage")
                     ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
                     if(ResponseVS.SC_OK == responseVS.statusCode) {
-                        UserVS userVS = ((MessageSMIME)responseVS.data).userVS
+                        UserVS userVS = responseVS.messageSMIME.userVS
                         SessionVSHelper.getInstance().put(session, userVS)
                         messageJSON.userId = userVS.id
                         messageJSON.messageVSList = messageVSService.getMessageList(userVS, MessageVS.State.PENDING)

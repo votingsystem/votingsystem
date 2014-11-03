@@ -61,7 +61,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         //byte[] base64timeStampRequest = Base64.encode(timeStampRequest.getEncoded());
         if(timeStampServiceURL == null) timeStampServiceURL =
-                contextVS.getAccessControl().getTimeStampServiceURL();
+                contextVS.getTimeStampServiceURL();
         ResponseVS responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

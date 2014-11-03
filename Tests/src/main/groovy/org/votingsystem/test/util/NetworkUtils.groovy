@@ -28,7 +28,7 @@ class NetworkUtils {
 
     public static String getIpAddress() {
         try {
-            Socket socket = new Socket("sistemavotacion.org", 80);
+            Socket socket = new Socket("www.sistemavotacion.org", 80);
             log.debug("main local ip:: " + socket.getLocalAddress().getHostAddress());
 
             String computername = InetAddress.getLocalHost().getHostName();

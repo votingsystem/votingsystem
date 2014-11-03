@@ -313,7 +313,7 @@ class  SignatureVSService {
                 Base64.getDecoder().decode(messageVSJSON.smimeMessage.getBytes())))
         ResponseVS responseVS = processSMIMERequest(smimeSender, contenType)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-        MessageSMIME messageSMIMEReq = responseVS.data
+        MessageSMIME messageSMIMEReq = responseVS.messageSMIME
         UserVS fromUser = messageSMIMEReq.getUserVS()
         def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         String msg = null
@@ -372,7 +372,7 @@ class  SignatureVSService {
                         eventVS:certValidationResponse.eventVS, type:typeVS,
                         content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr()).save()
             }
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIME)
         } else if(smimeMessageReq) {
             log.error "**** Filter - processSMIMERequest - signature ERROR - "
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,

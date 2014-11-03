@@ -1,9 +1,12 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.model.DeviceVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.websocket.SessionVSHelper
 
@@ -30,13 +33,31 @@ class MessageVSController {
     }
 
     def connected() {
-        List<Long> connectedUsers = SessionVSHelper.getInstance().connectedUsers
-        render connectedUsers as JSON
+        render SessionVSHelper.getInstance().getConnectedUsersDataMap() as JSON
+        return false
     }
 
-    def sendMessageByPhone() {
-        SessionVSHelper.getInstance().sendMessage(params.long("userId"), params.message)
-        render "OK"
+    def sendMessage() {
+        List<DeviceVS> userDeviceList
+        DeviceVS.withTransaction {
+            if(params.deviceId) {
+                DeviceVS deviceVS = DeviceVS.get(params.long("deviceId"))
+                userDeviceList = Arrays.asList(deviceVS)
+            } else if(params.userId) {
+                UserVS userVS = UserVS.get(params.long("userId"))
+                if(userVS) {
+                    userDeviceList  = DeviceVS.findAllWhere(userVS:userVS)
+                }
+            }
+
+        }
+        if(!userDeviceList || userDeviceList.isEmpty()) {
+            Map result = [status:ResponseVS.SC_NOT_FOUND, message:"No device connected with specified paramas" , params:params]
+            render result as JSON
+        } else {
+            SessionVSHelper.getInstance().sendMessage(userDeviceList, new JSONObject(
+                    [status:ResponseVS.SC_OK, message:params.message, operation:TypeVS.MESSAGEVS_SIGN.toString()]).toString())
+        }
         return false
     }
 

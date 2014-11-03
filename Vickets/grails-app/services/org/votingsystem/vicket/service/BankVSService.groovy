@@ -69,13 +69,13 @@ class BankVSService {
             bankVSDB.setCertificate(bankVS.getCertificate())
             bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
         }
-        CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
+        subscriptionVSService.setUserCertificate(bankVSDB, null)
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
                 IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
         String metaInfMsg = MetaInfMsg.getOKMsg(this.class.getSimpleName(), methodName,
-                "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
+                "bankVS_${bankVSDB.id}_certificateVS_${bankVSDB.certificateVS.id}")
         String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"
         log.debug("${metaInfMsg}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.BANKVS_NEW, message:msg, metaInf:metaInfMsg,

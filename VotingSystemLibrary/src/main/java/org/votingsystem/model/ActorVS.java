@@ -287,6 +287,11 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/userVS/" + String.valueOf(groupId);
     }
 
+
+    public String getDeviceListByNifServiceURL(String nif) {
+        return getServerURL() + "/deviceVS/" + nif + "/list";
+    }
+
     public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

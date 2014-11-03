@@ -13,12 +13,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
@@ -26,13 +26,15 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
-import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.client.util.WebSocketListener;
-import org.votingsystem.model.*;
+import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -49,7 +51,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -167,8 +168,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
                         BrowserVSSessionUtils.getInstance().checkCSRRequest();
                     }
-                }
-                catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {
                     responseVS = Utils.checkServer(vicketsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -222,10 +222,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }});
         selectRepresentativeButton.setPrefWidth(500);
         votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
-
         vicketOptionsBox = new VBox(15);
         Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
-
         vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
         vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {

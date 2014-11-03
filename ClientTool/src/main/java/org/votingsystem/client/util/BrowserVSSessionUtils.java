@@ -20,7 +20,6 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;

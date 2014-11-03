@@ -2,6 +2,7 @@ package org.votingsystem.vicket.websocket;
 
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ExceptionVS;
@@ -20,7 +21,7 @@ public class SessionVSHelper {
     private static Logger logger = Logger.getLogger(SessionVSHelper.class);
 
     private static final ConcurrentHashMap<String, SessionVS> sessionMap = new ConcurrentHashMap<String, SessionVS>();
-    private static final ConcurrentHashMap<Long, String> userSessionMap = new ConcurrentHashMap<Long, String>();
+    private static final ConcurrentHashMap<Long, String> deviceSessionMap = new ConcurrentHashMap<Long, String>();
 
     private static final SessionVSHelper instance = new SessionVSHelper();
 
@@ -36,22 +37,41 @@ public class SessionVSHelper {
         SessionVS sessionVS = sessionMap.get(session.getId());
         if(sessionVS == null) {
             sessionMap.put(session.getId(), new SessionVS(session, userVS));
-            userSessionMap.put(userVS.getId(), session.getId());
-        } else if(!userSessionMap.contains(userVS.getId())) {
+            deviceSessionMap.put(userVS.getDeviceVS().getId(), session.getId());
+        } else if(!deviceSessionMap.contains(userVS.getDeviceVS().getId())) {
             if(sessionVS.getUserVS() == null) sessionVS.setUserVS(userVS);
             else if(sessionVS.getUserVS().getId() != userVS.getId()){ throw new ExceptionVS("SessionVS with existing user");}
-            userSessionMap.putIfAbsent(userVS.getId(), session.getId());
+            deviceSessionMap.putIfAbsent(userVS.getDeviceVS().getId(), session.getId());
         } else logger.debug("put - Session already in sessionMap");
     }
 
-    public List<Long> getConnectedUsers() {
-        return Collections.list(userSessionMap.keys());
+    public Collection<Long> getConnectedDevices() {
+        return Collections.list(deviceSessionMap.keys());
+    }
+
+    public Collection<Long> getConnectedUsers() {
+        Set<Long> result = new HashSet();
+        for(Long deviceId : deviceSessionMap.keySet()) {
+            result.add(sessionMap.get(deviceSessionMap.get(deviceId)).getUserVS().getId());
+        }
+        return result;
+    }
+
+    public Map<Long, Set> getConnectedUsersDataMap() {
+        Map<Long, Set> result = new HashMap();
+        for(Long deviceId : deviceSessionMap.keySet()) {
+            Long userVSId = sessionMap.get(deviceSessionMap.get(deviceId)).getUserVS().getId();
+            Set<Long> deviceSet = result.get(userVSId);
+            if(deviceSet != null) deviceSet.add(deviceId);
+            else result.put(userVSId,  new HashSet<>(Arrays.asList(deviceId)));
+        }
+        return result;
     }
 
     public SessionVS remove(Session session) {
         logger.debug("remove - Session id: " + session.getId());
         SessionVS removedSessionVS = sessionMap.remove(session.getId());
-        while (userSessionMap.values().remove(session.getId()));
+        while (deviceSessionMap.values().remove(session.getId()));
         return removedSessionVS;
     }
 
@@ -63,10 +83,10 @@ public class SessionVSHelper {
         return sessionMap.get(session.getId());
     }
 
-    public SessionVS get(UserVS userVS) {
-        String sessionId = userSessionMap.get(userVS.getId());
+    public SessionVS get(Long deviceId) {
+        String sessionId = deviceSessionMap.get(deviceId);
         if(sessionId == null) {
-            logger.debug("get - user: '" + userVS.getId() + "' has not active session");
+            logger.debug("get - deviceId: '" + deviceId + "' has not active session");
             return null;
         }
         return sessionMap.get(sessionId);
@@ -125,9 +145,11 @@ public class SessionVSHelper {
         return responseVS;
     }
 
-    public void sendMessage(Long userId, String message) {
-        String sessionId = userSessionMap.get(userId);
-        sendMessage(sessionId, message);
+    public void sendMessage(List<DeviceVS> userVSDeviceList, String message) {
+        for(DeviceVS device : userVSDeviceList) {
+            String sessionId = deviceSessionMap.get(device.getId());
+            if(sessionId != null) sendMessage(sessionId, message);
+        }
     }
 
     public void sendMessage(String sessionId, String message) {

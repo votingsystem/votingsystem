@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
-import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;

@@ -11,15 +11,17 @@
 <body>
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
-            <paper-button raised onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
-                TransactionVS from BankVS
-            </paper-button>
+            <div>
+                <paper-button raised onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
+                    TransactionVS from BankVS
+                </paper-button>
+            </div>
             <div id="transactionvsFromBankVS" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
             <div layout horizontal center center-justified>
-                <paper-button raised style="margin: 0px 0px 0px 5px;">TransactionVS </paper-button>
+                <paper-button raised style="margin: 0px 0px 0px 5px;">TransactionVS</paper-button>
                 - http://vickets:8086/Vickets/transaction
             </div>
             <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>
@@ -30,6 +32,11 @@
             <div id="newBankVSEditor" style="width: 500px; height: 400px;"></div>
         </div>
 
+        <div layout vertical>
+            <div><paper-button raised style="margin: 0px 0px 0px 5px;">SignWithMobile</paper-button></div>
+
+            <div id="signWithMobileEditor" style="width: 500px; height: 400px;"></div>
+        </div>
     </div>
 </body>
 </html>
@@ -65,8 +72,6 @@
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
-
-
     var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
     var jsonTransactionVSEditor = {  "operation": "FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
         "Cheques comida &apos;proyecto Vickets&apos;", "subject": "Transacción 'sábado' \"21 junio\" a 20C",
@@ -98,7 +103,13 @@
         operation:"BANKVS_NEW", info:"Información del nuevo banco",
         certChainPEM:certChain,
     };
-
     bankVSEditor.set(jsonBankVSEditor);
+
+
+    var signWithMobileEditor = new JSONEditor(document.querySelector("#signWithMobileEditor"));
+    var jsonSignWithMobileEditor = {operation:"MESSAGEVS_SIGN", message:"Message from PC client"};
+    signWithMobileEditor.set(jsonSignWithMobileEditor);
+
+
 </asset:script>
 <asset:deferredScripts/>

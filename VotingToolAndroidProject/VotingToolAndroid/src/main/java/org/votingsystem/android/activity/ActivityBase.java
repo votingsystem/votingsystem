@@ -216,7 +216,8 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                                 MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
                                 connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
                             }
-                        }
+                        } else ActivityBase.this.showMessage(responseVS.getStatusCode(),
+                                responseVS.getCaption(), responseVS.getMessage());
                         break;
                     case WEB_SOCKET_CLOSE:
                         if(mainMenu != null) {
@@ -640,17 +641,21 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     }
 
     //progressDialog.dismiss();
-    private void showProgressDialog(String title, String dialogMessage) {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setCancelable(true);
-            progressDialog.setTitle(title);
-            progressDialog.setMessage(dialogMessage);
-            progressDialog.setIndeterminate(true);
-            /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
-                @Override public void onCancel(DialogInterface dialog){}});*/
-        }
-        progressDialog.show();
+    private void showProgressDialog(final String title, final String dialogMessage) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(ActivityBase.this);
+                    progressDialog.setCancelable(true);
+                    progressDialog.setTitle(title);
+                    progressDialog.setMessage(dialogMessage);
+                    progressDialog.setIndeterminate(true);
+                    /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
+                    @Override public void onCancel(DialogInterface dialog){}});*/
+                }
+                progressDialog.show();
+            }
+        });
     }
 
 

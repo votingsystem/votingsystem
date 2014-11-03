@@ -4,7 +4,6 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.scene.web.WebView;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -20,7 +19,6 @@ import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
-import org.votingsystem.signature.util.ContentSignerUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 
 import javax.websocket.*;
@@ -198,7 +196,8 @@ public class WebSocketService extends Service<ResponseVS> {
                 else {
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
-                            log.debug("TODO - SEND MESSAGE TO BROWSER");
+                            log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
+                            BrowserVS.getInstance().execCommandJSCurrentView("alert('" + responseVS.getMessage() + "')");
                             //browserVS.executeScript("updateMessageVSList(" + message + ")");
                         }
                     });

@@ -102,6 +102,7 @@ public class UserVS implements Serializable {
     @Transient private transient JSONObject metaInfJSON;
     @Transient private transient TimeStampToken timeStampToken;
     @Transient private transient SignerInformation signerInformation;
+    @Transient private transient DeviceVS deviceVS;
     @Transient private KeyStore keyStore;
 
     public UserVS() {}
@@ -412,6 +413,14 @@ public class UserVS implements Serializable {
         UserVS userVS = getUserVS(certificate.getSubjectDN().getName());
         userVS.setCertificate(certificate);
         return userVS;
+    }
+
+    public DeviceVS getDeviceVS() {
+        return deviceVS;
+    }
+
+    public void setDeviceVS(DeviceVS deviceVS) {
+        this.deviceVS = deviceVS;
     }
 
     public static UserVS getUserVS (String subjectDN) {

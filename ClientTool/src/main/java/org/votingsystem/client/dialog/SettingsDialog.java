@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
@@ -32,7 +33,7 @@ import java.security.cert.X509Certificate;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsDialog {
+public class SettingsDialog implements MobileSelectorDialog.Listener{
 
     private static Logger log = Logger.getLogger(SettingsDialog.class);
 
@@ -42,13 +43,13 @@ public class SettingsDialog {
     private VBox keyStoreVBox;
     private GridPane gridPane;
     private RadioButton signWithDNIeRb;
+    private RadioButton signWithMobileRb;
     private RadioButton signWithKeystoreRb;
 
     public SettingsDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }
         });
@@ -60,6 +61,15 @@ public class SettingsDialog {
         signWithDNIeRb.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 changeSignatureMode(actionEvent);
+            }});
+
+
+        signWithMobileRb = new RadioButton(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
+        signWithMobileRb.setToggleGroup(tg);
+        signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                changeSignatureMode(actionEvent);
+                MobileSelectorDialog.show(SettingsDialog.this);
             }});
 
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
@@ -118,9 +128,11 @@ public class SettingsDialog {
         footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
         gridPane.add(requestCertButton,0,0);
-        gridPane.add(signWithDNIeRb,0,1);
-        gridPane.add(signWithKeystoreRb,0,2);
-        gridPane.add(footerButtonsBox,0,4);
+        gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
+        gridPane.add(signWithMobileRb,0,1);
+        gridPane.add(signWithDNIeRb,0,2);
+        gridPane.add(signWithKeystoreRb,0,3);
+        gridPane.add(footerButtonsBox,0,5);
         gridPane.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(gridPane, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
@@ -147,7 +159,7 @@ public class SettingsDialog {
         log.debug("changeSignatureMode");
         gridPane.getChildren().remove(keyStoreVBox);
         if(evt.getSource() == signWithKeystoreRb) {
-            gridPane.add(keyStoreVBox, 0, 3);
+            gridPane.add(keyStoreVBox, 0, 4);
         }
         stage.sizeToScene();
     }
@@ -164,7 +176,7 @@ public class SettingsDialog {
                 break;
             case JKS_KEYSTORE:
                 signWithKeystoreRb.setSelected(true);
-                gridPane.add(keyStoreVBox, 0, 3);
+                gridPane.add(keyStoreVBox, 0, 4);
                 break;
         }
         stage.centerOnScreen();
@@ -234,6 +246,10 @@ public class SettingsDialog {
                     CryptoTokenVS.DNIe.toString());
         }
         stage.close();
+    }
+
+    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
+        log.debug("setSelectedDevice: " + deviceDataJSON.toString());
     }
 
     class Delta { double x, y; }

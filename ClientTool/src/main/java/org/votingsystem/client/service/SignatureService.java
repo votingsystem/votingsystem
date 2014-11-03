@@ -23,15 +23,14 @@ import org.votingsystem.vicket.model.VicketRequestBatch;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.math.BigDecimal;
+import java.net.InetAddress;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.SIGN_MECHANISM;
-import static org.votingsystem.model.ContextVS.SIG_NAME;
+import static org.votingsystem.model.ContextVS.*;
 
 /**
  * @author jgzornoza
@@ -172,7 +171,8 @@ public class SignatureService extends Service<ResponseVS> {
                     (String)operationVS.getDocument().get("nif"), (String)operationVS.getDocument().get("email"),
                     (String)operationVS.getDocument().get("phone"), BrowserVSSessionUtils.getInstance().getDeviceId(),
                     (String)operationVS.getDocument().get("givenname"),
-                    (String)operationVS.getDocument().get("surname"), DeviceVS.Type.PC);
+                    (String)operationVS.getDocument().get("surname"),
+                    InetAddress.getLocalHost().getHostName(), DeviceVS.Type.PC);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
                     ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());

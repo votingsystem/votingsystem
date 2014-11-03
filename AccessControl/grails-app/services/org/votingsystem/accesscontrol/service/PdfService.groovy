@@ -98,7 +98,6 @@ class PdfService {
 				ResponseVS userValidationResponseVS = subscriptionVSService.checkUser(userVS);
 				if(ResponseVS.SC_OK != userValidationResponseVS.statusCode) return userValidationResponseVS;
 				userVS = userValidationResponseVS.userVS;
-				certificate = (CertificateVS)userValidationResponseVS.data;
 			} else userVS = certificate.userVS;
 
             userVS.setTimeStampToken(timeStampToken)

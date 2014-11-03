@@ -408,4 +408,6 @@
     <string name="user_cert_lbl">certificado de usuario</string>
     <string name="debug_tests">pruebas depuración</string>
     <string name="cert_request_lbl">solicitud de certificado</string>
+    <string name="sign_lbl">firmar</string>
+    <string name="sign_request_lbl">solicitud de firma</string>
 </resources>
