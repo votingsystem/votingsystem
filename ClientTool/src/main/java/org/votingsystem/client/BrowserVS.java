@@ -42,6 +42,7 @@ import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
@@ -76,6 +77,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private final BrowserVSPane browserHelper;
     private TabPane tabPane;
     private Button prevButton;
+    private WebSocketServiceAuthenticated webSocketServiceAuthenticated;
+    private WebSocketService webSocketService;
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
@@ -283,7 +286,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new JavafxClient(webView));
                             webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                    BrowserVSSessionUtils.getInstance().getSessionData()));
+                                    BrowserVSSessionUtils.getInstance().getBrowserSessionData()));
                         }
                     } else if (newState.equals(Worker.State.FAILED)) {
                         showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
@@ -439,6 +442,24 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         });
     }
 
+    public WebSocketService getWebSocketService(){
+        if(webSocketService == null) {
+            webSocketService = new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
+                    ContextVS.getInstance().getVicketServer());
+            webSocketService.addListener(this);
+        }
+        return webSocketService;
+    }
+
+    public WebSocketServiceAuthenticated getWebSocketServiceAuthenticated(){
+        if(webSocketServiceAuthenticated == null) {
+            webSocketServiceAuthenticated = new WebSocketServiceAuthenticated(ContextVS.getInstance().getVotingSystemSSLCerts(),
+                    ContextVS.getInstance().getVicketServer());
+            webSocketServiceAuthenticated.addListener(this);
+        }
+        return webSocketServiceAuthenticated;
+    }
+
     public class JavafxClient {// JavaScript interface object
         private WebView webView;
         public JavafxClient(WebView webView) {
@@ -457,16 +478,13 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         Utils.receiptCancellation(operationVS, BrowserVS.this);
                         break;
                     case CONNECT:
-                        if(WebSocketService.getInstance() == null) {
-                            WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
-                                    getVotingSystemSSLCerts(), ContextVS.getInstance().getVicketServer());
-                            webSocketService.addListener(BrowserVS.this);
-                        }
-                        WebSocketService.getInstance().setConnectionEnabled(true, operationVS.getDocument());
+                        getWebSocketServiceAuthenticated().setConnectionEnabled(true, operationVS.getDocument());
                         break;
                     case DISCONNECT:
-                        if(WebSocketService.getInstance() != null)
-                            WebSocketService.getInstance().setConnectionEnabled(false, null);
+                        getWebSocketServiceAuthenticated().setConnectionEnabled(false, null);
+                        break;
+                    case MESSAGEVS_SIGN:
+                        getWebSocketService().sendMessage(jsonStr);
                         break;
                     case  KEYSTORE_SELECT:
                         Utils.selectKeystoreFile(operationVS, BrowserVS.this);
@@ -494,7 +512,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         break;
                     case MESSAGEVS_GET:
                         JSONObject documentJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocument());
-                        WebSocketService.getInstance().sendMessage(documentJSON.toString());
+                        WebSocketServiceAuthenticated.getInstance().sendMessage(documentJSON.toString());
                         break;
                     case CERT_USER_NEW:
                         browserHelper.processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));

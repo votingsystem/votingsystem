@@ -36,8 +36,7 @@ class MessageVSService {
         if(TypeVS.MESSAGEVS_EDIT == TypeVS.valueOf(messageJSON.operation)) {
             MessageVS messageVS = MessageVS.findWhere(id:Integer.valueOf(messageJSON.messageId).longValue(), toUserVS:userVS)
             if(messageVS) {
-                messageVS.state = MessageVS.State.valueOf(messageJSON.state)
-                messageVS.save()
+                messageVS.setState(MessageVS.State.valueOf(messageJSON.state)).save()
                 log.debug("${methodName} - messageVS: ${messageVS.id} - to state '${messageJSON.state}'")
                 return new ResponseVS(ResponseVS.SC_OK)
             } else return new ResponseVS(ResponseVS.SC_NOT_FOUND)

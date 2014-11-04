@@ -2,14 +2,18 @@ package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -21,12 +25,14 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
 
+import java.io.IOException;
+
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MobileSelectorDialog {
+public class MobileSelectorDialog extends DialogVS {
 
     public interface Listener {
         public void setSelectedDevice(JSONObject deviceDataJSON);
@@ -35,23 +41,26 @@ public class MobileSelectorDialog {
     private static Logger log = Logger.getLogger(MobileSelectorDialog.class);
 
     @FXML private VBox mainPane;
+    @FXML private Label captionLbl;
     @FXML private Button acceptButton;
     @FXML private Button cancelButton;
     @FXML private Button searchDeviceButton;
     @FXML private Label messageLbl;
     @FXML private TextField nifTextField;
-    @FXML private VBox devicesBox;
     @FXML private ProgressBar progressBar;
     @FXML private VBox deviceListBox;
+    @FXML private HBox footerBox;
     private Listener listener;
     private ToggleGroup deviceToggleGroup;
 
-    private MobileSelectorDialog(Listener listener) {
+    private MobileSelectorDialog(Listener listener) throws IOException {
+        super("/fxml/MobileSelectorDialog.fxml");
         this.listener = listener;
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
-        mainPane.getChildren().removeAll(devicesBox);
+        mainPane.getChildren().removeAll(progressBar);
+        captionLbl.setText(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
         messageLbl.setText(ContextVS.getMessage("setMobileSignatureMechanismAdv"));
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
@@ -60,13 +69,13 @@ public class MobileSelectorDialog {
         nifTextField.setPromptText(ContextVS.getMessage("nifLbl"));
         searchDeviceButton.setText(ContextVS.getMessage("searchDevicesLbl"));
         searchDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SEARCH));
+        footerBox.getChildren().remove(acceptButton);
     }
 
     public void searchButton(ActionEvent actionEvent) {
         try {
             final String nif = NifUtils.validate(nifTextField.getText());
-            if(!mainPane.getChildren().contains(devicesBox)) mainPane.getChildren().add(1, devicesBox);
-            if(!devicesBox.getChildren().contains(progressBar)) devicesBox.getChildren().add(0, progressBar);
+            if(!mainPane.getChildren().contains(progressBar)) mainPane.getChildren().add(1, progressBar);
             mainPane.getScene().getWindow().sizeToScene();
             new Thread(new Runnable() {
                 @Override public void run() {
@@ -86,28 +95,44 @@ public class MobileSelectorDialog {
     private void updateDeviceList(JSONArray deviceArray) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
-                if(devicesBox.getChildren().contains(progressBar)) devicesBox.getChildren().remove(progressBar);
+                if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
                 if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
                         deviceListBox.getChildren());
                 deviceToggleGroup = new ToggleGroup();
+                deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+                    public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
+                        if (deviceToggleGroup.getSelectedToggle() != null) {
+                            if(!footerBox.getChildren().contains(acceptButton))
+                                footerBox.getChildren().add(2, acceptButton);
+                        } else footerBox.getChildren().remove(acceptButton);
+                    }
+                });
                 for(int i = 0; i < deviceArray.size() ; i++) {
                     JSONObject deviceData = (JSONObject) deviceArray.get(i);
                     RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
                     radioButton.setUserData(deviceData);
                     radioButton.setToggleGroup(deviceToggleGroup);
-                    devicesBox.getChildren().add(radioButton);
+                    deviceListBox.getChildren().add(radioButton);
                 }
+                mainPane.getScene().getWindow().sizeToScene();
             }
         });
     }
 
     public void acceptButton(ActionEvent actionEvent) {
-        listener.setSelectedDevice((JSONObject) deviceToggleGroup.getSelectedToggle().getUserData());
+        if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
+            listener.setSelectedDevice((JSONObject) deviceToggleGroup.getSelectedToggle().getUserData());
+        hide();
     }
 
     public void cancelButton(ActionEvent actionEvent) {
-        mainPane.getScene().getWindow().hide();
+        hide();
     }
+
+    public void onEnterNifTextField(ActionEvent actionEvent) {
+        searchButton(actionEvent);
+    }
+
 
     public void showMessage(String message) {
         PlatformImpl.runLater(new Runnable() {
@@ -119,18 +144,10 @@ public class MobileSelectorDialog {
 
     public static void show(Listener listener) {
         Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 try {
                     MobileSelectorDialog dialog = new MobileSelectorDialog(listener);
-                    Stage stage = new Stage();
-                    stage.centerOnScreen();
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/MobileSelectorDialog.fxml"));
-                    fxmlLoader.setController(dialog);
-                    stage.setScene(new Scene(fxmlLoader.load()));
-                    stage.setTitle(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
-                    stage.initModality(Modality.WINDOW_MODAL);
-                    stage.show();
+                    dialog.show();
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }

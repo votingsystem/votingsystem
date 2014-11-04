@@ -125,8 +125,9 @@ public class MessageVS implements Serializable {
         return state;
     }
 
-    public void setState(State state) {
+    public MessageVS setState(State state) {
         this.state = state;
+        return this;
     }
 
 }

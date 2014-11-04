@@ -5,46 +5,47 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.WebSocketListener;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.*;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-
 import javax.websocket.*;
-import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketService extends Service<ResponseVS> {
+public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(WebSocketService.class);
+    private static Logger log = Logger.getLogger(WebSocketServiceAuthenticated.class);
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
-    private static WebSocketService instance;
+    private static WebSocketServiceAuthenticated instance;
     private final ClientManager client = ClientManager.createClient();
     private final String keyStorePassw = "";
     private ActorVS targetServer;
     private Session session;
+    private UserVS userVS;
     private Set<WebSocketListener> listeners = new HashSet<WebSocketListener>();
     private String connectionMessage = null;
 
-    public WebSocketService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
+    public WebSocketServiceAuthenticated(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
         if(targetServer.getWebSocketURL().startsWith("wss")) {
             log.debug("settings for SECURE connetion");
@@ -78,7 +79,7 @@ public class WebSocketService extends Service<ResponseVS> {
         });
     }
 
-    public static WebSocketService getInstance() {
+    public static WebSocketServiceAuthenticated getInstance() {
         return instance;
     }
 
@@ -102,7 +103,7 @@ public class WebSocketService extends Service<ResponseVS> {
                         } catch(Exception ex) {
                             log.error(ex.getMessage(), ex);
                         }
-                        WebSocketService.this.session = session;
+                        WebSocketServiceAuthenticated.this.session = session;
                     }
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
@@ -121,12 +122,26 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    public void close() {
-        log.debug("close");
-        if(session != null && session.isOpen()) {
-            try {session.close();}
-            catch(Exception ex) {log.error(ex.getMessage(), ex);}
-        } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+    public void setConnectionEnabled(boolean isConnectionEnabled, Map connectionDataMap){
+        if(isConnectionEnabled) {
+            Platform.runLater(new Runnable() {
+                @Override public void run() {
+                    PasswordDialog passwordDialog = new PasswordDialog();
+                    passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+                    String password = passwordDialog.getPassword();
+                    if(password != null) {
+                        new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
+                                password,targetServer)).start();
+                    } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                }
+            });
+        }
+        if(!isConnectionEnabled) {
+            if(session != null && session.isOpen()) {
+                try {session.close();}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+        }
     }
 
     public void addListener(WebSocketListener listener) {
@@ -137,11 +152,11 @@ public class WebSocketService extends Service<ResponseVS> {
         listeners.remove(listener);
     }
 
-    public void sendMessage(String message) throws IOException {
-        if(session != null && session.isOpen()) session.getBasicRemote().sendText(message);
-        else {
-            connectionMessage = message;
-            this.restart();
+    public void sendMessage(String message) {
+        try {
+            session.getBasicRemote().sendText(message);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -150,7 +165,14 @@ public class WebSocketService extends Service<ResponseVS> {
         log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + responseVS.getType() +
                 " - status: " + responseVS.getStatusCode());
         switch(responseVS.getType()) {
-            case MESSAGEVS_SIGN:
+            case INIT_VALIDATED_SESSION:
+                try {
+                    JSONObject messageJSON = (JSONObject) responseVS.getMessageJSON();
+                    BrowserVSSessionUtils.getInstance().setUserVS(userVS, true);
+                    messageJSON.put("userVS", userVS.toJSON());
+                    responseVS.setMessageJSON(messageJSON);
+                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                break;
             case MESSAGEVS_EDIT:
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) showMessage(
                         responseVS.getStatusCode(), responseVS.getMessage());
@@ -183,5 +205,62 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
+    public static JSONObject getMessageJSON(TypeVS operation, String message, Map data, SMIMEMessage smimeMessage) {
+        Map messageToServiceMap = new HashMap<>();
+        messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        messageToServiceMap.put("operation", operation.toString());
+        if(message != null) messageToServiceMap.put("message", message);
+        if(data != null) messageToServiceMap.put("data", data);
+        if(smimeMessage != null) {
+            try {
+                String smimeMessageStr = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
+                messageToServiceMap.put("smimeMessage", smimeMessageStr);
+            } catch (Exception ex) {
+                log.debug(ex.getMessage(), ex);
+            }
+        }
+        JSONObject messageToServiceJSON = (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
+        return messageToServiceJSON;
+    }
+
+    public class InitValidatedSessionTask extends Task<ResponseVS> {
+
+        private String password, nif;
+        private ActorVS targetServer;
+
+        public InitValidatedSessionTask (String nif, String password, ActorVS targetServer) {
+            this.nif = nif;
+            this.password = password;
+            this.targetServer = targetServer;
+        }
+
+        @Override protected ResponseVS call() throws Exception {
+            Map documentToSignMap = new HashMap<>();
+            documentToSignMap.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
+            documentToSignMap.put("UUID", UUID.randomUUID().toString());
+            ResponseVS responseVS = null;
+            try {
+                JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
+                KeyStore keyStore = ContextVS.getUserKeyStore(nif, password);
+                SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyStore,
+                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+                SMIMEMessage smimeMessage = SMIMESignedGeneratorVS.getSMIME(null, targetServer.getNameNormalized(),
+                        documentToSignJSON.toString(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
+                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
+                userVS = smimeMessage.getSigner();
+                responseVS = timeStamper.call();
+                smimeMessage = timeStamper.getSMIME();
+                connectionMessage = getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString();
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() { WebSocketServiceAuthenticated.this.restart();}
+                });
+            } catch(Exception ex) {
+                log.error(ex.getMessage(), ex);
+                broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                showMessage(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
+            }
+            return responseVS;
+        }
+    }
 
 }

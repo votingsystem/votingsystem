@@ -33,8 +33,8 @@
         </div>
 
         <div layout vertical>
-            <div><paper-button raised style="margin: 0px 0px 0px 5px;">SignWithMobile</paper-button></div>
-
+            <div><paper-button raised onclick="signWithMobile()" style="margin: 0px 0px 0px 5px;">
+                SignWithMobile</paper-button></div>
             <div id="signWithMobileEditor" style="width: 500px; height: 400px;"></div>
         </div>
     </div>
@@ -109,7 +109,18 @@
     var signWithMobileEditor = new JSONEditor(document.querySelector("#signWithMobileEditor"));
     var jsonSignWithMobileEditor = {operation:"MESSAGEVS_SIGN", message:"Message from PC client"};
     signWithMobileEditor.set(jsonSignWithMobileEditor);
-
+    function signWithMobile() {
+        console.log("signWithMobile")
+        var webAppMessage = signWithMobileEditor.get();
+        webAppMessage.statusCode = ResponseVS.SC_PROCESSING
+        webAppMessage.objectId = Math.random().toString(36).substring(7)
+        window[webAppMessage.objectId] = function(appMessage) {
+            console.log("signWithMobile - message: " + appMessage);
+            appMessageJSON = JSON.parse(appMessage)
+            showMessageVS(JSON.stringify(appMessageJSON.message), "signWithMobile " + appMessageJSON.statusCode)
+        }
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
 
 </asset:script>
 <asset:deferredScripts/>

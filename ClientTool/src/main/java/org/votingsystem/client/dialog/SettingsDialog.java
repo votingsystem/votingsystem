@@ -26,6 +26,7 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
@@ -33,27 +34,24 @@ import java.security.cert.X509Certificate;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsDialog implements MobileSelectorDialog.Listener{
+public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(SettingsDialog.class);
 
-    private Stage stage;
     private KeyStore userKeyStore;
-    private Label keyStoreLabel;
+    private Label keyStoreLbl;
+    private Label mobileDeviceLbl;
     private VBox keyStoreVBox;
     private GridPane gridPane;
     private RadioButton signWithDNIeRb;
     private RadioButton signWithMobileRb;
     private RadioButton signWithKeystoreRb;
+    private JSONObject deviceDataJSON;
 
     public SettingsDialog() {
-        stage = new Stage(StageStyle.TRANSPARENT);
-        stage.initModality(Modality.APPLICATION_MODAL);
+        super(new GridPane());
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {      }
-        });
-        gridPane = new GridPane();
+        gridPane = (GridPane) getRootNode();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
@@ -71,6 +69,8 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
                 changeSignatureMode(actionEvent);
                 MobileSelectorDialog.show(SettingsDialog.this);
             }});
+        mobileDeviceLbl = new Label();
+        mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
 
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
         signWithKeystoreRb.setToggleGroup(tg);
@@ -85,12 +85,12 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
             @Override public void handle(ActionEvent actionEvent) {
                 selectKeystoreFile();
             }});
-        keyStoreLabel = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
-        keyStoreLabel.setContentDisplay(ContentDisplay.LEFT);
+        keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
+        keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
         UserVS lastAuthenticatedUser = BrowserVSSessionUtils.getInstance().getUserVS();
-        if(lastAuthenticatedUser != null) keyStoreLabel.setText(
+        if(lastAuthenticatedUser != null) keyStoreLbl.setText(
                 lastAuthenticatedUser.getCertificate().getSubjectDN().toString());
-        keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLabel);
+        keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
 
@@ -103,10 +103,13 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
                         @Override public void run() {
                             BrowserVS.getInstance().newTab(
                                     ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
-                            stage.close();
+                            getStage().close();
                         }
                     });
-                } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
+                } else {
+                    log.error("missing 'access control'");
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
+                }
             }
         });
 
@@ -115,9 +118,8 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                stage.close();
+                getStage().close();
             }});
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
@@ -125,46 +127,35 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
             @Override public void handle(ActionEvent actionEvent) {
                 validateForm();
             }});
-        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(spacer, cancelButton, acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
         gridPane.add(requestCertButton,0,0);
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
         gridPane.add(signWithMobileRb,0,1);
-        gridPane.add(signWithDNIeRb,0,2);
-        gridPane.add(signWithKeystoreRb,0,3);
-        gridPane.add(footerButtonsBox,0,5);
+        gridPane.setMargin(mobileDeviceLbl, new Insets(0, 0, 0, 20));
+        gridPane.add(signWithDNIeRb,0,3);
+        gridPane.add(signWithKeystoreRb,0,5);
+        gridPane.add(footerButtonsBox,0,7);
         gridPane.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(gridPane, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
-        // allow the dialog to be dragged around.
-        final Node root = stage.getScene().getRoot();
-        final Delta dragDelta = new Delta();
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                // record a delta distance for the drag and drop operation.
-                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-            }
-        });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
-                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
-            }
-        });
+        getStage().setScene(new Scene(gridPane, Color.TRANSPARENT));
+        getStage().getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
         gridPane.setMinWidth(600);
     }
 
     private void changeSignatureMode(ActionEvent evt) {
         log.debug("changeSignatureMode");
-        gridPane.getChildren().remove(keyStoreVBox);
+        if(gridPane.getChildren().contains(keyStoreVBox)) gridPane.getChildren().remove(keyStoreVBox);
+        if(gridPane.getChildren().contains(mobileDeviceLbl)) gridPane.getChildren().remove(mobileDeviceLbl);
         if(evt.getSource() == signWithKeystoreRb) {
-            gridPane.add(keyStoreVBox, 0, 4);
+            gridPane.add(keyStoreVBox, 0, 6);
         }
-        stage.sizeToScene();
+        if(evt.getSource() == signWithMobileRb && deviceDataJSON != null) {
+            gridPane.add(mobileDeviceLbl, 0, 2);
+        }
+        getStage().sizeToScene();
     }
 
-    public void show() {
+    @Override public void show() {
         log.debug("show");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
                 CryptoTokenVS.DNIe.toString());
@@ -176,11 +167,15 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
                 break;
             case JKS_KEYSTORE:
                 signWithKeystoreRb.setSelected(true);
-                gridPane.add(keyStoreVBox, 0, 4);
+                gridPane.add(keyStoreVBox, 0, 6);
+                break;
+            case MOBILE:
+                signWithMobileRb.setSelected(true);
+                mobileDeviceLbl.setText(BrowserVSSessionUtils.getInstance().getMobileCryptoToken().getString("deviceName"));
+                gridPane.add(mobileDeviceLbl, 0, 2);
                 break;
         }
-        stage.centerOnScreen();
-        stage.show();
+        getStage().show();
     }
 
     private void selectKeystoreFile() {
@@ -188,7 +183,7 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
         try {
             final FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(ContextVS.getMessage("selectKeyStore"));
-            File file = fileChooser.showOpenDialog(stage);
+            File file = fileChooser.showOpenDialog(getStage());
             if (file != null) {
                 File selectedKeystore = new File(file.getAbsolutePath());
                 byte[] keystoreBytes = FileUtils.getBytesFromFile(selectedKeystore);
@@ -199,9 +194,9 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
                             ContextVS.getMessage("keyStoreNotValidErrorMsg"));
                 }
                 X509Certificate certSigner = (X509Certificate) userKeyStore.getCertificate("UserTestKeysStore");
-                keyStoreLabel.setText(certSigner.getSubjectDN().toString());
+                keyStoreLbl.setText(certSigner.getSubjectDN().toString());
             } else {
-                keyStoreLabel.setText(ContextVS.getMessage("selectKeyStoreLbl"));
+                keyStoreLbl.setText(ContextVS.getMessage("selectKeyStoreLbl"));
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -235,23 +230,29 @@ public class SettingsDialog implements MobileSelectorDialog.Listener{
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             CryptoTokenVS.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
-                    showMessage(null, ContextVS.getMessage("errorLbl") + " " +
-                            ContextVS.getMessage("errorStoringKeyStoreMsg"));
+                    showMessage(null, ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }
             }
         }
         if(signWithDNIeRb.isSelected()) {
-            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                    CryptoTokenVS.DNIe.toString());
+            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         }
-        stage.close();
+        if(signWithMobileRb.isSelected() && deviceDataJSON == null) {
+            showMessage(null, ContextVS.getMessage("deviceDataMissingErrorMsg"));
+            return;
+        } else if(signWithMobileRb.isSelected()) {
+            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.MOBILE.toString());
+            BrowserVSSessionUtils.getInstance().setMobileCryptoToken(deviceDataJSON);
+        }
+        hide();
     }
 
     @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
         log.debug("setSelectedDevice: " + deviceDataJSON.toString());
+        this.deviceDataJSON = deviceDataJSON;
+        if(!gridPane.getChildren().contains(mobileDeviceLbl)) gridPane.add(mobileDeviceLbl, 0, 2);
+        mobileDeviceLbl.setText(deviceDataJSON.getString("deviceName"));
     }
-
-    class Delta { double x, y; }
 
 }

@@ -415,7 +415,7 @@ public class SignatureService extends Service<ResponseVS> {
                 editDataMap.put("state", "CONSUMED");
                 editDataMap.put("messageId", documentToDecrypt.get("id"));
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(editDataMap);
-                WebSocketService.getInstance().sendMessage(jsonObject.toString());
+                WebSocketServiceAuthenticated.getInstance().sendMessage(jsonObject.toString());
             }
             else {
                 log.error("Unable to decrypt from this device");
@@ -549,7 +549,6 @@ public class SignatureService extends Service<ResponseVS> {
             return senderWorker.call();
         }
 
-
         //we know this is done in a background thread
         private ResponseVS<ActorVS> publishSMIME(OperationVS operationVS) throws Exception {
             log.debug("publishPoll");
@@ -563,6 +562,5 @@ public class SignatureService extends Service<ResponseVS> {
             return responseVS;
         }
     }
-
 
 }

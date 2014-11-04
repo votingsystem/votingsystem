@@ -35,6 +35,7 @@ public class BrowserVSSessionUtils {
 
     private UserVS userVS;
     private File sessionFile;
+    private JSONObject browserSessionDataJSON;
     private JSONObject sessionDataJSON;
 
     private static final BrowserVSSessionUtils INSTANCE = new BrowserVSSessionUtils();
@@ -44,10 +45,15 @@ public class BrowserVSSessionUtils {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE_NAME);
             if(sessionFile.createNewFile()) {
                 sessionDataJSON = new JSONObject();
-                sessionDataJSON.put("deviceId", UUID.randomUUID().toString());
-            } else sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
-            sessionDataJSON.put("isConnected", false);
-            if(sessionDataJSON.get("userVS") != null) userVS = UserVS.parse((java.util.Map) sessionDataJSON.get("userVS"));
+                browserSessionDataJSON = new JSONObject();
+                browserSessionDataJSON.put("deviceId", UUID.randomUUID().toString());
+                sessionDataJSON.put("browserSession", browserSessionDataJSON);
+            } else {
+                sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
+                browserSessionDataJSON = sessionDataJSON.getJSONObject("browserSession");
+            }
+            browserSessionDataJSON.put("isConnected", false);
+            if(browserSessionDataJSON.get("userVS") != null) userVS = UserVS.parse((java.util.Map) browserSessionDataJSON.get("userVS"));
             flush();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -59,21 +65,30 @@ public class BrowserVSSessionUtils {
     }
 
     public void setIsConnected(boolean isConnected) {
-        sessionDataJSON.put("isConnected", isConnected);
+        browserSessionDataJSON.put("isConnected", isConnected);
         flush();
     }
 
     public void setCSRRequestId(Long id) {
-        sessionDataJSON.put("csrRequestId", id);
+        browserSessionDataJSON.put("csrRequestId", id);
         flush();
     }
 
+    public void setMobileCryptoToken(JSONObject deviceDataJSON) {
+        sessionDataJSON.put("mobileCryptoToken", deviceDataJSON);
+        flush();
+    }
+
+    public JSONObject getMobileCryptoToken() {
+        return sessionDataJSON.getJSONObject("mobileCryptoToken");
+    }
+
     public Long getCSRRequestId() {
-        return sessionDataJSON.getLong("csrRequestId");
+        return browserSessionDataJSON.getLong("csrRequestId");
     }
 
     public String getDeviceId() {
-        return sessionDataJSON.getString("deviceId");
+        return browserSessionDataJSON.getString("deviceId");
     }
 
     public UserVS getUserVS() {
@@ -83,8 +98,8 @@ public class BrowserVSSessionUtils {
     public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
         this.userVS = userVS;
         JSONArray userVSList = null;
-        if(sessionDataJSON.has("userVSList")) {
-            userVSList = sessionDataJSON.getJSONArray("userVSList");
+        if(browserSessionDataJSON.has("userVSList")) {
+            userVSList = browserSessionDataJSON.getJSONArray("userVSList");
             boolean updated = false;
             for(int i = 0; i < userVSList.size(); i++) {
                 JSONObject user = (JSONObject) userVSList.get(i);
@@ -98,15 +113,15 @@ public class BrowserVSSessionUtils {
         } else {
             userVSList = new JSONArray();
             userVSList.add(userVS.toJSON());
-            sessionDataJSON.put("userVSList", userVSList);
+            browserSessionDataJSON.put("userVSList", userVSList);
         }
-        sessionDataJSON.put("isConnected", isConnected);
-        sessionDataJSON.put("userVS", userVS.toJSON());
+        browserSessionDataJSON.put("isConnected", isConnected);
+        browserSessionDataJSON.put("userVS", userVS.toJSON());
         flush();
     }
 
-    public JSONObject getSessionData() {
-        return sessionDataJSON;
+    public JSONObject getBrowserSessionData() {
+        return browserSessionDataJSON;
     }
 
     public void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
@@ -115,7 +130,6 @@ public class BrowserVSSessionUtils {
             csrFile.createNewFile();
             JSONObject jsonData = bundle.toJSON();
             jsonData.put("requestId", requestId);
-            flush();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(jsonData.toString().getBytes()), csrFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -194,7 +208,9 @@ public class BrowserVSSessionUtils {
     }
 
     private void flush() {
+        log.debug("flush");
         try {
+            sessionDataJSON.put("browserSession", browserSessionDataJSON);
             FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataJSON.toString().getBytes()), sessionFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
