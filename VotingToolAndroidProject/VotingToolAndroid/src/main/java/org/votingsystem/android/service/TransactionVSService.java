@@ -12,7 +12,7 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
@@ -63,7 +63,7 @@ public class TransactionVSService extends IntentService {
 
     private void broadCastResponse(ResponseVS responseVS) {
         contextVS.showNotification(responseVS);
-        contextVS.sendBroadcast(responseVS);
+        contextVS.broadcastResponse(responseVS);
     }
 
 }

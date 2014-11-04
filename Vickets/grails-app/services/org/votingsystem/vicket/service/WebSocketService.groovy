@@ -14,6 +14,7 @@ import org.votingsystem.vicket.websocket.SessionVSHelper
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 class WebSocketService {
 
@@ -25,13 +26,15 @@ class WebSocketService {
         try {
             processRequest(new WebSocketRequest(session, msg, last))
         } catch(Exception ex) {
-            processResponse(WebSocketUtils.getResponse(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())))
+            log.error(ex.getMessage(), ex);
+            processResponse(WebSocketUtils.getResponse(session.getId(),
+                    new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())))
         }
     }
 
-    public void onBinaryMessage(Session session, ByteBuffer bb, boolean last) {
+    public void onBinaryMessage(Session session, ByteBuffer byteBuffer, boolean last) {
         log.debug("onBinaryMessage")
-        //session.getBasicRemote().sendBinary(bb, last);
+        //session.getBasicRemote().sendBinary(byteBuffer, last);
     }
 
     public void onOpen(Session session) {
@@ -54,19 +57,13 @@ class WebSocketService {
                 messageVSService.sendWebSocketMessage(request.messageJSON)
                 break;
             case TypeVS.MESSAGEVS_EDIT:
-                if(!request.sessionVS) processResponse(WebSocketUtils.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
+                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
                 grailsApplication.mainContext.getBean("messageVSService").editMessage(
                         request. messageJSON, request.sessionVS.userVS, request.locale)
                 break;
-            case TypeVS.WEB_SOCKET_ADD_SESSION:
-                if(!request.sessionVS) processResponse(WebSocketUtils.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
-                grailsApplication.mainContext.getBean("messageVSService").editMessage(
-                        request.messageJSON, request.sessionVS.userVS, request.locale)
-                break;
             case TypeVS.MESSAGEVS_GET:
-                if(!request.sessionVS) processResponse(WebSocketUtils.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
+                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
                 request.messageJSON.userId = request.sessionVS.userVS.id
                 request.messageJSON.messageVSList = messageVSService.getMessageList(request.sessionVS.userVS,
@@ -74,20 +71,23 @@ class WebSocketService {
                 request.messageJSON.status = ResponseVS.SC_OK
                 processResponse(request.messageJSON)
                 break;
-            case TypeVS.MESSAGEVS_SIGN:
-                ResponseVS responseVS = SessionVSHelper.getInstance().sendMessage(Long.valueOf(
-                        request.messageJSON.deviceId), request.messageJSON.deviceName, request.messageJSON)
-                processResponse(WebSocketUtils.getSignResponse(responseVS, request.messageJSON))
+            case TypeVS.MESSAGEVS_TO_DEVICE:
+                if(SessionVSHelper.getInstance().sendMessageToDevice(Long.valueOf(
+                        request.messageJSON.deviceId), request.messageJSON.toString())) {//message send OK
+                    processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_TO_DEVICE, ResponseVS.SC_OK,null)))
+                } else processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_TO_DEVICE, ResponseVS.SC_ERROR,
+                        messageSource.getMessage("webSocketDeviceSessionNotFoundErrorMsg",
+                        [request.messageJSON.deviceToName].toArray(), locale))));
                 break;
-            case TypeVS.MESSAGEVS_SIGN_RESPONSE:
-                if(!request.sessionVS) processResponse(WebSocketUtils.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
+            case TypeVS.MESSAGEVS_FROM_DEVICE:
+                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
                 Session originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
-                if(!originSession) processResponse(WebSocketUtils.getResponse(
+                if(!originSession) processResponse(request.getResponse(
                         new ResponseVS(TypeVS.MESSAGEVS_SIGN_RESPONSE, ResponseVS.SC_ERROR, messageSource.getMessage(
                                 "messagevsSignRequestorNotFound", null, locale))))
                 originSession.getBasicRemote().sendText(request.messageJSON.toString())
-                processResponse(WebSocketUtils.getResponse(new ResponseVS(
+                processResponse(request.getResponse(new ResponseVS(
                         TypeVS.MESSAGEVS_SIGN_RESPONSE, ResponseVS.SC_OK, null)))
                 break;
             case TypeVS.INIT_VALIDATED_SESSION:
@@ -98,14 +98,14 @@ class WebSocketService {
                 ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
-                    SessionVSHelper.getInstance().put(request.session, userVS)
+                    SessionVSHelper.getInstance().putAuthenticatedDevice(request.session, userVS)
                     request.messageJSON.userId = userVS.id
-                    request.messageJSON.messageVSList = messageVSService.getMessageList(userVS, MessageVS.State.PENDING)
-                    request.messageJSON.state = MessageVS.State.PENDING
-                    request.messageJSON.status = ResponseVS.SC_OK
+                    request.messageJSON.messageVSDataMap = [(MessageVS.State.PENDING.toString()):
+                                messageVSService.getMessageList(userVS, MessageVS.State.PENDING)]
+                    request.messageJSON.statusCode = ResponseVS.SC_OK
                     processResponse(request.messageJSON)
                 } else {
-                    request.messageJSON.status = ResponseVS.SC_ERROR
+                    request.messageJSON.statusCode = ResponseVS.SC_ERROR
                     request.messageJSON.message = responseVS.getMessage()
                     processResponse(request.messageJSON)
                 }
@@ -147,12 +147,19 @@ class WebSocketService {
         WebSocketRequest(Session session, String msg, boolean last) {
             this.session = session;
             messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
-            if(!messageJSON.locale) throw new ExceptionVS("missing message locale")
-            locale = Locale.forLanguageTag(messageJSON.locale)
-            operation = TypeVS.valueOf(messageJSON.operation)
             messageJSON.sessionId = session.getId()
+            if(!messageJSON.locale) throw new ExceptionVS("missing message 'locale'")
+            locale = Locale.forLanguageTag(messageJSON.locale)
+            if(!messageJSON.operation) throw new ExceptionVS("missing message 'operation'")
+            operation = TypeVS.valueOf(messageJSON.operation)
+            if(TypeVS.MESSAGEVS_SIGN == operation) {
+                if(!messageJSON.deviceId) throw new ExceptionVS("missing message 'deviceId'")
+            }
             sessionVS = SessionVSHelper.getInstance().getAuthenticatedSession(session)
-            log.debug("WebSocketRequest - session id: ${session.getId()} - operation : ${messageJSON?.operation} - last: ${last}")
+            log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - last: ${last}")
+        }
+        JSONObject getResponse(ResponseVS responseVS){
+            return WebSocketUtils.getResponse(session.getId(), responseVS)
         }
     }
 

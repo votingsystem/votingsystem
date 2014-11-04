@@ -14,7 +14,7 @@ import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.util.HttpHelper;
 
@@ -95,7 +95,7 @@ public class BootStrapService extends IntentService {
         }
         if(responseVS == null) responseVS = new ResponseVS();
         responseVS.setServiceCaller(serviceCaller);
-        contextVS.sendBroadcast(responseVS);
+        contextVS.broadcastResponse(responseVS);
     }
 
     private void runOnUiThread(Runnable runnable) {

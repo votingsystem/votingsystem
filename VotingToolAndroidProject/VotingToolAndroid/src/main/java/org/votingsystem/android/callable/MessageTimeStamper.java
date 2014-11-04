@@ -7,7 +7,7 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 

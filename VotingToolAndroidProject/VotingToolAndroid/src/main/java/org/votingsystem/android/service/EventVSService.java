@@ -13,7 +13,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSResponse;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -157,7 +157,7 @@ public class EventVSService extends IntentService {
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         }
-        contextVS.sendBroadcast(responseVS);
+        contextVS.broadcastResponse(responseVS);
     }
 
 }

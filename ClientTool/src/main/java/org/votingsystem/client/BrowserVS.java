@@ -393,6 +393,15 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         });
     }
 
+    public void showMessage(Integer statusCode, String message) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                MessageDialog messageDialog = new MessageDialog();
+                messageDialog.showMessage(statusCode, message);
+            }
+        });
+    }
+
     public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,
             final boolean isToolbarVisible) {
         final StringBuilder jsCommand = new StringBuilder();
@@ -403,13 +412,24 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     @Override public void consumeWebSocketMessage(JSONObject messageJSON) {
-        TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
-        log.debug("consumeWebSocketMessage: " + operation.toString());
-        switch(operation) {
-            case INIT_VALIDATED_SESSION:
-                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
-                break;
-        }
+        messageJSON = messageJSON.getJSONObject("message");
+        if(messageJSON.containsKey("operation")) {
+            TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
+            log.debug("consumeWebSocketMessage: " + operation.toString());
+            switch(operation) {
+                case INIT_VALIDATED_SESSION:
+                    execCommandJS(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
+                    break;
+                case MESSAGEVS_SIGN:
+                    showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
+                            messageJSON.containsKey("message")?messageJSON.getString("message"):null);
+                    break;
+                default:
+                    showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
+                            messageJSON.containsKey("message")?messageJSON.getString("message"):null);
+            }
+        } else showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
+                messageJSON.containsKey("message")?messageJSON.getString("message"):null);
     }
 
     @Override public void setConnectionStatus(ConnectionStatus status) {
@@ -483,7 +503,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     case DISCONNECT:
                         getWebSocketServiceAuthenticated().setConnectionEnabled(false, null);
                         break;
-                    case MESSAGEVS_SIGN:
+                    case MESSAGEVS_TO_DEVICE:
                         getWebSocketService().sendMessage(jsonStr);
                         break;
                     case  KEYSTORE_SELECT:

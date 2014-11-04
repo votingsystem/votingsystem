@@ -9,7 +9,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
@@ -79,7 +79,7 @@ public class UserCertRequestService extends IntentService {
                     message);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
-            contextVS.sendBroadcast(responseVS);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 

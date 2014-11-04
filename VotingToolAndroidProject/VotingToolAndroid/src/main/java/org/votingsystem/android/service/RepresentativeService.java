@@ -30,7 +30,7 @@ import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
@@ -303,7 +303,7 @@ public class RepresentativeService extends IntentService {
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operationType);
-            contextVS.sendBroadcast(responseVS);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 

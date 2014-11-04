@@ -71,40 +71,6 @@ public class EventsVSActivity extends ActivityBase
     private Menu mainMenu;
     private String broadCastId = EventsVSActivity.class.getSimpleName();
 
-    /*private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        refreshingStateChanged(true);
-                        toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else {
-                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + responseVS.getTypeVS());
-                refreshingStateChanged(false);
-                switch(responseVS.getTypeVS()) {
-                    case INIT_VALIDATED_SESSION:
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            if(mainMenu != null) {
-                                MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                                connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
-                            }
-                        }
-                        break;
-                    case WEB_SOCKET_CLOSE:
-                        if(mainMenu != null) {
-                            MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                            connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
-                        }
-                        break;
-                }
-
-            }
-        }
-    };*/
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +

@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.ByteArrayInputStream;
@@ -310,7 +310,7 @@ public class Encryptor {
         return result;
     }
 
-    public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
+    /*public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
         Log.d(TAG + ".decryptCMS()", "decryptCMS");
         try {
             byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
@@ -340,7 +340,7 @@ public class Encryptor {
         } catch(Exception ex) {
             return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
         }
-    }
+    }*/
 
 	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
             PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {

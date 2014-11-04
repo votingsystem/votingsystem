@@ -31,7 +31,7 @@ import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.signature.smime.SMIMEMessage;

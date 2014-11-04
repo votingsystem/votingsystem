@@ -28,7 +28,6 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ResponseVS;
 
 import java.io.File;
 import java.io.IOException;

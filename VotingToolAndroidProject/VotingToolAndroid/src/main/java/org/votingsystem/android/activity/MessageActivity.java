@@ -11,7 +11,7 @@ import android.util.Log;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 
 /**
  * @author jgzornoza

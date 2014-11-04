@@ -29,16 +29,10 @@ public class WebSocketUtils {
         return messageToServiceJSON;
     }
 
-    public static JSONObject getSignResponse(ResponseVS responseVS, JSONObject requestJSON){
-        if(requestJSON.has("encryptedMessage")) requestJSON.remove("encryptedMessage");
-        requestJSON.put("statusCode", responseVS.getStatusCode());
-        requestJSON.put("message", responseVS.getMessage());
-        return requestJSON;
-    }
-
-    public static JSONObject getResponse(ResponseVS responseVS){
+    public static JSONObject getResponse(String sessionId, ResponseVS responseVS){
         JSONObject result = new JSONObject();
         result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
+        result.put("sessionId", sessionId);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("statusCode", responseVS.getStatusCode());
         jsonObject.put("message", responseVS.getMessage());

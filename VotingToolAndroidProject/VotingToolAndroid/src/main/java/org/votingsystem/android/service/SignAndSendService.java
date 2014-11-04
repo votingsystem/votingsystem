@@ -16,7 +16,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -138,7 +138,7 @@ public class SignAndSendService extends IntentService {
             responseVS.setTypeVS(operationType);
             responseVS.setServiceCaller(serviceCaller);
             contextVS.showNotification(responseVS);
-            contextVS.sendBroadcast(responseVS);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 
@@ -158,7 +158,7 @@ public class SignAndSendService extends IntentService {
         responseVS.setServiceCaller(serviceCaller);
         responseVS.setOperation(operation);
         contextVS.showNotification(responseVS);
-        contextVS.sendBroadcast(responseVS);
+        contextVS.broadcastResponse(responseVS);
     }
 
     private void sendMessageVS(OperationVS operationVS, String serviceCaller){
@@ -213,7 +213,7 @@ public class SignAndSendService extends IntentService {
             responseVS.setOperation(operationVS);
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operationVS.getTypeVS());
-            contextVS.sendBroadcast(responseVS);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 

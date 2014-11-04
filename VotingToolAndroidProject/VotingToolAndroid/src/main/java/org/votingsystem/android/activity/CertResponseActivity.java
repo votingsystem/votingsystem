@@ -27,7 +27,7 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;

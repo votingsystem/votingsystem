@@ -107,7 +107,8 @@
 
 
     var signWithMobileEditor = new JSONEditor(document.querySelector("#signWithMobileEditor"));
-    var jsonSignWithMobileEditor = {operation:"MESSAGEVS_SIGN", message:"Message from PC client"};
+    var jsonSignWithMobileEditor = {operation:"MESSAGEVS_TO_DEVICE", deviceToName:"Nexus 4", locale:"es", deviceId:2,
+        encryptedMessage:{deviceFromName:'pc-vs', documentToSign:{},operation:"MESSAGEVS_SIGN"}};
     signWithMobileEditor.set(jsonSignWithMobileEditor);
     function signWithMobile() {
         console.log("signWithMobile")

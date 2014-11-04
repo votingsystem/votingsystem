@@ -23,7 +23,7 @@ import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class BrowserVSActivity extends ActivityBase {
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             if(TypeVS.MESSAGEVS_DECRYPT == typeVS) {
-                decryptMessageVS(operationVS);
+                //decryptMessageVS(operationVS);
             } else launchSignAndSendService();
         }
         else {
@@ -147,7 +147,7 @@ public class BrowserVSActivity extends ActivityBase {
         }
     }
 
-    private void decryptMessageVS(OperationVS operationVS)  {
+    /*private void decryptMessageVS(OperationVS operationVS)  {
         Log.d(TAG + ".decryptMessageVS(...) ", "decryptMessageVS");
         ResponseVS responseVS = null;
         try {
@@ -160,7 +160,7 @@ public class BrowserVSActivity extends ActivityBase {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-    }
+    }*/
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
         Log.d(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());

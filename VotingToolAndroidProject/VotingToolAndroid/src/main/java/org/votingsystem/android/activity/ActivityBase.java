@@ -71,10 +71,11 @@ import org.votingsystem.android.util.LoginAndAuthHelper;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.android.util.WebSocketRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -196,38 +197,39 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        showProgressDialog(getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg));
-                        toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else {
-                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + responseVS.getTypeVS());
-                if(progressDialog != null) progressDialog.dismiss();
-                switch(responseVS.getTypeVS()) {
-                    case INIT_VALIDATED_SESSION:
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            if(mainMenu != null) {
-                                MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                                connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
-                            }
-                        } else ActivityBase.this.showMessage(responseVS.getStatusCode(),
-                                responseVS.getCaption(), responseVS.getMessage());
-                        break;
-                    case WEB_SOCKET_CLOSE:
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            switch(responseVS.getTypeVS()) {
+                case WEB_SOCKET_INIT:
+                    showProgressDialog(getString(R.string.connecting_caption),
+                            getString(R.string.connecting_to_service_msg));
+                    toggleWebSocketServiceConnection();
+                    break;
+            }
+        } else if(request != null) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + request.getTypeVS());
+            if(progressDialog != null) progressDialog.dismiss();
+            switch(request.getTypeVS()) {
+                case INIT_VALIDATED_SESSION:
+                    if(ResponseVS.SC_OK == request.getStatusCode()) {
                         if(mainMenu != null) {
                             MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                            connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
+                            connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
                         }
-                        break;
-                }
-
+                    } else ActivityBase.this.showMessage(request.getStatusCode(),
+                            request.getCaption(), request.getMessage());
+                    break;
+                case WEB_SOCKET_CLOSE:
+                    if(mainMenu != null) {
+                        MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
+                        connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
+                    }
+                    break;
             }
+
+        }
         }
     };
 

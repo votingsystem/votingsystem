@@ -28,7 +28,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -40,6 +40,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.android.util.WebSocketRequest;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -233,7 +234,15 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return keyEntry;
     }
 
-    public ResponseVS decryptMessageVS(JSONObject documentToDecrypt) throws Exception {
+
+    public byte[] decryptMessage(byte[] encryptedBytes) throws Exception {
+        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+        //X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
+        PrivateKey privateKey = keyEntry.getPrivateKey();
+        return Encryptor.decryptCMS(privateKey, encryptedBytes);
+    }
+
+    /*public ResponseVS decryptMessageVS(JSONObject documentToDecrypt) throws Exception {
         ResponseVS responseVS = null;
         JSONArray encryptedDataArray = documentToDecrypt.getJSONArray("encryptedDataList");
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
@@ -249,7 +258,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             }
         }
         if(encryptedData != null) {
-            responseVS = Encryptor.decryptCMS(encryptedData.getBytes(), privateKey);
+            responseVS = Encryptor.decryptCMS(privateKey, encryptedData.getBytes());
             responseVS.setContentType(ContentTypeVS.JSON);
             Map editDataMap = new HashMap();
             editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
@@ -264,7 +273,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(R.string.decrypt_cert_notfound_msg));
         }
         return responseVS;
-    }
+    }*/
 
     public ResponseVS signMessage(String toUser, String textToSign, String subject) {
         ResponseVS responseVS = null;
@@ -324,24 +333,31 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
     }
 
-    public void sendBroadcast(ResponseVS responseVS) {
-        LOGD(TAG + ".sendBroadcast(...) ", "statusCode: " + responseVS.getStatusCode() +
+    public void broadcastResponse(ResponseVS responseVS) {
+        LOGD(TAG + ".broadcastResponse(...) ", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        if(responseVS.getTypeVS() != null) {
-            switch(responseVS.getTypeVS()) {
+    }
+
+    public void sendWebSocketBroadcast(WebSocketRequest request) {
+        LOGD(TAG + ".sendWebSocketBroadcast(...) ", "statusCode: " + request.getStatusCode() +
+                " - type: " + request.getTypeVS() + " - serviceCaller: " +
+                request.getServiceCaller());
+        Intent intent = null;
+        if(request.getTypeVS() != null) {
+            switch(request.getTypeVS()) {
                 case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    if(ResponseVS.SC_OK == request.getStatusCode()) {
                         try {
-                            setWebSocketSessionId(responseVS.getMessageJSON().getString("sessionId"));
-                            setWebSocketUserId(responseVS.getMessageJSON().getString("userId"));
-                            if(responseVS.getMessageJSON().has("messageVSList")) {
-                                JSONArray messageVSList = responseVS.getMessageJSON().getJSONArray("messageVSList");
+                            setWebSocketSessionId(request.getMessageJSON().getString("sessionId"));
+                            setWebSocketUserId(request.getMessageJSON().getString("userId"));
+                            if(request.getMessageJSON().has("messageVSList")) {
+                                JSONArray messageVSList = request.getMessageJSON().getJSONArray("messageVSList");
                                 if(messageVSList.length() > 0) {
-                                    String jsCommand = "javascript:updateMessageVSList('" + responseVS.getMessageJSON().toString() + "')";
+                                    String jsCommand = "javascript:updateMessageVSList('" + request.getMessageJSON().toString() + "')";
                                     intent = new Intent(this, BrowserVSActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
@@ -355,19 +371,24 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     }
                     break;
                 case WEB_SOCKET_CLOSE:
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    if(ResponseVS.SC_OK == request.getStatusCode()) {
                         setWebSocketSessionId(null);
                         setWebSocketUserId(null);
                     }
                     break;
+                case MESSAGEVS_TO_DEVICE:
+                    break;
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                    intent.putExtra(ContextVS.RESPONSEVS_KEY, request);
                     startActivity(intent);
                     break;
             }
-        } else  LOGD(TAG + ".sendBroadcast(...) ", "broadcast response with null type!!!");
+        } else  LOGD(TAG + ".broadcastResponse(...) ", "broadcast response with null type!!!");
+        intent = new Intent(request.getServiceCaller());
+        intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     public String getWebSocketSessionId() {

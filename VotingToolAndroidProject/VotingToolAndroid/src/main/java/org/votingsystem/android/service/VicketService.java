@@ -22,7 +22,7 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -409,6 +409,6 @@ public class VicketService extends IntentService {
 
     private void broadCastResponse(ResponseVS responseVS) {
         contextVS.showNotification(responseVS);
-        contextVS.sendBroadcast(responseVS);
+        contextVS.broadcastResponse(responseVS);
     }
 }

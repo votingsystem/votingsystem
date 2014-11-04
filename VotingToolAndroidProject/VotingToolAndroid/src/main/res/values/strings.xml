@@ -410,4 +410,5 @@
     <string name="cert_request_lbl">solicitud de certificado</string>
     <string name="sign_lbl">firmar</string>
     <string name="sign_request_lbl">solicitud de firma</string>
+    <string name="ban_device_lbl">bloquear las solicitudes que vengan de ese dispositivo</string>
 </resources>

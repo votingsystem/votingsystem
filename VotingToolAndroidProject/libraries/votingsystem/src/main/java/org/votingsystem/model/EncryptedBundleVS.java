@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ResponseVS;
 
 /**
 * @author jgzornoza

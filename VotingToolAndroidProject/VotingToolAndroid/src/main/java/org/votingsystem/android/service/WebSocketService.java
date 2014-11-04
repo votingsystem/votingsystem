@@ -20,13 +20,14 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.android.util.WebSocketRequest;
 
 import java.net.URI;
 import java.security.KeyStore;
@@ -78,8 +79,8 @@ public class WebSocketService extends Service {
             String messageToSend = arguments.getString(ContextVS.MESSAGE_KEY);
             ResponseVS responseVS = null;
             if(contextVS.getVicketServer() == null) {
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(R.string.connection_error_msg));
-                contextVS.sendBroadcast(responseVS);
+                contextVS.sendWebSocketBroadcast(new WebSocketRequest(
+                        ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), null));
             }
             if(session == null || !session.isOpen()) {
                 WebSocketListener socketListener = new WebSocketListener(
@@ -104,7 +105,7 @@ public class WebSocketService extends Service {
     }
 
 
-    private ResponseVS initAuthenticatedSession() {
+    private WebSocketRequest initAuthenticatedSession() {
         VicketServer vicketServer = contextVS.getVicketServer();
         Map mapToSend = new HashMap();
         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
@@ -113,7 +114,7 @@ public class WebSocketService extends Service {
         JSONObject requestJSON = new JSONObject(mapToSend);
         ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
                 requestJSON.toString(), msgSubject);
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) WebSocketRequest.load(responseVS);
         SMIMEMessage smimeMessage = null;
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
@@ -121,12 +122,12 @@ public class WebSocketService extends Service {
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
-                return responseVS;
+                return WebSocketRequest.load(responseVS);
             }
             smimeMessage = timeStamper.getSMIME();
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.WEB_SOCKET_BROADCAST_ID,
+            return WebSocketRequest.load(ResponseVS.SC_ERROR, ContextVS.WEB_SOCKET_BROADCAST_ID,
                     getString(R.string.timestamp_service_error_caption),
                     ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
         }
@@ -135,9 +136,9 @@ public class WebSocketService extends Service {
                     smimeMessage).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            return new WebSocketRequest(ResponseVS.SC_ERROR, ex.getMessage(), null);
         }
-        return new ResponseVS(ResponseVS.SC_OK);
+        return new WebSocketRequest(ResponseVS.SC_OK, null, null);
     }
 
     public JSONObject getMessageJSON(TypeVS operation, String message, Map data,
@@ -171,11 +172,11 @@ public class WebSocketService extends Service {
         }
     };
 
-    private void consumeMessage(ResponseVS responseVS) {
-        Log.d(TAG + "consumeMessage", "status: " + responseVS.getStatusCode() +
-                " - typeVS: " + responseVS.getTypeVS());
-        responseVS.setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID);
-        contextVS.sendBroadcast(responseVS);
+    private void consumeMessage(WebSocketRequest request) {
+        Log.d(TAG + "consumeMessage", "status: " + request.getStatusCode() +
+                " - typeVS: " + request.getTypeVS());
+        request.setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID);
+        contextVS.sendWebSocketBroadcast(request);
     }
 
     private class WebSocketListener implements Runnable {
@@ -221,7 +222,7 @@ public class WebSocketService extends Service {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
-                                consumeMessage(ResponseVS.parseWebSocketResponse(message));
+                                consumeMessage(WebSocketRequest.parse(message));
                             }
                         });
                         WebSocketService.this.session = session;
@@ -230,7 +231,7 @@ public class WebSocketService extends Service {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         latch = new CountDownLatch(1);
-                        consumeMessage(new ResponseVS(ResponseVS.SC_OK, TypeVS.WEB_SOCKET_CLOSE));
+                        consumeMessage(new WebSocketRequest(ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                     }
                 }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
 
@@ -262,8 +263,7 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case WEB_SOCKET_INIT:
-                    responseVS = initAuthenticatedSession();
-                    contextVS.sendBroadcast(responseVS);
+                    contextVS.sendWebSocketBroadcast(initAuthenticatedSession());
                     break;
                 case WEB_SOCKET_CLOSE:
                     try {
