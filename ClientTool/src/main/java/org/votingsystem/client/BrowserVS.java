@@ -56,6 +56,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -424,6 +425,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
                             messageJSON.containsKey("message")?messageJSON.getString("message"):null);
                     break;
+                case MESSAGEVS_FROM_DEVICE:
+                    BrowserVSSessionUtils.setMessageFromDevice(messageJSON);
+                    break;
                 default:
                     showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
                             messageJSON.containsKey("message")?messageJSON.getString("message"):null);
@@ -462,13 +466,21 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         });
     }
 
-    public WebSocketService getWebSocketService(){
+    private WebSocketService getWebSocketService(){
         if(webSocketService == null) {
             webSocketService = new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
                     ContextVS.getInstance().getVicketServer());
             webSocketService.addListener(this);
         }
         return webSocketService;
+    }
+
+    public void sendWebSocketMessage(String message) throws IOException {
+        getWebSocketService().sendMessage(message);
+    }
+
+    public void sendWebSocketAuthenticatedMessage(String message) throws IOException {
+        getWebSocketServiceAuthenticated().sendMessage(message);
     }
 
     public WebSocketServiceAuthenticated getWebSocketServiceAuthenticated(){

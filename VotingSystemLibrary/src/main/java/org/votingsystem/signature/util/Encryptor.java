@@ -323,28 +323,23 @@ public class Encryptor {
    public static SMIMEMessage decryptSMIME(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
-        InputStream inputStream = new ByteArrayInputStream(decryptMessage(
-                encryptedMessageBytes, publicKey, receiverPrivateKey));
+        InputStream inputStream = new ByteArrayInputStream(decryptMessage(encryptedMessageBytes, receiverPrivateKey));
         return new SMIMEMessage(inputStream);
    }
 
     /**
      * helper method to decrypt SMIME signed messages
      */
-    public static byte[] decryptMessage(byte[] encryptedMessageBytes,
-                                        PublicKey receiverPublicKey, PrivateKey receiverPrivateKey) throws Exception {
+    public static byte[] decryptMessage(byte[] encryptedMessageBytes, PrivateKey receiverPrivateKey) throws Exception {
         log.debug("decryptMessage(...) ");
         RecipientId recId = null;
-        /*if(receiverCert != null)
-            recId = new JceKeyTransRecipientId(receiverCert);*/
+        /*if(receiverCert != null) recId = new JceKeyTransRecipientId(receiverCert);*/
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
                 receiverPrivateKey).setProvider(ContextVS.PROVIDER);
         MimeMessage msg = new MimeMessage(null,
                 new ByteArrayInputStream(encryptedMessageBytes));
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-
         RecipientInformation        recipientInfo = null;
         //if(recId != null) recipientInfo = recipients.get(recId);
         if(recipientInfo == null && recipients.getRecipients().size() == 1) {

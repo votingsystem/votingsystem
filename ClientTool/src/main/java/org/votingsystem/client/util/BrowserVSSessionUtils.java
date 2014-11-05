@@ -5,25 +5,30 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.dnie.DNIeContentSigner;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.*;
 
+import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.net.InetAddress;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author jgzornoza
@@ -37,6 +42,10 @@ public class BrowserVSSessionUtils {
     private File sessionFile;
     private JSONObject browserSessionDataJSON;
     private JSONObject sessionDataJSON;
+    private static CountDownLatch countDownLatch;
+    private static WebSocketUtils.RequestBundle requestBundle;
+    private static SMIMEMessage smimeMessage;
+    private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
 
     private static final BrowserVSSessionUtils INSTANCE = new BrowserVSSessionUtils();
 
@@ -79,6 +88,7 @@ public class BrowserVSSessionUtils {
         flush();
     }
 
+    //{"id":,"deviceName":"","certPEM":""}
     public JSONObject getMobileCryptoToken() {
         return sessionDataJSON.getJSONObject("mobileCryptoToken");
     }
@@ -196,6 +206,59 @@ public class BrowserVSSessionUtils {
             }
         }
 
+    }
+
+    public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
+                    char[] password, String subject, Header... headers) throws Exception {
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        log.debug("getSMIME - tokenType: " + tokenType);
+        switch(CryptoTokenVS.valueOf(tokenType)) {
+            case JKS_KEYSTORE:
+                KeyStore keyStore = ContextVS.getUserKeyStore(password);
+                SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
+                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password, ContextVS.DNIe_SIGN_MECHANISM);
+                return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
+            case DNIe:
+                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject, headers);
+            case MOBILE:
+                countDownLatch = new CountDownLatch(1);
+                JSONObject mobileTokenJSON = getInstance().getMobileCryptoToken();//{"id":,"deviceName":"","certPEM":""}
+                Long deviceToId = mobileTokenJSON.getLong("id");
+                String deviceToName = mobileTokenJSON.getString("deviceName");
+                String deviceFromName = InetAddress.getLocalHost().getHostName();
+                String certPEM = mobileTokenJSON.getString("certPEM");
+                X509Certificate deviceToCert =  CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
+                requestBundle = WebSocketUtils.getSignRequest(deviceToId, deviceToName,
+                    deviceFromName, toUser, textToSign, subject, ContextVS.getInstance().getLocale().getLanguage(),
+                    deviceToCert, headers);
+                BrowserVS.getInstance().sendWebSocketMessage(requestBundle.getRequest().toString());
+
+                countDownLatch.await();
+                ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
+                else return responseVS.getData();
+            default: return null;
+        }
+    }
+
+    public static void setMessageFromDevice(JSONObject messageJSON) {
+        try {
+            smimeMessage = WebSocketUtils.getSignResponse(requestBundle, messageJSON);
+            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+        countDownLatch.countDown();
+    }
+
+    public static ResponseVS getMessageToDeviceResponse() {
+        return messageToDeviceResponse;
+    }
+
+    public static CryptoTokenVS getCryptoTokenType () {
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        return CryptoTokenVS.valueOf(tokenType);
     }
 
     public void showMessage(final String message) {

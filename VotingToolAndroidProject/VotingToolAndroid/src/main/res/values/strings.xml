@@ -377,7 +377,6 @@
     <string name="hint_surname">apellidos</string>
     <string name="hint_name">nombre</string>
     <string name="hint_pin">pin</string>
-    <string name="connect_to_service_lbl">conectar a servicio</string>
     <string name="disconnect_from_service_lbl">desconectar de servicio</string>
     <string name="init_authenticated_session_msg_subject">inicio de sesión websocket</string>
     <string name="init_authenticated_session_pin_msg">introduzca su contraseña para firmar la solicitud de conexión</string>
@@ -411,4 +410,8 @@
     <string name="sign_lbl">firmar</string>
     <string name="sign_request_lbl">solicitud de firma</string>
     <string name="ban_device_lbl">bloquear las solicitudes que vengan de ese dispositivo</string>
+    <string name="disconnected_lbl">desconectado</string>
+    <string name="connected_lbl">conectado</string>
+    <string name="connected_with_lbl">conectado con</string>
+    <string name="disconnect_lbl">desconectar</string>
 </resources>

@@ -19,7 +19,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.util.*;
 import org.votingsystem.vicket.model.VicketRequestBatch;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.math.BigDecimal;
@@ -29,7 +28,6 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
-
 import static org.votingsystem.model.ContextVS.*;
 
 /**
@@ -195,7 +193,7 @@ public class SignatureService extends Service<ResponseVS> {
             String toUser =  eventVS.getAccessControlVS().getNameNormalized();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
-            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(fromUser, toUser, jsonObject.toString(),
+            SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(fromUser, toUser, jsonObject.toString(),
                     password.toCharArray(), msgSubject, null);
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
@@ -273,7 +271,7 @@ public class SignatureService extends Service<ResponseVS> {
                 //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
                 //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
                 JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-                SMIMEMessage representativeRequestSMIME = ContentSignerUtils.getSMIME(null,
+                SMIMEMessage representativeRequestSMIME = BrowserVSSessionUtils.getSMIME(null,
                         operationVS.getNormalizedReceiverName(), documentToSignJSON.toString(),
                         password.toCharArray(), operationVS.getSignedMessageSubject(), null);
                 RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME,
@@ -294,7 +292,7 @@ public class SignatureService extends Service<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
                     vicketBatch.getVicketCSRRequest().toString().getBytes());
-            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null,
+            SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
                     operationVS.getNormalizedReceiverName(), vicketBatch.getRequestDataToSignJSON().toString(),
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
@@ -361,7 +359,7 @@ public class SignatureService extends Service<ResponseVS> {
             }
             operationVS.getDocumentToSignMap().put("encryptedDataInfo", signedDataList);
             JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null, operationVS.getTargetServer().getNameNormalized(),
+            SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null, operationVS.getTargetServer().getNameNormalized(),
                     documentToSignJSON.toString(), password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     operationVS.getTargetServer().getTimeStampServiceURL());
@@ -441,7 +439,7 @@ public class SignatureService extends Service<ResponseVS> {
                     jsonObject.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
                     jsonObject.put("UUID", UUID.randomUUID().toString());
                     String documentToSignStr = jsonObject.toString();
-                    SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null,
+                    SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
                             operationVS.getNormalizedReceiverName(), documentToSignStr,
                             password.toCharArray(), operationVS.getSignedMessageSubject(), null);
                     SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
@@ -480,7 +478,7 @@ public class SignatureService extends Service<ResponseVS> {
                 String fromUser = null;
                 String toUser =  ContextVS.getInstance().getAccessControl().getNameNormalized();
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(fromUser, toUser, jsonObject.toString(),
+                SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(fromUser, toUser, jsonObject.toString(),
                         password.toCharArray(), operationVS.getSignedMessageSubject(), null);
                 String originHashCertVS = UUID.randomUUID().toString();
                 String hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
@@ -537,7 +535,7 @@ public class SignatureService extends Service<ResponseVS> {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
                 documentToSignStr = documentToSignJSON.toString();
             }
-            SMIMEMessage smimeMessage = ContentSignerUtils.getSMIME(null,
+            SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
                     operationVS.getNormalizedReceiverName(), documentToSignStr,
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             if(operationVS.getAsciiDoc() != null) {

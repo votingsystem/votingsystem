@@ -15,11 +15,6 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/connect_to_service"
-        android:orderInCategory="4"
-        android:showAsAction="never"
-        android:title="@string/connect_to_service_lbl"/>
-
     <item android:id="@+id/menu_debug"
         android:title="@string/description_debug"
         android:orderInCategory="18"

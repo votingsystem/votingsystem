@@ -111,20 +111,6 @@ public class UserVSAccountsFragment extends Fragment {
                     } else ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     break;
-                case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        if(fragmentMenu != null) {
-                            MenuItem connectToServiceMenuItem = fragmentMenu.findItem(R.id.connect_to_service);
-                            connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
-                        }
-                    }
-                    break;
-                case WEB_SOCKET_CLOSE:
-                    if(fragmentMenu != null) {
-                        MenuItem connectToServiceMenuItem = fragmentMenu.findItem(R.id.connect_to_service);
-                        connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
-                    }
-                    break;
                 default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
             }

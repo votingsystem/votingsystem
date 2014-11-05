@@ -19,21 +19,18 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.ContentSignerUtils;
+import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.util.ContentSignerVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PDFContentSigner;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -83,7 +80,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
         } else {
             log.debug("Generating System VotingSystemSignedGenerator");
-            pdfSigner = ContentSignerUtils.getPDFContentSigner(password);
+            pdfSigner = getPDFContentSigner(password);
             signerCertChain = pdfSigner.getCertificateChain();
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");
@@ -196,5 +193,20 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         String subjectDN = certificate.getSubjectDN().getName();
         return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
     }
-    
+
+    public static ContentSignerVS getPDFContentSigner(char[] password) throws Exception {
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        log.debug("getPDFContentSigner - tokenType: " + tokenType);
+        switch(CryptoTokenVS.valueOf(tokenType)) {
+            case JKS_KEYSTORE:
+                KeyStore keyStore = ContextVS.getUserKeyStore(password);
+                java.security.cert.Certificate[] signerCertChain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
+                PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password);
+                return new PDFContentSigner( signerPrivatekey, signerCertChain,
+                        PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+            case DNIe:
+                return DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
+            default: return null;
+        }
+    }
 }

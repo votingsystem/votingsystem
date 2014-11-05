@@ -1,19 +1,3 @@
-/*
- * Copyright 2014 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.activity;
 
 import android.animation.Animator;
@@ -23,6 +7,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -40,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -49,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -101,7 +88,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 
     // the LoginAndAuthHelper handles signing in to Google Play Services and OAuth
     private LoginAndAuthHelper mLoginAndAuthHelper;
-    private Menu mainMenu;
     // Navigation drawer:
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
@@ -111,12 +97,8 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private LPreviewUtilsBase mLPreviewUtils;
 
     private ObjectAnimator mStatusBarColorAnimator;
-    private LinearLayout mAccountListContainer;
     private ViewGroup mDrawerItemsListContainer;
     private Handler mHandler;
-
-    private ImageView mExpandAccountBoxIndicator;
-    private boolean mAccountBoxExpanded = false;
 
     // When set, these components will be shown/hidden in sync with the action bar
     // to implement the "quick recall" effect (the Action Bar and the header views disappear
@@ -185,6 +167,8 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private int mActionBarAutoHideMinY = 0;
     private int mActionBarAutoHideSignal = 0;
     private boolean mActionBarShown = true;
+    private TextView connectionStatusText;
+    private ImageView connectionStatusView;
 
     // A Runnable that we should execute when the navigation drawer finishes its closing animation
     private Runnable mDeferredOnDrawerClosedRunnable;
@@ -197,39 +181,35 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            switch(responseVS.getTypeVS()) {
-                case WEB_SOCKET_INIT:
-                    showProgressDialog(getString(R.string.connecting_caption),
-                            getString(R.string.connecting_to_service_msg));
-                    toggleWebSocketServiceConnection();
-                    break;
-            }
-        } else if(request != null) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + request.getTypeVS());
-            if(progressDialog != null) progressDialog.dismiss();
-            switch(request.getTypeVS()) {
-                case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        if(mainMenu != null) {
-                            MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                            connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
-                        }
-                    } else ActivityBase.this.showMessage(request.getStatusCode(),
-                            request.getCaption(), request.getMessage());
-                    break;
-                case WEB_SOCKET_CLOSE:
-                    if(mainMenu != null) {
-                        MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
-                        connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
-                    }
-                    break;
-            }
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(responseVS.getTypeVS()) {
+                    case WEB_SOCKET_INIT:
+                        showProgressDialog(getString(R.string.connecting_caption),
+                                getString(R.string.connecting_to_service_msg));
+                        toggleWebSocketServiceConnection();
+                        break;
+                }
+            } else if(request != null) {
+                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + request.getTypeVS());
+                if(progressDialog != null) progressDialog.dismiss();
+                switch(request.getTypeVS()) {
+                    case INIT_VALIDATED_SESSION:
+                        if(ResponseVS.SC_OK == request.getStatusCode()) {
+                            connectionStatusText.setText(getString(R.string.connected_lbl));
+                            connectionStatusView.setVisibility(View.VISIBLE);
+                        } else ActivityBase.this.showMessage(request.getStatusCode(),
+                                request.getCaption(), request.getMessage());
+                        break;
+                    case WEB_SOCKET_CLOSE:
+                        connectionStatusText.setText(getString(R.string.disconnected_lbl));
+                        connectionStatusView.setVisibility(View.GONE);
+                        break;
+                }
 
-        }
+            }
         }
     };
 
@@ -237,18 +217,15 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        // Check if the EULA has been accepted; if not, show it.
-        /*if (!PrefUtils.isTosAccepted(this)) {
+        /*if (!PrefUtils.isTosAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);
             finish();
         }*/
         mHandler = new Handler();
-
         if (savedInstanceState == null) {
             LOGD(TAG, "savedInstanceState null");
         }
-
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         sp.registerOnSharedPreferenceChangeListener(this);
 
@@ -275,7 +252,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                     requestDataRefresh();
                 }
             });
-
             if (mSwipeRefreshLayout instanceof MultiSwipeRefreshLayout) {
                 MultiSwipeRefreshLayout mswrl = (MultiSwipeRefreshLayout) mSwipeRefreshLayout;
                 mswrl.setCanChildScrollUpCallback(this);
@@ -289,9 +265,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     }
 
     private void updateSwipeRefreshProgressBarTop() {
-        if (mSwipeRefreshLayout == null) {
-            return;
-        }
+        if (mSwipeRefreshLayout == null) return;
         if (mActionBarShown) {
             mSwipeRefreshLayout.setProgressBarTop(mProgressBarTopWhenActionBarShown);
         } else {
@@ -338,10 +312,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                 if (mDeferredOnDrawerClosedRunnable != null) {
                     mDeferredOnDrawerClosedRunnable.run();
                     mDeferredOnDrawerClosedRunnable = null;
-                }
-                if (mAccountBoxExpanded) {
-                    mAccountBoxExpanded = false;
-                    setupAccountBoxToggle();
                 }
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                 updateStatusBarForNavDrawerSlide(0f);
@@ -414,6 +384,18 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         if (mDrawerItemsListContainer == null) {
             return;
         }
+        connectionStatusText = (TextView) findViewById(R.id.connection_status_text);
+        connectionStatusView = (ImageView) findViewById(R.id.connection_status_img);
+        LinearLayout userBox = (LinearLayout)findViewById(R.id.user_box);
+        userBox.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                LOGD(TAG, "userBox clicked");
+                if(contextVS.getWebSocketSessionId() == null) {
+                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
+                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
+                } else {showConnectionStatusDialog();}
+            }
+        });
         mNavDrawerItemViews = new View[mNavDrawerItems.size()];
         mDrawerItemsListContainer.removeAllViews();
         int i = 0;
@@ -451,25 +433,16 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         }
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
+    @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
         setupAccountBox();
-
         trySetupSwipeRefresh();
         updateSwipeRefreshProgressBarTop();
-
         View mainContent = findViewById(R.id.main_content);
         if (mainContent != null) {
-
-
-
            // mainContent.setAlpha(0);
            // mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-
-
-
         } else {
             LOGW(TAG, "No view with ID main_content to fade in.");
         }
@@ -481,35 +454,16 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
      * shows the user's Google+ cover photo as background.
      */
     private void setupAccountBox() {
-        mAccountListContainer = (LinearLayout) findViewById(R.id.account_list);
-        if (mAccountListContainer == null) { //The activity does not have an account box
-            return;
-        }
         final View chosenAccountView = findViewById(R.id.chosen_account_view);
         chosenAccountView.setVisibility(View.VISIBLE);
-        mAccountListContainer.setVisibility(View.INVISIBLE);
-
         TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
         TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
-        mExpandAccountBoxIndicator = (ImageView) findViewById(R.id.expand_account_box_indicator);
 
         UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
         if(sessionUserVS != null) {
             nameTextView.setText(sessionUserVS.getName());
             email.setText(sessionUserVS.getEmail());
             chosenAccountView.setEnabled(true);
-            mExpandAccountBoxIndicator.setVisibility(View.VISIBLE);
-            chosenAccountView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mAccountBoxExpanded = !mAccountBoxExpanded;
-                    setupAccountBoxToggle();
-                }
-            });
-            setupAccountBoxToggle();
-        } else {
-            mAccountListContainer.setVisibility(View.GONE);
-            findViewById(R.id.chosen_account_view).setVisibility(View.GONE);
         }
     }
 
@@ -517,102 +471,29 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         // override if you want to be notified when another account has been selected account has changed
     }
 
-    private void setupAccountBoxToggle() {
-        int selfItem = getSelfNavDrawerItem();
-        if (mDrawerLayout == null || selfItem == NAVDRAWER_ITEM_INVALID) {
-            // this Activity does not have a nav drawer
-            return;
-        }
-        mExpandAccountBoxIndicator.setImageResource(mAccountBoxExpanded
-                ? R.drawable.ic_drawer_accounts_collapse
-                : R.drawable.ic_drawer_accounts_expand);
-        int hideTranslateY = -mAccountListContainer.getHeight() / 4; // last 25% of animation
-        if (mAccountBoxExpanded && mAccountListContainer.getTranslationY() == 0) {
-            // initial setup
-            mAccountListContainer.setAlpha(0);
-            mAccountListContainer.setTranslationY(hideTranslateY);
-        }
-
-        AnimatorSet set = new AnimatorSet();
-        set.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mDrawerItemsListContainer.setVisibility(mAccountBoxExpanded
-                        ? View.INVISIBLE : View.VISIBLE);
-                mAccountListContainer.setVisibility(mAccountBoxExpanded
-                        ? View.VISIBLE : View.INVISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                onAnimationEnd(animation);
-            }
-        });
-
-        if (mAccountBoxExpanded) {
-            mAccountListContainer.setVisibility(View.VISIBLE);
-            AnimatorSet subSet = new AnimatorSet();
-            subSet.playTogether(
-                    ObjectAnimator.ofFloat(mAccountListContainer, View.ALPHA, 1)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION),
-                    ObjectAnimator.ofFloat(mAccountListContainer, View.TRANSLATION_Y, 0)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION));
-            set.playSequentially(
-                    ObjectAnimator.ofFloat(mDrawerItemsListContainer, View.ALPHA, 0)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION),
-                    subSet);
-            set.start();
-        } else {
-            mDrawerItemsListContainer.setVisibility(View.VISIBLE);
-            AnimatorSet subSet = new AnimatorSet();
-            subSet.playTogether(
-                    ObjectAnimator.ofFloat(mAccountListContainer, View.ALPHA, 0)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION),
-                    ObjectAnimator.ofFloat(mAccountListContainer, View.TRANSLATION_Y,
-                            hideTranslateY)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION));
-            set.playSequentially(
-                    subSet,
-                    ObjectAnimator.ofFloat(mDrawerItemsListContainer, View.ALPHA, 1)
-                            .setDuration(ACCOUNT_BOX_EXPAND_ANIM_DURATION));
-            set.start();
-        }
-        set.start();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    @Override public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (mDrawerToggle != null) {
             mDrawerToggle.onConfigurationChanged(newConfig);
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_base, menu);
         MenuItem debugItem = menu.findItem(R.id.menu_debug);
         if (debugItem != null) {
             debugItem.setVisible(BuildConfig.DEBUG);
         }
-        this.mainMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         switch (id) {
-            case R.id.connect_to_service:
-                if(contextVS.getWebSocketSessionId() == null) {
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
-                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
-                } else {toggleWebSocketServiceConnection();}
-                return true;
             case R.id.menu_about:
                 HelpUtils.showAbout(this);
                 return true;
@@ -645,7 +526,8 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     //progressDialog.dismiss();
     private void showProgressDialog(final String title, final String dialogMessage) {
         runOnUiThread(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 if (progressDialog == null) {
                     progressDialog = new ProgressDialog(ActivityBase.this);
                     progressDialog.setCancelable(true);
@@ -708,18 +590,13 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             }, NAVDRAWER_LAUNCH_DELAY);
 */
             goToNavDrawerItem(itemId);
-
             // change the active item on the list so the user can see the item changed
             setSelectedNavDrawerItem(itemId);
             // fade out the main content
             View mainContent = findViewById(R.id.main_content);
-
-
             /*if (mainContent != null) {
                 mainContent.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
             }*/
-
-
         }
         mDrawerLayout.closeDrawer(Gravity.START);
     }
@@ -861,19 +738,16 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 //        mLoginAndAuthHelper.start();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public void onStop() {
+    @Override public void onStop() {
         LOGD(TAG, "onStop");
         super.onStop();
     }
 
-    @Override
-    public void onPlusInfoLoaded(String accountName) {
+    @Override public void onPlusInfoLoaded(String accountName) {
         setupAccountBox();
         populateNavDrawer();
     }
@@ -886,8 +760,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
      * @param newlyAuthenticated If true, this user just authenticated for the first time.
      * If false, it's a returning user.
      */
-    @Override
-    public void onAuthSuccess(String accountName, boolean newlyAuthenticated) {
+    @Override public void onAuthSuccess(String accountName, boolean newlyAuthenticated) {
         LOGD(TAG, "onAuthSuccess, account " + accountName + ", newlyAuthenticated=" + newlyAuthenticated);
         refreshAccountDependantData();
         if (newlyAuthenticated) {
@@ -897,8 +770,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         populateNavDrawer();
     }
 
-    @Override
-    public void onAuthFailure(String accountName) {
+    @Override public void onAuthFailure(String accountName) {
         LOGD(TAG, "Auth failed for account " + accountName);
         refreshAccountDependantData();
     }
@@ -912,9 +784,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         mLoginAndAuthHelper.retryAuthByUserRequest();
     }
 
-    /**
-     * Initializes the Action Bar auto-hide (aka Quick Recall) effect.
-     */
     private void initActionBarAutoHide() {
         mActionBarAutoHideEnabled = true;
         mActionBarAutoHideMinY = getResources().getDimensionPixelSize(
@@ -967,12 +836,10 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             final static int ITEMS_THRESHOLD = 3;
             int lastFvi = 0;
 
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-            }
+            @Override public void onScrollStateChanged(AbsListView view, int scrollState) { }
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            @Override public void onScroll(AbsListView view, int firstVisibleItem,
+                               int visibleItemCount, int totalItemCount) {
                 onMainContentScrolled(firstVisibleItem <= ITEMS_THRESHOLD ? 0 : Integer.MAX_VALUE,
                         lastFvi - firstVisibleItem > 0 ? Integer.MIN_VALUE :
                                 lastFvi == firstVisibleItem ? 0 : Integer.MAX_VALUE
@@ -980,6 +847,27 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                 lastFvi = firstVisibleItem;
             }
         });
+    }
+
+    private void showConnectionStatusDialog() {
+        if(contextVS.getWebSocketSessionId() != null) {
+            View dialogView = getLayoutInflater().inflate(R.layout.connection_status_dialog, null);
+            TextView userInfoText = (TextView) dialogView.findViewById(R.id.user_info_text);
+            UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
+            if(sessionUserVS != null) {
+                userInfoText.setText(sessionUserVS.getEmail());
+            }
+            final AlertDialog dialog = new AlertDialog.Builder(this).setTitle(
+                    getString(R.string.connected_with_lbl)).setView(dialogView).create();
+            Button connectionButton = (Button) dialogView.findViewById(R.id.connection_button);
+            connectionButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    toggleWebSocketServiceConnection();
+                    dialog.hide();
+                }
+            });
+            dialog.show();
+        }
     }
 
     private View makeNavDrawerItem(final int itemId, ViewGroup container) {
@@ -993,32 +881,22 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             layoutToInflate = R.layout.navdrawer_item;
         }
         View view = getLayoutInflater().inflate(layoutToInflate, container, false);
-
         if (isSeparator(itemId)) {
-            // we are done
             UIUtils.setAccessibilityIgnore(view);
             return view;
         }
-
         ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         TextView titleView = (TextView) view.findViewById(R.id.title);
         int iconId = itemId >= 0 && itemId < NAVDRAWER_ICON_RES_ID.length ?
                 NAVDRAWER_ICON_RES_ID[itemId] : 0;
         int titleId = itemId >= 0 && itemId < NAVDRAWER_TITLE_RES_ID.length ?
                 NAVDRAWER_TITLE_RES_ID[itemId] : 0;
-
-        // set icon and text
         iconView.setVisibility(iconId > 0 ? View.VISIBLE : View.GONE);
-        if (iconId > 0) {
-            iconView.setImageResource(iconId);
-        }
+        if (iconId > 0)  iconView.setImageResource(iconId);
         titleView.setText(getString(titleId));
-
         formatNavDrawerItem(view, itemId, selected);
-
         view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            @Override public void onClick(View v) {
                 onNavDrawerItemClicked(itemId);
             }
         });
@@ -1039,7 +917,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             // not applicable
             return;
         }
-
         ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         TextView titleView = (TextView) view.findViewById(R.id.title);
         // configure its appearance according to whether or not it's selected
@@ -1115,11 +992,10 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     }
 
     private void toggleWebSocketServiceConnection() {
-        Log.d(TAG + ".toggleWebSocketServiceConnection(...)", "toggleWebSocketServiceConnection");
         Intent startIntent = new Intent(((AppContextVS)getApplicationContext()), WebSocketService.class);
-        TypeVS typeVS;
+        TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
         if(((AppContextVS)getApplicationContext()).getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        else typeVS = TypeVS.WEB_SOCKET_INIT;
+        Log.d(TAG + ".toggleWebSocketServiceConnection(...)", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         startService(startIntent);
     }

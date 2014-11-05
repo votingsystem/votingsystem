@@ -16,9 +16,11 @@ import javafx.scene.text.TextAlignment;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SignatureService;
+import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
 
 
 /**
@@ -149,11 +151,13 @@ public class BrowserVSPane extends StackPane {
 
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
-        PlatformImpl.runAndWait(new Runnable() {
-            @Override public void run() {
-                setPasswordDialogVisible(true, passwordDialogMessage);
-            }
-        });
+        if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
+            PlatformImpl.runAndWait(new Runnable() {
+                @Override public void run() {
+                    setPasswordDialogVisible(true, passwordDialogMessage);
+                }
+            });
+        } else signatureService.processOperationVS("", operationVS);
     }
 
     public void setPasswordDialogVisible(boolean isVisible, String message) {
