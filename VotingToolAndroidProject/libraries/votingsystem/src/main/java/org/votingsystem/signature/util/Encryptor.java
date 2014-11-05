@@ -5,6 +5,7 @@ import android.util.Log;
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
 import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
+import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.CMSTypedStream;
 import org.bouncycastle2.cms.KeyTransRecipientId;
 import org.bouncycastle2.cms.Recipient;
@@ -19,6 +20,7 @@ import org.bouncycastle2.crypto.DataLengthException;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
+import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONException;
@@ -30,6 +32,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -39,6 +42,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
@@ -74,7 +78,7 @@ public class Encryptor {
 	
 	public static final String TAG = "EncryptionHelper";
 
-	private  Encryptor() {	}
+	private  Encryptor() { }
 	
 	public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
@@ -135,13 +139,13 @@ public class Encryptor {
         return result;
 	}
 	
-    public static MimeBodyPart encryptBase64Message(byte[] fileBytes,
+    public static MimeBodyPart encryptBase64Message(byte[] bytesToEncrypt,
             X509Certificate receiverCert, Header... headers) throws Exception {
     	Log.d(TAG + ".encryptMessage(...) ", " - encryptFile(...)");
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage mimeMessage = new MimeMessage(session);
-        byte[] base64EncodedFileBytes = Base64.encode(fileBytes);
+        byte[] base64EncodedFileBytes = Base64.encode(bytesToEncrypt);
         
         mimeMessage.setContent(base64EncodedFileBytes, 
         		"text/plain; charset=ISO-8859-1");
@@ -161,68 +165,71 @@ public class Encryptor {
         return encryptedPart;
     }
 
-    public static ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) {
-        ResponseVS responseVS = null;
-        try {
-            CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-            dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).
-                    setProvider(ContextVS.PROVIDER));
-            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-            OutputStream out = dataStreamGen.open(bOut,
-                    new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
-                            setProvider(ContextVS.PROVIDER).build());
-            out.write(dataToEncrypt);
-            out.close();
-            byte[] result = bOut.toByteArray();
-            byte[] base64EncryptedDataBytes = Base64.encode(result);
-            responseVS = new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-        } finally {
-            return responseVS;
-        }
+    public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert)
+            throws CertificateEncodingException, OperatorCreationException, CMSException, IOException {
+        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).
+                setProvider(ContextVS.PROVIDER));
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        OutputStream out = dataStreamGen.open(bOut, new JceCMSContentEncryptorBuilder(
+                CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
+        out.write(dataToEncrypt);
+        out.close();
+        byte[] result = bOut.toByteArray();
+        return Base64.encode(result);
+    }
+
+    public static byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+                "".getBytes(), receptorPublicKey).setProvider(ContextVS.PROVIDER));
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        OutputStream out = dataStreamGen.open(bOut,
+                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+                        setProvider(ContextVS.PROVIDER).build());
+        out.write(dataToEncrypt);
+        out.close();
+        return Base64.encode(bOut.toByteArray());
     }
 
     /**
     * Method to decrypt SMIME signed messages
     */
-   public static SMIMEMessage decryptSMIME(
-           byte[] encryptedMessageBytes, PublicKey  publicKey, 
+   public static SMIMEMessage decryptSMIME(byte[] encryptedMessageBytes,
             PrivateKey receiverPrivateKey) throws Exception {
 	   Log.d(TAG + ".decryptSMIME(...) ", "decryptSMIME(...) ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
-                encryptedMessageBytes, publicKey, receiverPrivateKey));
+                encryptedMessageBytes, receiverPrivateKey));
         return new SMIMEMessage(null, inputStream, null);
    }
-   
+
    /**
     * helper method to decrypt SMIME signed messages
     */
-   public static byte[] decryptMessage(byte[] encryptedMessageBytes, 
-           PublicKey receiverPublicKey, PrivateKey receiverPrivateKey) throws Exception {
+   public static byte[] decryptMessage(byte[] encryptedMessageBytes,
+           PrivateKey receiverPrivateKey) throws Exception {
 	   Log.d(TAG + ".decryptMessage(...) ", "decryptMessage(...) ");
        RecipientId recId = null;
-       /*if(receiverCert != null) 
+       /*if(receiverCert != null)
            recId = new JceKeyTransRecipientId(receiverCert);*/
        Recipient recipient = new JceKeyTransEnvelopedRecipient(
                receiverPrivateKey).setProvider(ContextVS.PROVIDER);
-       MimeMessage msg = new MimeMessage(null, 
+       MimeMessage msg = new MimeMessage(null,
                        new ByteArrayInputStream(encryptedMessageBytes));
        SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 
        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-       
+
        RecipientInformation        recipientInfo = null;
        //if(recId != null) recipientInfo = recipients.get(recId);
        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
-           recipientInfo = (RecipientInformation) 
+           recipientInfo = (RecipientInformation)
                recipients.getRecipients().iterator().next();
        }
        byte[] messageBytes = recipientInfo.getContent(recipient);
        return messageBytes;
    }
-   
+
 	
 	/**
 	 * helper method to decrypt SMIME signed messages
@@ -246,7 +253,6 @@ public class Encryptor {
             recipientInfo = (RecipientInformation) 
                 recipients.getRecipients().iterator().next();
         }
-
 		/*RecipientId recipientRID = null;
 		if(recipient.getRID() != null) {
 			recipientRID = recipient.getRID();
@@ -310,38 +316,6 @@ public class Encryptor {
         return result;
     }
 
-    /*public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
-        Log.d(TAG + ".decryptCMS()", "decryptCMS");
-        try {
-            byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
-            CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
-            RecipientInformationStore  recipients = ep.getRecipientInfos();
-            Collection                 c = recipients.getRecipients();
-            Iterator                   it = c.iterator();
-            byte[] result = null;
-            if (it.hasNext()) {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-                //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-                CMSTypedStream recData = recipient.getContentStream(
-                        new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
-                InputStream           dataStream = recData.getContentStream();
-                ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
-                byte[]                buf = new byte[4096];
-                int len = 0;
-                while ((len = dataStream.read(buf)) >= 0) {
-                    dataOut.write(buf, 0, len);
-                }
-                dataOut.close();
-                result = dataOut.toByteArray();
-                return new ResponseVS(ResponseVS.SC_OK, result, null);
-            } else {
-                return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, "encryptedMessageWithoutRecipientsErrorMsg");
-            }
-        } catch(Exception ex) {
-            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
-        }
-    }*/
-
 	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
             PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {
 		byte[] messageBytes = null;
@@ -353,9 +327,8 @@ public class Encryptor {
 				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
 				break;
 			case SMIME_MESSAGE:
-				SMIMEMessage smimeMessage = decryptSMIME(
-						encryptedBundleVS.getEncryptedMessageBytes(),
-                        publicKey, receiverPrivateKey);
+				SMIMEMessage smimeMessage = decryptSMIME(encryptedBundleVS.getEncryptedMessageBytes(),
+                        receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
 				encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessage);
 				break;
@@ -369,7 +342,7 @@ public class Encryptor {
 		return encryptedBundleVS;
 	}
 	
-	public List<EncryptedBundleVS> decryptEncryptedBundleList(
+	public static List<EncryptedBundleVS> decryptEncryptedBundleList(
 			List<EncryptedBundleVS> encryptedBundleVSList, PublicKey publicKey,
 			PrivateKey receiverPrivateKey) throws Exception {
 		List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
@@ -380,10 +353,10 @@ public class Encryptor {
 		return result;
 	}
 
-    /* http://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption?rq=1
+    /**
+     * http://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption?rq=1
      * Share the password (a char[]) and salt (a byte[]—8 bytes selected by a SecureRandom makes a
      * good salt—which doesn't need to be kept secret) with the recipient
-     *
      */
     public static Map encrypt(String textToEncrypt, char[] password, byte[] salt) throws
             NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,

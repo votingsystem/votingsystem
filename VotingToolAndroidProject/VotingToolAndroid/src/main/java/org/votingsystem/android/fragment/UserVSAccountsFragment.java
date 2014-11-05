@@ -32,12 +32,12 @@ import org.votingsystem.android.service.VicketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

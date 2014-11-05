@@ -1,7 +1,10 @@
 package org.votingsystem.model;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,14 +14,23 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+
+import javax.mail.Header;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class OperationVS implements Serializable{
+public class OperationVS implements Parcelable {
 
 	public static final String TAG = OperationVS.class.getSimpleName();
 
@@ -36,6 +48,7 @@ public class OperationVS implements Serializable{
     private String signedMessageSubject;
     private EventVS eventVS;
     private String sessionId;
+    private String publicKeyBase64;
     private Uri uriData;
     private String[] args;
     private transient JSONArray targetCertArray;
@@ -43,10 +56,103 @@ public class OperationVS implements Serializable{
     private transient JSONObject documentToEncrypt;
     private transient JSONObject documentToDecrypt;
     private transient JSONObject document;
-
+    private String deviceFromName;
+    private String toUser;
+    private String textToSign;
+    private String subject;
+    private List<Header> headerList;
 
     public OperationVS() {}
-    
+
+    public OperationVS(Parcel source) {
+        // Must read values in the same order as they were placed in. The
+        // generic 'readValues' instead of the typed vesions are for the null values
+        typeVS = (TypeVS) source.readSerializable();
+        statusCode = (Integer) source.readValue(Integer.class.getClassLoader());
+        sessionId = (String) source.readValue(String.class.getClassLoader());
+        callerCallback = (String) source.readValue(String.class.getClassLoader());
+        message = (String) source.readValue(String.class.getClassLoader());
+        urlTimeStampServer = (String) source.readValue(String.class.getClassLoader());
+        serviceURL = (String) source.readValue(String.class.getClassLoader());
+        serverURL = (String) source.readValue(String.class.getClassLoader());
+        receiverName = (String) source.readValue(String.class.getClassLoader());
+        signedMessageSubject = (String) source.readValue(String.class.getClassLoader());
+        sessionId = (String) source.readValue(String.class.getClassLoader());
+        publicKeyBase64 = (String) source.readValue(String.class.getClassLoader());
+        uriData = (Uri) source.readValue(Uri.class.getClassLoader());
+        deviceFromName = (String) source.readValue(String.class.getClassLoader());
+        toUser = (String) source.readValue(String.class.getClassLoader());
+        textToSign = (String) source.readValue(String.class.getClassLoader());
+        subject = (String) source.readValue(String.class.getClassLoader());
+        String headerArrayStr = (String) source.readValue(String.class.getClassLoader());
+        try {
+            if(headerArrayStr != null) headerList = getHeadersList(new JSONArray(headerArrayStr));
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    @Override public int describeContents() { return 0;  }
+
+    @Override public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeSerializable(typeVS);
+        parcel.writeValue(statusCode);
+        parcel.writeValue(sessionId);
+        parcel.writeValue(callerCallback);
+        parcel.writeValue(message);
+        parcel.writeValue(urlTimeStampServer);
+        parcel.writeValue(serviceURL);
+        parcel.writeValue(serverURL);
+        parcel.writeValue(receiverName);
+        parcel.writeValue(signedMessageSubject);
+        parcel.writeValue(sessionId);
+        parcel.writeValue(publicKeyBase64);
+        parcel.writeValue(uriData);
+        parcel.writeValue(deviceFromName);
+        parcel.writeValue(toUser);
+        parcel.writeValue(textToSign);
+        parcel.writeValue(subject);
+        try {
+            parcel.writeValue(getHeadersJSONArray(headerList).toString());
+        } catch (JSONException ex) { ex.printStackTrace(); }
+    }
+
+    public static final Parcelable.Creator<OperationVS> CREATOR =
+            new Parcelable.Creator<OperationVS>() {
+                @Override public OperationVS createFromParcel(Parcel source) {
+                    return new OperationVS(source);
+                }
+
+                @Override public OperationVS[] newArray(int size) {
+                    return new OperationVS[size];
+                }
+
+            };
+
+
+    public static JSONArray getHeadersJSONArray(List<Header> headerList) throws JSONException {
+        JSONArray headersArray = new JSONArray();
+        if(headerList != null) {
+            for(Header header : headerList) {
+                if (header != null) {
+                    JSONObject headerJSON = new JSONObject();
+                    headerJSON.put("name", header.getName());
+                    headerJSON.put("value", header.getValue());
+                    headersArray.put(headerJSON);
+                }
+            }
+        }
+        return headersArray;
+    }
+
+    public static List<Header> getHeadersList(JSONArray jsonArray) throws JSONException {
+        List<Header> headerList = new ArrayList<Header>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject headerJSON = (JSONObject) jsonArray.get(i);
+            Header header = new Header(headerJSON.getString("name"), headerJSON.getString("value"));
+            headerList.add(header);
+        }
+        return headerList;
+    }
+
     public OperationVS(int statusCode) {
         this.statusCode = statusCode;
     }
@@ -151,6 +257,16 @@ public class OperationVS implements Serializable{
         if (operationJSON.has("operation")) {
             operation.setTypeVS(TypeVS.valueOf(operationJSON.getString("operation")));
         }
+        if(operationJSON.has("deviceFromName")) operation.setDeviceFromName(
+                operationJSON.getString("deviceFromName"));
+        if(operationJSON.has("toUser")) operation.setToUser(operationJSON.getString("toUser"));
+        if(operationJSON.has("textToSign"))
+            operation.setTextToSign(operationJSON.getString("textToSign"));
+        if(operationJSON.has("subject")) operation.setSubject(operationJSON.getString("subject"));
+        if(operationJSON.has("headers")) operation.setHeaderList(
+                getHeadersList(operationJSON.getJSONArray("headers")));
+        if(operationJSON.has("publicKey")) operation.setPublicKeyBase64(
+                operationJSON.getString("publicKey"));
         if (operationJSON.has("args")) {
             JSONArray arrayArgs = operationJSON.getJSONArray("args");
             String[] args = new String[arrayArgs.length()];
@@ -188,7 +304,6 @@ public class OperationVS implements Serializable{
         if (operationJSON.has("targetCertList")) {
             operation.setTargetCertArray(operationJSON.getJSONArray("targetCertList"));
         }
-
         if (operationJSON.has("receiverName")) {
             operation.setReceiverName(operationJSON.getString("receiverName"));
         }
@@ -205,6 +320,11 @@ public class OperationVS implements Serializable{
         }
         if (operationJSON.has("caption")) operation.setCaption(operationJSON.getString("caption"));
         return operation;
+    }
+
+    public PublicKey getPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyFactory.getInstance("RSA").generatePublic(
+                new X509EncodedKeySpec(Base64.decode(publicKeyBase64)));
     }
 
     public JSONObject getJSON () throws JSONException {
@@ -231,7 +351,6 @@ public class OperationVS implements Serializable{
     public void setSignedMessageSubject(String signedMessageSubject) {
         this.signedMessageSubject = signedMessageSubject;
     }
-
 
     public String getCaption() {
         return caption;
@@ -306,7 +425,6 @@ public class OperationVS implements Serializable{
         if(contentStr != null) targetCertArray = new JSONArray(contentStr);
     }
 
-
     public String getCallerCallback() {
         return callerCallback;
     }
@@ -345,6 +463,50 @@ public class OperationVS implements Serializable{
 
     public void setTargetCertArray(JSONArray targetCertArray) {
         this.targetCertArray = targetCertArray;
+    }
+
+    public String getDeviceFromName() {
+        return deviceFromName;
+    }
+
+    public void setDeviceFromName(String deviceFromName) {
+        this.deviceFromName = deviceFromName;
+    }
+
+    public String getToUser() {
+        return toUser;
+    }
+
+    public void setToUser(String toUser) {
+        this.toUser = toUser;
+    }
+
+    public String getTextToSign() {
+        return textToSign;
+    }
+
+    public void setTextToSign(String textToSign) {
+        this.textToSign = textToSign;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public List<Header> getHeaderList() {
+        return headerList;
+    }
+
+    public void setHeaderList(List<Header> headerList) {
+        this.headerList = headerList;
+    }
+
+    public void setPublicKeyBase64(String publicKeyBase64) {
+        this.publicKeyBase64 = publicKeyBase64;
     }
 }
 

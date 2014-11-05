@@ -12,10 +12,10 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
+import org.votingsystem.util.ResponseVS;
 
 
 /**

@@ -27,13 +27,13 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.FileOutputStream;
 import java.security.KeyStore;

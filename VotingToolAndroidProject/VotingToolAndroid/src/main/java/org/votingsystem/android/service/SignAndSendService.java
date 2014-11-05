@@ -16,13 +16,13 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class SignAndSendService extends IntentService {
         contextVS = (AppContextVS) getApplicationContext();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        OperationVS operationVS = (OperationVS)arguments.getSerializable(ContextVS.OPERATIONVS_KEY);
+        OperationVS operationVS = (OperationVS)arguments.getParcelable(ContextVS.OPERATIONVS_KEY);
         if(operationVS != null) {
             switch(operationVS.getTypeVS()) {
                 case MESSAGEVS:
@@ -172,11 +172,14 @@ public class SignAndSendService extends IntentService {
             JSONArray targetCertArray = operationVS.getTargetCertArray();
             for(int i = 0; i < targetCertArray.length(); i++) {
                 JSONObject targetCertItem = targetCertArray.getJSONObject(i);
-                X509Certificate receiverCert = CertUtils.fromPEMToX509Cert((targetCertItem.getString("pemCert")).getBytes());
+                X509Certificate receiverCert = CertUtils.fromPEMToX509Cert(
+                        (targetCertItem.getString("pemCert")).getBytes());
                 JSONObject documentToEncrypt = operationVS.getDocumentToEncrypt();
-                responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
-                String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");
-                String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr, ContextVS.VOTING_DATA_DIGEST);
+                byte[] encryptedBytes = Encryptor.encryptToCMS(
+                        documentToEncrypt.toString().getBytes(), receiverCert);
+                String encryptedMessageStr = new String(encryptedBytes, "UTF-8");
+                String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr,
+                        ContextVS.VOTING_DATA_DIGEST);
                 Map signedMap = new HashMap();
                 signedMap.put("serialNumber", targetCertItem.getString("serialNumber"));
                 signedMap.put("encryptedMessageHashBase64", encryptedMessageHash);
@@ -198,8 +201,8 @@ public class SignAndSendService extends IntentService {
                         targetServer.getTimeStampServiceURL(), contextVS);
                 responseVS = timeStamper.call();
                 smimeMessage = timeStamper.getSMIME();
-                String base64ResultDigest = new String(Base64.encode(smimeMessage.getBytes()));
-                operationVS.getDocumentToSignJSON().put("smimeMessage", base64ResultDigest);
+                String smimeMessageBase64 = new String(Base64.encode(smimeMessage.getBytes()));
+                operationVS.getDocumentToSignJSON().put("smimeMessage", smimeMessageBase64);
                 operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));
                 responseVS = HttpHelper.sendData(operationVS.getDocumentToSignJSON().toString().getBytes(),
                         ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());

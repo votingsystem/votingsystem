@@ -5,11 +5,11 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
 
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
@@ -67,8 +67,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             byte[] messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
             responseVS = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage receipt = Encryptor.decryptSMIME(
-                        responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
+                SMIMEMessage receipt = Encryptor.decryptSMIME(responseVS.getMessageBytes(),
                         certificationRequest.getKeyPair().getPrivate());
                 responseVS.setSMIME(receipt);
             } else return responseVS;

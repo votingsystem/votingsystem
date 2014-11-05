@@ -10,27 +10,24 @@ import android.database.Cursor;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-import android.util.Log;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.activity.SMIMESignerActivity;
+import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketServer;
@@ -40,7 +37,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -54,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -80,7 +76,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     private State state = State.WITHOUT_CSR;
     private String webSocketSessionId = null;
-    private String webSocketUserId = null;
+    private Long webSocketUserId = null;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
@@ -275,6 +271,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return responseVS;
     }*/
 
+    //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
     public ResponseVS signMessage(String toUser, String textToSign, String subject) {
         ResponseVS responseVS = null;
         try {
@@ -286,8 +283,38 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
                     textToSign, subject);
-            //we can't timestamp here because of android.os.NetworkOnMainThreadException
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    getTimeStampServiceURL(), this);
+            responseVS = timeStamper.call();
+            smimeMessage = timeStamper.getSMIME();
             responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),message);
+        } finally {
+            return responseVS;
+        }
+    }
+
+    //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
+    public ResponseVS signMessage(String toUser, String textToSign, String subject,
+              String timeStampServiceURL) {
+        ResponseVS responseVS = null;
+        try {
+            String userVS = getUserVS().getNif();
+            LOGD(TAG + ".signMessage(...) ", "subject: " + subject);
+            KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
+                    (X509Certificate) keyEntry.getCertificateChain()[0],
+                    SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
+            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
+                    textToSign, subject);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
+                    timeStampServiceURL , this);
+            responseVS = timeStamper.call();
+            responseVS = new ResponseVS(ResponseVS.SC_OK, timeStamper.getSMIME());
         } catch (Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();
@@ -344,51 +371,49 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public void sendWebSocketBroadcast(WebSocketRequest request) {
         LOGD(TAG + ".sendWebSocketBroadcast(...) ", "statusCode: " + request.getStatusCode() +
-                " - type: " + request.getTypeVS() + " - serviceCaller: " +
-                request.getServiceCaller());
-        Intent intent = null;
-        if(request.getTypeVS() != null) {
-            switch(request.getTypeVS()) {
-                case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        try {
-                            setWebSocketSessionId(request.getMessageJSON().getString("sessionId"));
-                            setWebSocketUserId(request.getMessageJSON().getString("userId"));
-                            if(request.getMessageJSON().has("messageVSList")) {
-                                JSONArray messageVSList = request.getMessageJSON().getJSONArray("messageVSList");
-                                if(messageVSList.length() > 0) {
-                                    String jsCommand = "javascript:updateMessageVSList('" + request.getMessageJSON().toString() + "')";
-                                    intent = new Intent(this, BrowserVSActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
-                                    intent.putExtra(ContextVS.URL_KEY, getVicketServer().getMessageVSInboxURL());
-                                    startActivity(intent);
-                                }
-                            }
-                        } catch(Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    break;
-                case WEB_SOCKET_CLOSE:
-                    if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        setWebSocketSessionId(null);
-                        setWebSocketUserId(null);
-                    }
-                    break;
-                case MESSAGEVS_TO_DEVICE:
-                    break;
-                case MESSAGEVS_SIGN:
-                    intent = new Intent(this, SMIMESignerActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.RESPONSEVS_KEY, request);
-                    startActivity(intent);
-                    break;
-            }
-        } else  LOGD(TAG + ".broadcastResponse(...) ", "broadcast response with null type!!!");
-        intent = new Intent(request.getServiceCaller());
+            " - type: " + request.getTypeVS() + " - serviceCaller: " + request.getServiceCaller());
+        Intent intent =  new Intent(request.getServiceCaller());
         intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        switch(request.getTypeVS()) {
+            case INIT_VALIDATED_SESSION:
+                if(ResponseVS.SC_OK == request.getStatusCode()) {
+                    try {
+                        setWebSocketSessionId(request.getSessionId());
+                        setWebSocketUserId(request.getUserId());
+                        WebSocketRequest.MessageVSBundle messageBundle =
+                                request.getMessageVSBundle();
+                        if(messageBundle != null && messageBundle.getPendingMessages().length() > 0) {
+                            JSONArray messageVSList = messageBundle.getPendingMessages();
+                            if(messageVSList.length() > 0) {
+                                String jsCommand = "javascript:updateMessageVSList('" + messageVSList.toString() + "')";
+                                intent = new Intent(this, BrowserVSActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
+                                intent.putExtra(ContextVS.URL_KEY, getVicketServer().getMessageVSInboxURL());
+                                startActivity(intent);
+                            }
+                        }
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                break;
+            case WEB_SOCKET_CLOSE:
+                if(ResponseVS.SC_OK == request.getStatusCode()) {
+                    setWebSocketSessionId(null);
+                    setWebSocketUserId(null);
+                }
+                break;
+            case MESSAGEVS_TO_DEVICE:
+                break;
+            case MESSAGEVS_SIGN:
+                intent = new Intent(this, SMIMESignerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
+                startActivity(intent);
+                break;
+        }
     }
 
     public String getWebSocketSessionId() {
@@ -399,11 +424,11 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         this.webSocketSessionId = webSocketSessionId;
     }
 
-    public String getWebSocketUserId() {
+    public Long getWebSocketUserId() {
         return webSocketUserId;
     }
 
-    public void setWebSocketUserId(String webSocketUserId) {
+    public void setWebSocketUserId(Long webSocketUserId) {
         this.webSocketUserId = webSocketUserId;
     }
 

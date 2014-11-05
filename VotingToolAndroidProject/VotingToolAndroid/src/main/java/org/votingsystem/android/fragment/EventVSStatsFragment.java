@@ -36,8 +36,8 @@ import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
 
 
 public class EventVSStatsFragment extends Fragment {

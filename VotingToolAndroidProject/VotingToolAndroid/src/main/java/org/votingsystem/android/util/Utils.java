@@ -3,8 +3,8 @@ package org.votingsystem.android.util;
 import android.content.Context;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ResponseVS;
 
 /**
  * @author jgzornoza

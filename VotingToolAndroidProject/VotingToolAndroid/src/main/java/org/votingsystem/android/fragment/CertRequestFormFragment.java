@@ -38,8 +38,8 @@ import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.activity.EventsVSActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.text.Normalizer;
 import java.util.UUID;

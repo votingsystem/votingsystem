@@ -23,8 +23,8 @@ import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ResponseVS;
 
 import java.util.HashMap;
 import java.util.Map;

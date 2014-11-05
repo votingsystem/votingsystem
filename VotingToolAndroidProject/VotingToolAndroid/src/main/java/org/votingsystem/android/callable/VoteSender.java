@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -15,6 +14,7 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
 
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -80,8 +80,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     vote.getEventVS().getControlCenter().getCertificate());
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage voteReceipt = Encryptor.decryptSMIME(
-                        responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
+                SMIMEMessage voteReceipt = Encryptor.decryptSMIME(responseVS.getMessageBytes(),
                         certificationRequest.getKeyPair().getPrivate());
                 try {
                     vote.setVoteReceipt(voteReceipt);

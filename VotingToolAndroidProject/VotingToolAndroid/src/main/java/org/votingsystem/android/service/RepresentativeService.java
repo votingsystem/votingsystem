@@ -30,7 +30,6 @@ import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
@@ -41,6 +40,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -261,7 +261,6 @@ public class RepresentativeService extends IntentService {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     SMIMEMessage delegationReceipt = Encryptor.decryptSMIME(
                             responseVS.getMessageBytes(),
-                            anonymousDelegation.getCertificationRequest().getKeyPair().getPublic(),
                             anonymousDelegation.getCertificationRequest().getKeyPair().getPrivate());
 
                     anonymousDelegation.setDelegationReceipt(delegationReceipt);

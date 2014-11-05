@@ -11,6 +11,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.sun.mail.iap.Response;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -19,15 +21,16 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.MessageTimeStamper;
+import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtils;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.util.ResponseVS;
 
 import java.net.URI;
 import java.security.KeyStore;
@@ -63,7 +66,7 @@ public class WebSocketService extends Service {
     @Override public void onCreate(){
         contextVS = (AppContextVS) getApplicationContext();
         handler = new Handler();
-        Log.i(TAG + ".onCreate(...) ", "WebSocketService created");
+        Log.d(TAG + ".onCreate(...) ", "WebSocketService created");
     }
 
     @Override public void onDestroy(){
@@ -76,34 +79,32 @@ public class WebSocketService extends Service {
         if(intent != null) {
             Bundle arguments = intent.getExtras();
             TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
+            OperationVS operationVS = (OperationVS)arguments.getParcelable(ContextVS.OPERATIONVS_KEY);
             String messageToSend = arguments.getString(ContextVS.MESSAGE_KEY);
-            ResponseVS responseVS = null;
+            String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
             if(contextVS.getVicketServer() == null) {
                 contextVS.sendWebSocketBroadcast(new WebSocketRequest(
-                        ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), null));
+                        ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), operationType));
             }
             if(session == null || !session.isOpen()) {
                 WebSocketListener socketListener = new WebSocketListener(
                         contextVS.getVicketServer().getWebSocketURL());
-                Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
-                websocketThread.start();
+                new Thread(null, socketListener, "websocket_service_thread").start();
             }
             try {
-                Log.d(TAG + ".onStartCommand(...) ", "starting session");
+                Log.d(TAG + ".onStartCommand(...) ", "starting websocket session");
                 latch.await();
-                Log.d(TAG + ".onStartCommand(...) ", "session started");
+                Log.d(TAG + ".onStartCommand(...) ", "websocket session started");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            WebSocketMessageProccessor messageProccessor = new WebSocketMessageProccessor(
-                    operationType, messageToSend);
-            Thread messageProccessorThread = new Thread(null, messageProccessor, "websocket_message_proccessor_thread");
-            messageProccessorThread.start();
+            new Thread(null, new MessageProccessor(
+                    operationType, operationVS, messageToSend, serviceCaller),
+                    "websocket_message_proccessor_thread").start();
         }
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
     }
-
 
     private WebSocketRequest initAuthenticatedSession() {
         VicketServer vicketServer = contextVS.getVicketServer();
@@ -136,9 +137,9 @@ public class WebSocketService extends Service {
                     smimeMessage).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new WebSocketRequest(ResponseVS.SC_ERROR, ex.getMessage(), null);
+            return new WebSocketRequest(ResponseVS.SC_ERROR, ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
         }
-        return new WebSocketRequest(ResponseVS.SC_OK, null, null);
+        return new WebSocketRequest(ResponseVS.SC_PROCESSING, null, TypeVS.INIT_VALIDATED_SESSION);
     }
 
     public JSONObject getMessageJSON(TypeVS operation, String message, Map data,
@@ -172,17 +173,9 @@ public class WebSocketService extends Service {
         }
     };
 
-    private void consumeMessage(WebSocketRequest request) {
-        Log.d(TAG + "consumeMessage", "status: " + request.getStatusCode() +
-                " - typeVS: " + request.getTypeVS());
-        request.setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID);
-        contextVS.sendWebSocketBroadcast(request);
-    }
-
     private class WebSocketListener implements Runnable {
 
         private String serviceURL = null;
-
         final ClientManager client = ClientManager.createClient();
 
         public WebSocketListener(String serviceURL) {
@@ -192,25 +185,25 @@ public class WebSocketService extends Service {
                 try {
                     KeyStore p12Store = KeyStore.getInstance("PKCS12");
                     p12Store.load(null, null);
-                    byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open("VotingSystemSSLCert.pem"));
-                    Collection<X509Certificate> votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(certBytes);
+                    byte[] certBytes = FileUtils.getBytesFromInputStream(
+                            getAssets().open("VotingSystemSSLCert.pem"));
+                    Collection<X509Certificate> votingSystemSSLCerts =
+                            CertUtils.fromPEMToX509CertCollection(certBytes);
                     X509Certificate serverCert = votingSystemSSLCerts.iterator().next();
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
                     byte[] p12KeyStoreBytes = KeyStoreUtils.getBytes(p12Store, "".toCharArray());
-
                     // Grizzly ssl configuration
                     SSLContextConfigurator sslContext = new SSLContextConfigurator();
                     sslContext.setTrustStoreType("PKCS12");
                     sslContext.setTrustStoreBytes(p12KeyStoreBytes);
                     sslContext.setTrustStorePass("");
-                    SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
+                    SSLEngineConfigurator sslEngineConfigurator =
+                            new SSLEngineConfigurator(sslContext, true, false, false);
                     client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
                 } catch(Exception ex) {
                     ex.printStackTrace();
                 }
-            } else {
-                Log.d(TAG + ".WebsocketListener", "setting INSECURE connection");
-            }
+            } else Log.d(TAG + ".WebsocketListener", "setting INSECURE connection");
         }
 
         @Override public void run() {
@@ -222,7 +215,7 @@ public class WebSocketService extends Service {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
-                                consumeMessage(WebSocketRequest.parse(message));
+                                contextVS.sendWebSocketBroadcast(WebSocketRequest.parse(message, contextVS));
                             }
                         });
                         WebSocketService.this.session = session;
@@ -231,7 +224,8 @@ public class WebSocketService extends Service {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         latch = new CountDownLatch(1);
-                        consumeMessage(new WebSocketRequest(ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
+                        contextVS.sendWebSocketBroadcast(
+                                new WebSocketRequest(ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                     }
                 }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
 
@@ -241,40 +235,53 @@ public class WebSocketService extends Service {
         }
     }
 
-    private class WebSocketMessageProccessor implements Runnable {
+    private class MessageProccessor implements Runnable {
 
         private String messageToSend = null;
+        private String serviceCaller = null;
         private TypeVS operationType = null;
+        private OperationVS operationVS = null;
 
-        public WebSocketMessageProccessor(TypeVS operationType, String messageToSend) {
+        public MessageProccessor(TypeVS operationType, OperationVS operationVS,
+                 String messageToSend, String serviceCaller) {
             this.messageToSend = messageToSend;
             this.operationType = operationType;
+            this.operationVS = operationVS;
+            this.serviceCaller = serviceCaller;
         }
 
         @Override public void run() {
-            ResponseVS responseVS;
-            switch(operationType) {
-                case MESSAGEVS_GET:
-                case WEB_SOCKET_MESSAGE:
-                    try {
+            try {
+                if(operationType == null && operationVS != null)
+                    operationType = operationVS.getTypeVS();
+                switch(operationType) {
+                    case MESSAGEVS_GET:
+                    case WEB_SOCKET_MESSAGE:
                         session.getBasicRemote().sendText(messageToSend);
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    break;
-                case WEB_SOCKET_INIT:
-                    contextVS.sendWebSocketBroadcast(initAuthenticatedSession());
-                    break;
-                case WEB_SOCKET_CLOSE:
-                    try {
+                        break;
+                    case WEB_SOCKET_INIT:
+                        contextVS.sendWebSocketBroadcast(initAuthenticatedSession());
+                        break;
+                    case WEB_SOCKET_CLOSE:
                         session.close();
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    break;
-                default:
-                    Log.i(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
-            }
+                        break;
+                    case MESSAGEVS_SIGN:
+                        ResponseVS responseVS = contextVS.signMessage(operationVS.getToUser(),
+                                operationVS.getTextToSign(), operationVS.getSignedMessageSubject());
+                        JSONObject responseJSON = WebSocketRequest.getSignResponse(ResponseVS.SC_OK,
+                                null, operationVS.getSessionId(),
+                                operationVS.getPublicKey(), responseVS.getSMIME());
+                        session.getBasicRemote().sendText(responseJSON.toString());
+                        contextVS.broadcastResponse(ResponseVS.getResponse(ResponseVS.SC_OK,
+                                serviceCaller, getString(R.string.sign_document_lbl),
+                                getString(R.string.sign_document_result_ok_msg),
+                                TypeVS.MESSAGEVS_SIGN));
+                        //    public static ResponseVS getResponse(Integer statusCode, String serviceCaller, String caption,
+                        //String notificationMessage, TypeVS typeVS) {
+                    default:
+                        Log.i(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
+                }
+            } catch(Exception ex) {ex.printStackTrace();}
         }
     }
 }

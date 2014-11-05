@@ -1,7 +1,9 @@
 package org.votingsystem.util;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -25,6 +27,8 @@ import java.util.Map;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class WebSocketUtils {
+
+    private static Logger log = Logger.getLogger(WebSocketUtils.class);
 
     public static JSONObject getSignRequest(Long deviceIdTo, String deviceIdFrom, String deviceName,
             byte[] encryptedBytes, String locale) {
@@ -53,7 +57,18 @@ public class WebSocketUtils {
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("textToSign", textToSign);
         encryptedDataMap.put("subject", subject);
-        if(headers != null) encryptedDataMap.put("headers", Arrays.asList(headers));
+        if(headers != null) {
+            JSONArray headersArray = new JSONArray();
+            for(Header header : headers) {
+                if (header != null) {
+                    JSONObject headerJSON = new JSONObject();
+                    headerJSON.put("name", header.getName());
+                    headerJSON.put("value", header.getValue());
+                    headersArray.add(headerJSON);
+                }
+            }
+            encryptedDataMap.put("headers", headersArray);
+        }
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         encryptedDataMap.put("publicKey", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
@@ -64,14 +79,17 @@ public class WebSocketUtils {
     }
 
     public static SMIMEMessage getSignResponse(RequestBundle request, JSONObject response) throws Exception {
-        byte[] decryptedBytes = Encryptor.decryptMessage(response.getString("encryptedMessage").getBytes(),
-                request.getKeyPair().getPrivate());
-        JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(decryptedBytes, "UTF-8"));
-        if(ResponseVS.SC_OK == responseJSON.getInt("statusCode")) {
-            byte[] smimeMessageBytes = Base64.getDecoder().decode(responseJSON.getString("smime").getBytes());
-            SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
-            return smimeMessage;
-        } else throw new ExceptionVS(responseJSON.getString("message"));
+        log.debug("getSignResponse - response: " + response.toString());
+        if(response.has("encryptedMessage")) {
+            byte[] decryptedBytes = Encryptor.decryptMessage(response.getString("encryptedMessage").getBytes(),
+                    request.getKeyPair().getPrivate());
+            JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(decryptedBytes, "UTF-8"));
+            if(ResponseVS.SC_OK == responseJSON.getInt("statusCode")) {
+                byte[] smimeMessageBytes = Base64.getDecoder().decode(responseJSON.getString("smime").getBytes());
+                SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+                return smimeMessage;
+            } else throw new ExceptionVS(responseJSON.getString("message"));
+        } else throw new ExceptionVS(response.getString("message"));
     }
 
     public static JSONObject getResponse(String sessionId, ResponseVS responseVS){

@@ -33,12 +33,12 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.File;
 import java.io.FileDescriptor;

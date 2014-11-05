@@ -75,7 +75,7 @@ class WebSocketService {
                 if(SessionVSHelper.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
                     processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_TO_DEVICE, ResponseVS.SC_OK,null)))
-                } else processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_TO_DEVICE, ResponseVS.SC_ERROR,
+                } else processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_FROM_DEVICE, ResponseVS.SC_ERROR,
                         messageSource.getMessage("webSocketDeviceSessionNotFoundErrorMsg",
                         [request.messageJSON.deviceToName].toArray(), locale))));
                 break;

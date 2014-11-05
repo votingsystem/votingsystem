@@ -4,15 +4,18 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
+
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.mail.Header;
+
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 

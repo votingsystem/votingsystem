@@ -87,7 +87,7 @@ public class SignatureService extends Service<ResponseVS> {
                 }
                 updateProgress(25, 100);
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    updateMessage(operationVS.getSignedMessageSubject());
+                    updateMessage(getOperationMessage(operationVS));
                     updateProgress(40, 100);
                     switch(operationVS.getType()) {
                         case SEND_SMIME_VOTE:
@@ -139,6 +139,13 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
+        private String getOperationMessage(OperationVS operationVS) {
+            if(CryptoTokenVS.MOBILE == BrowserVSSessionUtils.getCryptoTokenType()) {
+                return ContextVS.getMessage("messageToDeviceProgressMsg",
+                        BrowserVSSessionUtils.getInstance().getMobileCryptoName());
+            } else return operationVS.getSignedMessageSubject();
+        }
+
         private ResponseVS openReceiptFromURL(final OperationVS operationVS) throws Exception {
             ResponseVS responseVS = null;
             if(VotingSystemApp.getInstance().getSMIME(operationVS.getServiceURL()) != null) {
@@ -183,7 +190,6 @@ public class SignatureService extends Service<ResponseVS> {
             return responseVS;
         }
 
-
         //we know this is done in a background thread
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
             log.debug("sendVote");
@@ -224,7 +230,6 @@ public class SignatureService extends Service<ResponseVS> {
                 voteResponse.setType(TypeVS.VOTEVS);
                 voteResponse.setData(eventVS.getVoteVS());
                 ContextVS.getInstance().addHashCertVSData(eventVS.getVoteVS().getHashCertVSBase64(), voteResponse);
-                //voteURL header
                 JSONObject responseJSON = new JSONObject();
                 responseJSON.put("statusCode", ResponseVS.SC_OK);
                 responseJSON.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
@@ -538,6 +543,7 @@ public class SignatureService extends Service<ResponseVS> {
             SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
                     operationVS.getNormalizedReceiverName(), documentToSignStr,
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+            updateMessage(operationVS.getSignedMessageSubject());
             if(operationVS.getAsciiDoc() != null) {
                 smimeMessage.setHeader(SMIMEMessage.CONTENT_TYPE_VS, ContentTypeVS.ASCIIDOC.getName());
             }

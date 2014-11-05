@@ -183,5 +183,4 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-
 }

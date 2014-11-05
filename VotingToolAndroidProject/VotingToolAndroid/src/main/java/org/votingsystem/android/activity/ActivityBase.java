@@ -1,8 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
@@ -25,7 +22,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -41,7 +37,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -57,17 +52,15 @@ import org.votingsystem.android.util.LPreviewUtilsBase;
 import org.votingsystem.android.util.LoginAndAuthHelper;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.android.util.WebSocketRequest;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
@@ -181,7 +174,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -189,18 +182,21 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                     case WEB_SOCKET_INIT:
                         showProgressDialog(getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg));
-                        toggleWebSocketServiceConnection();
+                        new Thread(new Runnable() {
+                            @Override public void run() { toggleWebSocketServiceConnection(); }
+                        }).start();
                         break;
                 }
             } else if(request != null) {
-                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + request.getTypeVS());
+                Log.d(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
                 if(progressDialog != null) progressDialog.dismiss();
                 switch(request.getTypeVS()) {
                     case INIT_VALIDATED_SESSION:
                         if(ResponseVS.SC_OK == request.getStatusCode()) {
                             connectionStatusText.setText(getString(R.string.connected_lbl));
                             connectionStatusView.setVisibility(View.VISIBLE);
-                        } else ActivityBase.this.showMessage(request.getStatusCode(),
+                        } else if(ResponseVS.SC_ERROR == request.getStatusCode())
+                                ActivityBase.this.showMessage(request.getStatusCode(),
                                 request.getCaption(), request.getMessage());
                         break;
                     case WEB_SOCKET_CLOSE:
@@ -208,13 +204,11 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                         connectionStatusView.setVisibility(View.GONE);
                         break;
                 }
-
             }
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         /*if (!PrefUtils.isTosAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
@@ -228,12 +222,10 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         }
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         sp.registerOnSharedPreferenceChangeListener(this);
-
         ActionBar ab = getActionBar();
         if (ab != null) {
             ab.setDisplayHomeAsUpEnabled(true);
         }
-
         mLPreviewUtils = LPreviewUtils.getInstance(this);
         mThemedStatusBarColor = getResources().getColor(R.color.theme_primary_dark);
     }
@@ -290,7 +282,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     private void setupNavDrawer() {
         // What nav drawer item should be selected?
         int selfItem = getSelfNavDrawerItem();
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
@@ -304,10 +295,8 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             mDrawerLayout = null;
             return;
         }
-
         mDrawerToggle = mLPreviewUtils.setupDrawerToggle(mDrawerLayout, new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerClosed(View drawerView) {
+            @Override public void onDrawerClosed(View drawerView) {
                 // run deferred action, if we have one
                 if (mDeferredOnDrawerClosedRunnable != null) {
                     mDeferredOnDrawerClosedRunnable.run();
@@ -317,22 +306,16 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                 updateStatusBarForNavDrawerSlide(0f);
                 onNavDrawerStateChanged(false, false);
             }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
+            @Override public void onDrawerOpened(View drawerView) {
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                 updateStatusBarForNavDrawerSlide(1f);
                 onNavDrawerStateChanged(true, false);
             }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
+            @Override public void onDrawerStateChanged(int newState) {
                 invalidateOptionsMenu();
                 onNavDrawerStateChanged(isNavDrawerOpen(), newState != DrawerLayout.STATE_IDLE);
             }
-
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            @Override public void onDrawerSlide(View drawerView, float slideOffset) {
                 updateStatusBarForNavDrawerSlide(slideOffset);
                 onNavDrawerSlide(slideOffset);
             }
@@ -455,15 +438,17 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
      */
     private void setupAccountBox() {
         final View chosenAccountView = findViewById(R.id.chosen_account_view);
-        chosenAccountView.setVisibility(View.VISIBLE);
-        TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
-        TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
+        if(chosenAccountView != null) { //there are Activitys withou
+            chosenAccountView.setVisibility(View.VISIBLE);
+            TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
+            TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
 
-        UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
-        if(sessionUserVS != null) {
-            nameTextView.setText(sessionUserVS.getName());
-            email.setText(sessionUserVS.getEmail());
-            chosenAccountView.setEnabled(true);
+            UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
+            if(sessionUserVS != null) {
+                nameTextView.setText(sessionUserVS.getName());
+                email.setText(sessionUserVS.getEmail());
+                chosenAccountView.setEnabled(true);
+            }
         }
     }
 
@@ -523,7 +508,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         refreshingStateChanged(false);
     }
 
-    //progressDialog.dismiss();
     private void showProgressDialog(final String title, final String dialogMessage) {
         runOnUiThread(new Runnable() {
             @Override

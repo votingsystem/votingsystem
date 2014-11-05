@@ -40,9 +40,9 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.Serializable;
 import java.util.ArrayList;

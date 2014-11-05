@@ -93,6 +93,10 @@ public class BrowserVSSessionUtils {
         return sessionDataJSON.getJSONObject("mobileCryptoToken");
     }
 
+    public String getMobileCryptoName() {
+        return sessionDataJSON.getJSONObject("mobileCryptoToken").getString("deviceName");
+    }
+
     public Long getCSRRequestId() {
         return browserSessionDataJSON.getLong("csrRequestId");
     }
@@ -246,7 +250,6 @@ public class BrowserVSSessionUtils {
             smimeMessage = WebSocketUtils.getSignResponse(requestBundle, messageJSON);
             messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
             messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
         }
         countDownLatch.countDown();
@@ -279,4 +282,5 @@ public class BrowserVSSessionUtils {
             log.error(ex.getMessage(), ex);
         }
     }
+
 }

@@ -36,11 +36,11 @@ import org.votingsystem.android.activity.VicketPagerActivity;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.text.Collator;
 import java.util.Calendar;

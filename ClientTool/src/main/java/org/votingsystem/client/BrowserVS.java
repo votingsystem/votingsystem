@@ -89,7 +89,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private BrowserVS() {
         browserHelper = new BrowserVSPane();
         Platform.setImplicitExit(false);
-        browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 log.debug("signatureService - OnSucceeded");
                 PlatformImpl.runLater(new Runnable() {
@@ -134,6 +134,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             @Override public void handle(WindowEvent event) {
                 event.consume();
                 browserStage.hide();
+                browserHelper.getSignatureService().cancel();
                 log.debug("browserStage.setOnCloseRequest");
             }
         });
