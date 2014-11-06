@@ -92,9 +92,11 @@ public class WebSocketService extends Service {
                 new Thread(null, socketListener, "websocket_service_thread").start();
             }
             try {
-                Log.d(TAG + ".onStartCommand(...) ", "starting websocket session");
-                latch.await();
-                Log.d(TAG + ".onStartCommand(...) ", "websocket session started");
+                if(latch.getCount() > 0) {
+                    Log.d(TAG + ".onStartCommand(...) ", "starting websocket session");
+                    latch.await();
+                    Log.d(TAG + ".onStartCommand(...) ", "websocket session started");
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -193,6 +195,7 @@ public class WebSocketService extends Service {
 
         @Override public void run() {
             try {
+                latch = new CountDownLatch(1);
                 Log.d(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
                 // sets the incoming buffer size to 1000000 bytes ~ 900K
                 //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
@@ -255,15 +258,11 @@ public class WebSocketService extends Service {
                                 operationVS.getTextToSign(), operationVS.getSignedMessageSubject(),
                                 contextVS.getVicketServer().getTimeStampServiceURL());
                         JSONObject responseJSON = WebSocketRequest.getSignResponse(ResponseVS.SC_OK,
-                                null, operationVS.getSessionId(),
-                                operationVS.getPublicKey(), responseVS.getSMIME());
+                                null, operationVS.getSessionId(), operationVS.getPublicKey(),
+                                responseVS.getSMIME(),
+                                contextVS.getResources().getConfiguration().locale.getLanguage());
                         session.getBasicRemote().sendText(responseJSON.toString());
-                        contextVS.broadcastResponse(ResponseVS.getResponse(ResponseVS.SC_OK,
-                                serviceCaller, getString(R.string.sign_document_lbl),
-                                getString(R.string.sign_document_result_ok_msg),
-                                TypeVS.MESSAGEVS_SIGN));
-                        //    public static ResponseVS getResponse(Integer statusCode, String serviceCaller, String caption,
-                        //String notificationMessage, TypeVS typeVS) {
+                        break;
                     default:
                         Log.i(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
                 }

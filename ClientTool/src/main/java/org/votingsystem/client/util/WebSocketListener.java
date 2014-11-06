@@ -1,6 +1,7 @@
 package org.votingsystem.client.util;
 
 import net.sf.json.JSONObject;
+import org.votingsystem.util.WebSocketMessage;
 
 /**
  * @author jgzornoza
@@ -8,9 +9,7 @@ import net.sf.json.JSONObject;
  */
 public interface WebSocketListener {
 
-    public enum ConnectionStatus {OPEN, CLOSED}
-
-    public void consumeWebSocketMessage(JSONObject messageJSON);
-    public void setConnectionStatus(ConnectionStatus status);
+    public void consumeWebSocketMessage(WebSocketMessage message);
+    public void setConnectionStatus(WebSocketMessage.ConnectionStatus status);
 
 }

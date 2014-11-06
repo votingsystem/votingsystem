@@ -58,15 +58,26 @@ public class SessionVSHelper {
 
     public Map<Long, Set> getConnectedUsersDataMap() {
         Map result = new HashMap();
-        result.put("numUsersNotAuthenticated", sessionMap.size());
+        Map notAuthenticatedDataMap = new HashMap();
+        notAuthenticatedDataMap.put("numUsersNotAuthenticated", sessionMap.size());
+        List<String> notAuthenticatedSessionList = new ArrayList<>();
+        for(Session session : sessionMap.values()) {
+            notAuthenticatedSessionList.add(session.getId());
+        }
+        notAuthenticatedDataMap.put("sessionIdList", notAuthenticatedSessionList);
         Map<Long, Set> authUsersMap = new HashMap();
         for(Long deviceId : deviceSessionMap.keySet()) {
+            Map deviceInfoMap = new HashMap();
+            deviceInfoMap.put("deviceId", deviceId);
+            deviceInfoMap.put("sessionId", deviceSessionMap.get(deviceId));
             Long userVSId = authenticatedSessionMap.get(deviceSessionMap.get(deviceId)).getUserVS().getId();
-            Set<Long> deviceSet = authUsersMap.get(userVSId);
-            if(deviceSet != null) deviceSet.add(deviceId);
-            else authUsersMap.put(userVSId,  new HashSet<>(Arrays.asList(deviceId)));
+            Set userDeviceSet = authUsersMap.get(userVSId);
+            if(userDeviceSet == null) userDeviceSet = new HashSet<>();
+            userDeviceSet.add(deviceInfoMap);
+            authUsersMap.put(userVSId,  userDeviceSet);
         }
         result.put("authenticatedUsers", authUsersMap);
+        result.put("notAuthenticatedUsers", notAuthenticatedDataMap);
         return result;
     }
 

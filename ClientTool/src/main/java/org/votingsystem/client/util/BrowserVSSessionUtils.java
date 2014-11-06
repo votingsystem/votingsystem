@@ -235,6 +235,7 @@ public class BrowserVSSessionUtils {
                 requestBundle = WebSocketUtils.getSignRequest(deviceToId, deviceToName,
                     deviceFromName, toUser, textToSign, subject, ContextVS.getInstance().getLocale().getLanguage(),
                     deviceToCert, headers);
+
                 BrowserVS.getInstance().sendWebSocketMessage(requestBundle.getRequest().toString());
 
                 countDownLatch.await();
@@ -245,14 +246,25 @@ public class BrowserVSSessionUtils {
         }
     }
 
-    public static void setMessageFromDevice(JSONObject messageJSON) {
-        try {
-            smimeMessage = WebSocketUtils.getSignResponse(requestBundle, messageJSON);
-            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
-        } catch(Exception ex) {
-            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
+    public static void setWebSocketMessage(WebSocketMessage message) {
+        switch (message.getOperation()) {
+            case MESSAGEVS_TO_DEVICE:
+                if(ResponseVS.SC_ERROR == message.getStatusCode()) {
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, message.getMessage());
+                    countDownLatch.countDown();
+                }
+                break;
+            case MESSAGEVS_FROM_DEVICE:
+                try {
+                    smimeMessage = message.getSignResponse(requestBundle);
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
+                } catch(Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
+                }
+                countDownLatch.countDown();
+                break;
         }
-        countDownLatch.countDown();
     }
 
     public static ResponseVS getMessageToDeviceResponse() {

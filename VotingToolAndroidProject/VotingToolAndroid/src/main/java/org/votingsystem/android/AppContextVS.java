@@ -317,7 +317,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             " - type: " + request.getTypeVS() + " - serviceCaller: " + request.getServiceCaller());
         Intent intent =  new Intent(request.getServiceCaller());
         intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         switch(request.getTypeVS()) {
             case INIT_VALIDATED_SESSION:
                 if(ResponseVS.SC_OK == request.getStatusCode()) {
@@ -341,14 +340,18 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                         ex.printStackTrace();
                     }
                 }
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 break;
             case WEB_SOCKET_CLOSE:
                 if(ResponseVS.SC_OK == request.getStatusCode()) {
                     setWebSocketSessionId(null);
                     setWebSocketUserId(null);
                 }
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 break;
+            case MESSAGEVS_FROM_DEVICE:
             case MESSAGEVS_TO_DEVICE:
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 break;
             case MESSAGEVS_SIGN:
                 intent = new Intent(this, SMIMESignerActivity.class);

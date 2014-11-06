@@ -196,26 +196,6 @@ public class Utils {
         });
     }
 
-
-    public static String getWebSocketCoreSignalJSCommand(
-            JSONObject messageJSON, WebSocketListener.ConnectionStatus status) {
-        JSONObject coreSignal = new JSONObject();
-        if(messageJSON == null) messageJSON = new JSONObject();
-        messageJSON.put("socketStatus", status.toString());
-        //this.fire('core-signal', {name: "vs-websocket-message", data: messageJSON});
-        coreSignal.put("name", "vs-websocket-message");
-        coreSignal.put("data", messageJSON);
-        String jsCommand = null;
-        try {
-            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
-                    coreSignal.toString().getBytes("UTF-8")) + "')";
-
-        } catch (UnsupportedEncodingException ex) {
-            log.error(ex.getMessage(), ex);
-        }
-        return jsCommand;
-    }
-
     public static String getSessionCoreSignalJSCommand(JSONObject sessionDataJSON) {
         JSONObject coreSignal = new JSONObject();
         //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});

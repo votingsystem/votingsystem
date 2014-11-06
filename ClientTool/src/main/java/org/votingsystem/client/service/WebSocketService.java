@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -16,6 +17,7 @@ import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.WebSocketMessage;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -106,7 +108,7 @@ public class WebSocketService extends Service<ResponseVS> {
                     }
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
-                        broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+                        broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
                         BrowserVSSessionUtils.getInstance().setIsConnected(false);
                     }
 
@@ -126,7 +128,7 @@ public class WebSocketService extends Service<ResponseVS> {
         if(session != null && session.isOpen()) {
             try {session.close();}
             catch(Exception ex) {log.error(ex.getMessage(), ex);}
-        } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
+        } else broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
     }
 
     public void addListener(WebSocketListener listener) {
@@ -145,23 +147,23 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    private void consumeMessage(final String message) {
-        ResponseVS responseVS = ResponseVS.parseWebSocketResponse(message);
-        log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + responseVS.getType() +
-                " - status: " + responseVS.getStatusCode());
-        switch(responseVS.getType()) {
+    private void consumeMessage(final String messageStr) {
+        WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
+        log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + message.getOperation() +
+                " - status: " + message.getStatusCode());
+        switch(message.getOperation()) {
             case MESSAGEVS_SIGN:
             case MESSAGEVS_EDIT:
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) showMessage(
-                        responseVS.getStatusCode(), responseVS.getMessage());
+                if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
+                        message.getStatusCode(), message.getMessage());
             case MESSAGEVS_GET:
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) showMessage(
-                        responseVS.getStatusCode(), responseVS.getMessage());
+                if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
+                        message.getStatusCode(), message.getMessage());
                 else {
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
                             log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
-                            BrowserVS.getInstance().execCommandJSCurrentView("alert('" + responseVS.getMessage() + "')");
+                            BrowserVS.getInstance().execCommandJSCurrentView("alert('" + message.getMessage() + "')");
                             //browserVS.executeScript("updateMessageVSList(" + message + ")");
                         }
                     });
@@ -169,12 +171,12 @@ public class WebSocketService extends Service<ResponseVS> {
                 break;
         }
         for(WebSocketListener listener : listeners) {
-            if(listener != null) listener.consumeWebSocketMessage((JSONObject) responseVS.getMessageJSON());
+            if(listener != null) listener.consumeWebSocketMessage(message);
             else listeners.remove(listener);
         }
     }
 
-    private void broadcastConnectionStatus(WebSocketListener.ConnectionStatus status) {
+    private void broadcastConnectionStatus(WebSocketMessage.ConnectionStatus status) {
         if(session == null) log.debug("broadcastConnectionStatus - status: " + status.toString());
         else log.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         for(WebSocketListener listener : listeners) {

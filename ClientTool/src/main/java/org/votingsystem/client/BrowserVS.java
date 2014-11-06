@@ -51,6 +51,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.WebSocketMessage;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -413,38 +414,33 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         newTab(urlToLoad, caption, "".equals(jsCommand.toString()) ? null : jsCommand.toString());
     }
 
-    @Override public void consumeWebSocketMessage(JSONObject messageJSON) {
-        messageJSON = messageJSON.getJSONObject("message");
-        if(messageJSON.containsKey("operation")) {
-            TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
-            log.debug("consumeWebSocketMessage: " + operation.toString());
-            switch(operation) {
-                case INIT_VALIDATED_SESSION:
-                    execCommandJS(Utils.getWebSocketCoreSignalJSCommand(messageJSON, ConnectionStatus.OPEN));
-                    break;
-                case MESSAGEVS_SIGN:
-                    showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
-                            messageJSON.containsKey("message")?messageJSON.getString("message"):null);
-                    break;
-                case MESSAGEVS_FROM_DEVICE:
-                    BrowserVSSessionUtils.setMessageFromDevice(messageJSON);
-                    break;
-                default:
-                    showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
-                            messageJSON.containsKey("message")?messageJSON.getString("message"):null);
-            }
-        } else showMessage(messageJSON.containsKey("statusCode")?messageJSON.getInt("statusCode"):null,
-                messageJSON.containsKey("message")?messageJSON.getString("message"):null);
+    @Override public void consumeWebSocketMessage(WebSocketMessage message) {
+        log.debug("consumeWebSocketMessage - operation: " + message.getOperation().toString());
+        switch(message.getOperation()) {
+            case INIT_VALIDATED_SESSION:
+                execCommandJS(message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                break;
+            case MESSAGEVS_SIGN:
+                log.debug("========= TODO MESSAGEVS_SIGN");
+                break;
+            case MESSAGEVS_TO_DEVICE:
+            case MESSAGEVS_FROM_DEVICE:
+                BrowserVSSessionUtils.setWebSocketMessage(message);
+                break;
+            default: log.debug("unprocessed message");
+        }
     }
 
-    @Override public void setConnectionStatus(ConnectionStatus status) {
+    @Override public void setConnectionStatus(WebSocketMessage.ConnectionStatus status) {
         log.debug("setConnectionStatus - status: " + status.toString());
         switch (status) {
             case CLOSED:
-                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.CLOSED));
+                execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                        null, WebSocketMessage.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                execCommandJS(Utils.getWebSocketCoreSignalJSCommand(null, ConnectionStatus.OPEN));
+                execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                        null, WebSocketMessage.ConnectionStatus.OPEN));
                 break;
         }
     }
@@ -477,11 +473,21 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     public void sendWebSocketMessage(String message) throws IOException {
-        getWebSocketService().sendMessage(message);
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                try { getWebSocketService().sendMessage(message);}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            }
+        });
     }
 
     public void sendWebSocketAuthenticatedMessage(String message) throws IOException {
-        getWebSocketServiceAuthenticated().sendMessage(message);
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                try { getWebSocketServiceAuthenticated().sendMessage(message);}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            }
+        });
     }
 
     public WebSocketServiceAuthenticated getWebSocketServiceAuthenticated(){

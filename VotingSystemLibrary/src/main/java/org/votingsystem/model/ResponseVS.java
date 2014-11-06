@@ -341,17 +341,6 @@ public class ResponseVS<T> implements Serializable {
         return responseVS;
     }
 
-    public static ResponseVS parseWebSocketResponse(String message) {
-        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(message);
-        ResponseVS result = new ResponseVS();
-        result.setMessageJSON(messageJSON);
-        if(messageJSON.containsKey("operation")) result.setType(TypeVS.valueOf(messageJSON.getString("operation")));
-        if(messageJSON.containsKey("status")) result.setStatusCode(Integer.valueOf(messageJSON.getString("status")));
-        if(messageJSON.containsKey("message")) result.setMessage(messageJSON.getString("message"));
-        if(messageJSON.containsKey("URL")) result.setMessage(messageJSON.getString("URL"));
-        return result;
-    }
-
     public MessageSMIME getMessageSMIME() {
         return messageSMIME;
     }

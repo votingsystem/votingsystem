@@ -27,8 +27,7 @@ class WebSocketService {
             processRequest(new WebSocketRequest(session, msg, last))
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            processResponse(WebSocketUtils.getResponse(session.getId(),
-                    new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())))
+            processResponse(WebSocketRequest.getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage()));
         }
     }
 
@@ -74,21 +73,22 @@ class WebSocketService {
             case TypeVS.MESSAGEVS_TO_DEVICE:
                 if(SessionVSHelper.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
-                    processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_TO_DEVICE, ResponseVS.SC_OK,null)))
-                } else processResponse(request.getResponse(new ResponseVS(TypeVS.MESSAGEVS_FROM_DEVICE, ResponseVS.SC_ERROR,
+                    processResponse(request.getResponse(ResponseVS.SC_OK, null))
+                } else processResponse(request.getResponse(ResponseVS.SC_ERROR,
                         messageSource.getMessage("webSocketDeviceSessionNotFoundErrorMsg",
-                        [request.messageJSON.deviceToName].toArray(), locale))));
+                        [request.messageJSON.deviceToName].toArray(), locale)));
                 break;
             case TypeVS.MESSAGEVS_FROM_DEVICE:
                 if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
                 Session originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
-                if(!originSession) processResponse(request.getResponse(
-                        new ResponseVS(TypeVS.MESSAGEVS_SIGN_RESPONSE, ResponseVS.SC_ERROR, messageSource.getMessage(
-                                "messagevsSignRequestorNotFound", null, locale))))
-                originSession.getBasicRemote().sendText(request.messageJSON.toString())
-                processResponse(request.getResponse(new ResponseVS(
-                        TypeVS.MESSAGEVS_SIGN_RESPONSE, ResponseVS.SC_OK, null)))
+                if(!originSession) {
+                    processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
+                                    "messagevsSignRequestorNotFound", null, locale)))
+                } else {
+                    originSession.getBasicRemote().sendText(request.messageJSON.toString())
+                    processResponse(request.getResponse(ResponseVS.SC_OK, null))
+                }
                 break;
             case TypeVS.INIT_VALIDATED_SESSION:
                 SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
@@ -147,7 +147,7 @@ class WebSocketService {
         WebSocketRequest(Session session, String msg, boolean last) {
             this.session = session;
             messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
-            messageJSON.sessionId = session.getId()
+            if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
             if(!messageJSON.locale) throw new ExceptionVS("missing message 'locale'")
             locale = Locale.forLanguageTag(messageJSON.locale)
             if(!messageJSON.operation) throw new ExceptionVS("missing message 'operation'")
@@ -158,9 +158,20 @@ class WebSocketService {
             sessionVS = SessionVSHelper.getInstance().getAuthenticatedSession(session)
             log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - last: ${last}")
         }
-        JSONObject getResponse(ResponseVS responseVS){
-            return WebSocketUtils.getResponse(session.getId(), responseVS)
+        JSONObject getResponse(Integer statusCode, String message){
+            return getResponse(session.getId(), statusCode, operation, message);
         }
+
+        public static JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
+            JSONObject result = new JSONObject();
+            if(typeVS != null) result.put("operation", typeVS.toString());
+            else result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
+            result.put("sessionId", sessionId);
+            result.put("statusCode", statusCode);
+            result.put("message", message);
+            return result;
+        }
+
     }
 
 }
