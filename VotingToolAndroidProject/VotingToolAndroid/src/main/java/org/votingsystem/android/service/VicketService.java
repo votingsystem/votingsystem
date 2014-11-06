@@ -158,7 +158,7 @@ public class VicketService extends IntentService {
             for(Vicket vicket : sendedVickets) {
                 responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
                         vicket.getCancellationRequest().toString(),
-                        getString(R.string.vicket_cancellation_msg_subject));
+                        getString(R.string.vicket_cancellation_msg_subject), contextVS.getTimeStampServiceURL());
                 cancellationList.add(new String(Base64.encode(responseVS.getSMIME().getBytes())));
             }
             Map requestMap = new HashMap();

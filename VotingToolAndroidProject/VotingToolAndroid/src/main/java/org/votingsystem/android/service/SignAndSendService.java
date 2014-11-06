@@ -192,23 +192,20 @@ public class SignAndSendService extends IntentService {
             }
             operationVS.getDocumentToSignJSON().put("encryptedDataInfo", new JSONArray(signedDataList));
             responseVS = contextVS.signMessage(targetServer.getNameNormalized(),
-                    operationVS.getDocumentToSignJSON().toString(), operationVS.getSignedMessageSubject());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                responseVS.setOperation(operationVS);
-            } else {
-                SMIMEMessage smimeMessage = responseVS.getSMIME();
-                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                        targetServer.getTimeStampServiceURL(), contextVS);
-                responseVS = timeStamper.call();
-                smimeMessage = timeStamper.getSMIME();
-                String smimeMessageBase64 = new String(Base64.encode(smimeMessage.getBytes()));
-                operationVS.getDocumentToSignJSON().put("smimeMessage", smimeMessageBase64);
-                operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));
-                responseVS = HttpHelper.sendData(operationVS.getDocumentToSignJSON().toString().getBytes(),
-                        ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS =
-                        new ResponseVS(ResponseVS.SC_OK, getString(R.string.messagevs_send_ok_msg));
-            }
+                    operationVS.getDocumentToSignJSON().toString(), operationVS.getSignedMessageSubject(),
+                    targetServer.getTimeStampServiceURL());
+            SMIMEMessage smimeMessage = responseVS.getSMIME();
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    targetServer.getTimeStampServiceURL(), contextVS);
+            responseVS = timeStamper.call();
+            smimeMessage = timeStamper.getSMIME();
+            String smimeMessageBase64 = new String(Base64.encode(smimeMessage.getBytes()));
+            operationVS.getDocumentToSignJSON().put("smimeMessage", smimeMessageBase64);
+            operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));
+            responseVS = HttpHelper.sendData(operationVS.getDocumentToSignJSON().toString().getBytes(),
+                    ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS =
+                    new ResponseVS(ResponseVS.SC_OK, getString(R.string.messagevs_send_ok_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());

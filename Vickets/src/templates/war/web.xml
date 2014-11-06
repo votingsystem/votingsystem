@@ -11,6 +11,14 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/applicationContext.xml</param-value>
     </context-param>
+    <context-param>
+        <param-name>org.apache.tomcat.websocket.textBufferSize</param-name>
+        <param-value>32768</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.apache.tomcat.websocket.binaryBufferSize</param-name>
+        <param-value>32768</param-value>
+    </context-param>
 
     <context-param>
         <param-name>webAppRootKey</param-name>

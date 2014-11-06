@@ -230,72 +230,11 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return keyEntry;
     }
 
-
     public byte[] decryptMessage(byte[] encryptedBytes) throws Exception {
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         //X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
         PrivateKey privateKey = keyEntry.getPrivateKey();
         return Encryptor.decryptCMS(privateKey, encryptedBytes);
-    }
-
-    /*public ResponseVS decryptMessageVS(JSONObject documentToDecrypt) throws Exception {
-        ResponseVS responseVS = null;
-        JSONArray encryptedDataArray = documentToDecrypt.getJSONArray("encryptedDataList");
-        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
-        X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
-        PrivateKey privateKey = keyEntry.getPrivateKey();
-        String encryptedData = null;
-        for(int i = 0 ; i < encryptedDataArray.length(); i++){
-            JSONObject arrayItem = encryptedDataArray.getJSONObject(i);
-            Long serialNumber = Long.valueOf((String) arrayItem.get("serialNumber"));
-            if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
-                LOGD(TAG + ".decryptMessageVS(...) ", "Cert matched - serialNumber: " + serialNumber);
-                encryptedData = (String) arrayItem.get("encryptedData");
-            }
-        }
-        if(encryptedData != null) {
-            responseVS = Encryptor.decryptCMS(privateKey, encryptedData.getBytes());
-            responseVS.setContentType(ContentTypeVS.JSON);
-            Map editDataMap = new HashMap();
-            editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
-            editDataMap.put("locale", Locale.getDefault().getLanguage().toLowerCase());
-            editDataMap.put("state", "CONSUMED");
-            editDataMap.put("messageId", documentToDecrypt.get("id"));
-            JSONObject messageToWebSocket = new JSONObject(editDataMap);
-            responseVS.setData(messageToWebSocket);
-        }
-        else {
-            Log.e(TAG + ".decryptMessageVS(...)", "Unable to decrypt from this device");
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(R.string.decrypt_cert_notfound_msg));
-        }
-        return responseVS;
-    }*/
-
-    //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public ResponseVS signMessage(String toUser, String textToSign, String subject) {
-        ResponseVS responseVS = null;
-        try {
-            String userVS = getUserVS().getNif();
-            LOGD(TAG + ".signMessage(...) ", "subject: " + subject);
-            KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
-                    (X509Certificate) keyEntry.getCertificateChain()[0],
-                    SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
-                    textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                    getTimeStampServiceURL(), this);
-            responseVS = timeStamper.call();
-            smimeMessage = timeStamper.getSMIME();
-            responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),message);
-        } finally {
-            return responseVS;
-        }
     }
 
     //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
@@ -314,6 +253,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
                     timeStampServiceURL , this);
             responseVS = timeStamper.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
+                return responseVS;
+            }
             responseVS = new ResponseVS(ResponseVS.SC_OK, timeStamper.getSMIME());
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -114,24 +114,9 @@ public class WebSocketService extends Service {
         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
         JSONObject requestJSON = new JSONObject(mapToSend);
         ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
-                requestJSON.toString(), msgSubject);
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) WebSocketRequest.load(responseVS);
-        SMIMEMessage smimeMessage = null;
-        try {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
-                    contextVS);
-            responseVS = timeStamper.call();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
-                return WebSocketRequest.load(responseVS);
-            }
-            smimeMessage = timeStamper.getSMIME();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            return WebSocketRequest.load(ResponseVS.SC_ERROR, ContextVS.WEB_SOCKET_BROADCAST_ID,
-                    getString(R.string.timestamp_service_error_caption),
-                    ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
-        }
+                requestJSON.toString(), msgSubject, contextVS.getVicketServer().getTransactionVSServiceURL());
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketRequest.load(responseVS);
+        SMIMEMessage smimeMessage = responseVS.getSMIME();
         try {
             session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
                     smimeMessage).toString());
@@ -267,7 +252,8 @@ public class WebSocketService extends Service {
                         break;
                     case MESSAGEVS_SIGN:
                         ResponseVS responseVS = contextVS.signMessage(operationVS.getToUser(),
-                                operationVS.getTextToSign(), operationVS.getSignedMessageSubject());
+                                operationVS.getTextToSign(), operationVS.getSignedMessageSubject(),
+                                contextVS.getVicketServer().getTimeStampServiceURL());
                         JSONObject responseJSON = WebSocketRequest.getSignResponse(ResponseVS.SC_OK,
                                 null, operationVS.getSessionId(),
                                 operationVS.getPublicKey(), responseVS.getSMIME());
