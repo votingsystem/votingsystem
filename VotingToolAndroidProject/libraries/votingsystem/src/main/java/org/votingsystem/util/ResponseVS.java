@@ -67,8 +67,23 @@ public class ResponseVS<T> implements Parcelable {
 
     public ResponseVS() {  }
 
-    public ResponseVS(Parcel parcel) {
-        readFromParcel(parcel);
+    public ResponseVS(Parcel source) {
+        // Must read values in the same order as they were placed in
+        statusCode = source.readInt();
+        iconId = source.readInt();
+        serviceCaller = source.readString();
+        caption = source.readString();
+        notificationMessage = source.readString();
+        message = source.readString();
+        operation = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
+        eventQueryResponse = (EventVSResponse) source.readSerializable();
+        typeVS = (TypeVS) source.readSerializable();
+        contentType = (ContentTypeVS) source.readSerializable();
+        messageBytes = new byte[source.readInt()];
+        source.readByteArray(messageBytes);
+        smimeMessageBytes = new byte[source.readInt()];
+        source.readByteArray(smimeMessageBytes);
+        uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
     public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
@@ -331,25 +346,6 @@ public class ResponseVS<T> implements Parcelable {
 
     @Override public int describeContents() {
         return 0;
-    }
-
-    public void readFromParcel(Parcel source) {
-        // Must read values in the same order as they were placed in
-        statusCode = source.readInt();
-        iconId = source.readInt();
-        serviceCaller = source.readString();
-        caption = source.readString();
-        notificationMessage = source.readString();
-        message = source.readString();
-        operation = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
-        eventQueryResponse = (EventVSResponse) source.readSerializable();
-        typeVS = (TypeVS) source.readSerializable();
-        contentType = (ContentTypeVS) source.readSerializable();
-        messageBytes = new byte[source.readInt()];
-        source.readByteArray(messageBytes);
-        smimeMessageBytes = new byte[source.readInt()];
-        source.readByteArray(smimeMessageBytes);
-        uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
