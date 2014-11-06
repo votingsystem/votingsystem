@@ -17,6 +17,7 @@
     <color name="theme_primary_dark">#303f9f</color>
 
     <color name="background_vs">#ba0011</color>
+    <color name="foreground_vs">#fefefe</color>
     <color name="theme_accent_2">#e91e63</color>
     <color name="theme_accent_1">#00b0ff</color>
     <color name="theme_primary_light">#7986cb</color>

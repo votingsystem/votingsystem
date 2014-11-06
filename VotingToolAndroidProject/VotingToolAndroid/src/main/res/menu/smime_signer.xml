@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
+    <item android:id="@+id/sign_document"
+        android:title="@string/sign_lbl"/>
+    <item android:id="@+id/ban_device"
+        android:title="@string/ban_device_lbl"/>
+</menu>

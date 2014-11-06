@@ -206,12 +206,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
                         connectionStatusText.setText(getString(R.string.disconnected_lbl));
                         connectionStatusView.setVisibility(View.GONE);
                         break;
-                    case MESSAGEVS_FROM_DEVICE:
-                        if(ResponseVS.SC_OK == request.getStatusCode()) {
-                            showMessage(request.getStatusCode(), getString(R.string.sign_document_lbl),
-                                    getString(R.string.sign_document_result_ok_msg));
-                        }
-                        break;
                 }
             }
         }

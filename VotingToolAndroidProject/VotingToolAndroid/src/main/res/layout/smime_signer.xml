@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/mainLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:foreground="@drawable/shape_window_dim" >
+    <ScrollView android:id="@+id/scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/form_background"
+            android:orientation="vertical">
+            <TextView android:id="@+id/deviceName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/event_subject"
+                android:layout_margin="10dp"
+                android:textSize="20sp" />
+            <WebView android:id="@+id/smime_signed_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

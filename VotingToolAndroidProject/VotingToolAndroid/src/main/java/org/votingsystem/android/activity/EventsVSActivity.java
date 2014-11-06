@@ -266,7 +266,7 @@ public class EventsVSActivity extends ActivityBase
 
     /** Adapter that provides views for our top-level Action Bar spinner. */
     private class EventVSSpinnerAdapter extends BaseAdapter {
-        private int mDotSize;
+
         private boolean mTopLevel;
 
         private EventVSSpinnerAdapter(boolean topLevel) {
@@ -288,18 +288,15 @@ public class EventsVSActivity extends ActivityBase
             mItems.add(new EventVSSpinnerItem(true, "", title, false, 0));
         }
 
-        @Override
-        public int getCount() {
+        @Override public int getCount() {
             return mItems.size();
         }
 
-        @Override
-        public Object getItem(int position) {
+        @Override public Object getItem(int position) {
             return mItems.get(position);
         }
 
-        @Override
-        public long getItemId(int position) {
+        @Override public long getItemId(int position) {
             return position;
         }
 
@@ -329,10 +326,8 @@ public class EventsVSActivity extends ActivityBase
                 headerTextView.setVisibility(View.GONE);
                 normalTextView.setVisibility(View.VISIBLE);
                 dividerView.setVisibility(View.GONE);
-
-                setUpNormalDropdownView(position, normalTextView);
+                normalTextView.setText(getTitle(position));
             }
-
             return view;
         }
 
@@ -355,36 +350,11 @@ public class EventsVSActivity extends ActivityBase
         }
 
         private int getColor(int position) {
-            return position >= 0 && position < mItems.size() ? mItems.get(position).color : 0;
+            return position >= 0 && position < mItems.size() ? mItems.get(position).color : R.color.background_vs;
         }
 
         private String getTag(int position) {
             return position >= 0 && position < mItems.size() ? mItems.get(position).tag : "";
-        }
-
-        private void setUpNormalDropdownView(int position, TextView textView) {
-            textView.setText(getTitle(position));
-            ShapeDrawable colorDrawable = (ShapeDrawable) textView.getCompoundDrawables()[2];
-            int color = getColor(position);
-            if (color == 0) {
-                if (colorDrawable != null) {
-                    textView.setCompoundDrawables(null, null, null, null);
-                }
-            } else {
-                if (mDotSize == 0) {
-                    mDotSize = getResources().getDimensionPixelSize(
-                            R.dimen.tag_color_dot_size);
-                }
-                if (colorDrawable == null) {
-                    colorDrawable = new ShapeDrawable(new OvalShape());
-                    colorDrawable.setIntrinsicWidth(mDotSize);
-                    colorDrawable.setIntrinsicHeight(mDotSize);
-                    colorDrawable.getPaint().setStyle(Paint.Style.FILL);
-                    textView.setCompoundDrawablesWithIntrinsicBounds(null, null, colorDrawable, null);
-                }
-                colorDrawable.getPaint().setColor(color);
-            }
-
         }
 
         @Override
@@ -392,18 +362,15 @@ public class EventsVSActivity extends ActivityBase
             return !isHeader(position);
         }
 
-        @Override
-        public int getItemViewType(int position) {
+        @Override public int getItemViewType(int position) {
             return 0;
         }
 
-        @Override
-        public int getViewTypeCount() {
+        @Override  public int getViewTypeCount() {
             return 1;
         }
 
-        @Override
-        public boolean areAllItemsEnabled() {
+        @Override public boolean areAllItemsEnabled() {
             return false;
         }
     }
