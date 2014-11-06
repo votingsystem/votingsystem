@@ -27,7 +27,7 @@
 
      	<activity android:label="@string/app_name" android:noHistory="true"
             android:name=".activity.IntentFilterActivity"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -67,25 +67,25 @@
         <meta-data android:name="android.app.default_searchable" android:value=".app.Search" />
 
         <activity android:name=".activity.FragmentContainerActivity"
-            android:noHistory="true" android:theme="@style/Theme.AppCompat.Light"/>
+            android:noHistory="true" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
-            android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".ui.debug.DebugActionRunnerActivity" android:noHistory="true"
-            android:label="@string/debug_tests" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/debug_tests" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.CertResponseActivity" android:noHistory="true"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.EventVSStatsPagerActivity"
-            android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.NewRepresentativeActivity" android:icon="@drawable/system_users_22"
-            android:label="@string/new_representative_title" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/new_representative_title" android:theme="@style/ThemeVS"/>
 
         <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativesActivity" android:theme="@style/ThemeVS"/>
 
@@ -95,30 +95,30 @@
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativePagerActivity"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.ReceiptPagerActivity"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.MessageActivity"
             android:theme="@style/Theme.Transparent"/>
 
         <activity android:name=".activity.ConfirmImageActivity"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.TransactionVSPagerActivity"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.VicketPagerActivity"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativeDelegationActivity"
             android:icon="@drawable/system_users_22"
-            android:label="@string/representative_delegation_lbl" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.BrowserVSActivity"
             android:icon="@drawable/fa_gears_16"
-            android:label="@string/browswevs_lbl" android:theme="@style/Theme.AppCompat.Light"/>
+            android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->

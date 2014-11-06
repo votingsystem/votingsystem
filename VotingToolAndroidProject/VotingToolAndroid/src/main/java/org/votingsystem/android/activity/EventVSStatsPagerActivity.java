@@ -55,7 +55,7 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
         } else cursor.moveToPosition(cursorPosition);
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         EventVSPagerAdapter eventsPagerAdapter = new EventVSPagerAdapter(getSupportFragmentManager(),
                 eventState.toString(), eventType.toString());
         mViewPager.setAdapter(eventsPagerAdapter);
@@ -82,7 +82,7 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
         String subtTitle = null;
         switch(event.getTypeVS()) {
             case MANIFEST_EVENT:
-                getSupportActionBar().setLogo(R.drawable.manifest_32);
+                getActionBar().setLogo(R.drawable.manifest_32);
                 title = getString(R.string.manifest_info_lbl) + " '"+ event.getSubject() + "'";
                 switch(event.getState()) {
                     case ACTIVE:
@@ -113,11 +113,11 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                         break;
                     default:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
+                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                 }
                 break;
             case CLAIM_EVENT:
-                getSupportActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
+                getActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
                 title = getString(R.string.claim_info_lbl) + " '"+ event.getSubject() + "'";
                 switch(event.getState()) {
                     case ACTIVE:
@@ -151,7 +151,7 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                 }
                 break;
             case VOTING_EVENT:
-                getSupportActionBar().setLogo(R.drawable.poll_32);
+                getActionBar().setLogo(R.drawable.poll_32);
                 title = getString(R.string.voting_info_lbl) + " '"+ event.getSubject() + "'";
                 switch(event.getState()) {
                     case ACTIVE:
@@ -170,8 +170,8 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                 }
                 break;
         }
-        if(title != null) getSupportActionBar().setTitle(title);
-        if(subtTitle != null) getSupportActionBar().setSubtitle(subtTitle);
+        if(title != null) getActionBar().setTitle(title);
+        if(subtTitle != null) getActionBar().setSubtitle(subtTitle);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

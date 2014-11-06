@@ -33,7 +33,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
@@ -55,11 +55,11 @@ public class RepresentativePagerActivity extends ActionBarActivity {
     }
 
     private void updateActionBarTitle() {
-        getSupportActionBar().setLogo(R.drawable.system_users_22);
-        getSupportActionBar().setTitle(getString(R.string.representative_lbl));
+        getActionBar().setLogo(R.drawable.system_users_22);
+        getActionBar().setTitle(getString(R.string.representative_lbl));
         String fullName = cursor.getString(cursor.getColumnIndex(
                 UserContentProvider.FULL_NAME_COL));
-        getSupportActionBar().setSubtitle(fullName);
+        getActionBar().setSubtitle(fullName);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

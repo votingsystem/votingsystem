@@ -76,8 +76,8 @@ public class ConfirmImageActivity extends ActionBarActivity {
                 ex.printStackTrace();
             }
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(title);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setTitle(title);
     }
 
     private void sendResult(int result) {

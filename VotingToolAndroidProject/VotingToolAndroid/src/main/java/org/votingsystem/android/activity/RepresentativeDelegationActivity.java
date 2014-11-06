@@ -171,8 +171,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         });
         refreshingStateChanged(true);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setTitle(getString(R.string.representative_delegation_lbl));
 
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);

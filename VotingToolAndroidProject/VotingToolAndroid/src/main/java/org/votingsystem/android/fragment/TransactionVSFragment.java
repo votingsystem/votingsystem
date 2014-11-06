@@ -166,9 +166,9 @@ public class TransactionVSFragment extends Fragment {
         }
         if(getActivity() instanceof ActionBarActivity) {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+            ((ActionBarActivity)getActivity()).getActionBar().setSubtitle(
                     selectedTransactionVS.getDescription(getActivity().getApplicationContext()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
+            ((ActionBarActivity)getActivity()).getActionBar().setLogo(
                     selectedTransactionVS.getIconId(getActivity().getApplicationContext()));
         }
     }

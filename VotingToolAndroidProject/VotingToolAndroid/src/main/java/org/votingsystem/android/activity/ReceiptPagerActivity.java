@@ -33,7 +33,7 @@ public class ReceiptPagerActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
@@ -44,7 +44,7 @@ public class ReceiptPagerActivity extends ActionBarActivity {
                 null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
-        getSupportActionBar().setLogo(R.drawable.receipt_32);
+        getActionBar().setLogo(R.drawable.receipt_32);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

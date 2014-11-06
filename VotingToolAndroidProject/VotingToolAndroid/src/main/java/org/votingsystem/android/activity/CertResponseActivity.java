@@ -135,8 +135,8 @@ public class CertResponseActivity extends ActionBarActivity {
         broadCastId = CertResponseActivity.class.getSimpleName();
         Log.d(TAG + ".onCreate(...) ", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
-        getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setTitle(getString(R.string.voting_system_lbl));
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
         goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {

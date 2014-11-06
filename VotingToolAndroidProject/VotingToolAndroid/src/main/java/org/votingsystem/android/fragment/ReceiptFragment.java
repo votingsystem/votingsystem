@@ -299,9 +299,9 @@ public class ReceiptFragment extends Fragment {
         } else menu.removeItem(R.id.save_receipt);
         if(getActivity() instanceof ActionBarActivity) {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+            ((ActionBarActivity)getActivity()).getActionBar().setSubtitle(
                     receiptContainer.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_32);
+            ((ActionBarActivity)getActivity()).getActionBar().setLogo(R.drawable.receipt_32);
         }
     }
 

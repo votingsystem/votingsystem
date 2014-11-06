@@ -36,7 +36,7 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +

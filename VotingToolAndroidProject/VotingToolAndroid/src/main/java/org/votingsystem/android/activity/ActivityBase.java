@@ -19,9 +19,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -74,7 +74,7 @@ import static org.votingsystem.model.ContextVS.USER_KEY;
  * A base activity that handles common functionality in the app. This includes the
  * navigation drawer, login and authentication, Action Bar tweaks, amongst others.
  */
-public abstract class ActivityBase extends ActionBarActivity implements LoginAndAuthHelper.Callbacks,
+public abstract class ActivityBase extends FragmentActivity implements LoginAndAuthHelper.Callbacks,
         SharedPreferences.OnSharedPreferenceChangeListener,
         MultiSwipeRefreshLayout.CanChildScrollUpCallback, ActivityVS {
     private static final String TAG = makeLogTag(ActivityBase.class);

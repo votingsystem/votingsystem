@@ -1,23 +1,5 @@
 <resources>
-
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Light">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
-    </style>
-
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-    </style>
-
-    <style name="Theme.Transparent" parent="@style/Theme.AppCompat.Light">
+    <style name="Theme.Transparent" parent="@style/ThemeVS">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -29,20 +11,20 @@
     <style name="FrameworkRoot.Widget.Spinner" parent="android:Widget.Holo.Light.Spinner" />
     <style name="Widget.IOSched.HeaderBar.Spinner.Base" parent="FrameworkRoot.Widget.Spinner">
         <item name="android:background">?android:selectableItemBackground</item>
-        <item name="android:dropDownSelector">?android:selectableItemBackground</item>
         <item name="android:divider">@null</item>
         <item name="android:dividerHeight">0dp</item>
     </style>
+
     <style name="Widget.IOSched.HeaderBar.Spinner" parent="Widget.IOSched.HeaderBar.Spinner.Base" />
 
-    <style name="HeaderBar" />
-
-    <style name="ThemeVS" parent="@style/Theme.AppCompat.Light">
-        <!--<item name="android:actionBarStyle">@style/ActionBarVS</item>-->
+    <style name="ThemeVS" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/ActionBarVS</item>
     </style>
-
     <style name="ActionBarVS" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">#ba0011</item>
+        <item name="android:background">@color/background_vs</item>
+        <item name="android:titleTextStyle">@style/ThemeVS.ActionBar.TitleTextStyle</item>
     </style>
-
+    <style name="ThemeVS.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">#f9f9f9</item>
+    </style>
 </resources>

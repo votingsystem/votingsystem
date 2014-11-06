@@ -33,8 +33,8 @@ public class RepresentativesActivity extends ActivityBase {
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                         ((Object)fragment).getClass().getSimpleName()).commit();
-        getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.system_users_32));
-        getSupportActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
+        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.system_users_32));
+        getActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

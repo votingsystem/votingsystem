@@ -19,24 +19,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <View
-        android:id="@+id/divider_view"
+    <View android:id="@+id/divider_view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#888" />
+        android:textColor="#f9f9f9"
+        android:color="#f9f9f9"
+        android:background="@color/background_vs" />
 
-    <TextView
-        android:id="@+id/header_text"
+    <TextView android:id="@+id/header_text"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="4dp"
+        android:textColor="#f9f9f9"
+        android:color="#f9f9f9"
         android:textSize="14sp"/>
 
-    <TextView
-        android:id="@+id/normal_text"
+    <TextView android:id="@+id/normal_text"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:paddingLeft="16dp"
@@ -46,5 +47,6 @@
         android:paddingBottom="8dp"
         android:gravity="center_vertical|start"
         android:textSize="18sp"
-        android:textColor="#888" />
+        android:textColor="#f9f9f9"
+        android:background="@color/background_vs"/>
 </LinearLayout>

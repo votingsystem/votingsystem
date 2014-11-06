@@ -148,7 +148,7 @@ public class NewRepresentativeActivity extends ActivityBase {
         Log.d(TAG + ".onCreate(...)", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.new_representative);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
         imageCaption = (TextView) findViewById(R.id.representative_image_caption);
@@ -172,7 +172,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                     ex.printStackTrace();
                 }
             }
-            getSupportActionBar().setTitle(getString(R.string.edit_representative_lbl));
+            getActionBar().setTitle(getString(R.string.edit_representative_lbl));
         }
         if(savedInstanceState != null) {
             representativeImageUri = (Uri) savedInstanceState.getParcelable(ContextVS.URI_KEY);

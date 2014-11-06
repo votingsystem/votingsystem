@@ -148,9 +148,9 @@ public class EventsVSActivity extends ActivityBase
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
-        getSupportActionBar().setTitle(title);
-        if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
-        if(iconId != null) getSupportActionBar().setLogo(iconId);
+        getActionBar().setTitle(title);
+        if(subTitle != null) getActionBar().setSubtitle(subTitle);
+        if(iconId != null) getActionBar().setLogo(iconId);
     }
 
     @Override protected int getSelfNavDrawerItem() {

@@ -57,7 +57,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
                 null, selection, new String[]{eventTypeStr, eventStateStr}, null);
         cursor.moveToPosition(cursorPosition);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager(),
                 eventStateStr, eventTypeStr);
         mViewPager.setAdapter(eventsPagerAdapter);
@@ -84,21 +84,21 @@ public class EventVSPagerActivity extends ActionBarActivity {
         String subtTitle = null;
         switch(event.getTypeVS()) {
             case MANIFEST_EVENT:
-                getSupportActionBar().setLogo(R.drawable.manifest_32);
+                getActionBar().setLogo(R.drawable.manifest_32);
                 switch(event.getState()) {
                     case ACTIVE:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_open_lbl,
+                        getActionBar().setTitle(getString(R.string.manifest_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case PENDING:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
+                        getActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                         break;
                     case CANCELLED:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl) + " - (" +
+                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
@@ -107,32 +107,32 @@ public class EventVSPagerActivity extends ActionBarActivity {
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
+                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                         break;
                     default:
-                        getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
+                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                 }
                 break;
             case CLAIM_EVENT:
-                getSupportActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
+                getActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
                 switch(event.getState()) {
                     case ACTIVE:
-                        getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,
+                        getActionBar().setTitle(getString(R.string.claim_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case PENDING:
-                        getSupportActionBar().setTitle(getString(R.string.claim_pending_lbl));
+                        getActionBar().setTitle(getString(R.string.claim_pending_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                         break;
                     case CANCELLED:
-                        getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl) + " - (" +
+                        getActionBar().setTitle(getString(R.string.claim_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
@@ -147,29 +147,29 @@ public class EventVSPagerActivity extends ActionBarActivity {
                                 "" + getString(R.string.finish_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                     default:
-                        getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl));
+                        getActionBar().setTitle(getString(R.string.claim_closed_lbl));
                 }
                 break;
             case VOTING_EVENT:
-                getSupportActionBar().setLogo(R.drawable.poll_32);
+                getActionBar().setLogo(R.drawable.poll_32);
                 switch(event.getState()) {
                     case ACTIVE:
-                        getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
+                        getActionBar().setTitle(getString(R.string.voting_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case PENDING:
-                        getSupportActionBar().setTitle(getString(R.string.voting_pending_lbl));
+                        getActionBar().setTitle(getString(R.string.voting_pending_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
                                 DateUtils.getDayWeekDateStr(event.getDateFinish());
                         break;
                     default:
-                        getSupportActionBar().setTitle(getString(R.string.voting_closed_lbl));
+                        getActionBar().setTitle(getString(R.string.voting_closed_lbl));
                 }
                 break;
         }
-        if(subtTitle != null) getSupportActionBar().setSubtitle(subtTitle);
+        if(subtTitle != null) getActionBar().setSubtitle(subtTitle);
     }
 
     @Override public AppContextVS getApplicationContext() {

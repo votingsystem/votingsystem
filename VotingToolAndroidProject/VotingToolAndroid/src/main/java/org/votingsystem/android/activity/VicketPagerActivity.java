@@ -44,7 +44,7 @@ public class VicketPagerActivity extends ActivityBase {
         setContentView(R.layout.activity_vickets);
         getLPreviewUtils().trySetActionBar();
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
@@ -55,8 +55,8 @@ public class VicketPagerActivity extends ActivityBase {
         cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
-        getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.fa_money_32));
-        getSupportActionBar().setTitle(getString(R.string.vicket_lbl));
+        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.fa_money_32));
+        getActionBar().setTitle(getString(R.string.vicket_lbl));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

@@ -95,9 +95,9 @@ public class BrowserVSActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setTitle(getString(R.string.browswevs_lbl));
-        getSupportActionBar().hide();
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        //getActionBar().setTitle(getString(R.string.browswevs_lbl));
+        getActionBar().hide();
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
         }

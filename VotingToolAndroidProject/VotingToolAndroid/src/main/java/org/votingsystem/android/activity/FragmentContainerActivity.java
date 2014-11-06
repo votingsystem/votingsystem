@@ -40,7 +40,7 @@ public class FragmentContainerActivity extends ActivityBase {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.generic_fragment_container_activity);
         // if we're being restored from a previous state should return or else
         // we could end up with overlapping fragments.
@@ -62,9 +62,9 @@ public class FragmentContainerActivity extends ActivityBase {
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
-        getSupportActionBar().setTitle(title);
-        if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
-        if(iconId != null) getSupportActionBar().setLogo(iconId);
+        getActionBar().setTitle(title);
+        if(subTitle != null) getActionBar().setSubtitle(subTitle);
+        if(iconId != null) getActionBar().setLogo(iconId);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
