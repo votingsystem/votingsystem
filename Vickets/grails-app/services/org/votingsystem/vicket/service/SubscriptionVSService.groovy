@@ -38,22 +38,21 @@ class SubscriptionVSService {
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
 		UserVS userVSDB = UserVS.findByNif(validatedNIF)
         JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
-        boolean isNewUser = false
 		if (!userVSDB) {
             userVSDB = userVS.save()
-			setUserCertificate(userVS, deviceData);
-            isNewUser = true
+            certificate = setUserCertificate(userVSDB, deviceData);
 			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:userVSDB)
 		} else {
             userVSDB.setCertificateCA(userVS.getCertificateCA())
             userVSDB.setCertificate(userVS.getCertificate())
             userVSDB.setTimeStampToken(userVS.getTimeStampToken())
 			setUserCertificate(userVSDB, deviceData);
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB)
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser])
 	}
 
-    @Transactional  public void setUserCertificate(UserVS userVS, JSONObject deviceData) {
+    @Transactional  CertificateVS setUserCertificate(UserVS userVS, JSONObject deviceData) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug "$methodName - deviceData: ${deviceData}"
         X509Certificate x509Cert = userVS.getCertificate()
@@ -79,6 +78,7 @@ class SubscriptionVSService {
         } else if(deviceData?.deviceId) deviceVS = DeviceVS.findWhere(deviceId:deviceData.deviceId)
         userVS.setCertificateVS(certificate)
         userVS.setDeviceVS(deviceVS)
+        return certificate
     }
 
     @Transactional

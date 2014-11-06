@@ -11,8 +11,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.sun.mail.iap.Response;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -20,7 +18,6 @@ import org.glassfish.tyrus.client.ClientManager;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;

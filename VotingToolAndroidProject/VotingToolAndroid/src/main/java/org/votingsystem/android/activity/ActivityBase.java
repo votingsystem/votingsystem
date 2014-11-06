@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -58,9 +59,11 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
@@ -202,6 +205,12 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                     case WEB_SOCKET_CLOSE:
                         connectionStatusText.setText(getString(R.string.disconnected_lbl));
                         connectionStatusView.setVisibility(View.GONE);
+                        break;
+                    case MESSAGEVS_FROM_DEVICE:
+                        if(ResponseVS.SC_OK == request.getStatusCode()) {
+                            showMessage(request.getStatusCode(), getString(R.string.sign_document_lbl),
+                                    getString(R.string.sign_document_result_ok_msg));
+                        }
                         break;
                 }
             }

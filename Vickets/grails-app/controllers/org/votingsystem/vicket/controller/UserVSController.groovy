@@ -233,7 +233,7 @@ class UserVSController {
     /**
      * (Disponible sólo para administradores de sistema)
      *
-     * Servicio que añade Usuario al sistema.<br/>
+     * Servicio que añade Usuario al sistema
      *
      * @httpMethod [POST]
      * @param pemCertificate certificado en formato PEM del Usuario que se desea añadir.

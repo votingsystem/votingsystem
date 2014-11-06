@@ -11,6 +11,7 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
 
+import javax.jws.soap.SOAPBinding;
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -244,8 +245,9 @@ public class UserVS implements Serializable {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public UserVS setReason(String reason) {
         this.reason = reason;
+        return this;
     }
 
 	public MessageSMIME getRepresentativeMessage() {
@@ -329,8 +331,9 @@ public class UserVS implements Serializable {
         return state;
     }
 
-    public void setState(State state) {
+    public UserVS setState(State state) {
         this.state = state;
+        return this;
     }
 
     public CertificateVS getCertificateVS() {
