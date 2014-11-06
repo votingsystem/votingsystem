@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -40,6 +41,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
 
     private KeyStore userKeyStore;
     private Label keyStoreLbl;
+    private HBox mobileDeviceInfo;
     private Label mobileDeviceLbl;
     private VBox keyStoreVBox;
     private GridPane gridPane;
@@ -67,10 +69,22 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 changeSignatureMode(actionEvent);
-                MobileSelectorDialog.show(SettingsDialog.this);
-            }});
+            }
+        });
+
+        mobileDeviceInfo = new HBox(15);
+        mobileDeviceInfo.setAlignment(Pos.CENTER);
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
+        Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
+        mobileDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.EXCHANGE, Utils.COLOR_BUTTON_OK));
+        mobileDeviceButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                MobileSelectorDialog.show(SettingsDialog.this);
+            }
+        });
+        mobileDeviceInfo.getChildren().addAll(mobileDeviceLbl, mobileDeviceButton);
 
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
         signWithKeystoreRb.setToggleGroup(tg);
@@ -132,7 +146,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         gridPane.add(requestCertButton,0,0);
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
         gridPane.add(signWithMobileRb,0,1);
-        gridPane.setMargin(mobileDeviceLbl, new Insets(0, 0, 0, 20));
+        gridPane.setMargin(mobileDeviceInfo, new Insets(0, 0, 0, 20));
         gridPane.add(signWithDNIeRb,0,3);
         gridPane.add(signWithKeystoreRb,0,5);
         gridPane.add(footerButtonsBox,0,7);
@@ -145,13 +159,14 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     private void changeSignatureMode(ActionEvent evt) {
         log.debug("changeSignatureMode");
         if(gridPane.getChildren().contains(keyStoreVBox)) gridPane.getChildren().remove(keyStoreVBox);
-        if(gridPane.getChildren().contains(mobileDeviceLbl)) gridPane.getChildren().remove(mobileDeviceLbl);
+        if(gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.getChildren().remove(mobileDeviceInfo);
         if(evt.getSource() == signWithKeystoreRb) {
             gridPane.add(keyStoreVBox, 0, 6);
         }
         if(evt.getSource() == signWithMobileRb && deviceDataJSON != null) {
-            gridPane.add(mobileDeviceLbl, 0, 2);
+            gridPane.add(mobileDeviceInfo, 0, 2);
         }
+        if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(SettingsDialog.this);
         getStage().sizeToScene();
     }
 
@@ -172,7 +187,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
             case MOBILE:
                 signWithMobileRb.setSelected(true);
                 mobileDeviceLbl.setText(BrowserVSSessionUtils.getInstance().getMobileCryptoToken().getString("deviceName"));
-                gridPane.add(mobileDeviceLbl, 0, 2);
+                gridPane.add(mobileDeviceInfo, 0, 2);
                 break;
         }
         getStage().show();
@@ -251,7 +266,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
         log.debug("setSelectedDevice: " + deviceDataJSON.toString());
         this.deviceDataJSON = deviceDataJSON;
-        if(!gridPane.getChildren().contains(mobileDeviceLbl)) gridPane.add(mobileDeviceLbl, 0, 2);
+        if(!gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.add(mobileDeviceInfo, 0, 2);
         mobileDeviceLbl.setText(deviceDataJSON.getString("deviceName"));
     }
 

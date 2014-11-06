@@ -9,6 +9,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
@@ -38,7 +39,6 @@ public class UserCertRequestService extends IntentService {
 
     public UserCertRequestService() { super(TAG); }
 
-
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         Log.d(TAG + ".onHandleIntent(...) ", "arguments: " + arguments);
@@ -55,8 +55,7 @@ public class UserCertRequestService extends IntentService {
             String pin = arguments.getString(PIN_KEY);
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     KEY_SIZE, SIG_NAME, SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId,
-                    givenName, surname);
-
+                    givenName, surname, DeviceVS.Type.MOBILE);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             responseVS = HttpHelper.sendData(csrBytes, null,
                     contextVS.getAccessControl().getUserCSRServiceURL());

@@ -9,6 +9,7 @@ import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -122,15 +123,15 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getUserRequest (int keySize, String keyName,
                String signatureMechanism, String provider, String nif, String email,
-               String phone, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException,
+               String phone, String deviceId, String givenName, String surName,
+               DeviceVS.Type deviceType) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
-
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map extensionDataMap = new HashMap<String, String>();
         extensionDataMap.put("deviceId", deviceId);
+        extensionDataMap.put("deviceType", deviceType.toString());
         extensionDataMap.put("deviceName", DeviceUtils.getDeviceName());
         if (email != null) extensionDataMap.put("email", email);
         if (phone != null) extensionDataMap.put("mobilePhone", phone);
@@ -138,7 +139,6 @@ public class CertificationRequestVS implements java.io.Serializable {
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
                 new DERUTF8String(jsonObject.toString())));
         X500Principal subject = new X500Principal(principal);
-
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);

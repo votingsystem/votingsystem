@@ -97,10 +97,10 @@ public class CertificationRequestVS implements java.io.Serializable {
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map extensionDataMap = new HashMap<String, String>();
         extensionDataMap.put("deviceId", deviceId);
+        extensionDataMap.put("deviceType", deviceType.toString());
         if(deviceName != null) extensionDataMap.put("deviceName", deviceName);
         if (email != null) extensionDataMap.put("email", email);
         if (phone != null) extensionDataMap.put("mobilePhone", phone);
-        if (deviceType != null) extensionDataMap.put("deviceType", deviceType.toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(extensionDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
                 new DERUTF8String(jsonObject.toString())));

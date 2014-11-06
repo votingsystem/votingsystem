@@ -250,7 +250,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
                     textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSMIME(),
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     timeStampServiceURL , this);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

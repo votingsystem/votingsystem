@@ -112,12 +112,12 @@ public class WebSocketService extends Service {
         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
         mapToSend.put("UUID", UUID.randomUUID().toString());
         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
-        JSONObject requestJSON = new JSONObject(mapToSend);
-        ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
-                requestJSON.toString(), msgSubject, contextVS.getVicketServer().getTransactionVSServiceURL());
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketRequest.load(responseVS);
-        SMIMEMessage smimeMessage = responseVS.getSMIME();
         try {
+            JSONObject requestJSON = new JSONObject(mapToSend);
+            ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
+                    requestJSON.toString(), msgSubject, contextVS.getVicketServer().getTimeStampServiceURL());
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketRequest.load(responseVS);
+            SMIMEMessage smimeMessage = responseVS.getSMIME();
             session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
                     smimeMessage).toString());
         } catch(Exception ex) {
