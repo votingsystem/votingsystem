@@ -7,7 +7,6 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.WebSocketUtils
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.websocket.SessionVS
 import org.votingsystem.vicket.websocket.SessionVSHelper
@@ -162,7 +161,7 @@ class WebSocketService {
             return getResponse(session.getId(), statusCode, operation, message);
         }
 
-        public static JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
+        public JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
             JSONObject result = new JSONObject();
             if(typeVS != null) result.put("operation", typeVS.toString());
             else result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
