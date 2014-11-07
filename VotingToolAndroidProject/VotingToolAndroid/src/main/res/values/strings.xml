@@ -409,7 +409,7 @@
     <string name="cert_request_lbl">solicitud de certificado</string>
     <string name="sign_lbl">firmar</string>
     <string name="sign_request_lbl">solicitud de firma</string>
-    <string name="ban_device_lbl">bloquear las solicitudes que vengan de ese dispositivo</string>
+    <string name="ban_device_lbl">bloquear dispositivo solicitante</string>
     <string name="disconnected_lbl">desconectado</string>
     <string name="connected_lbl">conectado</string>
     <string name="connected_with_lbl">conectado con</string>
@@ -419,4 +419,6 @@
     <string name="sign_document_lbl">firma de documento</string>
     <string name="sign_document_result_ok_msg">el documento se ha enviado firmado al solicitante</string>
     <string name="signing_document_lbl">firmando documento</string>
+    <string name="reject_sign_request_lbl">rechazar solicitud</string>
+    <string name="reject_websocket_request_msg">el dispositivo \'%1$s\' ha rechazado su solicitud</string>
 </resources>

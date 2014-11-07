@@ -113,6 +113,9 @@
         this.$.connectButton.onclick = function(e){
             e.stopPropagation();
         }
+        if(!window['isClientToolConnected'] ) this.$.connectButton.style.display = 'none'
+
+
     },
     requestCert:function() {
         window.open(window['accessControlURL'] + "/certificateVS/certRequest", "_blank");

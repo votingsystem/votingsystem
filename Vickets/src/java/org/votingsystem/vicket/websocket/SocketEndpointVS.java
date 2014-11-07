@@ -1,19 +1,23 @@
 package org.votingsystem.vicket.websocket;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.vicket.util.ApplicationContextHolder;
 import org.votingsystem.vicket.service.WebSocketService;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import org.votingsystem.vicket.util.ApplicationContextHolder;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
-@ServerEndpoint("/websocket/service")
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+//@ServerEndpoint(value = "/websocket/service", configurator = SocketConfigurator.class)
+@ServerEndpoint(value = "/websocket/service")
 public class SocketEndpointVS {
 
-    private static Logger logger = Logger.getLogger(SocketEndpointVS.class);
+    private static Logger log = Logger.getLogger(SocketEndpointVS.class);
 
     private WebSocketService webSocketService = null;
 
@@ -23,7 +27,7 @@ public class SocketEndpointVS {
                 webSocketService.onTextMessage(session, msg, last);
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             try {
                 session.close();
             } catch (IOException e1) { // Ignore
@@ -37,7 +41,7 @@ public class SocketEndpointVS {
                 webSocketService.onBinaryMessage(session, bb, last);
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             try {
                 session.close();
             } catch (IOException ex1) { // Ignore
@@ -46,27 +50,27 @@ public class SocketEndpointVS {
     }
 
     @OnError public void onError(Throwable t) {
-        logger.error(t.getMessage(), t);
+        log.error(t.getMessage(), t);
     }
 
-    @OnOpen public void onOpen(Session session) {
+    @OnOpen public void onOpen(Session session, EndpointConfig config) {
         if(webSocketService == null) {
             webSocketService = (WebSocketService) ApplicationContextHolder.getBean("webSocketService");
         }
         webSocketService.onOpen(session);
     }
 
+
     @OnClose public void onClose(Session session, CloseReason closeReason) {
-        //logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
+        //log.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
         webSocketService.onClose(session, closeReason);
     }
 
     /**
-     * Process a received pong. This is a NO-OP.
-     *
+     * Process a received pong.
      * @param pm    Ignored.
      */
     @OnMessage public void echoPongMessage(PongMessage pm) {
-        // NO-OP
+        // Ignored
     }
 }

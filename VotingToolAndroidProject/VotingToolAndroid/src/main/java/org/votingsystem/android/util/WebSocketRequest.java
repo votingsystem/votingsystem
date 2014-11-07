@@ -17,7 +17,9 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ResponseVS;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -250,6 +252,36 @@ public class WebSocketRequest implements Parcelable {
             }
         } else responseVS.setIconId( R.drawable.fa_times_32);
         return responseVS;
+    }
+
+    public JSONObject getResponse(TypeVS operationType, Integer statusCode, String message,
+            Context context) throws Exception {
+        Map result = new HashMap();
+        result.put("sessionId", operationVS.getSessionId());
+        result.put("locale", context.getResources().getConfiguration().locale.getLanguage());
+        if(operationVS.getPublicKey() != null) {
+            result.put("operation", TypeVS.MESSAGEVS_FROM_DEVICE.toString());
+            Map dataToEncrypt = new HashMap();
+            dataToEncrypt.put("statusCode", statusCode);
+            dataToEncrypt.put("message", message);
+            dataToEncrypt.put("operation", operationType.toString());
+            byte[] encryptedData = Encryptor.encryptToCMS(
+                    new JSONObject(dataToEncrypt).toString().getBytes(), operationVS.getPublicKey());
+            result.put("encryptedMessage", new String(encryptedData, "UTF_8"));
+        } else {
+            result.put("operation", operationType.toString());
+            result.put("statusCode", statusCode);
+            result.put("message", message);
+        }
+        return new JSONObject(result);
+    }
+
+    public JSONObject getBanResponse(Context context) throws Exception {
+        Map result = new HashMap();
+        result.put("sessionId", operationVS.getSessionId());
+        result.put("locale", context.getResources().getConfiguration().locale.getLanguage());
+        result.put("operation", TypeVS.WEB_SOCKET_BAN_SESSION);
+        return new JSONObject(result);
     }
 
     public static JSONObject getSignResponse(Integer statusCode, String message, String sessionId,

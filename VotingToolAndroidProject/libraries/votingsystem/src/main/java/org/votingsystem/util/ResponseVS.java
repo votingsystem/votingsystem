@@ -75,6 +75,9 @@ public class ResponseVS<T> implements Parcelable {
         caption = source.readString();
         notificationMessage = source.readString();
         message = source.readString();
+        String messageJSONStr = (String) source.readValue(String.class.getClassLoader());;
+        try {if(messageJSONStr != null) messageJSON = new JSONObject(messageJSONStr);}
+        catch (Exception ex) {ex.printStackTrace();}
         operation = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
         eventQueryResponse = (EventVSResponse) source.readSerializable();
         typeVS = (TypeVS) source.readSerializable();
@@ -355,6 +358,8 @@ public class ResponseVS<T> implements Parcelable {
         parcel.writeString(caption);
         parcel.writeString(notificationMessage);
         parcel.writeString(message);
+        if(messageJSON == null) parcel.writeValue(null);
+        else parcel.writeValue(messageJSON.toString());
         parcel.writeParcelable(operation, flags);
         parcel.writeSerializable(eventQueryResponse);
         parcel.writeSerializable(typeVS);

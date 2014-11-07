@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -22,10 +21,12 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ResponseVS;
 
 /**
@@ -40,6 +41,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     private AppContextVS contextVS = null;
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
+    private WebSocketRequest request;
     private OperationVS operationVS;
     private ProgressDialog progressDialog = null;
 
@@ -51,17 +53,14 @@ public class SMIMESignerActivity extends FragmentActivity {
         WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService();
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService(null, operationVS);
         else {
             if(progressDialog != null) progressDialog.dismiss();
             if(request != null) {
                 if(TypeVS.MESSAGEVS_FROM_DEVICE == request.getTypeVS()) {
                     if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        intent = new Intent(SMIMESignerActivity.this, MessageActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(ContextVS.RESPONSEVS_KEY,
+                        UIUtils.launchMessageActivity(SMIMESignerActivity.this,
                                 request.getNotificationResponse(SMIMESignerActivity.this));
-                        startActivity(intent);
                         SMIMESignerActivity.this.finish();
                     } else showMessage(request.getStatusCode(),
                             getString(R.string.sign_document_lbl), request.getMessage());
@@ -70,12 +69,14 @@ public class SMIMESignerActivity extends FragmentActivity {
         }
     }};
 
-    private void launchService() {
+    private void launchService(ResponseVS responseVS, OperationVS operationVS) {
         Log.d(TAG + ".launchService() ", "launchService");
         Intent startIntent = new Intent(this, WebSocketService.class);
         startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
+        startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        showProgressDialog(getString(R.string.wait_caption), getString(R.string.signing_document_lbl));
+        if(operationVS != null) showProgressDialog(
+                getString(R.string.wait_caption), getString(R.string.signing_document_lbl));
         startService(startIntent);
     }
 
@@ -84,7 +85,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.smime_signer);
         contextVS = (AppContextVS) getApplicationContext();
-        WebSocketRequest request =  getIntent().getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        request =  getIntent().getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         operationVS = request.getOperationVS();
         webView = (WebView) findViewById(R.id.smime_signed_content);
         try {
@@ -112,12 +113,23 @@ public class SMIMESignerActivity extends FragmentActivity {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
             case R.id.sign_document:
                 PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
                         getString(R.string.ping_to_sign_msg), false, TypeVS.MESSAGEVS_SIGN);
+                return true;
+            case android.R.id.home:
+            case R.id.reject_sign_request:
+                try {
+                    ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
+                    responseVS.setMessageJSON(request.getResponse(operationVS.getTypeVS(),
+                            ResponseVS.SC_ERROR, getString(R.string.reject_websocket_request_msg,
+                            DeviceUtils.getDeviceName()), this));
+                    launchService(responseVS, null);
+                    this.finish();
+                } catch(Exception ex) {ex.printStackTrace();}
+                return true;
+            case R.id.ban_device:
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

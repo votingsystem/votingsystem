@@ -1,7 +1,12 @@
 package org.votingsystem.vicket.service
 
+import net.sf.json.JSONNull
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
+import org.apache.coyote.http11.upgrade.NioServletOutputStream
+import org.apache.tomcat.websocket.WsRemoteEndpointAsync
+import org.apache.tomcat.websocket.WsSession
+import org.apache.tomcat.websocket.server.WsRemoteEndpointImplServer
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
@@ -26,7 +31,7 @@ class WebSocketService {
             processRequest(new WebSocketRequest(session, msg, last))
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            processResponse(WebSocketRequest.getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage()));
+            processResponse(getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage()));
         }
     }
 
@@ -110,6 +115,7 @@ class WebSocketService {
                 }
                 break;
             case TypeVS.WEB_SOCKET_BAN_SESSION:
+                //talks
                 break;
             default: throw new ExceptionVS(messageSource.getMessage("unknownSocketOperationErrorMsg",
                     [request.messageJSON.operation].toArray(), request.locale))
@@ -137,40 +143,43 @@ class WebSocketService {
         SessionVSHelper.getInstance().sendMessage(((String)messageJSON.sessionId), messageJSON.toString());
     }
 
+    public JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
+        JSONObject result = new JSONObject();
+        if(typeVS != null) result.put("operation", typeVS.toString());
+        else result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
+        result.put("sessionId", sessionId);
+        result.put("statusCode", statusCode);
+        result.put("message", message);
+        return result;
+    }
+
     public class WebSocketRequest {
         Session session;
         JSONObject messageJSON;
         SessionVS sessionVS
         Locale locale
         TypeVS operation
-        WebSocketRequest(Session session, String msg, boolean last) {
+        InetSocketAddress remoteAddress
+        public WebSocketRequest(Session session, String msg, boolean last) {
+            this.remoteAddress = ((InetSocketAddress)((NioServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
+                    ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.socket.sc.remoteAddress);
             this.session = session;
             messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
             if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
             if(!messageJSON.locale) throw new ExceptionVS("missing message 'locale'")
             locale = Locale.forLanguageTag(messageJSON.locale)
-            if(!messageJSON.operation) throw new ExceptionVS("missing message 'operation'")
+            if(!messageJSON.operation || JSONNull.getInstance().equals(messageJSON.operation))
+                throw new ExceptionVS("missing message 'operation'")
             operation = TypeVS.valueOf(messageJSON.operation)
             if(TypeVS.MESSAGEVS_SIGN == operation) {
                 if(!messageJSON.deviceId) throw new ExceptionVS("missing message 'deviceId'")
             }
             sessionVS = SessionVSHelper.getInstance().getAuthenticatedSession(session)
-            log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - last: ${last}")
+            log.debug("sessiI id: ${session.getId()} - operatin : ${messageJSON?.operation}- remoteIp: ${remoteAddress.address} - last: ${last}")
         }
         JSONObject getResponse(Integer statusCode, String message){
             return getResponse(session.getId(), statusCode, operation, message);
         }
-
-        public JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
-            JSONObject result = new JSONObject();
-            if(typeVS != null) result.put("operation", typeVS.toString());
-            else result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
-            result.put("sessionId", sessionId);
-            result.put("statusCode", statusCode);
-            result.put("message", message);
-            return result;
-        }
-
     }
 
 }

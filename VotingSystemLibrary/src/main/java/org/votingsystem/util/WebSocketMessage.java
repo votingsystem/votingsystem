@@ -110,7 +110,7 @@ public class WebSocketMessage {
                 byte[] smimeMessageBytes = Base64.getDecoder().decode(responseJSON.getString("smimeMessage").getBytes());
                 SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
                 return smimeMessage;
-            } else throw new ExceptionVS(message);
+            } else throw new ExceptionVS(responseJSON.getString("message"));
         } else throw new ExceptionVS(message);
     }
 

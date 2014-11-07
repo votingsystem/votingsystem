@@ -13,7 +13,8 @@ import org.votingsystem.vicket.model.TransactionVS;
 import org.votingsystem.vicket.service.TransactionVSService;
 
 import javax.servlet.ServletContext;
-import java.util.Locale;
+
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 /**
  * @author jgzornoza
@@ -21,29 +22,24 @@ import java.util.Locale;
  */
 public class ApplicationContextHolder implements ApplicationContextAware, ApplicationVS {
 
-    private static Logger logger = Logger.getLogger(ApplicationContextHolder.class);
+    private static Logger log = Logger.getLogger(ApplicationContextHolder.class);
 
     private ApplicationContext ctx;
     private static ApplicationContextHolder instance;
-    private static Locale locale = new Locale("es");
    
     private ApplicationContextHolder() {}
 
     public void setApplicationContext(ApplicationContext applicationContext) {
-    ctx = applicationContext;
+        ctx = applicationContext;
     }
 
     public static ApplicationContext getApplicationContext() {
     return getInstance().ctx;
     }
 
-    public static void setLocale(Locale newLocale) {
-    locale = newLocale;
-    }
-
     public static ApplicationContextHolder getInstance() {
         if (instance == null) {
-            logger.debug("init instance");
+            log.debug("init instance");
             instance = new ApplicationContextHolder();
         }
         return instance;
@@ -74,9 +70,9 @@ public class ApplicationContextHolder implements ApplicationContextAware, Applic
     public static String getMessage(String key, String... args) {
         String msg = null;
         try {
-            msg = ((MessageSource)getBean("messageSource")).getMessage(key, args, locale);
+            msg = ((MessageSource)getBean("messageSource")).getMessage(key, args, getLocale());
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return msg;
     }

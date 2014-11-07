@@ -75,6 +75,16 @@ public class WebSocketService extends Service {
         super.onStartCommand(intent, flags, startId);
         if(intent != null) {
             Bundle arguments = intent.getExtras();
+            final ResponseVS responseVS = (ResponseVS)arguments.getParcelable(ContextVS.RESPONSEVS_KEY);
+            if(responseVS != null) {
+                new Thread(null, new Runnable() {
+                    @Override public void run() {
+                        try {session.getBasicRemote().sendText(responseVS.getMessageJSON().toString()); }
+                        catch(Exception ex) {ex.printStackTrace();}
+                    }
+                }, "websocket_message_proccessor_thread").start();
+                return START_STICKY;
+            }
             TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             OperationVS operationVS = (OperationVS)arguments.getParcelable(ContextVS.OPERATIONVS_KEY);
             String messageToSend = arguments.getString(ContextVS.MESSAGE_KEY);
@@ -157,6 +167,11 @@ public class WebSocketService extends Service {
         }
     };
 
+    private void setWebSocketSession(Session session) {
+        this.session = session;
+        latch.countDown();
+    }
+
     private class WebSocketListener implements Runnable {
 
         private String serviceURL = null;
@@ -192,7 +207,7 @@ public class WebSocketService extends Service {
 
         @Override public void run() {
             try {
-                latch = new CountDownLatch(1);
+                if(latch.getCount() == 0) latch = new CountDownLatch(1);
                 Log.d(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
                 // sets the incoming buffer size to 1000000 bytes ~ 900K
                 //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
@@ -203,12 +218,10 @@ public class WebSocketService extends Service {
                                 contextVS.sendWebSocketBroadcast(WebSocketRequest.parse(message, contextVS));
                             }
                         });
-                        WebSocketService.this.session = session;
-                        latch.countDown();
+                        setWebSocketSession(session);
                     }
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
-                        latch = new CountDownLatch(1);
                         contextVS.sendWebSocketBroadcast(
                                 new WebSocketRequest(ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                     }

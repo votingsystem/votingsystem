@@ -43,6 +43,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ResponseVS;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -84,6 +87,13 @@ public class UIUtils  {
     private static SimpleDateFormat sDayOfWeekFormat = new SimpleDateFormat("E");
     private static DateFormat sShortTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
+
+    public static void launchMessageActivity(Context context, ResponseVS responseVS) {
+        Intent intent = new Intent(context, MessageActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        context.startActivity(intent);
+    }
 
     public static String formatEventVSSubtitle(Context context,String paramas) {
         return null;

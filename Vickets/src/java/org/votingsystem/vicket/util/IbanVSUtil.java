@@ -1,8 +1,8 @@
 package org.votingsystem.vicket.util;
 
+import groovy.util.ConfigObject;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.iban4j.*;
-import groovy.util.ConfigObject;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

@@ -43,7 +43,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-
     <!-- enable CORS -> http://tomcat.apache.org/tomcat-7.0-doc/config/filter.html#CORS_Filter -->
     <filter>
         <filter-name>CorsFilter</filter-name>

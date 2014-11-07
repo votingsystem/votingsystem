@@ -62,6 +62,7 @@ public enum TypeVS {
     WEB_SOCKET_INIT,
     WEB_SOCKET_CLOSE,
     WEB_SOCKET_MESSAGE,
+    WEB_SOCKET_BAN_SESSION,
 
     RECEIPT;
 }
