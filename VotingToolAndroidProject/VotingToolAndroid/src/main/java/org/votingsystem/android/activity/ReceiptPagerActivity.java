@@ -3,10 +3,10 @@ package org.votingsystem.android.activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -20,7 +20,7 @@ import org.votingsystem.model.ContextVS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ReceiptPagerActivity extends ActionBarActivity {
+public class ReceiptPagerActivity extends FragmentActivity {
 
     public static final String TAG = ReceiptPagerActivity.class.getSimpleName();
 

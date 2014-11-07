@@ -8,7 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +32,7 @@ import java.math.RoundingMode;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ConfirmImageActivity extends ActionBarActivity {
+public class ConfirmImageActivity extends FragmentActivity {
 	
 	public static final String TAG = ConfirmImageActivity.class.getSimpleName();
 

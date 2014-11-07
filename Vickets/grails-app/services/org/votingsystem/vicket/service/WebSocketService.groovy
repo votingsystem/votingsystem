@@ -55,14 +55,14 @@ class WebSocketService {
                 messageVSService.sendWebSocketMessage(request.messageJSON)
                 break;
             case TypeVS.MESSAGEVS_EDIT:
-                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
+                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
+                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
                 grailsApplication.mainContext.getBean("messageVSService").editMessage(
                         request. messageJSON, request.sessionVS.userVS, request.locale)
                 break;
             case TypeVS.MESSAGEVS_GET:
-                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
+                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
+                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
                 request.messageJSON.userId = request.sessionVS.userVS.id
                 request.messageJSON.messageVSList = messageVSService.getMessageList(request.sessionVS.userVS,
                         MessageVS.State.valueOf(request.messageJSON.state))
@@ -78,8 +78,8 @@ class WebSocketService {
                         [request.messageJSON.deviceToName].toArray(), locale)));
                 break;
             case TypeVS.MESSAGEVS_FROM_DEVICE:
-                if(!request.sessionVS) processResponse(request.getResponse(new ResponseVS(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale))))
+                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
+                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
                 Session originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
                 if(!originSession) {
                     processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(

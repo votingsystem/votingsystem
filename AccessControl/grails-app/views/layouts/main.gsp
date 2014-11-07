@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-pie-chart.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="HandheldFriendly" content="true" />

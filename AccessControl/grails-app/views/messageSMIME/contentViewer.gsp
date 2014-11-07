@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-pie-chart.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="signedDocumentLbl"/></title>
     <g:include view="/include/styles.gsp"/>

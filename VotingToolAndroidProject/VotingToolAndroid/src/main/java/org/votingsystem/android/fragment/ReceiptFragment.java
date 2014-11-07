@@ -12,8 +12,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -297,11 +297,11 @@ public class ReceiptFragment extends Fragment {
         if(receiptContainer.getLocalId() < 0) {
             menu.removeItem(R.id.delete_receipt);
         } else menu.removeItem(R.id.save_receipt);
-        if(getActivity() instanceof ActionBarActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
-            ((ActionBarActivity)getActivity()).getActionBar().setSubtitle(
+        if(getActivity() instanceof FragmentActivity) {
+            ((FragmentActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
                     receiptContainer.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getActionBar().setLogo(R.drawable.receipt_32);
+            ((FragmentActivity)getActivity()).getActionBar().setLogo(R.drawable.receipt_32);
         }
     }
 

@@ -8,8 +8,8 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -164,11 +164,11 @@ public class TransactionVSFragment extends Fragment {
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
                     selectedTransactionVS.getType());
         }
-        if(getActivity() instanceof ActionBarActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
-            ((ActionBarActivity)getActivity()).getActionBar().setSubtitle(
+        if(getActivity() instanceof FragmentActivity) {
+            ((FragmentActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
+            ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
                     selectedTransactionVS.getDescription(getActivity().getApplicationContext()));
-            ((ActionBarActivity)getActivity()).getActionBar().setLogo(
+            ((FragmentActivity)getActivity()).getActionBar().setLogo(
                     selectedTransactionVS.getIconId(getActivity().getApplicationContext()));
         }
     }
