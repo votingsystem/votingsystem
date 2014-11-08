@@ -178,14 +178,14 @@ class EventVSElectionController {
 	 * @param [eventAccessControlURL] Obligatorio. URL del evento en el Control de Acceso.
 	 *
 	 * @httpMethod [GET]
-	 * @serviceURL [/eventVS/$id/statistics]
+	 * @serviceURL [/eventVS/$id/stats]
 	 * @param [id] Opcional. El identificador en la base de datos del evento consultado.
      * @param [eventAccessControlURL] Opcional. La url del evento en el Control de Asceso 
      *         que se publicó
 	 * @responseContentType [application/json]
 	 * @return Documento JSON con estadísticas de la votación solicitada.
 	 */
-    def statistics () {
+    def stats () {
 		EventVS eventVSElection
 		if (params.long('id')) {
             EventVS.withTransaction { eventVSElection = EventVS.get(params.long('id')) }
@@ -203,24 +203,24 @@ class EventVSElectionController {
 		}
         if (eventVSElection) {
             response.status = ResponseVS.SC_OK
-            def statisticsMap = new HashMap()
-			statisticsMap.fieldsEventVS = []
-            statisticsMap.id = eventVSElection.id
-			statisticsMap.numVotesVS = VoteVS.countByEventVSElection(eventVSElection)
-			statisticsMap.numVotesVSOK = VoteVS.countByEventVSElectionAndState(
+            def statsMap = new HashMap()
+			statsMap.fieldsEventVS = []
+            statsMap.id = eventVSElection.id
+			statsMap.numVotesVS = VoteVS.countByEventVSElection(eventVSElection)
+			statsMap.numVotesVSOK = VoteVS.countByEventVSElectionAndState(
 					eventVSElection, VoteVS.State.OK)
-			statisticsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSElectionAndState(
+			statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSElectionAndState(
 				eventVSElection, VoteVS.State.CANCELLED)
             eventVSElection.fieldsEventVS.each { opcion ->
 				def numVotesVS = VoteVS.countByOpcionDeEventoAndState(
 					opcion, VoteVS.State.OK)
 				def opcionMap = [id:opcion.id, content:opcion.content,
 					numVotesVS:numVotesVS, fieldEventVSId:opcion.fieldEventVSId]
-				statisticsMap.fieldsEventVS.add(opcionMap)
+				statsMap.fieldsEventVS.add(opcionMap)
 			}
-			statisticsMap.voteVSInfoURL="${grailsApplication.config.grails.serverURL}/eventVS/votes?eventAccessControlURL=${eventVSElection.url}"
-			if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
-			else render statisticsMap as JSON
+			statsMap.voteVSInfoURL="${grailsApplication.config.grails.serverURL}/eventVS/votes?eventAccessControlURL=${eventVSElection.url}"
+			if (params.callback) render "${params.callback}(${statsMap as JSON})"
+			else render statsMap as JSON
         } else {
             return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',

@@ -290,27 +290,26 @@ class EventVSElectionService {
 
 	}
         
-    public Map getStatisticsMap (EventVSElection eventVS) {
-        log.debug("getStatisticsMap - eventId: ${eventVS?.id}")
+    public Map getStatsMap (EventVSElection eventVS) {
         if(!eventVS) throw new ExceptionVS("EventVSElection null")
-        def statisticsMap = new HashMap()
-        statisticsMap.fieldsEventVS = []
-        statisticsMap.id = eventVS.id
-        statisticsMap.subject = eventVS.subject
-        statisticsMap.numAccessRequests = AccessRequestVS.countByEventVSElection(eventVS)
-        statisticsMap.numAccessRequestsOK = AccessRequestVS.countByEventVSElectionAndState(
+        def statsMap = new HashMap()
+        statsMap.fieldsEventVS = []
+        statsMap.id = eventVS.id
+        statsMap.subject = eventVS.subject
+        statsMap.numAccessRequests = AccessRequestVS.countByEventVSElection(eventVS)
+        statsMap.numAccessRequestsOK = AccessRequestVS.countByEventVSElectionAndState(
                         eventVS, AccessRequestVS.State.OK)
-        statisticsMap.numAccessRequestsCancelled =   AccessRequestVS.countByEventVSElectionAndState(
+        statsMap.numAccessRequestsCancelled =   AccessRequestVS.countByEventVSElectionAndState(
                         eventVS, AccessRequestVS.State.CANCELLED)
-        statisticsMap.numVotesVS = VoteVS.countByEventVS(eventVS)
-        statisticsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVS, VoteVS.State.OK)
-        statisticsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVS,VoteVS.State.CANCELLED)
+        statsMap.numVotesVS = VoteVS.countByEventVS(eventVS)
+        statsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVS, VoteVS.State.OK)
+        statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVS,VoteVS.State.CANCELLED)
         eventVS.fieldsEventVS.each { option ->
             def numVotesVS = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
             def optionMap = [id:option.id, content:option.content, numVotesVS:numVotesVS]
-            statisticsMap.fieldsEventVS.add(optionMap)
+            statsMap.fieldsEventVS.add(optionMap)
         }
-        return statisticsMap
+        return statsMap
     }
 	
 }

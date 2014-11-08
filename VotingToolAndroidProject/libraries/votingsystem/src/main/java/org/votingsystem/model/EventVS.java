@@ -228,7 +228,7 @@ public class EventVS implements Serializable {
         return vote;
     }
 
-    public String getURLStatistics() {
+    public String getURLstats() {
         String basePath = accessControl.getServerURL();
         switch(this.getTypeVS()) {
             case VOTING_EVENT:
@@ -241,7 +241,7 @@ public class EventVS implements Serializable {
                 basePath = basePath + "/eventVSManifest/";
                 break;
         }
-        return basePath + id + "/statistics";
+        return basePath + id + "/stats";
     }
 
     public static String getURLPart(TypeVS typeVS) {

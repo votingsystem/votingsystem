@@ -351,31 +351,31 @@ class EventVSManifestController {
 	 * Servicio que devuelve estadísticas asociadas a un manifiesto.
 	 * 
 	 * @httpMethod [GET]
-	 * @serviceURL [/eventVSManifest/$id/statistics]
+	 * @serviceURL [/eventVSManifest/$id/stats]
 	 * @param [id] Identificador en la base de datos del manifiesto que se desea consultar.
 	 * @responseContentType [application/json]
 	 * @return documento JSON con las estadísticas asociadas al manifiesto solicitado.
 	 */
-	def statistics () {
+	def stats () {
 		if (params.long('id')) {
 			EventVSManifest eventVSManifest
 			if (!params.eventVS) {
 				EventVSManifest.withTransaction { eventVSManifest = EventVSManifest.get(params.id) }
 			} 
-			else eventVSManifest = params.eventVS //forwarded from /eventVS/statistics
+			else eventVSManifest = params.eventVS //forwarded from /eventVS/stats
 			if (eventVSManifest) {
-				def statisticsMap = eventVSService.getEventVSManifestMap(eventVSManifest)
-				statisticsMap.numSignatures = PDFDocumentVS.countByEventVSAndState(
+				def statsMap = eventVSService.getEventVSManifestMap(eventVSManifest)
+				statsMap.numSignatures = PDFDocumentVS.countByEventVSAndState(
 					eventVSManifest, PDFDocumentVS.State.MANIFEST_SIGNATURE_VALIDATED)
-				statisticsMap.signaturesInfoURL = "${grailsApplication.config.grails.serverURL}" +
+				statsMap.signaturesInfoURL = "${grailsApplication.config.grails.serverURL}" +
 					"/eventVS/signaturesInfo?id=${eventVSManifest.id}"
-				statisticsMap.URL = "${grailsApplication.config.grails.serverURL}" + 
+				statsMap.URL = "${grailsApplication.config.grails.serverURL}" +
 					"/eventVS/${eventVSManifest.id}"
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-					if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
-					else render statisticsMap as JSON
+					if (params.callback) render "${params.callback}(${statsMap as JSON})"
+					else render statsMap as JSON
 				} else {
-					render(view:"statistics", model: [statisticsMap:statisticsMap])
+					render(view:"stats", model: [statsMap:statsMap])
 				}
 			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))]

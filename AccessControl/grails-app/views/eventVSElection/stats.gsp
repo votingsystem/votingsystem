@@ -14,7 +14,7 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
-    var jsonData = ${statisticsJSON}
+    var jsonData = ${statsJSON}
     google.load('visualization', '1', {'packages':['corechart']});
     google.setOnLoadCallback(drawChart);
     

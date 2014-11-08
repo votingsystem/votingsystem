@@ -7,7 +7,7 @@
 <polymer-element name="alert-dialog">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <paper-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .votingsystemMessageDialog {
                 top: 150px;

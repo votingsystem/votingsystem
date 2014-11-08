@@ -4,7 +4,6 @@
     <session-factory>
 
         <!--<property name="hibernate.generate_statistics">true</property>-->
-        <mapping package="org.votingsystem.model" />
         <mapping class="org.votingsystem.model.TimeStampVS" />
 
     </session-factory>

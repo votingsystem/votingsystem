@@ -92,7 +92,7 @@ public class EventVSStatsFragment extends Fragment {
         }
         if(htmlContent == null || baseURL == null) {
             GetDataTask getDataTask = new GetDataTask(null);
-            getDataTask.execute(eventVS.getURLStatistics());
+            getDataTask.execute(eventVS.getURLstats());
         }
     }
 

@@ -1,12 +1,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 
 <polymer-element name="eventvs-admin-dialog" attributes="opened">
     <template>
-        <vs-dialog flex vertical id="xDialog" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
+        <paper-dialog flex vertical id="xDialog" layered backdrop opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
             <g:include view="/include/styles.gsp"/>
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
@@ -39,14 +40,14 @@
                 <div>
                     <p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
                     <g:message code="documentStateSelectionMsg"/>:<br/>
-                    <div style="font-size: 0.9em; margin:10px 0 0 10px;">
-                        <div class="radio">
+                    <div style="font-size: 1.1em; margin:10px 0 0 10px;">
+                        <div style="margin:10px 0 0 0">
                             <label>
                                 <input type="radio" name="optionsRadios" id="selectDeleteDocument" value="">
                                 <g:message code="selectDeleteDocumentMsg"/>
                             </label>
                         </div>
-                        <div class="radio">
+                        <div style="margin:10px 0 0 0">
                             <label>
                                 <input type="radio" name="optionsRadios" id="selectCloseDocument" value="">
                                 <g:message code="selectCloseDocumentMsg"/>
@@ -54,7 +55,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
                     <div flex></div>
                     <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
@@ -62,7 +62,7 @@
                     </paper-button>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('eventvs-admin-dialog', {

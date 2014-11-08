@@ -4,7 +4,7 @@
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
 
-<polymer-element name="eventvs-election-list" attributes="url eventvstype">
+<polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
@@ -18,6 +18,7 @@
             margin: 10px;
         }
         </style>
+        <vs-innerpage-signal id="innerpageSignal" title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
         <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
@@ -52,7 +53,7 @@
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
-                                <div class='eventSubjectDiv'>
+                                <div  eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
                                 <div class='eventBodyDiv'>
                                     <div style='vertical-align: middle;'>
@@ -104,9 +105,11 @@
                 this.groupvsData = {}
                 this.page = 0;
                 this.subpage = 0;
+                if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
             },
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")
+                this.$.innerpageSignal.fireSignal()
                 this.page = 0;
             },
             pagerChange:function(e) {
@@ -121,6 +124,7 @@
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
+                this.$.eventvsDetails.fireSignal()
                 this.$.eventvsDetails.eventvs = e.target.templateInstance.model.eventvs;
                 this.page = 1;
             },

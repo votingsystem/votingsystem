@@ -76,9 +76,9 @@ class UrlMappings {
             }
         }
 
-        "/eventVS/$id/statistics" {
+        "/eventVS/$id/stats" {
             controller = "eventVS"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }
@@ -97,9 +97,9 @@ class UrlMappings {
             }
         }
 
-        "/eventVSManifest/$id/statistics" {
+        "/eventVSManifest/$id/stats" {
             controller = "eventVSManifest"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }
@@ -135,9 +135,9 @@ class UrlMappings {
             }
         }
 
-        "/eventVSClaim/$id/statistics" {
+        "/eventVSClaim/$id/stats" {
             controller = "eventVSClaim"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }
@@ -180,9 +180,9 @@ class UrlMappings {
             }
         }
 
-        "/eventVSElection/$id/statistics" {
+        "/eventVSElection/$id/stats" {
             controller = "eventVSElection"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }
@@ -190,7 +190,7 @@ class UrlMappings {
 
         "/eventVSElection/$id/voteVSInfo" {
             controller = "eventVSElection"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }

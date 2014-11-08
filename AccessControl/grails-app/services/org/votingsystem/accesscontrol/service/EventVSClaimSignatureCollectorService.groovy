@@ -43,28 +43,28 @@ class EventVSClaimSignatureCollectorService {
                 messageSMIME: messageSMIMEReq, type:TypeVS.CLAIM_EVENT_SIGN, contentType:ContentTypeVS.JSON_SIGNED)
     }
 
-	 public Map getStatisticsMap (EventVSClaim event) {
-		 log.debug("getStatisticsMap - eventId: ${event?.id}")
+	 public Map getStatsMap (EventVSClaim event) {
+		 log.debug("getStatsMap - eventId: ${event?.id}")
 		 if(!event) return null
-		 def statisticsMap = new HashMap()
-		 statisticsMap.fieldsEventVS = []
-		 statisticsMap.id = event.id
-		 statisticsMap.subject = event.subject
-		 statisticsMap.numSignatures = SignatureVS.countByEventVS(event)
-		 statisticsMap.state =  event.state.toString()
-		 statisticsMap.dateBegin = event.getDateBegin()
-		 statisticsMap.dateFinish = event.getDateFinish()
-		 statisticsMap.publishRequestURL = "${grailsApplication?.config.grails.serverURL}" +
+		 def statsMap = new HashMap()
+		 statsMap.fieldsEventVS = []
+		 statsMap.id = event.id
+		 statsMap.subject = event.subject
+		 statsMap.numSignatures = SignatureVS.countByEventVS(event)
+		 statsMap.state =  event.state.toString()
+		 statsMap.dateBegin = event.getDateBegin()
+		 statsMap.dateFinish = event.getDateFinish()
+		 statsMap.publishRequestURL = "${grailsApplication?.config.grails.serverURL}" +
 			 "/eventVSClaim/${event.id}/signed"
-		 statisticsMap.validatedPublishRequestURL = "${grailsApplication?.config.grails.serverURL}" +
+		 statsMap.validatedPublishRequestURL = "${grailsApplication?.config.grails.serverURL}" +
 			 "/eventVSClaim/${event.id}/validated"
-		 statisticsMap.signaturesInfoURL = "${grailsApplication?.config.grails.serverURL}" +
+		 statsMap.signaturesInfoURL = "${grailsApplication?.config.grails.serverURL}" +
 			 "/eventVSClaim/${event.id}/signaturesInfo"
-		 statisticsMap.URL = "${grailsApplication.config.grails.serverURL}/eventVS/${event.id}"
+		 statsMap.URL = "${grailsApplication.config.grails.serverURL}/eventVS/${event.id}"
 		 event.fieldsEventVS.each { field ->
-			 statisticsMap.fieldsEventVS.add(field.content)
+			 statsMap.fieldsEventVS.add(field.content)
 		 }
-		 return statisticsMap
+		 return statsMap
 	 }
 
     private class SignatureRequest {

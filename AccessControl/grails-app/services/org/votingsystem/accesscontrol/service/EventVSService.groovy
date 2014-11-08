@@ -166,7 +166,7 @@ class EventVSService {
 				return [id:opcion.id, content:opcion.content]}
 		ControlCenterVS controlCenter = eventVSItem.controlCenterVS
 		def controlCenterMap = [id:controlCenter.id, serverURL:controlCenter.serverURL, name:controlCenter.name,
-			eventVSStatisticsURL:"${controlCenter.serverURL}/eventVSElection/statistics?eventAccessControlURL=${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}"]
+			eventVSstatsURL:"${controlCenter.serverURL}/eventVSElection/stats?eventAccessControlURL=${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}"]
 		eventVSMap.controlCenter = controlCenterMap
 		eventVSMap.eventCACertificate = "${grailsApplication.config.grails.serverURL}/certificateVS/eventCA/${eventVSItem.id}"
 		return eventVSMap

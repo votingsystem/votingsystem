@@ -44,9 +44,9 @@ class UrlMappings {
         }
 
 
-        "/eventVSElection/$id?/statistics"{
+        "/eventVSElection/$id?/stats"{
             controller = "eventVSElection"
-            action = "statistics"
+            action = "stats"
             constraints {
                 id(matches:/\d*/)
             }

@@ -5,7 +5,7 @@
         <asset:javascript src="jsapi.js"/>
 </head>
     <body>    
-        <div id="subject" class='statisticData'>${statisticsMap.subject}</div>
-		<div id="numSignatures" class='statisticData'>${message(code: 'numSignaturesLabel', null)}: ${statisticsMap.numSignatures}</div>
+        <div id="subject" class='statisticData'>${statsMap.subject}</div>
+		<div id="numSignatures" class='statisticData'>${message(code: 'numSignaturesLabel', null)}: ${statsMap.numSignatures}</div>
     </body>
 </html>

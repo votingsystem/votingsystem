@@ -131,7 +131,7 @@ class EventVSElectionController {
 	 * Servicio que devuelve estadísticas asociadas a una votación.
 	 *
 	 * @httpMethod [GET]
-	 * @serviceURL [/eventVSElection/$id/statistics]
+	 * @serviceURL [/eventVSElection/$id/stats]
 	 * @param [id] Obligatorio. Identificador en la base de datos de la votación que se desea consultar.
          * @requestContentType [application/json] Para solicitar una respuesta en formato JSON
          * @requestContentType [text/html] Para solicitar una respuesta en formato HTML
@@ -139,20 +139,19 @@ class EventVSElectionController {
 	 * @responseContentType [text/html]
 	 * @return documento JSON con las estadísticas asociadas a la votación solicitada.
 	 */
-    def statistics () {
+    def stats () {
         if (params.long('id')) {
             EventVSElection eventVSElection
             if (!params.eventVS) {
 				EventVSElection.withTransaction {eventVSElection = EventVSElection.get(params.id)}
-			} 
-            else eventVSElection = params.eventVS
+			} else eventVSElection = params.eventVS
             if (eventVSElection) {
                 response.status = ResponseVS.SC_OK
-                def statisticsMap = eventVSElectionService.getStatisticsMap(eventVSElection)
-                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-                    if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
-                    else render statisticsMap as JSON
-                } else render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
+                def statsMap = eventVSElectionService.getStatsMap(eventVSElection)
+                if(request.contentType?.contains("json")) {
+                    if (params.callback) render "${params.callback}(${statsMap as JSON})"
+                    else render statsMap as JSON
+                } else render(view:"stats", model: [statsJSON: statsMap  as JSON])
             } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
