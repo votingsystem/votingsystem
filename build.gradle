@@ -66,19 +66,19 @@ def initAppsCertsData() {
 
 def initWebAppsCertsData() {
     initRootCertData()
-    Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
+    Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/votingsystem/AccessControl.jks",
             distinguishedName:accessControlDN, alias:accessControlCertAlias,
             isTimeStampingCert:false]
 
-    Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
+    Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/votingsystem/ControlCenter.jks",
             distinguishedName:controlCenterDN, alias:controlCenterCertAlias,
             isTimeStampingCert:false]
 
-    Map timeStampServerMap = [file:"$projectDir/TimeStampServer/web-app/WEB-INF/cms/TimeStampServer.jks",
+    Map timeStampServerMap = [file:"$projectDir/TimeStampServer/web-app/WEB-INF/votingsystem/TimeStampServer.jks",
             distinguishedName:timeStampServerDN, alias:timeStampServerCertAlias,
             isTimeStampingCert:true]
 
-    Map vicketServerMap = [file:"$projectDir/Vickets/web-app/WEB-INF/cms/VicketServer.jks",
+    Map vicketServerMap = [file:"$projectDir/Vickets/web-app/WEB-INF/votingsystem/VicketServer.jks",
             distinguishedName:vicketServerDN, alias:vicketServerCertAlias,
             isTimeStampingCert:true]
 

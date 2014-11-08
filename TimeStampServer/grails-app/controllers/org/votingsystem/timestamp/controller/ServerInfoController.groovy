@@ -43,8 +43,9 @@ class ServerInfoController {
      */
     def certChain () {
         byte[] serverCertPEMBytes = timeStampService.getSigningCertChainPEMBytes()
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT,
-                messageBytes:serverCertPEMBytes)]
+        response.setContentType(ContentTypeVS.TEXT.getName()+";charset=UTF-8")
+        response.outputStream <<  serverCertPEMBytes
+        response.outputStream.flush()
     }
 
     /**

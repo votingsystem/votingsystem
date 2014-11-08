@@ -90,13 +90,6 @@ class UserVSService {
         return resultMap
     }
 
-	boolean isUserAdmin(String nif) {
-        nif = NifUtils.validate(nif);
-        boolean result = grailsApplication.config.vs.adminsDNI.contains(nif)
-        if(result) log.debug("isUserAdmin - nif: ${nif}")
-		return result
-	}
-
     public Map getUserVSBasicDataMap(UserVS userVS){
         String name = userVS.name
         if(!name) name = "${userVS.firstName} ${userVS.lastName}"

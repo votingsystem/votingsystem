@@ -227,7 +227,7 @@ log4j = {
 
 }
 
-grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
+grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/votingsystem") { }}
 vs.dev.accessControlURL='http://sistemavotacion.org/AccessControl'
 vs.prod.accessControlURL='http://www.sistemavotacion.org/AccessControl'
 vs.IBAN_bankCode = "7878"
@@ -238,12 +238,10 @@ vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 vs.backupCopyPath='./Vickets/backups'
 vs.weekReportsPath = vs.backupCopyPath + '/weekReports'
 vs.errorsBaseDir='./Vickets/errors'
-vs.keyStorePath='WEB-INF/cms/VicketServer.jks'
+vs.keyStorePath='WEB-INF/votingsystem/VicketServer.jks'
 vs.signKeysAlias='VicketServerKeys'
 vs.signKeysPassword='PemPass'
-vs.certAuthoritiesDirPath='WEB-INF/cms/'
+vs.certAuthoritiesDirPath='WEB-INF/votingsystem/'
 vs.defaulTagsFilePath='WEB-INF/docs/defaultTags.txt'
-
-vs.certChainPath='WEB-INF/cms/certChain.pem'
-vs.requestTimeOut = 500
-vs.defaultLocale = 'en'
+vs.certChainPath='WEB-INF/votingsystem/certChain.pem'
+vs.requestTimeOut = 500 //milliseconds

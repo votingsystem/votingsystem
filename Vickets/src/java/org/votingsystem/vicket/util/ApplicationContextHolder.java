@@ -11,9 +11,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ApplicationVS;
 import org.votingsystem.vicket.model.TransactionVS;
 import org.votingsystem.vicket.service.TransactionVSService;
-
 import javax.servlet.ServletContext;
-
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 /**
@@ -61,7 +59,6 @@ public class ApplicationContextHolder implements ApplicationContextAware, Applic
     static GrailsPluginManager getPluginManager() {
         return (GrailsPluginManager)getBean("pluginManager");
     }
-
 
     public static GrailsApplication getGrailsApplication() {
         return (GrailsApplication) getBean("grailsApplication");

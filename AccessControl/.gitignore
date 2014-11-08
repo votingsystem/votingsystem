@@ -1,12 +1,5 @@
-/web-app/WEB-INF/cms/*.jks
-/web-app/WEB-INF/cms/certChain
-
-/grails-app/views/restDoc
-/grails-app/views/restDocTemplates
-
 /web-app/tools
 /web-app/android
-
 
 /build
 /logs

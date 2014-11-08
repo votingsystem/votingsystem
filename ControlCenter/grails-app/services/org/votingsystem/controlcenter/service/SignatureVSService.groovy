@@ -190,6 +190,14 @@ class SignatureVSService {
                 data:[checkedSigner:checkedSigner])
     }
 
+    public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {
+        CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                getTrustAnchors(), false, [userVS.getCertificate()])
+        X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
+        log.debug("verifyCertificate - user '${userVS.nif}' cert issuer: " + certCaResult?.getSubjectDN()?.toString());
+        return validatorResult
+    }
+
     public ResponseVS validateSMIMEVoteCancellation(String url, SMIMEMessage smimeMessage) {
         log.debug("validateSMIMEVoteCancellation - url: ${url}")
         EventVS eventVS = null

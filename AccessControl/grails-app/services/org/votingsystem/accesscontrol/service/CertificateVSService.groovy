@@ -20,7 +20,7 @@ class CertificateVSService {
     /*
      * Método para poder añadir certificados de confianza.
      * El procedimiento para añadir una autoridad certificadora consiste en
-     * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
+     * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
     @Transactional
     public ResponseVS addCertificateAuthority(MessageSMIME messageSMIMEReq) {

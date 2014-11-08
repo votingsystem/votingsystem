@@ -1,9 +1,3 @@
-/web-app/WEB-INF/cms
-
-/grails-app/views/restDoc
-/grails-app/views/restDocTemplates
-
-
 /web-app/android
 /web-app/ckeditor
 /web-app/tools

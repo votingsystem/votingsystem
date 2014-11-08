@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import javax.servlet.ServletContext;
-import java.util.Locale;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 public class ApplicationContextHolder implements ApplicationContextAware {
 
@@ -16,7 +16,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
 
     private ApplicationContext ctx;
     private static ApplicationContextHolder instance;
-    private static Locale locale = new Locale("es");
    
     private ApplicationContextHolder() {}
 
@@ -26,10 +25,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
 
     public static ApplicationContext getApplicationContext() {
     return getInstance().ctx;
-    }
-
-    public static void setLocale(Locale newLocale) {
-    locale = newLocale;
     }
 
     public static ApplicationContextHolder getInstance() {
@@ -44,7 +39,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         return getApplicationContext().getBean(name);
     }
 
-
     static ConfigObject getConfig() {
         return getGrailsApplication().getConfig();
     }
@@ -57,7 +51,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         return (GrailsPluginManager)getBean("pluginManager");
     }
 
-
     public static GrailsApplication getGrailsApplication() {
         return (GrailsApplication) getBean("grailsApplication");
     }
@@ -65,7 +58,7 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     public static String getMessage(String key, String... args) {
         String msg = null;
         try {
-            msg = ((MessageSource)getBean("messageSource")).getMessage(key, args, locale);
+            msg = ((MessageSource)getBean("messageSource")).getMessage(key, args, getLocale());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

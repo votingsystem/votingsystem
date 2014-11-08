@@ -1,0 +1,25 @@
+Para añadir una Autoridad Certificadora hay que copiar en el directorio ./WEB_INF/cms
+la cadena de certificación de la misma en un archivo en formato PEM añadiendo el
+prefijo 'AC_' al name del archivo y poniendo como extensión la cadema '.pem'.
+
+
+- 'AC_RAIZ_DNIE_SHA1.pem' certificateVS raíz del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_RAIZ_DNIE_SHA2.pem' certificateVS raíz del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_001_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_001_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_002_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_002_SHA2.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_003_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+- 'AC_DNIE_003_SHA2.pem' certificateVS intermedio del DNI electrónico emitido en España
+(http://www.dnielectronico.es/seccion_integradores/certs.html)
+
+Generación y configuración del almacén de claves de la aplicación:
+https://github.com/votingsystem/votingsystem/wiki/Almacenes-de-claves
+

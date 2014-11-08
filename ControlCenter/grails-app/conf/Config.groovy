@@ -202,23 +202,19 @@ log4j = {
     }
 }
 
-grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
+grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/votingsystem") { }}
 
 vs.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
+vs.systemNIF = "CONTROL_CENTER_SYSTEM_NIF"
 vs.backupCopyPath='./VotingSystem/backup'
 vs.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
 vs.errorsBaseDir='./VotingSystem/errors'
-vs.keyStorePath='WEB-INF/cms/ControlCenter.jks'
+vs.keyStorePath='WEB-INF/votingsystem/ControlCenter.jks'
 vs.signKeysAlias='ControlCenterKeys'
-vs.certAuthoritiesDirPath='WEB-INF/cms/'
-vs.certChainPath='WEB-INF/cms/certChain.pem'
+vs.certAuthoritiesDirPath='WEB-INF/votingsystem/certs/'
+vs.certChainPath='WEB-INF/votingsystem/certs/certChain.pem'
 vs.signKeysPassword='PemPass'
-//milliseconds
-vs.requestTimeOut = 500
-//Name decriptivo del servidor
+vs.requestTimeOut = 500 //milliseconds
 vs.serverName='Voting System Control Center'
 vs.blogURL ='http://www.sistemavotacion.org/blog.html'
-vs.emailAdmin='jgzornoza@gmail.com'
-vs.defaultLocale = 'en'
-//_ TODO _
-vs.adminsDNI=['07553172H']
+vs.emailAdmin='admin@sistemavotacion.org'

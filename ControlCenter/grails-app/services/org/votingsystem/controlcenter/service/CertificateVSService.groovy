@@ -12,7 +12,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.*
 //@Transactional
 class CertificateVSService {
 
-    def userVSService
+    def systemService
     def signatureVSService
     def messageSource
     def grailsLinkGenerator
@@ -20,7 +20,7 @@ class CertificateVSService {
     /*
      * Método para poder añadir certificados de confianza.
      * El procedimiento para añadir una autoridad certificadora consiste en
-     * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
+     * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
     @Transactional
     public ResponseVS addCertificateAuthority(MessageSMIME messageSMIMEReq) {
@@ -34,7 +34,7 @@ class CertificateVSService {
         ResponseVS responseVS = null;
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(!userVSService.isUserAdmin(userSigner.getNif())) {
+        if(!systemService.isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_CA_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
@@ -96,7 +96,7 @@ class CertificateVSService {
         log.debug(methodName);
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(!userVSService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
+        if(!systemService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_EDIT.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
