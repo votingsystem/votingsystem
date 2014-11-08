@@ -47,7 +47,7 @@ public class TimeStampCertValidationPane extends GridPane {
         add(messageLbl, 0, 0);
         textArea = new TextArea();
         textArea.setWrapText(true);
-        textArea.setPrefHeight(400);
+        textArea.setStyle("-fx-font-size: 10;-fx-pref-height: 400;");
         add(textArea, 0, 1);
 
         validateTimeStampButton = new Button(ContextVS.getMessage("validateLbl"));

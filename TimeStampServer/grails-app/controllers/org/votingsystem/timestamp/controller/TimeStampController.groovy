@@ -31,15 +31,12 @@ class TimeStampController {
         Calendar calendar = Calendar.getInstance()
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes, calendar.getTime(),
-                request.getLocale())
-        response.status = responseVS.getStatusCode()
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            response.contentLength = responseVS.getMessageBytes().length
-            response.setContentType(responseVS.getContentType().getName())
-            response.outputStream <<  responseVS.getMessageBytes()
-            response.outputStream.flush()
-        } else render responseVS.getMessage()
+        byte[] responseBytes = timeStampService.processRequest(timeStampRequestBytes, calendar.getTime())
+        response.status = ResponseVS.SC_OK
+        response.contentLength = responseBytes.length
+        response.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName())
+        response.outputStream <<  responseBytes
+        response.outputStream.flush()
         return false
     }
 
@@ -56,14 +53,12 @@ class TimeStampController {
 	 */
 	def index() {
         byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes, Calendar.getInstance().getTime())
-        response.status = responseVS.getStatusCode()
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            response.contentLength = responseVS.getMessageBytes().length
-            response.setContentType(responseVS.getContentType().getName())
-            response.outputStream <<  responseVS.getMessageBytes()
-            response.outputStream.flush()
-        } else render responseVS.getMessage()
+        byte[] responseBytes = timeStampService.processRequest(timeStampRequestBytes, Calendar.getInstance().getTime())
+        response.status = ResponseVS.SC_OK
+        response.contentLength = responseBytes.length
+        response.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName())
+        response.outputStream <<  responseBytes
+        response.outputStream.flush()
         return false
 	}
 	
@@ -136,6 +131,7 @@ class TimeStampController {
     def exceptionHandler(final Exception exception) {
         ResponseVS responseVS = ResponseVS.getExceptionResponse(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))
+        log.error(responseVS.message)
         response.status = responseVS.statusCode
         render responseVS.message
         return false

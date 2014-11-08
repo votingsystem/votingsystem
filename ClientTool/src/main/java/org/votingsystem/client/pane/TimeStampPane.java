@@ -39,11 +39,7 @@ public class TimeStampPane extends GridPane {
 
     private static Logger log = Logger.getLogger(TimeStampPane.class);
 
-    private TimeStampToken timeStampToken;
-    private Label timeStampDateLabel;
-
     public TimeStampPane(final TimeStampToken timeStampToken) {
-        this.timeStampToken = timeStampToken;
         setPadding(new Insets(10, 10 , 10, 10));
 
         TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
@@ -145,7 +141,6 @@ public class TimeStampPane extends GridPane {
                 TimeStampCertValidationPane.showDialog(timeStampToken);
             }
         });
-
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));

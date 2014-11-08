@@ -18,11 +18,8 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.bouncycastle.tsp.*
 import org.bouncycastle.util.Store
-import static org.springframework.context.i18n.LocaleContextHolder.*
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.TimeStampVS
-import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.signature.util.TimeStampResponseGenerator
@@ -30,11 +27,11 @@ import org.votingsystem.signature.util.KeyGeneratorVS
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
-
 import javax.security.auth.x500.X500PrivateCredential
 import java.security.*
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
+import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**
  * @author jgzornoza
@@ -170,13 +167,10 @@ class TimeStampService {
 			getAcceptedAlgorithms(), getAcceptedPolicies(), getAcceptedExtensions())
 	}	
 	
-	public ResponseVS processRequest(byte[] timeStampRequestBytes, Date date) throws Exception {
-		if(!timeStampRequestBytes) {
-			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
-			log.debug("processRequest - ${msg}"); 
-			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
-		}
-		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
+	public byte[] processRequest(byte[] timeStampRequestBytes, Date date) throws Exception {
+		if(!timeStampRequestBytes) throw new ExceptionVS(messageSource.getMessage('timestampRequestNullMsg', null, locale),
+                    MetaInfMsg.getErrorMsg("processRequest", "missingRequest"))
+    	TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 		final BigInteger serialNumber = KeyGeneratorVS.INSTANCE.getSerno()
 		log.debug("processRequest - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
 		final TimeStampToken token = null;
@@ -185,16 +179,15 @@ class TimeStampService {
 			token = timeStampResponse.getTimeStampToken();
 			PKIFailureInfo failureInfo = timeStampResponse.getFailInfo();
 			if (failureInfo != null) {
-				log.error("timeStampResponse Status: " + timeStampResponse.getStatus())
-				log.error("timeStampResponse Failure info: ${failureInfo.intValue()}");
-                log.error("timeStampResponse error: ${timeStampResponse.getStatusString()}");
-                return new ResponseVS(ResponseVS.SC_ERROR, messageSource.getMessage('timestampGenErrorMsg', null, locale))
+				log.error("timeStampResponse Status: " + timeStampResponse.getStatus() +
+                        " - Failure info: ${failureInfo.intValue()} - error: ${timeStampResponse.getStatusString()}");
+                throw new ExceptionVS(messageSource.getMessage('timestampGenErrorMsg', null, locale),
+                        MetaInfMsg.getErrorMsg("processRequest", "missingRequest"));
 			}
 		}
-        TimeStampVS timeStampVS = new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(),
+        new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(),
                 state:TimeStampVS.State.OK, timeStampRequestBytes:timeStampRequestBytes).save()
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded(),
-                contentType:ContentTypeVS.TIMESTAMP_RESPONSE)
+		return token.getEncoded()
 	}
 
     public void validateToken(TimeStampToken tsToken) throws ExceptionVS {
