@@ -1,10 +1,14 @@
 package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -155,6 +159,12 @@ public class BrowserVSSessionUtils {
         PlatformImpl.runLater(new Runnable() { @Override public void run() { checkCSR(); } });
     }
 
+    private void deleteCSR() {
+        log.debug("deleteCSR");
+        File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+        if(csrFile.exists()) csrFile.delete();
+    }
+
     private void checkCSR() {
         File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) {
@@ -180,7 +190,13 @@ public class BrowserVSSessionUtils {
                         passwordDialog.show(ContextVS.getMessage("csrPasswMsg"));
                         passwd = passwordDialog.getPassword();
                         if(passwd == null) {
-                            showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"));
+                            Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
+                            optionButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+                            optionButton.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override public void handle(ActionEvent actionEvent) {
+                                    deleteCSR();
+                                }});
+                            showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;
                         }
                         Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(jsonData);
@@ -188,7 +204,7 @@ public class BrowserVSSessionUtils {
                             serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
                         } catch (Exception ex) {
                             passwd = null;
-                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), null);
                         }
                     }
 
@@ -201,12 +217,12 @@ public class BrowserVSSessionUtils {
                     ContextVS.saveUserKeyStore(userKeyStore, passwd);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             CryptoTokenVS.JKS_KEYSTORE.toString());
-                    showMessage(ContextVS.getMessage("certInstallOKMsg"));
+                    showMessage(ContextVS.getMessage("certInstallOKMsg"), null);
                     csrFile.delete();
-                } else showMessage(ContextVS.getMessage("certPendingMsg"));
+                } else showMessage(ContextVS.getMessage("certPendingMsg"), null);
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                showMessage(ContextVS.getMessage("errorStoringKeyStoreMsg"));
+                showMessage(ContextVS.getMessage("errorStoringKeyStoreMsg"), null);
             }
         }
 
@@ -276,11 +292,11 @@ public class BrowserVSSessionUtils {
         return CryptoTokenVS.valueOf(tokenType);
     }
 
-    public void showMessage(final String message) {
+    public void showMessage(final String message, final Button optionButton) {
         PlatformImpl.runLater(new Runnable() {
             @Override
             public void run() {
-                new MessageDialog().showHtmlMessage(message);
+                new MessageDialog().showHtmlMessage(message, optionButton);
             }
         });
     }

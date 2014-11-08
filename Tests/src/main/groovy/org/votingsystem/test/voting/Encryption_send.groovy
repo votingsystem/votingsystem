@@ -14,7 +14,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 Map simulationDataMap = [serverURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
-                         numRequestsProjected:2, timer:[active:false, time:"00:00:10"]]
+                         numRequestsProjected:1, timer:[active:false, time:"00:00:10"]]
 
 log = TestUtils.init(Encryption_send.class, simulationDataMap)
 

@@ -10,6 +10,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.Callable
@@ -35,10 +36,8 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif)
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
                 StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject)
-        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,
-                ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL(),
-                ContentTypeVS.JSON_SIGNED, null, null);
-        ResponseVS responseVS = sender.call();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(
+                smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] multiSigendResponseBytes = responseVS.getMessageBytes();
             SMIMEMessage smimeResponse = new SMIMEMessage(new ByteArrayInputStream(multiSigendResponseBytes));

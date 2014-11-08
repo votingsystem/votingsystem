@@ -114,7 +114,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     log.debug("publishEvent");
     eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()));
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(publisherNIF,
+    SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
             JSONSerializer.toJSON(eventVS.getDataMap()).toString(), smimeMessageSubject)
     SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
@@ -145,7 +145,7 @@ private void changeEventState(String publisherNIF) throws Exception {
             TestUtils.simulationData.getEventStateWhenFinished());
     String smimeMessageSubject = "cancelEventMsgSubject"
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(publisherNIF,
+    SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
             JSONSerializer.toJSON(cancelDataMap).toString(), smimeMessageSubject)
     SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
@@ -191,7 +191,7 @@ private void cancelVote(VoteVS voteVS, String nif) {
     cancelDataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
     cancelDataMap.put("UUID", UUID.randomUUID().toString());
     SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
+    SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
             ContextVS.getInstance().getAccessControl().getNameNormalized(),
             JSONSerializer.toJSON(cancelDataMap).toString(), "cancelVote")
     SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,

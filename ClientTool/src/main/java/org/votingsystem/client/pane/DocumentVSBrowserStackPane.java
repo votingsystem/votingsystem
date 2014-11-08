@@ -244,11 +244,13 @@ public class DocumentVSBrowserStackPane extends StackPane {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(getScene().getWindow());
             DocumentVS selectedDocumentVS = ((DocumentVS)tabPane.getSelectionModel().getSelectedItem().getContent());
-            String fileName = file.getAbsolutePath();
-            if(!fileName.contains(".")) fileName = fileName + selectedDocumentVS.getContentTypeVS().getExtension();
-            FileOutputStream fos = new FileOutputStream(new File(fileName));
-            fos.write(selectedDocumentVS.getDocumentBytes());
-            fos.close();
+            if(file != null) {
+                String fileName = file.getAbsolutePath();
+                if(!fileName.contains(".")) fileName = fileName + selectedDocumentVS.getContentTypeVS().getExtension();
+                FileOutputStream fos = new FileOutputStream(new File(fileName));
+                fos.write(selectedDocumentVS.getDocumentBytes());
+                fos.close();
+            }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }

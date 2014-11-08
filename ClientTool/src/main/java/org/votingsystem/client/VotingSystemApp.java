@@ -266,6 +266,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     adminChoiceBox.getSelectionModel().select(0);
                 }
             });
+        mainBox.getChildren().add(0, headerButtonsBox);
         headerButtonsBox.getChildren().addAll(adminChoiceBox, documentChoiceBox);
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
@@ -308,13 +309,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             @Override public void run() {
                 if(available) {
                     mainBox.getChildren().add((mainBox.getChildren().size() - 1), vicketOptionsBox);
-                    mainBox.getChildren().add(0, headerButtonsBox);
                 } else {
                     if(mainBox.getChildren().contains(vicketOptionsBox)) {
                         mainBox.getChildren().remove(vicketOptionsBox);
-                    }
-                    if(mainBox.getChildren().contains(headerButtonsBox)) {
-                        mainBox.getChildren().remove(headerButtonsBox);
                     }
                 }
                 primaryStage.sizeToScene();
@@ -327,7 +324,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
-                    mainBox.getChildren().add(0, votingSystemOptionsBox);
+                    mainBox.getChildren().add(1, votingSystemOptionsBox);
                 } else {
                     if(mainBox.getChildren().contains(votingSystemOptionsBox)) {
                         mainBox.getChildren().remove(votingSystemOptionsBox);

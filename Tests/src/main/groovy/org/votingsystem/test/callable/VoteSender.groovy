@@ -32,7 +32,7 @@ public class VoteSender implements Callable<ResponseVS> {
         String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(electorNIF)
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(electorNIF, toUser,
+        SMIMEMessage smimeMessage = signatureService.getSMIME(electorNIF, toUser,
                 JSONSerializer.toJSON(voteVS.getAccessRequestDataMap()).toString(), smimeMessageSubject)
 
         AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);

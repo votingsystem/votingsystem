@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -34,6 +35,7 @@ public class MessageDialog {
     private static Logger log = Logger.getLogger(MessageDialog.class);
 
     private final Stage stage;
+    private HBox footerButtonsBox;
     private VBox mainBox;
     private Label messageLabel;
     private WebView messageWebView;
@@ -62,7 +64,7 @@ public class MessageDialog {
             }});
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
-        HBox footerButtonsBox = new HBox(10);
+        footerButtonsBox = new HBox(10);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         footerButtonsBox.getChildren().addAll(spacer, acceptButton);
@@ -113,6 +115,25 @@ public class MessageDialog {
         stage.show();
         stage.toFront();
     }
+
+    public void showHtmlMessage(String htmlMessage, Button optionButton) {
+        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;'>" + htmlMessage + "</html>";
+        if(optionButton != null) {
+            footerButtonsBox.getChildren().add(0, optionButton);
+            optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED,
+                new EventHandler<MouseEvent>() {
+                    @Override public void handle(MouseEvent e) {
+                        stage.hide();
+                    }
+                });
+        }
+        messageWebView.getEngine().loadContent(finalHTML);
+        isHTMLView(true);
+        stage.centerOnScreen();
+        stage.show();
+        stage.toFront();
+    }
+
 
     public void showMessage(Integer statusCode, String message) {
         messageLabel.setText(message);

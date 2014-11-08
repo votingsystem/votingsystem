@@ -34,7 +34,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         String subject = "representativeDelegationMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF)
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(userNIF, toUser,
+        SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser,
                 getRequestJSON(representativeNIF).toString(), subject)
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
