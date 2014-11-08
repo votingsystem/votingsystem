@@ -134,7 +134,10 @@ class TimeStampController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
-                StackTraceUtils.extractRootCause(exception))]
+        ResponseVS responseVS = ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+                StackTraceUtils.extractRootCause(exception))
+        response.status = responseVS.statusCode
+        render responseVS.message
+        return false
     }
 }

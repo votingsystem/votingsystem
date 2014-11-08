@@ -30,6 +30,7 @@ if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.ge
 }
 ContextVS.getInstance().setDefaultServer(actorVS)
 ContextVS.getInstance().setTimeStampServerCert(actorVS.getX509Certificate())
+ContextVS.getInstance().config.put("urlTimeStampServer", TestUtils.simulationData.getServerURL())
 
 SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService()
 String serviceURL = "${TestUtils.simulationData.getServerURL()}/certificateVS/addCertificateAuthority"

@@ -153,7 +153,7 @@ class SignatureService {
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${ContextVS.getInstance().config.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         return timeStamper.getSMIME();
     }
 		

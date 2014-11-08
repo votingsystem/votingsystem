@@ -100,7 +100,7 @@ environments {
         } else {
             grails.logging.jul.usebridge = true
             grails.resources.debug = true
-            grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
+            grails.serverURL = "http://vickets/TimeStampServer"
         }
     }
 

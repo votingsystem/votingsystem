@@ -1,7 +1,6 @@
-Para añadir una Autoridad Certificadora hay que copiar en el directorio ./WEB_INF/cms
-la cadena de certificación de la misma en un archivo en formato PEM añadiendo el
-prefijo 'AC_' al name del archivo y poniendo como extensión la cadema '.pem'.
-
+Certs are PEM files.
+To add a new trusted authority copy its cert chain within the dir  './WEB_INF/votingsystem/certs' in a file with
+the 'AC_' prefix in the file name
 
 - 'AC_RAIZ_DNIE_SHA1.pem' certificateVS raíz del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
