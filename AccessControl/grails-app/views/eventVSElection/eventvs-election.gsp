@@ -28,7 +28,7 @@
                 <template if="{{subpage}}">
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </template>
-                <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader text-center">{{eventvs.subject}}</div>
+                <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
 
             <div layout horizontal style="width: 100%;">
@@ -86,7 +86,6 @@
                             </div>
                         </fieldset>
                     </div>
-
                     <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                 </div>
             </div>

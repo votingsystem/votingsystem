@@ -65,7 +65,7 @@ class EventVSElectionController {
             } else {
                 EventVSElection eventVS = resultList.iterator().next()
                 eventVS = eventVSService.checkEventVSDates(eventVS).eventVS
-                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                if(request.contentType?.contains('json')) {
                     render eventVSService.getEventVSMap(eventVS) as JSON
                 } else {
                     render(view:"eventVSElection", model: [eventMap: eventVSService.getEventVSMap(eventVS)])
@@ -73,8 +73,8 @@ class EventVSElectionController {
             }
             return false
         }
-        def resultList
-        def eventsVSMap = new HashMap()
+        List<EventVSElection> resultList
+        Map eventsVSMap = new HashMap()
         eventsVSMap.eventVS = []
         params.sort = "dateBegin"
         EventVS.State eventVSState
@@ -88,7 +88,7 @@ class EventVSElectionController {
                         eq("state", EventVS.State.TERMINATED)
                         eq("state", EventVS.State.CANCELLED)
                     }
-                } else if(eventVSState) {
+                } else if(eventVSState && eventVSState != EventVS.State.DELETED_FROM_SYSTEM) {
                     eq("state", eventVSState)
                 }
             }
@@ -155,8 +155,7 @@ class EventVSElectionController {
             } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
     }
     
 	/**
@@ -196,8 +195,7 @@ class EventVSElectionController {
                         message(code: 'eventVSNotFound', args:[params.id]))]
             }
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
     }
 	
 	/**
@@ -225,8 +223,7 @@ class EventVSElectionController {
 			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 
 	/**
@@ -312,8 +309,7 @@ class EventVSElectionController {
 			}
 			render voteVSInfoMap as JSON
 		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 
 	/**

@@ -53,47 +53,44 @@ class EventVSElectionController {
             } else {
                 EventVSElection eventVS = resultList.iterator().next()
                 eventVS = eventVSElectionService.checkEventVSDates(eventVS).eventVS
-                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                if(request.contentType?.contains('json')) {
                     render eventVSElectionService.getEventVSElectionMap(eventVS) as JSON
                 } else {
                     render(view:"eventVSElection", model: [eventMap: eventVSElectionService.getEventVSElectionMap(eventVS)])
                 }
             }
-        } else if(request.contentType?.contains("json")) {
-            def resultList
-            params.sort = "dateBegin"
-            EventVS.State eventVSState
-            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
-            EventVSElection.withTransaction {
-                resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
-                        sort:params.sort, order:params.order) {
-                    if(eventVSState == EventVS.State.TERMINATED) {
-                        or{
-                            eq("state", EventVS.State.TERMINATED)
-                            eq("state", EventVS.State.CANCELLED)
-                        }
-                    } else if(eventVSState) {
-                        eq("state", eventVSState)
-                    } else {
-                        or{
-                            eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.PENDING)
-                            eq("state", EventVS.State.TERMINATED)
-                            eq("state", EventVS.State.CANCELLED)
-                        }
+        }
+        List<EventVSElection> resultList
+        Map eventsVSMap = new HashMap()
+        eventsVSMap.eventVS = []
+        params.sort = "dateBegin"
+        EventVS.State eventVSState
+        try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
+        if(!eventVSState) eventVSState = EventVS.State.ACTIVE
+        EventVSElection.withTransaction {
+            resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
+                    sort:params.sort, order:'desc') {
+                if(eventVSState == EventVS.State.TERMINATED) {
+                    or{
+                        eq("state", EventVS.State.TERMINATED)
+                        eq("state", EventVS.State.CANCELLED)
                     }
+                } else if(eventVSState && eventVSState != EventVS.State.DELETED_FROM_SYSTEM) {
+                    eq("state", eventVSState)
                 }
             }
-            def eventsVSMap = [eventVS:[], offset:params.offset, max:params.max, totalCount:resultList?.totalCount]
-            resultList.each {eventVSItem ->
-                eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem).eventVS
-                eventsVSMap.eventVS.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
-            }
+        }
+        eventsVSMap.totalCount = resultList?.totalCount
+        eventsVSMap.offset = params.long('offset')
+        resultList.each {eventVSItem ->
+            eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem).eventVS
+            eventsVSMap.eventVS.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
+        }
+        if(request.contentType?.contains("json")) {
             render eventsVSMap as JSON
-        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+        } else render(view:"index" , model:[eventsVSMap:eventsVSMap])
 	}
-	
-	
+
 	/**
 	 * Servicio que da de alta las votaciones.
 	 * 
@@ -118,39 +115,36 @@ class EventVSElectionController {
 	 */
     def votes () {
         if (params.eventAccessControlURL) {
-            def eventVSElection
-			EventVS.withTransaction {
-				eventVSElection = EventVS.findWhere(url:params.eventAccessControlURL)
+            EventVSElection eventVSElection
+            EventVSElection.withTransaction {
+                eventVSElection = EventVSElection.findWhere(url:params.eventAccessControlURL)
 			}
             if (eventVSElection) {
                 def votesVSMap = new HashMap()
                 votesVSMap.votesVS = []
                 votesVSMap.fieldsEventVS = []
 				List<VoteVS> votesVS
-				VoteVS.withTransaction {
-					votesVS = VoteVS.findAllWhere(eventVSElection:eventVSElection)
-				}
-				def votesVSCancelled = VoteVS.findAllWhere(eventVSElection:eventVSElection, state:VoteVS.State.CANCELLED)
-				def votesVSOk = VoteVS.findAllWhere(eventVSElection:eventVSElection, VoteVS.State.OK)
+				VoteVS.withTransaction { votesVS = VoteVS.findAllWhere(eventVS:eventVSElection) }
+				def votesVSCancelled = VoteVS.findAllWhere(eventVS:eventVSElection, state:VoteVS.State.CANCELLED)
+				def votesVSOk = VoteVS.findAllWhere(eventVS:eventVSElection, state:VoteVS.State.OK)
                 votesVSMap.numVotesVS = votesVS.size()
 				votesVSMap.numVotesVSOK = votesVSOk.size()
 				votesVSMap.numVotesVSVotesVSCANCELLED = votesVSCancelled.size()
-                votesVSMap.accessControlURL=eventVSElection.accessControl.serverURL
-				votesVSMap.eventVSElectionURL=eventVSElection.url
+                votesVSMap.accessControlURL = eventVSElection.accessControlVS.serverURL
+				votesVSMap.eventVSElectionURL = eventVSElection.url
                 HexBinaryAdapter hexConverter = new HexBinaryAdapter();
                 votesVS.each {voteVS ->
-                    String hashCertVoteHex = hexConverter.marshal(voteVS.getCertificateVS.hashCertVSBase64.getBytes());
-                    def voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.getCertificateVS.hashCertVSBase64,
-                        fieldEventVSId:voteVS.getFieldEventVS.fieldEventVSId, eventVSElectionId:voteVS.eventVS.eventVSElectionId,
-                        state:voteVS.state,
+                    String hashCertVoteHex = hexConverter.marshal(voteVS.getCertificateVS().hashCertVSBase64.getBytes());
+                    def voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.getCertificateVS().hashCertVSBase64,
+                        accessControlFieldEventVSId:voteVS.getFieldEventVS().accessControlFieldEventId,
+                        eventVSElectionId:voteVS.eventVS.getFieldsEventVS(), state:voteVS.state,
 						certificateURL:"${grailsApplication.config.grails.serverURL}/certificateVS/voteVS/hashHex/${hashCertVoteHex}",
                         voteVSSMIMEURL:"${grailsApplication.config.grails.serverURL}/messageSMIME/${voteVS.messageSMIME.id}"]
 					if(VoteVS.State.CANCELLED == voteVS.state) {
 						VoteVSCanceller voteVSCanceller
-						VoteVSCanceller.withTransaction {
-							voteVSCanceller = VoteVSCanceller.findWhere(voteVS:voteVS)
-						}
-						voteVSMap.cancellerURL="${grailsApplication.config.grails.serverURL}/messageSMIME/${voteVSCanceller?.messageSMIME?.id}"
+						VoteVSCanceller.withTransaction { voteVSCanceller = VoteVSCanceller.findWhere(voteVS:voteVS) }
+						voteVSMap.cancellerURL =
+                                "${grailsApplication.config.grails.serverURL}/messageSMIME/${voteVSCanceller?.messageSMIME?.id}"
 					}
 					votesVSMap.votesVS.add(voteVSMap)
                 }
@@ -159,17 +153,15 @@ class EventVSElectionController {
                     def fieldEventVSMap = [fieldEventVSId:fieldEventVS.id,
                             content:fieldEventVS.content, numVotesVS:numVotesVS]
                     votesVSMap.fieldsEventVS.add(fieldEventVSMap)
-                    
                 }
 				render votesVSMap as JSON
                 return
             }
-            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSUrlNotFound',
+            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFoundByURL',
                     args:[params.eventAccessControlURL]))]
         }
         return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
     }
 
 	/**
@@ -191,14 +183,14 @@ class EventVSElectionController {
             EventVS.withTransaction { eventVSElection = EventVS.get(params.long('id')) }
 			if (!eventVSElection) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVS.eventVSNotFound', args:[params.id]))]
+                        message(code: 'eventVSNotFound', args:[params.id]))]
 			}
 		} else if(params.eventAccessControlURL) {
 			log.debug("params.eventAccessControlURL: ${params.eventAccessControlURL}")
 			EventVS.withTransaction { eventVSElection = EventVS.findByUrl(params.eventAccessControlURL.trim()) }
 			if (!eventVSElection) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVS.eventVSNotFound', args:[params.eventAccessControlURL]))]
+                        message(code: 'eventVSNotFoundByURL', args:[params.eventAccessControlURL]))]
 			}
 		}
         if (eventVSElection) {
@@ -206,25 +198,21 @@ class EventVSElectionController {
             def statsMap = new HashMap()
 			statsMap.fieldsEventVS = []
             statsMap.id = eventVSElection.id
-			statsMap.numVotesVS = VoteVS.countByEventVSElection(eventVSElection)
-			statsMap.numVotesVSOK = VoteVS.countByEventVSElectionAndState(
-					eventVSElection, VoteVS.State.OK)
-			statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSElectionAndState(
-				eventVSElection, VoteVS.State.CANCELLED)
-            eventVSElection.fieldsEventVS.each { opcion ->
-				def numVotesVS = VoteVS.countByOpcionDeEventoAndState(
-					opcion, VoteVS.State.OK)
-				def opcionMap = [id:opcion.id, content:opcion.content,
-					numVotesVS:numVotesVS, fieldEventVSId:opcion.fieldEventVSId]
-				statsMap.fieldsEventVS.add(opcionMap)
+			statsMap.numVotesVS = VoteVS.countByEventVS(eventVSElection)
+			statsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVSElection, VoteVS.State.OK)
+			statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVSElection, VoteVS.State.CANCELLED)
+            eventVSElection.fieldsEventVS.each { option ->
+				def numVotesVS = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
+				def optionMap = [id:option.id, accessControlId:option.accessControlFieldEventId, content:option.content,
+					numVotesVS:numVotesVS]
+				statsMap.fieldsEventVS.add(optionMap)
 			}
-			statsMap.voteVSInfoURL="${grailsApplication.config.grails.serverURL}/eventVS/votes?eventAccessControlURL=${eventVSElection.url}"
+			statsMap.voteVSInfoURL="${grailsApplication.config.grails.serverURL}/eventVSElection/votes?eventAccessControlURL=${eventVSElection.url}"
 			if (params.callback) render "${params.callback}(${statsMap as JSON})"
 			else render statsMap as JSON
         } else {
             return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 		}
     }
 

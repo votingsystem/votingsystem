@@ -40,13 +40,11 @@ dependencies {
 
     runtime 'com.h2database:h2:1.4.182'
 
-
     testCompile 'junit:junit:4.11'
 
     def javaFXPath = "${System.getenv()['JAVA_HOME']}/jre/lib/ext/jfxrt.jar"
     if(!file(javaFXPath).exists()) println ("=== Java 8 runtime missing ===")
     compile files(javaFXPath)
-
 }
 
 /*task runJava(dependsOn: 'classes', type: JavaExec) {

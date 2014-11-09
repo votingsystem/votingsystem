@@ -1,18 +1,19 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-stats']"/>">
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style></style>
-        <div class="pageContentDiv" style="min-width: 800px;">
+        <div vertical layout>
 
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </template>
-                <div flex id="pageTitle" class="pageHeader text-center"><h3>{{eventvs.subject}}</h3></div>
+                <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
 
             <div layout horizontal style="width: 100%;">
@@ -41,17 +42,21 @@
                     <b><g:message code="publishedByLbl"/>: </b>{{eventvs.userVS}}
                 </div>
 
-                <div class="fieldsBox" style="">
-                    <fieldset>
-                        <legend><g:message code="pollFieldLegend"/></legend>
-                        <div>
-                            <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
-                                <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-                                    - {{optionvs.content}}
-                                </div>
-                            </template>
-                        </div>
-                    </fieldset>
+                <div horizontal layout class="fieldsBox" style="">
+                    <div style="width: 100%;">
+                        <fieldset>
+                            <legend><g:message code="pollFieldLegend"/></legend>
+                            <div>
+                                <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
+                                    <div class="voteOption" style="width: 90%;margin: 15px auto 0px auto;
+                                        font-size: 1.3em; font-weight: bold;">
+                                        - {{optionvs.content}}
+                                    </div>
+                                </template>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                 </div>
             </div>
             </div>
@@ -67,6 +72,9 @@
             },
             subpage:false,
             optionVSSelected:null,
+            fireSignal:function() {
+                this.fire('core-signal', {name: "vs-innerpage", data: {title:"<g:message code="pollLbl"/>"}});
+            },
             eventvsChanged:function() {
                 this.optionVSSelected = null
             },

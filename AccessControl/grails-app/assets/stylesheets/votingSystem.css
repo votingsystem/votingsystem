@@ -123,6 +123,7 @@ hr {
     font-weight: bold;
     text-overflow: ellipsis;
     font-size: 1.3em;
+    text-align: center;
 }
 
 .representativeDiv {

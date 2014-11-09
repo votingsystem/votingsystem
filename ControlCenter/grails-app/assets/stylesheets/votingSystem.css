@@ -127,8 +127,9 @@ hr {
 .pageHeader {
     color: #6c0404;
     font-weight: bold;
-    text-decoration: underline;
     text-overflow: ellipsis;
+    font-size: 1.3em;
+    text-align: center;
 }
 
 .representativeDiv {

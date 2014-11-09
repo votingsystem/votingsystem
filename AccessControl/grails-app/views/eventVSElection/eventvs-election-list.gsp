@@ -8,15 +8,9 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
-        .card {
-            position: relative;
-            display: inline-block;
-            width: 300px;
-            vertical-align: top;
-            background-color: #f9f9f9;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-            margin: 10px;
-        }
+            .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
+                background-color: #fff; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
+            }
         </style>
         <vs-innerpage-signal id="innerpageSignal" title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
         <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
@@ -96,16 +90,15 @@
             publish: {
                 eventsVSMap: {value: {}}
             },
-            eventsVSMapChanged:function() {
-                this.loading = false
-            },
-            ready :  function(e) {
+            ready:function(e) {
                 console.log(this.tagName + " - ready")
                 this.loading = true
-                this.groupvsData = {}
                 this.page = 0;
                 this.subpage = 0;
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            eventsVSMapChanged:function() {
+                this.loading = false
             },
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")

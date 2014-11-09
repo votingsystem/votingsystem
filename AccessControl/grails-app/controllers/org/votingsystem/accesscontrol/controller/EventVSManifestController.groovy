@@ -95,8 +95,7 @@ class EventVSManifestController {
                         messageBytes: eventVS.pdf, message:"manifest_${params.id}.pdf")]
             }
 		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 
 	
@@ -138,8 +137,7 @@ class EventVSManifestController {
             }
 		} else {
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
         }
 	}
 	
@@ -156,8 +154,7 @@ class EventVSManifestController {
         String eventVSStr = "${request.getInputStream()}"
         if (!eventVSStr) {
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
         } else {
             def eventVSJSON = JSON.parse(eventVSStr)
             log.debug "eventVSJSON.content: ${eventVSJSON.content}"
@@ -199,8 +196,7 @@ class EventVSManifestController {
             else return [responseVS:new ResponseVS(ResponseVS.SC_OK,
                     message(code:'eventVSNotFound', args:["${params.id}"]))]
 		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 	
 	/**
@@ -380,8 +376,7 @@ class EventVSManifestController {
 			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))]
 		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 
     /**

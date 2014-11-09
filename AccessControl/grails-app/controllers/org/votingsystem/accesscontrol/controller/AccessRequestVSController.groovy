@@ -96,8 +96,7 @@ class AccessRequestVSController {
                     message(code: 'accessRequestNotFound',args:[params.hashHex]))]
         }
         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
     }
 	
 	/**
@@ -136,8 +135,7 @@ class AccessRequestVSController {
             }
 		} else {
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
         }
 	}
 

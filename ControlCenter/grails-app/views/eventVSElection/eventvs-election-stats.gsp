@@ -19,7 +19,7 @@
             options: {
                 chart: {
                     plotBackgroundColor: null,
-                    spacingTop: 0,
+                    spacingTop:0,
                     spacingBottom: 30,
                     plotBorderWidth: 0
                 },

@@ -2,22 +2,19 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
 
-<polymer-element name="eventvs-election-list" attributes="url eventvstype">
+
+<polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
-        .card {
-            position: relative;
-            display: inline-block;
-            width: 300px;
-            vertical-align: top;
-            background-color: #fff;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-            margin: 10px;
+        .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
+            background-color: #fff; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
         }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{eventVSData}}" handleAs="json"
+        <vs-innerpage-signal id="innerpageSignal" title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
+        <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
@@ -25,35 +22,15 @@
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
-                        <template if="{{(eventvstype == 'election')}}">
-                            <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
-                                    on-change="{{eventVSStateSelect}}" class="form-control">
-
-                                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-                                <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-                                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-                            </select>
-                        </template>
-                        <template if="{{eventvstype == 'claim'}}">
-                            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
-                                <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
-                                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
-                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
-                                <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
-                            </select>
-                        </template>
-                        <template if="{{eventvstype == 'manifest'}}">
-                            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
-                                <option value="" style="color:black;"> - <g:message code="selectManifestsLbl"/> - </option>
-                                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenManifestsLbl"/> - </option>
-                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
-                                <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedManifestsLbl"/> - </option>
-                            </select>
-                        </template>
+                        <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
+                                on-change="{{eventVSStateSelect}}" class="form-control">
+                            <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+                            <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                            <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+                        </select>
                     </div>
                     <div layout flex horizontal wrap around-justified>
-                        <template repeat="{{eventvs in eventVSData.eventVS}}">
+                        <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
                                 <div class='eventSubjectDiv'>
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
@@ -78,6 +55,10 @@
                             </div>
                         </template>
                     </div>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}" style="margin: 0 0 100px 0;"
+                              next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
+                              first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
+                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
                 </div>
             </section>
 
@@ -91,19 +72,35 @@
     </template>
     <script>
         Polymer('eventvs-election-list', {
-            ready :  function(e) {
+            publish: {
+                eventsVSMap: {value: {}}
+            },
+            ready:function(e) {
                 console.log(this.tagName + " - ready")
                 this.loading = true
                 this.groupvsData = {}
                 this.page = 0;
                 this.subpage = 0;
+                if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            eventsVSMapChanged:function() {
+                this.loading = false
+            },
+            ready :  function(e) {
+                console.log(this.tagName + " - ready")
+                this.loading = true
+                this.page = 0;
+                this.subpage = 0;
+                if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
             },
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")
+                this.$.innerpageSignal.fireSignal()
                 this.page = 0;
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
+                this.$.eventvsDetails.fireSignal()
                 this.$.eventvsDetails.eventvs = e.target.templateInstance.model.eventvs;
                 this.page = 1;
             },
@@ -138,6 +135,7 @@
                 targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" + optionSelected
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
+                this.$.ajax.go()
             },
             ajaxComplete:function() {
                 this.loading = false

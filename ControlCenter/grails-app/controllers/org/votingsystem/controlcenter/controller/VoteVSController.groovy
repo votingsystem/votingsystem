@@ -122,7 +122,6 @@ class VoteVSController {
                 return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'voteVSConCertNotFound', args:[params.hashHex]))]
 			}
-			 
 			if(VoteVS.State.CANCELLED.equals(voteVS.state)) {
 				VoteVSCanceller voteVSCanceller
 				VoteVSCanceller.withTransaction {
@@ -134,8 +133,7 @@ class VoteVSController {
 			return
 		}
         return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
 	}
 
 	
@@ -150,16 +148,13 @@ class VoteVSController {
 	 
 	 def post () {
 	 	 MimeMessage smimeMessageReq = params.smimeMessageReq
-		 Respuesta responseVS = voteVSService.validarFirmaUsuario(
-			 smimeMessageReq, request.getLocale())
+		 Respuesta responseVS = voteVSService.validateVote(smimeMessageReq)
 		 if (ResponseVS.SC_OK== responseVS.statusCode) {
 			 def ctx = startAsync()
 			 ctx.setTimeout(10000);
-			 
 			 EventVS eventVS = responseVS.eventVS
 			 def future = callAsync {
-				  return voteVSService.sendVoteToControlAccess(
-				  smimeMessage, eventVS, request.getLocale())
+				  return voteVSService.sendVoteToControlAccess(smimeMessage, eventVS, request.getLocale())
 			 }
 			 responseVS = future.get()
 			 if (ResponseVS.SC_OK == responseVS?.statusCode) {
