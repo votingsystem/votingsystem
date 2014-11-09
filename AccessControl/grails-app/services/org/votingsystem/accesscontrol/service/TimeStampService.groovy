@@ -135,8 +135,8 @@ class TimeStampService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream()
         tsToken.tsaSignerInfo.content.write(baos);
         byte[] contentBytes = baos.toByteArray()
-        MessageDigest sha = MessageDigest.getInstance(algorithmStr);
-        byte[] resultDigest =  sha.digest(contentBytes);
+        MessageDigest messageDigest = MessageDigest.getInstance(algorithmStr);
+        byte[] resultDigest =  messageDigest.digest(contentBytes);
         baos.close();
         if(!Arrays.equals(digestToken, resultDigest)) {
             String tokenStr = java.util.Base64.getEncoder().encodeToString(tsToken.getEncoded());

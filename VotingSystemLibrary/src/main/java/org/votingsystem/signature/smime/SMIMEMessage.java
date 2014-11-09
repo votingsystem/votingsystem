@@ -7,12 +7,16 @@ import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -21,12 +25,9 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.signature.util.PKIXCertPathReviewer;
+import org.votingsystem.signature.util.*;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.StringUtils;
-
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -38,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.Arrays;
 
 /**
  * @author jgzornoza
@@ -59,12 +61,6 @@ public class SMIMEMessage extends MimeMessage {
     private X509Certificate certWithCertExtension;
     private boolean isValidSignature = false;
     private TimeStampToken timeStampToken;
-
-    public SMIMEMessage(Session session) throws MessagingException {
-        super(session);
-        String fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
-        setDisposition("attachment; fileName=" + fileName + ".p7m");
-    }
 
     public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
         super(ContextVS.MAIL_SESSION);
@@ -147,17 +143,6 @@ public class SMIMEMessage extends MimeMessage {
         return smimeSigned;
     }
 
-    private void verifySignerCert(SignerInformation signer, X509Certificate cert) throws Exception{
-        try {
-            signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-                    ContextVS.PROVIDER).build(cert));
-        } catch(CMSVerifierCertificateNotValidException ex) {
-            log.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
-            log.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
-            throw ex;
-        }
-    }
-
     public TimeStampToken getTimeStampToken () {return timeStampToken;}
 
     public boolean isValidSignature()  {
@@ -179,12 +164,23 @@ public class SMIMEMessage extends MimeMessage {
         signers = new HashSet<UserVS>();
         while (it.hasNext()) {// check each signer
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getMatches(signer.getSID());
-            Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER)
-                    .getCertificate((X509CertificateHolder)certIt.next());
-            log.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + certCollection.size() + " match");
-            verifySignerCert(signer, cert);
+            Collection certCollection = certs.getMatches(signer.getSID());
+            Iterator certIt = certCollection.iterator();
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
+                    (X509CertificateHolder) certIt.next());
+            log.debug("checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
+            try {
+                verifySigner(signer, new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                        ContextVS.PROVIDER).build(cert));
+                //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
+            } catch(CMSVerifierCertificateNotValidException ex) {
+                log.error("checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
+                log.error("checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
+                throw ex;
+            } catch (Exception ex) {
+                log.error("checkSignature" + ex.getMessage(), ex);
+                throw ex;
+            }
             UserVS userVS = UserVS.getUserVS(cert);
             userVS.setSignerInformation(signer);
             TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.
@@ -207,6 +203,29 @@ public class SMIMEMessage extends MimeMessage {
         }
         if(voteVS != null) voteVS.setServerCerts(signerCerts);
         return true;
+    }
+
+    private byte[] verifySigner(SignerInformation signer, SignerInformationVerifier verifier) throws CMSException,
+            OperatorCreationException, IOException, MessagingException {
+        DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
+                CMSAttributes.signingTime, "signing-time");
+        Time signingTime = Time.getInstance(derObject);
+        X509CertificateHolder dcv = verifier.getAssociatedCertificate();
+        if (!dcv.isValidOn(signingTime.getDate()))  {
+            throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
+        }
+        // RFC 3852 11.1 Check the content-type attribute is correct -> missing
+        //verify digest
+        DigestCalculator calc = verifier.getDigestCalculator(signer.getDigestAlgorithmID());
+        OutputStream      digOut = calc.getOutputStream();
+        smimeSigned.getSignedContent().write(digOut);
+        digOut.close();
+        byte[] resultDigest = calc.getDigest();
+        byte[] signerDigest = CMSUtils.getSignerDigest(signer);
+        if (!Arrays.equals(resultDigest, signerDigest)) {
+            throw new CMSSignerDigestMismatchException("message-digest attribute value does not match calculated value");
+        }
+        return resultDigest;
     }
 
     public X509Certificate getCertWithCertExtension() {return certWithCertExtension;}
@@ -292,43 +311,38 @@ public class SMIMEMessage extends MimeMessage {
     }
 
     public void setTimeStampToken(TimeStampToken timeStampToken) throws Exception {
-        if(timeStampToken == null ) throw new Exception("NULL_TIME_STAMP_TOKEN");
+        if(timeStampToken == null ) throw new Exception("timestamp token null");
         DERObject derObject = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
         DERSet derset = new DERSet(derObject);
         Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
-
         Hashtable hashTable = new Hashtable();
         hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
         AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
-
-        byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-        //String hashTokenStr = Base64.getEncoder().encodeToString(hashTokenBytes);
+        byte[] timeStampTokenHash = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
+        //String hashTokenStr = Base64.getEncoder().encodeToString(timeStampTokenHash);
         //log.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
-        SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        Iterator<SignerInformation> it = signers.getSigners().iterator();
+        Iterator<SignerInformation> it = smimeSigned.getSignerInfos().getSigners().iterator();
         List<SignerInformation> newSigners = new ArrayList<SignerInformation>();
         while (it.hasNext()) {
             SignerInformation signer = it.next();
-            byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
+            byte[] digestBytes = CMSUtils.getSignerDigest(signer);
             //String digestStr = Base64.getEncoder().encodeToString(digestBytes);
             //log.debug("setTimeStampToken - hash signerVS: " +  digestStr +
             //        " - hash token: " + hashTokenStr);
-            if(Arrays.equals(hashTokenBytes, digestBytes)) {
-                log.debug("setTimeStampToken - signerVS");
+            if(Arrays.equals(timeStampTokenHash, digestBytes)) {
+                log.debug("setTimeStampToken - found signer");
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
                 if(attributeTable != null) {
                     log.debug("setTimeStampToken - signer with UnsignedAttributes");
                     hashTable = attributeTable.toHashtable();
-                    hashTable.put(PKCSObjectIdentifiers.
-                            id_aa_signatureTimeStampToken, timeStampAsAttribute);
-                    attributeTable = new AttributeTable(hashTable);
+                    hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
+                    timeStampAsAttributeTable = new AttributeTable(hashTable);
                 }
                 updatedSigner = signer.replaceUnsignedAttributes(signer, timeStampAsAttributeTable);
                 newSigners.add(updatedSigner);
             } else newSigners.add(signer);
         }
-        //log.debug("setTimeStampToken - num. signers: " + newSigners.size());
         SignerInformationStore newSignersStore = new SignerInformationStore(newSigners);
         CMSSignedData cmsdata = smimeSigned.replaceSigners(smimeSigned, newSignersStore);
         replaceSigners(cmsdata);
@@ -358,12 +372,25 @@ public class SMIMEMessage extends MimeMessage {
                 BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
     }
 
+    //this is for multisigned messages
+    public TimeStampRequest getTimeStampRequest(AlgorithmIdentifier digestAlgorithmIdentifier)
+            throws NoSuchAlgorithmException, IOException, CMSException {
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        //reqgen.setReqPolicy(m_sPolicyOID);
+        MessageDigest digestCalculator = MessageDigest.getInstance(
+                CMSUtils.getDigestId(digestAlgorithmIdentifier.getAlgorithm().getId()));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        smimeSigned.getSignedContent().write(baos);
+        byte[] messageDigest = digestCalculator.digest(baos.toByteArray());
+        return reqgen.generate(digestAlgorithmIdentifier.getAlgorithm(), messageDigest,
+                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
+    }
+
     public byte[] getBytes () throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeTo(baos);
-        byte[] messageBytes = baos.toByteArray();
         baos.close();
-        return messageBytes;
+        return baos.toByteArray();
     }
 
     public VoteVS getVoteVS() {
@@ -388,24 +415,13 @@ public class SMIMEMessage extends MimeMessage {
     //Call this method after isValidSignature()!!!
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
-        //byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
-        //String digestStr = Base64.getEncoder().encodeToString(digestBytes);
         AttributeTable  unsignedAttributes = signer.getUnsignedAttributes();
         if(unsignedAttributes != null) {
-            Attribute timeStampAttribute = unsignedAttributes.get(
-                    PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
+            Attribute timeStampAttribute = unsignedAttributes.get(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
             if(timeStampAttribute != null) {
                 DEREncodable dob = timeStampAttribute.getAttrValues().getObjectAt(0);
-                CMSSignedData signedData =
-                        new CMSSignedData(dob.getDERObject().getEncoded());
+                CMSSignedData signedData = new CMSSignedData(dob.getDERObject().getEncoded());
                 timeStampToken = new TimeStampToken(signedData);
-                byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-                //String digestTokenStr = Base64.getEncoder().encodeToString(hashToken);
-                Calendar cal = new GregorianCalendar();
-                cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                log.debug("checkTimeStampToken - timeStampToken: " +  cal.getTime());
-                //log.debug("checkTimeStampToken - digestStr: " + digestStr
-                //		+ " - digestTokenStr " + digestTokenStr);
                 return timeStampToken;
             }
         } else log.debug("checkTimeStampToken - without unsignedAttributes");

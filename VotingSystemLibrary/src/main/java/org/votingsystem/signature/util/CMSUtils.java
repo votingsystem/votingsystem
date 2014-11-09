@@ -15,11 +15,13 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.io.Streams;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -229,6 +231,33 @@ public class CMSUtils {
         return hexConverter.marshal(base64Str.getBytes());
     }
 
+    public static DERObject getSingleValuedSignedAttribute(AttributeTable signedAttrTable, DERObjectIdentifier attrOID,
+            String printableName) throws CMSException {
+        if (signedAttrTable == null) return null;
+        ASN1EncodableVector vector = signedAttrTable.getAll(attrOID);
+        switch (vector.size()) {
+            case 0:
+                return null;
+            case 1:
+                Attribute t = (Attribute)vector.get(0);
+                ASN1Set attrValues = t.getAttrValues();
+                if (attrValues.size() != 1)
+                    throw new CMSException("A " + printableName + " attribute MUST have a single attribute value");
+                return attrValues.getObjectAt(0).getDERObject();
+            default:
+                throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
+                        + printableName + " attribute");
+        }
+    }
+
+    public static byte[] getSignerDigest(SignerInformation signer) throws CMSException {
+        DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
+                CMSAttributes.messageDigest, "message-digest");
+        ASN1OctetString signedMessageDigest = (ASN1OctetString)derObject;
+        return signedMessageDigest.getOctets();
+    }
+
+
     public static String getDigestId (String digestAlgOID) {
         if (DIGEST_SHA1.equals(digestAlgOID)) return "SHA1";
         if (DIGEST_SHA224.equals(digestAlgOID)) return "SHA224";
@@ -259,7 +288,6 @@ public class CMSUtils {
         }
         return algId;
     }
-
 
     public static byte[] getDigestToken(TimeStampToken timeStampToken) {
         if(timeStampToken == null) return null;
