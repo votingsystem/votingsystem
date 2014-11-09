@@ -147,12 +147,12 @@ class SimulationData {
         return simulationData;
     }
 
-    public Long getNumRequestsColected() {
+    public Long getNumRequestsCollected() {
         return numRequestsOK.get() + numRequestsERROR.get();
     }
 
     public boolean hasPendingRequest() {
-        return (getNumRequestsProjected() > getNumRequestsColected());
+        return (getNumRequestsProjected() > getNumRequestsCollected());
     }
 
     public Long getNumRequests() {

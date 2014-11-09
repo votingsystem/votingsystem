@@ -73,8 +73,8 @@ private void sendMails() throws Exception {
 private void readMails () throws Exception {
     log.debug("readMails");
     int numIterations = 1;
-    while (simulationData.getNumRequestsColected() < simulationData.getNumRequestsProjected()) {
-        log.debug("Num. requests colected: " + simulationData.getNumRequestsColected());
+    while (simulationData.getNumRequestsCollected() < simulationData.getNumRequestsProjected()) {
+        log.debug("Num. requests collected: " + simulationData.getNumRequestsCollected());
         Folder remoteInbox = pop3Store.getFolder("INBOX");
         remoteInbox.open(Folder.READ_WRITE);
         Message[] messages = remoteInbox.getMessages();
@@ -88,5 +88,5 @@ private void readMails () throws Exception {
         }
         remoteInbox.close(true);
     }
-    TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsColected())
+    TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsCollected())
 }

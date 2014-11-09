@@ -51,7 +51,7 @@ public void sendRequests (String serviceURL) throws Exception {
     log.debug("sendRequests - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
     while(TestUtils.simulationData.getNumRequests() < TestUtils.simulationData.getNumRequestsProjected()) {
         if((TestUtils.simulationData.getNumRequests() - TestUtils.simulationData.
-                getNumRequestsColected()) <= TestUtils.simulationData.getMaxPendingResponses()) {
+                getNumRequestsCollected()) <= TestUtils.simulationData.getMaxPendingResponses()) {
             String nifFrom = NifUtils.getNif(TestUtils.simulationData.getAndIncrementNumRequests().intValue());
             completionService.submit(new EncryptionTestSender(nifFrom, serviceURL,
             ContextVS.getInstance().getDefaultServer().getX509Certificate()));
@@ -62,7 +62,7 @@ public void sendRequests (String serviceURL) throws Exception {
 
 private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
-    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
+    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsCollected()) {
         try {
             Future<ResponseVS> f = completionService.take();
             ResponseVS responseVS = f.get();

@@ -67,7 +67,7 @@ public void sendRequests () throws Exception {
     if(TestUtils.simulationData.isTimerBased()) startSimulationTimer(TestUtils.simulationData);
     else {
         while(!synchronizedSignerList.isEmpty()) {
-            if((TestUtils.simulationData.getNumRequests() - TestUtils.simulationData.getNumRequestsColected()) <
+            if((TestUtils.simulationData.getNumRequests() - TestUtils.simulationData.getNumRequestsCollected()) <
                     TestUtils.simulationData.getMaxPendingResponses()) {
                 int randomSigner = new Random().nextInt(synchronizedSignerList.size());
                 launchSignature(synchronizedSignerList.remove(randomSigner));
@@ -83,7 +83,7 @@ private void launchSignature(String nif) throws Exception {
 
 private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
-    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
+    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsCollected()) {
         try {
             Future<ResponseVS> f = signClaimCompletionService.take();
             ResponseVS responseVS = f.get();

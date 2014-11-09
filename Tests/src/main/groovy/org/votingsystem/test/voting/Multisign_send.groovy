@@ -50,7 +50,7 @@ public void sendRequest () throws Exception {
     log.debug("sendRequest - NumRequestsProjected: " + TestUtils.simulationData.getNumRequestsProjected());
     while(TestUtils.simulationData.getNumRequests() < TestUtils.simulationData.getNumRequestsProjected()) {
         if((TestUtils.simulationData.getNumRequests() - TestUtils.simulationData.
-                getNumRequestsColected()) <= TestUtils.simulationData.getMaxPendingResponses()) {
+                getNumRequestsCollected()) <= TestUtils.simulationData.getMaxPendingResponses()) {
             String nifFrom = NifUtils.getNif(TestUtils.simulationData.getAndIncrementNumRequests().intValue());
             signCompletionService.submit(new MultiSignTestSender(nifFrom,
                     ContextVS.getInstance().getDefaultServer().getMultiSignedMessageTestServiceURL()));
@@ -62,7 +62,7 @@ public void sendRequest () throws Exception {
 private void waitForResponses() throws Exception {
     log.debug("waitForResponses - NumRequestsProjected: " +
             TestUtils.simulationData.getNumRequestsProjected());
-    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsColected()) {
+    while (TestUtils.simulationData.getNumRequestsProjected() > TestUtils.simulationData.getNumRequestsCollected()) {
         try {
             Future<ResponseVS> f = signCompletionService.take();
             ResponseVS responseVS = f.get();

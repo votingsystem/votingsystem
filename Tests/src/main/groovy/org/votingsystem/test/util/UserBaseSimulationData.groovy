@@ -59,7 +59,7 @@ class UserBaseSimulationData extends SimulationData {
 
     private AtomicLong userIndex = new AtomicLong(0);
 
-    public Long getNumDelegationRequestsColected() {
+    public Long getNumDelegationRequestsCollected() {
         return (numDelegationsERROR.get() + numDelegationsOK.get());
     }
 
@@ -79,7 +79,7 @@ class UserBaseSimulationData extends SimulationData {
         return representativeRequests.getAndIncrement();
     }
 
-    public Long getNumRepresentativeRequestsColected() {
+    public Long getNumRepresentativeRequestsCollected() {
         return (numRepresentativeRequestsOK.get() +
                 numRepresentativeRequestsERROR.get());
     }
@@ -93,7 +93,7 @@ class UserBaseSimulationData extends SimulationData {
     }
 
     public boolean waitingForRepresesentativeRequests() {
-        return (getMaxPendingResponses() < (representativeRequests.get() - getNumRepresentativeRequestsColected()));
+        return (getMaxPendingResponses() < (representativeRequests.get() - getNumRepresentativeRequestsCollected()));
     }
 
     public Long getAndIncrementNumRepresentativeRequestsOK() {
@@ -323,7 +323,7 @@ class UserBaseSimulationData extends SimulationData {
             while (getNumDelegationRequests() < getNumUsersWithRepresentative()) {
                 log.debug("getNumDelegationRequests: " + getNumDelegationRequests() +
                         "- getNumUsersWithRepresentative: " + getNumUsersWithRepresentative())
-                if((getNumDelegationRequests() - getNumDelegationRequestsColected()) < getMaxPendingResponses()) {
+                if((getNumDelegationRequests() - getNumDelegationRequestsCollected()) < getMaxPendingResponses()) {
                     String userNIF = NifUtils.getNif(new Long(getAndIncrementUserIndex()).intValue());
                     String representativeNIF = getRandomRepresentative();
                     requestCompletionService.submit(new RepresentativeDelegatorDataSender(

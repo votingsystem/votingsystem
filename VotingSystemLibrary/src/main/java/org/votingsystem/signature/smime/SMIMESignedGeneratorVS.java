@@ -20,6 +20,7 @@ import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import java.io.ByteArrayOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -118,29 +119,22 @@ public class SMIMESignedGeneratorVS {
         if (textToSign == null) throw new IllegalArgumentException("Content null");
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textToSign);
-        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-                msg,ContextVS.DEFAULT_SIGNED_FILE_NAME);
-        SMIMEMessage body = new SMIMEMessage(ContextVS.MAIL_SESSION);
-        if (headers != null) {
-        	for(Header header : headers) {
-        		 if (header != null) body.setHeader(header.getName(), header.getValue());
-        	}
+        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,ContextVS.DEFAULT_SIGNED_FILE_NAME);
+        SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
+        if(fromUser != null) {
+            fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+            smimeMessage.setFrom(new InternetAddress(fromUser));
         }
-        if (fromUser != null && !fromUser.trim().isEmpty()) {
-        	Address fromUserAddress = new InternetAddress(fromUser);
-        	body.setFrom(fromUserAddress);
+        if(toUser != null) {
+            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         }
-        if (toUser != null && !toUser.trim().isEmpty()) {
-        	Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
-        	body.setRecipient(Message.RecipientType.TO, toUserAddress);
-        }
-        body.setSubject(subject);
-        body.setContent(mimeMultipart, mimeMultipart.getContentType());
-        body.updateChanges();
-        return body;
+        smimeMessage.setSubject(subject);
+        return smimeMessage;
     }
      
-     public synchronized SMIMEMessage getSMIMEMultiSigned(SMIMEMessage smimeMessage, String subject) throws Exception {
+     public synchronized SMIMEMessage getSMIMEMultiSigned(String fromUser, String toUser,
+              SMIMEMessage smimeMessage, String subject) throws Exception {
  		 MimeMultipart mimeMultipart = (MimeMultipart)smimeMessage.getContent();
  		 MimeBodyPart bodyPart = (MimeBodyPart) mimeMultipart.getBodyPart(0);    	 
     	 SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
@@ -152,17 +146,18 @@ public class SMIMESignedGeneratorVS {
          smimeSignedGenerator.addCertificates(smimeMessage.getSmimeSigned().getCertificates());
          smimeSignedGenerator.addCRLs(smimeMessage.getSmimeSigned().getCRLs());
          smimeSignedGenerator.getGeneratedDigests();
-         MimeMultipart newMimeMultipart = smimeSignedGenerator.generate(bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
-         /*MimeMessage multiSignedMessage = new MimeMessage(ContextVS.MAIL_SESSION);
- 		 multiSignedMessage.setSubject(subject);
- 		 multiSignedMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
- 		 multiSignedMessage.saveChanges();
- 		 return multiSignedMessage;*/
+         mimeMultipart = smimeSignedGenerator.generate(bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
+         smimeMessage = new SMIMEMessage(mimeMultipart);
          if(subject != null) smimeMessage.setSubject(subject);
-         smimeMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
-         smimeMessage.updateChanges();
+         if(fromUser != null) {
+             fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+             smimeMessage.setFrom(new InternetAddress(fromUser));
+         }
+         if(toUser != null) {
+             toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+             smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
+         }
          return smimeMessage;
      }
-
     
 }

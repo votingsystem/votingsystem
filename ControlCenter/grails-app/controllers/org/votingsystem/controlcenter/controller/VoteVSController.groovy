@@ -8,25 +8,19 @@ import org.votingsystem.util.ApplicationContextHolder
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 /**
- * @infoController Servicio de Votos
- * @descController Servicio que procesa los votesVS recibidos.
- * 
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
- * */
+ */
 class VoteVSController {
 
     def voteVSService
 	
-	
 	/**
-	 * Servicio que recoge los votesVS enviados por los usersVS.
+	 * Service that validate votes and send to the 'access control'
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @contentType [application/x-pkcs7-signature] Obligatorio. El archivo de voto firmado por el
-	 *        <a href="https://github.com/votingsystem/votingsystem/wiki/Certificado-de-voto">certificado de VoteVS.</a>
-	 * @return  <a href="https://github.com/votingsystem/votingsystem/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
+	 * @contentType [application/x-pkcs7-signature] required. The vote signed with the anonymous certificate
 	 */
 	def index() {
         MessageSMIME messageSMIME = request.messageSMIMEReq

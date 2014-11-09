@@ -27,10 +27,7 @@ import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
+import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -56,7 +53,6 @@ public class SMIMEMessage extends MimeMessage {
     private ContentTypeVS contentTypeVS ;
     private String signedContent;
     private SMIMESigned smimeSigned;
-
     private Set<UserVS> signers;
     private UserVS signerVS;
     private VoteVS voteVS;
@@ -66,19 +62,19 @@ public class SMIMEMessage extends MimeMessage {
 
     public SMIMEMessage(Session session) throws MessagingException {
         super(session);
-        log.debug("SMIMEMessage(Session session)");
         String fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ".p7m");
     }
 
-    public SMIMEMessage(SMIMESigned simeSigned) throws Exception {
+    public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
         super(ContextVS.MAIL_SESSION);
-        this.smimeSigned = simeSigned;
-        smimeSigned = new SMIMESigned(this);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
-        signedContent = baos.toString();
-        this.isValidSignature = checkSignature();
+        setContent(mimeMultipart);
+        if (headers != null) {
+            for(Header header : headers) {
+                if (header != null) setHeader(header.getName(), header.getValue());
+            }
+        }
+        init();
     }
 
     public SMIMEMessage(InputStream inputStream) throws Exception {
@@ -121,11 +117,6 @@ public class SMIMEMessage extends MimeMessage {
 
     public ContentTypeVS getContentTypeVS() {
         return contentTypeVS;
-    }
-
-    public void updateChanges() throws Exception {
-        super.saveChanges();
-        init();
     }
 
     public void setMessageID(String messageId) throws MessagingException {
@@ -193,7 +184,6 @@ public class SMIMEMessage extends MimeMessage {
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER)
                     .getCertificate((X509CertificateHolder)certIt.next());
             log.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + certCollection.size() + " match");
-            writeTo(new FileOutputStream(new File("/home/jgzornoza/test1.p7s")));
             verifySignerCert(signer, cert);
             UserVS userVS = UserVS.getUserVS(cert);
             userVS.setSignerInformation(signer);

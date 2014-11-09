@@ -15,9 +15,7 @@ import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
-
 import javax.mail.Header
-import javax.mail.internet.InternetAddress
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -260,10 +258,7 @@ class SignatureVSService {
     public synchronized SMIMEMessage getSMIMEMultiSigned (
             String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
         log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-        if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")))
-        if(toUser) smimeMessage.setHeader("To", toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", ""))
-        SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
-        return multiSignedMessage
+        return getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject);
     }
 
     public CertificateVS getCACertificate(long numSerie) {

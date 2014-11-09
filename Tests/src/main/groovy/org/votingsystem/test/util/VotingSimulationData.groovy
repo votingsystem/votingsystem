@@ -80,7 +80,7 @@ class VotingSimulationData extends SimulationData {
         return votingRequestOK.getAndIncrement();
     }
 
-    public Long getNumVotingRequestsColected() {
+    public Long getNumVotingRequestsCollected() {
         return (votingRequestERROR.get() + votingRequestOK.get()
                 + accessRequestERROR.get());
     }
@@ -105,16 +105,19 @@ class VotingSimulationData extends SimulationData {
         return accessRequestOK.getAndIncrement();
     }
 
-    public Long getNumAccessRequestsColected() {
+    public Long getNumAccessRequestsCollected() {
         return (accessRequestERROR.get() + accessRequestOK.get());
     }
 
     public boolean waitingForVoteRequests() {
-        return (maxPendingResponses < (getNumVotingRequests() - getNumVotingRequestsColected()));
+        log.debug("waitingForVoteRequests - collected: " + getNumVotingRequestsCollected() + " of " + getNumVotingRequests())
+        return (maxPendingResponses < (getNumVotingRequests() - getNumVotingRequestsCollected()));
     }
 
     public boolean hasPendingVotes() {
-        return (getNumOfElectors() > getNumVotingRequestsColected());
+        log.debug("hasPendingVotes - NumOfElectors: " + getNumOfElectors() + " - NumVotingRequestsCollected: " +
+                getNumVotingRequestsCollected())
+        return (getNumOfElectors() > getNumVotingRequestsCollected());
     }
 
     public String getControlCenterURL() {

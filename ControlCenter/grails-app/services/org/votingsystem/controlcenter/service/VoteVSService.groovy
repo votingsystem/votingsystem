@@ -1,6 +1,7 @@
 package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -16,6 +17,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.*
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 * */
+@Transactional
 class VoteVSService {
 
     static transactional = true
@@ -24,9 +26,8 @@ class VoteVSService {
 	def messageSource
 	def signatureVSService
     def grailsApplication
-	
-	
-	public synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq) {
+
+	public ResponseVS validateVote(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
@@ -127,7 +128,7 @@ class VoteVSService {
 		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVSBase64?.getBytes());
 		Map voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.certificateVS.hashCertVSBase64,
-			    fieldEventVSId:voteVS.getFieldEventVS.fieldEventVSId,
+			    fieldEventVSId:voteVS.getFieldEventVS().fieldEventVSId,
                 accessControlEventVSId: voteVS.eventVS.accessControlEventVSId,
 			eventVSElectionURL:voteVS.eventVS?.url, state:voteVS?.state?.toString(),
 			certificateURL:"${grailsApplication.config.grails.serverURL}/certificateVS/voteVS/hashHex/${hashHex}",

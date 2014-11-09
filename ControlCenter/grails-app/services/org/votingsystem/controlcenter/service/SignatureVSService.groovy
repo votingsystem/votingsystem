@@ -9,9 +9,7 @@ import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
-
 import javax.mail.Header
-import javax.mail.internet.InternetAddress
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -322,19 +320,13 @@ class SignatureVSService {
 
     public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject,Header header) {
         log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage mimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header)
-        return mimeMessage;
+        return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header);
     }
 
     public synchronized SMIMEMessage getSMIMEMultiSigned (
             String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
         log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-        if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")))
-        if(toUser) smimeMessage.setHeader("To", toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", ""))
-        return getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
+        return getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject);
     }
 
     public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {

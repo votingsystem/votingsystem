@@ -25,8 +25,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
-
-import javax.mail.Address;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
@@ -41,8 +39,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
-
 import static org.votingsystem.model.ContextVS.DNIe_SIGN_MECHANISM;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 
@@ -296,13 +292,12 @@ public class DNIeContentSigner implements ContentSigner {
             }
             return sigBytes;
         }
-
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
                      char[] password, String subject, Header... headers) throws Exception {
-        if (subject == null) subject = "";
-        if (textToSign == null) textToSign = "";
+        if (subject == null) throw new ExceptionVS("missing subject");
+        if (textToSign == null) throw new ExceptionVS("missing text to sign");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         caps.addCapability(SMIMECapability.dES_EDE3_CBC);
@@ -310,46 +305,28 @@ public class DNIeContentSigner implements ContentSigner {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-        DNIeContentSigner dnieContentSigner = null;
-        dnieContentSigner = DNIeContentSigner.getInstance(
+        DNIeContentSigner dnieContentSigner = DNIeContentSigner.getInstance(
                 password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = dnieSignerInfoGeneratorBuilder.build(dnieContentSigner);
-
         gen.addSignerInfoGenerator(signerInfoGenerator);
         gen.addCertificates(dnieContentSigner.getCertificates());
-        // create the base for our message
-        MimeBodyPart msg = new MimeBodyPart();
-        msg.setText(textToSign);
-        // extract the multipart object from the SMIMESigned object.
+        MimeBodyPart msg = new MimeBodyPart();// create the base for our message
+        msg.setText(textToSign); // extract the multipart object from the SMIMESigned object.
         MimeMultipart mimeMultipart = gen.generate(msg, "");
-
-        // Get a Session object and create the mail message
-        Properties props = System.getProperties();
-        javax.mail.Session session = javax.mail.Session.getDefaultInstance(props, null);
+        SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
         String userNIF = null;
         if (ContextVS.getInstance().getSessionUser() != null) userNIF =
                 ContextVS.getInstance().getSessionUser().getNif();
-        Address fromUserAddress = null;
-        if(userNIF != null) fromUserAddress = new InternetAddress(userNIF);
-        Address toUserAddress = null;
-        if(toUser != null) toUserAddress = new InternetAddress(toUser.replace(" ", ""));
-
-        SMIMEMessage body = new SMIMEMessage(session);
-        if (headers != null) {
-            for(Header header : headers) {
-                if (header != null) body.setHeader(header.getName(), header.getValue());
-            }
+        if(userNIF != null) smimeMessage.setFrom(new InternetAddress(userNIF));
+        if(toUser != null) {
+            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         }
-        body.setHeader("Content-Type", "text/plain; charset=UTF-8");
-        if(fromUserAddress != null) body.setFrom(fromUserAddress);
-        if(toUserAddress != null) body.setRecipient(Message.RecipientType.TO, toUserAddress);
-        body.setSubject(subject, "UTF-8");
-        body.setContent(mimeMultipart, mimeMultipart.getContentType());
-        body.updateChanges();
-        return body;
+        smimeMessage.setSubject(subject, "UTF-8");
+        return smimeMessage;
     }
 
 }

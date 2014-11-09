@@ -19,8 +19,8 @@ public class SimulationDataTask extends Task {
 
     @Override  protected Object call() throws Exception {
         while(simulationData.hasPendingRequest()) {
-            updateProgress(simulationData.getNumRequestsColected(), simulationData.getNumRequestsProjected());
-            updateMessage(simulationData.getNumRequestsColected() + "/" + simulationData.getNumRequestsProjected());
+            updateProgress(simulationData.getNumRequestsCollected(), simulationData.getNumRequestsProjected());
+            updateMessage(simulationData.getNumRequestsCollected() + "/" + simulationData.getNumRequestsProjected());
             Thread.sleep(1000);
         }
         return null;

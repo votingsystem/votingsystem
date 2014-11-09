@@ -29,7 +29,7 @@ Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:10, numUsers
                        numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
-Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
+    Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
                          userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
                          backupRequestEmail:"", event:eventDataMap,
                          dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
@@ -91,10 +91,9 @@ private void waitForVoteResponses() throws Exception {
     log.debug("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
     while (simulationData.hasPendingVotes()) {
         try {
-            String nifFrom = null;
             Future<ResponseVS> f = responseService.take();
             ResponseVS responseVS = f.get();
-            nifFrom = responseVS.getData()?.userVS?.getNif();
+            String nifFrom = responseVS.getData()?.userVS?.getNif();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 VoteVS voteReceipt = responseVS.getData().voteVS;
                 if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom)

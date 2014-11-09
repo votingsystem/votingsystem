@@ -11,13 +11,10 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.signature.util.CryptoTokenVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.*
-
 import javax.mail.Header
-import javax.mail.internet.InternetAddress
 import javax.security.auth.x500.X500PrivateCredential
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -168,15 +165,8 @@ class SignatureService {
 	public synchronized SMIMEMessage getSMIMEMultiSigned (
 		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
 		log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-		if(fromUser) {
-			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setFrom(new InternetAddress(fromUser))
-		} 
-		if(toUser) {
-			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setHeader("To", toUser)
-		}
-		SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(smimeMessage, subject);
+		SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser,
+                smimeMessage, subject);
 		return multiSignedMessage
 	}
 
