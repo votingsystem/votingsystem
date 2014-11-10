@@ -56,64 +56,69 @@ class AccessControlFilters {
                     return printOutputStream(response,  new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                 }
-                Map fileMap = ((MultipartHttpServletRequest)request)?.getFileMap();
-                Set<String> fileNames = fileMap.keySet()
-                for(String key : fileNames) {
-                    //String key = fileMap.keySet().iterator().next()
-                    if(key.contains(":")) {
-                        String[] keySplitted = key.split(":")
-                        String fileName = keySplitted[0]
-                        ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
-                        log.debug "filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
-                        if(contentTypeVS == null) {
-                            return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                                    messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
-                                    request.getLocale())))
+                try {
+                    Map fileMap = ((MultipartHttpServletRequest)request)?.getFileMap();
+                    Set<String> fileNames = fileMap.keySet()
+                    for(String key : fileNames) {
+                        //String key = fileMap.keySet().iterator().next()
+                        if(key.contains(":")) {
+                            String[] keySplitted = key.split(":")
+                            String fileName = keySplitted[0]
+                            ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
+                            log.debug "filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
+                            if(contentTypeVS == null) {
+                                return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                                        messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
+                                                request.getLocale())))
+                            }
+                            ResponseVS responseVS = null
+                            SMIMEMessage smimeMessageReq = null
+                            switch(contentTypeVS) {
+                                case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
+                                case ContentTypeVS.SIGNED_AND_ENCRYPTED:
+                                    responseVS = signatureVSService.decryptSMIME(fileMap.get(key)?.getBytes())
+                                    if(ResponseVS.SC_OK == responseVS.statusCode) smimeMessageReq = responseVS.smimeMessage
+                                    break;
+                                case ContentTypeVS.ENCRYPTED:
+                                    responseVS = signatureVSService.decryptMessage(fileMap.get(key)?.getBytes())
+                                    if(ResponseVS.SC_OK == responseVS.statusCode) {
+                                        params[fileName] = responseVS.messageBytes
+                                    }
+                                    break;
+                                case ContentTypeVS.JSON_SIGNED:
+                                case ContentTypeVS.SIGNED:
+                                    try {
+                                        smimeMessageReq = new SMIMEMessage(
+                                                new ByteArrayInputStream(fileMap.get(key)?.getBytes()));
+                                    } catch(Exception ex) {
+                                        log.error(ex.getMessage(), ex)
+                                        return printOutputStream(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                                                messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
+                                    }
+                                    break;
+                                case ContentTypeVS.JSON_SIGNED:
+                                    smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(fileMap.get(key).getBytes()));
+                                    break;
+                                case ContentTypeVS.JSON:
+                                case ContentTypeVS.TEXT:
+                                    params[fileName] = fileMap.get(key).getBytes()
+                                    break;
+                            }
+                            if(smimeMessageReq) {
+                                responseVS = processSMIMERequest(smimeMessageReq, contentTypeVS, params, request)
+                                if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageSMIME
+                                else params[fileName] = null
+                            }
+                            if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode())
+                                return printOutput(response, responseVS)
+                        } else {
+                            params[key] = fileMap.get(key)?.getBytes()
+                            log.debug "---- filemapFilter - before - file: '${key}' -> without ContentTypeVS"
                         }
-                        ResponseVS responseVS = null
-                        SMIMEMessage smimeMessageReq = null
-                        switch(contentTypeVS) {
-                            case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
-                            case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                                responseVS = signatureVSService.decryptSMIME(fileMap.get(key)?.getBytes())
-                                if(ResponseVS.SC_OK == responseVS.statusCode) smimeMessageReq = responseVS.smimeMessage
-                                break;
-                            case ContentTypeVS.ENCRYPTED:
-                                responseVS = signatureVSService.decryptMessage(fileMap.get(key)?.getBytes())
-                                if(ResponseVS.SC_OK == responseVS.statusCode) {
-                                    params[fileName] = responseVS.messageBytes
-                                }
-                                break;
-                            case ContentTypeVS.JSON_SIGNED:
-                            case ContentTypeVS.SIGNED:
-                                try {
-                                    smimeMessageReq = new SMIMEMessage(
-                                            new ByteArrayInputStream(fileMap.get(key)?.getBytes()));
-                                } catch(Exception ex) {
-                                    log.error(ex.getMessage(), ex)
-                                    return printOutputStream(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                                            messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
-                                }
-                                break;
-                            case ContentTypeVS.JSON_SIGNED:
-                                smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(fileMap.get(key).getBytes()));
-                                break;
-                            case ContentTypeVS.JSON:
-                            case ContentTypeVS.TEXT:
-                                params[fileName] = fileMap.get(key).getBytes()
-                                break;
-                        }
-                        if(smimeMessageReq) {
-                            responseVS = processSMIMERequest(smimeMessageReq, contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageSMIME
-                            else params[fileName] = null
-                        }
-                        if(responseVS != null && ResponseVS.SC_OK != responseVS.getStatusCode())
-                            return printOutput(response, responseVS)
-                    } else {
-                        params[key] = fileMap.get(key)?.getBytes()
-                        log.debug "---- filemapFilter - before - file: '${key}' -> without ContentTypeVS"
                     }
+                } catch(Exception ex) {
+                    return printOutput(response, ResponseVS.getExceptionResponse(params.controller, params.action,
+                            ex, StackTraceUtils.extractRootCause(ex)).save())
                 }
             }
         }
@@ -270,7 +275,6 @@ class AccessControlFilters {
     private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType,
             Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
-            log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
             switch(contenType) {
                 case ContentTypeVS.VOTE:
@@ -298,7 +302,6 @@ class AccessControlFilters {
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIME)
         } else if(smimeMessageReq) {
-            log.error "**** Filter - processSMIMERequest - signature ERROR"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                     message:messageSource.getMessage('signatureErrorMsg', null, request.getLocale()))
         }

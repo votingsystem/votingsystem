@@ -94,7 +94,7 @@ public class Vicket implements Serializable  {
 
     public Vicket() {}
 
-    public Vicket(SMIMEMessage smimeMessage) throws ExceptionVS, IOException {
+    public Vicket(SMIMEMessage smimeMessage) throws Exception {
         this.smimeMessage = smimeMessage;
         x509AnonymousCert = smimeMessage.getCertWithCertExtension();
         JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
@@ -157,7 +157,7 @@ public class Vicket implements Serializable  {
         return "ERROR - Vicket with hash: " + hashCertVS + " - ";
     }
 
-    public void validateSignedData() throws ExceptionVS {
+    public void validateSignedData() throws Exception {
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
         TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));

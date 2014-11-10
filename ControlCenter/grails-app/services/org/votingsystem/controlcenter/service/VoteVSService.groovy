@@ -65,7 +65,7 @@ class VoteVSService {
         //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIME(responseVS.messageBytes)
         //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSMIME();
         SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
-        if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
+        if(!smimeMessageResp.isValidSignature() || !smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
             log.error("validateVote - ERROR digest sent: " + signedVoteDigest +
                     " - digest received: " + smimeMessageResp.getContentDigestStr())
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR,

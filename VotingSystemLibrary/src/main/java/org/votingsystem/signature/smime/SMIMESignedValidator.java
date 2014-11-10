@@ -22,8 +22,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
- *
  * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SMIMESignedValidator { 
     
@@ -53,8 +53,7 @@ public class SMIMESignedValidator {
             log.debug("SubjectDN: " + cert.getSubjectDN() +
           		  " - Not before: " + cert.getNotBefore() + " - Not after: " + cert.getNotAfter() 
           		  + " - SigningTime: " + getSigningTime(signer));
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-            		ContextVS.PROVIDER).build(cert))){
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert))){
                 log.debug("signature verified");
                 result = true;
             } else {

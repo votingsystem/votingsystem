@@ -19,12 +19,12 @@ import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-isWithVoteCancellation = true
+isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
                     dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/11/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:10, numUsersWithoutRepresentativeWithVote:10,
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:100, numUsersWithoutRepresentativeWithVote:100,
                        numRepresentatives:0, numRepresentativesWithVote:0,
                        numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 

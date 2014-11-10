@@ -152,7 +152,7 @@ public class ResponseVS<T> implements Serializable {
         this.messageJSON = jsonObject;
     }
 
-    public JSON getSignedJSON() {
+    public JSON getSignedJSON() throws Exception {
         if(smimeMessage == null) return null;
         else return JSONSerializer.toJSON(smimeMessage.getSignedContent());
     }

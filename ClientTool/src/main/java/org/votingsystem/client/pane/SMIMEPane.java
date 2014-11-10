@@ -74,9 +74,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         }
         signatureContentWebView.getEngine().loadContent(contentStr);
         signatureContentWebView.setPrefHeight(600);
-
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
-
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
         timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
         timeStampButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -85,8 +83,6 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             }
         });
         setMargin(timeStampButton, new Insets(10, 0, 10, 0));
-
-
 
         VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);
         add(timeStampButton, 0, 0);

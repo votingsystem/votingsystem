@@ -232,7 +232,6 @@ class SignatureVSService {
 
     public ResponseVS validateVoteCerts(SMIMEMessage smimeMessageReq, EventVS eventVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName);
         Set<UserVS> signersVS = smimeMessageReq.getSigners();
         String msg
         if(signersVS.isEmpty()) throw new ExceptionVS(messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))

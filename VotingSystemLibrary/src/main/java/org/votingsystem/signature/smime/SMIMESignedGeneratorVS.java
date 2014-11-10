@@ -42,6 +42,8 @@ public class SMIMESignedGeneratorVS {
     private Certificate[] chain;
     private Store jcaCertStore;
     private SignerInfoGenerator signerInfoGenerator;
+    private JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder;
+    private String signMechanism;
     
     public SMIMESignedGeneratorVS(byte[] keyStoreBytes, String keyAlias,
                                   char[] password, String signMechanism) throws Exception {
@@ -57,6 +59,7 @@ public class SMIMESignedGeneratorVS {
     private void init(KeyStore keyStore, String keyAlias, 
     		char[] password, String signMechanism) throws Exception {
     	log.debug("init");
+        this.signMechanism = signMechanism;
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         chain = keyStore.getCertificateChain(keyAlias);
         jcaCertStore = new JcaCertStore( Arrays.asList(chain));
@@ -72,14 +75,9 @@ public class SMIMESignedGeneratorVS {
         // adding the smime attributes above to the signed attributes that
         // will be generated as part of the signature. The encryption algorithm
         // used is taken from the key - in this RSA with PKCS1Padding
-        JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  
-        		new JcaSimpleSignerInfoGeneratorBuilder();
-        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(
-        		ContextVS.PROVIDER);
-        jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(
-        		new AttributeTable(signedAttrs));
-        signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(
-        		signMechanism, key, (X509Certificate)chain[0]);
+        jcaSignerInfoGeneratorBuilder = new JcaSimpleSignerInfoGeneratorBuilder().setProvider(ContextVS.PROVIDER);
+        jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
+        signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(signMechanism, key, (X509Certificate)chain[0]);
         smimeSignedGenerator = new SMIMESignedGenerator();
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
@@ -132,13 +130,14 @@ public class SMIMESignedGeneratorVS {
         smimeMessage.setSubject(subject);
         return smimeMessage;
     }
-     
-     public synchronized SMIMEMessage getSMIMEMultiSigned(String fromUser, String toUser,
+
+    public synchronized SMIMEMessage getSMIMEMultiSigned(String fromUser, String toUser,
               SMIMEMessage smimeMessage, String subject) throws Exception {
  		 MimeMultipart mimeMultipart = (MimeMultipart)smimeMessage.getContent();
  		 MimeBodyPart bodyPart = (MimeBodyPart) mimeMultipart.getBodyPart(0);    	 
     	 SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
-         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
+         smimeSignedGenerator.addSignerInfoGenerator(jcaSignerInfoGeneratorBuilder.build(
+                 signMechanism, key, (X509Certificate)chain[0]));
          // add our pool of certs and cerls (if any) to go with the signature
          smimeSignedGenerator.addCertificates(jcaCertStore);
          smimeSignedGenerator.addSigners(smimeMessage.getSmimeSigned().getSignerInfos());
@@ -158,6 +157,6 @@ public class SMIMESignedGeneratorVS {
              smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
          }
          return smimeMessage;
-     }
+    }
     
 }

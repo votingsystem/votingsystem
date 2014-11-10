@@ -52,15 +52,15 @@ public class SMIMEMessage extends MimeMessage {
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
 
     //"application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
-    private ContentTypeVS contentTypeVS ;
-    private String signedContent;
+    private ContentTypeVS contentTypeVS;
     private SMIMESigned smimeSigned;
-    private Set<UserVS> signers;
+    private String signedContent;
     private UserVS signerVS;
+    private Set<UserVS> signers;
+    private TimeStampToken timeStampToken;
+    private SMIMEContentInfo contentInfo;
     private VoteVS voteVS;
     private X509Certificate certWithCertExtension;
-    private boolean isValidSignature = false;
-    private TimeStampToken timeStampToken;
 
     public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
         super(ContextVS.MAIL_SESSION);
@@ -70,45 +70,15 @@ public class SMIMEMessage extends MimeMessage {
                 if (header != null) setHeader(header.getName(), header.getValue());
             }
         }
-        init();
     }
 
     public SMIMEMessage(InputStream inputStream) throws Exception {
         super(ContextVS.MAIL_SESSION, inputStream);
-        init();
     }
 
-    private void init() throws Exception {
-        if(getContent() instanceof MimeMultipart){
-            log.debug("content instanceof MimeMultipart");
-            smimeSigned = new SMIMESigned((MimeMultipart)getContent());
-            MimeBodyPart content = smimeSigned.getContent();
-            Object  cont = content.getContent();
-            if (cont instanceof String) {
-                signedContent = (String)cont;
-            } else if (cont instanceof Multipart){
-                Multipart multipart = (Multipart)cont;
-                int count = multipart.getCount();
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < count; i++) {
-                    BodyPart bodyPart = multipart.getBodyPart(i);
-                    Object part = bodyPart.getContent();
-                    stringBuilder.append("Part " + i).append("---------------------------");
-                    if (part instanceof String) {
-                        stringBuilder.append((String)part);
-                    } else if (part instanceof ByteArrayInputStream) {
-                        stringBuilder.append(new String(FileUtils.getBytesFromInputStream(
-                                (ByteArrayInputStream) cont), "UTF-8"));
-                    }  else  new ExceptionVS(" TODO - get content from part instanceof -> " + part.getClass());
-                }
-                signedContent = stringBuilder.toString();
-            } else if (cont instanceof ByteArrayInputStream) {
-                signedContent = new String(FileUtils.getBytesFromInputStream((ByteArrayInputStream) cont), "UTF-8");
-            }
-        } else throw new ExceptionVS("TODO - content instanceof String -> " + getContent());
-        this.isValidSignature = checkSignature();
-        String[] headerValues = getHeader(CONTENT_TYPE_VS);
-        if(headerValues != null && headerValues.length > 0) contentTypeVS = ContentTypeVS.getByName(headerValues[0]);
+    public boolean isValidSignature() throws Exception {
+        if(contentInfo == null) contentInfo = new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
+        return true;
     }
 
     public ContentTypeVS getContentTypeVS() {
@@ -119,113 +89,17 @@ public class SMIMEMessage extends MimeMessage {
         setHeader("Message-ID", messageId);
     }
 
-    /**
-     * @return the signedContent
-     */
     public String getSignedContent() {
         return signedContent;
     }
 
-    /**
-     * Digest for storing unique MessageSMIME in database
-     * @return the contentDigestStr
-     * @throws java.security.NoSuchAlgorithmException
-     */
-    public String getContentDigestStr() throws NoSuchAlgorithmException {
-        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-        return Base64.getEncoder().encodeToString(messageDigest.digest(signedContent.getBytes()));
-    }
-
-    /**
-     * @return the smimeSigned
-     */
-    public SMIMESigned getSmimeSigned() {
+    public SMIMESigned getSmimeSigned() throws Exception {
+        if(smimeSigned == null) isValidSignature();
         return smimeSigned;
     }
 
-    public TimeStampToken getTimeStampToken () {return timeStampToken;}
-
-    public boolean isValidSignature()  {
-        return isValidSignature;
-    }
-
-    /**
-     * verify that the signature is correct and that it was generated when the
-     * certificate was current(assuming the cert is contained in the message).
-     */
-    private boolean checkSignature() throws Exception {
-        Store certs = smimeSigned.getCertificates();
-        SignerInformationStore  signerInfos = smimeSigned.getSignerInfos();
-        Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
-        log.debug("checkSignature - document with '" + signerInfos.size() + "' signers");
-        Collection c = signerInfos.getSigners();
-        Iterator it = c.iterator();
-        Date firstSignature = null;
-        signers = new HashSet<UserVS>();
-        while (it.hasNext()) {// check each signer
-            SignerInformation   signer = (SignerInformation)it.next();
-            Collection certCollection = certs.getMatches(signer.getSID());
-            Iterator certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
-                    (X509CertificateHolder) certIt.next());
-            log.debug("checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
-            try {
-                verifySigner(signer, new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-                        ContextVS.PROVIDER).build(cert));
-                //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
-            } catch(CMSVerifierCertificateNotValidException ex) {
-                log.error("checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
-                log.error("checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
-                throw ex;
-            } catch (Exception ex) {
-                log.error("checkSignature" + ex.getMessage(), ex);
-                throw ex;
-            }
-            UserVS userVS = UserVS.getUserVS(cert);
-            userVS.setSignerInformation(signer);
-            TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.
-            userVS.setTimeStampToken(timeStampToken);
-            if(timeStampToken != null) {
-                Date timeStampDate = timeStampToken.getTimeStampInfo().getGenTime();
-                if(firstSignature == null || firstSignature.after(timeStampDate)) {
-                    firstSignature = timeStampDate;
-                    this.signerVS = userVS;
-                }
-                this.timeStampToken = timeStampToken;
-            }
-            signers.add(userVS);
-            if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
-                voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
-            } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
-                certWithCertExtension = cert;
-            } else {signerCerts.add(cert);}
-        }
-        if(voteVS != null) voteVS.setServerCerts(signerCerts);
-        return true;
-    }
-
-    private byte[] verifySigner(SignerInformation signer, SignerInformationVerifier verifier) throws CMSException,
-            OperatorCreationException, IOException, MessagingException {
-        DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
-                CMSAttributes.signingTime, "signing-time");
-        Time signingTime = Time.getInstance(derObject);
-        X509CertificateHolder dcv = verifier.getAssociatedCertificate();
-        if (!dcv.isValidOn(signingTime.getDate()))  {
-            throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
-        }
-        // RFC 3852 11.1 Check the content-type attribute is correct -> missing
-        //verify digest
-        DigestCalculator calc = verifier.getDigestCalculator(signer.getDigestAlgorithmID());
-        OutputStream      digOut = calc.getOutputStream();
-        smimeSigned.getSignedContent().write(digOut);
-        digOut.close();
-        byte[] resultDigest = calc.getDigest();
-        byte[] signerDigest = CMSUtils.getSignerDigest(signer);
-        if (!Arrays.equals(resultDigest, signerDigest)) {
-            throw new CMSSignerDigestMismatchException("message-digest attribute value does not match calculated value");
-        }
-        return resultDigest;
+    public TimeStampToken getTimeStampToken () {
+        return timeStampToken;
     }
 
     public X509Certificate getCertWithCertExtension() {return certWithCertExtension;}
@@ -319,16 +193,11 @@ public class SMIMEMessage extends MimeMessage {
         hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
         AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
         byte[] timeStampTokenHash = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-        //String hashTokenStr = Base64.getEncoder().encodeToString(timeStampTokenHash);
-        //log.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
         Iterator<SignerInformation> it = smimeSigned.getSignerInfos().getSigners().iterator();
         List<SignerInformation> newSigners = new ArrayList<SignerInformation>();
         while (it.hasNext()) {
             SignerInformation signer = it.next();
             byte[] digestBytes = CMSUtils.getSignerDigest(signer);
-            //String digestStr = Base64.getEncoder().encodeToString(digestBytes);
-            //log.debug("setTimeStampToken - hash signerVS: " +  digestStr +
-            //        " - hash token: " + hashTokenStr);
             if(Arrays.equals(timeStampTokenHash, digestBytes)) {
                 log.debug("setTimeStampToken - found signer");
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
@@ -344,7 +213,7 @@ public class SMIMEMessage extends MimeMessage {
             } else newSigners.add(signer);
         }
         SignerInformationStore newSignersStore = new SignerInformationStore(newSigners);
-        CMSSignedData cmsdata = smimeSigned.replaceSigners(smimeSigned, newSignersStore);
+        CMSSignedData cmsdata =  smimeSigned.replaceSigners(smimeSigned, newSignersStore);
         replaceSigners(cmsdata);
     }
 
@@ -354,36 +223,9 @@ public class SMIMEMessage extends MimeMessage {
         gen.addAttributeCertificates(cmsdata.getAttributeCertificates());
         gen.addCertificates(cmsdata.getCertificates());
         gen.addSigners(cmsdata.getSignerInfos());
-        MimeMultipart mimeMultipart = gen.generate(smimeSigned.getContent(), smimeSigned.getContent().getFileName());
+        MimeMultipart mimeMultipart = gen.generate(smimeSigned.getContent(),smimeSigned.getContent().getFileName());
         setContent(mimeMultipart, mimeMultipart.getContentType());
         saveChanges();
-    }
-
-    public TimeStampRequest getTimeStampRequest() {
-        SignerInformation signerInformation = ((SignerInformation)smimeSigned.getSignerInfos().getSigners().iterator().next());
-        AttributeTable table = signerInformation.getSignedAttributes();
-        Attribute hash = table.get(CMSAttributes.messageDigest);
-        ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
-        //byte[] digest = Base64.getEncoder().encodeToString(as.getOctets());
-        //log.debug(" - digest: " + new String(digest));
-        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-        //reqgen.setReqPolicy(m_sPolicyOID);
-        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets(),
-                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
-    }
-
-    //this is for multisigned messages
-    public TimeStampRequest getTimeStampRequest(AlgorithmIdentifier digestAlgorithmIdentifier)
-            throws NoSuchAlgorithmException, IOException, CMSException {
-        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-        //reqgen.setReqPolicy(m_sPolicyOID);
-        MessageDigest digestCalculator = MessageDigest.getInstance(
-                CMSUtils.getDigestId(digestAlgorithmIdentifier.getAlgorithm().getId()));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        smimeSigned.getSignedContent().write(baos);
-        byte[] messageDigest = digestCalculator.digest(baos.toByteArray());
-        return reqgen.generate(digestAlgorithmIdentifier.getAlgorithm(), messageDigest,
-                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
     }
 
     public byte[] getBytes () throws Exception {
@@ -412,7 +254,6 @@ public class SMIMEMessage extends MimeMessage {
         return signerVS;
     }
 
-    //Call this method after isValidSignature()!!!
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
         AttributeTable  unsignedAttributes = signer.getUnsignedAttributes();
@@ -426,6 +267,151 @@ public class SMIMEMessage extends MimeMessage {
             }
         } else log.debug("checkTimeStampToken - without unsignedAttributes");
         return timeStampToken;
+    }
+
+    public TimeStampRequest getTimeStampRequest() throws Exception {
+        SignerInformation signerInformation =
+                ((SignerInformation)getSmimeSigned().getSignerInfos().getSigners().iterator().next());
+        AttributeTable table = signerInformation.getSignedAttributes();
+        Attribute hash = table.get(CMSAttributes.messageDigest);
+        ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        //reqgen.setReqPolicy(m_sPolicyOID);
+        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets(),
+                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
+    }
+
+    //this is for multisigned messages
+    public TimeStampRequest getTimeStampRequest(AlgorithmIdentifier digestAlgorithmIdentifier)
+            throws NoSuchAlgorithmException, IOException, CMSException {
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        //reqgen.setReqPolicy(m_sPolicyOID);
+        MessageDigest digestCalculator = MessageDigest.getInstance(
+                CMSUtils.getDigestId(digestAlgorithmIdentifier.getAlgorithm().getId()));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        smimeSigned.getSignedContent().write(baos);
+        byte[] messageDigest = digestCalculator.digest(baos.toByteArray());
+        return reqgen.generate(digestAlgorithmIdentifier.getAlgorithm(), messageDigest,
+                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
+    }
+
+    /**
+     * Digest for storing unique MessageSMIME in database
+     */
+    public String getContentDigestStr() throws Exception {
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        return Base64.getEncoder().encodeToString(messageDigest.digest(signedContent.getBytes()));
+    }
+
+    public class SMIMEContentInfo {
+
+        public SMIMEContentInfo(Object content, String[] headerValues) throws Exception {
+            if(content instanceof MimeMultipart){
+                smimeSigned = new SMIMESigned((MimeMultipart)content);
+                Object  cont = ((MimeMultipart)content).getBodyPart(0).getContent();
+                if (cont instanceof String) {
+                    signedContent = (String)cont;
+                } else if (cont instanceof Multipart){
+                    Multipart multipart = (Multipart)cont;
+                    int count = multipart.getCount();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int i = 0; i < count; i++) {
+                        BodyPart bodyPart = multipart.getBodyPart(i);
+                        Object part = bodyPart.getContent();
+                        stringBuilder.append("Part " + i).append("---------------------------");
+                        if (part instanceof String) {
+                            stringBuilder.append((String)part);
+                        } else if (part instanceof ByteArrayInputStream) {
+                            stringBuilder.append(new String(FileUtils.getBytesFromInputStream(
+                                    (ByteArrayInputStream) cont), "UTF-8"));
+                        } else new ExceptionVS(" TODO - get content from part instanceof -> " + part.getClass());
+                    }
+                    signedContent = stringBuilder.toString();
+                } else if (cont instanceof ByteArrayInputStream) {
+                    signedContent = new String(FileUtils.getBytesFromInputStream((ByteArrayInputStream) cont), "UTF-8");
+                }
+            } else throw new ExceptionVS("TODO - content instanceof String");
+            checkSignature();
+            if(headerValues != null && headerValues.length > 0) contentTypeVS = ContentTypeVS.getByName(headerValues[0]);
+        }
+
+        /**
+         * verify that the signature is correct and that it was generated when the
+         * certificate was current(assuming the cert is contained in the message).
+         */
+        private boolean checkSignature() throws Exception {
+            Store certs = smimeSigned.getCertificates();
+            SignerInformationStore signerInfos = smimeSigned.getSignerInfos();
+            Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
+            log.debug("checkSignature - document with '" + signerInfos.size() + "' signers");
+            Collection c = signerInfos.getSigners();
+            Iterator it = c.iterator();
+            Date firstSignature = null;
+            signers = new HashSet<UserVS>();
+            while (it.hasNext()) {// check each signer
+                SignerInformation   signer = (SignerInformation)it.next();
+                Collection certCollection = certs.getMatches(signer.getSID());
+                Iterator certIt = certCollection.iterator();
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
+                        (X509CertificateHolder) certIt.next());
+                log.debug("checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
+                try {
+                    verifySigner(signer, new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                            ContextVS.PROVIDER).build(cert));
+                    //concurrency issues ->
+                    //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
+                } catch(CMSVerifierCertificateNotValidException ex) {
+                    log.error("checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
+                    log.error("checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
+                    throw ex;
+                } catch (Exception ex) {
+                    throw ex;
+                }
+                UserVS userVS = UserVS.getUserVS(cert);
+                userVS.setSignerInformation(signer);
+                TimeStampToken tsToken = checkTimeStampToken(signer);
+                userVS.setTimeStampToken(tsToken);
+                if(tsToken != null) {
+                    Date timeStampDate = tsToken.getTimeStampInfo().getGenTime();
+                    if(firstSignature == null || firstSignature.after(timeStampDate)) {
+                        firstSignature = timeStampDate;
+                        signerVS = userVS;
+                    }
+                    timeStampToken = tsToken;
+                }
+                signers.add(userVS);
+                if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
+                    JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
+                    voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
+                } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
+                    certWithCertExtension = cert;
+                } else {signerCerts.add(cert);}
+            }
+            if(voteVS != null) voteVS.setServerCerts(signerCerts);
+            return true;
+        }
+
+        private byte[] verifySigner(SignerInformation signer, SignerInformationVerifier verifier) throws CMSException,
+                OperatorCreationException, IOException, MessagingException {
+            DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
+                    CMSAttributes.signingTime, "signing-time");
+            Time signingTime = Time.getInstance(derObject);
+            X509CertificateHolder dcv = verifier.getAssociatedCertificate();
+            if (!dcv.isValidOn(signingTime.getDate()))  {
+                throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
+            }
+            // RFC 3852 11.1 Check the content-type attribute is correct -> missing
+            //verify digest
+            DigestCalculator calc = verifier.getDigestCalculator(signer.getDigestAlgorithmID());
+            OutputStream digOut = calc.getOutputStream();
+            smimeSigned.getSignedContent().write(digOut);
+            digOut.close();
+            byte[] resultDigest = calc.getDigest();
+            byte[] signerDigest = CMSUtils.getSignerDigest(signer);
+            if (!Arrays.equals(resultDigest, signerDigest)) throw new CMSSignerDigestMismatchException(
+                    "message-digest attribute value does not match calculated value");
+            return resultDigest;
+        }
     }
 
 }
