@@ -82,6 +82,20 @@ public class BrowserVSSessionUtils {
         flush();
     }
 
+    public WebSocketMessage initAuthenticatedSession(WebSocketMessage message, UserVS userVS) {
+        try {
+            message.getMessageJSON().put("userVS", userVS.toJSON());
+            message.setUserVS(userVS);
+            browserSessionDataJSON.put("userVS", userVS.toJSON());
+            browserSessionDataJSON.put("isConnected", true);
+            flush();
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+        return message;
+    }
+
+
     public void setCSRRequestId(Long id) {
         browserSessionDataJSON.put("csrRequestId", id);
         flush();

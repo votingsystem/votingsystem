@@ -181,7 +181,7 @@
             this.connectButtonLbl = "<g:message code="connectLbl"/>"
             this.connecButtonIcon ="settings-remote"
         }
-        console.log(this.tagName + " - updateUserStatus - userVS: " + userVS + " - sessionData: " + sessionData +
+        console.log(this.tagName + " - updateSession - userVS: " + userVS + " - sessionData: " + sessionData +
                 " - isConnected: " + this.isConnected)
     },
     togglePanel: function() {

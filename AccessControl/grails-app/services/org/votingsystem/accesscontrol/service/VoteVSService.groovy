@@ -77,7 +77,7 @@ class VoteVSService {
         if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
             SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(
                     responseVSControlCenter.message.getBytes()))
-            if(smimeMessageResp.isValidSignature() || !smimeMessageReq.contentDigestStr.equals(
+            if(!smimeMessageResp.isValidSignature() || !smimeMessageReq.contentDigestStr.equals(
                     smimeMessageResp.contentDigestStr))  throw new ValidationExceptionVS(
                     "smimeContentMismatchError", MetaInfMsg.getErrorMsg(methodName, "smimeContentMismatchError"))
             signatureVSService.validateSignersCerts(smimeMessageResp)

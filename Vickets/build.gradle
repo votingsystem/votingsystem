@@ -7,6 +7,7 @@ sourceCompatibility = 7
 dependencies {
     compile (project(':VotingSystemLibrary'))
     compile ('org.iban4j:iban4j:2.1.1')
+    compile ('javax.websocket:javax.websocket-api:1.1')
 }
 
 task copyApps(dependsOn: [':generateVotingSystemApps']) {

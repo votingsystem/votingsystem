@@ -21,7 +21,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/layouts/vs-navbar']"/>">
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
+    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>
     <g:layoutHead/>
     <style>
     </style>
