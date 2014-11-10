@@ -167,6 +167,7 @@ public class MessageSMIME implements Serializable {
     @Transient public SMIMEMessage getSMIME() throws Exception {
 		if(smimeMessage == null && content != null) {
 			smimeMessage = new SMIMEMessage(new ByteArrayInputStream(content));
+            smimeMessage.isValidSignature();
 		}
 		return smimeMessage;
 	}

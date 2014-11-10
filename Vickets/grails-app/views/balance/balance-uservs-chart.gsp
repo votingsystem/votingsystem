@@ -16,7 +16,6 @@
             },
             options: {
                 chart: {
-                    margin: [0, 0, 0, 0],
                     spacingBottom: 30,
                     spacingTop: 30,
                     spacingLeft: 50,

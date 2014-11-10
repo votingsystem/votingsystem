@@ -6,7 +6,7 @@ import org.votingsystem.model.VicketServer
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.test.util.TransactionVSPlan
 
-Map simulationDataMap = [groupId:5, serverURL:"http://vickets:8086/Vickets"]
+Map simulationDataMap = [groupId:10, serverURL:"http://vickets:8086/Vickets"]
 Logger log = TestUtils.init(GroupVS_sendTransactionVS.class, simulationDataMap)
 
 VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)

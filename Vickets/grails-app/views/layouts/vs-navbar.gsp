@@ -121,9 +121,11 @@
         window.open(window['accessControlURL'] + "/certificateVS/certRequest", "_blank");
     },
     disConnect: function(e) {
+        this.async(function() {
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.DISCONNECT)
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        }.bind(this));
         this.$.userInfoPanel.show = false
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.DISCONNECT)
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     },
     selectCertificate: function(e) {
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.KEYSTORE_SELECT)

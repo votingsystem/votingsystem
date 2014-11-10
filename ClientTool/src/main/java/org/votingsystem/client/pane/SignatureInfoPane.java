@@ -70,11 +70,14 @@ public class SignatureInfoPane extends GridPane {
 
         WebView webView = new WebView();
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-        webView.getEngine().loadContent(Formatter.getInfoCert(signer.getCertificate()));
-        webView.setPrefHeight(170);
+
+        String finalHTML = "<html style='font-size:0.9em;background: #f9f9f9;'>" +
+                Formatter.getInfoCert(signer.getCertificate()) + "</html>";
+        webView.getEngine().loadContent(finalHTML);
+        webView.setPrefHeight(150);
         setHgrow(webView, Priority.ALWAYS);
         setVgrow(webView, Priority.ALWAYS);
-        webView.setStyle("-fx-word-wrap:break-word;");
+        webView.setStyle("-fx-word-wrap:break-word;-fx-font-size: 10;");
         add(webView, 0, 2, 3, 1);
         getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(500), new ColumnConstraints());
     }

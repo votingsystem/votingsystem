@@ -480,10 +480,13 @@ public class UserVS implements Serializable {
             userVS.setType(type);
         }
         if(userVSDataMap.containsKey("certificateList")) {
-            JSONObject certData = (JSONObject) ((JSONArray) userVSDataMap.get("certificateList")).get(0);
-            Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
-                    certData.getString("pemCert").getBytes());
-            userVS.setCertificate(certCollection.iterator().next());
+            JSONArray arrayCerts = (JSONArray) userVSDataMap.get("certificateList");
+            if(arrayCerts.size() > 0) {
+                JSONObject certData = (JSONObject) arrayCerts.get(0);
+                Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
+                        certData.getString("pemCert").getBytes());
+                userVS.setCertificate(certCollection.iterator().next());
+            }
         }
         return userVS;
     }
@@ -515,4 +518,5 @@ public class UserVS implements Serializable {
         jsonData.put("description", description);
         return jsonData;
     }
+
 }

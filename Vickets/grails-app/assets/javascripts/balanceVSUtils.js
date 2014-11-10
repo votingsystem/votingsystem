@@ -33,7 +33,7 @@ function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
     var tagBalanceMap = JSON.parse(JSON.stringify(tagBalanceMapParam))
     Object.keys(allTagsMap).forEach(function(tag) {
         if(tagBalanceMap[tag] == null) allTagsMap[tag].push(0)
-        else allTagsMap[tag].push(tagBalanceMap[tag])
+        else allTagsMap[tag].push(parseFloat(tagBalanceMap[tag]))
     })
     return allTagsMap
 }

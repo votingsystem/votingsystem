@@ -427,7 +427,10 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             case MESSAGEVS_FROM_DEVICE:
                 BrowserVSSessionUtils.setWebSocketMessage(message);
                 break;
-            default: log.debug("unprocessed message");
+            default:
+                if(ResponseVS.SC_ERROR == message.getStatusCode())
+                    showMessage(message.getStatusCode(), message.getMessage());
+                log.debug("unprocessed message");
         }
     }
 

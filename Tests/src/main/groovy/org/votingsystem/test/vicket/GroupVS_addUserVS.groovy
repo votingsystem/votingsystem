@@ -11,10 +11,9 @@ import org.votingsystem.test.util.SimulationData
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.ExceptionVS
 
-Map userBaseData = [userIndex:100]
-Map simulationDataMap = [groupId:4, serverURL:"http://vickets:8086/Vickets", numRequestsProjected: 5, userBaseData:userBaseData]
+Map userBaseData = [userIndex:200]
+Map simulationDataMap = [groupId:10, serverURL:"http://vickets:8086/Vickets", numRequestsProjected: 5, userBaseData:userBaseData]
 isWithUserValidation = Boolean.TRUE
-
 
 log = TestUtils.init(GroupVS_addUserVS.class, simulationDataMap)
 SimulationData simulationData = TestUtils.getSimulationData()
@@ -34,7 +33,7 @@ List<MockDNI> userList = authoritySignatureService.subscribeUsers(subscriptionDa
 if(!isWithUserValidation) TestUtils.finish()
 
 log.debug("activateUsers")
-SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER)
+SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER)
 representativeSignatureService.validateUserVSSubscriptions(simulationDataMap.groupId, vicketServer,
         TestUtils.getUserVSMap(userList))
 

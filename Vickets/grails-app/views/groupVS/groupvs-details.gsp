@@ -70,7 +70,7 @@
                 </div>
             </template>
             <div id="pageHeader" layout horizontal center center-justified>
-                <div flex id="tagsDiv" style="padding:7px 0px 0px 7px;">
+                <div horizontal layout flex style="padding:7px 0px 0px 7px;">
                     <template if="{{subpage}}">
                         <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
                             <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>

@@ -19,6 +19,7 @@ import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.WebSocketMessage;
 
@@ -72,7 +73,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         instance = this;
     }
 
-    public void showMessage(final int statusCode, final String message) {
+    public void showMessage(final Integer statusCode, final String message) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 MessageDialog messageDialog = new MessageDialog();
@@ -128,13 +129,17 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         if(isConnectionEnabled) {
             Platform.runLater(new Runnable() {
                 @Override public void run() {
-                    PasswordDialog passwordDialog = new PasswordDialog();
-                    passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
-                    String password = passwordDialog.getPassword();
-                    if(password != null) {
-                        new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
-                                password,targetServer)).start();
-                    } else broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+                    String password = null;
+                    if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
+                        PasswordDialog passwordDialog = new PasswordDialog();
+                        passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+                        password = passwordDialog.getPassword();
+                        if(password == null) {
+                            broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+                            return;
+                        } else new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
+                                password, targetServer)).start();
+                    } else showMessage(null, ContextVS.getMessage("mobileCryptoTokenNotAllowedErrorMsg"));
                 }
             });
         }
@@ -238,11 +243,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                KeyStore keyStore = ContextVS.getUserKeyStore(nif, password);
-                SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyStore,
-                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-                SMIMEMessage smimeMessage = SMIMESignedGeneratorVS.getSMIME(null, targetServer.getNameNormalized(),
-                        documentToSignJSON.toString(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
+                SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
+                        targetServer.getNameNormalized(), documentToSignJSON.toString(),
+                        password.toCharArray(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
                 responseVS = timeStamper.call();

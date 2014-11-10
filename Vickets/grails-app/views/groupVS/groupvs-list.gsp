@@ -17,6 +17,7 @@
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             margin: 10px;
         }
+        vs-html-echo /deep/ p {margin:0px 0px 0px 0px;}
         </style>
         <g:include view="/include/styles.gsp"/>
         <asset:stylesheet src="vickets_groupvs.css"/>

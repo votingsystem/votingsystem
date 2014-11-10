@@ -27,11 +27,18 @@ class WebSocketService {
     def messageVSService
 
     public void onTextMessage(Session session, String msg , boolean last) {
+        WebSocketRequest request = null
         try {
-            processRequest(new WebSocketRequest(session, msg, last))
+            request = new WebSocketRequest(session, msg, last)
+            processRequest(request)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            processResponse(getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage()));
+            String message = ex.getMessage()
+            if(message == null) message = messageSource.getMessage('socketRequestErrorMsg', null, locale)
+            JSONObject responseJSON
+            if(request) responseJSON = request.getResponse(ResponseVS.SC_ERROR, message)
+            else responseJSON = getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage())
+            processResponse(responseJSON);
         }
     }
 

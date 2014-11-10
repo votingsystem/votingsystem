@@ -114,51 +114,39 @@ public class SMIMEMessage extends MimeMessage {
 
     public ValidationResult verify(PKIXParameters params) throws Exception {
         SignedMailValidator validator = new SignedMailValidator(this, params);
-        // iterate over all signatures and print results
         Iterator it = validator.getSignerInformationStore().getSigners().iterator();
-        Locale loc = Locale.ENGLISH;
-        //only one signer supposed!!!
-        ValidationResult result = null;
+        ValidationResult result = null;//only one signer supposed!!!
         while (it.hasNext()) {
             SignerInformation signer = (SignerInformation) it.next();
             result = validator.getValidationResult(signer);
-            if (result.isValidSignature()){
-                log.debug("isValidSignature");
-            }
+            if (result.isValidSignature()) log.debug("isValidSignature");
             else {
-                log.debug("sigInvalid");
-                log.debug("Errors:");
+                log.debug("sigInvalid - Errors:");
                 Iterator errorsIt = result.getErrors().iterator();
                 while (errorsIt.hasNext()) {
-                    log.debug("ERROR - " + errorsIt.next().toString());
+                    log.debug("error - " + errorsIt.next().toString());
                 }
             }
             if (!result.getNotifications().isEmpty()) {
-                log.debug("Notifications:");
+                log.debug("notifications:");
                 Iterator notIt = result.getNotifications().iterator();
                 while (notIt.hasNext()) {
-                    log.debug("NOTIFICACION - " + notIt.next());
+                    log.debug("notification: " + notIt.next());
                 }
             }
             PKIXCertPathReviewer review = result.getCertPathReview();
             if (review != null) {
-                if (review.isValidCertPath()) {
-                    log.debug("Certificate path valid");
-                }
-                else {
-                    log.debug("Certificate path invalid");
-                }
-                log.debug("Certificate path validation results:");
+                if (review.isValidCertPath()) log.debug("certificate path valid");
+                else log.debug("certificate path invalid");
+                log.debug("certificate path validation results:");
                 Iterator errorsIt = review.getErrors(-1).iterator();
                 while (errorsIt.hasNext()) {
-                    log.debug("ERROR - " + errorsIt.next().toString());
+                    log.debug("error - " + errorsIt.next().toString());
                 }
-                Iterator notificationsIt = review.getNotifications(-1)
-                        .iterator();
+                Iterator notificationsIt = review.getNotifications(-1).iterator();
                 while (notificationsIt.hasNext()) {
-                    log.debug("NOTIFICACION - " + notificationsIt.next().toString());
+                    log.debug("notification: " + notificationsIt.next().toString());
                 }
-                // per certificate errors and notifications
                 Iterator certIt = review.getCertPath().getCertificates().iterator();
                 int i = 0;
                 while (certIt.hasNext()) {
@@ -171,7 +159,6 @@ public class SMIMEMessage extends MimeMessage {
                     while (errorsIt.hasNext())  {
                         log.debug( errorsIt.next().toString());
                     }
-                    // notifications
                     log.debug("Notifications:");
                     notificationsIt = review.getNotifications(i).iterator();
                     while (notificationsIt.hasNext()) {

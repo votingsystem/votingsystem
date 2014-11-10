@@ -356,7 +356,6 @@ public class SignatureService extends Service<ResponseVS> {
                 signedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
                 signedMap.put("encryptedMessageHashBase64", encryptedMessageHash);
                 signedDataList.add(signedMap);
-
                 Map encryptedMap = new HashMap<>();
                 encryptedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
                 encryptedMap.put("encryptedData", encryptedMessageStr);

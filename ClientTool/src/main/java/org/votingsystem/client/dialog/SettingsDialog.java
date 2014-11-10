@@ -63,7 +63,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 changeSignatureMode(actionEvent);
             }});
 
-
         signWithMobileRb = new RadioButton(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
         signWithMobileRb.setToggleGroup(tg);
         signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
@@ -268,6 +267,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         this.deviceDataJSON = deviceDataJSON;
         if(!gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.add(mobileDeviceInfo, 0, 2);
         mobileDeviceLbl.setText(deviceDataJSON.getString("deviceName"));
+        getStage().sizeToScene();
     }
 
 }
