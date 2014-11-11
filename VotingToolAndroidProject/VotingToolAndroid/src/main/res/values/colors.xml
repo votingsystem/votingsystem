@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="dialog_caption">#33b5e5</color>
     <color name="empty_field_form">#f00</color>
     <color name="terminated">#cc1606</color>
     <color name="pending">#fba131</color>

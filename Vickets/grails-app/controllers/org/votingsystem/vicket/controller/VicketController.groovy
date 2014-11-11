@@ -7,17 +7,13 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
-import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketRequestBatch
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 class VicketController {
 
-    private static Logger requestslog = Logger.getLogger("vicketsRequestLog");
     private static Logger vicketsIssuedlog = Logger.getLogger("vicketsIssuedLog");
-
 
     def vicketService
     def userVSService
@@ -57,13 +53,13 @@ class VicketController {
     }
 
     /**
-     * Servicio que valida las solicitudes de vickets de los usuarios.
+     * Service that validates cash requests
      *
      * @httpMethod [POST]
      * @serviceURL [/vicket/request]
-     * @requestContentType [application/x-pkcs7-signature] La solicitud de certificado de delegación.
-     * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
-     * @return La solicitud de certificado de delegación anónima firmada.
+     * @requestContentType [application/x-pkcs7-signature] The request with the amount required signed by the user
+     * @param [csr] Required. The anonymous certificate request for the cash.
+     * @return The anonymous certificate request signed (with this you can make secured anonymous transactions).
      */
     def processRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.VICKET_REQUEST_DATA_FILE_NAME]

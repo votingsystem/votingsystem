@@ -24,25 +24,28 @@ public class VicketBatch {
 
     private Map<String, Vicket> vicketsMap;
     private VicketServer vicketServer;
-    private BigDecimal requestAmount;
+    private String subject;
+    private BigDecimal totalAmount;
     private BigDecimal vicketsValue;
     private String currencyCode;
+    private Boolean isTimeLimited;
     private List<Map> vicketCSRList;
     private String tagVS;
 
-    public VicketBatch(BigDecimal requestAmount, BigDecimal vicketsValue,
-               String currencyCode, String tagVS, VicketServer vicketServer) throws Exception {
-        this.setRequestAmount(requestAmount);
+    public VicketBatch(BigDecimal totalAmount, BigDecimal vicketsValue, String currencyCode,
+               String tagVS, Boolean isTimeLimited, VicketServer vicketServer) throws Exception {
+        this.setTotalAmount(totalAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
         this.vicketsValue = vicketsValue;
+        this.isTimeLimited = isTimeLimited;
         this.tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
-        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, vicketServer);
+        this.vicketsMap = getVicketBatch(totalAmount,vicketsValue, currencyCode, tagVS, vicketServer);
         vicketCSRList = new ArrayList<Map>();
         for(Vicket vicket : vicketsMap.values()) {
             Map csrVicketMap = new HashMap();
             csrVicketMap.put("currencyCode", currencyCode);
-            csrVicketMap.put("tagVS", tagVS);
+            csrVicketMap.put("tag", tagVS);
             csrVicketMap.put("vicketValue", vicketsValue.toString());
             csrVicketMap.put("csr", new String(vicket.getCertificationRequest().getCsrPEM(), "UTF-8"));
             vicketCSRList.add(csrVicketMap);
@@ -65,12 +68,12 @@ public class VicketBatch {
         this.vicketServer = vicketServer;
     }
 
-    public BigDecimal getRequestAmount() {
-        return requestAmount;
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setRequestAmount(BigDecimal requestAmount) {
-        this.requestAmount = requestAmount;
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public String getCurrencyCode() {
@@ -105,9 +108,11 @@ public class VicketBatch {
         Map smimeContentMap = new HashMap();
         smimeContentMap.put("operation", TypeVS.VICKET_REQUEST.toString());
         smimeContentMap.put("serverURL", vicketServer.getServerURL());
-        smimeContentMap.put("totalAmount", requestAmount.toString());
+        smimeContentMap.put("subject", subject);
+        smimeContentMap.put("totalAmount", totalAmount.toString());
         smimeContentMap.put("currencyCode", currencyCode);
-        smimeContentMap.put("tagVS", tagVS);
+        smimeContentMap.put("isTimeLimited", isTimeLimited);
+        smimeContentMap.put("tag", tagVS);
         smimeContentMap.put("UUID", UUID.randomUUID().toString());
         JSONObject requestJSON = new JSONObject(smimeContentMap);
         return requestJSON;

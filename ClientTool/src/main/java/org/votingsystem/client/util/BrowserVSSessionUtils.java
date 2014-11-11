@@ -101,18 +101,32 @@ public class BrowserVSSessionUtils {
         flush();
     }
 
-    public void setMobileCryptoToken(JSONObject deviceDataJSON) {
-        sessionDataJSON.put("mobileCryptoToken", deviceDataJSON);
+    public void setCryptoToken(CryptoTokenVS cryptoTokenVS, JSONObject deviceDataJSON) {
+        log.debug("setCryptoToken - type: " + cryptoTokenVS.toString() + "- deviceDataJSON: " +
+                ((deviceDataJSON != null)?deviceDataJSON.toString():"null"));
+        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoTokenVS.toString());
+        if(deviceDataJSON == null) deviceDataJSON = new JSONObject();
+        deviceDataJSON.put("type", cryptoTokenVS.toString());
+        browserSessionDataJSON.put("cryptoTokenVS", deviceDataJSON);
         flush();
     }
 
     //{"id":,"deviceName":"","certPEM":""}
-    public JSONObject getMobileCryptoToken() {
-        return sessionDataJSON.getJSONObject("mobileCryptoToken");
+    public JSONObject getCryptoToken() {
+        return browserSessionDataJSON.getJSONObject("cryptoTokenVS");
     }
 
-    public String getMobileCryptoName() {
-        return sessionDataJSON.getJSONObject("mobileCryptoToken").getString("deviceName");
+    public static CryptoTokenVS getCryptoTokenType () {
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        return CryptoTokenVS.valueOf(tokenType);
+    }
+
+    public String getCryptoTokenName() {
+        if(browserSessionDataJSON.has("cryptoTokenVS")) {
+            if(browserSessionDataJSON.getJSONObject("cryptoTokenVS").has("deviceName")) {
+                return browserSessionDataJSON.getJSONObject("cryptoTokenVS").getString("deviceName");
+            } else return null;
+        } else return null;
     }
 
     public Long getCSRRequestId() {
@@ -256,7 +270,7 @@ public class BrowserVSSessionUtils {
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject, headers);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
-                JSONObject mobileTokenJSON = getInstance().getMobileCryptoToken();//{"id":,"deviceName":"","certPEM":""}
+                JSONObject mobileTokenJSON = getInstance().getCryptoToken();//{"id":,"deviceName":"","certPEM":""}
                 Long deviceToId = mobileTokenJSON.getLong("id");
                 String deviceToName = mobileTokenJSON.getString("deviceName");
                 String deviceFromName = InetAddress.getLocalHost().getHostName();
@@ -265,9 +279,7 @@ public class BrowserVSSessionUtils {
                 requestBundle = WebSocketUtils.getSignRequest(deviceToId, deviceToName,
                     deviceFromName, toUser, textToSign, subject, ContextVS.getInstance().getLocale().getLanguage(),
                     deviceToCert, headers);
-
                 BrowserVS.getInstance().sendWebSocketMessage(requestBundle.getRequest().toString());
-
                 countDownLatch.await();
                 ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -301,15 +313,9 @@ public class BrowserVSSessionUtils {
         return messageToDeviceResponse;
     }
 
-    public static CryptoTokenVS getCryptoTokenType () {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
-        return CryptoTokenVS.valueOf(tokenType);
-    }
-
     public void showMessage(final String message, final Button optionButton) {
         PlatformImpl.runLater(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 new MessageDialog().showHtmlMessage(message, optionButton);
             }
         });

@@ -311,4 +311,15 @@ public class DateUtils {
         else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
 
+    public static Date getDayWeekDate (String dateStr) throws ParseException {
+        Date result = null;
+        try {
+            result = getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");
+            return result;
+        } catch (Exception ex) {
+            result = getDateFromString (dateStr, "EEE dd MMM' 'HH:mm");
+            return result;
+        }
+    }
+
 }

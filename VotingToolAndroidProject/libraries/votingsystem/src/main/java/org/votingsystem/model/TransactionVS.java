@@ -9,7 +9,6 @@ import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,15 +31,6 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public List<String> getToUserIBAN() {
-        return toUserIBAN;
-    }
-
-    public void setToUserIBAN(List<String> toUserIBAN) {
-        this.toUserIBAN = toUserIBAN;
-    }
-
-
     public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, FROM_BANKVS, FROM_USERVS,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD;}
 
@@ -51,29 +41,37 @@ public class TransactionVS  implements Serializable {
     private String messageSMIMEURL;
     private String subject;
     private BigDecimal amount = null;
-
     private transient SMIMEMessage messageSMIME;
     private byte[] messageSMIMEBytes;
     private transient SMIMEMessage cancellationSMIME;
     private byte[] cancellationSMIMEBytes;
-
+    private Boolean isTimeLimited;
     private TransactionVS transactionParent;
     private String currencyCode;
-
     private UserVS fromUserVS;
     private UserVS sender;
     private UserVS toUserVS;
     private List<String> toUserIBAN;
-
     private List<Vicket> vickets;
-    private List<TagVS> tagVSList;
+    private TagVS tagVS = new TagVS(TagVS.WILDTAG);
     private Type type;
-
     private Date validTo;
     private Date dateCreated;
     private Date lastUpdated;
 
     public TransactionVS() {}
+
+    public TransactionVS(BigDecimal amount, String currencyCode) {
+        this.amount = amount;
+        this.currencyCode = currencyCode;
+    }
+
+    public TransactionVS(BigDecimal amount, String currencyCode, TagVS tagVS, boolean isTimeLimited){
+        this.amount = amount;
+        this.currencyCode = currencyCode;
+        this.tagVS = tagVS;
+        this.isTimeLimited = isTimeLimited;
+    }
 
     public TransactionVS(Type type, List<Vicket> vickets) {
         this.type = type;
@@ -177,16 +175,28 @@ public class TransactionVS  implements Serializable {
         this.sender = sender;
     }
 
-    public List<TagVS> getTagVSList() {
-        return tagVSList;
-    }
-
     public TagVS getTagVS() {
-        return tagVSList.iterator().next();
+        return tagVS;
     }
 
-    public void setTagVSList(List<TagVS> tagVSList) {
-        this.tagVSList = tagVSList;
+    public List<String> getToUserIBAN() {
+        return toUserIBAN;
+    }
+
+    public void setToUserIBAN(List<String> toUserIBAN) {
+        this.toUserIBAN = toUserIBAN;
+    }
+
+    public Boolean isTimeLimited() {
+        return isTimeLimited;
+    }
+
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
+    }
+
+    public void setTagVS(TagVS tagVS) {
+        this.tagVS = tagVS;
     }
 
     public SMIMEMessage getMessageSMIME() {
@@ -328,7 +338,7 @@ public class TransactionVS  implements Serializable {
         TagVS tagVS = null;
         if(uriData.getQueryParameter("tagVS") != null) tagVS = new TagVS(uriData.getQueryParameter("tagVS"));
         else tagVS = new TagVS(TagVS.WILDTAG);
-        transactionVS.setTagVSList(Arrays.asList(tagVS));
+        transactionVS.setTagVS(tagVS);
         transactionVS.setCurrencyCode(uriData.getQueryParameter("currencyCode"));
         transactionVS.setSubject(uriData.getQueryParameter("subject"));
         UserVS toUserVS = new UserVS();
@@ -347,7 +357,7 @@ public class TransactionVS  implements Serializable {
         if(tagArray != null && tagArray.length() > 0) {
             tagVS = new TagVS(((JSONObject)tagArray.get(0)).getString("name"));
         } else tagVS = new TagVS(TagVS.WILDTAG);
-        transactionVS.setTagVSList(Arrays.asList(tagVS));
+        transactionVS.setTagVS(tagVS);
         transactionVS.setCurrencyCode(documentToSign.getString("currency"));
         transactionVS.setSubject(documentToSign.getString("subject"));
 
@@ -391,14 +401,13 @@ public class TransactionVS  implements Serializable {
         }
         transactionVS.setSubject(jsonData.getString("subject"));
         transactionVS.setCurrencyCode(jsonData.getString("currency"));
-        transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated"),
-                "dd MMM yyyy' 'HH:mm"));
+        transactionVS.setDateCreated(DateUtils.getDayWeekDate(jsonData.getString("dateCreated")));
         if(jsonData.has("validTo")) transactionVS.setValidTo(
-                DateUtils.getDateFromString(jsonData.getString("validTo"), "dd MMM yyyy' 'HH:mm"));
+                DateUtils.getDayWeekDate(jsonData.getString("validTo")));
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));
-        if(jsonData.has("tags")) transactionVS.setTagVSList(TagVS.parse(jsonData.getJSONArray("tags"))); ;
+        if(jsonData.has("tag")) transactionVS.setTagVS(new TagVS(jsonData.getString("tag")));
         return transactionVS;
     }
 
@@ -440,13 +449,7 @@ public class TransactionVS  implements Serializable {
         if(type != null) jsonData.put("type", type.toString());
         if(amount != null) jsonData.put("amount", amount.toString());
         jsonData.put("messageSMIMEURL", messageSMIMEURL);
-        if(tagVSList != null && !tagVSList.isEmpty()) {
-            JSONArray jsonArray = new JSONArray();
-            for(TagVS tag:tagVSList) {
-                jsonArray.put(tag.toJSON());
-            }
-            jsonData.put("tags", jsonArray);
-        }
+        jsonData.put("tag", tagVS.getName());
         return jsonData;
     }
 
@@ -460,10 +463,8 @@ public class TransactionVS  implements Serializable {
 
     @Override
     public String toString() {
-        String tagVS = null;
-        if(tagVSList != null && !tagVSList.isEmpty()) tagVS = tagVSList.iterator().next().getName();
         return  "[TransactionVS - subject: '" + subject + "' - amount: '" + amount + "'" +
-            " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS + " - toUser: '" +
+            " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS.getName() + " - toUser: '" +
                 toUserVS.getName() + "' - toUserIBAN: '" + toUserVS.getIBAN() +"']";
     }
 

@@ -150,7 +150,7 @@
                 return pertecentageExpended.toFixed(0)
             },
             isTimeLimited: function(currency, tag) {
-                if(this.balance.balancesTo[currency][tag].timeLimited === 0) return false
+                if(this.balance.balancesTo[currency][tag].timeLimited == 0) return false
                 else return true
             },
             getMapKeys: function(e) {

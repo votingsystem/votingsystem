@@ -142,7 +142,7 @@ public class SignatureService extends Service<ResponseVS> {
         private String getOperationMessage(OperationVS operationVS) {
             if(CryptoTokenVS.MOBILE == BrowserVSSessionUtils.getCryptoTokenType()) {
                 return ContextVS.getMessage("messageToDeviceProgressMsg",
-                        BrowserVSSessionUtils.getInstance().getMobileCryptoName());
+                        BrowserVSSessionUtils.getInstance().getCryptoTokenName());
             } else return operationVS.getSignedMessageSubject();
         }
 
@@ -312,7 +312,10 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
                 vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
-                JSONArray storedWalletJSON = (JSONArray) WalletUtils.getWallet(password);
+                Object wallet = WalletUtils.getWallet(password);
+                JSONArray storedWalletJSON = null;
+                if(wallet == null) storedWalletJSON = new JSONArray();
+                else storedWalletJSON = (JSONArray) WalletUtils.getWallet(password);
                 storedWalletJSON.addAll(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
                 WalletUtils.saveWallet(storedWalletJSON, password);
                 Map responseMap = new HashMap<>();

@@ -38,7 +38,7 @@ public class EventVSPagerActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
         }
     };
 

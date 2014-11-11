@@ -442,7 +442,7 @@ public class ContextVS {
         }
     }
 
-    public static void saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
+    public static UserVS saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
         byte[] resultBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
         File mainKeyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
         mainKeyStoreFile.createNewFile();
@@ -452,6 +452,7 @@ public class ContextVS {
         userVSKeyStoreFile.createNewFile();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), userVSKeyStoreFile);
         FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), mainKeyStoreFile);
+        return userVS;
     }
 
     public static KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS{

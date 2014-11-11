@@ -116,6 +116,7 @@
             messageToUser:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.selectedTags = []
                 this.$.tagDialog.addEventListener('tag-selected', function (e) {
                     console.log("tag-selected: " + JSON.stringify(e.detail))
                     this.selectedTags = e.detail
@@ -145,7 +146,6 @@
                     this.messageToUser = "<g:message code='amountTooLowMsg'/>"
                     return
                 }
-
                 var tagList = []
                 if(this.selectedTags.length > 0) {
                     for(tagIdx in this.selectedTags) {

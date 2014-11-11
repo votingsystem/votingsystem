@@ -112,7 +112,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("vicketValue", amount);
         delegationDataMap.put("currencyCode", currency);
-        delegationDataMap.put("tagVS", tagVS);
+        delegationDataMap.put("tag", tagVS);
         JSONObject jsonObject = new JSONObject(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
                 new DERUTF8String(jsonObject.toString())));

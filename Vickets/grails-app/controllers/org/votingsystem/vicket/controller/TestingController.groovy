@@ -36,10 +36,11 @@ class TestingController {
     def systemService
     def groupVSService
     def transactionVS_UserVSService
+    def bankVSService
 
     def index() {
-        TransactionVSUtils tu = new TransactionVSUtils();
-        render tu.testService()
+        bankVSService.refreshBankInfoData()
+        render "OK"
         return false
     }
 
@@ -71,8 +72,6 @@ class TestingController {
             for(TransactionVS transaction : transactionList) {
                 transaction.delete()
             }
-
-
         }*/
         render "OK"
         return false

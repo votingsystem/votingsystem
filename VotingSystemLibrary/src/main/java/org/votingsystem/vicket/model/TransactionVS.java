@@ -259,11 +259,13 @@ public class TransactionVS  implements Serializable {
         if(jsonData.has("bankIBAN")) {
             transactionVS.setFromUser(jsonData.getString("fromUser"));
             transactionVS.setFromUserIBAN(jsonData.getString("fromUserIBAN"));
-            UserVS toUserVS = new UserVS();
-            toUserVS.setName(jsonData.getString("toUserName"));
-            JSONArray toUserArray = jsonData.getJSONArray("toUserIBAN");
-            toUserVS.setIBAN(toUserArray.getString(0));
-            transactionVS.setToUserVS(toUserVS);
+            if(jsonData.has("toUserName")) {
+                UserVS toUserVS = new UserVS();
+                toUserVS.setName(jsonData.getString("toUserName"));
+                JSONArray toUserArray = jsonData.getJSONArray("toUserIBAN");
+                toUserVS.setIBAN(toUserArray.getString(0));
+                transactionVS.setToUserVS(toUserVS);
+            }
         } else if (jsonData.has("fromUserVS")) {
             JSONObject fromUserJSON = jsonData.getJSONObject("fromUserVS");
             transactionVS.setFromUserVS(UserVS.parse(fromUserJSON));

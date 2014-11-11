@@ -78,14 +78,18 @@ public class VicketService extends IntentService {
             switch(operation) {
                 case VICKET_USER_INFO:
                     responseVS = updateUserInfo();
-                    break;
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode())
+                        responseVS.setNotificationMessage(getString(R.string.user_info_updated));
+                    return;
                 case VICKET_REQUEST:
-                    responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
-                            transactionVS.getCurrencyCode(), tagVS, contextVS.getVicketServer()));
+                    responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(),
+                            transactionVS.getAmount(), transactionVS.getCurrencyCode(), tagVS,
+                            transactionVS.isTimeLimited(), contextVS.getVicketServer()));
                     break;
                 case VICKET_SEND:
-                    VicketBatch vicketBatch = new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
-                            transactionVS.getCurrencyCode(), tagVS, contextVS.getVicketServer());
+                    VicketBatch vicketBatch = new VicketBatch(transactionVS.getAmount(),
+                            transactionVS.getAmount(), transactionVS.getCurrencyCode(), tagVS,
+                            transactionVS.isTimeLimited(), contextVS.getVicketServer());
                     responseVS = requestAndSendVicket(vicketBatch);
                     break;
                 case VICKET_CANCEL:
@@ -336,7 +340,6 @@ public class VicketService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject issuedVicketsJSON = new JSONObject(new String(
                         responseVS.getMessageBytes(), "UTF-8"));
-
                 JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
                 for(int i = 0; i < transactionsArray.length(); i++) {
                     TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
@@ -354,7 +357,7 @@ public class VicketService extends IntentService {
                 }
                 VicketContentProvider.insertVickets(contextVS, vicketBatch.getVicketsMap().values());
                 caption = getString(R.string.vicket_request_ok_caption);
-                message = getString(R.string.vicket_request_ok_msg, vicketBatch.getRequestAmount(),
+                message = getString(R.string.vicket_request_ok_msg, vicketBatch.getTotalAmount(),
                         vicketBatch.getCurrencyCode());
                 iconId = R.drawable.fa_money_24;
             } else {
@@ -362,10 +365,7 @@ public class VicketService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setIconId(iconId).setCaption(caption).setNotificationMessage(message);
             return responseVS;

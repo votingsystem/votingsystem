@@ -44,7 +44,7 @@ public class IntentFilterActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             try {
                 if(operationVS != null  && ContextVS.State.WITH_CERTIFICATE == contextVS.getState()){

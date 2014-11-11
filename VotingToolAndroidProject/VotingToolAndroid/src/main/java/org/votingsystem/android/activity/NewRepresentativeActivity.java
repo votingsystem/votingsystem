@@ -67,8 +67,8 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver",
+                    "extras:" + intent.getExtras());
             TypeVS broadcastType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                     ResponseVS.SC_ERROR);

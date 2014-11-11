@@ -65,7 +65,7 @@
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         this.loadWallet(appMessageJSON.message)
                     } else {
-                        var caption = '<g:message code="vicketRequestERRORCaption"/>'
+                        var caption = '<g:message code="errorLbl"/>'
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))

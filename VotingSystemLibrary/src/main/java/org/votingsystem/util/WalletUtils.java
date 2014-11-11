@@ -49,16 +49,17 @@ public class WalletUtils {
         return result;
     }
 
+    public static boolean exist() throws ExceptionVS {
+        File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.WALLET_FILE_NAME);
+        return walletFile.exists();
+    }
+
     public static JSON getWallet(String password) throws ExceptionVS {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         if(CryptoTokenVS.DNIe.toString().equals(tokenType)) throw new ExceptionVS(
                 ContextVS.getMessage("dnieNotSupportedMsg"));
-        File walletFile = null;
-        try {
-            walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.WALLET_FILE_NAME);
-        } catch(Exception ex) {
-            throw new ExceptionVS(ContextVS.getMessage("walletNotFoundErrorMsg"), ex);
-        }
+        File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.WALLET_FILE_NAME);
+        if(!walletFile.exists()) return null;
         try {
             KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
             PrivateKey privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());

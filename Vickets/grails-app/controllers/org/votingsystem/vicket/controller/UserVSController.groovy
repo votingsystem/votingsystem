@@ -2,6 +2,7 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
@@ -34,7 +35,13 @@ class UserVSController {
                     UserVSAccount.withTransaction {
                         UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:params.IBAN)
                         if(userAccount) uservs = userAccount.userVS
-                        else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+                        else {
+                            Iban iban = Iban.valueOf(params.IBAN);
+                            BankVSInfo bankVSInfo
+                            BankVSInfo.withTransaction { bankVSInfo = BankVSInfo.findWhere(bankCode:iban.bankCode) }
+                            if(bankVSInfo) msg = message(code: 'ibanFromBankVSClientMsg', args:[bankVSInfo.bankVS.name])
+                            else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+                        }
                     }
                 }
             }

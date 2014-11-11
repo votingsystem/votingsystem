@@ -100,9 +100,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
             }});
         keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
-        UserVS lastAuthenticatedUser = BrowserVSSessionUtils.getInstance().getUserVS();
-        if(lastAuthenticatedUser != null) keyStoreLbl.setText(
-                lastAuthenticatedUser.getCertificate().getSubjectDN().toString());
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
@@ -171,9 +168,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
 
     @Override public void show() {
         log.debug("show");
-        String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                CryptoTokenVS.DNIe.toString());
-        CryptoTokenVS cryptoTokenVS = CryptoTokenVS.valueOf(cryptoTokenStr);
+        CryptoTokenVS cryptoTokenVS = BrowserVSSessionUtils.getCryptoTokenType();
         gridPane.getChildren().remove(keyStoreVBox);
         switch(cryptoTokenVS) {
             case DNIe:
@@ -185,7 +180,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 break;
             case MOBILE:
                 signWithMobileRb.setSelected(true);
-                mobileDeviceLbl.setText(BrowserVSSessionUtils.getInstance().getMobileCryptoToken().getString("deviceName"));
+                mobileDeviceLbl.setText(BrowserVSSessionUtils.getInstance().getCryptoTokenName());
                 gridPane.add(mobileDeviceInfo, 0, 2);
                 break;
         }
@@ -224,9 +219,8 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
 
     private void validateForm() {
         log.debug("validateForm");
-        String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                CryptoTokenVS.DNIe.toString());
-        CryptoTokenVS cryptoTokenVS = CryptoTokenVS.valueOf(cryptoTokenStr);
+        CryptoTokenVS cryptoTokenVS = BrowserVSSessionUtils.getCryptoTokenType();
+        CryptoTokenVS newCryptoTokenVS = null;
         if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
                 showMessage(null, ContextVS.getMessage("errorLbl") + " " +
@@ -240,25 +234,20 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                     PasswordDialog passwordDialog = new PasswordDialog();
                     passwordDialog.show(ContextVS.getMessage("newKeyStorePasswordMsg"));
                     String password = passwordDialog.getPassword();
-                    ContextVS.saveUserKeyStore(userKeyStore, password);
-                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                            CryptoTokenVS.JKS_KEYSTORE.toString());
+                    deviceDataJSON = ContextVS.saveUserKeyStore(userKeyStore, password).toJSON();
+                    newCryptoTokenVS = CryptoTokenVS.JKS_KEYSTORE;
                 } catch(Exception ex) {
                     showMessage(null, ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }
             }
         }
-        if(signWithDNIeRb.isSelected()) {
-            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
-        }
+        if(signWithDNIeRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.DNIe;
         if(signWithMobileRb.isSelected() && deviceDataJSON == null) {
             showMessage(null, ContextVS.getMessage("deviceDataMissingErrorMsg"));
             return;
-        } else if(signWithMobileRb.isSelected()) {
-            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.MOBILE.toString());
-            BrowserVSSessionUtils.getInstance().setMobileCryptoToken(deviceDataJSON);
-        }
+        } else if(signWithMobileRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.MOBILE;
+        BrowserVSSessionUtils.getInstance().setCryptoToken(newCryptoTokenVS, deviceDataJSON);
         hide();
     }
 

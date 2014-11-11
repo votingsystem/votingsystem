@@ -48,10 +48,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.WebSocketMessage;
+import org.votingsystem.util.*;
 import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,6 +69,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private static Logger log = Logger.getLogger(BrowserVS.class);
     private static final int BROWSER_WIDTH = 1200;
     private static final int BROWSER_HEIGHT = 1000;
+    private static final int MAX_CHARACTERS_TAB_CAPTION = 25;
 
     private Stage browserStage;
     private Map<String, WebView> webViewMap = new HashMap<>();
@@ -313,8 +311,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 }
             }
         });
-        if(tabCaption != null) newTab.setText(tabCaption);
-        else newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
+        if(tabCaption != null) newTab.setText(tabCaption.length() > MAX_CHARACTERS_TAB_CAPTION ?
+                tabCaption.substring(0, MAX_CHARACTERS_TAB_CAPTION) + "...":tabCaption);
+        else if(URL != null) newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
         newTab.setContent(webView);
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);
@@ -559,13 +558,17 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     case CERT_USER_NEW:
                         browserHelper.processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                         break;
+                    case WALLET_OPEN:
+                        if(WalletUtils.exist()) browserHelper.processOperationVS(operationVS, null);
+                        else showMessage(new ResponseVS(ResponseVS.SC_ERROR,
+                                ContextVS.getMessage("walletNotFoundErrorMsg")));
+                        break;
                     default:
                         browserHelper.processOperationVS(operationVS, null);
                 }
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("errorLbl") + " - " +
-                        ex.getMessage()));
+                showMessage(new ResponseVS(ResponseVS.SC_ERROR,  ex.getMessage()));
             }
         }
 

@@ -1,11 +1,13 @@
 package org.votingsystem.util;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONObject;
+import org.votingsystem.android.lib.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.EventVSResponse;
 import org.votingsystem.model.OperationVS;
@@ -46,7 +48,7 @@ public class ResponseVS<T> implements Parcelable {
 
 
     private int statusCode;
-    private Integer iconId = -1;
+    private Integer iconId = null;
     private StatusVS<?> status;
     private OperationVS operation;
     private EventVSResponse eventQueryResponse;
@@ -190,6 +192,12 @@ public class ResponseVS<T> implements Parcelable {
         responseVS.setCaption(caption);
         responseVS.setNotificationMessage(message);
         return responseVS;
+    }
+
+    public static ResponseVS getExceptionResponse(Exception ex, Context context) {
+        String message = ex.getMessage();
+        if(message == null || message.isEmpty()) message = context.getString(R.string.exception_lbl);
+        return getExceptionResponse(context.getString(R.string.exception_lbl), message);
     }
 
     public String getMessage() {
@@ -388,7 +396,7 @@ public class ResponseVS<T> implements Parcelable {
 
     public String getNotificationMessage() {
         if(notificationMessage == null) {
-            if (ContentTypeVS.JSON == contentType) {
+            if (ContentTypeVS.JSON == contentType && getMessageJSON().has("message")) {
                 try {
                     notificationMessage = getMessageJSON().getString("message");
                 } catch(Exception ex) {

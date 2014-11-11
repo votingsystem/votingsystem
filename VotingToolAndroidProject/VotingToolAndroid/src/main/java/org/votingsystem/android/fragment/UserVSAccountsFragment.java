@@ -30,6 +30,7 @@ import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVS;
@@ -38,7 +39,6 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,6 +55,7 @@ public class UserVSAccountsFragment extends Fragment {
 
 	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
 
+    private String currencyCode;
     private TransactionVS transactionVS;
     private View rootView;
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
@@ -62,12 +63,11 @@ public class UserVSAccountsFragment extends Fragment {
     private TextView last_request_date;
     private TextView time_remaining_info;
     private ListView accounts_list_view;
-    private Menu fragmentMenu;
     private String IBAN;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+        Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
@@ -88,15 +88,14 @@ public class UserVSAccountsFragment extends Fragment {
             switch(responseVS.getTypeVS()) {
                 case VICKET_REQUEST:
                     if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
-                        BigDecimal amount = (BigDecimal) responseVS.getData();
+                        transactionVS = (TransactionVS) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                getString(R.string.vicket_request_pin_msg, amount,
+                                getString(R.string.vicket_request_pin_msg, transactionVS.getAmount(),
                                 transactionVS.getCurrencyCode()), false, TypeVS.VICKET_REQUEST);
                     } else {
-                        ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                                responseVS.getNotificationMessage());
+                        UIUtils.launchMessageActivity(getActivity(), responseVS);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                            loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                                loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                     }
                     break;
                 case VICKET_SEND:
@@ -108,8 +107,7 @@ public class UserVSAccountsFragment extends Fragment {
                 case VICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
-                    } else ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                            responseVS.getNotificationMessage());
+                    } else UIUtils.launchMessageActivity(getActivity(), responseVS);
                     break;
                 default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
@@ -152,7 +150,6 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     @Override public void onStart() {
-        Log.d(TAG + ".onStart()", "onStart");
         super.onStart();
         if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
             transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
@@ -165,7 +162,6 @@ public class UserVSAccountsFragment extends Fragment {
             } catch (Exception ex) {ex.printStackTrace();}
         }
         if(transactionVS != null){
-            Log.d(TAG + ".onStart(...)", transactionVS.toString());
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
                 UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
@@ -241,7 +237,6 @@ public class UserVSAccountsFragment extends Fragment {
         menuInflater.inflate(R.menu.vicket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
-        fragmentMenu = menu;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -262,78 +257,57 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendUserInfoRequest() {
-        Log.d(TAG + ".sendUserInfoRequest(...) ", "");
-        try {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    VicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                VicketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        getActivity().startService(startIntent);
     }
 
     private void sendVicketRequest() {
-        try {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    VicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                VicketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        getActivity().startService(startIntent);
     }
 
     private void sendVicket() {
-        try {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    VicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                VicketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
+        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        getActivity().startService(startIntent);
     }
 
     private void sendTransactionVS() {
-        try {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    TransactionVSService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                TransactionVSService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
+        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        getActivity().startService(startIntent);
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
@@ -371,10 +345,11 @@ public class UserVSAccountsFragment extends Fragment {
             if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                 request_button.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
+                        UserVSAccountsFragment.this.currencyCode = currencyCode;
                         CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
                                 getString(R.string.cash_request_dialog_caption),
                                 getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
-                                accountBalance, TypeVS.VICKET_REQUEST);
+                                accountBalance, currencyCode, TypeVS.VICKET_REQUEST);
                     }
                 });
                 request_button.setVisibility(View.VISIBLE);

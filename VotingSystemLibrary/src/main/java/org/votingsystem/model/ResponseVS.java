@@ -328,9 +328,18 @@ public class ResponseVS<T> implements Serializable {
         return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message);
     }
 
-    public static ResponseVS getJSONResponse(Integer status, JSON messageJSON) {
-        ResponseVS responseVS = new ResponseVS(status, ContentTypeVS.JSON);
+    public static ResponseVS getJSONResponse(Integer statusCode, JSON messageJSON) {
+        ResponseVS responseVS = new ResponseVS(statusCode, ContentTypeVS.JSON);
         responseVS.setMessageJSON(messageJSON);
+        return responseVS;
+    }
+
+    public static ResponseVS getJSONResponse(Integer statusCode, String message) {
+        ResponseVS responseVS = new ResponseVS(statusCode, ContentTypeVS.JSON);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("statusCode", statusCode);
+        jsonObject.put("message", message);
+        responseVS.setMessageJSON(jsonObject);
         return responseVS;
     }
 

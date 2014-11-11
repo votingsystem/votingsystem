@@ -133,7 +133,9 @@ public class TagVS  implements Serializable {
     public static List<TagVS> parse(JSONArray jsonArray) throws Exception {
         List<TagVS> result = new ArrayList<TagVS>();
         for(int i = 0; i < jsonArray.length(); i++) {
-            result.add(parse((JSONObject) jsonArray.get(i)));
+            if(jsonArray.get(i) instanceof  JSONObject) {
+                result.add(parse((JSONObject) jsonArray.get(i)));
+            } else result.add(new TagVS((String) jsonArray.get(i)));
         }
         return result;
     }

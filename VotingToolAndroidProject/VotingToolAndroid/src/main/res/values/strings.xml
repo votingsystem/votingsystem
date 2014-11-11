@@ -321,15 +321,15 @@
         entre el resto de usuarios]]></string>
     <string name="cash_request_dialog_caption">retirar dinero</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
-    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
+    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
     <string name="vicket_request_msg_subject">retirada de vickets</string>
-    <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
+    <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
     <string name="transactionvs_send_pin_msg"><![CDATA[va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
     <string name="vicket_request_ok_caption">retirada de dinero con éxito</string>
     <string name="vicket_request_error_caption">error retirando dinero</string>
-    <string name="vicket_request_ok_msg"><![CDATA[su disponible se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
+    <string name="vicket_request_ok_msg"><![CDATA[su disponible se ha incrementado en <b>\'%1$s\' %2$s</b>]]></string>
     <string name="insufficient_cash_for_tagvs_caption">disponible insuficiente para \'%1$s\'</string>
     <string name="insufficient_cash_caption">disponible insuficiente</string>
     <string name="insufficient_cash_msg"><![CDATA[importe solicitado <b>\'%2$s\' %1$s</b><br/>
@@ -343,7 +343,7 @@
     <string name="week_lbl">semana</string>
     <string name="transactionvs_lbl">transacción</string>
     <string name="transactionsvs_lbl">transacciones</string>
-    <string name="transactionvs_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
+    <string name="transactionvs_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$s]]></string>
     <string name="transactionvs_from_user_lbl"><![CDATA[usuario <b>emisor</b>:<br/><b>nif:</b> %1$s<br/>
     <b>nombre:</b> %2$s]]></string>
     <string name="transactionvs_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
@@ -421,4 +421,12 @@
     <string name="signing_document_lbl">firmando documento</string>
     <string name="reject_sign_request_lbl">rechazar solicitud</string>
     <string name="reject_websocket_request_msg">el dispositivo \'%1$s\' ha rechazado su solicitud</string>
+    <string name="user_info_updated">información sobre las cuentas del usuario actualizada</string>
+    <string name="time_limited_checkbox_msg">gastar antes del domingo a las 24:00</string>
+    <string name="add_tag_lbl">añadir etiqueta</string>
+    <string name="selected_tag_lbl">para gastar en \'%1$s\'</string>
+    <string name="search_lbl">buscar</string>
+    <string name="search_tag_lbl">buscar etiquetas</string>
+    <string name="add_tag_advice_msg">si añade una etiqueta el ingreso sólo se podrá emplear en servicios asociados a esa etiqueta</string>
+    <string name="remove_tag_lbl">quitar etiqueta</string>
 </resources>

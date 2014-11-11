@@ -2,8 +2,8 @@
     "userVSList":[],
     "groupVSList":[],
     "bankVSList":[
-        {"fromUserVSId":11, "toUserVSId":10, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs to userVS",
+        {"fromUserVSId":11, "bankIBAN":"", "toUserVSId":8, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs to userVS",
          "fromUser": "ClientBankVS App1 App2", "fromUserIBAN":"ES8477777777450000012345",
-         "amount":"8000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
+         "amount":"200", "currencyCode": "EUR", "tags":["HIDROGENO"], "isTimeLimited":true}
     ]
 }

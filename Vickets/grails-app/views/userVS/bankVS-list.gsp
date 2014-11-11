@@ -2,20 +2,16 @@
 
 <polymer-element name="bankVS-list">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <style>
-            .nifColumn {width:50px; margin: 10px auto;}
-            .IBANColumn {width: 220px; margin: 10px auto;}
-            .nameColumn {width: 170px; margin: 10px auto;}
-            .stateColumn {width: 40px; margin: 10px auto;}
-            .row {margin: 0px  auto;text-align: center; cursor: pointer;}
-            .descriptionColumn {width: 350px; text-overflow: ellipsis;margin: 10px auto;}
+            .bankvs {border: 1px solid #6c0404; margin: 10px; padding:0 10px 10px 10px;
+                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); text-align: center;
+                cursor: pointer; text-overflow: ellipsis; max-width: 300px;
+            }
         </style>
         <template repeat="{{bankVS in bankVSMap.bankVSList}}">
-            <div horizontal layout class="row" on-click="{{bankVSSelected}}')">
-                <div class="nifColumn">{{bankVS.nif}}</div>
-                <div class="IBANColumn">{{bankVS.IBAN}}</div>
-                <div class="nameColumn">{{bankVS.name}}</div>
-                <div class="stateColumn">{{bankVS.state}}</div>
+            <div class="bankvs" on-click="{{bankVSSelected}}')">
+                <div class="nameColumn linkVS" style="font-size: 1.2em;">{{bankVS.name}}</div>
                 <div class="descriptionColumn">{{bankVS.description}}</div>
             </div>
         </template>

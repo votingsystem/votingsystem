@@ -71,8 +71,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver",
+                    "extras:" + intent.getExtras());
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
             else {
                 ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(

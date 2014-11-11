@@ -390,6 +390,5 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         if(USER_KEY.equals(key)) {
             userVS = PrefUtils.getSessionUserVS(this);
         }
-
     }
 }

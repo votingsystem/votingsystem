@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.iban4j.Iban
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -91,4 +92,16 @@ class BankVSService {
         return resultMap
     }
 
+    public void refreshBankInfoData() {
+        List<BankVS> bankVSList = BankVS.getAll()
+        for(BankVS bankVS : bankVSList) {
+            BankVSInfo bankVSInfo = BankVSInfo.findWhere(bankVS:bankVS)
+            Iban iban = Iban.valueOf(bankVS.IBAN);
+            if(bankVSInfo) {
+                bankVSInfo.setBankCode(iban.bankCode).save();
+            } else {
+                bankVSInfo = new BankVSInfo(bankVS:bankVS, bankCode:iban.bankCode).save();
+            }
+        }
+    }
 }

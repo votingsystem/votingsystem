@@ -73,8 +73,8 @@ public class RepresentativeGridFragment extends Fragment
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                "intent.getExtras(): " + intent.getExtras());
+        Log.d(TAG + ".broadcastReceiver",
+                "extras:" + intent.getExtras());
         int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);

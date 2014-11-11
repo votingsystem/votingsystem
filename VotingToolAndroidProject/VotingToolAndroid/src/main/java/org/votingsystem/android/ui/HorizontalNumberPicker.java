@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.votingsystem.android.R;
 
@@ -26,6 +27,7 @@ public class HorizontalNumberPicker extends LinearLayout {
     private EditText edit_text;
     private Button btn_plus;
     private Button btn_minus;
+    private TextView currency_text;
     private BigDecimal maxValue = new BigDecimal(0);
 
     private AtomicBoolean isLongPressed = new AtomicBoolean(false);
@@ -58,9 +60,8 @@ public class HorizontalNumberPicker extends LinearLayout {
             }
         });
         btn_minus = (Button) findViewById(R.id.btn_minus);
-
+        currency_text = (TextView) findViewById(R.id.currency_text);
         handler = new Handler();
-
         btn_minus.setOnTouchListener(new OnTouchListener() {
             @Override public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -91,8 +92,9 @@ public class HorizontalNumberPicker extends LinearLayout {
         this.maxValue = new BigDecimal(maxValue);
     }
 
-    public void setMaxValue(BigDecimal maxValue) {
+    public void setMaxValue(BigDecimal maxValue, String currencyCode) {
         this.maxValue = maxValue;
+        currency_text.setText(currencyCode);
     }
 
 

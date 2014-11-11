@@ -20,8 +20,8 @@
     .userInfoPanel { border: 1px solid #6c0404; padding: 10px; background: #f9f9f9; width: 300px; color: #888;
         font-size: 1em; padding:30px 20px 20px 20px; margin:20px 0 0 0;
     }
-    ::shadow #tooltip { padding: 0px; background: #f9f9f9; font-size: 1.2em; top:200px;}
-    ::shadow #control {color:#f9f9f9;}
+    #userInfoPanel #tooltip { padding: 0px; background: #f9f9f9; font-size: 1.2em; top:200px;}
+    #userInfoPanel #control {color:#f9f9f9;}
     paper-dialog::shadow #main {padding:10px 24px 0px 24px;}
     paper-dialog::shadow h1 {color:#6c0404;}
   </style>
@@ -36,7 +36,8 @@
         <core-icon-button id="searchButton" icon="search" on-tap="{{toogleSearchPanel}}" style="fill: #f9f9f9;"></core-icon-button>
         <div horizontal layout style="font-size: 0.8em;">
             <div flex></div>
-            <div horizontal layout center center-justified style=" margin:0 30px 0 0; width: 250px;">
+            <div id="connectContainer" horizontal layout center center-justified
+                 style=" margin:0 30px 0 0; width: 250px;display: none">
                 <core-icon-button id="connectButton" icon="{{connecButtonIcon}}" on-click="{{connectButtonClicked}}">
                     <span id="connectButtonDiv">{{connectButtonLbl}}</span>
                 </core-icon-button>
@@ -167,6 +168,10 @@
         }
     },
     updateSession:function(userVS, sessionData) {
+        if(sessionData!= null &&sessionData.cryptoTokenVS != null && "MOBILE" === sessionData.cryptoTokenVS.type) {
+            this.$.connectContainer.style.display = 'none'
+            return;
+        } else this.$.connectContainer.style.display = 'block'
         this.sessionData = sessionData
         this.userVS = userVS
         if(this.sessionData != null) {
