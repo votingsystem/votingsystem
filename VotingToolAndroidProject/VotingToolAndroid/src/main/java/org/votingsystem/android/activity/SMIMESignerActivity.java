@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;

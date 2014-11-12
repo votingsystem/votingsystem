@@ -200,7 +200,7 @@ public class Encryptor {
 	   Log.d(TAG + ".decryptSMIME(...) ", "decryptSMIME(...) ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, receiverPrivateKey));
-        return new SMIMEMessage(null, inputStream, null);
+       return new SMIMEMessage(inputStream);
    }
 
    /**

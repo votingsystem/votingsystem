@@ -93,7 +93,7 @@ public class VicketTransactionBatch {
             String hashCertVS = (String) receiptData.keySet().iterator().next();
             SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     java.util.Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes())));
-            String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getCertWithCertExtension(), ContextVS.VICKET_OID);
+            String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getVicketCert(), ContextVS.VICKET_OID);
             Vicket vicket = vicketMap.remove(signatureHashCertVS);
             vicket.validateReceipt(smimeReceipt, trustAnchor);
         }

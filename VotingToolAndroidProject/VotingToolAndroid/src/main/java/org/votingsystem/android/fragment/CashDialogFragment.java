@@ -35,6 +35,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
@@ -45,6 +46,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
+
 import java.math.BigDecimal;
 
 public class CashDialogFragment extends DialogFragment {

@@ -96,24 +96,17 @@ public class SignedMailGenerator {
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
                 ContextVS.DEFAULT_SIGNED_FILE_NAME);
-        SMIMEMessage body = new SMIMEMessage(session);
-        if (headers != null) {
-            for(Header header : headers) {
-                if (header != null) body.setHeader(header.getName(), header.getValue());
-            }
+        SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
+        if(fromUser != null) {
+            fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+            smimeMessage.setFrom(new InternetAddress(fromUser));
         }
-        if (fromUser != null && !fromUser.isEmpty()) {
-        	Address fromUserAddress = new InternetAddress(fromUser);
-        	body.setFrom(fromUserAddress);
+        if(toUser != null) {
+            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         }
-        if (toUser != null && !toUser.isEmpty()) {
-        	Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
-        	body.setRecipient(Message.RecipientType.TO, toUserAddress);
-        }
-        body.setSubject(subject);
-        body.setContent(mimeMultipart, mimeMultipart.getContentType());
-        body.save();
-        return body;
+        smimeMessage.setSubject(subject);
+        return smimeMessage;
     }
    
      public MimeMultipart genMimeMultipart(MimeBodyPart body, 

@@ -240,8 +240,9 @@ public class ResponseVS<T> implements Parcelable {
         return statusCode;
     }
 
-    public void setStatusCode(int statusCode) {
+    public ResponseVS setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+        return this;
     }
 
     public TypeVS getTypeVS() {
@@ -272,8 +273,7 @@ public class ResponseVS<T> implements Parcelable {
     public SMIMEMessage getSMIME() {
         if(smimeMessage == null && smimeMessageBytes != null) {
             try {
-                smimeMessage = new SMIMEMessage(null,
-                        new ByteArrayInputStream(smimeMessageBytes), null);
+                smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

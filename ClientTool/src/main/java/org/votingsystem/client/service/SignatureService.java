@@ -315,7 +315,7 @@ public class SignatureService extends Service<ResponseVS> {
                 Object wallet = WalletUtils.getWallet(password);
                 JSONArray storedWalletJSON = null;
                 if(wallet == null) storedWalletJSON = new JSONArray();
-                else storedWalletJSON = (JSONArray) WalletUtils.getWallet(password);
+                else storedWalletJSON = (JSONArray) wallet;
                 storedWalletJSON.addAll(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
                 WalletUtils.saveWallet(storedWalletJSON, password);
                 Map responseMap = new HashMap<>();
@@ -429,7 +429,6 @@ public class SignatureService extends Service<ResponseVS> {
             //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.name]
             //messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
             //encryptedDataList:messageVSJSON.encryptedDataList]
-
             return responseVS;
         }
 

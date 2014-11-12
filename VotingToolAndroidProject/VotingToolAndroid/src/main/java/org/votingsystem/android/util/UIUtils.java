@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -45,6 +44,8 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TagVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.util.ResponseVS;
 
 import java.text.DateFormat;
@@ -200,7 +201,7 @@ public class UIUtils  {
     public static Drawable getLogoIcon(Context context, int iconId) {
         Drawable logoIcon = context.getResources().getDrawable(iconId);
         logoIcon.setBounds(0, 0, 32, 32);
-        logoIcon.setColorFilter(R.color.navdrawer_background, PorterDuff.Mode.MULTIPLY);
+        //logoIcon.setColorFilter(R.color.navdrawer_background, PorterDuff.Mode.MULTIPLY);
         return logoIcon;
     }
 
@@ -302,6 +303,17 @@ public class UIUtils  {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         }
+    }
+
+    public static String getTagVSMessage(String tag, Context context) {
+        if(TagVS.WILDTAG.equals(tag)) return context.getString(R.string.wildtag_lbl);
+        else return tag;
+    }
+
+    public static String getVicketRequestMessage(TransactionVS transactionVS, Context context) {
+        String tagMessage = getTagVSMessage(transactionVS.getTagVS().getName(), context);
+        return context.getString(R.string.vicket_request_msg, transactionVS.getAmount().toPlainString(),
+                transactionVS.getCurrencyCode(), tagMessage);
     }
 
     public static void killApp(boolean killSafely) {

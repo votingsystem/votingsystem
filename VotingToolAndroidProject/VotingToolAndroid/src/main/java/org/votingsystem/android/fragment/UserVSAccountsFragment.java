@@ -22,7 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
@@ -56,6 +55,7 @@ public class UserVSAccountsFragment extends Fragment {
 	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
 
     private String currencyCode;
+    private ModalProgressDialogFragment progressDialog;
     private TransactionVS transactionVS;
     private View rootView;
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
@@ -64,18 +64,20 @@ public class UserVSAccountsFragment extends Fragment {
     private TextView time_remaining_info;
     private ListView accounts_list_view;
     private String IBAN;
+    private String pin;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            pin = intent.getStringExtra(ContextVS.PIN_KEY);
             switch(responseVS.getTypeVS()) {
                 case VICKET_USER_INFO:
                     sendUserInfoRequest();
                     break;
                 case VICKET_REQUEST:
-                    sendVicketRequest();
+                    sendVicketRequest(pin);
                     break;
                 case VICKET_SEND:
                     sendVicket();
@@ -94,8 +96,12 @@ public class UserVSAccountsFragment extends Fragment {
                                 transactionVS.getCurrencyCode()), false, TypeVS.VICKET_REQUEST);
                     } else {
                         UIUtils.launchMessageActivity(getActivity(), responseVS);
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+
+
+
+                            loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                        }
                     }
                     break;
                 case VICKET_SEND:
@@ -113,6 +119,7 @@ public class UserVSAccountsFragment extends Fragment {
                         responseVS.getNotificationMessage());
             }
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            if(progressDialog != null) progressDialog.dismiss();
         }
         }
     };
@@ -134,8 +141,6 @@ public class UserVSAccountsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
-                " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.uservs_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
@@ -257,7 +262,6 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendUserInfoRequest() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
@@ -266,19 +270,21 @@ public class UserVSAccountsFragment extends Fragment {
         getActivity().startService(startIntent);
     }
 
-    private void sendVicketRequest() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+    private void sendVicketRequest(String pin) {
+        progressDialog = ModalProgressDialogFragment.showDialog(getFragmentManager(),
+                UIUtils.getVicketRequestMessage(transactionVS, getActivity()),
+                getString(R.string.vicket_request_msg_subject));
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.PIN_KEY, pin);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
         ((ActivityVS)getActivity()).refreshingStateChanged(true);
         getActivity().startService(startIntent);
     }
 
     private void sendVicket() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
@@ -290,7 +296,6 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendTransactionVS() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 TransactionVSService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);

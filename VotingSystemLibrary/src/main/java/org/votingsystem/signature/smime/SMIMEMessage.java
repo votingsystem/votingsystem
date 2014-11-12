@@ -60,7 +60,7 @@ public class SMIMEMessage extends MimeMessage {
     private TimeStampToken timeStampToken;
     private SMIMEContentInfo contentInfo;
     private VoteVS voteVS;
-    private X509Certificate certWithCertExtension;
+    private X509Certificate vicketCert;
 
     public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
         super(ContextVS.MAIL_SESSION);
@@ -102,7 +102,7 @@ public class SMIMEMessage extends MimeMessage {
         return timeStampToken;
     }
 
-    public X509Certificate getCertWithCertExtension() {return certWithCertExtension;}
+    public X509Certificate getVicketCert() {return vicketCert;}
 
     public Set<X509Certificate> getSignersCerts() {
         Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
@@ -331,8 +331,7 @@ public class SMIMEMessage extends MimeMessage {
             SignerInformationStore signerInfos = smimeSigned.getSignerInfos();
             Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
             log.debug("checkSignature - document with '" + signerInfos.size() + "' signers");
-            Collection c = signerInfos.getSigners();
-            Iterator it = c.iterator();
+            Iterator it = signerInfos.getSigners().iterator();
             Date firstSignature = null;
             signers = new HashSet<UserVS>();
             while (it.hasNext()) {// check each signer
@@ -371,7 +370,7 @@ public class SMIMEMessage extends MimeMessage {
                     JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
                     voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
-                    certWithCertExtension = cert;
+                    vicketCert = cert;
                 } else {signerCerts.add(cert);}
             }
             if(voteVS != null) voteVS.setServerCerts(signerCerts);

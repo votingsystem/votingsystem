@@ -2,6 +2,8 @@ package org.votingsystem.model;
 
 import java.nio.charset.Charset;
 
+import javax.mail.Session;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,6 +13,8 @@ public class ContextVS {
     public enum State {WITH_CERTIFICATE, WITH_CSR, WITHOUT_CSR}
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
+
+    public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
 
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
@@ -28,6 +32,7 @@ public class ContextVS {
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
+    public static final String WALLET_FILE_NAME = "wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
     public static final String CSR_FILE_NAME                   = "csr";
     public static final String IMAGE_FILE_NAME                 = "image";

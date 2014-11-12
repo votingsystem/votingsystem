@@ -45,7 +45,6 @@ public class VicketPagerActivity extends ActivityBase {
         getLPreviewUtils().trySetActionBar();
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
-
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
@@ -61,11 +60,9 @@ public class VicketPagerActivity extends ActivityBase {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
     }
 
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...)", "onRestoreInstanceState:" + savedInstanceState);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -175,7 +172,6 @@ public class VicketPagerActivity extends ActivityBase {
         @Override public int getCount() {
             return selectedGroup.getChildList().size();
         }
-
 
     }
 

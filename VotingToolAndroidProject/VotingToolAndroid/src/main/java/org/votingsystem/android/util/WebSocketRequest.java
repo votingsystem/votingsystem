@@ -17,9 +17,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ResponseVS;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
 

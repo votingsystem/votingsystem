@@ -105,7 +105,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
                 ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
-                ", OU=TAGVS:" + tagVS + ", OU=DigitalCurrency");
+                ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
         delegationDataMap.put("vicketServerURL", vicketServerURL);

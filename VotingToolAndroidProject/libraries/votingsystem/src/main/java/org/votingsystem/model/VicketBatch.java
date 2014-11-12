@@ -1,8 +1,11 @@
 package org.votingsystem.model;
 
+import android.util.Log;
+
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -21,6 +24,8 @@ import java.util.UUID;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class VicketBatch {
+
+    public static final String TAG = VicketBatch.class.getSimpleName();
 
     private Map<String, Vicket> vicketsMap;
     private VicketServer vicketServer;
@@ -128,15 +133,9 @@ public class VicketBatch {
         if(certificates.isEmpty()) throw new ExceptionVS(
                 "Unable to init Vicket. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
-        byte[] vicketExtensionValue = x509Certificate.getExtensionValue(ContextVS.VICKET_OID);
-        DERTaggedObject vicketCertDataDER = (DERTaggedObject)
-                X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
-        JSONObject vicketCertData = new JSONObject(((DERUTF8String)
-                vicketCertDataDER.getObject()).toString());
-        String hashCertVS = vicketCertData.getString("hashCertVS");
-        Vicket vicket = vicketsMap.get(hashCertVS);
-        vicket.setState(Vicket.State.OK);
-        vicket.getCertificationRequest().initSigner(signedCsr.getBytes());
+        JSONObject certExtensionData = CertUtils.getCertExtensionData(x509Certificate, ContextVS.VICKET_OID);
+        Vicket vicket = vicketsMap.get(certExtensionData.getString("hashCertVS")).setState(Vicket.State.OK);
+        vicket.initSigner(signedCsr.getBytes());
         return vicket;
     }
 
@@ -146,5 +145,17 @@ public class VicketBatch {
 
     public void setTagVS(String tagVS) {
         this.tagVS = tagVS;
+    }
+
+    public void initVickets(JSONArray issuedVicketsArray) throws Exception {
+        Log.d(TAG + ".initVickets", "num vickets: " + issuedVicketsArray.length());
+        if(issuedVicketsArray.length() != vicketsMap.size()) {
+            Log.d(TAG + ".initVickets", "num vickets requested: " + vicketsMap.size() +
+                    " - num. vickets received: " + issuedVicketsArray.length());
+        }
+        for(int i = 0; i < issuedVicketsArray.length(); i++) {
+            Vicket vicket = initVicket(issuedVicketsArray.getString(i));
+            vicketsMap.put(vicket.getHashCertVS(), vicket);
+        }
     }
 }

@@ -256,4 +256,5 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     public void setIsTimeLimited(Boolean isTimeLimited) {
         this.isTimeLimited = isTimeLimited;
     }
+
 }

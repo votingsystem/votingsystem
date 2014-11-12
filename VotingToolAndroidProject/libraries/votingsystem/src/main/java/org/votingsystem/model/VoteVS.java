@@ -160,8 +160,7 @@ public class VoteVS extends ReceiptContainer {
 	public SMIMEMessage getCancelVoteReceipt() {
         if(cancelVoteReceipt == null && cancelVoteReceiptBytes != null) {
             try {
-                cancelVoteReceipt = new SMIMEMessage(null,
-                        new ByteArrayInputStream(cancelVoteReceiptBytes), null);
+                cancelVoteReceipt = new SMIMEMessage(new ByteArrayInputStream(cancelVoteReceiptBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -176,8 +175,7 @@ public class VoteVS extends ReceiptContainer {
     public SMIMEMessage getVoteReceipt() {
         if(voteReceipt == null && voteReceiptBytes != null) {
             try {
-                voteReceipt = new SMIMEMessage(null,
-                        new ByteArrayInputStream(voteReceiptBytes), null);
+                voteReceipt = new SMIMEMessage(new ByteArrayInputStream(voteReceiptBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

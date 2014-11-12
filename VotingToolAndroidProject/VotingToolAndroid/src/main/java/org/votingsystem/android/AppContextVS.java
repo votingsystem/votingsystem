@@ -230,6 +230,13 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return keyEntry;
     }
 
+    public X509Certificate getX509UserCert() throws CertificateException, UnrecoverableEntryException,
+            NoSuchAlgorithmException, KeyStoreException, IOException {
+        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+        return (X509Certificate) keyEntry.getCertificateChain()[0];
+    }
+
+
     public byte[] decryptMessage(byte[] encryptedBytes) throws Exception {
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         //X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];

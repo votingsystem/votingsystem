@@ -202,8 +202,7 @@ public class TransactionVS  implements Serializable {
     public SMIMEMessage getMessageSMIME() {
         if(messageSMIME == null && messageSMIMEBytes != null) {
             try {
-                messageSMIME = new SMIMEMessage(null,
-                        new ByteArrayInputStream(messageSMIMEBytes), null);
+                messageSMIME = new SMIMEMessage(new ByteArrayInputStream(messageSMIMEBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -218,8 +217,7 @@ public class TransactionVS  implements Serializable {
     public SMIMEMessage getCancellationSMIME() {
         if(cancellationSMIME == null && cancellationSMIMEBytes != null) {
             try {
-                cancellationSMIME = new SMIMEMessage(null,
-                        new ByteArrayInputStream(cancellationSMIMEBytes), null);
+                cancellationSMIME = new SMIMEMessage(new ByteArrayInputStream(cancellationSMIMEBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

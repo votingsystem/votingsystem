@@ -39,8 +39,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
     public SMIMEMessage getCancelVoteReceipt() {
         if(delegationReceipt == null && delegationReceiptBytes != null) {
             try {
-                delegationReceipt = new SMIMEMessage(null,
-                        new ByteArrayInputStream(delegationReceiptBytes), null);
+                delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(delegationReceiptBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

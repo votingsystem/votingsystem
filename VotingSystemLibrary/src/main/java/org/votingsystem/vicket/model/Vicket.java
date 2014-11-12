@@ -96,9 +96,9 @@ public class Vicket implements Serializable  {
 
     public Vicket(SMIMEMessage smimeMessage) throws Exception {
         this.smimeMessage = smimeMessage;
-        x509AnonymousCert = smimeMessage.getCertWithCertExtension();
+        x509AnonymousCert = smimeMessage.getVicketCert();
         JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
-        initCertData(certExtensionData, smimeMessage.getCertWithCertExtension().getSubjectDN().toString());
+        initCertData(certExtensionData, smimeMessage.getVicketCert().getSubjectDN().toString());
         validateSignedData();
     }
 

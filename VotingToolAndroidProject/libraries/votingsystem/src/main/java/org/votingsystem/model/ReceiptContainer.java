@@ -72,7 +72,7 @@ public class ReceiptContainer implements Serializable {
     public void setReceiptBytes(byte[] receiptBytes) throws Exception {
         this.receiptBytes = receiptBytes;
         if(receiptBytes != null) {
-            receipt = new SMIMEMessage(null, new ByteArrayInputStream(receiptBytes), null);
+            receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
             subject = receipt.getSubject();
         }
     }
@@ -93,8 +93,7 @@ public class ReceiptContainer implements Serializable {
     public SMIMEMessage getReceipt() throws Exception {
         if(receipt == null && receiptBytes != null) {
             try {
-                receipt = new SMIMEMessage(
-                        null, new ByteArrayInputStream(receiptBytes), null);
+                receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

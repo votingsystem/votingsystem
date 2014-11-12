@@ -46,8 +46,7 @@ public class SignersInfoDialogFragment extends DialogFragment {
         byte[] smimeMessageBytes = getArguments().getByteArray(ContextVS.MESSAGE_KEY);
         SMIMEMessage smimeMessage = null;
         try {
-            smimeMessage = new SMIMEMessage(null,
-                    new ByteArrayInputStream(smimeMessageBytes), null);
+            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
         } catch(Exception ex) {
             ex.printStackTrace();
         }

@@ -24,6 +24,7 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
+import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
@@ -51,6 +52,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.security.cert.CertificateException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -70,6 +72,7 @@ import javax.activation.CommandMap;
 import javax.activation.FileDataSource;
 import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -111,31 +114,29 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     }
 
     private String messageId;
-    private String fileName;
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private boolean isValidSignature = false;
-
     private Set<UserVS> signers = null;
     private UserVS signerVS;
     private VoteVS voteVS;
-    
-    public SMIMEMessage(Session session) throws MessagingException {
-        super(session);
-        fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
-        setDisposition("attachment; fileName=" + fileName + ContentTypeVS.SIGNED.getExtension());
-        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName +
-                ContentTypeVS.SIGNED.getExtension();
+    private X509Certificate vicketCert;
+
+
+    public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
+        super(ContextVS.MAIL_SESSION);
+        setContent(mimeMultipart);
+        if (headers != null) {
+            for(Header header : headers) {
+                if (header != null) setHeader(header.getName(), header.getValue());
+            }
+        }
+        initSMIMEMessage();
     }
 
-    public SMIMEMessage(Session session, InputStream inputStream, String fileName)
-            throws IOException, MessagingException, CMSException, SMIMEException, Exception {
-        super(session, inputStream);
-        //Properties props = System.getProperties();
-        //Session.getDefaultInstance(props, null);
-        if (fileName == null) this.fileName = DEFAULT_SIGNED_FILE_NAME; 
-        else this.fileName = fileName;
+    public SMIMEMessage(InputStream inputStream) throws Exception {
+        super(ContextVS.MAIL_SESSION, inputStream);
         initSMIMEMessage();
     }
     
@@ -228,6 +229,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return smimeSigned;
     }
 
+    public X509Certificate getVicketCert() {return vicketCert;}
 
     /**
      * verify that the sig is correct and that it was generated when the 
@@ -307,6 +309,8 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                 JSONObject voteJSON = new JSONObject(signedContent);
                 voteVS = VoteVS.getInstance(JsonUtils.toMap(voteJSON), cert, timeStampToken);
+            } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
+                vicketCert = cert;
             } else {signerCerts.add(cert);}
         }
         if(voteVS != null) voteVS.setServerCerts(signerCerts);
@@ -359,7 +363,6 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         DERSet derset = new DERSet(derObject);
         Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.
                             id_aa_signatureTimeStampToken, derset);
-        
         Hashtable hashTable = new Hashtable();
         hashTable.put(PKCSObjectIdentifiers.
                         id_aa_signatureTimeStampToken, timeStampAsAttribute);
@@ -444,8 +447,8 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 result = true;
             } else {Log.d(TAG + ".verifySignerCert(...)" , "signature failed!");}
         } catch(CMSVerifierCertificateNotValidException ex) {
-            Log.d(TAG + ".verifySignerCert(...)" , "-----> cert.getNotBefore(): " + cert.getNotBefore());
-            Log.d(TAG + ".verifySignerCert(...)" , "-----> cert.getNotAfter(): " + cert.getNotAfter());
+            Log.d(TAG + ".verifySignerCert" , "cert notBefore: " + cert.getNotBefore() +
+                    "cert notAfter(): " + cert.getNotAfter());
             ex.printStackTrace();
         } finally {
             return result;
@@ -471,10 +474,6 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return signerVS;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-    
     public SignedMailValidator.ValidationResult verify(
             PKIXParameters params) throws Exception {
         SignedMailValidator validator = new SignedMailValidator(this, params);
@@ -547,6 +546,21 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         }
         return result;
     }
-    
-    
+
+    public TimeStampToken getTimeStampToken(X509Certificate requestCert) throws Exception {
+        Store certs = smimeSigned.getCertificates();
+        SignerInformationStore signerInfos = smimeSigned.getSignerInfos();
+        Iterator it = signerInfos.getSigners().iterator();
+        while (it.hasNext()) {// check each signer
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection certCollection = certs.getMatches(signer.getSID());
+            Iterator certIt = certCollection.iterator();
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
+                    (X509CertificateHolder) certIt.next());
+            if(requestCert.getSerialNumber().equals(cert.getSerialNumber())) {
+                return checkTimeStampToken(signer);
+            }
+        }
+        return null;
+    }
 }

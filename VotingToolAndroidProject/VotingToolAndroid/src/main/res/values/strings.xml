@@ -323,7 +323,7 @@
     <string name="cash_send_dialog_caption">realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
-    <string name="vicket_request_msg_subject">retirada de vickets</string>
+    <string name="vicket_request_msg_subject">retirada de efectivo</string>
     <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
     <string name="transactionvs_send_pin_msg"><![CDATA[va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
@@ -429,4 +429,6 @@
     <string name="search_tag_lbl">buscar etiquetas</string>
     <string name="add_tag_advice_msg">si añade una etiqueta el ingreso sólo se podrá emplear en servicios asociados a esa etiqueta</string>
     <string name="remove_tag_lbl">quitar etiqueta</string>
+    <string name="wildtag_lbl">gastos libres</string>
+    <string name="vicket_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
 </resources>
