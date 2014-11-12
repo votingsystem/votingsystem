@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,11 +21,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -106,6 +103,7 @@ public class VicketFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        byte[] serializedVicket = getArguments().getByteArray(ContextVS.VICKET_KEY);
         broadCastId = VicketFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
@@ -122,15 +120,8 @@ public class VicketFragment extends Fragment {
             selectedVicket = (Vicket) savedInstanceState.getSerializable(ContextVS.RECEIPT_KEY);
             initVicketScreen(selectedVicket);
         } else {
-            Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                    VicketContentProvider.CONTENT_URI, null, null, null, null);
-            cursor.moveToPosition(cursorPosition);
-            byte[] serializedVicket = cursor.getBlob(cursor.getColumnIndex(
-                    VicketContentProvider.SERIALIZED_OBJECT_COL));
-            Long vicketId = cursor.getLong(cursor.getColumnIndex(VicketContentProvider.ID_COL));
             try {
                 selectedVicket = (Vicket) ObjectUtils.deSerializeObject(serializedVicket);
-                selectedVicket.setLocalId(vicketId);
                 initVicketScreen(selectedVicket);
             } catch (Exception ex) {
                 ex.printStackTrace();

@@ -1,35 +1,35 @@
 <resources>
     <string name="library_app_name">Android Voting System Library</string>
-    <string name="voting_drop_down_lbl">Votaciones</string>
-    <string name="claims_drop_down_lbl">Reclamaciones</string>
-    <string name="manifiests_drop_down_lbl">Manifiestos</string>
-    <string name="representatives_drop_down_lbl">Representantes</string>
-    <string name="receipts_drop_down_lbl">Recibos</string>
-    <string name="representatives_list_lbl">Lista de representantes</string>
-    <string name="representatives_operations_lbl">Operaciones</string>
+    <string name="voting_drop_down_lbl">votaciones</string>
+    <string name="claims_drop_down_lbl">reclamaciones</string>
+    <string name="manifiests_drop_down_lbl">manifiestos</string>
+    <string name="representatives_drop_down_lbl">representantes</string>
+    <string name="receipts_drop_down_lbl">recibos</string>
+    <string name="representatives_list_lbl">lista de representantes</string>
+    <string name="representatives_operations_lbl">operaciones</string>
 
-    <string name="unknown_drop_down_lbl">Sistema desconocido</string>
-    <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que
+    <string name="unknown_drop_down_lbl">sistema desconocido</string>
+    <string name="vote_repeated_msg"><![CDATA[ya había enviado un voto para la convocatoria \'%1$s\' en el que
         había elegido la opción \'%2$s\']]></string>
-    <string name="option_error_msg"><![CDATA[<html>La opción del recibo no coincide con la del voto.
-        <br/> ¿Desea anular la operación?</html>]]></string>
-    <string name="vote_ok_msg"><![CDATA[En el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
+    <string name="option_error_msg"><![CDATA[<html>la opción del recibo no coincide con la del voto.
+        <br/> ¿desea anular la operación?</html>]]></string>
+    <string name="vote_ok_msg"><![CDATA[en el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
 
 
-    <string name="open_voting_lbl">Abiertas</string>
-    <string name="pending_voting_lbl">Pendientes</string>
-    <string name="closed_voting_lbl">Cerradas</string>
+    <string name="open_voting_lbl">abiertas</string>
+    <string name="pending_voting_lbl">pendientes</string>
+    <string name="closed_voting_lbl">cerradas</string>
 
-    <string name="open_claim_lbl">Abiertas</string>
-    <string name="pending_claim_lbl">Pendientes</string>
-    <string name="closed_claim_lbl">Cerradas</string>
+    <string name="open_claim_lbl">abiertas</string>
+    <string name="pending_claim_lbl">pendientes</string>
+    <string name="closed_claim_lbl">cerradas</string>
 
-    <string name="open_manifest_lbl">Abiertos</string>
-    <string name="pending_manifest_lbl">Pendientes</string>
-    <string name="closed_manifest_lbl">Cerrados</string>
-    <string name="unknown_event_state_lbl">Evento de tipo desconocido</string>
-    <string name="exception_lbl">Excepción</string>
-    <string name="timestamp_service_error_caption">Error con el sellado de tiempo</string>
+    <string name="open_manifest_lbl">abiertos</string>
+    <string name="pending_manifest_lbl">pendientes</string>
+    <string name="closed_manifest_lbl">cerrados</string>
+    <string name="unknown_event_state_lbl">evento de tipo desconocido</string>
+    <string name="exception_lbl">excepción</string>
+    <string name="timestamp_service_error_caption">error con el sellado de tiempo</string>
 
     <string name="years_lbl">años</string>
     <string name="days_lbl">días</string>
@@ -37,14 +37,14 @@
     <string name="minutes_lbl">minutos</string>
     <string name="seconds_lbl">segundos</string>
 
-    <string name="receipt_vote_subtitle">Voto</string>
-    <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
-    <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
-    <string name="receipt_lbl">Recibo</string>
-    <string name="account_input">Ingreso en cuenta</string>
-    <string name="account_output">Retirada de efectivo</string>
-    <string name="vicket_send">Pago en Vickets</string>
-    <string name="vicket_request_subtitle">Obtención de Vickets</string>
-    <string name="vicket_cancellation">Cancelación de Vickets</string>
+    <string name="receipt_vote_subtitle">voto</string>
+    <string name="receipt_cancel_vote_subtitle">cancelación de voto</string>
+    <string name="receipt_anonimous_representative_request_subtitle">delegación anónima de representante</string>
+    <string name="receipt_lbl">recibo</string>
+    <string name="account_input">ingreso en cuenta</string>
+    <string name="account_output">tetirada de efectivo</string>
+    <string name="vicket_send">pago en Vickets</string>
+    <string name="vicket_request_subtitle">obtención de Vickets</string>
+    <string name="vicket_cancellation">cancelación de vickets</string>
 
 </resources>

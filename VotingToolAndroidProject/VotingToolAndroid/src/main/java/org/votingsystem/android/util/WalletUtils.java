@@ -33,16 +33,28 @@ public class WalletUtils {
 
     private static final String TAG = makeLogTag(WalletUtils.class.getSimpleName());
 
-    public static void saveVicketsToWallet(Collection<Vicket> vicketCollection, String walletPath)
-            throws Exception {
-        for(Vicket vicket : vicketCollection) {
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            new File(walletPath).mkdirs();
-            String vicketPath = walletPath + UUID.randomUUID().toString() + ".servs";
-            File vicketFile = FileUtils.copyStreamToFile(
-                    new ByteArrayInputStream(vicketSerialized), new File(vicketPath));
-            LOGD(TAG + ".saveVicketsToWallet", "Stored vicket: " + vicketFile.getAbsolutePath());
+
+    public static List<Vicket> getVicketList(String password, Context context) throws Exception {
+            JSONArray vicketArray = getWallet(password, context);
+        List<Vicket> vicketList = new ArrayList<Vicket>();
+        for(int i = 0; i < vicketArray.length(); i++) {
+            byte[] serializedVicket = vicketArray.getJSONObject(i).getString("object").getBytes();
+            vicketList.add((Vicket) ObjectUtils.deSerializeObject(serializedVicket));
         }
+        return vicketList;
+    }
+
+    public static void saveVicketList(Collection<Vicket> vicketList, String password,
+            Context context) throws Exception {
+        Object wallet = getWallet(password, context);
+        JSONArray storedWalletJSON = null;
+        if(wallet == null) storedWalletJSON = new JSONArray();
+        else storedWalletJSON = (JSONArray) wallet;
+        List<Map> serializedVicketList = getSerializedVicketList(vicketList);
+        for(Map vicket : serializedVicketList) {
+            storedWalletJSON.put(vicket);
+        }
+        WalletUtils.saveWallet(storedWalletJSON, password, context);
     }
 
     public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection)
@@ -65,13 +77,13 @@ public class WalletUtils {
         } catch (Exception ex) {  return null; }
     }
 
-    public static JSONArray getWallet(Context context, String password) throws Exception {
-        byte[] walletBytes = getWalletBytes(context, password);
+    public static JSONArray getWallet(String password, Context context) throws Exception {
+        byte[] walletBytes = getWalletBytes(password, context);
         if(walletBytes == null) return null;
         else return new JSONArray(new String(walletBytes, "UTF-8"));
     }
 
-    private static byte[] getWalletBytes(Context context, String password) throws Exception {
+    private static byte[] getWalletBytes(String password, Context context) throws Exception {
         String storedPasswordHash = PrefUtils.getStoredPasswordHash(context);
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {
@@ -82,8 +94,8 @@ public class WalletUtils {
         else return ((AppContextVS)context.getApplicationContext()).decryptMessage(encryptedWalletBytes);
     }
 
-    private static byte[] getWalletBytes(byte[] encryptedWalletBytes, Context context,
-                 String password) throws Exception {
+    private static byte[] getWalletBytes(byte[] encryptedWalletBytes, String password,
+                 Context context) throws Exception {
         String storedPasswordHash = PrefUtils.getStoredPasswordHash(context);
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {

@@ -12,12 +12,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/background_vs"
-            android:textStyle="bold"
             android:layout_gravity="center"
             android:text="@string/add_tag_lbl"
             android:gravity="center"
             android:padding="5dp"
-            android:textSize="27sp" />
+            android:textSize="28sp" />
     </LinearLayout>
 
     <View android:layout_width="fill_parent"

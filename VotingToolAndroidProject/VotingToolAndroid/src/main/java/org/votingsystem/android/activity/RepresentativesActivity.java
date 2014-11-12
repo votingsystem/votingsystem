@@ -33,7 +33,6 @@ public class RepresentativesActivity extends ActivityBase {
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                         ((Object)fragment).getClass().getSimpleName()).commit();
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.system_users_32));
         getActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
     }
 

@@ -121,7 +121,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
             R.string.polls_lbl,
             R.string.representative_lbl,
-            R.string.vicket_lbl,
+            R.string.finance_lbl,
             R.string.navdrawer_item_settings,
     };
 

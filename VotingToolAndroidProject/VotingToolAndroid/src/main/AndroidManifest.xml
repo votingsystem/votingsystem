@@ -134,9 +134,6 @@
         <provider android:name=".contentprovider.EventVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.eventvs"/>
 
-        <provider android:name=".contentprovider.VicketContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.vicket"/>
-
         <provider android:name=".contentprovider.ReceiptContentProvider"
             android:exported="false" android:authorities="votingsystem.org.receipt"/>
 

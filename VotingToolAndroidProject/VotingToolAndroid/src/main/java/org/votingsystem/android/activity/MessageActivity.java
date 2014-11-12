@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
@@ -36,19 +39,25 @@ public class MessageActivity extends FragmentActivity {
         }
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
                 AppContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
+        View view = getLayoutInflater().inflate(R.layout.message_activity, null);
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(responseVS.getCaption());
-        if(responseVS.getMessage() != null) builder.setMessage(Html.fromHtml(
-                responseVS.getNotificationMessage())).
-                setPositiveButton(getString(R.string.ok_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                onBackPressed();
-                                finish();
-                            }
-                        });
-        if(responseVS.getIconId() > 0) builder.setIcon(responseVS.getIconId());
-        AlertDialog dialog = builder.show();
+        ((TextView) view.findViewById(R.id.caption_text)).setText(responseVS.getCaption());
+        ((TextView) view.findViewById(R.id.message_text)).setText(Html.fromHtml(
+                responseVS.getNotificationMessage()));
+        ImageView icon = (ImageView) view.findViewById(R.id.icon);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setView(view);
+        builder.setPositiveButton(getString(R.string.accept_lbl),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        onBackPressed();
+                        finish();
+                    }
+                });
+        if(responseVS.getIconId() != null && responseVS.getIconId() > 0) {
+            icon.setImageResource(responseVS.getIconId());
+            icon.setVisibility(View.VISIBLE);
+        }
+        builder.show();
     }
 
 

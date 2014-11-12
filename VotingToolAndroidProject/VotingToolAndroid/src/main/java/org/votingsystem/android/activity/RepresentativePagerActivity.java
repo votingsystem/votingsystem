@@ -55,7 +55,6 @@ public class RepresentativePagerActivity extends FragmentActivity {
     }
 
     private void updateActionBarTitle() {
-        getActionBar().setLogo(R.drawable.system_users_22);
         getActionBar().setTitle(getString(R.string.representative_lbl));
         String fullName = cursor.getString(cursor.getColumnIndex(
                 UserContentProvider.FULL_NAME_COL));

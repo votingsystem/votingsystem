@@ -41,6 +41,8 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
+import com.sun.mail.iap.Response;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.model.ContextVS;
@@ -90,6 +92,16 @@ public class UIUtils  {
 
 
     public static void launchMessageActivity(Context context, ResponseVS responseVS) {
+        Intent intent = new Intent(context, MessageActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        context.startActivity(intent);
+    }
+
+    public static void launchMessageActivity(Integer statusCode, String message, String caption,
+             Context context) {
+        ResponseVS responseVS = new ResponseVS(statusCode);
+        responseVS.setCaption(caption).setNotificationMessage(message);
         Intent intent = new Intent(context, MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

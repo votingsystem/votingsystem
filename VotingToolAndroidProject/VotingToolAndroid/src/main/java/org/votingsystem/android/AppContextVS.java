@@ -6,39 +6,33 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-
 import org.json.JSONArray;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -47,13 +41,10 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
@@ -187,35 +178,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
     }
 
-    public List<Vicket> getVicketList(String currencyCode) {
-        String selection = VicketContentProvider.WEEK_LAPSE_COL + " =? AND " +
-                VicketContentProvider.STATE_COL + " =? AND " +
-                VicketContentProvider.CURRENCY_COL + "= ? ";
-        String weekLapseId = getCurrentWeekLapseId();
-        Cursor cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, selection,
-                new String[]{weekLapseId, Vicket.State.OK.toString(), currencyCode}, null);
-        LOGD(TAG + ".getCurrencyData(...)", "VicketContentProvider - cursor.getCount(): " + cursor.getCount());
-        List<Vicket> vicketList = new ArrayList<Vicket>();
-        while(cursor.moveToNext()) {
-            Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(cursor.getBlob(
-                    cursor.getColumnIndex(VicketContentProvider.SERIALIZED_OBJECT_COL)));
-            Long vicketId = cursor.getLong(cursor.getColumnIndex(VicketContentProvider.ID_COL));
-            vicket.setLocalId(vicketId);
-            vicketList.add(vicket);
-        }
-        selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? AND " +
-                TransactionVSContentProvider.CURRENCY_COL + "= ? ";
-        cursor =  getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,null,
-                selection, new String[]{weekLapseId, currencyCode}, null);
-        List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
-        while(cursor.moveToNext()) {
-            TransactionVS transactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                    cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
-            transactionList.add(transactionVS);
-        }
-        return vicketList;
-    }
-
     public String getCurrentWeekLapseId() {
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
         return DateUtils.getPath(currentLapseCalendar.getTime());
@@ -235,7 +197,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         return (X509Certificate) keyEntry.getCertificateChain()[0];
     }
-
 
     public byte[] decryptMessage(byte[] encryptedBytes) throws Exception {
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();

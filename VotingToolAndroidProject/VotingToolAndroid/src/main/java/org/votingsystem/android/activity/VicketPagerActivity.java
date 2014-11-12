@@ -2,7 +2,6 @@ package org.votingsystem.android.activity;
 
 import android.app.SearchManager;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,19 +10,14 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.MenuItem;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
-
 import java.util.Calendar;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -35,7 +29,6 @@ public class VicketPagerActivity extends ActivityBase {
     public static final String TAG = VicketPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
-    private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
@@ -51,11 +44,7 @@ public class VicketPagerActivity extends ActivityBase {
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, null, null, null);
-        cursor.moveToPosition(cursorPosition);
-        mViewPager.setCurrentItem(cursorPosition);
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.fa_money_32));
-        getActionBar().setTitle(getString(R.string.vicket_lbl));
+        getActionBar().setTitle(getString(R.string.finance_lbl));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

@@ -92,13 +92,11 @@ public class UserVSAccountsFragment extends Fragment {
                     if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
                         transactionVS = (TransactionVS) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                getString(R.string.vicket_request_pin_msg, transactionVS.getAmount(),
-                                transactionVS.getCurrencyCode()), false, TypeVS.VICKET_REQUEST);
+                                UIUtils.getVicketRequestMessage(transactionVS, getActivity()),
+                                false, TypeVS.VICKET_REQUEST);
                     } else {
                         UIUtils.launchMessageActivity(getActivity(), responseVS);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-
-
 
                             loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                         }
@@ -160,13 +158,14 @@ public class UserVSAccountsFragment extends Fragment {
             transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
                     ContextVS.URI_KEY));
         }
+        OperationVS operationVS = null;
         if(getArguments().getSerializable(ContextVS.OPERATIONVS_KEY) != null) {
-            OperationVS operationVS = (OperationVS)getArguments().getSerializable(ContextVS.OPERATIONVS_KEY);
+            operationVS = (OperationVS)getArguments().getSerializable(ContextVS.OPERATIONVS_KEY);
             try {
                 transactionVS = TransactionVS.parse(operationVS);
             } catch (Exception ex) {ex.printStackTrace();}
         }
-        if(transactionVS != null){
+        if(operationVS != null){
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
                 UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
@@ -187,10 +186,11 @@ public class UserVSAccountsFragment extends Fragment {
                 } else caption = getString(R.string.insufficient_cash_caption);
                 ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, caption,
                         getString(R.string.insufficient_cash_msg, transactionVS.getCurrencyCode(),
-                                transactionVS.getAmount().toString(), cashAvailable));
+                        transactionVS.getAmount().toString(), cashAvailable));
             }
         }
     }
+
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = PrefUtils.getLastVicketAccountCheckTime(getActivity());
         if(lastCheckedTime == null) {
@@ -217,24 +217,6 @@ public class UserVSAccountsFragment extends Fragment {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-        }
-    }
-
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
-        int statusCode = -1;
-        String caption = null;
-        String message = null;
-        if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
-        if(Activity.RESULT_OK == requestCode) {
-            statusCode = ResponseVS.SC_OK;
-            caption = getString(R.string.operation_ok_msg);
-            ((ActivityVS)getActivity()).showMessage(statusCode, caption, message);
-        } else if(message != null) {
-            statusCode = ResponseVS.SC_ERROR;
-            caption = getString(R.string.operation_error_msg);
-            ((ActivityVS)getActivity()).showMessage(statusCode, caption, message);
         }
     }
 

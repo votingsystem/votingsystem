@@ -72,12 +72,12 @@ public class ResponseVS<T> implements Parcelable {
     public ResponseVS(Parcel source) {
         // Must read values in the same order as they were placed in
         statusCode = source.readInt();
-        iconId = source.readInt();
+        iconId = (Integer) source.readValue(Integer.class.getClassLoader());
         serviceCaller = source.readString();
         caption = source.readString();
         notificationMessage = source.readString();
         message = source.readString();
-        String messageJSONStr = (String) source.readValue(String.class.getClassLoader());;
+        String messageJSONStr = (String) source.readValue(String.class.getClassLoader());
         try {if(messageJSONStr != null) messageJSON = new JSONObject(messageJSONStr);}
         catch (Exception ex) {ex.printStackTrace();}
         operation = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
@@ -324,8 +324,9 @@ public class ResponseVS<T> implements Parcelable {
         return serviceCaller;
     }
 
-    public void setServiceCaller(String serviceCaller) {
+    public ResponseVS setServiceCaller(String serviceCaller) {
         this.serviceCaller = serviceCaller;
+        return this;
     }
 
     public Uri getUri() {
@@ -361,7 +362,7 @@ public class ResponseVS<T> implements Parcelable {
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(statusCode);
-        parcel.writeInt(iconId);
+        parcel.writeValue(iconId);
         parcel.writeString(serviceCaller);
         parcel.writeString(caption);
         parcel.writeString(notificationMessage);

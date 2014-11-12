@@ -11,65 +11,68 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.VicketPagerActivity;
-import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.List;
 
-public class VicketGridFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
+public class VicketGridFragment extends Fragment {
 
     public static final String TAG = VicketGridFragment.class.getSimpleName();
+    public static final String AUTHENTICATED_KEY = "AUTHENTICATED_KEY";
 
     private View rootView;
     private GridView gridView;
     private VicketListAdapter adapter = null;
-    private String queryStr = null;
-    private AppContextVS contextVS = null;
-    private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
+    private List<Vicket> vicketList = new ArrayList<Vicket>();
     private String broadCastId = VicketGridFragment.class.getSimpleName();
-    private int loaderId = -1;
+    private boolean isAuthenticated = false;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        if(pin != null) {
             switch(responseVS.getTypeVS()) {
-                case VICKET_USER_INFO:
-                    launchUpdateUserInfoService();
+                case VICKET:
+                    try {
+                        vicketList = WalletUtils.getVicketList(pin, getActivity());
+                        adapter.setItemList(vicketList);
+                        adapter.notifyDataSetChanged();
+                        isAuthenticated = true;
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                                getString(R.string.error_lbl), getActivity());
+                    }
                     break;
             }
         } else {
@@ -77,14 +80,9 @@ public class VicketGridFragment extends Fragment
                 case VICKET_USER_INFO:
                     break;
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
         }
     };
-
-    private void launchUpdateUserInfoService() {
-
-    }
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -98,50 +96,38 @@ public class VicketGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
-        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS.getLoaderId(0);
-        queryStr = getArguments().getString(SearchManager.QUERY);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.vicket_lbl), null,
-                R.drawable.fa_money_32);
+        ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.wallet_lbl), null, null);
         rootView = inflater.inflate(R.layout.generic_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new VicketListAdapter(getActivity().getApplicationContext(), null,false);
+        adapter = new VicketListAdapter(vicketList, getActivity().getApplicationContext());
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v, pos, id);
             }
         });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                onListItemClick(parent, v, position, id);
+                Intent intent = new Intent(getActivity().getApplicationContext(),VicketPagerActivity.class);
+                intent.putExtra(ContextVS.VICKET_KEY, vicketList.get(position));
+                startActivity(intent);
             }
         });
-        gridView.setOnScrollListener(this);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        if(savedInstanceState != null) {
+            isAuthenticated = savedInstanceState.getBoolean(AUTHENTICATED_KEY);
+        }
+        if(!isAuthenticated) PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
         return rootView;
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
-        //Prepare the loader. Either re-connect with an existing one or start a new one.
-        getLoaderManager().initLoader(loaderId, null, this);
-        if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
-            gridView.onRestoreInstanceState(gridState);
-            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
-        }
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -149,49 +135,10 @@ public class VicketGridFragment extends Fragment
         return true;
     }
 
-    @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
-
-    @Override public void onScroll(AbsListView view, int firstVisibleItem,
-               int visibleItemCount, int totalItemCount) { }
-
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.vicket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
-    }
-
-    private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +" -id: " + id);
-        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity().getApplicationContext(),VicketPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
-        startActivity(intent);
-    }
-
-    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.d(TAG + ".onCreateLoader(...)", "");
-        String weekLapse = DateUtils.getPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
-        String selection = VicketContentProvider.WEEK_LAPSE_COL + " =? ";
-        CursorLoader loader = new CursorLoader(this.getActivity(), VicketContentProvider.CONTENT_URI,
-                null, selection, new String[]{weekLapse}, null);
-        return loader;
-    }
-
-    @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
-                " - firstVisiblePosition: " + firstVisiblePosition);
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
-        if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
-        firstVisiblePosition = null;
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
-        if(cursor.getCount() == 0) {
-            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-        } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-    }
-
-    @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -207,73 +154,83 @@ public class VicketGridFragment extends Fragment
         }
     }
 
-    public class VicketListAdapter extends CursorAdapter {
+    public class VicketListAdapter  extends ArrayAdapter<Vicket> {
 
-        private LayoutInflater inflater = null;
+        private List<Vicket> itemList;
+        private Context context;
 
-        public VicketListAdapter(Context context, Cursor c, boolean autoRequery) {
-            super(context, c, autoRequery);
-            inflater = LayoutInflater.from(context);
+        public VicketListAdapter(List<Vicket> itemList, Context ctx) {
+            super(ctx, R.layout.row_vicket, itemList);
+            this.itemList = itemList;
+            this.context = ctx;
         }
 
-        @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_vicket, viewGroup, false);
+        public int getCount() {
+            if (itemList != null) return itemList.size();
+            return 0;
         }
 
-        @Override public void bindView(View view, Context context, Cursor cursor) {
-            if(cursor != null) {
-                byte[] serializedVicket = cursor.getBlob(cursor.getColumnIndex(
-                        VicketContentProvider.SERIALIZED_OBJECT_COL));
-                Long vicketId = cursor.getLong(cursor.getColumnIndex(
-                        VicketContentProvider.ID_COL));
+        public Vicket getItem(int position) {
+            if (itemList != null) return itemList.get(position);
+            return null;
+        }
 
-                Vicket vicket = (Vicket) ObjectUtils.
-                        deSerializeObject(serializedVicket);
-                String weekLapseStr = cursor.getString(cursor.getColumnIndex(
-                        VicketContentProvider.WEEK_LAPSE_COL));
-                Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
-                Calendar weekLapseCalendar = Calendar.getInstance();
-                weekLapseCalendar.setTime(weekLapse);
-                LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                linearLayout.setBackgroundColor(Color.WHITE);
-                TextView date_data = (TextView)view.findViewById(R.id.date_data);
-                String dateData = getString(R.string.vicket_data_info_lbl,
-                        DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
-                        DateUtils.getDayWeekDateStr(vicket.getValidTo()));
-                date_data.setText(DateUtils.getDayWeekDateStr(vicket.getValidFrom()));
-
-                TextView vicket_state = (TextView) view.findViewById(R.id.vicket_state);
-                vicket_state.setText(vicket.getState().toString() + " - ID: " + vicketId);
-                TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                week_lapse.setText(weekLapseStr);
-
-                TextView amount = (TextView) view.findViewById(R.id.amount);
-                amount.setText(vicket.getAmount().toPlainString());
-                TextView currency = (TextView) view.findViewById(R.id.currencyCode);
-                currency.setText(vicket.getCurrencyCode().toString());
+        @Override public View getView(int position, View view, ViewGroup parent) {
+            Vicket vicket = itemList.get(position);
+            if (view == null) {
+                LayoutInflater inflater =
+                        (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.row_vicket, null);
             }
+            //Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
+            //Calendar weekLapseCalendar = Calendar.getInstance();
+            //weekLapseCalendar.setTime(weekLapse);
+            LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
+            linearLayout.setBackgroundColor(Color.WHITE);
+            TextView date_data = (TextView)view.findViewById(R.id.date_data);
+            String dateData = getString(R.string.vicket_data_info_lbl,
+                    DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
+                    DateUtils.getDayWeekDateStr(vicket.getValidTo()));
+            date_data.setText(DateUtils.getDayWeekDateStr(vicket.getValidFrom()));
+
+            TextView vicket_state = (TextView) view.findViewById(R.id.vicket_state);
+            vicket_state.setText(vicket.getState().toString());
+            TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
+            //week_lapse.setText(weekLapseStr);
+
+            TextView amount = (TextView) view.findViewById(R.id.amount);
+            amount.setText(vicket.getAmount().toPlainString());
+            TextView currency = (TextView) view.findViewById(R.id.currencyCode);
+            currency.setText(vicket.getCurrencyCode().toString());
+            return view;
+        }
+
+        public List<Vicket> getItemList() {
+            return itemList;
+        }
+
+        public void setItemList(List<Vicket> itemList) {
+            this.itemList = itemList;
         }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        outState.putBoolean(AUTHENTICATED_KEY, isAuthenticated);
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
+
 }

@@ -39,9 +39,9 @@ import java.util.List;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SelectTagDialogFragment extends DialogFragment {
+public class TagVSSelectDialogFragment extends DialogFragment {
 
-    public static final String TAG = SelectTagDialogFragment.class.getSimpleName();
+    public static final String TAG = TagVSSelectDialogFragment.class.getSimpleName();
 
     private SimpleAdapter simpleAdapter;
     private String previousSearch;
@@ -49,7 +49,7 @@ public class SelectTagDialogFragment extends DialogFragment {
     private List<String> tagList = new ArrayList<String>();
 
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
-        SelectTagDialogFragment dialogFragment = new SelectTagDialogFragment();
+        TagVSSelectDialogFragment dialogFragment = new TagVSSelectDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.CALLER_KEY, dialogCaller);
         dialogFragment.setArguments(args);
