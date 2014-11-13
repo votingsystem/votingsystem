@@ -1,10 +1,7 @@
 package org.votingsystem.android.util;
 
 import android.content.Context;
-import android.util.Log;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -15,14 +12,14 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 /**
@@ -35,10 +32,16 @@ public class WalletUtils {
 
 
     public static List<Vicket> getVicketList(String password, Context context) throws Exception {
-            JSONArray vicketArray = getWallet(password, context);
+        JSONArray storedWalletJSON = getWallet(password, context);
+        if(storedWalletJSON == null) return new ArrayList<Vicket>();
+        return getVicketListFromJSONArray(storedWalletJSON);
+    }
+
+    public static List<Vicket> getVicketListFromJSONArray(JSONArray jsonArray) throws Exception {
         List<Vicket> vicketList = new ArrayList<Vicket>();
-        for(int i = 0; i < vicketArray.length(); i++) {
-            byte[] serializedVicket = vicketArray.getJSONObject(i).getString("object").getBytes();
+        for(int i = 0; i < jsonArray.length(); i++) {
+            JSONObject vicketJSON = jsonArray.getJSONObject(i);
+            byte[] serializedVicket = ((JSONObject)vicketJSON).getString("object").getBytes();
             vicketList.add((Vicket) ObjectUtils.deSerializeObject(serializedVicket));
         }
         return vicketList;
@@ -52,7 +55,7 @@ public class WalletUtils {
         else storedWalletJSON = (JSONArray) wallet;
         List<Map> serializedVicketList = getSerializedVicketList(vicketList);
         for(Map vicket : serializedVicketList) {
-            storedWalletJSON.put(vicket);
+            storedWalletJSON.put(new JSONObject(vicket));
         }
         WalletUtils.saveWallet(storedWalletJSON, password, context);
     }
@@ -68,6 +71,19 @@ public class WalletUtils {
             result.add(vicketDataMap);
         }
         return result;
+    }
+
+    public static JSONArray getSerializedVicketArray(Collection<Vicket> vicketCollection)
+            throws UnsupportedEncodingException {
+        JSONArray jsonArray = new JSONArray();
+        for(Vicket vicket : vicketCollection) {
+            Map vicketDataMap = vicket.getCertSubject().getDataMap();
+            vicketDataMap.put("isTimeLimited", vicket.getIsTimeLimited());
+            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
+            vicketDataMap.put("object", new String(vicketSerialized, "UTF-8"));
+            jsonArray.put(new JSONObject(vicketDataMap));
+        }
+        return jsonArray;
     }
 
     public static byte[] getWalletEncrypted(Context context) throws ExceptionVS, IOException {

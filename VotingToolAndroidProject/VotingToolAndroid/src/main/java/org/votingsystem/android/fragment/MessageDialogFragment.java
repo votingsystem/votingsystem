@@ -2,8 +2,10 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -22,6 +24,19 @@ public class MessageDialogFragment extends DialogFragment {
 
     public static final String TAG = MessageDialogFragment.class.getSimpleName();
 
+
+    public static void showDialog(Integer statusCode, String caption, String message,
+            FragmentManager fragmentManager) {
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(fragmentManager, MessageDialogFragment.TAG);
+    }
+
+    public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
+        showDialog(responseVS.getStatusCode(), responseVS.getCaption(), responseVS.getMessage(),
+                fragmentManager);
+    }
+
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,
                     String message){
         MessageDialogFragment frag = new MessageDialogFragment();
@@ -39,9 +54,15 @@ public class MessageDialogFragment extends DialogFragment {
         int statusCode = getArguments().getInt(ContextVS.RESPONSE_STATUS_KEY, -1);
         String caption = getArguments().getString(ContextVS.CAPTION_KEY);
         String message = getArguments().getString(ContextVS.MESSAGE_KEY);
-        AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setPositiveButton(
+                getString(R.string.accept_lbl),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        MessageDialogFragment.this.dismiss();
+                    }
+                });
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
-        if(caption != null) builder.setTitle(caption);
+        ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
         if(message != null) messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         AlertDialog dialog = builder.create();
@@ -50,6 +71,7 @@ public class MessageDialogFragment extends DialogFragment {
             if(ResponseVS.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
             else dialog.setIcon(R.drawable.fa_times_32);
         }
+        this.setCancelable(false);
         return dialog;
     }
 

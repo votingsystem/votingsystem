@@ -347,7 +347,7 @@ public class EventsVSActivity extends ActivityBase
         }
 
         private int getColor(int position) {
-            return position >= 0 && position < mItems.size() ? mItems.get(position).color : R.color.background_vs;
+            return position >= 0 && position < mItems.size() ? mItems.get(position).color : R.color.bkg_vs;
         }
 
         private String getTag(int position) {

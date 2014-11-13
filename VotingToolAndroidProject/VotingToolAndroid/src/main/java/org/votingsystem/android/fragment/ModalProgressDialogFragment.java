@@ -18,18 +18,13 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.LightingColorFilter;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import org.votingsystem.android.AppContextVS;
+
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 

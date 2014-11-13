@@ -11,7 +11,7 @@
         <TextView android:id="@+id/caption"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/background_vs"
+            android:textColor="@color/bkg_vs"
             android:textStyle="bold"
             android:layout_gravity="center"
             android:text="@string/add_tag_lbl"
@@ -29,7 +29,7 @@
 
     <View android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@color/background_vs"/>
+        android:background="@color/bkg_vs"/>
 
     <LinearLayout android:id="@+id/tag_info"
         android:layout_width="fill_parent"
@@ -40,7 +40,7 @@
         <TextView android:id="@+id/tag_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/background_vs"
+            android:textColor="@color/bkg_vs"
             android:textStyle="bold"
             android:layout_gravity="center"
             android:text="@string/add_tag_lbl"

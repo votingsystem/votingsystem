@@ -9,17 +9,16 @@ import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
+
 import org.json.JSONArray;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
-import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
@@ -33,6 +32,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -45,6 +45,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;

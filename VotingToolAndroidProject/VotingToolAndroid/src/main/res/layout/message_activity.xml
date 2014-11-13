@@ -17,7 +17,7 @@
         <TextView android:id="@+id/caption_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/background_vs"
+            android:textColor="@color/bkg_vs"
             android:layout_gravity="center"
             android:text="@string/add_tag_lbl"
             android:gravity="center"
@@ -28,7 +28,7 @@
 
     <View android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@color/background_vs"/>
+        android:background="@color/bkg_vs"/>
 
     <TextView android:id="@+id/message_text"
         android:layout_width="fill_parent"

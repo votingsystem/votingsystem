@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.MenuItem;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
@@ -17,7 +18,9 @@ import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
+
 import java.util.Calendar;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

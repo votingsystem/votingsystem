@@ -41,8 +41,6 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
-import com.sun.mail.iap.Response;
-
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.model.ContextVS;

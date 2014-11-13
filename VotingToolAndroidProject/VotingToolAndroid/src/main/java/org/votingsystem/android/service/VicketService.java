@@ -1,12 +1,11 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,13 +35,13 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

@@ -7,7 +7,6 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
-import org.votingsystem.android.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 

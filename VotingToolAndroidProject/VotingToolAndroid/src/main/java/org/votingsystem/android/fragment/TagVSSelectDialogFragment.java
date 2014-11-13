@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.votingsystem.android.AppContextVS;
@@ -30,7 +29,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +57,7 @@ public class TagVSSelectDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.select_tag_dialog, null);
+        View view = inflater.inflate(R.layout.tagvs_select_dialog, null);
         final EditText search_text = (EditText) view.findViewById(R.id.search_text);
         Button search_tag_btn = (Button) view.findViewById(R.id.search_tag_btn);
         search_tag_btn.setOnClickListener(new View.OnClickListener() {
@@ -74,7 +72,6 @@ public class TagVSSelectDialogFragment extends DialogFragment {
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setTitle(
                 getString(R.string.search_tag_lbl));
         final AlertDialog dialog = builder.create();
-        dialog.setIcon(R.drawable.fa_tag_24_green);
         dialog.setView(view);
         simpleAdapter = new SimpleAdapter(new ArrayList<String>(), getActivity());
         tag_list_view.setAdapter(simpleAdapter);

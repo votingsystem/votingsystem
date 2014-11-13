@@ -237,7 +237,13 @@ public class Vicket extends ReceiptContainer {
         this.originHashCertVS = originHashCertVS;
     }
 
-    public Vicket.CertSubject getCertSubject() {return certSubject;}
+    public Vicket.CertSubject getCertSubject() {
+        if(certSubject == null && certificationRequest != null) {
+            certSubject = new Vicket.CertSubject(
+                    certificationRequest.getCertificate().getSubjectDN().toString(), hashCertVS);
+        }
+        return certSubject;
+    }
 
     public String getHashCertVS() {
         return hashCertVS;

@@ -140,8 +140,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             View view = inflater.inflate(R.layout.pin_dialog, null);
             msgTextView = (TextView) view.findViewById(R.id.msg);
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
-                    getString(R.string.pin_dialog_caption));
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
                 msgTextView.setVisibility(View.GONE);
             } else {

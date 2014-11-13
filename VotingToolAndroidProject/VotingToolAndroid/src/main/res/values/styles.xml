@@ -20,24 +20,24 @@
 
     <style name="ThemeVS" parent="android:Theme.Holo.Light.DarkActionBar">
         <item name="android:popupMenuStyle">@style/ThemeVS.PopupMenu</item>
-        <item name="android:panelBackground">@color/background_vs</item>
+        <item name="android:panelBackground">@color/bkg_vs</item>
         <item name="android:actionBarWidgetTheme">@style/ThemeVS</item>
         <item name="android:actionBarStyle">@style/ActionBarVS</item>
-        <item name="android:panelFullBackground">@color/background_vs</item>
+        <item name="android:panelFullBackground">@color/bkg_vs</item>
         <item name="android:itemTextAppearance">@style/ItemVS</item>
     </style>
     <style name="ItemVS">
-        <item name="android:textColor">@color/foreground_vs</item>
+        <item name="android:textColor">@color/frg_vs</item>
     </style>
     <style name="ThemeVS.PopupMenu" parent="android:Widget.Holo.Light.ListPopupWindow">
-        <item name="android:popupBackground">@color/background_vs</item>
+        <item name="android:popupBackground">@color/bkg_vs</item>
     </style>
 
     <style name="ActionBarVS" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@color/background_vs</item>
+        <item name="android:background">@color/bkg_vs</item>
         <item name="android:titleTextStyle">@style/ThemeVS.ActionBar.TitleTextStyle</item>
     </style>
     <style name="ThemeVS.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/foreground_vs</item>
+        <item name="android:textColor">@color/frg_vs</item>
     </style>
 </resources>

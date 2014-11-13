@@ -3,7 +3,7 @@
     <string name="content_error_msg">contenido nulo</string>
     <string name="vote_canceled_receipt_lbl">recibo de anulación de voto</string>
     <string name="loading_data_msg">cargando datos...</string>
-    <string name="wait_caption">por favor, espere</string>
+    <string name="wait_msg">por favor, espere</string>
     <string name="sending_data_lbl">enviando datos ... </string>
     <string name="back_to_cancel_lbl">pulsar \'atrás\' para cancelar</string>
     <string name="manifest_pendind_lbl">manifiesto pendiente de abrir</string>
@@ -434,4 +434,5 @@
     <string name="vicket_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
     <string name="finance_lbl">finanzas</string>
     <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear monedero</string>
+    <string name="unlocking_wallet_msg">desbloqueando monedero</string>
 </resources>

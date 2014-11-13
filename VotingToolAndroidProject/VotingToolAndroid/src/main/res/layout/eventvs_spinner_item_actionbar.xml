@@ -25,7 +25,7 @@
         android:paddingRight="4dp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="@color/foreground_vs"
+        android:textColor="@color/frg_vs"
         android:textSize="18sp"
         android:fontFamily="sans-serif"
         android:drawablePadding="4dp"

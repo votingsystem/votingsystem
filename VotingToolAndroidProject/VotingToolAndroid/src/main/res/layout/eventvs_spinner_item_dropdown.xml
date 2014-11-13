@@ -22,7 +22,7 @@
     <View android:id="@+id/divider_view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/background_vs" />
+        android:background="@color/bkg_vs" />
 
     <TextView android:id="@+id/header_text"
         android:layout_height="wrap_content"
@@ -47,5 +47,5 @@
         android:gravity="center_vertical|start"
         android:textSize="18sp"
         android:textColor="#f9f9f9"
-        android:background="@color/background_vs"/>
+        android:background="@color/bkg_vs"/>
 </LinearLayout>

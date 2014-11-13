@@ -2,17 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="10dp"
     android:orientation="vertical">
+
+    <TextView android:id="@+id/caption_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/bkg_vs"
+        android:layout_gravity="center"
+        android:text="@string/pin_dialog_caption"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:padding="5dp"
+        android:textSize="28sp" />
+
+    <View android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/bkg_vs"/>
 
     <TextView
         android:id="@+id/msg"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
+        android:padding="10dp"
         android:layout_gravity="center"
         android:textSize="21sp" />
-   
+
     <EditText
         android:id="@+id/user_pin"
         android:layout_height="wrap_content"
@@ -23,7 +37,7 @@
         android:maxLength="4"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium" >
-        	<requestFocus />
-      </EditText>
+        <requestFocus />
+    </EditText>
     
 </LinearLayout>

@@ -71,12 +71,7 @@ public class CashDialogFragment extends DialogFragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            tagVS = (TagVS) intent.getSerializableExtra(ContextVS.TAG_KEY);
-            if(tagVS != null) {
-                add_tag_btn.setText(getString(R.string.remove_tag_lbl));
-                tag_text.setText(getString(R.string.selected_tag_lbl,tagVS.getName()));
-                tag_info.setVisibility(View.VISIBLE);
-            }
+            setTagVS((TagVS) intent.getSerializableExtra(ContextVS.TAG_KEY));
         }
     };
 
@@ -155,6 +150,9 @@ public class CashDialogFragment extends DialogFragment {
                 @Override public void onClick(View v) { addTagClicked(); }
             });
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            if(savedInstanceState != null) {
+                setTagVS((TagVS) savedInstanceState.getSerializable(ContextVS.TAG_KEY));
+            }
             if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
                 msgTextView.setVisibility(View.GONE);
             } else {
@@ -181,6 +179,7 @@ public class CashDialogFragment extends DialogFragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putSerializable(ContextVS.TAG_KEY, tagVS);
     }
 
     @Override public void onResume() {
@@ -195,14 +194,22 @@ public class CashDialogFragment extends DialogFragment {
                 unregisterReceiver(broadcastReceiver);
     }
 
-    public void addTagClicked() {
-        if(tagVS == null) TagVSSelectDialogFragment.showDialog(broadCastId,
-                getActivity().getSupportFragmentManager(), TagVSSelectDialogFragment.TAG);
-        else {
-            tagVS = null;
+    private void setTagVS(TagVS tagVS) {
+        this.tagVS = tagVS;
+        if(tagVS != null) {
+            add_tag_btn.setText(getString(R.string.remove_tag_lbl));
+            tag_text.setText(getString(R.string.selected_tag_lbl,tagVS.getName()));
+            tag_info.setVisibility(View.VISIBLE);
+        } else {
             add_tag_btn.setText(getString(R.string.add_tag_lbl));
             tag_info.setVisibility(View.GONE);
         }
+    }
+
+    public void addTagClicked() {
+        if(tagVS == null) TagVSSelectDialogFragment.showDialog(broadCastId,
+                getActivity().getSupportFragmentManager(), TagVSSelectDialogFragment.TAG);
+        else setTagVS(null);
     }
 
     private void sendCashValue() {

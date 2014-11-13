@@ -1,6 +1,5 @@
 package org.votingsystem.android.fragment;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
@@ -38,6 +38,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -111,7 +112,7 @@ public class UserVSAccountsFragment extends Fragment {
                 case VICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
-                    } else UIUtils.launchMessageActivity(getActivity(), responseVS);
+                } else  MessageDialogFragment.showDialog(responseVS, getFragmentManager());
                     break;
                 default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());

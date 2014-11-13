@@ -77,7 +77,7 @@ public class SMIMESignerActivity extends FragmentActivity {
         startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         if(operationVS != null) showProgressDialog(
-                getString(R.string.wait_caption), getString(R.string.signing_document_lbl));
+                getString(R.string.wait_msg), getString(R.string.signing_document_lbl));
         startService(startIntent);
     }
 
