@@ -192,8 +192,9 @@ public class VicketFragment extends Fragment {
                             getString(R.string.exception_lbl), ex.getMessage(), getFragmentManager());
                 }
             } else {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        responseVS.getMessage());
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                        getString(R.string.error_lbl), responseVS.getMessage(),
+                        getFragmentManager());
             }
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }

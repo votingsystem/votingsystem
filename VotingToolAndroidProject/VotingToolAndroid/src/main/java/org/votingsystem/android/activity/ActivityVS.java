@@ -3,7 +3,6 @@ package org.votingsystem.android.activity;
 public interface ActivityVS {
 
     public void refreshingStateChanged(boolean refreshing);
-    public void showMessage(int statusCode, String caption, String notificationMessage);
     public boolean isRefreshing();
 
 }

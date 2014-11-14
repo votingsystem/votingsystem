@@ -126,8 +126,8 @@ public class WalletFragment extends Fragment {
     }
 
     private void isProgressDialogVisible(boolean isVisible) {
-        if(isVisible) progressDialog = ModalProgressDialogFragment.showDialog(getFragmentManager(),
-                getString(R.string.unlocking_wallet_msg), getString(R.string.wait_msg));
+        if(isVisible) progressDialog = ModalProgressDialogFragment.showDialog(
+                getString(R.string.unlocking_wallet_msg), getString(R.string.wait_msg), getFragmentManager());
         else if(progressDialog != null) progressDialog.dismiss();
     }
 

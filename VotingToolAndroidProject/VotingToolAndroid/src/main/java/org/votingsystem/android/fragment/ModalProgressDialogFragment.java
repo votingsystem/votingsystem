@@ -36,8 +36,8 @@ public class ModalProgressDialogFragment extends DialogFragment {
     private String progressMessage = null;
     private String caption = null;
 
-    public static ModalProgressDialogFragment showDialog(
-            FragmentManager fragmentManager, String progressMessage, String caption) {
+    public static ModalProgressDialogFragment showDialog(String progressMessage, String caption,
+            FragmentManager fragmentManager) {
         ModalProgressDialogFragment dialog = new ModalProgressDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
@@ -62,8 +62,6 @@ public class ModalProgressDialogFragment extends DialogFragment {
         View view = getActivity().getLayoutInflater().inflate(R.layout.modal_progress_dialog, null);
         progress_text = (TextView) view.findViewById(R.id.progress_text);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
-        /*((ProgressBar) view.findViewById(R.id.progress_bar)).getIndeterminateDrawable().
-                setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);*/
         progress_text.setText(progressMessage);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setView(view);
         return builder.create();

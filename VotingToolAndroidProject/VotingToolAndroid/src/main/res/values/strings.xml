@@ -442,4 +442,5 @@
     <string name="rejected_lbl">rechazado</string>
     <string name="currency_lbl">divisa</string>
     <string name="in_lbl">en</string>
+    <string name="uservs_accounts_lbl">cuentas de usuario</string>
 </resources>

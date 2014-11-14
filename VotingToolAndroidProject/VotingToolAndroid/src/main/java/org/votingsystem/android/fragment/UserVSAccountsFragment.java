@@ -251,9 +251,9 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendVicketRequest(String pin) {
-        progressDialog = ModalProgressDialogFragment.showDialog(getFragmentManager(),
+        progressDialog = ModalProgressDialogFragment.showDialog(
                 MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
-                getString(R.string.vicket_request_msg_subject));
+                getString(R.string.vicket_request_msg_subject), getFragmentManager());
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);

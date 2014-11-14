@@ -46,7 +46,7 @@ public class VicketPagerActivity extends ActivityBase {
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
-        getActionBar().setTitle(getString(R.string.finance_lbl));
+        getActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

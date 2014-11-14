@@ -93,7 +93,7 @@ public class PublishEventVSFragment extends Fragment {
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     if(optionList.contains(message)) {
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().
-                                getString(R.string.error_lbl), getActivity().getString(
+                                getString(R.string.error_lbl), getString(
                                 R.string.option_repeated_msg, message), getFragmentManager());
                     } else {
                         optionList.add(message);
@@ -155,14 +155,14 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
-                        R.string.error_lbl), getActivity().getString(R.string.date_error_lbl),
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
+                        R.string.error_lbl), getString(R.string.date_error_lbl),
                         getFragmentManager());
             } else {
                 if(dateBeginCalendar != null) {
                     if(dateBeginCalendar.after(newCalendar)) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                                getActivity().getString(R.string.date_init_after_finish_error_lbl),
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                                getString(R.string.date_init_after_finish_error_lbl),
                                 getFragmentManager());
                         return;
                     }
@@ -184,14 +184,14 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
-                        R.string.error_lbl), getActivity().getString(R.string.date_error_lbl),
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
+                        R.string.error_lbl), getString(R.string.date_error_lbl),
                         getFragmentManager());
             } else {
                 if(dateFinishCalendar != null) {
                     if(newCalendar.after(dateFinishCalendar)) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
-                                R.string.error_lbl), getActivity().getString(
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
+                                R.string.error_lbl), getString(
                                 R.string.date_init_after_finish_error_lbl), getFragmentManager());
                         return;
                     }
@@ -214,16 +214,16 @@ public class PublishEventVSFragment extends Fragment {
         eventVS.setDateFinish(dateFinishCalendar.getTime());
         switch(formType) {
             case CLAIM_PUBLISHING:
-                signedMessageSubject = getActivity().getString(R.string.publish_claim_msg_subject);
+                signedMessageSubject = getString(R.string.publish_claim_msg_subject);
                 break;
             case VOTING_PUBLISHING:
-                signedMessageSubject = getActivity().getString(R.string.publish_election_msg_subject);
+                signedMessageSubject = getString(R.string.publish_election_msg_subject);
                 eventVS.setControlCenter(controlCenterList.get(new Long(
                         controlCenterSetSpinner.getSelectedItemId()).intValue() - 1)); //-1 -> Select Control Center msg
                 eventVS.setDateBegin(dateBeginCalendar.getTime());
                 break;
             case MANIFEST_PUBLISHING:
-                signedMessageSubject = getActivity().getString(R.string.publish_manifest_msg_subject);
+                signedMessageSubject = getString(R.string.publish_manifest_msg_subject);
                 break;
         }
         if(!optionList.isEmpty()) {
@@ -275,7 +275,7 @@ public class PublishEventVSFragment extends Fragment {
                 optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 controlCenterSetSpinner = (Spinner) rootView.findViewById(R.id.controlCenterSetSpinner);
                 List<String> controlCenterNameList = new ArrayList<String>();
-                controlCenterNameList.add(getActivity().getString(R.string.select_control_center_lbl));
+                controlCenterNameList.add(getString(R.string.select_control_center_lbl));
                 controlCenterNameList.add(contextVS.getAccessControl().getControlCenter().getName());
                 controlCenterList.add(contextVS.getAccessControl().getControlCenter());
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
@@ -292,7 +292,7 @@ public class PublishEventVSFragment extends Fragment {
                         DatePickerDialog dialog = new DatePickerDialog(getActivity(), dateBeginListener,
                                 calendarToShow.get(Calendar.YEAR), calendarToShow.get(Calendar.MONTH),
                                 calendarToShow.get(Calendar.DAY_OF_MONTH));
-                        dialog.setTitle(getActivity().getString(R.string.date_begin_lbl));
+                        dialog.setTitle(getString(R.string.date_begin_lbl));
                         dialog.show();
                     }
                 });
@@ -310,7 +310,7 @@ public class PublishEventVSFragment extends Fragment {
                 DatePickerDialog dialog = new DatePickerDialog(getActivity(), dateFinishListener,
                         calendarToShow.get(Calendar.YEAR), calendarToShow.get(Calendar.MONTH),
                         calendarToShow.get(Calendar.DAY_OF_MONTH));
-                dialog.setTitle(getActivity().getString(R.string.date_finish_lbl));
+                dialog.setTitle(getString(R.string.date_finish_lbl));
                 dialog.show();
             }
         });
@@ -415,12 +415,12 @@ public class PublishEventVSFragment extends Fragment {
         String message = null;
         switch(formType) {
             case VOTING_PUBLISHING:
-                caption = getActivity().getString(R.string.add_vote_option_lbl);
-                message = getActivity().getString(R.string.add_vote_option_msg);
+                caption = getString(R.string.add_vote_option_lbl);
+                message = getString(R.string.add_vote_option_msg);
                 break;
             case CLAIM_PUBLISHING:
-                caption = getActivity().getString(R.string.add_claim_option_lbl);
-                message = getActivity().getString(R.string.add_claim_option_msg);
+                caption = getString(R.string.add_claim_option_lbl);
+                message = getString(R.string.add_claim_option_msg);
                 break;
         }
         NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(caption,
@@ -432,40 +432,37 @@ public class PublishEventVSFragment extends Fragment {
         LOGD(TAG + ".validateForm()", "");
         if(formType == TypeVS.VOTING_PUBLISHING) {
             if(controlCenterSetSpinner.getSelectedItemId() == 0) {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                        getActivity().getString(R.string.error_lbl),
-                        getActivity().getString(R.string.control_center_missing_error_lbl));
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                        getString(R.string.error_lbl), 
+                        getString(R.string.control_center_missing_error_lbl),
+                        getFragmentManager());
                 return false;
             }
             if(dateBeginCalendar == null) {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                        getActivity().getString(R.string.error_lbl),
-                        getActivity().getString(R.string.date_error_lbl));
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                        getString(R.string.error_lbl),
+                        getString(R.string.date_error_lbl), getFragmentManager());
                 return false;
             }
             if(optionList.size() < ContextVS.NUM_MIN_OPTIONS) {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                        getActivity().getString(R.string.error_lbl),
-                        getActivity().getString(R.string.num_vote_options_error_msg));
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        getString(R.string.num_vote_options_error_msg), getFragmentManager());
                 return false;
             }
         }
         if(editorFragment.isEditorDataEmpty()) {
-            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                    getActivity().getString(R.string.error_lbl),
-                    getActivity().getString(R.string.editor_empty_error_lbl));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.editor_empty_error_lbl), getFragmentManager());
             return false;
         }
         if(dateFinishCalendar == null) {
-            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                    getActivity().getString(R.string.error_lbl),
-                    getActivity().getString(R.string.date_error_lbl));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.date_error_lbl), getFragmentManager());
             return false;
         }
         if(TextUtils.isEmpty(subjectEditText.getText())) {
-            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
-                    getActivity().getString(R.string.error_lbl),
-                    getActivity().getString(R.string.subject_error_lbl));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.subject_error_lbl), getFragmentManager());
             return false;
         }
         return true;

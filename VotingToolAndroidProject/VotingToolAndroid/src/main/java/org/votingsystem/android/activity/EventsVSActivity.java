@@ -227,17 +227,6 @@ public class EventsVSActivity extends ActivityBase
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
-
-    private void toggleWebSocketServiceConnection() {
-        LOGD(TAG + ".toggleWebSocketServiceConnection", "toggleWebSocketServiceConnection");
-        Intent startIntent = new Intent(contextVS, WebSocketService.class);
-        TypeVS typeVS;
-        if(contextVS.getWebSocketSession() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        else typeVS = TypeVS.WEB_SOCKET_INIT;
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        startService(startIntent);
-    }
-
     @Override protected void onDestroy() {
         super.onDestroy();
         PrefUtils.unregisterPreferenceChangeListener(this, this);

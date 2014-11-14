@@ -449,12 +449,12 @@ public class ReceiptFragment extends Fragment {
                     setActionBar(selectedReceipt);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
-                            ex.getMessage());
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
+                            ex.getMessage(), getFragmentManager());
                 }
             } else {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        responseVS.getMessage());
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        responseVS.getMessage(), getFragmentManager());
             }
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }

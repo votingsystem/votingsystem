@@ -35,6 +35,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
@@ -44,6 +45,7 @@ import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.LPreviewUtils;
 import org.votingsystem.android.util.LPreviewUtilsBase;
+import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
@@ -67,7 +69,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
 
     private static final String TAG = makeLogTag(ActivityBase.class);
 
-    private ProgressDialog progressDialog = null;
+    private ModalProgressDialogFragment progressDialog = null;
     private AtomicBoolean isRefreshing = new AtomicBoolean(false);
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
@@ -152,8 +154,10 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
-                        showProgressDialog(getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg));
+                        progressDialog = ModalProgressDialogFragment.showDialog(
+                                getString(R.string.connecting_caption),
+                                getString(R.string.connecting_to_service_msg),
+                                getSupportFragmentManager());
                         new Thread(new Runnable() {
                             @Override public void run() { toggleWebSocketServiceConnection(); }
                         }).start();
@@ -202,8 +206,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
                     R.color.refresh_progress_3,
                     R.color.refresh_progress_4);
             mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
+                @Override  public void onRefresh() {
                     requestDataRefresh();
                 }
             });
@@ -323,7 +326,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
-                if(contextVS.getWebSocketSession().getSessionId() == null) {
+                if(contextVS.getWebSocketSession() == null) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
                 } else {showConnectionStatusDialog();}
@@ -432,23 +435,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
         refreshingStateChanged(false);
     }
-
-    private void showProgressDialog(final String title, final String dialogMessage) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            if (progressDialog == null) {
-                progressDialog = new ProgressDialog(ActivityBase.this);
-                progressDialog.setCancelable(true);
-                progressDialog.setTitle(title);
-                progressDialog.setMessage(dialogMessage);
-                progressDialog.setIndeterminate(true);
-            }
-            progressDialog.show();
-            }
-        });
-    }
-
 
     public boolean isRefreshing() {
         return isRefreshing.get();
@@ -785,7 +771,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        boolean refreshing = (progressDialog != null && progressDialog.isShowing()) || isRefreshing.get();
+        boolean refreshing = (progressDialog != null && progressDialog.isVisible()) || isRefreshing.get();
         outState.putBoolean(ContextVS.LOADING_KEY, refreshing);
     }
 
