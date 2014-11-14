@@ -20,6 +20,7 @@ import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
@@ -67,8 +68,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public static final String TAG = AppContextVS.class.getSimpleName();
 
     private State state = State.WITHOUT_CSR;
-    private String webSocketSessionId = null;
-    private Long webSocketUserId = null;
+    private WebSocketSession webSocketSession;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
@@ -77,26 +77,14 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
 
     @Override public void onCreate() {
-        //System.setProperty("android.os.Build.ID", android.os.Build.ID);
         try {
-            /*java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);
-            java.security.KeyStore.PrivateKeyEntry keyEntry = (java.security.KeyStore.PrivateKeyEntry)
-                    keyStore.getEntry("USER_CERT_ALIAS", null);
-            Enumeration aliases = keyStore.aliases();
-            while (aliases.hasMoreElements()) {
-                String alias = (String) aliases.nextElement();
-                X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-                LOGD(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
-                LOGD(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
-            }*/
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             PrefUtils.init(this);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
             String vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
             String accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
-            LOGD(TAG + ".onCreate()", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
+            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
                     vicketServerURL);
             if(accessControl == null || vicketServer == null) {
                 Intent startIntent = new Intent(this, BootStrapService.class);
@@ -120,7 +108,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void setServer(ActorVS actorVS) {
         if(serverMap.get(actorVS.getServerURL()) == null) {
             serverMap.put(actorVS.getServerURL(), actorVS);
-        } else LOGD(TAG + ".setServer", "ActorVS with URL '" + actorVS.getServerURL() +
+        } else LOGD(TAG + ".setServer", "server with URL '" + actorVS.getServerURL() +
                 "' already in context");
     }
 
@@ -129,13 +117,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     @Override public void onTerminate() {
-        LOGD(TAG + ".onTerminate", "");
         super.onTerminate();
         PrefUtils.unregisterPreferenceChangeListener(this, this);
-    }
-
-    public String getHostID() {
-        return android.os.Build.ID;
     }
 
     public State getState() {
@@ -229,9 +212,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             responseVS = new ResponseVS(ResponseVS.SC_OK, timeStamper.getSMIME());
         } catch (Exception ex) {
             ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             return responseVS;
         }
@@ -289,8 +270,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             case INIT_VALIDATED_SESSION:
                 if(ResponseVS.SC_OK == request.getStatusCode()) {
                     try {
-                        setWebSocketSessionId(request.getSessionId());
-                        setWebSocketUserId(request.getUserId());
+                        setWebSocketSession(new WebSocketSession(
+                                request.getSessionId(), request.getUserId()));
                         WebSocketRequest.MessageVSBundle messageBundle =
                                 request.getMessageVSBundle();
                         if(messageBundle != null && messageBundle.getPendingMessages().length() > 0) {
@@ -312,8 +293,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 break;
             case WEB_SOCKET_CLOSE:
                 if(ResponseVS.SC_OK == request.getStatusCode()) {
-                    setWebSocketSessionId(null);
-                    setWebSocketUserId(null);
+                    setWebSocketSession(null);
                 }
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 break;
@@ -330,20 +310,12 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         }
     }
 
-    public String getWebSocketSessionId() {
-        return webSocketSessionId;
+    public WebSocketSession getWebSocketSession() {
+        return webSocketSession;
     }
 
-    public void setWebSocketSessionId(String webSocketSessionId) {
-        this.webSocketSessionId = webSocketSessionId;
-    }
-
-    public Long getWebSocketUserId() {
-        return webSocketUserId;
-    }
-
-    public void setWebSocketUserId(Long webSocketUserId) {
-        this.webSocketUserId = webSocketUserId;
+    public void setWebSocketSession(WebSocketSession webSocketSession) {
+        this.webSocketSession = webSocketSession;
     }
 
     @Override

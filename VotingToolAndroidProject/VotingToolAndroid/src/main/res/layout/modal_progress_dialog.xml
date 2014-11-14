@@ -42,7 +42,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/sending_data_lbl"
             android:layout_marginLeft="10dip"
-            android:textColor="#888"
+            android:textColor="@color/msg_content_vs"
             android:textSize="18sp" />
     </LinearLayout>
 

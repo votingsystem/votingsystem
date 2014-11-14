@@ -32,13 +32,6 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-           	<intent-filter>
-		       	<data android:scheme="http" android:host="controlcenter.org"/>
-	       	    <data android:path="/ControlCenter/app/androidClient"/>
-		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>
-     		    <category android:name="android.intent.category.BROWSABLE" />
-	        </intent-filter>
 
        		<intent-filter>
 		       	<data android:scheme="http" android:host="sistemavotacion.org"/>
@@ -67,7 +60,7 @@
         <meta-data android:name="android.app.default_searchable" android:value=".app.Search" />
 
         <activity android:name=".activity.FragmentContainerActivity"
-            android:noHistory="true" android:theme="@style/ThemeVS"/>
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
@@ -122,7 +115,6 @@
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->
-
         <provider android:name="org.votingsystem.util.SearchSuggestionProvider"
                   android:authorities="org.votingsystem.util.SuggestionProvider" />
 
@@ -141,7 +133,7 @@
             android:exported="false" android:authorities="votingsystem.org.transactionVS"/>
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
-            service is only available to this app. -->
+            service are only available to this app. -->
         <service android:name=".service.BootStrapService"  android:exported="false"/>
         <service android:name=".service.EventVSService"  android:exported="false"/>
         <service android:name=".service.RepresentativeService"  android:exported="false"/>

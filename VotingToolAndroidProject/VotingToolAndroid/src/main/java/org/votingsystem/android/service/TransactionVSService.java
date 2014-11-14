@@ -53,10 +53,7 @@ public class TransactionVSService extends IntentService {
             responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
-            message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
         }

@@ -150,9 +150,7 @@ public class EventVSService extends IntentService {
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    String message = ex.getMessage();
-                    if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-                    responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl), message);
+                    responseVS = ResponseVS.getExceptionResponse(ex, this);
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         }

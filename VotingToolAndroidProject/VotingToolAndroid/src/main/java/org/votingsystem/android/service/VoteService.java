@@ -133,10 +133,7 @@ public class VoteService extends IntentService {
             responseVS.setData(vote);
         } catch(Exception ex) {
             ex.printStackTrace();
-            message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operation);
@@ -170,10 +167,7 @@ public class VoteService extends IntentService {
             responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally { return responseVS; }
     }
 

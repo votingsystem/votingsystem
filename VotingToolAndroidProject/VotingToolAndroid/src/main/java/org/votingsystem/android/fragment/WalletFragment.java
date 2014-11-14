@@ -11,9 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,8 +21,6 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
-import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;

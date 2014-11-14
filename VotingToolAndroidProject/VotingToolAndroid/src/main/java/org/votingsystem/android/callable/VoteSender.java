@@ -121,10 +121,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
         } finally { return responseVS;}
     }
 

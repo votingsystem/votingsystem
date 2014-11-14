@@ -12,15 +12,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

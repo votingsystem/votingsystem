@@ -14,7 +14,6 @@ import android.widget.Button;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CertRequestFormFragment;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;

@@ -11,12 +11,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -33,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -53,17 +52,17 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
-import static org.votingsystem.model.ContextVS.USER_KEY;
 
 
 public abstract class ActivityBase extends FragmentActivity implements ActivityVS,
-        SharedPreferences.OnSharedPreferenceChangeListener,
         MultiSwipeRefreshLayout.CanChildScrollUpCallback  {
 
     private static final String TAG = makeLogTag(ActivityBase.class);
@@ -83,7 +82,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
     // to implement the "quick recall" effect (the Action Bar and the header views disappear
     // when you scroll down a list, and reappear quickly when you scroll up).
     private ArrayList<View> mHideableHeaderViews = new ArrayList<View>();
-
     // Durations for certain animations we use:
     private static final int HEADER_HIDE_ANIM_DURATION = 300;
     private static final int ACCOUNT_BOX_EXPAND_ANIM_DURATION = 200;
@@ -141,7 +139,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
 
     // A Runnable that we should execute when the navigation drawer finishes its closing animation
     private Runnable mDeferredOnDrawerClosedRunnable;
-    private AtomicBoolean isCancelled = new AtomicBoolean(false);
     private int mProgressBarTopWhenActionBarShown;
     private static final TypeEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
 
@@ -186,13 +183,11 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        /*if (!PrefUtils.isTosAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
+        /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);
             finish();
         }*/
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        PrefUtils.registerPreferenceChangeListener(this, this);
         ActionBar ab = getActionBar();
         if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
         mLPreviewUtils = LPreviewUtils.getInstance(this);
@@ -283,14 +278,12 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-        // populate the nav drawer with the correct items
         populateNavDrawer();
         mDrawerToggle.syncState();
         // When the user runs the app for the first time, we want to land them with the
         // navigation drawer open. But just the first time.
         if (!PrefUtils.isDataBootstrapDone(this)) {
-            // first run of the app starts with the nav drawer open
-            PrefUtils.isDataBootstrapDone(this);
+            PrefUtils.markDataBootstrapDone(this);
             mDrawerLayout.openDrawer(Gravity.START);
         }
     }
@@ -330,7 +323,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
-                if(contextVS.getWebSocketSessionId() == null) {
+                if(contextVS.getWebSocketSession().getSessionId() == null) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
                 } else {showConnectionStatusDialog();}
@@ -365,14 +358,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing: ");
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        if(USER_KEY.equals(key)) {
-            setupAccountBox();
-        }
-    }
-
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
@@ -383,16 +368,9 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         if (mainContent != null) {
            // mainContent.setAlpha(0);
            // mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        } else {
-            LOGW(TAG, "No view with ID main_content to fade in.");
-        }
+        } else LOGW(TAG, "No view with ID main_content to fade in.");
     }
 
-    /**
-     * Sets up the account box. The account box is the area at the top of the nav drawer that
-     * shows which account the user is logged in as, and lets them switch accounts. It also
-     * shows the user's Google+ cover photo as background.
-     */
     private void setupAccountBox() {
         final View chosenAccountView = findViewById(R.id.chosen_account_view);
         if(chosenAccountView != null) { //there are Activitys withou
@@ -406,10 +384,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
                 chosenAccountView.setEnabled(true);
             }
         }
-    }
-
-    protected void onAccountChangeRequested() {
-        // override if you want to be notified when another account has been selected account has changed
     }
 
     @Override public void onConfigurationChanged(Configuration newConfig) {
@@ -444,8 +418,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
                 }
                 return true;
             case R.id.close_app:
-                isCancelled.set(true);
-                finish();
+                ((AppContextVS)getApplicationContext()).finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -526,11 +499,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
             }*/
         }
         mDrawerLayout.closeDrawer(Gravity.START);
-    }
-
-    protected void configureStandardMenuItems(Menu menu) {
-        MenuItem debugItem = menu.findItem(R.id.menu_debug);
-        if (debugItem != null) debugItem.setVisible(BuildConfig.DEBUG);
     }
 
     @Override protected void onResume() {
@@ -645,7 +613,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
     }
 
     private void showConnectionStatusDialog() {
-        if(contextVS.getWebSocketSessionId() != null) {
+        if(contextVS.getWebSocketSession() != null) {
             View dialogView = getLayoutInflater().inflate(R.layout.connection_status_dialog, null);
             TextView userInfoText = (TextView) dialogView.findViewById(R.id.user_info_text);
             UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
@@ -725,8 +693,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
 
     @Override protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterPreferenceChangeListener(this, this);
-        if(isCancelled.get()) ((AppContextVS)getApplicationContext()).finish();
     }
 
     private SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
@@ -782,7 +748,8 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
     private void toggleWebSocketServiceConnection() {
         Intent startIntent = new Intent(((AppContextVS)getApplicationContext()), WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(((AppContextVS)getApplicationContext()).getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
+        if(((AppContextVS)getApplicationContext()).getWebSocketSession().getSessionId() != null)
+            typeVS = TypeVS.WEB_SOCKET_CLOSE;
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         startService(startIntent);

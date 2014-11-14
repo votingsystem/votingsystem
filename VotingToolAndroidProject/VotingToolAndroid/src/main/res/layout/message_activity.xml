@@ -36,7 +36,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_marginLeft="10dip"
         android:gravity="center"
-        android:textColor="#888"
+        android:textColor="@color/msg_content_vs"
         android:padding="10dp"
         android:textSize="20sp" />
 
