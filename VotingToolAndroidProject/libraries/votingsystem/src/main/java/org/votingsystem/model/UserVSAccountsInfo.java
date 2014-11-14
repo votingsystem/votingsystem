@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.util.DateUtils;
@@ -18,9 +17,9 @@ import java.util.Set;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserVSTransactionVSListInfo {
+public class UserVSAccountsInfo {
 
-    public static final String TAG = UserVSTransactionVSListInfo.class.getSimpleName();
+    public static final String TAG = UserVSAccountsInfo.class.getSimpleName();
 
     private UserVS userVS;
     private DateUtils.TimePeriod timePeriod;
@@ -93,13 +92,13 @@ public class UserVSTransactionVSListInfo {
         if(balancesCashMap.containsKey(currencyCode)) {
             return balancesCashMap.get(currencyCode);
         } else {
-            Log.d(TAG + ".getTagVSBalancesMap(...)", "User has not accounts for currency '" + currencyCode +"'");
+            Log.d(TAG + ".getTagVSBalancesMap", "User has not accounts for currency '" + currencyCode +"'");
             return null;
         }
     }
 
-    public static UserVSTransactionVSListInfo parse(JSONObject jsonData) throws Exception {
-        UserVSTransactionVSListInfo result =  new UserVSTransactionVSListInfo();
+    public static UserVSAccountsInfo parse(JSONObject jsonData) throws Exception {
+        UserVSAccountsInfo result =  new UserVSAccountsInfo();
         DateUtils.TimePeriod timePeriod = DateUtils.TimePeriod.parse(jsonData.getJSONObject("timePeriod"));
         result.setTimePeriod(timePeriod);
         result.setUserVS(UserVS.parse(jsonData.getJSONObject("userVS")));

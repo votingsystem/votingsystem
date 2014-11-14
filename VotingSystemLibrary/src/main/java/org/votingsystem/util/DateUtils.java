@@ -299,6 +299,12 @@ public class DateUtils {
             return dataMap;
         }
 
+        public boolean isCurrentWeekPeriod() {
+            TimePeriod currentWeekPeriod = getCurrentWeekPeriod();
+            return (dateFrom.compareTo(currentWeekPeriod.getDateFrom()) >=0 &&
+                    dateTo.compareTo(currentWeekPeriod.getDateTo()) <= 0);
+        }
+
         @Override public String toString() {
             return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
         }

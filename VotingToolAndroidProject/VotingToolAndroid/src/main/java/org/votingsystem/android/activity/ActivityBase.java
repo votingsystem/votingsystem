@@ -15,9 +15,7 @@ import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
@@ -35,8 +33,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -49,7 +45,6 @@ import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.LPreviewUtils;
 import org.votingsystem.android.util.LPreviewUtilsBase;
-import org.votingsystem.android.util.LoginAndAuthHelper;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
@@ -58,42 +53,31 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 import static org.votingsystem.model.ContextVS.USER_KEY;
 
 
-/**
- * A base activity that handles common functionality in the app. This includes the
- * navigation drawer, login and authentication, Action Bar tweaks, amongst others.
- */
-public abstract class ActivityBase extends FragmentActivity implements LoginAndAuthHelper.Callbacks,
+public abstract class ActivityBase extends FragmentActivity implements ActivityVS,
         SharedPreferences.OnSharedPreferenceChangeListener,
-        MultiSwipeRefreshLayout.CanChildScrollUpCallback, ActivityVS {
+        MultiSwipeRefreshLayout.CanChildScrollUpCallback  {
+
     private static final String TAG = makeLogTag(ActivityBase.class);
 
     private ProgressDialog progressDialog = null;
     private AtomicBoolean isRefreshing = new AtomicBoolean(false);
-
-    // the LoginAndAuthHelper handles signing in to Google Play Services and OAuth
-    private LoginAndAuthHelper mLoginAndAuthHelper;
-    // Navigation drawer:
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
     private AppContextVS contextVS = null;
     // allows access to L-Preview APIs through an abstract interface so we can compile with
     // both the L Preview SDK and with the API 19 SDK
     private LPreviewUtilsBase mLPreviewUtils;
-
     private ObjectAnimator mStatusBarColorAnimator;
     private ViewGroup mDrawerItemsListContainer;
-    private Handler mHandler;
 
     // When set, these components will be shown/hidden in sync with the action bar
     // to implement the "quick recall" effect (the Action Bar and the header views disappear
@@ -132,28 +116,18 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
             R.drawable.ic_drawer_settings,
     };
 
-    // delay to launch nav drawer item, to allow close animation to play
-    private static final int NAVDRAWER_LAUNCH_DELAY = 250;
-
     // fade in and fade out durations for the main content when switching between
     // different Activities of the app through the Nav Drawer
     private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
     private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
 
-    // list of navdrawer items that were actually added to the navdrawer, in order
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
-
-    // views that correspond to each navdrawer item, null if not yet created
     private View[] mNavDrawerItemViews = null;
-
     // SwipeRefreshLayout allows the user to swipe the screen down to trigger a manual refresh
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     // handle to our sync observer (that notifies us about changes in our sync state)
     private Object mSyncObserverHandle;
-
-    // data bootstrap thread. Data bootstrap is the process of initializing the database
-    // with the data cache that ships with the app.
     Thread mDataBootstrapThread = null;
 
     // variables that control the Action Bar auto hide behavior (aka "quick recall")
@@ -168,7 +142,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     // A Runnable that we should execute when the navigation drawer finishes its closing animation
     private Runnable mDeferredOnDrawerClosedRunnable;
     private AtomicBoolean isCancelled = new AtomicBoolean(false);
-    private int mThemedStatusBarColor;
     private int mProgressBarTopWhenActionBarShown;
     private static final TypeEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
 
@@ -218,18 +191,11 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
             startActivity(intent);
             finish();
         }*/
-        mHandler = new Handler();
-        if (savedInstanceState == null) {
-            LOGD(TAG, "savedInstanceState null");
-        }
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        sp.registerOnSharedPreferenceChangeListener(this);
+        PrefUtils.registerPreferenceChangeListener(this, this);
         ActionBar ab = getActionBar();
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true);
-        }
+        if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
         mLPreviewUtils = LPreviewUtils.getInstance(this);
-        mThemedStatusBarColor = getResources().getColor(R.color.theme_primary_dark);
     }
 
     private void trySetupSwipeRefresh() {
@@ -253,18 +219,10 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         }
     }
 
-    protected void setProgressBarTopWhenActionBarShown(int progressBarTopWhenActionBarShown) {
-        mProgressBarTopWhenActionBarShown = progressBarTopWhenActionBarShown;
-        updateSwipeRefreshProgressBarTop();
-    }
-
     private void updateSwipeRefreshProgressBarTop() {
         if (mSwipeRefreshLayout == null) return;
-        if (mActionBarShown) {
-            mSwipeRefreshLayout.setProgressBarTop(mProgressBarTopWhenActionBarShown);
-        } else {
-            mSwipeRefreshLayout.setProgressBarTop(0);
-        }
+        if (mActionBarShown) mSwipeRefreshLayout.setProgressBarTop(mProgressBarTopWhenActionBarShown);
+        else  mSwipeRefreshLayout.setProgressBarTop(0);
     }
 
     /**
@@ -350,11 +308,8 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity.START);
     }
 
-    /** Populates the navigation drawer with the appropriate items. */
     private void populateNavDrawer() {
         mNavDrawerItems.clear();
-        // decide which items will appear in the nav drawer
-        //if (isLogged) { }
         mNavDrawerItems.add(NAVDRAWER_ITEM_POLLS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_REPRESENTATIVES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
@@ -444,7 +399,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
             chosenAccountView.setVisibility(View.VISIBLE);
             TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
             TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
-
             UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
             if(sessionUserVS != null) {
                 nameTextView.setText(sessionUserVS.getName());
@@ -497,10 +451,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         return super.onOptionsItemSelected(item);
     }
 
-    public void showRefreshMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
     public void showMessage(int statusCode, String caption, String message) {
         LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
@@ -514,16 +464,14 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (progressDialog == null) {
-                    progressDialog = new ProgressDialog(ActivityBase.this);
-                    progressDialog.setCancelable(true);
-                    progressDialog.setTitle(title);
-                    progressDialog.setMessage(dialogMessage);
-                    progressDialog.setIndeterminate(true);
-                    /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
-                    @Override public void onCancel(DialogInterface dialog){}});*/
-                }
-                progressDialog.show();
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(ActivityBase.this);
+                progressDialog.setCancelable(true);
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(dialogMessage);
+                progressDialog.setIndeterminate(true);
+            }
+            progressDialog.show();
             }
         });
     }
@@ -559,7 +507,8 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     }
 
     private void onNavDrawerItemClicked(final int itemId) {
-        LOGD(TAG + ".onNavDrawerItemClicked", "itemId: " + itemId + " - getSelfNavDrawerItem(): " + getSelfNavDrawerItem());
+        LOGD(TAG + ".onNavDrawerItemClicked", "itemId: " + itemId +
+                " - selfNavDrawerItem: " + getSelfNavDrawerItem());
         if (itemId == getSelfNavDrawerItem()) {
             mDrawerLayout.closeDrawer(Gravity.START);
             return;
@@ -567,14 +516,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         if (isSpecialItem(itemId)) {
             goToNavDrawerItem(itemId);
         } else {
-            // launch the target Activity after a short delay, to allow the close animation to play
-  /*          mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    goToNavDrawerItem(itemId);
-                }
-            }, NAVDRAWER_LAUNCH_DELAY);
-*/
             goToNavDrawerItem(itemId);
             // change the active item on the list so the user can see the item changed
             setSelectedNavDrawerItem(itemId);
@@ -589,16 +530,11 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
 
     protected void configureStandardMenuItems(Menu menu) {
         MenuItem debugItem = menu.findItem(R.id.menu_debug);
-        if (debugItem != null) {
-            debugItem.setVisible(BuildConfig.DEBUG);
-        }
+        if (debugItem != null) debugItem.setVisible(BuildConfig.DEBUG);
     }
 
-    @Override
-    protected void onResume() {
+    @Override protected void onResume() {
         super.onResume();
-        // Watch for sync state changes
-        LOGD(TAG + ".onResume() ", "onResume");
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -609,9 +545,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
     }
 
-    @Override
-    protected void onPause() {
-        LOGD(TAG + ".onPause() ", "onPause");
+    @Override protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
@@ -621,69 +555,16 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         }
     }
 
-    /**
-     * Converts an intent into a {@link android.os.Bundle} suitable for use as fragment arguments.
-     */
-    public static Bundle intentToFragmentArguments(Intent intent) {
-        Bundle arguments = new Bundle();
-        if (intent == null) {
-            return arguments;
-        }
-
-        final Uri data = intent.getData();
-        if (data != null) {
-            arguments.putParcelable("_uri", data);
-        }
-
-        final Bundle extras = intent.getExtras();
-        if (extras != null) {
-            arguments.putAll(intent.getExtras());
-        }
-
-        return arguments;
-    }
-
-    /**
-     * Converts a fragment arguments bundle into an intent.
-     */
-    public static Intent fragmentArgumentsToIntent(Bundle arguments) {
-        Intent intent = new Intent();
-        if (arguments == null) {
-            return intent;
-        }
-
-        final Uri data = arguments.getParcelable("_uri");
-        if (data != null) {
-            intent.setData(data);
-        }
-
-        intent.putExtras(arguments);
-        intent.removeExtra("_uri");
-        return intent;
-    }
-
-    @Override
-    public void onStart() {
-        LOGD(TAG, "onStart");
+    @Override public void onStart() {
         super.onStart();
-
-        // Perform one-time bootstrap setup, if needed
         if (!PrefUtils.isDataBootstrapDone(this) && mDataBootstrapThread == null) {
-            LOGD(TAG, "One-time data bootstrap not done yet. Doing now.");
             performDataBootstrap();
         }
-
-        startLoginProcess();
     }
 
-    /**
-     * Performs the one-time data bootstrap. This means taking our prepackaged conference data
-     * from the R.raw.bootstrap_data resource, and parsing it to populate the database. This
-     * data contains the sessions, speakers, etc.
-     */
     private void performDataBootstrap() {
         final Context appContext = getApplicationContext();
-        LOGD(TAG, "Starting activity bootstrap background thread.");
+        LOGD(TAG, "performDataBootstrap - starting activity bootstrap background thread");
         mDataBootstrapThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -699,75 +580,12 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         mDataBootstrapThread.start();
     }
 
-    /**
-     * Returns the default account on the device. We use the rule that the first account
-     * should be the default. It's arbitrary, but the alternative would be showing an account
-     * chooser popup which wouldn't be a smooth first experience with the app. Since the user
-     * can easily switch the account with the nav drawer, we opted for this implementation.
-     */
-    private String getDefaultAccount() {
-        // Choose first account on device.
-        LOGD(TAG, "Choosing default account (first account on device)");
-        return "default acccount";
-    }
-
-    private void startLoginProcess() {
-        LOGD(TAG, "Starting login process.");
-        String accountName = getDefaultAccount();
-        if (mLoginAndAuthHelper != null && mLoginAndAuthHelper.getAccountName().equals(accountName)) {
-            LOGD(TAG, "Helper already set up; simply starting it.");
-            mLoginAndAuthHelper.start();
-            return;
-        }
-        LOGD(TAG, "Starting login process with account " + accountName);
-//        mLoginAndAuthHelper = new LoginAndAuthHelper(this, this, accountName);
-//        mLoginAndAuthHelper.start();
-    }
-
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override public void onStop() {
-        LOGD(TAG, "onStop");
         super.onStop();
-    }
-
-    @Override public void onPlusInfoLoaded(String accountName) {
-        setupAccountBox();
-        populateNavDrawer();
-    }
-
-    /**
-     * Called when authentication succeeds. This may either happen because the user just
-     * authenticated for the first time (and went through the sign in flow), or because it's
-     * a returning user.
-     * @param accountName name of the account that just authenticated successfully.
-     * @param newlyAuthenticated If true, this user just authenticated for the first time.
-     * If false, it's a returning user.
-     */
-    @Override public void onAuthSuccess(String accountName, boolean newlyAuthenticated) {
-        LOGD(TAG, "onAuthSuccess, account " + accountName + ", newlyAuthenticated=" + newlyAuthenticated);
-        refreshAccountDependantData();
-        if (newlyAuthenticated) {
-            LOGD(TAG, "Enabling auto sync on content provider for account " + accountName);
-        }
-        setupAccountBox();
-        populateNavDrawer();
-    }
-
-    @Override public void onAuthFailure(String accountName) {
-        LOGD(TAG, "Auth failed for account " + accountName);
-        refreshAccountDependantData();
-    }
-
-    protected void refreshAccountDependantData() {
-        // Force local data refresh for data that depends on the logged user:
-        LOGD(TAG, "Refreshing MySchedule data");
-    }
-
-    protected void retryAuth() {
-        mLoginAndAuthHelper.retryAuthByUserRequest();
     }
 
     private void initActionBarAutoHide() {
@@ -792,25 +610,17 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         } else if (deltaY < -mActionBarAutoHideSensivity) {
             deltaY = -mActionBarAutoHideSensivity;
         }
-
         if (Math.signum(deltaY) * Math.signum(mActionBarAutoHideSignal) < 0) {
             // deltaY is a motion opposite to the accumulated signal, so reset signal
             mActionBarAutoHideSignal = deltaY;
-        } else {
-            // add to accumulated signal
-            mActionBarAutoHideSignal += deltaY;
-        }
-
+        } else mActionBarAutoHideSignal += deltaY;
         boolean shouldShow = currentY < mActionBarAutoHideMinY ||
                 (mActionBarAutoHideSignal <= -mActionBarAutoHideSensivity);
         autoShowOrHideActionBar(shouldShow);
     }
 
     protected void autoShowOrHideActionBar(boolean show) {
-        if (show == mActionBarShown) {
-            return;
-        }
-
+        if (show == mActionBarShown)  return;
         mActionBarShown = show;
         getLPreviewUtils().showHideActionBarIfPartOfDecor(show);
         onActionBarAutoShowOrHide(show);
@@ -821,7 +631,6 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             final static int ITEMS_THRESHOLD = 3;
             int lastFvi = 0;
-
             @Override public void onScrollStateChanged(AbsListView view, int scrollState) { }
 
             @Override public void onScroll(AbsListView view, int firstVisibleItem,
@@ -914,11 +723,9 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
                 getResources().getColor(R.color.navdrawer_icon_tint));
     }
 
-
-    @Override
-    protected void onDestroy() {
+    @Override protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this, this);
         if(isCancelled.get()) ((AppContextVS)getApplicationContext()).finish();
     }
 
@@ -941,7 +748,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         }
     }
 
-    protected void enableDisableSwipeRefresh(boolean enable) {
+    public void enableDisableSwipeRefresh(boolean enable) {
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setEnabled(enable);
         }
@@ -967,21 +774,16 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         if (mStatusBarColorAnimator != null) {
             mStatusBarColorAnimator.cancel();
         }
-
         if (!mActionBarShown) {
             mLPreviewUtils.setStatusBarColor(Color.BLACK);
-            return;
         }
-
-        mLPreviewUtils.setStatusBarColor((Integer) ARGB_EVALUATOR.evaluate(slideOffset,
-                mThemedStatusBarColor, Color.BLACK));
     }
 
     private void toggleWebSocketServiceConnection() {
         Intent startIntent = new Intent(((AppContextVS)getApplicationContext()), WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
         if(((AppContextVS)getApplicationContext()).getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        LOGD(TAG + ".toggleWebSocketServiceConnection(...)", "operation: " + typeVS.toString());
+        LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         startService(startIntent);
     }
@@ -990,13 +792,9 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         if (mStatusBarColorAnimator != null) {
             mStatusBarColorAnimator.cancel();
         }
-        mStatusBarColorAnimator = ObjectAnimator.ofInt(mLPreviewUtils, "statusBarColor",
-                shown ? mThemedStatusBarColor : Color.BLACK).setDuration(250);
         mStatusBarColorAnimator.setEvaluator(ARGB_EVALUATOR);
         mStatusBarColorAnimator.start();
-
         updateSwipeRefreshProgressBarTop();
-
         for (View view : mHideableHeaderViews) {
             if (shown) {
                 view.animate().translationY(0).alpha(1).setDuration(HEADER_HIDE_ANIM_DURATION)
@@ -1023,4 +821,5 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         boolean refreshing = (progressDialog != null && progressDialog.isShowing()) || isRefreshing.get();
         outState.putBoolean(ContextVS.LOADING_KEY, refreshing);
     }
+
 }

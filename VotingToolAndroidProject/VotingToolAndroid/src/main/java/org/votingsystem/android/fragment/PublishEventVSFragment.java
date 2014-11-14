@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -91,9 +92,9 @@ public class PublishEventVSFragment extends Fragment {
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     if(optionList.contains(message)) {
-                        ((ActivityVS)getActivity()).showMessage(
-                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                                getActivity().getString(R.string.option_repeated_msg, message));
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().
+                                getString(R.string.error_lbl), getActivity().getString(
+                                R.string.option_repeated_msg, message), getFragmentManager());
                     } else {
                         optionList.add(message);
                         addEventOption(message);
@@ -134,9 +135,9 @@ public class PublishEventVSFragment extends Fragment {
                     //to avoid avoid dissapear on screen orientation change
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
-                    ((ActivityVS)getActivity()).showMessage(
-                            responseStatusCode, getString(R.string.publish_document_ERROR_msg),
-                            Html.fromHtml(responseVS.getNotificationMessage()).toString());
+                    MessageDialogFragment.showDialog(responseStatusCode, getString(
+                            R.string.publish_document_ERROR_msg), Html.fromHtml(
+                            responseVS.getNotificationMessage()).toString(), getFragmentManager());
                 }
             }
         }
@@ -154,15 +155,15 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                ((ActivityVS)getActivity()).showMessage(
-                        ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                        getActivity().getString(R.string.date_error_lbl));
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
+                        R.string.error_lbl), getActivity().getString(R.string.date_error_lbl),
+                        getFragmentManager());
             } else {
                 if(dateBeginCalendar != null) {
                     if(dateBeginCalendar.after(newCalendar)) {
-                        ((ActivityVS)getActivity()).showMessage(
-                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                                getActivity().getString(R.string.date_init_after_finish_error_lbl));
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                                getActivity().getString(R.string.date_init_after_finish_error_lbl),
+                                getFragmentManager());
                         return;
                     }
                 }
@@ -183,15 +184,15 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                ((ActivityVS)getActivity()).showMessage(
-                        ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                        getActivity().getString(R.string.date_error_lbl));
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
+                        R.string.error_lbl), getActivity().getString(R.string.date_error_lbl),
+                        getFragmentManager());
             } else {
                 if(dateFinishCalendar != null) {
                     if(newCalendar.after(dateFinishCalendar)) {
-                        ((ActivityVS)getActivity()).showMessage(
-                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
-                                getActivity().getString(R.string.date_init_after_finish_error_lbl));
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().getString(
+                                R.string.error_lbl), getActivity().getString(
+                                R.string.date_init_after_finish_error_lbl), getFragmentManager());
                         return;
                     }
                 }
@@ -244,8 +245,8 @@ public class PublishEventVSFragment extends Fragment {
                     ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, eventVS.toJSON().toString());
-            ((ActivityVS)getActivity()).showRefreshMessage(getActivity().getString(
-                    R.string.publishing_document_msg));
+            Toast.makeText(getActivity(), getString(
+                    R.string.publishing_document_msg), Toast.LENGTH_SHORT).show();
             ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -284,7 +285,7 @@ public class PublishEventVSFragment extends Fragment {
                 dateBeginEditText = (EditText) rootView.findViewById(R.id.dateBegin);
                 dateBeginEditText.setOnClickListener(new View.OnClickListener() {
                     @Override public void onClick(View v) {
-                        LOGD(TAG + ".setOnClickListener(...)", "");
+                        LOGD(TAG + ".setOnClickListener", "");
                         Calendar calendarToShow = null;
                         if(dateBeginCalendar == null) calendarToShow = DateUtils.addDays(1);
                         else calendarToShow = dateBeginCalendar;
@@ -302,7 +303,7 @@ public class PublishEventVSFragment extends Fragment {
         dateFinishEditText = (EditText) rootView.findViewById(R.id.dateFinish);
         dateFinishEditText.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                LOGD(TAG + ".setOnClickListener(...)", "");
+                LOGD(TAG + ".setOnClickListener", "");
                 Calendar calendarToShow = null;
                 if(dateFinishCalendar == null) calendarToShow = DateUtils.addDays(1);
                 else calendarToShow = dateFinishCalendar;
@@ -327,8 +328,8 @@ public class PublishEventVSFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        //LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
-        LOGD(TAG +  ".onActivityCreated(...)", "");
+        //LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "");
         super.onActivityCreated(savedInstanceState);
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
@@ -377,8 +378,8 @@ public class PublishEventVSFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) optionList);
-        //LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "");
+        //LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "");
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {

@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSTransactionVSListInfo;
+import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
@@ -63,7 +63,7 @@ public class PrefUtils {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(APPLICATION_ID_KEY, applicationId);
             editor.commit();
-            LOGD(TAG, "getApplicationId- new applicationId: " + applicationId);
+            LOGD(TAG, ".getApplicationId - new applicationId: " + applicationId);
         }
         return applicationId;
     }
@@ -83,42 +83,54 @@ public class PrefUtils {
                 Calendar.getInstance().getTimeInMillis()).commit();
     }
 
-    public static void registerOnSharedPreferenceChangeListener(final Context context,
+    public static void registerPreferenceChangeListener(final Context context,
         SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.registerOnSharedPreferenceChangeListener(listener);
     }
 
-    public static void unregisterOnSharedPreferenceChangeListener(final Context context,
+    public static void unregisterPreferenceChangeListener(final Context context,
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    public static UserVSTransactionVSListInfo getUserVSTransactionVSListInfo(
-            final Context context) throws Exception {
+    public static Date getUserVSAccountsLastCheckDate(final Context context) {
+        SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                Context.MODE_PRIVATE);
+        GregorianCalendar lastCheckedTime = new GregorianCalendar();
+        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY, 0));
+        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
+        if(lastCheckedTime.getTime().after(currentLapseCalendar.getTime())) {
+            return lastCheckedTime.getTime();
+        } else return null;
+    }
+
+    public static UserVSAccountsInfo getUserVSAccountsInfo(final Context context) throws Exception {
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         String userInfoStr = pref.getString(editorKey, null);
-        if(userInfoStr != null) return UserVSTransactionVSListInfo.parse(new JSONObject(userInfoStr));
+        if(userInfoStr != null) return UserVSAccountsInfo.parse(new JSONObject(userInfoStr));
         else return null;
     }
 
-    public static void putUserVSTransactionVSListInfo(final Context context,
-              UserVSTransactionVSListInfo userInfo, DateUtils.TimePeriod timePeriod) throws Exception {
+    public static void putUserVSAccountsInfo(final Context context,
+              UserVSAccountsInfo userInfo, DateUtils.TimePeriod timePeriod) throws Exception {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
+                Calendar.getInstance().getTimeInMillis());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(timePeriod.getDateFrom());
         editor.putString(editorKey, userInfo.toJSON().toString());
         editor.commit();
     }
 
-    public static void setPin(final Context context, String pin) {
+    public static void putPin(final Context context, String pin) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -151,33 +163,13 @@ public class PrefUtils {
     }
 
     public static void putAppCertState(final Context context, String accessControlURL, State state, String nif) {
-        LOGD(TAG + ".putAppCertState(...)", STATE_KEY + "_" + accessControlURL +  " - state: " + state.toString());
+        LOGD(TAG + ".putAppCertState", STATE_KEY + "_" + accessControlURL +  " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(STATE_KEY + "_" + accessControlURL , state.toString());
         if(nif != null) editor.putString(NIF_KEY, nif);
         editor.commit();
-    }
-
-    public static void putLastVicketAccountCheckTime(final Context context) {
-        SharedPreferences settings = context.getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY,
-                Calendar.getInstance().getTimeInMillis());
-        editor.commit();
-    }
-
-    public static Date getLastVicketAccountCheckTime(final Context context) {
-        SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
-                Context.MODE_PRIVATE);
-        GregorianCalendar lastCheckedTime = new GregorianCalendar();
-        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY, 0));
-        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
-        if(lastCheckedTime.getTime().after(currentLapseCalendar.getTime())) {
-            return lastCheckedTime.getTime();
-        } else return null;
     }
 
     public static void putCsrRequest(final Context context, Long requestId,

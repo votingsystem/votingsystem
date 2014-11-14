@@ -143,7 +143,7 @@ public class EventVSService extends IntentService {
                         int numRowsCreated = getContentResolver().bulkInsert(
                                 EventVSContentProvider.CONTENT_URI, contentValuesList.toArray(
                                 new ContentValues[contentValuesList.size()]));
-                        LOGD(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated + " rows" +
+                        LOGD(TAG + ".onHandleIntent", "inserted: " + numRowsCreated + " rows" +
                             " - eventType: " + eventType + " - eventState: " + eventState);
                     } else { //To notify ContentProvider Listeners
                         getContentResolver().insert(EventVSContentProvider.CONTENT_URI, null);

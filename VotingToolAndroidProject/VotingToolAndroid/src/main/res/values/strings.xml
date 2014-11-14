@@ -308,15 +308,15 @@
     <string name="delete_vicket_lbl">borrar vicket</string>
     <string name="share_vicket_lbl">compartir vicket</string>
     <string name="vicket_user_info_lbl">información del usuario</string>
-    <string name="request_button">retirar dinero</string>
+    <string name="request_cash_lbl">retirar efectivo</string>
     <string name="uservs_accountvs_info_missing_caption">faltan los datos del usuario</string>
     <string name="uservs_accountvs_info_missing"><![CDATA[no ha actualizado los datos de la semana]]></string>
     <string name="update_signers_info_lbl">actualizar datos</string>
     <string name="send_message_lbl">enviar mensaje</string>
     <string name="update_user_info_pin_msg">para obtener los datos necesita firmar una solicitud</string>
     <string name="vicket_user_info_request_msg_subject">solicitud de información de cuentas</string>
-    <string name="vicket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en caja]]></string>
-    <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en efectivo en su móvil]]></string>
+    <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en caja]]></string>
+    <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
     <string name="vicket_last_request_info_lbl"><![CDATA[última actualización el <u><b>\'%1$s\'</b></u>]]></string>
     <string name="time_remaining_info_lbl"><![CDATA[lo que no gastes antes del domingo a las 24:00 horas se repartirá
         entre el resto de usuarios]]></string>
@@ -441,4 +441,5 @@
     <string name="expended_lbl">consumido</string>
     <string name="lapsed_lbl">caducado</string>
     <string name="rejected_lbl">rechazado</string>
+    <string name="currency_lbl">divisa</string>
 </resources>

@@ -54,7 +54,7 @@ public class IntentFilterActivity extends FragmentActivity {
                         responseVS = HttpHelper.getData(operationVS.getEventVS().getURL(), null);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             EventVS selectedEvent = EventVS.parse(new JSONObject(responseVS.getMessage()));
-                            LOGD(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
+                            LOGD(TAG + ".onStartCommand", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS ||
@@ -94,7 +94,7 @@ public class IntentFilterActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {

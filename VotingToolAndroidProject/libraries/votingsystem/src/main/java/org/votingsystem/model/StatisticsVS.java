@@ -131,7 +131,7 @@ public class StatisticsVS {
     }
 
     public static StatisticsVS parse (String strEstadisticas) throws IOException, Exception {
-    	Log.d(TAG + ".parse(...)", "parse(...)");
+    	Log.d(TAG + ".parse", "parse");
         StatisticsVS statisticsVS = new StatisticsVS();
         JSONObject estadisticaJSON = new JSONObject(strEstadisticas);
         JSONObject jsonObject = null;

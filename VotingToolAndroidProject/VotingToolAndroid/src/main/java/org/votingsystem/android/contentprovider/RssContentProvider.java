@@ -182,7 +182,7 @@ public class RssContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             File dbFile = context.getDatabasePath(DB_NAME);
-            LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            LOGD(TAG + ".DatabaseHelper", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){

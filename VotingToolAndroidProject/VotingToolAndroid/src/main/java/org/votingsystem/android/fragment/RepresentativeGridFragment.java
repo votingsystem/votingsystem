@@ -88,9 +88,10 @@ public class RepresentativeGridFragment extends Fragment
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
                 ((ActivityVS)getActivity()).refreshingStateChanged(false);
-                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                       responseVS.getNotificationMessage());
-            } else ((ActivityVS)getActivity()).showMessage(responseStatusCode, caption, message);
+                MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage(), getFragmentManager());
+            } else MessageDialogFragment.showDialog(responseStatusCode, caption, message,
+                    getFragmentManager());
         }
         }
     };
@@ -138,7 +139,7 @@ public class RepresentativeGridFragment extends Fragment
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
         }
-        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
@@ -165,7 +166,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
@@ -179,7 +180,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick", "id: " + id);
         return true;
     }
 
@@ -193,7 +194,7 @@ public class RepresentativeGridFragment extends Fragment
         if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset <
                 UserContentProvider.getNumTotalRepresentatives() &&
                 totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
-            LOGD(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
+            LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
                     " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
             firstVisiblePosition = firstVisibleItem;
             fetchItems(new Long(totalItemCount));
@@ -216,7 +217,7 @@ public class RepresentativeGridFragment extends Fragment
                     contextVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
             return;
         }
-        LOGD(TAG +  ".fetchItems(...)", "offset: " + offset);
+        LOGD(TAG +  ".fetchItems", "offset: " + offset);
         if(((ActivityVS)getActivity()).isRefreshing()) return;
         ((ActivityVS)getActivity()).refreshingStateChanged(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
@@ -364,7 +365,7 @@ public class RepresentativeGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 
     @Override public void onResume() {

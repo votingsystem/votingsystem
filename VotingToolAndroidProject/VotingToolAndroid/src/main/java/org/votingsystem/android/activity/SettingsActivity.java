@@ -46,7 +46,7 @@ public class SettingsActivity extends PreferenceActivity
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected(...)", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -59,7 +59,7 @@ public class SettingsActivity extends PreferenceActivity
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
-        PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.registerPreferenceChangeListener(this, this);
         Preference button = (Preference)findPreference("requestCertButton");
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override public boolean onPreferenceClick(Preference arg0) {
@@ -73,7 +73,7 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this, this);
     }
 
 

@@ -44,7 +44,7 @@ public class ConfirmImageActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.confirm_image);
         image = (ImageView) findViewById(R.id.selected_image);
@@ -86,7 +86,7 @@ public class ConfirmImageActivity extends FragmentActivity {
         if(result == Activity.RESULT_OK) {
             resultIntent = new Intent();
             resultIntent.setData(imageUri);
-            LOGD(TAG + ".onActivityResult(...)", "printedBitmap.getWidth(): " + printedBitmap.getWidth() +
+            LOGD(TAG + ".onActivityResult", "printedBitmap.getWidth(): " + printedBitmap.getWidth() +
                     " - view.getHeight(): " + printedBitmap.getHeight());
             //image.setDrawingCacheEnabled(true);
             //Bitmap capturedBitmap = Bitmap.createBitmap(image.getDrawingCache());
@@ -98,14 +98,14 @@ public class ConfirmImageActivity extends FragmentActivity {
                     new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH), 2, RoundingMode.CEILING);
             imageHeight = imageHeight.divide(scaleFactor, 2, RoundingMode.CEILING);
             imageWidth = new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH);
-            LOGD(TAG + ".onActivityResult(...)", "imageWidth: " + imageWidth +
+            LOGD(TAG + ".onActivityResult", "imageWidth: " + imageWidth +
                     " - imageHeight: " + imageHeight + " - scaleFactor: " + scaleFactor);
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(capturedBitmap,
                     imageWidth.intValue(), imageHeight.intValue(), true);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
-            LOGD(TAG + ".onActivityResult(...)", "captured byteArray length: " + byteArray.length);
+            LOGD(TAG + ".onActivityResult", "captured byteArray length: " + byteArray.length);
             File representativeDataFile = new File(getApplicationContext().getFilesDir(),
                     ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
             UserVS representativeData = null;

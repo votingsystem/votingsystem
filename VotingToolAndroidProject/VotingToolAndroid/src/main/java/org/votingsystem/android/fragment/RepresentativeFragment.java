@@ -89,7 +89,7 @@ public class RepresentativeFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         representativeId =  getArguments().getLong(ContextVS.USER_KEY);
@@ -126,7 +126,7 @@ public class RepresentativeFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         int statusCode = -1;
         String caption = null;

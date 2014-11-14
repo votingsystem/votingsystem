@@ -115,7 +115,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
@@ -205,7 +205,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private void showClaimFieldsDialog() {
         if (eventVS.getFieldsEventVS() == null) {
-            LOGD(TAG + ".showClaimFieldsDialog(...)", "Event without fields");
+            LOGD(TAG + ".showClaimFieldsDialog", "Event without fields");
             return;
         }
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
@@ -254,7 +254,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
-        LOGD(TAG + ".addFormField(...)", "field: " + label);
+        LOGD(TAG + ".addFormField", "field: " + label);
         TextView textView = new TextView(getActivity().getApplicationContext());
         textView.setTextSize(getResources().getDimension(R.dimen.claim_field_text_size));
         textView.setText(label);

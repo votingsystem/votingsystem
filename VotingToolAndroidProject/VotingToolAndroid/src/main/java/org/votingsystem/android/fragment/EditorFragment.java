@@ -51,7 +51,7 @@ public class EditorFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             editorDataStr = savedInstanceState.getString(ContextVS.FORM_DATA_KEY);
@@ -64,7 +64,7 @@ public class EditorFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.FORM_DATA_KEY, editorDataStr);
         outState.putBoolean(ContextVS.EDITOR_VISIBLE_KEY, isEditable);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -108,7 +108,7 @@ public class EditorFragment extends Fragment {
         String editorFileName = "editor_" + Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                LOGD(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
+                LOGD(TAG + ".loadEditor", "missing editorFileName: " + editorFileName);
                 editorFileName = "editor_es.html";
             }
         } catch(Exception ex) {
@@ -165,12 +165,12 @@ public class EditorFragment extends Fragment {
     }
     
     public void onBackPressed() {
-        LOGD(TAG + ".onBackPressed(...)", "onBackPressed");
+        LOGD(TAG + ".onBackPressed", "onBackPressed");
         if(webView.canGoBack()) webView.goBack();
     }
 
     public void setEditable(boolean editable) {
-        LOGD(TAG + ".setEditable(...)", " - editable: " + editable);
+        LOGD(TAG + ".setEditable", " - editable: " + editable);
         String functionStr = null;
         if(editable) {
             functionStr = "javascript:createEditor('" + editorDataStr + "')";

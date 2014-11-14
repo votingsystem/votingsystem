@@ -240,27 +240,27 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
-		Log.d(TAG + ".isValidSignature(...) ", "signers.size(): " + signers.size());
+		Log.d(TAG + ".isValidSignature ", "signers.size(): " + signers.size());
         Iterator it = signers.getSigners().iterator();
         boolean result = false;
         // check each signer
         while (it.hasNext()) {
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
-    		Log.d(TAG + ".isValidSignature(...) ", "Collection matches: " + certCollection.size());
+    		Log.d(TAG + ".isValidSignature ", "Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
-    		Log.d(TAG + ".isValidSignature(...) ", "cert.getSubjectDN(): " + cert.getSubjectDN());
-    		Log.d(TAG + ".isValidSignature(...) ", "cert.getNotBefore(): " + cert.getNotBefore());
-    		Log.d(TAG + ".isValidSignature(...) ", "cert.getNotAfter(): " + cert.getNotAfter());
+    		Log.d(TAG + ".isValidSignature ", "cert.getSubjectDN(): " + cert.getSubjectDN());
+    		Log.d(TAG + ".isValidSignature ", "cert.getNotBefore(): " + cert.getNotBefore());
+    		Log.d(TAG + ".isValidSignature ", "cert.getNotAfter(): " + cert.getNotAfter());
 
             if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(PROVIDER).build(cert))){
-        		Log.d(TAG + ".isValidSignature(...) ", "signature verified"); 
+        		Log.d(TAG + ".isValidSignature ", "signature verified");
                 result = true;
             } else {
-            	Log.d(TAG + ".isValidSignature(...) ", "signature failed!"); 
+            	Log.d(TAG + ".isValidSignature ", "signature failed!");
                 result = false;
             }
         }
@@ -411,7 +411,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
         //String digest = Base64.encodeToString(as.getOctets(), Base64.DEFAULT);
-        //Log.d(TAG + ".getSolicitudAcceso(...)", " - digest: " + digest);
+        //Log.d(TAG + ".getSolicitudAcceso", " - digest: " + digest);
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         reqgen.setCertReq(true);
         //reqgen.setReqPolicy(m_sPolicyOID);
@@ -443,9 +443,9 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         try {
             if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                     ContextVS.PROVIDER).build(cert))){
-                Log.d(TAG + ".verifySignerCert(...)" , "signature verified");
+                Log.d(TAG + ".verifySignerCert" , "signature verified");
                 result = true;
-            } else {Log.d(TAG + ".verifySignerCert(...)" , "signature failed!");}
+            } else {Log.d(TAG + ".verifySignerCert" , "signature failed!");}
         } catch(CMSVerifierCertificateNotValidException ex) {
             Log.d(TAG + ".verifySignerCert" , "cert notBefore: " + cert.getNotBefore() +
                     "cert notAfter(): " + cert.getNotAfter());

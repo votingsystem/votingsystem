@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,6 +24,8 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
+import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
+import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -39,16 +42,16 @@ import java.util.List;
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
-public class VicketGridFragment extends Fragment {
+public class WalletFragment extends Fragment {
 
-    public static final String TAG = VicketGridFragment.class.getSimpleName();
+    public static final String TAG = WalletFragment.class.getSimpleName();
     public static final String AUTHENTICATED_KEY = "AUTHENTICATED_KEY";
 
     private View rootView;
     private GridView gridView;
     private VicketListAdapter adapter = null;
     private List<Vicket> vicketList;
-    private String broadCastId = VicketGridFragment.class.getSimpleName();
+    private String broadCastId = WalletFragment.class.getSimpleName();
     private ModalProgressDialogFragment progressDialog = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -134,14 +137,8 @@ public class VicketGridFragment extends Fragment {
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick", "id: " + id);
         return true;
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.vicket_user_info, menu);
-        menu.setGroupVisible(R.id.general_items, false);
-        menu.removeItem(R.id.search_item);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -152,7 +149,7 @@ public class VicketGridFragment extends Fragment {
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            LOGD(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+            LOGD(TAG + ".onAttach", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }

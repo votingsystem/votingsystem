@@ -1,6 +1,9 @@
 package org.votingsystem.android.util;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.TypeVS;
@@ -24,6 +27,22 @@ public class Utils {
         }
         responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
         return responseVS;
+    }
+
+    public static Bundle intentToFragmentArguments(Intent intent) {
+        Bundle arguments = new Bundle();
+        if (intent == null) {
+            return arguments;
+        }
+        final Uri data = intent.getData();
+        if (data != null) {
+            arguments.putParcelable("_uri", data);
+        }
+        final Bundle extras = intent.getExtras();
+        if (extras != null) {
+            arguments.putAll(intent.getExtras());
+        }
+        return arguments;
     }
 
 }

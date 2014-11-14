@@ -57,7 +57,7 @@ public class UserVSRepresentativesInfo {
     }
 
 	public static UserVSRepresentativesInfo parse(JSONObject userJSON) throws Exception {
-    	Log.d(TAG + ".parse(...)", "parse(...)");
+    	Log.d(TAG + ".parse", "parse");
         UserVSRepresentativesInfo eventVSResponse = new UserVSRepresentativesInfo();
         List<UserVS> users = new ArrayList<UserVS>();
         JSONArray representativesArray = userJSON.getJSONArray("representatives");

@@ -84,7 +84,7 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         if(savedInstanceState != null) firstPin = savedInstanceState.getString(ContextVS.PIN_KEY);
         this.setCancelable(false);
     }

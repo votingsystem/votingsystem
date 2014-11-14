@@ -215,6 +215,10 @@ public class DateUtils {
         return result;
     }
 
+    public static TimePeriod getCurrentWeekPeriod() {
+        return getWeekPeriod(Calendar.getInstance());
+    }
+
     public static TimePeriod getWeekPeriod(Calendar selectedDate) {
         Calendar weekFromCalendar = getMonday(selectedDate);
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();

@@ -76,8 +76,9 @@ public class ReceiptFragment extends Fragment {
                     getActivity().onBackPressed();
                 }
                 ((ActivityVS)getActivity()).refreshingStateChanged(false);
-                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(),
-                        responseVS.getCaption(), responseVS.getNotificationMessage());
+                MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                        responseVS.getCaption(), responseVS.getNotificationMessage(),
+                        getFragmentManager());
             }
         }
     };
@@ -127,7 +128,7 @@ public class ReceiptFragment extends Fragment {
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.message_smime, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
@@ -213,7 +214,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptContainer receiptContainer) {
-        LOGD(TAG + ".initReceiptScreen(...)", "type: " + receiptContainer.getTypeVS() +
+        LOGD(TAG + ".initReceiptScreen", "type: " + receiptContainer.getTypeVS() +
                 " - messageId: " + receiptContainer.getMessageId());
         try {
             String contentFormatted = null;

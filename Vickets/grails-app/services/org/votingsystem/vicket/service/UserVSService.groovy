@@ -129,7 +129,8 @@ class UserVSService {
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
-        if(UserVS.Type.SYSTEM != userVS.type) userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
+        if(UserVS.Type.SYSTEM != userVS.type && timePeriod.isCurrentWeekPeriod())
+            userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesFrom)
         resultMap.balancesTo = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesTo)
         resultMap.balancesCash = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesCash)

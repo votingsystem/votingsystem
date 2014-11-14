@@ -84,7 +84,7 @@ public class ReceiptGridFragment extends Fragment implements
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick", "id: " + id);
         return true;
     }
 

@@ -114,7 +114,7 @@ public class VoteSender implements Callable<ResponseVS> {
             SMIMESignedGenerator gen = dnies.getSMIMESignedGenerator();
             byte[] contentDigestBytes = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
             String contentDigest = Base64.encodeToString(contentDigestBytes, Base64.DEFAULT);
-            LOGD(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
+            LOGD(TAG + ".getSolicitudAcceso", " - contentDigest: " + contentDigest);*/
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
@@ -130,7 +130,7 @@ public class VoteSender implements Callable<ResponseVS> {
 
 
     private ResponseVS cancelAccessRequest(SignedMailGenerator signedMailGenerator, String userVS) {
-        LOGD(TAG + ".cancelAccessRequest(...)", "");
+        LOGD(TAG + ".cancelAccessRequest", "");
         try {
             String subject = contextVS.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();

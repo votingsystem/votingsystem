@@ -22,6 +22,7 @@ import android.os.Bundle;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityBase;
+import org.votingsystem.android.util.Utils;
 
 /**
  * A {@link org.votingsystem.android.activity.ActivityVS} that simply contains a single fragment. The intent used to invoke this
@@ -31,24 +32,19 @@ import org.votingsystem.android.activity.ActivityBase;
 public abstract class SimpleSinglePaneActivity extends ActivityBase {
     private Fragment mFragment;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewResId());
-
         if (getIntent().hasExtra(Intent.EXTRA_TITLE)) {
             setTitle(getIntent().getStringExtra(Intent.EXTRA_TITLE));
         }
-
         final String customTitle = getIntent().getStringExtra(Intent.EXTRA_TITLE);
         setTitle(customTitle != null ? customTitle : getTitle());
-
         if (savedInstanceState == null) {
             mFragment = onCreatePane();
-            mFragment.setArguments(intentToFragmentArguments(getIntent()));
+            mFragment.setArguments(Utils.intentToFragmentArguments(getIntent()));
             getFragmentManager().beginTransaction()
-                    .add(R.id.root_container, mFragment, "single_pane")
-                    .commit();
+                    .add(R.id.root_container, mFragment, "single_pane").commit();
         } else {
             mFragment = getFragmentManager().findFragmentByTag("single_pane");
         }

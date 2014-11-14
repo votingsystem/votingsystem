@@ -81,7 +81,7 @@ public class CertResponseActivity extends FragmentActivity {
     };
 
     private void updateKeyStore (String pin) {
-        LOGD(TAG + ".updateKeyStore(...)", "");
+        LOGD(TAG + ".updateKeyStore", "");
         if (csrSigned == null) {
             setMessage(getString(R.string.cert_install_error_msg));
         } else {
@@ -102,7 +102,7 @@ public class CertResponseActivity extends FragmentActivity {
                         csrSigned.getBytes());
                 X509Certificate userCert = certificates.iterator().next();
                 UserVS user = UserVS.getUserVS(userCert);
-                LOGD(TAG + ".updateKeyStore(...)", "user: " + user.getNif() +
+                LOGD(TAG + ".updateKeyStore", "user: " + user.getNif() +
                         " - certificates.size(): " + certificates.size());
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
@@ -115,7 +115,7 @@ public class CertResponseActivity extends FragmentActivity {
                 outputStream.close();
                 PrefUtils.putAppCertState(appContextVS, appContextVS.getAccessControl().getServerURL(),
                         State.WITH_CERTIFICATE, user.getNif());
-                PrefUtils.setPin(appContextVS, pin);
+                PrefUtils.putPin(appContextVS, pin);
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(this, user);
                 insertPinButton.setVisibility(View.GONE);

@@ -154,7 +154,7 @@ public class RssService extends Service  implements Runnable {
         try {
             URL wrappedUrl = new URL(url);
             String rssFeed = readRss(wrappedUrl);
-            LOGD(TAG + ".queryItem(...)", "RSS Feed " + url + ":\n " + rssFeed);
+            LOGD(TAG + ".queryItem", "RSS Feed " + url + ":\n " + rssFeed);
             if(TextUtils.isEmpty(rssFeed)) {
                 return false;
             }
@@ -204,7 +204,7 @@ public class RssService extends Service  implements Runnable {
     private String readRss(URL url){
         String html = "<html><body><h2>No data</h2></body></html>";
         try {
-            LOGD(TAG + ".readRss(...)", "url:" + url.toString());
+            LOGD(TAG + ".readRss", "url:" + url.toString());
             BufferedReader inStream = new BufferedReader(new InputStreamReader(url.openStream()),
                             1024);
             String line;

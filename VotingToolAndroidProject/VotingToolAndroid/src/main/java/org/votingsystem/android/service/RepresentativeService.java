@@ -119,7 +119,7 @@ public class RepresentativeService extends IntentService {
                     int numRowsCreated = getContentResolver().bulkInsert(
                             UserContentProvider.CONTENT_URI,contentValuesList.toArray(
                             new ContentValues[contentValuesList.size()]));
-                    LOGD(TAG + ".requestRepresentatives(...)", "inserted: " + numRowsCreated + " rows");
+                    LOGD(TAG + ".requestRepresentatives", "inserted: " + numRowsCreated + " rows");
                 } else { //To notify ContentProvider Listeners
                     getContentResolver().insert(UserContentProvider.CONTENT_URI, null);
                 }
@@ -276,7 +276,7 @@ public class RepresentativeService extends IntentService {
                     responseVS.setNotificationMessage(getString(R.string.anonymous_delegation_msg,
                             representative.getFullName(), weeksOperationActive));
                 } else {
-                    LOGD(TAG + ".anonymousDelegation(...)", " _ TODO _ cancel anonymous delegation");
+                    LOGD(TAG + ".anonymousDelegation", " _ TODO _ cancel anonymous delegation");
                 }
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
@@ -410,7 +410,7 @@ public class RepresentativeService extends IntentService {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
                 imageBytes = out.toByteArray();
                 compressFactor = compressFactor - 10;
-                LOGD(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
+                LOGD(TAG + ".reduceImageFileSize", "compressFactor: " + compressFactor +
                         " - imageBytes: " + imageBytes.length);
             } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
         } catch(Exception ex) {

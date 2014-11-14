@@ -613,7 +613,7 @@ public class SignerInformation
                 /*String resultDigestStr = Base64.encodeToString(resultDigest, Base64.DEFAULT);
                 String signedMessageDigestStr = Base64.encodeToString(signedMessageDigest.getOctets(), Base64.DEFAULT);
                 
-				Log.d("SignerInformation ", ".doVerify(...) - resultDigestStr: " + resultDigestStr 
+				Log.d("SignerInformation ", ".doVerify - resultDigestStr: " + resultDigestStr
 						+ " - signedMessageDigestStr: " + signedMessageDigestStr);*/
                 
                 if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))

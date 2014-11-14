@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityBase;
 import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
@@ -34,7 +35,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVSTransactionVSListInfo;
+import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -63,7 +64,6 @@ public class UserVSAccountsFragment extends Fragment {
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
     private AppContextVS contextVS;
     private TextView last_request_date;
-    private TextView time_remaining_info;
     private ListView accounts_list_view;
     private String IBAN;
     private String pin;
@@ -75,9 +75,6 @@ public class UserVSAccountsFragment extends Fragment {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             pin = intent.getStringExtra(ContextVS.PIN_KEY);
             switch(responseVS.getTypeVS()) {
-                case VICKET_USER_INFO:
-                    sendUserInfoRequest();
-                    break;
                 case VICKET_REQUEST:
                     sendVicketRequest(pin);
                     break;
@@ -99,24 +96,24 @@ public class UserVSAccountsFragment extends Fragment {
                     } else {
                         UIUtils.launchMessageActivity(getActivity(), responseVS);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-
-                            loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                            loadUserInfo(DateUtils.getCurrentWeekPeriod());
                         }
                     }
                     break;
                 case VICKET_SEND:
-                    ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                            responseVS.getNotificationMessage());
+                    MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                            responseVS.getNotificationMessage(), getFragmentManager());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                        loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     break;
                 case VICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
-                } else  MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                        loadUserInfo(DateUtils.getCurrentWeekPeriod());
+                    }
                     break;
-                default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage());
+                default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                        responseVS.getCaption(), responseVS.getNotificationMessage(),
+                        getFragmentManager());
             }
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
             if(progressDialog != null) progressDialog.dismiss();
@@ -144,13 +141,16 @@ public class UserVSAccountsFragment extends Fragment {
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.uservs_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
-        time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
         accounts_list_view = (ListView) rootView.findViewById(R.id.accounts_list_view);
         setHasOptionsMenu(true);
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
             transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
         }
+        if(getActivity() instanceof ActivityBase) {
+            ((ActivityBase)getActivity()).enableDisableSwipeRefresh(false);
+        }
+
         return rootView;
     }
 
@@ -170,7 +170,7 @@ public class UserVSAccountsFragment extends Fragment {
         if(operationVS != null){
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
-                UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
+                UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
                 IBAN = userInfo.getUserVS().getIBAN();
                 cashAvailable = userInfo.getAvailableForTagVS(transactionVS.getCurrencyCode(),
                         transactionVS.getTagVS().getName());
@@ -186,26 +186,25 @@ public class UserVSAccountsFragment extends Fragment {
                     caption = getString(R.string.insufficient_cash_for_tagvs_caption,
                             transactionVS.getTagVS().getName());
                 } else caption = getString(R.string.insufficient_cash_caption);
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, caption,
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, caption,
                         getString(R.string.insufficient_cash_msg, transactionVS.getCurrencyCode(),
-                        transactionVS.getAmount().toString(), cashAvailable));
+                                transactionVS.getAmount().toString(), cashAvailable), getFragmentManager());
             }
         }
     }
 
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
-        Date lastCheckedTime = PrefUtils.getLastVicketAccountCheckTime(getActivity());
+        Date lastCheckedTime = PrefUtils.getUserVSAccountsLastCheckDate(getActivity());
         if(lastCheckedTime == null) {
-            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.uservs_accountvs_info_missing_caption),
-                    getString(R.string.uservs_accountvs_info_missing));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
+                    R.string.uservs_accountvs_info_missing_caption),  getString(
+                    R.string.uservs_accountvs_info_missing), getFragmentManager());
             return;
         }
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
-            time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                    DateUtils.getDayWeekDateStr(timePeriod.getDateTo()))));
-            UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
+            UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
             if(userInfo != null) {
                 Map<String, TagVS> tagVSBalancesMap = userInfo.getTagVSBalancesMap(
                         Currency.getInstance("EUR").getCurrencyCode());
@@ -214,7 +213,6 @@ public class UserVSAccountsFragment extends Fragment {
                     AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
                             tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
                     accounts_list_view.setAdapter(accountVSInfoAdapter);
-                    //accountVSInfoAdapter.notifyDataSetChanged();
                 }
             }
         } catch(Exception ex) {
@@ -223,7 +221,7 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.vicket_user_info, menu);
+        menuInflater.inflate(R.menu.uservs_accounts, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
     }
@@ -232,11 +230,10 @@ public class UserVSAccountsFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
+                sendUserInfoRequest();
                 return true;
             case R.id.open_vicket_grid:
-                UIUtils.launchEmbeddedFragment(VicketGridFragment.class.getName(), getActivity());
+                UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -327,7 +324,7 @@ public class UserVSAccountsFragment extends Fragment {
             View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
             String selectedtag = tagVSList.get(position);
             final BigDecimal accountBalance = tagVSListBalances.get(selectedtag).getTotal();
-            Button request_button = (Button) accountView.findViewById(R.id.request_button);
+            Button request_button = (Button) accountView.findViewById(R.id.cash_button);
             if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                 request_button.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
@@ -340,14 +337,21 @@ public class UserVSAccountsFragment extends Fragment {
                 });
                 request_button.setVisibility(View.VISIBLE);
             } else request_button.setVisibility(View.GONE);
+            /*String time_remaining_msg =     Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                    DateUtils.getDayWeekDateStr(timePeriod.getDateTo())));*/
 
-            TextView vicket_account_info = (TextView)accountView.findViewById(R.id.vicket_account_info);
-            vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
+
+//"cash_info time_limited_text
+            TextView tag_text = (TextView)accountView.findViewById(R.id.tag_text);
+            String tag_text_msg = "'" + selectedtag +  "' " + getString(R.string.currency_lbl) +
+                    " " + currencyCode;
+            tag_text.setText(tag_text_msg);
+            TextView cash_info = (TextView)accountView.findViewById(R.id.cash_info);
+            cash_info.setText(Html.fromHtml(getString(R.string.account_amount_info_lbl,
                     accountBalance, currencyCode)));
             //vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
             //        accountBalance, currencyCode)));
-            TextView vicket_cash_info = (TextView)accountView.findViewById(R.id.vicket_cash_info);
-            vicket_cash_info.setText("vicket_cash_info ");
+
             return accountView;
         }
     }

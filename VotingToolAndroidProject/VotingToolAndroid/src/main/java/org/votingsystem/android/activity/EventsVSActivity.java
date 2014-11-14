@@ -68,7 +68,7 @@ public class EventsVSActivity extends ActivityBase
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vs);
@@ -122,7 +122,7 @@ public class EventsVSActivity extends ActivityBase
 
         getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.poll_32));
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
-        PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.registerPreferenceChangeListener(this, this);
         if(!PrefUtils.isDataBootstrapDone(this)) {
             refreshingStateChanged(true);
         }
@@ -183,7 +183,7 @@ public class EventsVSActivity extends ActivityBase
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected(...)",
+        LOGD(TAG + ".onOptionsItemSelected",
                 " - Title: " + item.getTitle() + " - ItemId: " + item.getItemId());
         Intent intent = null;
         switch (item.getItemId()) {
@@ -229,7 +229,7 @@ public class EventsVSActivity extends ActivityBase
 
 
     private void toggleWebSocketServiceConnection() {
-        LOGD(TAG + ".toggleWebSocketServiceConnection(...)", "toggleWebSocketServiceConnection");
+        LOGD(TAG + ".toggleWebSocketServiceConnection", "toggleWebSocketServiceConnection");
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS;
         if(contextVS.getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
@@ -241,7 +241,7 @@ public class EventsVSActivity extends ActivityBase
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this, this);
     }
 
     private class EventVSSpinnerItem {

@@ -52,8 +52,9 @@ public class VicketFragment extends Fragment {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
             else {
                 ((ActivityVS)getActivity()).refreshingStateChanged(false);
-                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage());
+                MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                        responseVS.getCaption(), responseVS.getNotificationMessage(),
+                        getFragmentManager());
             }
         }
     };
@@ -63,7 +64,7 @@ public class VicketFragment extends Fragment {
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         selectedVicket = (Vicket) getArguments().getSerializable(ContextVS.VICKET_KEY);
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         broadCastId = VicketFragment.class.getSimpleName() + "_" + selectedVicket.getHashCertVS();
         View rootView = inflater.inflate(R.layout.vicket, container, false);

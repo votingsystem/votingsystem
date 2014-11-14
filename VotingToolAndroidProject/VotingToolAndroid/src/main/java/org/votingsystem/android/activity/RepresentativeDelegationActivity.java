@@ -139,7 +139,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
@@ -157,7 +157,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                 Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                LOGD(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
+                LOGD(TAG + ".loadEditor", "missing editorFileName: " + editorFileName);
                 editorFileName = "delegation_message_es.html";
             }
         } catch(Exception ex) {

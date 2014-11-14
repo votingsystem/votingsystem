@@ -236,7 +236,12 @@ class UrlMappings {
             action = [POST:"save"]
         }
 
-        "/userVS/$year/$month/$day" {
+        "/userVS/userInfo/$NIF" {
+            controller = "userVS"
+            action = "userInfo"
+        }
+
+        "/userVS/$NIF/$year/$month/$day" {
             controller = "userVS"
             action = "userInfo"
             constraints {

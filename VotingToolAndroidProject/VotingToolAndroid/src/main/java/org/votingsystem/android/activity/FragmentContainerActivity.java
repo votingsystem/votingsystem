@@ -39,7 +39,7 @@ public class FragmentContainerActivity extends FragmentActivity {
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -82,7 +82,7 @@ public class FragmentContainerActivity extends FragmentActivity {
 
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         super.onActivityResult(requestCode, resultCode, data);
     }

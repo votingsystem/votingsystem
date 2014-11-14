@@ -146,7 +146,7 @@ public class NewRepresentativeActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         broadCastId = ((Object)this).getClass().getSimpleName();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
-        LOGD(TAG + ".onCreate(...)", "operationType: " + operationType +
+        LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.new_representative);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -238,7 +238,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        LOGD(TAG + ".onCreateOptionsMenu(...)", "");
+        LOGD(TAG + ".onCreateOptionsMenu", "");
         getMenuInflater().inflate(R.menu.editor, menu);
         this.menu = menu;
         if(operationType == TypeVS.REPRESENTATIVE && representative == null)
@@ -263,7 +263,7 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     //https://developer.android.com/guide/topics/providers/document-provider.html
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode); //Activity.RESULT_OK;
         if(SELECT_PICTURE == requestCode) {
             if(data != null && data.getData() != null) {
@@ -340,7 +340,7 @@ public class NewRepresentativeActivity extends ActivityBase {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
         outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
-        LOGD(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG + ".onSaveInstanceState", "outState: " + outState);
     }
 
     @Override public void onResume() {

@@ -90,7 +90,7 @@ public class ContextVS {
     public static final String OPERATIONVS_KEY = "OPERATIONVS_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
-    public static final String VICKET_ACCOUNT_LAST_CHECKED_KEY = "VICKET_ACCOUNT_LAST_CHECKED_KEY";
+    public static final String USERVS_ACCOUNT_LAST_CHECKED_KEY = "USERVS_ACCOUNT_LAST_CHECKED_KEY";
     public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";

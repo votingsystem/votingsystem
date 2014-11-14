@@ -105,12 +105,12 @@ public class FileUtils {
     }
 
     public static FileOutputStream openFileOutputStream(String filename, Context context) {
-        Log.d(TAG + ".openFileOutputStream(...)", " - filename: " + filename);
+        Log.d(TAG + ".openFileOutputStream", " - filename: " + filename);
         FileOutputStream fout = null;
         try {
             fout = context.openFileOutput(filename, Context.MODE_PRIVATE);
         } catch(Exception ex) {
-            Log.e(TAG + ".openFileOutputStream(...)", ex.getMessage(), ex);
+            Log.e(TAG + ".openFileOutputStream", ex.getMessage(), ex);
         }
         return fout;
     }
@@ -120,26 +120,26 @@ public class FileUtils {
         try {
             //File sdCard = Environment.getExternalStorageDirectory();
             file = new File(context.getFilesDir(), filename);
-            Log.d(TAG + ".getFile(...)", " - file.getAbsolutePath(): "
+            Log.d(TAG + ".getFile", " - file.getAbsolutePath(): "
                     + file.getAbsolutePath());
         } catch(Exception ex) {
-            Log.e(TAG + ".getFile(...)", ex.getMessage(), ex);
+            Log.e(TAG + ".getFile", ex.getMessage(), ex);
         }
         return file;
     }
 
     public static List<File> searchFiles(String path, String fileName) {
-        Log.d(TAG + ".searchFiles(...)", "path: " + path + " - fileName: " + fileName);
+        Log.d(TAG + ".searchFiles", "path: " + path + " - fileName: " + fileName);
         List<File> result = new ArrayList<File>();
         File root = new File(path);
         File[] list = root.listFiles();
         if (list == null) return result;
         for (File f : list ) {
             if (f.isDirectory()) {
-                //Log.d(TAG + ".searchFiles(...)", "path: " + f.getAbsoluteFile());
+                //Log.d(TAG + ".searchFiles", "path: " + f.getAbsoluteFile());
                 result.addAll(searchFiles(f.getAbsolutePath(), fileName));
             } else {
-                //Log.d(TAG + ".searchFiles(...)", "file: " + f.getAbsoluteFile());
+                //Log.d(TAG + ".searchFiles", "file: " + f.getAbsoluteFile());
                 if(f.getName().contains(fileName)) {
                     result.add(f);
                 }

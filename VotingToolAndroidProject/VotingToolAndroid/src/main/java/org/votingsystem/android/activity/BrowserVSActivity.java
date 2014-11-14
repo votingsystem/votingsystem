@@ -90,7 +90,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
@@ -108,7 +108,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     private void loadUrl(String viewerURL, final String jsCommand) {
-        LOGD(TAG + ".viewerURL(...)", " - viewerURL: " + viewerURL);
+        LOGD(TAG + ".viewerURL", " - viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
         refreshingStateChanged(true);
@@ -163,7 +163,7 @@ public class BrowserVSActivity extends ActivityBase {
     }*/
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
-        LOGD(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
+        LOGD(TAG + ".sendMessageToWebSocketService", "messageTypeVS: " + messageTypeVS.toString());
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);

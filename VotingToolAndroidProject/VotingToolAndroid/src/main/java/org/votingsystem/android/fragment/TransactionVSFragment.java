@@ -94,9 +94,9 @@ public class TransactionVSFragment extends Fragment {
                 TransactionVSContentProvider.WEEK_LAPSE_COL));
         String currencyStr = cursor.getString(cursor.getColumnIndex(
                 TransactionVSContentProvider.CURRENCY_COL));
-        LOGD(TAG + ".onCreateView(...)", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
+        LOGD(TAG + ".onCreateView", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
         broadCastId = TransactionVSFragment.class.getSimpleName() + "_" + cursorPosition;
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.transactionvs, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
@@ -119,7 +119,7 @@ public class TransactionVSFragment extends Fragment {
     }
 
     private void initTransactionVSScreen (final TransactionVS transactionvs) {
-        LOGD(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
+        LOGD(TAG + ".initTransactionVSScreen", "transactionvsId: " + transactionvs.getId());
         if(transactionvs.getFromUserVS() != null) {
             from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
                     transactionvs.getFromUserVS().getNif(),

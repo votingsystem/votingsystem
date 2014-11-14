@@ -83,7 +83,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.smime_signer);
         contextVS = (AppContextVS) getApplicationContext();
@@ -139,7 +139,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
-        LOGD(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
+        LOGD(TAG + ".sendMessageToWebSocketService", "messageTypeVS: " + messageTypeVS.toString());
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);

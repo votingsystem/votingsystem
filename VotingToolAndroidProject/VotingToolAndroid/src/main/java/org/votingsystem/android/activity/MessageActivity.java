@@ -28,8 +28,8 @@ public class MessageActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState -getIntent().getExtras(): " +
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState -getIntent().getExtras(): " +
                 getIntent().getExtras());
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.generic_fragment_container_activity);

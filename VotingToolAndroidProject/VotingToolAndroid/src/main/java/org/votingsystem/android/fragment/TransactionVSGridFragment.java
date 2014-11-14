@@ -122,7 +122,7 @@ public class TransactionVSGridFragment extends Fragment
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
-        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
@@ -148,7 +148,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
@@ -162,7 +162,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick", "id: " + id);
         return true;
     }
 
@@ -172,7 +172,7 @@ public class TransactionVSGridFragment extends Fragment
                int visibleItemCount, int totalItemCount) { }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.vicket_user_info, menu);
+        menuInflater.inflate(R.menu.uservs_accounts, menu);
 
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
@@ -300,7 +300,7 @@ public class TransactionVSGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 
     @Override public void onResume() {

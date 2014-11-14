@@ -70,7 +70,7 @@ public class EventVSResponse implements Serializable {
                 eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("totalCount"));
                 break;
             default:
-                Log.d(TAG + ".parse(...)", "unknown eventType: " + eventType.toString());
+                Log.d(TAG + ".parse", "unknown eventType: " + eventType.toString());
 
         }
         eventVSResponse.setNumEventVSInRequest(eventsArray.length());

@@ -33,7 +33,7 @@ public class CertRequestActivity extends FragmentActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         appContextVS = getApplicationContext();
-        LOGD(TAG + ".onCreate(...)", "appContextVS.getState(): " + appContextVS.getState() +
+        LOGD(TAG + ".onCreate", "appContextVS.getState(): " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_advice);
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
@@ -83,7 +83,6 @@ public class CertRequestActivity extends FragmentActivity {
         if(getIntent().getStringExtra(ContextVS.OPERATIONVS_KEY) != null) {
             cancelButton.setVisibility(View.GONE);
         }
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.signature_ok_22));
         getActionBar().setTitle(getString(R.string.cert_request_lbl));
     }
 

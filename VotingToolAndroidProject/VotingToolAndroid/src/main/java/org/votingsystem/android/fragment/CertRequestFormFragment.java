@@ -97,7 +97,7 @@ public class CertRequestFormFragment extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -105,7 +105,7 @@ public class CertRequestFormFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView(...)", "progressVisible: ");
+        LOGD(TAG + ".onCreateView", "progressVisible: ");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.cert_request_form, container, false);
         mainLayout = (FrameLayout)rootView.findViewById(R.id.mainLayout);
@@ -141,7 +141,7 @@ public class CertRequestFormFragment extends Fragment {
         nifText.setOnKeyListener(new OnKeyListener() {
             // android:imeOptions="actionDone" doesn't work
             @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //LOGD(TAG + ".onKey(...)", " - keyCode: " + keyCode);
+                //LOGD(TAG + ".onKey", " - keyCode: " + keyCode);
                 if (event != null && keyCode == KeyEvent.KEYCODE_ENTER) {
                     submitForm();
                     return true;

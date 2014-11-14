@@ -42,7 +42,7 @@ public class SignedMailGenerator {
 
     public SignedMailGenerator(PrivateKey key, Certificate[] chain,
     		String signatureMechanism, String provider) throws Exception {
-        Log.d(TAG + ".SignedMailGenerator(...)", " - signatureMechanism: " + signatureMechanism);
+        Log.d(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond
@@ -66,7 +66,7 @@ public class SignedMailGenerator {
 
     public SignedMailGenerator(PrivateKey key, X509Certificate x509Cert,
                    String signatureMechanism, String provider) throws Exception {
-        Log.d(TAG + ".SignedMailGenerator(...)", " - signatureMechanism: " + signatureMechanism);
+        Log.d(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond

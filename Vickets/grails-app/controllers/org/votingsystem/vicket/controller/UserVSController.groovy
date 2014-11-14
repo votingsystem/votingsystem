@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
@@ -202,40 +203,51 @@ class UserVSController {
 
 
     /**
-     * Servicio que envía información del estado de las cuentas
+     * Service that sends user accounts information
      *
      * @httpMethod [POST]
      * @serviceURL [/userVS/userInfo]
-     * @requestContentType [application/x-pkcs7-signature] Obligatorio.
-     *                     documento SMIME firmado con datos del usuario que solicita la información.
-     * @responseContentType [application/json;application/pkcs7-mime]. Documento JSON cifrado con datos de
-     *                      la cuenta del usuario.
-     * @return
+     * @requestContentType [application/x-pkcs7-signature] Required. JSON signed with the request data..
+     * @return JSON with the response
      */
-    def userInfo() {
+    def userInfoTest() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
         SMIMEMessage smimeMessage = messageSMIME.getSMIME()
-        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIME.getUserVS()
         if(!messageJSON.NIF.equals(userVS.getNif())) {
-            ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_ERROR, message:  message(code:'nifMisMatchErrorMsg',
-                    args: [userVS.getNif(), messageJSON.NIF]), contentType:ContentTypeVS.TEXT)
+            ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_ERROR, message: message(
+                    code:'nifMisMatchErrorMsg', args: [userVS.getNif(), messageJSON.NIF]), contentType:ContentTypeVS.TEXT)
             return [responseVS:responseVS]
         }
-        Calendar calendar = Calendar.getInstance()
-        if(params.year && params.month && params.day) {
-            calendar.set(Calendar.YEAR, params.int('year'))
-            calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
-            calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
-        }
+        Calendar calendar = RequestUtils.getCalendar(params);
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
-        //X509Certificate cert = messageSMIME?.getSMIME()?.getSigner()?.certificate
         return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
                 contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]
     }
 
+    /**
+     * Service that sends user accounts information
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/userVS/$NIF/$year/$month/$day]
+     * @return JSON with the response
+     */
+    def userInfo() {
+        UserVS userVS
+        if(params.NIF) UserVS.withTransaction { userVS = UserVS.findWhere(nif:params.NIF)  }
+        if(!userVS) return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_NOT_FOUND,
+                message: message(code:'userVSNotFoundByNIF', args: [params.NIF]), contentType: ContentTypeVS.TEXT,
+                type: TypeVS.VICKET_USER_INFO)]
+
+        Calendar calendar = RequestUtils.getCalendar(params);
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
+        Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
+        return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
+                contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]
+    }
 
     /**
      * (Disponible sólo para administradores de sistema)

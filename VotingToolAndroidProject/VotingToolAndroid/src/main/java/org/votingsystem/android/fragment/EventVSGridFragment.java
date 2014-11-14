@@ -76,8 +76,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                     "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
-            ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage());
+            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
     };
 
@@ -107,8 +106,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
         queryStr = getArguments().getString(SearchManager.QUERY);
         loaderId = groupPosition.getLoaderId(childPosition.getPosition());
-        PrefUtils.registerOnSharedPreferenceChangeListener(contextVS, this);
-        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        PrefUtils.registerPreferenceChangeListener(contextVS, this);
+        LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
@@ -128,7 +127,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
-        LOGD(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -154,7 +153,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
@@ -176,12 +175,12 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        /*LOGD(TAG + ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
+        /*LOGD(TAG + ".onScroll", "firstVisibleItem: " + firstVisibleItem +
                 " - visibleItemCount: " + visibleItemCount + " - visibleItemCount: " +
                 visibleItemCount + " - groupPosition: " + groupPosition + " - eventState: " +
                 eventState);*/
         if(contextVS.getAccessControl() == null) {
-            LOGD(TAG +  ".onScroll(...)", "Missing Access Control. Waiting for data");
+            LOGD(TAG +  ".onScroll", "Missing Access Control. Waiting for data");
             return;
         }
         if (totalItemCount == 0 || firstVisibleItem == 0) return ;
@@ -194,7 +193,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
             if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset < numTotalEvents &&
                     cursorCount < numTotalEvents) {
-                LOGD(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
+                LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
                         totalItemCount + " - numTotalEvents: " + numTotalEvents +
                         " - cursorCount: " + cursorCount + " - groupPosition: " + groupPosition +
@@ -216,7 +215,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     public void fetchItems(Long offset) {
-        LOGD(TAG +  ".fetchItems(...)", "offset: " + offset + " - progressVisible: " +
+        LOGD(TAG +  ".fetchItems", "offset: " + offset + " - progressVisible: " +
                 ((ActivityVS)getActivity()).isRefreshing() +
                 " - groupPosition: " + groupPosition + " - eventState: " + eventState);
         if(((ActivityVS)getActivity()).isRefreshing()) return;
@@ -243,7 +242,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -326,7 +325,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterOnSharedPreferenceChangeListener(contextVS, this);
+        PrefUtils.unregisterPreferenceChangeListener(contextVS, this);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
@@ -391,7 +390,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                     subject.setText(eventVS.getSubject());
                     String dateInfoStr = null;
                     ImageView imgView = (ImageView)view.findViewById(R.id.event_icon);
-                    LOGD(TAG + ".bindView(...)", "cursor.getPosition(): "  + cursor.getPosition() +
+                    LOGD(TAG + ".bindView", "cursor.getPosition(): "  + cursor.getPosition() +
                         " - eventState:"+ eventVS.getState()+ " - eventJSONData: " + eventJSONData);
                     switch(eventVS.getState()) {
                         case ACTIVE:
@@ -420,7 +419,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                     DateUtils.getDayWeekDateStr(eventVS.getDateFinish());
                             break;
                         default:
-                            LOGD(TAG +  ".bindView(...)", "unknown event state: " +
+                            LOGD(TAG +  ".bindView", "unknown event state: " +
                                     eventVS.getState());
                     }
                     if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
@@ -430,7 +429,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                 R.string.author_lbl) + "</b>: " + eventVS.getUserVS().getFullName();
                         author.setText(Html.fromHtml(authorStr));
                     }
-                } else LOGD(TAG +  ".bindView(...)", "Event null");
+                } else LOGD(TAG +  ".bindView", "Event null");
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

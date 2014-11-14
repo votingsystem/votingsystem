@@ -12,19 +12,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.UserVSTransactionVSListInfo;
+import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -193,7 +189,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             //File dbFile = context.getDatabasePath(DB_NAME);
-            //LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            //LOGD(TAG + ".DatabaseHelper", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -206,7 +202,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                LOGD(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
+                LOGD(TAG + ".DatabaseHelper.onCreate", "Database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -251,27 +247,25 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void updateUserVSTransactionVSList(AppContextVS contextVS,
-        UserVSTransactionVSListInfo userInfo) {
+    public static void updateUserVSTransactionVSList(Context context, UserVSAccountsInfo userInfo) {
         for(TransactionVS transactionVS : userInfo.getTransactionList()) {
-            addTransaction(contextVS, transactionVS,
+            addTransaction(context, transactionVS,
                     DateUtils.getPath(userInfo.getTimePeriod().getDateFrom()));
         }
-        PrefUtils.putLastVicketAccountCheckTime(contextVS);
     }
 
-    public static Uri addTransaction(AppContextVS contextVS, TransactionVS transactionVS,
+    public static Uri addTransaction(Context context, TransactionVS transactionVS,
               String weekLapse) {
         ContentValues values = populateTransactionContentValues(transactionVS);
         values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapse);
-        Uri uri = contextVS.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+        Uri uri = context.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
         LOGD(TAG + ".addTransaction() ", "added uri: " + uri.toString());
         return uri;
     }
 
-    public static int updateTransaction(AppContextVS contextVS, TransactionVS transactionVS) {
+    public static int updateTransaction(Context context, TransactionVS transactionVS) {
         ContentValues values = populateTransactionContentValues(transactionVS);
-        return contextVS.getContentResolver().update(TransactionVSContentProvider.
+        return context.getContentResolver().update(TransactionVSContentProvider.
                 getTransactionVSURI(transactionVS.getLocalId()), values, null, null);
     }
 

@@ -104,7 +104,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 startIntent.putExtra(ContextVS.VICKET_SERVER_URL, vicketServerURL);
                 startService(startIntent);
             }
-            PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
+            PrefUtils.registerPreferenceChangeListener(this, this);
             state = PrefUtils.getAppCertState(this, accessControlURL);
             userVS = PrefUtils.getSessionUserVS(this);
         } catch(Exception ex) {
@@ -120,7 +120,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void setServer(ActorVS actorVS) {
         if(serverMap.get(actorVS.getServerURL()) == null) {
             serverMap.put(actorVS.getServerURL(), actorVS);
-        } else LOGD(TAG + ".setServer(...)", "ActorVS with URL '" + actorVS.getServerURL() +
+        } else LOGD(TAG + ".setServer", "ActorVS with URL '" + actorVS.getServerURL() +
                 "' already in context");
     }
 
@@ -129,9 +129,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     @Override public void onTerminate() {
-        LOGD(TAG + ".onTerminate(...)", "");
+        LOGD(TAG + ".onTerminate", "");
         super.onTerminate();
-        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this, this);
     }
 
     public String getHostID() {
@@ -143,13 +143,13 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public X509Certificate getCert(String serverURL) {
-        LOGD(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
+        LOGD(TAG + ".getCert", " - getCert - serverURL: " + serverURL);
         if(serverURL == null) return null;
         return certsMap.get(serverURL);
     }
 
     public void putCert(String serverURL, X509Certificate cert) {
-        LOGD(TAG + ".putCert(...)", " serverURL: " + serverURL);
+        LOGD(TAG + ".putCert", " serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
     }
 

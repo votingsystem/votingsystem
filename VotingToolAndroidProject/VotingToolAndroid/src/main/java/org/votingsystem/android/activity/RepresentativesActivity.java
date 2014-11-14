@@ -21,7 +21,7 @@ public class RepresentativesActivity extends ActivityBase {
     WeakReference<RepresentativeGridFragment> weakRefToFragment;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vs);
@@ -45,7 +45,7 @@ public class RepresentativesActivity extends ActivityBase {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         super.onActivityResult(requestCode, resultCode, data);
     }

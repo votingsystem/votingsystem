@@ -71,7 +71,7 @@ public class HttpHelper {
     }
     
     public static ResponseVS getData (String serverURL, ContentTypeVS contentType) {
-        Log.d(TAG + ".getData(...)" ," - serverURL: " + serverURL +
+        Log.d(TAG + ".getData" ," - serverURL: " + serverURL +
                 " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
@@ -112,7 +112,7 @@ public class HttpHelper {
     public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
               String serverURL, String... headerNames) throws IOException {
         HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendData(...)" , " - serverURL: " + serverURL +
+        Log.d(TAG + ".sendData" , " - serverURL: " + serverURL +
                 " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
@@ -125,10 +125,10 @@ public class HttpHelper {
             response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            Log.d(TAG + ".sendData(...)" ,"----------------------------------------");
-            Log.d(TAG + ".sendData(...)" , response.getStatusLine().toString() + " - " +
+            Log.d(TAG + ".sendData" ,"----------------------------------------");
+            Log.d(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-            Log.d(TAG + ".sendData(...)" , "----------------------------------------");
+            Log.d(TAG + ".sendData" , "----------------------------------------");
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                     EntityUtils.toByteArray(response.getEntity()), responseContentType);
             if(headerNames != null && headerNames.length > 0) {
@@ -153,7 +153,7 @@ public class HttpHelper {
         ContentTypeVS responseContentType = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);
-            Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI()
+            Log.d(TAG + ".sendFile" , " - serverURL: " + httpPost.getURI()
                     + " - file: " + file.getAbsolutePath());
             FileBody fileBody = new FileBody(file);
             MultipartEntity reqEntity = new MultipartEntity();
@@ -185,7 +185,7 @@ public class HttpHelper {
      
      public static ResponseVS sendObjectMap(
              Map<String, Object> fileMap, String serverURL) throws Exception {
-    	 Log.d(TAG + ".sendObjectMap(...)" , "serverURL: " + serverURL);
+    	 Log.d(TAG + ".sendObjectMap" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
          ContentTypeVS responseContentType = null;
          if(fileMap == null || fileMap.isEmpty()) throw new Exception("Empty Map");

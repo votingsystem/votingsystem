@@ -36,8 +36,8 @@ public class VicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/vicket/cancel";
     }
 
-    public String getUserInfoServiceURL() {
-        return getServerURL() + "/userVS/userInfo";
+    public String getUserInfoServiceURL(String nif) {
+        return getServerURL() + "/userVS/userInfo/" + nif;
     }
 
     public String getTagVSSearchServiceURL(String searchParam) {
@@ -47,4 +47,5 @@ public class VicketServer extends ActorVS implements Serializable {
     public String getDateUserInfoServiceURL(Date date) {
         return getServerURL() + "/userVS" + DateUtils.getPath(date);
     }
+
 }

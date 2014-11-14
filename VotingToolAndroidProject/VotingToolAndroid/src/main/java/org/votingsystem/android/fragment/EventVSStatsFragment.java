@@ -68,7 +68,7 @@ public class EventVSStatsFragment extends Fragment {
         cursor.moveToFirst();
         String eventJSONData = cursor.getString(cursor.getColumnIndex(
                 EventVSContentProvider.JSON_DATA_COL));
-        LOGD(TAG + ".onCreateView(...)", "eventJSONData: " + eventJSONData);
+        LOGD(TAG + ".onCreateView", "eventJSONData: " + eventJSONData);
         try {
             eventVS = EventVS.parse(new JSONObject(eventJSONData));
             eventVS.setAccessControlVS(contextVS.getAccessControl());
@@ -81,8 +81,8 @@ public class EventVSStatsFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        //LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
-        LOGD(TAG +  ".onActivityCreated(...)", "");
+        //LOGD(TAG +  ".onActivityCreated", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated", "");
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
@@ -105,12 +105,12 @@ public class EventVSStatsFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.MESSAGE_KEY, htmlContent);
         outState.putString(ContextVS.URL_KEY, baseURL);
-        //LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
-        LOGD(TAG +  ".onSaveInstanceState(...)", "");
+        //LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState", "");
     }
 
     private void loadUrl(String serverURL) {
-    	LOGD(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
+    	LOGD(TAG + ".serverURL", " - serverURL: " + serverURL);
         WebView webview = (WebView) rootView.findViewById(R.id.webview);
         WebSettings webSettings = webview.getSettings();
         webSettings.setBuiltInZoomControls(true);
@@ -159,8 +159,7 @@ public class EventVSStatsFragment extends Fragment {
                 htmlContent = responseVS.getMessage();
                 loadHTMLContent(baseURL, htmlContent);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(),
-                        getString(R.string.operation_error_msg), responseVS.getMessage());
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
             }
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }

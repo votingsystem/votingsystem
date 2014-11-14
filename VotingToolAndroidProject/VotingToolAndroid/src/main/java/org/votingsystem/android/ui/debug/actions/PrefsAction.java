@@ -33,7 +33,7 @@ public class PrefsAction implements DebugAction {
     @Override
     public void run(final Context context, final Callback callback) {
         PrefUtils.putCsrRequest(context, 1L, null);
-        PrefUtils.setPin(context, "pins");
+        PrefUtils.putPin(context, "pins");
         PrefUtils.putAppCertState(context, ((AppContextVS)context.getApplicationContext()).
                 getAccessControl().getServerURL(), ContextVS.State.WITHOUT_CSR, null);
     }

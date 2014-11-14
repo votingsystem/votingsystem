@@ -126,7 +126,7 @@ public class NewFieldDialogFragment extends DialogFragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(ContextVS.ERROR_PANEL_KEY, error_message.getVisibility());
-        LOGD(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG + ".onSaveInstanceState", "outState: " + outState);
     }
 
 }

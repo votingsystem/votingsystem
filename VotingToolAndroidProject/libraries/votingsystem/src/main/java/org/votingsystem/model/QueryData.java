@@ -39,7 +39,7 @@ public class QueryData {
 	}
 	
 	public JSONObject toJSON() {
-		Log.d(TAG + ".toJSON(...)", " - toJSON");
+		Log.d(TAG + ".toJSON", " - toJSON");
 		Map<String, Object> map = new HashMap<String, Object>();
 		if(subsystem != null)
 			map.put("typeVS", subsystem.toString());

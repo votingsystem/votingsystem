@@ -82,7 +82,7 @@ public class Encryptor {
 	
 	public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
-		Log.d(TAG + ".encryptSMIMEFile(...) ", " #### encryptSMIMEFile ");
+		Log.d(TAG + ".encryptSMIMEFile ", " #### encryptSMIMEFile ");
     	/* Create the encryptor */
     	SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
     	encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
@@ -95,7 +95,7 @@ public class Encryptor {
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
             String headerLine = (String)headers.nextElement();
-            Log.d(TAG + ".encryptSMIMEFile(...)", " - headerLine: " + headerLine);
+            Log.d(TAG + ".encryptSMIMEFile", " - headerLine: " + headerLine);
             /* 
              * Make sure not to override any content-* headers from the
              * original message
@@ -113,7 +113,7 @@ public class Encryptor {
 	
     public static byte[] encryptMessage(byte[] text, 
             X509Certificate receiverCert, Header... headers) throws Exception {
-    	Log.d(TAG + ".encryptMessage(...) ", " #### encryptFile ");
+    	Log.d(TAG + ".encryptMessage ", " #### encryptFile ");
 		Properties props = System.getProperties();
 		Session session = Session.getDefaultInstance(props, null);
 		MimeMessage mimeMessage = new MimeMessage(session);
@@ -141,7 +141,7 @@ public class Encryptor {
 	
     public static MimeBodyPart encryptBase64Message(byte[] bytesToEncrypt,
             X509Certificate receiverCert, Header... headers) throws Exception {
-    	Log.d(TAG + ".encryptMessage(...) ", " - encryptFile(...)");
+    	Log.d(TAG + ".encryptMessage ", " - encryptFile");
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage mimeMessage = new MimeMessage(session);
@@ -197,7 +197,7 @@ public class Encryptor {
     */
    public static SMIMEMessage decryptSMIME(byte[] encryptedMessageBytes,
             PrivateKey receiverPrivateKey) throws Exception {
-	   Log.d(TAG + ".decryptSMIME(...) ", "decryptSMIME(...) ");
+	   Log.d(TAG + ".decryptSMIME ", "decryptSMIME ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, receiverPrivateKey));
        return new SMIMEMessage(inputStream);
@@ -208,7 +208,7 @@ public class Encryptor {
     */
    public static byte[] decryptMessage(byte[] encryptedMessageBytes,
            PrivateKey receiverPrivateKey) throws Exception {
-	   Log.d(TAG + ".decryptMessage(...) ", "decryptMessage(...) ");
+	   Log.d(TAG + ".decryptMessage ", "decryptMessage ");
        RecipientId recId = null;
        /*if(receiverCert != null)
            recId = new JceKeyTransRecipientId(receiverCert);*/
@@ -236,7 +236,7 @@ public class Encryptor {
 	 */
 	public static byte[] decryptMessage(byte[] encryptedMessageBytes,
 			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
-		Log.d(TAG + ".decryptMessage(...) ", " #### decryptMessage ");
+		Log.d(TAG + ".decryptMessage ", " #### decryptMessage ");
         RecipientId recId = null;
         if(receiverCert != null) 
             recId = new JceKeyTransRecipientId(receiverCert);
@@ -268,7 +268,7 @@ public class Encryptor {
 	
     public static byte[] decryptFile (byte[] encryptedFile, PublicKey publicKey,
             PrivateKey receiverPrivateKey) throws Exception {
-		Log.d(TAG + ".decryptFile(...) ", " #### decryptFile ");
+		Log.d(TAG + ".decryptFile ", " #### decryptFile ");
         RecipientId recId = new KeyTransRecipientId(publicKey.getEncoded());
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
                 receiverPrivateKey).setProvider(ContextVS.PROVIDER);

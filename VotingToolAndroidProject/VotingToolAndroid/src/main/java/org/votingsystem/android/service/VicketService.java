@@ -22,7 +22,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVSTransactionVSListInfo;
+import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketBatch;
 import org.votingsystem.model.VicketServer;
@@ -39,7 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ public class VicketService extends IntentService {
         try {
             switch(operation) {
                 case VICKET_USER_INFO:
-                    updateUserInfo();
+                    updateUserInfo(serviceCaller);
                     break;
                 case VICKET_REQUEST:
                     vicketRequest(serviceCaller, new VicketBatch(transactionVS.getAmount(),
@@ -104,7 +103,7 @@ public class VicketService extends IntentService {
                         responseVS.setIconId(R.drawable.cancel_22);
                         if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED) {
                             SMIMEMessage signedMessage = responseVS.getSMIME();
-                            LOGD(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
+                            LOGD(TAG + ".cancelVicket", "error JSON response: " + signedMessage.getSignedContent());
                             JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
                             operation = TypeVS.valueOf(jsonResponse.getString("operation"));
                             if(TypeVS.VICKET_CANCEL == operation) {
@@ -181,7 +180,7 @@ public class VicketService extends IntentService {
         byte[] decryptedMessageBytes = null;
         Map <Long,Vicket> sendedVicketsMap = new HashMap<Long, Vicket>();
         try {
-            UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
+            UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
             BigDecimal available = userInfo.getAvailableForTagVS(currencyCode, tagVS);
             if(available.compareTo(requestAmount) < 0) {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
@@ -260,7 +259,7 @@ public class VicketService extends IntentService {
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                LOGD(TAG + ".cancelVicketRepeated(...)", "cancelVicketRepeated");
+                LOGD(TAG + ".cancelVicketRepeated", "cancelVicketRepeated");
                 try {
                     JSONObject responseJSON = new JSONObject(new String(decryptedMessageBytes, ContextVS.UTF_8));
                     String base64EncodedVicketRepeated = responseJSON.getString("messageSMIME");
@@ -282,7 +281,7 @@ public class VicketService extends IntentService {
                 message = getString(R.string.vicket_expended_send_error_msg);
             } else {
                 for(Vicket vicket:sendedVicketsMap.values()) {
-                    LOGD(TAG + ".sendVicketFromWallet(...)", " ==== TODO - UPDATE VICKET STATE");
+                    LOGD(TAG + ".sendVicketFromWallet", " ==== TODO - UPDATE VICKET STATE");
                 }
                 caption = getString(R.string.vicket_send_ok_caption);
                 message = getString(R.string.vicket_send_ok_msg, requestAmount.toString(),
@@ -295,9 +294,6 @@ public class VicketService extends IntentService {
 
     private ResponseVS vicketRequest(String serviceCaller, VicketBatch vicketBatch,String password){
         VicketServer vicketServer = vicketBatch.getVicketServer();
-        String caption = null;
-        String message = null;
-        int iconId = R.drawable.cancel_22;
         ResponseVS responseVS = null;
         try {
             String messageSubject = getString(R.string.vicket_request_msg_subject);
@@ -332,35 +328,26 @@ public class VicketService extends IntentService {
         }
     }
 
-    private void updateUserInfo() {
-        LOGD(TAG + ".updateUserInfo(...)", "updateUserInfo");
-        VicketServer vicketServer = contextVS.getVicketServer();
-        String msgSubject = getString(R.string.vicket_user_info_request_msg_subject);
-        ResponseVS responseVS = null;
+    private void updateUserInfo(String serviceCaller) {
+        LOGD(TAG + ".updateUserInfo", "updateUserInfo");
+        String targetService = contextVS.getVicketServer().getUserInfoServiceURL(
+                contextVS.getUserVS().getNif());
+        ResponseVS responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
         try {
-            JSONObject userInfoRequestJSON = Vicket.getUserVSAccountInfoRequest(
-                    contextVS.getUserVS().getNif());
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
-                    vicketServer.getNameNormalized(), vicketServer.getUserInfoServiceURL(),
-                    userInfoRequestJSON.toString(), ContentTypeVS.JSON_SIGNED,
-                    msgSubject, vicketServer.getCertificate(), contextVS);
-            responseVS = smimeSignedSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                String responseStr = responseVS.getMessage();
-                UserVSTransactionVSListInfo userInfo = UserVSTransactionVSListInfo.parse(
-                        new JSONObject(responseStr));
-                PrefUtils.putUserVSTransactionVSListInfo(contextVS, userInfo,
-                        DateUtils.getWeekPeriod(Calendar.getInstance()));
-                TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, userInfo);
-            } else {
-                responseVS.setCaption(getString(R.string.error_lbl));
-            }
+                UserVSAccountsInfo accountsInfo = UserVSAccountsInfo.parse(
+                        responseVS.getMessageJSON());
+                PrefUtils.putUserVSAccountsInfo(contextVS, accountsInfo,
+                        DateUtils.getCurrentWeekPeriod());
+                TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, accountsInfo);
+            } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.user_info_updated));
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.VICKET_USER_INFO);
             broadCastResponse(responseVS);
         }
     }

@@ -221,7 +221,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
 	@Override public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
-        //LOGD(TAG + ".getGroupView(...)", "isExpanded: " + isExpanded);
+        //LOGD(TAG + ".getGroupView", "isExpanded: " + isExpanded);
         LayoutInflater layoutInflater = (LayoutInflater) this.context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		String headerTitle = (String) getGroup(groupPosition);

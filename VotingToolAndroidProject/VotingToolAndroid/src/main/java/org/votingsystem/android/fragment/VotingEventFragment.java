@@ -141,7 +141,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     @Override public View onCreateView(LayoutInflater inflater,
                ViewGroup container, Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
@@ -204,7 +204,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void setReceiptScreen(final VoteVS vote) {
-        LOGD(TAG + ".setReceiptScreen(...)", "");
+        LOGD(TAG + ".setReceiptScreen", "");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = vote.getEventVS().getSubject();
@@ -235,7 +235,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
 
     public void saveVote() {
-        LOGD(TAG + ".saveVote(...)", "");
+        LOGD(TAG + ".saveVote", "");
         ContentValues values = new ContentValues();
         vote.setTypeVS(TypeVS.VOTEVS);
         values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
@@ -243,12 +243,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.TYPE_COL, vote.getTypeVS().toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
-        LOGD(TAG + ".saveVote(...)", "uri: " + uri.toString());
+        LOGD(TAG + ".saveVote", "uri: " + uri.toString());
         saveReceiptButton.setEnabled(false);
     }
 
     private void setEventScreen(final EventVS event) {
-        LOGD(TAG + ".setEventScreen(...)", " - setEventScreen");
+        LOGD(TAG + ".setEventScreen", " - setEventScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         cancelVoteButton.setEnabled(true);
@@ -310,7 +310,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     public void onClickSubject(View v) {
-        LOGD(TAG + ".onClickSubject(...)", "");
+        LOGD(TAG + ".onClickSubject", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
@@ -359,7 +359,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     public void saveCancelReceipt(VoteVS vote) {
-        LOGD(TAG + ".saveCancelReceipt(...)", "saveCancelReceipt");
+        LOGD(TAG + ".saveCancelReceipt", "saveCancelReceipt");
         ContentValues values = new ContentValues();
         values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
         values.put(ReceiptContentProvider.TYPE_COL, TypeVS.CANCEL_VOTE.toString());
