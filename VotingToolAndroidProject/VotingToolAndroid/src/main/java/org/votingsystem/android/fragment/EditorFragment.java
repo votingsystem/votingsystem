@@ -23,6 +23,8 @@ import org.votingsystem.util.ResponseVS;
 import java.util.Arrays;
 import java.util.Locale;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -50,7 +52,7 @@ public class EditorFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             editorDataStr = savedInstanceState.getString(ContextVS.FORM_DATA_KEY);
@@ -63,16 +65,16 @@ public class EditorFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.FORM_DATA_KEY, editorDataStr);
         outState.putBoolean(ContextVS.EDITOR_VISIBLE_KEY, isEditable);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "onCreate: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "onCreate: " + savedInstanceState);
         super.onCreate(savedInstanceState);
     }
 
     @Override public void onStart() {
-        Log.d(TAG + ".onStart(...) ", "onStart");
+        LOGD(TAG + ".onStart", "onStart");
         super.onStart();
     }
 
@@ -107,7 +109,7 @@ public class EditorFragment extends Fragment {
         String editorFileName = "editor_" + Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                Log.d(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
+                LOGD(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
                 editorFileName = "editor_es.html";
             }
         } catch(Exception ex) {
@@ -129,7 +131,7 @@ public class EditorFragment extends Fragment {
     public void processOperation(OperationVS operationVS) {
         try {
             if (ResponseVS.SC_ERROR == operationVS.getStatusCode()) {
-                Log.d(TAG + ".processOperation(...) ", "statusCode: " +operationVS.getStatusCode());
+                LOGD(TAG + ".processOperation", "statusCode: " +operationVS.getStatusCode());
                 showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                         operationVS.getMessage());
             } else if (ResponseVS.SC_PAUSED == operationVS.getStatusCode()) {
@@ -156,7 +158,7 @@ public class EditorFragment extends Fragment {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -164,12 +166,12 @@ public class EditorFragment extends Fragment {
     }
     
     public void onBackPressed() {
-        Log.d(TAG + ".onBackPressed(...)", "onBackPressed");
+        LOGD(TAG + ".onBackPressed(...)", "onBackPressed");
         if(webView.canGoBack()) webView.goBack();
     }
 
     public void setEditable(boolean editable) {
-        Log.d(TAG + ".setEditable(...)", " - editable: " + editable);
+        LOGD(TAG + ".setEditable(...)", " - editable: " + editable);
         String functionStr = null;
         if(editable) {
             functionStr = "javascript:createEditor('" + editorDataStr + "')";

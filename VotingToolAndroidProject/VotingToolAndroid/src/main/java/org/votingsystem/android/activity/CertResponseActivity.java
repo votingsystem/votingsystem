@@ -42,6 +42,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
@@ -74,14 +75,14 @@ public class CertResponseActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore(intent.getStringExtra(PIN_KEY));
         }
     };
 
     private void updateKeyStore (String pin) {
-        Log.d(TAG + ".updateKeyStore(...)", "");
+        LOGD(TAG + ".updateKeyStore(...)", "");
         if (csrSigned == null) {
             setMessage(getString(R.string.cert_install_error_msg));
         } else {
@@ -102,7 +103,7 @@ public class CertResponseActivity extends FragmentActivity {
                         csrSigned.getBytes());
                 X509Certificate userCert = certificates.iterator().next();
                 UserVS user = UserVS.getUserVS(userCert);
-                Log.d(TAG + ".updateKeyStore(...)", "user: " + user.getNif() +
+                LOGD(TAG + ".updateKeyStore(...)", "user: " + user.getNif() +
                         " - certificates.size(): " + certificates.size());
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
@@ -133,7 +134,7 @@ public class CertResponseActivity extends FragmentActivity {
         setContentView(R.layout.cert_request_form_response);
         appContextVS = (AppContextVS) getApplicationContext();
         broadCastId = CertResponseActivity.class.getSimpleName();
-        Log.d(TAG + ".onCreate(...) ", "state: " + appContextVS.getState() +
+        LOGD(TAG + ".onCreate", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getActionBar().setTitle(getString(R.string.voting_system_lbl));
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -176,7 +177,7 @@ public class CertResponseActivity extends FragmentActivity {
         });
         if(savedInstanceState != null) 
         	isCertStateChecked.set(savedInstanceState.getBoolean(CERT_CHECKED, false));
-        Log.d(TAG + ".onCreate() ", "isCertStateChecked: " + isCertStateChecked);
+        LOGD(TAG + ".onCreate() ", "isCertStateChecked: " + isCertStateChecked);
         checkCertState();
     }
     
@@ -191,7 +192,7 @@ public class CertResponseActivity extends FragmentActivity {
 	        	SharedPreferences settings = getSharedPreferences(
                         VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
-	        	Log.d(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
+	        	LOGD(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
                 getDataTask.execute(appContextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
@@ -212,7 +213,6 @@ public class CertResponseActivity extends FragmentActivity {
         outState.putBoolean(CERT_CHECKED, isCertStateChecked.get());
         outState.putString(CSR_SIGNED, csrSigned);
         outState.putString(SCREEN_MESSAGE, screenMessage);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
 	}
 	
 	private void setCsrSigned (String csrSigned) {
@@ -220,7 +220,6 @@ public class CertResponseActivity extends FragmentActivity {
 	}
     
 	@Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-		Log.d(TAG + ".onRestoreInstanceState(...) ", "savedInstanceState: " + savedInstanceState);
 		setMessage(savedInstanceState.getString(SCREEN_MESSAGE));
 		csrSigned = savedInstanceState.getString(CSR_SIGNED);
 		isCertStateChecked.set(savedInstanceState.getBoolean(CERT_CHECKED, false));
@@ -232,7 +231,7 @@ public class CertResponseActivity extends FragmentActivity {
 	}
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
-		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+		LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:
                 super.onBackPressed();
@@ -246,18 +245,16 @@ public class CertResponseActivity extends FragmentActivity {
         super.onResume();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
     
     private void setMessage(String message) {
-		Log.d(TAG + ".setMessage(...) ", "message: " + message);
+		LOGD(TAG + ".setMessage", "message: " + message);
 		this.screenMessage = message;
     	TextView contentTextView = (TextView) findViewById(R.id.text);
     	contentTextView.setText(Html.fromHtml(message));
@@ -265,7 +262,7 @@ public class CertResponseActivity extends FragmentActivity {
     }
 
     private void showMessage(Integer statusCode,String caption,String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -287,7 +284,7 @@ public class CertResponseActivity extends FragmentActivity {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
+            LOGD(TAG + ".doInBackground", " - url: " + urls[0]);
             return  HttpHelper.getData(urls[0], contentType);
         }
 
@@ -295,7 +292,7 @@ public class CertResponseActivity extends FragmentActivity {
         protected void onProgressUpdate(Integer... progress) { }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
             if (progressDialog != null && progressDialog.isShowing()) {
                 progressDialog.dismiss();
             }

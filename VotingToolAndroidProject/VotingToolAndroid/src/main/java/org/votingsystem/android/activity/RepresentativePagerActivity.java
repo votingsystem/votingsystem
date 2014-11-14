@@ -16,6 +16,8 @@ import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.model.ContextVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -28,7 +30,7 @@ public class RepresentativePagerActivity extends FragmentActivity {
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
@@ -36,7 +38,7 @@ public class RepresentativePagerActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
-        Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
+        LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         RepresentativePagerAdapter pagerAdapter = new RepresentativePagerAdapter(
                 getSupportFragmentManager());
@@ -63,16 +65,14 @@ public class RepresentativePagerActivity extends FragmentActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
     }
 
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...)", "onRestoreInstanceState:" + savedInstanceState);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -93,7 +93,7 @@ public class RepresentativePagerActivity extends FragmentActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".RepresentativePagerAdapter.getItem(...) ", " - item: " + i);
+            LOGD(TAG + ".RepresentativePagerAdapter.getItem", " - item: " + i);
             cursor.moveToPosition(i);
             Long representativeId = cursor.getLong(cursor.getColumnIndex(
                     UserContentProvider.ID_COL));

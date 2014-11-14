@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -192,7 +194,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             //File dbFile = context.getDatabasePath(DB_NAME);
-            //Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            //LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -205,7 +207,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                Log.d(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
+                LOGD(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -235,7 +237,7 @@ public class TransactionVSContentProvider extends ContentProvider {
 
         int numWeeks = firstTransactionCalendar.get(Calendar.WEEK_OF_YEAR) -
                 lastTransactionCalendar.get(Calendar.WEEK_OF_YEAR);
-        Log.d(TAG + ".getTransactionWeekList() ", "numWeeks: " + numWeeks +
+        LOGD(TAG + ".getTransactionWeekList() ", "numWeeks: " + numWeeks +
                 " - firstTransactionDate: " + firstTransactionCalendar.getTime() +
                 " - lastTransactionDate: " + lastTransactionCalendar.getTime());
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
@@ -244,7 +246,7 @@ public class TransactionVSContentProvider extends ContentProvider {
             String periodLbl = contextVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
                     timePeriod.getDateFrom()), DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
             result.add(periodLbl);
-            Log.d(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);
+            LOGD(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);
         }
         return result;
     }
@@ -264,7 +266,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         ContentValues values = populateTransactionContentValues(transactionVS);
         values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapse);
         Uri uri = contextVS.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
-        Log.d(TAG + ".addTransaction() ", "added uri: " + uri.toString());
+        LOGD(TAG + ".addTransaction() ", "added uri: " + uri.toString());
         return uri;
     }
 

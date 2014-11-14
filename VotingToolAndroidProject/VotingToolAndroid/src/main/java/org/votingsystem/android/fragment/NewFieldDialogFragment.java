@@ -22,6 +22,8 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -125,7 +127,7 @@ public class NewFieldDialogFragment extends DialogFragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(ContextVS.ERROR_PANEL_KEY, error_message.getVisibility());
-        Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
 }

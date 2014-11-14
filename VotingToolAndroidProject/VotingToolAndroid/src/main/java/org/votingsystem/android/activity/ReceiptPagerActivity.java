@@ -16,6 +16,8 @@ import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.model.ContextVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -28,7 +30,7 @@ public class ReceiptPagerActivity extends FragmentActivity {
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
@@ -36,7 +38,7 @@ public class ReceiptPagerActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
-        Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
+        LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
@@ -49,16 +51,14 @@ public class ReceiptPagerActivity extends FragmentActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
     }
 
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...)", "onRestoreInstanceState:" + savedInstanceState);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -79,7 +79,7 @@ public class ReceiptPagerActivity extends FragmentActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".ReceiptPagerAdapter.getItem(...) ", " - item: " + i);
+            LOGD(TAG + ".ReceiptPagerAdapter.getItem", " - item: " + i);
             cursor.moveToPosition(i);
             return ReceiptFragment.newInstance(cursor.getPosition());
         }

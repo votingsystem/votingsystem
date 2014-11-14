@@ -20,6 +20,8 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -40,7 +42,7 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
         Long eventId = getIntent().getLongExtra(ContextVS.ITEM_ID_KEY, -1L);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
-        Log.d(TAG + ".onCreate(...) ", "eventId: " + eventId + " - cursorPosition: " +
+        LOGD(TAG + ".onCreate", "eventId: " + eventId + " - cursorPosition: " +
                 cursorPosition + " - eventState:" + eventState + " - eventType: " + eventType);
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
                 null, selection, new String[]{eventType.toString(), eventState.toString()}, null);
@@ -175,7 +177,7 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -198,7 +200,7 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".EventVSPagerAdapter.getItem(...) ", "item: " + i);
+            LOGD(TAG + ".EventVSPagerAdapter.getItem", "item: " + i);
             cursor.moveToPosition(i);
             Long eventId = cursor.getLong(cursor.getColumnIndex(EventVSContentProvider.ID_COL));
             return EventVSStatsFragment.newInstance(eventId);

@@ -28,6 +28,8 @@ import org.votingsystem.util.ResponseVS;
 
 import java.util.Properties;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 
 /**
  * @author jgzornoza
@@ -44,7 +46,7 @@ public class IntentFilterActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             try {
                 if(operationVS != null  && ContextVS.State.WITH_CERTIFICATE == contextVS.getState()){
@@ -53,7 +55,7 @@ public class IntentFilterActivity extends FragmentActivity {
                         responseVS = HttpHelper.getData(operationVS.getEventVS().getURL(), null);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             EventVS selectedEvent = EventVS.parse(new JSONObject(responseVS.getMessage()));
-                            Log.d(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
+                            LOGD(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS ||
@@ -68,7 +70,7 @@ public class IntentFilterActivity extends FragmentActivity {
                     switch (contextVS.getState()) {
                         case WITHOUT_CSR:
                             String applicationID = PrefUtils.getApplicationId(contextVS);
-                            Log.d(TAG + ".processOperation(.. ) ", "WITHOUT_CSR - applicationID: " +
+                            LOGD(TAG + ".processOperation(.. ) ", "WITHOUT_CSR - applicationID: " +
                                     applicationID);
                             responseIntent = new Intent(getBaseContext(), CertRequestActivity.class);
                             break;
@@ -93,12 +95,12 @@ public class IntentFilterActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
-            Log.d(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
+            LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
             return;
         }
         showProgressDialog(getString(R.string.connecting_caption),
@@ -158,7 +160,7 @@ public class IntentFilterActivity extends FragmentActivity {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -166,19 +168,16 @@ public class IntentFilterActivity extends FragmentActivity {
     }
     @Override protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
         if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
     };
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

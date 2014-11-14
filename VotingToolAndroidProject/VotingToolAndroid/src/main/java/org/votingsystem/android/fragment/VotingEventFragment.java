@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 /**
@@ -72,7 +73,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVoteService();
         else {
@@ -115,7 +116,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     };
 
     private void launchVoteService() {
-        Log.d(TAG + ".launchVoteService(...) ", "");
+        LOGD(TAG + ".launchVoteService", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VoteService.class);
@@ -141,7 +142,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     @Override public View onCreateView(LayoutInflater inflater,
                ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
@@ -188,7 +189,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
@@ -204,7 +205,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void setReceiptScreen(final VoteVS vote) {
-        Log.d(TAG + ".setReceiptScreen(...)", "");
+        LOGD(TAG + ".setReceiptScreen(...)", "");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = vote.getEventVS().getSubject();
@@ -235,7 +236,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
 
     public void saveVote() {
-        Log.d(TAG + ".saveVote(...)", "");
+        LOGD(TAG + ".saveVote(...)", "");
         ContentValues values = new ContentValues();
         vote.setTypeVS(TypeVS.VOTEVS);
         values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
@@ -243,12 +244,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.TYPE_COL, vote.getTypeVS().toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
-        Log.d(TAG + ".saveVote(...)", "uri: " + uri.toString());
+        LOGD(TAG + ".saveVote(...)", "uri: " + uri.toString());
         saveReceiptButton.setEnabled(false);
     }
 
     private void setEventScreen(final EventVS event) {
-        Log.d(TAG + ".setEventScreen(...)", " - setEventScreen");
+        LOGD(TAG + ".setEventScreen(...)", " - setEventScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         cancelVoteButton.setEnabled(true);
@@ -273,7 +274,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             optionButton.setOnClickListener(new Button.OnClickListener() {
                 FieldEventVS optionSelected = option;
                 public void onClick(View v) {
-                    Log.d(TAG + "- optionButton - optionId: " +
+                    LOGD(TAG + "- optionButton - optionId: " +
                             optionSelected.getId(), "state: " +
                             contextVS.getState().toString());
                     processSelectedOption(optionSelected);
@@ -287,7 +288,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void processSelectedOption(FieldEventVS optionSelected) {
-        Log.d(TAG + ".processSelectedOption", "processSelectedOption");
+        LOGD(TAG + ".processSelectedOption", "processSelectedOption");
         operation = TypeVS.VOTEVS;
         vote = new VoteVS(eventVS, optionSelected);
         String pinMsgPart = optionSelected.getContent().length() >
@@ -298,21 +299,19 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
     public void onClickSubject(View v) {
-        Log.d(TAG + ".onClickSubject(...)", "");
+        LOGD(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
@@ -327,7 +326,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -338,7 +337,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onDestroy() {
         super.onDestroy();
         if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
-        Log.d(TAG + ".onDestroy()", " - onDestroy");
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -358,12 +356,11 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
         super.onStop();
     }
 
     public void saveCancelReceipt(VoteVS vote) {
-        Log.d(TAG + ".saveCancelReceipt(...)", "saveCancelReceipt");
+        LOGD(TAG + ".saveCancelReceipt(...)", "saveCancelReceipt");
         ContentValues values = new ContentValues();
         values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
         values.put(ReceiptContentProvider.TYPE_COL, TypeVS.CANCEL_VOTE.toString());

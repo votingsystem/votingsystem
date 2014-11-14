@@ -70,7 +70,7 @@ public class EventsVSActivity extends ActivityBase
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vs);
@@ -105,7 +105,7 @@ public class EventsVSActivity extends ActivityBase
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> spinner, View view, int position, long itemId) {
-                Log.d(TAG + ".onItemSelected(...) ", "position:" + position);
+                LOGD(TAG + ".onItemSelected", "position:" + position);
                 if(position == 0) requestDataRefresh(EventVS.State.ACTIVE,
                         NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
                 else if(position == 1) requestDataRefresh(EventVS.State.PENDING,
@@ -170,7 +170,7 @@ public class EventsVSActivity extends ActivityBase
 
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
+        LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
         this.mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_eventsvs, menu);
@@ -185,7 +185,7 @@ public class EventsVSActivity extends ActivityBase
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...)",
+        LOGD(TAG + ".onOptionsItemSelected(...)",
                 " - Title: " + item.getTitle() + " - ItemId: " + item.getItemId());
         Intent intent = null;
         switch (item.getItemId()) {
@@ -231,7 +231,7 @@ public class EventsVSActivity extends ActivityBase
 
 
     private void toggleWebSocketServiceConnection() {
-        Log.d(TAG + ".toggleWebSocketServiceConnection(...)", "toggleWebSocketServiceConnection");
+        LOGD(TAG + ".toggleWebSocketServiceConnection(...)", "toggleWebSocketServiceConnection");
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS;
         if(contextVS.getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;

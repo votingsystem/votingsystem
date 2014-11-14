@@ -48,6 +48,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -70,7 +72,7 @@ public class UserVSAccountsFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             pin = intent.getStringExtra(ContextVS.PIN_KEY);
@@ -229,7 +231,7 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,

@@ -44,7 +44,7 @@ public class BootStrapService extends IntentService {
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);
         final String vicketServerURL = arguments.getString(ContextVS.VICKET_SERVER_URL);
-        LOGD(TAG + ".onHandleIntent(...) ", "accessControlURL: " + accessControlURL +
+        LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
                 " - vicketServerURL: " + vicketServerURL);
         ResponseVS responseVS = null;
         if(contextVS.getAccessControl() == null) {

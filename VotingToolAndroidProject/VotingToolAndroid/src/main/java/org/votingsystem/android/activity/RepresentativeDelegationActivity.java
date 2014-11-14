@@ -45,6 +45,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -69,7 +71,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver",
+        LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
@@ -96,7 +98,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
+        LOGD(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
         try {
             Intent startIntent = null;
             String serviceURL = null;
@@ -138,7 +140,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
@@ -156,7 +158,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                 Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                Log.d(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
+                LOGD(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
                 editorFileName = "delegation_message_es.html";
             }
         } catch(Exception ex) {
@@ -207,7 +209,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         if(anonymousCheckBox.isChecked() || publicCheckBox.isChecked()) {
             acceptButton.setEnabled(true);
         } else acceptButton.setEnabled(false);
-        Log.d(TAG + ".onCheckboxClicked(...) ", "anonymousCheckBox.isChecked(): " + anonymousCheckBox.isChecked() +
+        LOGD(TAG + ".onCheckboxClicked", "anonymousCheckBox.isChecked(): " + anonymousCheckBox.isChecked() +
                 " - publicCheckBox.isChecked(): " + publicCheckBox.isChecked());
     }
 
@@ -262,7 +264,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -273,14 +275,12 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

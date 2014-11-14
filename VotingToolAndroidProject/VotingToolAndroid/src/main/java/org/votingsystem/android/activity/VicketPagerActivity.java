@@ -34,7 +34,7 @@ public class VicketPagerActivity extends ActivityBase {
     private AppContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.activity_vickets);
@@ -42,7 +42,7 @@ public class VicketPagerActivity extends ActivityBase {
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
-        Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
+        LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
@@ -59,7 +59,7 @@ public class VicketPagerActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         Intent intent = null;
         switch (item.getItemId()) {
             case R.id.admin_vickets_menu_item:
@@ -114,7 +114,7 @@ public class VicketPagerActivity extends ActivityBase {
             }
             args.putString(SearchManager.QUERY, searchQuery);
             selectedFragment.setArguments(args);
-            Log.d(TAG + ".getItem(...) ", "position:" + position + " - args: " + args +
+            LOGD(TAG + ".getItem", "position:" + position + " - args: " + args +
                     " - selectedFragment.getClass(): " + ((Object)selectedFragment).getClass());
             return selectedFragment;
         }

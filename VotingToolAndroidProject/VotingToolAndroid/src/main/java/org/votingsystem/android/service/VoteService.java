@@ -32,6 +32,8 @@ import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 
 /**
  * @author jgzornoza
@@ -57,7 +59,7 @@ public class VoteService extends IntentService {
             contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
-            Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - receiverName: " +
+            LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - receiverName: " +
                     receiverName + " - event: " + vote.getEventVS().getId());
             if(receiverName == null) receiverName = contextVS.getAccessControl().getNameNormalized();
             ControlCenterVS controlCenter = vote.getEventVS().getControlCenter();
@@ -217,9 +219,9 @@ public class VoteService extends IntentService {
     }
 
     private void sendMessage(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+        LOGD(TAG + ".sendMessage", "statusCode: " + responseVS.getStatusCode() +
                 " - serviceCaller: " + responseVS.getServiceCaller() + " - operation: " +
-                responseVS.getTypeVS() + " - caption: " + responseVS.getCaption()  +
+                responseVS.getTypeVS() + " - caption: " + responseVS.getCaption() +
                 " - message: " + responseVS.getNotificationMessage());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

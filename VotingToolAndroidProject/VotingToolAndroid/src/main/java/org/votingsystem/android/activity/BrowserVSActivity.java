@@ -29,6 +29,8 @@ import org.votingsystem.util.ResponseVS;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -46,7 +48,7 @@ public class BrowserVSActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
@@ -76,7 +78,7 @@ public class BrowserVSActivity extends ActivityBase {
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
+        LOGD(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
         try {
             Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
@@ -89,7 +91,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
@@ -107,7 +109,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     private void loadUrl(String viewerURL, final String jsCommand) {
-        Log.d(TAG + ".viewerURL(...)", " - viewerURL: " + viewerURL);
+        LOGD(TAG + ".viewerURL(...)", " - viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
         refreshingStateChanged(true);
@@ -127,7 +129,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
-        Log.d(TAG + ".setJSONMessageToSignatureClient(...) ", "appMessage: " + appMessage);
+        LOGD(TAG + ".setJSONMessageToSignatureClient", "appMessage: " + appMessage);
         try {
             operationVS = OperationVS.parse(appMessage);
             switch(operationVS.getTypeVS()) {
@@ -147,7 +149,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     /*private void decryptMessageVS(OperationVS operationVS)  {
-        Log.d(TAG + ".decryptMessageVS(...) ", "decryptMessageVS");
+        LOGD(TAG + ".decryptMessageVS", "decryptMessageVS");
         ResponseVS responseVS = null;
         try {
             responseVS = contextVS.decryptMessageVS(operationVS.getDocumentToDecrypt());
@@ -155,14 +157,14 @@ public class BrowserVSActivity extends ActivityBase {
                 sendMessageToWebSocketService(TypeVS.WEB_SOCKET_MESSAGE,
                         ((JSONObject)responseVS.getData()).toString());
                 sendMessageToBrowserApp(responseVS.getMessageJSON(), operationVS.getCallerCallback());
-            } else Log.e(TAG + ".decryptMessageVS(...) ", "ERROR decrypting message");
+            } else Log.e(TAG + ".decryptMessageVS", "ERROR decrypting message");
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }*/
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
-        Log.d(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
+        LOGD(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
@@ -172,7 +174,7 @@ public class BrowserVSActivity extends ActivityBase {
 
     @Override public void onBackPressed() {
         String webUrl = webView.getUrl();
-        Log.d(TAG + ".onBackPressed(...) ", "webUrl: " + webUrl);
+        LOGD(TAG + ".onBackPressed", "webUrl: " + webUrl);
         if (webView.isFocused() && webView.canGoBack() && webUrl.contains("mode=details")) {
             webView.goBack();
         } else {
@@ -182,7 +184,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     private void processSignatureOperation(OperationVS operationVS) {
-        Log.d(TAG + ".processSignatureOperation(...) ", "processSignatureOperation");
+        LOGD(TAG + ".processSignatureOperation", "processSignatureOperation");
         PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
                 getString(R.string.enter_pin_signature_device_msg), false, null);
     }
@@ -195,7 +197,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
-        Log.d(TAG + ".sendMessageToBrowserApp(...) ", "statusCode: " + statusCode + " - message: " +
+        LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + statusCode + " - message: " +
                 message + " - callbackFunction: " + callbackFunction);
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
@@ -208,7 +210,7 @@ public class BrowserVSActivity extends ActivityBase {
 
 
     public void sendMessageToBrowserApp(JSONObject messageJSON, String callbackFunction) {
-        Log.d(TAG + ".sendMessageToBrowserApp(...) ", "statusCode: " + messageJSON.toString() +
+        LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + messageJSON.toString() +
                 " - callbackFunction: " + callbackFunction);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
@@ -216,7 +218,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -227,7 +229,6 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
@@ -236,7 +237,6 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

@@ -20,6 +20,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
@@ -40,7 +41,7 @@ public class VoteSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        Log.d(TAG + ".call()", "Event subject: " + vote.getEventVS().getSubject());
+        LOGD(TAG + ".call", "Event subject: " + vote.getEventVS().getSubject());
         ResponseVS responseVS = null;
         try {
             vote.genVote();
@@ -115,7 +116,7 @@ public class VoteSender implements Callable<ResponseVS> {
             SMIMESignedGenerator gen = dnies.getSMIMESignedGenerator();
             byte[] contentDigestBytes = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
             String contentDigest = Base64.encodeToString(contentDigestBytes, Base64.DEFAULT);
-            Log.d(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
+            LOGD(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
@@ -131,7 +132,7 @@ public class VoteSender implements Callable<ResponseVS> {
 
 
     private ResponseVS cancelAccessRequest(SignedMailGenerator signedMailGenerator, String userVS) {
-        Log.d(TAG + ".cancelAccessRequest(...)", "");
+        LOGD(TAG + ".cancelAccessRequest(...)", "");
         try {
             String subject = contextVS.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();

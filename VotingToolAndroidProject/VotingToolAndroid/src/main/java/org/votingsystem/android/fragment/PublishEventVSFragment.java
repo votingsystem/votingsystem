@@ -51,6 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -78,7 +80,7 @@ public class PublishEventVSFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
@@ -203,7 +205,7 @@ public class PublishEventVSFragment extends Fragment {
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchSignAndSendService(...) ", "operation: " + formType);
+        LOGD(TAG + ".launchSignAndSendService", "operation: " + formType);
         String serviceURL = contextVS.getAccessControl().getPublishServiceURL(formType);
         String signedMessageSubject = null;
         EventVS eventVS = new EventVS();
@@ -283,7 +285,7 @@ public class PublishEventVSFragment extends Fragment {
                 dateBeginEditText = (EditText) rootView.findViewById(R.id.dateBegin);
                 dateBeginEditText.setOnClickListener(new View.OnClickListener() {
                     @Override public void onClick(View v) {
-                        Log.d(TAG + ".setOnClickListener(...)", "");
+                        LOGD(TAG + ".setOnClickListener(...)", "");
                         Calendar calendarToShow = null;
                         if(dateBeginCalendar == null) calendarToShow = DateUtils.addDays(1);
                         else calendarToShow = dateBeginCalendar;
@@ -301,7 +303,7 @@ public class PublishEventVSFragment extends Fragment {
         dateFinishEditText = (EditText) rootView.findViewById(R.id.dateFinish);
         dateFinishEditText.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                Log.d(TAG + ".setOnClickListener(...)", "");
+                LOGD(TAG + ".setOnClickListener(...)", "");
                 Calendar calendarToShow = null;
                 if(dateFinishCalendar == null) calendarToShow = DateUtils.addDays(1);
                 else calendarToShow = dateFinishCalendar;
@@ -321,13 +323,13 @@ public class PublishEventVSFragment extends Fragment {
         // if set to true savedInstanceState will be allways null
         //setRetainInstance(true);
         setHasOptionsMenu(true);
-        Log.d(TAG + ".onCreateView(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         return rootView;
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        //Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
-        Log.d(TAG +  ".onActivityCreated(...)", "");
+        //LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "");
         super.onActivityCreated(savedInstanceState);
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
@@ -351,7 +353,7 @@ public class PublishEventVSFragment extends Fragment {
                 screenTitle = getString(R.string.publish_voting_caption);
                 break;
         }
-        Log.d(TAG + ".onCreate(...) ", "formType: " + formType + " - serverURL: " + serverURL);
+        LOGD(TAG + ".onCreate", "formType: " + formType + " - serverURL: " + serverURL);
         getActivity().setTitle(screenTitle);
     }
 
@@ -376,17 +378,17 @@ public class PublishEventVSFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) optionList);
-        //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "");
+        //LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "");
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "onCreate: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "onCreate: " + savedInstanceState);
         super.onCreate(savedInstanceState);
     }
 
     @Override public void onStart() {
-        Log.d(TAG + ".onStart(...) ", "onStart");
+        LOGD(TAG + ".onStart", "onStart");
         super.onStart();
     }
 
@@ -394,7 +396,7 @@ public class PublishEventVSFragment extends Fragment {
         menuInflater.inflate(R.menu.editor, menu);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 getActivity().onBackPressed();
@@ -427,7 +429,7 @@ public class PublishEventVSFragment extends Fragment {
     }
 
     private boolean validateForm () {
-        Log.d(TAG + ".validateForm()", "");
+        LOGD(TAG + ".validateForm()", "");
         if(formType == TypeVS.VOTING_PUBLISHING) {
             if(controlCenterSetSpinner.getSelectedItemId() == 0) {
                 ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
@@ -470,25 +472,20 @@ public class PublishEventVSFragment extends Fragment {
     }
 
     @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "onDestroy");
         super.onDestroy();
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
-
     @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
         super.onStop();
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));

@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -74,7 +76,7 @@ public class SignAndSendService extends IntentService {
             String caption = null;
             byte[] pdfBytes = null;
             String notificationMessage = null;
-            Log.d(TAG + ".onHandleIntent(...) ", "operationType: " + operationType +
+            LOGD(TAG + ".onHandleIntent", "operationType: " + operationType +
                     " - contentType: " + contentType);
             switch(operationType) {
                 case VOTING_PUBLISHING:
@@ -143,7 +145,7 @@ public class SignAndSendService extends IntentService {
     }
 
     private void processOperation(OperationVS operation, String serviceCaller) {
-        Log.d(TAG + ".processOperation(...) ", "operation: " + operation.getTypeVS() +
+        LOGD(TAG + ".processOperation", "operation: " + operation.getTypeVS() +
                 " - serviceCaller: " + serviceCaller);
         ActorVS targetServer = getActorVS(operation.getServerURL());
         ResponseVS responseVS = null;
@@ -162,7 +164,7 @@ public class SignAndSendService extends IntentService {
     }
 
     private void sendMessageVS(OperationVS operationVS, String serviceCaller){
-        Log.d(TAG + ".sendMessageVS(...) ", "operationVS: " + operationVS.getTypeVS());
+        LOGD(TAG + ".sendMessageVS", "operationVS: " + operationVS.getTypeVS());
         //operationVS.getContentType(); -> MessageVS
         ResponseVS responseVS = null;
         ActorVS targetServer = getActorVS(operationVS.getServerURL());
@@ -218,7 +220,7 @@ public class SignAndSendService extends IntentService {
     }
 
     private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) {
-        Log.d(TAG + ".sendSMIME(...) ", "sendSMIME");
+        LOGD(TAG + ".sendSMIME", "sendSMIME");
         String toUser = operationVS.getNormalizedReceiverName();
         String serviceURL = operationVS.getServiceURL();
         ContentTypeVS contentType = ContentTypeVS.JSON_SIGNED;

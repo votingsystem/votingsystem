@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class RepresentativeGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
@@ -73,7 +75,7 @@ public class RepresentativeGridFragment extends Fragment
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver",
+        LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
@@ -95,7 +97,7 @@ public class RepresentativeGridFragment extends Fragment
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        LOGD(TAG + ".launchSignAndSendService", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
@@ -137,13 +139,13 @@ public class RepresentativeGridFragment extends Fragment
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
         }
-        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
@@ -164,7 +166,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
@@ -178,7 +180,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        Log.d(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
         return true;
     }
 
@@ -192,7 +194,7 @@ public class RepresentativeGridFragment extends Fragment
         if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset <
                 UserContentProvider.getNumTotalRepresentatives() &&
                 totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
-            Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
+            LOGD(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                     " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
             firstVisiblePosition = firstVisibleItem;
             fetchItems(new Long(totalItemCount));
@@ -215,7 +217,7 @@ public class RepresentativeGridFragment extends Fragment
                     contextVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
             return;
         }
-        Log.d(TAG +  ".fetchItems(...)", "offset: " + offset);
+        LOGD(TAG +  ".fetchItems(...)", "offset: " + offset);
         if(((ActivityVS)getActivity()).isRefreshing()) return;
         ((ActivityVS)getActivity()).refreshingStateChanged(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
@@ -228,13 +230,13 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
+        LOGD(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
         menu.removeGroup(R.id.general_items);
         inflater.inflate(R.menu.representative_grid, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
+        LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
             /*case R.id.reload:
@@ -273,7 +275,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(),
@@ -283,7 +285,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.d(TAG + ".onCreateLoader(...)", "");
+        LOGD(TAG + ".onCreateLoader", "");
         String selection = UserContentProvider.TYPE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, selection,
@@ -292,7 +294,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
+        LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if(UserContentProvider.getNumTotalRepresentatives() == null)
             fetchItems(offset);
@@ -308,7 +310,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
+        LOGD(TAG + ".onLoaderReset", "");
         ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
@@ -320,7 +322,7 @@ public class RepresentativeGridFragment extends Fragment
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+            LOGD(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }
@@ -363,18 +365,16 @@ public class RepresentativeGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);

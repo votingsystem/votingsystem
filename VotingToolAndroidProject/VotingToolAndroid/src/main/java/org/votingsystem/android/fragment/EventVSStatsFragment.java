@@ -39,6 +39,8 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 
 public class EventVSStatsFragment extends Fragment {
 	
@@ -67,7 +69,7 @@ public class EventVSStatsFragment extends Fragment {
         cursor.moveToFirst();
         String eventJSONData = cursor.getString(cursor.getColumnIndex(
                 EventVSContentProvider.JSON_DATA_COL));
-        Log.d(TAG + ".onCreateView(...)", "eventJSONData: " + eventJSONData);
+        LOGD(TAG + ".onCreateView(...)", "eventJSONData: " + eventJSONData);
         try {
             eventVS = EventVS.parse(new JSONObject(eventJSONData));
             eventVS.setAccessControlVS(contextVS.getAccessControl());
@@ -80,8 +82,8 @@ public class EventVSStatsFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        //Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
-        Log.d(TAG +  ".onActivityCreated(...)", "");
+        //LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "");
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
@@ -98,19 +100,18 @@ public class EventVSStatsFragment extends Fragment {
 
     @Override public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG + ".onDestroy()", " - onDestroy");
     };
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.MESSAGE_KEY, htmlContent);
         outState.putString(ContextVS.URL_KEY, baseURL);
-        //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "");
+        //LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "");
     }
 
     private void loadUrl(String serverURL) {
-    	Log.d(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
+    	LOGD(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
         WebView webview = (WebView) rootView.findViewById(R.id.webview);
         WebSettings webSettings = webview.getSettings();
         webSettings.setBuiltInZoomControls(true);
@@ -146,7 +147,7 @@ public class EventVSStatsFragment extends Fragment {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             baseURL = urls[0];
-            Log.d(TAG + "GetDataTask.doInBackground", "baseURL: " + baseURL);
+            LOGD(TAG + "GetDataTask.doInBackground", "baseURL: " + baseURL);
             return  HttpHelper.getData(urls[0], ContentTypeVS.HTML);
         }
 
@@ -154,7 +155,7 @@ public class EventVSStatsFragment extends Fragment {
         protected void onProgressUpdate(Integer... progress) { }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 htmlContent = responseVS.getMessage();
                 loadHTMLContent(baseURL, htmlContent);

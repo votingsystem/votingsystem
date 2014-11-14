@@ -36,13 +36,13 @@ public class VotingAppService extends Service implements Runnable {
     @Override public void onCreate(){
         contextVS = (AppContextVS) getApplicationContext();
         handler = new Handler();
-        Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
+        LOGD(TAG + ".onCreate", "VotingAppService created");
     }
 
     @Override public void onDestroy(){ }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        LOGD(TAG + ".onStartCommand(...) ", "onStartCommand");
+        LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
         if(intent != null) {
             Bundle arguments = intent.getExtras();
@@ -60,7 +60,7 @@ public class VotingAppService extends Service implements Runnable {
             Thread thr = new Thread(null, runnable, "voting_app_service_thread");
             thr.start();
             //We want this service to continue running until it is explicitly stopped, so return sticky.
-        } else LOGD(TAG + ".onStartCommand(...) ", "onStartCommand - intent null");
+        } else LOGD(TAG + ".onStartCommand", "onStartCommand - intent null");
         return START_STICKY;
     }
 
@@ -76,12 +76,12 @@ public class VotingAppService extends Service implements Runnable {
     };
 
     private void checkForPendingOperations() {
-        Log.d(TAG + ".checkForPendingOperations()", "");
+        LOGD(TAG + ".checkForPendingOperations()", "");
         GregorianCalendar nextCheckTime = new GregorianCalendar();
         Calendar lastCheckedTime = PrefUtils.getLastPendingOperationCheckedTime(contextVS);
         nextCheckTime = (GregorianCalendar) lastCheckedTime.clone();
         nextCheckTime.add(GregorianCalendar.MINUTE, UPDATE_FREQUENCY_IN_MINUTES);
-        Log.d(TAG + ".checkForPendingOperations() ", "last checked time:" +
+        LOGD(TAG + ".checkForPendingOperations() ", "last checked time:" +
                 lastCheckedTime.toString() + " - Next checked time: " + nextCheckTime.toString());
 
         if(lastCheckedTime.before(nextCheckTime)) runPendingOperations();
@@ -89,7 +89,7 @@ public class VotingAppService extends Service implements Runnable {
     }
 
     private void runPendingOperations() {
-        Log.d(TAG + ".checkForPendingOperations(...) ", "");
+        LOGD(TAG + ".checkForPendingOperations", "");
     }
 
     @Override public void run() {

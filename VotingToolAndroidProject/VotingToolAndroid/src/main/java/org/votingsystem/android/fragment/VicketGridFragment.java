@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 public class VicketGridFragment extends Fragment {
@@ -51,7 +52,7 @@ public class VicketGridFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         if(pin != null) {
@@ -132,7 +133,7 @@ public class VicketGridFragment extends Fragment {
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        Log.d(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
         return true;
     }
 
@@ -150,7 +151,7 @@ public class VicketGridFragment extends Fragment {
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+            LOGD(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }

@@ -32,6 +32,8 @@ import android.util.Log;
 
 import java.io.File;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 // Content Provider for RSS feed information. Each row describes a single
 // RSS feed. See the public static constants at the end of this class
 // to learn what each record contains.
@@ -181,7 +183,7 @@ public class RssContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             File dbFile = context.getDatabasePath(DB_NAME);
-            Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -195,7 +197,7 @@ public class RssContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                Log.d(TAG + ".onCreate()", "database created");
+                LOGD(TAG + ".onCreate()", "database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

@@ -49,6 +49,8 @@ import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class CashDialogFragment extends DialogFragment {
 
     public static final String TAG = CashDialogFragment.class.getSimpleName();
@@ -70,7 +72,7 @@ public class CashDialogFragment extends DialogFragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             setTagVS((TagVS) intent.getSerializableExtra(ContextVS.TAG_KEY));
         }
     };
@@ -105,7 +107,7 @@ public class CashDialogFragment extends DialogFragment {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateDialog", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);

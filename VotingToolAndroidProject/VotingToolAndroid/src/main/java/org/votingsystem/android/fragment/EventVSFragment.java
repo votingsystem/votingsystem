@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 /**
@@ -71,7 +72,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
             else {
@@ -86,7 +87,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        LOGD(TAG + ".launchSignAndSendService", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
@@ -115,7 +116,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
@@ -140,7 +141,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         if (!eventVS.isActive()) signAndSendButton.setEnabled(false);
         signAndSendButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Log.d(TAG + "- signAndSendButton -", " - state: " + contextVS.getState().toString());
+                LOGD(TAG + "- signAndSendButton -", " - state: " + contextVS.getState().toString());
                 if (eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     if(eventVS.getFieldsEventVS() != null && !eventVS.getFieldsEventVS().isEmpty()) {
                         showClaimFieldsDialog();
@@ -173,7 +174,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
@@ -189,17 +190,14 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
         super.onDestroy();
     };
 
     @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
         super.onStop();
     }
 
     public void onClickSubject(View v) {
-        Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
@@ -207,9 +205,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showClaimFieldsDialog() {
-        Log.d(TAG + ".showClaimFieldsDialog(...)", "");
         if (eventVS.getFieldsEventVS() == null) {
-            Log.d(TAG + ".showClaimFieldsDialog(...)", "Event without fields");
+            LOGD(TAG + ".showClaimFieldsDialog(...)", "Event without fields");
             return;
         }
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
@@ -245,7 +242,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                         errorMsgTextView.setVisibility(View.VISIBLE);
                         return;
                     } else field.setValue(fieldValue);
-                    Log.d(TAG + ".ClaimFieldsDialog", "field id: " + field.getId() +
+                    LOGD(TAG + ".ClaimFieldsDialog", "field id: " + field.getId() +
                             " - text: " + fieldValue);
                 }
                 dialog.dismiss();
@@ -258,7 +255,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
-        Log.d(TAG + ".addFormField(...)", "field: " + label);
+        LOGD(TAG + ".addFormField(...)", "field: " + label);
         TextView textView = new TextView(getActivity().getApplicationContext());
         textView.setTextSize(getResources().getDimension(R.dimen.claim_field_text_size));
         textView.setText(label);
@@ -288,7 +285,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -297,14 +294,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);

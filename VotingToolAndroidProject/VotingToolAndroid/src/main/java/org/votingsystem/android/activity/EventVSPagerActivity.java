@@ -23,6 +23,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CURSOR_POSITION_KEY;
 import static org.votingsystem.model.ContextVS.EVENT_STATE_KEY;
 import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
@@ -38,13 +39,12 @@ public class EventVSPagerActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
         }
     };
 
-
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager_activity);
         Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
@@ -177,7 +177,7 @@ public class EventVSPagerActivity extends FragmentActivity {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -202,7 +202,7 @@ public class EventVSPagerActivity extends FragmentActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", "item: " + i);
+            LOGD(TAG + ".EventsPagerAdapter.getItem", "item: " + i);
             cursor.moveToPosition(i);
             String eventJSONStr = cursor.getString(cursor.getColumnIndex(
                     EventVSContentProvider.JSON_DATA_COL));

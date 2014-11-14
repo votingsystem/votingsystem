@@ -47,6 +47,8 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class TransactionVSDialogFragment extends DialogFragment implements OnKeyListener {
 
     public static final String TAG = TransactionVSDialogFragment.class.getSimpleName();
@@ -83,13 +85,13 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         if(savedInstanceState != null) firstPin = savedInstanceState.getString(ContextVS.PIN_KEY);
         this.setCancelable(false);
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateDialog", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
@@ -206,12 +208,12 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
         //so you have to filter:
         if (event.getAction()!=KeyEvent.ACTION_DOWN) return true;
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Log.d(TAG + ".onKey(...) ", "KEYCODE_BACK KEYCODE_BACK ");
+            LOGD(TAG + ".onKey", "KEYCODE_BACK KEYCODE_BACK ");
             dialog.dismiss();
         }
         //if (keyCode == KeyEvent.KEYCODE_DEL) { } 
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
-            Log.d(TAG + ".onKey(...) ", "KEYCODE_ENTER");
+            LOGD(TAG + ".onKey", "KEYCODE_ENTER");
             String pin = userPinEditText.getText().toString();
             if(pin != null && pin.length() == 4) {
                 setPin(pin);

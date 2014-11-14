@@ -16,6 +16,8 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -27,14 +29,14 @@ public class MessageActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState -getIntent().getExtras(): " +
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState -getIntent().getExtras(): " +
                 getIntent().getExtras());
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.generic_fragment_container_activity);
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
-            Log.d(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
+            LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
             return;
         }
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(

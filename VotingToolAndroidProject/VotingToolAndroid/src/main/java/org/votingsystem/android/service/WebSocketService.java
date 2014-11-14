@@ -45,6 +45,8 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -63,15 +65,15 @@ public class WebSocketService extends Service {
     @Override public void onCreate(){
         contextVS = (AppContextVS) getApplicationContext();
         handler = new Handler();
-        Log.d(TAG + ".onCreate(...) ", "WebSocketService created");
+        LOGD(TAG + ".onCreate", "WebSocketService created");
     }
 
     @Override public void onDestroy(){
-        Log.i(TAG + ".onDestroy() ", "onDestroy");
+        LOGD(TAG + ".onDestroy() ", "onDestroy");
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG + ".onStartCommand(...) ", "onStartCommand");
+        LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
         if(intent != null) {
             Bundle arguments = intent.getExtras();
@@ -100,9 +102,9 @@ public class WebSocketService extends Service {
             }
             try {
                 if(latch.getCount() > 0) {
-                    Log.d(TAG + ".onStartCommand(...) ", "starting websocket session");
+                    LOGD(TAG + ".onStartCommand", "starting websocket session");
                     latch.await();
-                    Log.d(TAG + ".onStartCommand(...) ", "websocket session started");
+                    LOGD(TAG + ".onStartCommand", "websocket session started");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -180,7 +182,7 @@ public class WebSocketService extends Service {
         public WebSocketListener(String serviceURL) {
             this.serviceURL = serviceURL;
             if(serviceURL.startsWith("wss")) {
-                Log.d(TAG + ".WebsocketListener", "setting SECURE connection");
+                LOGD(TAG + ".WebsocketListener", "setting SECURE connection");
                 try {
                     KeyStore p12Store = KeyStore.getInstance("PKCS12");
                     p12Store.load(null, null);
@@ -202,13 +204,13 @@ public class WebSocketService extends Service {
                 } catch(Exception ex) {
                     ex.printStackTrace();
                 }
-            } else Log.d(TAG + ".WebsocketListener", "setting INSECURE connection");
+            } else LOGD(TAG + ".WebsocketListener", "setting INSECURE connection");
         }
 
         @Override public void run() {
             try {
                 if(latch.getCount() == 0) latch = new CountDownLatch(1);
-                Log.d(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
+                LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
                 // sets the incoming buffer size to 1000000 bytes ~ 900K
                 //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
                 client.connectToServer(new Endpoint() {
@@ -274,7 +276,7 @@ public class WebSocketService extends Service {
                         session.getBasicRemote().sendText(responseJSON.toString());
                         break;
                     default:
-                        Log.i(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
+                        LOGD(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
                 }
             } catch(Exception ex) {ex.printStackTrace();}
         }

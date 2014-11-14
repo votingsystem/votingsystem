@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
@@ -49,7 +50,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS call() {
-        Log.d(TAG + ".call", " - urlAccessRequest: " + serviceURL);
+        LOGD(TAG + ".call", " - urlAccessRequest: " + serviceURL);
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequest, contextVS);
             ResponseVS responseVS = timeStamper.call();

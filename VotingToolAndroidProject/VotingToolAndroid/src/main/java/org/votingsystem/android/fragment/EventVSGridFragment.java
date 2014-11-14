@@ -73,7 +73,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
@@ -109,7 +109,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         queryStr = getArguments().getString(SearchManager.QUERY);
         loaderId = groupPosition.getLoaderId(childPosition.getPosition());
         PrefUtils.registerOnSharedPreferenceChangeListener(contextVS, this);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
@@ -129,7 +129,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -155,7 +155,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
@@ -168,7 +168,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        Log.i(TAG, ".onLongListItemClick - id: " + id);
+        LOGD(TAG, ".onLongListItemClick - id: " + id);
         return true;
     }
 
@@ -195,7 +195,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
             if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset < numTotalEvents &&
                     cursorCount < numTotalEvents) {
-                Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
+                LOGD(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
                         totalItemCount + " - numTotalEvents: " + numTotalEvents +
                         " - cursorCount: " + cursorCount + " - groupPosition: " + groupPosition +
@@ -217,7 +217,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     public void fetchItems(Long offset) {
-        Log.d(TAG +  ".fetchItems(...)", "offset: " + offset + " - progressVisible: " +
+        LOGD(TAG +  ".fetchItems(...)", "offset: " + offset + " - progressVisible: " +
                 ((ActivityVS)getActivity()).isRefreshing() +
                 " - groupPosition: " + groupPosition + " - eventState: " + eventState);
         if(((ActivityVS)getActivity()).isRefreshing()) return;
@@ -244,11 +244,11 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG +  ".onOptionsItemSelected(..)", " - Title: " + item.getTitle() +
+        LOGD(TAG +  ".onOptionsItemSelected(..)", " - Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId() + " - groupPosition: " + groupPosition +
                 " - eventState: " + eventState);
         switch (item.getItemId()) {
@@ -265,7 +265,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG + ".onListItemClick(...)", "Clicked item - position:" + position +
+        LOGD(TAG + ".onListItemClick", "Clicked item - position:" + position +
                 " -id: " + id);
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(), EventVSPagerActivity.class);
@@ -276,7 +276,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.d(TAG + ".onCreateLoader(...)", "groupPosition: " + groupPosition + " - eventState: " +
+        LOGD(TAG + ".onCreateLoader", "groupPosition: " + groupPosition + " - eventState: " +
             eventState);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
@@ -287,7 +287,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", "groupPosition: " + groupPosition +
+        LOGD(TAG + ".onLoadFinished", "groupPosition: " + groupPosition +
                 " - eventState: " + eventState + " - numTotal: " + EventVSContentProvider.
                 getNumTotal(groupPosition.getTypeVS(), eventState) +
                 " - cursor.getCount(): " + cursor.getCount() +
@@ -308,7 +308,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "onLoaderReset");
+        LOGD(TAG + ".onLoaderReset", "onLoaderReset");
         ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
@@ -320,14 +320,13 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+            LOGD(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }
 
     @Override public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
         PrefUtils.unregisterOnSharedPreferenceChangeListener(contextVS, this);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
@@ -393,7 +392,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                     subject.setText(eventVS.getSubject());
                     String dateInfoStr = null;
                     ImageView imgView = (ImageView)view.findViewById(R.id.event_icon);
-                    Log.d(TAG + ".bindView(...)", "cursor.getPosition(): "  + cursor.getPosition() +
+                    LOGD(TAG + ".bindView(...)", "cursor.getPosition(): "  + cursor.getPosition() +
                         " - eventState:"+ eventVS.getState()+ " - eventJSONData: " + eventJSONData);
                     switch(eventVS.getState()) {
                         case ACTIVE:
@@ -422,7 +421,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                     DateUtils.getDayWeekDateStr(eventVS.getDateFinish());
                             break;
                         default:
-                            Log.d(TAG +  ".bindView(...)", "unknown event state: " +
+                            LOGD(TAG +  ".bindView(...)", "unknown event state: " +
                                     eventVS.getState());
                     }
                     if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
@@ -432,7 +431,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                 R.string.author_lbl) + "</b>: " + eventVS.getUserVS().getFullName();
                         author.setText(Html.fromHtml(authorStr));
                     }
-                } else Log.d(TAG +  ".bindView(...)", "Event null");
+                } else LOGD(TAG +  ".bindView(...)", "Event null");
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

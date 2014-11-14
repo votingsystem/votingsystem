@@ -39,6 +39,8 @@ import org.votingsystem.util.ResponseVS;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -58,7 +60,7 @@ public class RepresentativeFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver",
+        LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
@@ -88,7 +90,7 @@ public class RepresentativeFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         representativeId =  getArguments().getLong(ContextVS.USER_KEY);
@@ -125,7 +127,7 @@ public class RepresentativeFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         int statusCode = -1;
         String caption = null;
@@ -170,7 +172,7 @@ public class RepresentativeFragment extends Fragment {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -182,7 +184,7 @@ public class RepresentativeFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
 
             default:
@@ -191,14 +193,12 @@ public class RepresentativeFragment extends Fragment {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);

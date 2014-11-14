@@ -28,6 +28,8 @@ import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -38,7 +40,7 @@ public class FragmentContainerActivity extends FragmentActivity {
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -69,7 +71,7 @@ public class FragmentContainerActivity extends FragmentActivity {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -81,7 +83,7 @@ public class FragmentContainerActivity extends FragmentActivity {
 
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         super.onActivityResult(requestCode, resultCode, data);
     }

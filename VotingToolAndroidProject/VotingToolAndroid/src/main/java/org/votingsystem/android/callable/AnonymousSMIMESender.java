@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -52,7 +54,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        Log.d(TAG + ".call()", "");
+        LOGD(TAG + ".call", "");
         ResponseVS responseVS = null;
         try {
             SMIMEMessage signedMessage = certificationRequest.getSMIME(fromUser, toUser,

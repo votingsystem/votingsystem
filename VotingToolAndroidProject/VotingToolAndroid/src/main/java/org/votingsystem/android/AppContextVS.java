@@ -212,7 +212,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         ResponseVS responseVS = null;
         try {
             String userVS = getUserVS().getNif();
-            LOGD(TAG + ".signMessage(...) ", "subject: " + subject);
+            LOGD(TAG + ".signMessage", "subject: " + subject);
             KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     (X509Certificate) keyEntry.getCertificateChain()[0],
@@ -281,7 +281,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public void sendWebSocketBroadcast(WebSocketRequest request) {
-        LOGD(TAG + ".sendWebSocketBroadcast(...) ", "statusCode: " + request.getStatusCode() +
+        LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + request.getStatusCode() +
             " - type: " + request.getTypeVS() + " - serviceCaller: " + request.getServiceCaller());
         Intent intent =  new Intent(request.getServiceCaller());
         intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);

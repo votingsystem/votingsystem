@@ -28,6 +28,9 @@ import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -50,16 +53,16 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
             boolean validationOk = false;
             for(X509CertificateHolder certificateHolder : matches) {
                 boolean isSigner = false;
-                Log.d(TAG + ".newInstance(...)", "cert_serial_number: '" + cert_serial_number +
+                LOGD(TAG + ".newInstance(...)", "cert_serial_number: '" + cert_serial_number +
                         "' - serial number: '" + certificateHolder.getSerialNumber() + "'");
                 if(certificateHolder.getSerialNumber().compareTo(cert_serial_number) == 0) {
                     try {
-                        Log.d(TAG + ".newInstance(...)", "certificateHolder.getSubject(): "
+                        LOGD(TAG + ".newInstance(...)", "certificateHolder.getSubject(): "
                                 + certificateHolder.getSubject() +
                                 " - serial number" + certificateHolder.getSerialNumber());
                         timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().
                                 setProvider(ContextVS.PROVIDER).build(certificateHolder));
-                        Log.d(TAG + ".newInstance(...)", "Validation OK");
+                        LOGD(TAG + ".newInstance(...)", "Validation OK");
                         validationOk = true;
                         isSigner = true;
                     } catch (Exception ex) {
@@ -80,7 +83,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
                 } catch (CertificateException ex) {
                     ex.printStackTrace();
                 }
-                if(!validationOk) Log.d(TAG + ".newInstance(...)", "Validation ERROR");
+                if(!validationOk) LOGD(TAG + ".newInstance(...)", "Validation ERROR");
             }
         }
         String htmlInfo = null;

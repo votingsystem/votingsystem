@@ -43,6 +43,8 @@ import org.votingsystem.util.ResponseVS;
 import java.io.File;
 import java.io.FileDescriptor;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -67,7 +69,7 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             TypeVS broadcastType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
@@ -119,7 +121,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     };
 
     private void launchSignAndSendService() {
-        Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        LOGD(TAG + ".launchSignAndSendService", "");
         editorFragment.setEditable(false);
         String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
@@ -145,7 +147,7 @@ public class NewRepresentativeActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         broadCastId = ((Object)this).getClass().getSimpleName();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
-        Log.d(TAG + ".onCreate(...)", "operationType: " + operationType +
+        LOGD(TAG + ".onCreate(...)", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.new_representative);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -209,7 +211,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -237,7 +239,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG + ".onCreateOptionsMenu(...)", "");
+        LOGD(TAG + ".onCreateOptionsMenu(...)", "");
         getMenuInflater().inflate(R.menu.editor, menu);
         this.menu = menu;
         if(operationType == TypeVS.REPRESENTATIVE && representative == null)
@@ -246,7 +248,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     }
 
     private boolean validateForm () {
-        Log.d(TAG + ".validateForm()", "");
+        LOGD(TAG + ".validateForm()", "");
         if(editorFragment == null || editorFragment.isEditorDataEmpty()) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.editor_empty_error_lbl));
@@ -262,7 +264,7 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     //https://developer.android.com/guide/topics/providers/document-provider.html
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode); //Activity.RESULT_OK;
         if(SELECT_PICTURE == requestCode) {
             if(data != null && data.getData() != null) {
@@ -339,18 +341,16 @@ public class NewRepresentativeActivity extends ActivityBase {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
         outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
-        Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

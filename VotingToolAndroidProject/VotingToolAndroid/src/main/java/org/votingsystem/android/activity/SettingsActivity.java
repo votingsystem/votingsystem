@@ -78,6 +78,6 @@ public class SettingsActivity extends PreferenceActivity
 
 
     @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG, ".onSharedPreferenceChanged(...) - key: " + key);
+        LOGD(TAG, ".onSharedPreferenceChanged- key: " + key);
     }
 }

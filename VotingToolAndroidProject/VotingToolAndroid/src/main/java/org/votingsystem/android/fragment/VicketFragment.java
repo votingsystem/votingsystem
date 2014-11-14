@@ -38,6 +38,8 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 import java.security.cert.X509Certificate;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 
 /**
  * @author jgzornoza
@@ -54,7 +56,7 @@ public class VicketFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
             else {
@@ -70,7 +72,7 @@ public class VicketFragment extends Fragment {
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         selectedVicket = (Vicket) getArguments().getSerializable(ContextVS.VICKET_KEY);
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         broadCastId = VicketFragment.class.getSimpleName() + "_" + selectedVicket.getHashCertVS();
         View rootView = inflater.inflate(R.layout.vicket, container, false);
@@ -119,7 +121,7 @@ public class VicketFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected model type:" + selectedVicket.getTypeVS());
+        LOGD(TAG + ".onCreateOptionsMenu", " selected model type:" + selectedVicket.getTypeVS());
         menuInflater.inflate(R.menu.vicket_fragment, menu);
         try {
             if(selectedVicket.getReceipt() == null) {
@@ -132,7 +134,7 @@ public class VicketFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         AlertDialog dialog = null;
         try {
             switch (item.getItemId()) {

@@ -69,11 +69,11 @@ public class LogUtils {
     }
 
     public static void LOGI(final String tag, String message) {
-        Log.i(tag, message);
+        LOGD(tag, message);
     }
 
     public static void LOGI(final String tag, String message, Throwable cause) {
-        Log.i(tag, message, cause);
+        LOGD(tag, message, cause);
     }
 
     public static void LOGW(final String tag, String message) {

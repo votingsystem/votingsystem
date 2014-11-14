@@ -32,6 +32,8 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -53,7 +55,7 @@ public class TransactionVSFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
             switch(responseVS.getTypeVS()) {
@@ -93,9 +95,9 @@ public class TransactionVSFragment extends Fragment {
                 TransactionVSContentProvider.WEEK_LAPSE_COL));
         String currencyStr = cursor.getString(cursor.getColumnIndex(
                 TransactionVSContentProvider.CURRENCY_COL));
-        Log.d(TAG + ".onCreateView(...)", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
+        LOGD(TAG + ".onCreateView(...)", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
         broadCastId = TransactionVSFragment.class.getSimpleName() + "_" + cursorPosition;
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.transactionvs, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
@@ -118,7 +120,7 @@ public class TransactionVSFragment extends Fragment {
     }
 
     private void initTransactionVSScreen (final TransactionVS transactionvs) {
-        Log.d(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
+        LOGD(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
         if(transactionvs.getFromUserVS() != null) {
             from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
                     transactionvs.getFromUserVS().getNif(),
@@ -161,7 +163,7 @@ public class TransactionVSFragment extends Fragment {
             case VICKET_SEND:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
-            default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
+            default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +
                     selectedTransactionVS.getType());
         }
         if(getActivity() instanceof FragmentActivity) {
@@ -179,28 +181,26 @@ public class TransactionVSFragment extends Fragment {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected transactionvs type:");
+        LOGD(TAG + ".onCreateOptionsMenu", " selected transactionvs type:");
         menuInflater.inflate(R.menu.transactionvs_fragment, menu);
         this.menu = menu;
         setActionBar();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         AlertDialog dialog = null;
         switch (item.getItemId()) {
             case R.id.show_signers_info:

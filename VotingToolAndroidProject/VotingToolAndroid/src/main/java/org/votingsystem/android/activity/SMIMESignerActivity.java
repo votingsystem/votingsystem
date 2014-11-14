@@ -30,6 +30,8 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -48,7 +50,7 @@ public class SMIMESignerActivity extends FragmentActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver",
+        LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
@@ -71,7 +73,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }};
 
     private void launchService(ResponseVS responseVS, OperationVS operationVS) {
-        Log.d(TAG + ".launchService() ", "launchService");
+        LOGD(TAG + ".launchService() ", "launchService");
         Intent startIntent = new Intent(this, WebSocketService.class);
         startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
         startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
@@ -82,7 +84,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.smime_signer);
         contextVS = (AppContextVS) getApplicationContext();
@@ -112,7 +114,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
                 PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
@@ -138,7 +140,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
-        Log.d(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
+        LOGD(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
@@ -146,7 +148,7 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     public void showMessage(int statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -172,7 +174,6 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
@@ -181,7 +182,6 @@ public class SMIMESignerActivity extends FragmentActivity {
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

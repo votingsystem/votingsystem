@@ -31,6 +31,7 @@ import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
 import org.votingsystem.android.ui.debug.actions.PrefsAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 public class DebugActionRunnerFragment extends Fragment {
@@ -54,7 +55,7 @@ public class DebugActionRunnerFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 getActivity().onBackPressed();
@@ -86,7 +87,7 @@ public class DebugActionRunnerFragment extends Fragment {
 
     protected void logTimed(long time, String message) {
         message = "["+time+"ms] "+message;
-        Log.d(TAG, message);
+        LOGD(TAG, message);
         mLogArea.append(message + "\n");
     }
 

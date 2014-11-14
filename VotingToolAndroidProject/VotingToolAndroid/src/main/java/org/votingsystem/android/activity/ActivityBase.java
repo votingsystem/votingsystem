@@ -177,7 +177,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -191,7 +191,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
                         break;
                 }
             } else if(request != null) {
-                Log.d(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
+                LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
                 if(progressDialog != null) progressDialog.dismiss();
                 switch(request.getTypeVS()) {
                     case INIT_VALIDATED_SESSION:
@@ -503,7 +503,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     }
 
     public void showMessage(int statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -560,7 +560,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     }
 
     private void onNavDrawerItemClicked(final int itemId) {
-        Log.d(TAG + ".onNavDrawerItemClicked(...) ", "itemId: " + itemId + " - getSelfNavDrawerItem(): " + getSelfNavDrawerItem());
+        LOGD(TAG + ".onNavDrawerItemClicked", "itemId: " + itemId + " - getSelfNavDrawerItem(): " + getSelfNavDrawerItem());
         if (itemId == getSelfNavDrawerItem()) {
             mDrawerLayout.closeDrawer(Gravity.START);
             return;
@@ -599,7 +599,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
     protected void onResume() {
         super.onResume();
         // Watch for sync state changes
-        Log.d(TAG + ".onResume() ", "onResume");
+        LOGD(TAG + ".onResume() ", "onResume");
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -612,7 +612,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
 
     @Override
     protected void onPause() {
-        Log.d(TAG + ".onPause() ", "onPause");
+        LOGD(TAG + ".onPause() ", "onPause");
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
@@ -982,7 +982,7 @@ public abstract class ActivityBase extends FragmentActivity implements LoginAndA
         Intent startIntent = new Intent(((AppContextVS)getApplicationContext()), WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
         if(((AppContextVS)getApplicationContext()).getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        Log.d(TAG + ".toggleWebSocketServiceConnection(...)", "operation: " + typeVS.toString());
+        LOGD(TAG + ".toggleWebSocketServiceConnection(...)", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         startService(startIntent);
     }

@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -103,7 +105,7 @@ public class VicketService extends IntentService {
                         responseVS.setIconId(R.drawable.cancel_22);
                         if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED) {
                             SMIMEMessage signedMessage = responseVS.getSMIME();
-                            Log.d(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
+                            LOGD(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
                             JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
                             operation = TypeVS.valueOf(jsonResponse.getString("operation"));
                             if(TypeVS.VICKET_CANCEL == operation) {
@@ -191,7 +193,7 @@ public class VicketService extends IntentService {
             int numVickets = requestAmount.divide(vicketAmount).intValue();
             List<Vicket> vicketsToSend = new ArrayList<Vicket>();
             for(int i = 0; i < numVickets; i++) {
-                Log.d(TAG + ".sendVicketFromWallet", " === TODO FETCH VICKET FROM WALLET === ");
+                LOGD(TAG + ".sendVicketFromWallet", " === TODO FETCH VICKET FROM WALLET === ");
             }
             List<String> smimeVicketList = new ArrayList<String>();
             for(Vicket vicket : vicketsToSend) {
@@ -259,7 +261,7 @@ public class VicketService extends IntentService {
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                Log.d(TAG + ".cancelVicketRepeated(...)", "cancelVicketRepeated");
+                LOGD(TAG + ".cancelVicketRepeated(...)", "cancelVicketRepeated");
                 try {
                     JSONObject responseJSON = new JSONObject(new String(decryptedMessageBytes, ContextVS.UTF_8));
                     String base64EncodedVicketRepeated = responseJSON.getString("messageSMIME");
@@ -281,7 +283,7 @@ public class VicketService extends IntentService {
                 message = getString(R.string.vicket_expended_send_error_msg);
             } else {
                 for(Vicket vicket:sendedVicketsMap.values()) {
-                    Log.d(TAG + ".sendVicketFromWallet(...)", " ==== TODO - UPDATE VICKET STATE");
+                    LOGD(TAG + ".sendVicketFromWallet(...)", " ==== TODO - UPDATE VICKET STATE");
                 }
                 caption = getString(R.string.vicket_send_ok_caption);
                 message = getString(R.string.vicket_send_ok_msg, requestAmount.toString(),
@@ -332,7 +334,7 @@ public class VicketService extends IntentService {
     }
 
     private void updateUserInfo() {
-        Log.d(TAG + ".updateUserInfo(...)", "updateUserInfo");
+        LOGD(TAG + ".updateUserInfo(...)", "updateUserInfo");
         VicketServer vicketServer = contextVS.getVicketServer();
         String msgSubject = getString(R.string.vicket_user_info_request_msg_subject);
         ResponseVS responseVS = null;
@@ -356,10 +358,7 @@ public class VicketService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
-                    message);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.user_info_updated));

@@ -19,6 +19,8 @@ import org.votingsystem.util.DateUtils;
 
 import java.util.Calendar;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -31,7 +33,7 @@ public class TransactionVSPagerActivity extends FragmentActivity {
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
@@ -39,7 +41,7 @@ public class TransactionVSPagerActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
-        Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
+        LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
                 getSupportFragmentManager());
@@ -63,11 +65,10 @@ public class TransactionVSPagerActivity extends FragmentActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -90,7 +91,7 @@ public class TransactionVSPagerActivity extends FragmentActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".TransactionVSPagerAdapter.getItem(...) ", "item: " + i);
+            LOGD(TAG + ".TransactionVSPagerAdapter.getItem", "item: " + i);
             cursor.moveToPosition(i);
             return TransactionVSFragment.newInstance(i);
         }

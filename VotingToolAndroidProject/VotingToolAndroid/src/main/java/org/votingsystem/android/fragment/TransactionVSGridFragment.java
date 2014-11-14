@@ -51,6 +51,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
@@ -68,7 +70,7 @@ public class TransactionVSGridFragment extends Fragment
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
@@ -93,7 +95,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     private void launchUpdateUserInfoService() {
-        Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
+        LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
@@ -121,13 +123,13 @@ public class TransactionVSGridFragment extends Fragment
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        LOGD(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.generic_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new TransactionVSListAdapter(getActivity().getApplicationContext(), null,false);
@@ -147,7 +149,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
@@ -161,7 +163,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        Log.d(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
         return true;
     }
 
@@ -181,7 +183,7 @@ public class TransactionVSGridFragment extends Fragment
             MenuItem item = menu.add (weekLbl);
             item.setOnMenuItemClickListener (new MenuItem.OnMenuItemClickListener(){
                 @Override public boolean onMenuItemClick (MenuItem item){
-                    Log.d(TAG +  ".onMenuItemClick(..)", "click on weekLbl: " + weekLbl);
+                    LOGD(TAG +  ".onMenuItemClick(..)", "click on weekLbl: " + weekLbl);
                     return true;
                 }
             });
@@ -190,7 +192,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
+        LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
@@ -203,7 +205,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +" -id: " + id);
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +" -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(),
                 TransactionVSPagerActivity.class);
@@ -212,7 +214,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.d(TAG + ".onCreateLoader(...)", "");
+        LOGD(TAG + ".onCreateLoader", "");
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 TransactionVSContentProvider.CONTENT_URI, null, selection,
@@ -221,7 +223,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
+        LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
         ((ActivityVS)getActivity()).refreshingStateChanged(false);
         if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
@@ -233,7 +235,7 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
+        LOGD(TAG + ".onLoaderReset", "");
         ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
@@ -245,7 +247,7 @@ public class TransactionVSGridFragment extends Fragment
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+            LOGD(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }
@@ -299,18 +301,16 @@ public class TransactionVSGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        LOGD(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);

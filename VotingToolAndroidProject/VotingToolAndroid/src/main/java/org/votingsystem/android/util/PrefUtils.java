@@ -63,7 +63,7 @@ public class PrefUtils {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(APPLICATION_ID_KEY, applicationId);
             editor.commit();
-            LOGD(TAG, "getApplicationId(...) - new applicationId: " + applicationId);
+            LOGD(TAG, "getApplicationId- new applicationId: " + applicationId);
         }
         return applicationId;
     }

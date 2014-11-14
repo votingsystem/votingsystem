@@ -17,6 +17,8 @@ import android.util.Log;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -249,7 +251,7 @@ public class EventVSContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             //File dbFile = context.getDatabasePath(DB_NAME);
-            //Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            //LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -262,7 +264,7 @@ public class EventVSContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                Log.d(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
+                LOGD(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

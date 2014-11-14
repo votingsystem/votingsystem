@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -155,7 +157,7 @@ public class ReceiptContentProvider extends ContentProvider {
         String idColStr = String.valueOf(ContentUris.parseId(uri));
         int rowCount = database.delete(TABLE_NAME, ID_COL + " = ?", new String[]{idColStr});
         // Notify any listeners and return the deleted row count.
-        Log.d(TAG + ".delete(...)", "receipt id: " + idColStr);
+        LOGD(TAG + ".delete(...)", "receipt id: " + idColStr);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
     }
@@ -175,7 +177,7 @@ public class ReceiptContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             //File dbFile = context.getDatabasePath(DB_NAME);
-            //Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            //LOGD(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -188,7 +190,7 @@ public class ReceiptContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                Log.d(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
+                LOGD(TAG + ".DatabaseHelper.onCreate(...)", "Database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

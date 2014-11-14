@@ -36,7 +36,7 @@ public class RepresentativesActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         /*switch (item.getItemId()) {
             case android.R.id.home:
                 //super.onBackPressed();
@@ -46,7 +46,7 @@ public class RepresentativesActivity extends ActivityBase {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+        LOGD(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         super.onActivityResult(requestCode, resultCode, data);
     }

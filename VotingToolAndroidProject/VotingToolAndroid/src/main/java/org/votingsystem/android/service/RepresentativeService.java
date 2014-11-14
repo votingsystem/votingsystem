@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
@@ -76,7 +77,7 @@ public class RepresentativeService extends IntentService {
         contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
-        Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation);
+        LOGD(TAG + ".onHandleIntent", "operation: " + operation);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         if(operation == TypeVS.ITEMS_REQUEST) {
             requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
@@ -119,7 +120,7 @@ public class RepresentativeService extends IntentService {
                     int numRowsCreated = getContentResolver().bulkInsert(
                             UserContentProvider.CONTENT_URI,contentValuesList.toArray(
                             new ContentValues[contentValuesList.size()]));
-                    Log.d(TAG + ".requestRepresentatives(...)", "inserted: " + numRowsCreated +" rows");
+                    LOGD(TAG + ".requestRepresentatives(...)", "inserted: " + numRowsCreated + " rows");
                 } else { //To notify ContentProvider Listeners
                     getContentResolver().insert(UserContentProvider.CONTENT_URI, null);
                 }
@@ -276,7 +277,7 @@ public class RepresentativeService extends IntentService {
                     responseVS.setNotificationMessage(getString(R.string.anonymous_delegation_msg,
                             representative.getFullName(), weeksOperationActive));
                 } else {
-                    Log.d(TAG + ".anonymousDelegation(...)", " _ TODO _ cancel anonymous delegation");
+                    LOGD(TAG + ".anonymousDelegation(...)", " _ TODO _ cancel anonymous delegation");
                 }
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
@@ -410,7 +411,7 @@ public class RepresentativeService extends IntentService {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
                 imageBytes = out.toByteArray();
                 compressFactor = compressFactor - 10;
-                Log.d(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
+                LOGD(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
                         " - imageBytes: " + imageBytes.length);
             } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
         } catch(Exception ex) {
@@ -453,8 +454,8 @@ public class RepresentativeService extends IntentService {
 
     private void sendMessage(Integer statusCode, String caption, String message, TypeVS typeVS,
              String serviceCaller, Uri representativeUri) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - caption: " +
-                caption  + " - message: " + message + " - serviceCaller: " + serviceCaller);
+        LOGD(TAG + ".sendMessage", "statusCode: " + statusCode + " - caption: " +
+                caption + " - message: " + message + " - serviceCaller: " + serviceCaller);
         Intent intent = new Intent(serviceCaller);
         intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         if(statusCode != null) {

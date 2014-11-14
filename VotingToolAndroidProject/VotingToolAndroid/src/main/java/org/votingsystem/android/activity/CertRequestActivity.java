@@ -18,6 +18,7 @@ import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 /**
@@ -33,7 +34,7 @@ public class CertRequestActivity extends FragmentActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         appContextVS = getApplicationContext();
-        Log.d(TAG + ".onCreate(...)", "appContextVS.getState(): " + appContextVS.getState() +
+        LOGD(TAG + ".onCreate(...)", "appContextVS.getState(): " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_advice);
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
@@ -88,7 +89,7 @@ public class CertRequestActivity extends FragmentActivity {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();

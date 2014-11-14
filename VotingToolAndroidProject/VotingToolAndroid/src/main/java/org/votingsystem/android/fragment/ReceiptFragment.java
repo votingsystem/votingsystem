@@ -49,6 +49,8 @@ import org.votingsystem.util.ResponseVS;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -59,7 +61,7 @@ public class ReceiptFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
+            LOGD(TAG + ".broadcastReceiver",
                     "extras:" + intent.getExtras());
             TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
@@ -126,7 +128,7 @@ public class ReceiptFragment extends Fragment {
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.message_smime, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
@@ -212,7 +214,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptContainer receiptContainer) {
-        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receiptContainer.getTypeVS() +
+        LOGD(TAG + ".initReceiptScreen(...)", "type: " + receiptContainer.getTypeVS() +
                 " - messageId: " + receiptContainer.getMessageId());
         try {
             String contentFormatted = null;
@@ -291,7 +293,7 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.cancel_vote);
                 menu.removeItem(R.id.check_receipt);
                 break;
-            default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
+            default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +
                     receiptContainer.getTypeVS());
         }
         if(receiptContainer.getLocalId() < 0) {
@@ -311,21 +313,19 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
+        LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" +
                 selectedReceipt.getTypeVS());
         menuInflater.inflate(R.menu.receipt_fragment, menu);
         this.menu = menu;
@@ -333,7 +333,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         AlertDialog dialog = null;
         switch (item.getItemId()) {
             case android.R.id.home:

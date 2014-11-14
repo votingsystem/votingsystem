@@ -16,6 +16,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
@@ -51,7 +52,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        Log.d(TAG + ".call()", "serviceURL: " + serviceURL);
+        LOGD(TAG + ".call", "serviceURL: " + serviceURL);
         ResponseVS responseVS = null;
         try {
             KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();

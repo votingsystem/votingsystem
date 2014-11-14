@@ -37,6 +37,8 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.util.Date;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class ReceiptGridFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
 
@@ -51,7 +53,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.message_smime_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new ReceiptGridAdapter(getActivity().getApplicationContext(), null,false);
@@ -74,7 +76,7 @@ public class ReceiptGridFragment extends Fragment implements
 
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
@@ -83,7 +85,7 @@ public class ReceiptGridFragment extends Fragment implements
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
-        Log.d(TAG + ".onLongListItemClick(...)", "id: " + id);
+        LOGD(TAG + ".onLongListItemClick(...)", "id: " + id);
         return true;
     }
 
@@ -105,7 +107,7 @@ public class ReceiptGridFragment extends Fragment implements
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
+        LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount());
         ((ActivityVS)getActivity()).refreshingStateChanged(false);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
@@ -114,7 +116,7 @@ public class ReceiptGridFragment extends Fragment implements
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
+        LOGD(TAG + ".onLoaderReset", "");
         ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
@@ -180,7 +182,7 @@ public class ReceiptGridFragment extends Fragment implements
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -193,7 +195,6 @@ public class ReceiptGridFragment extends Fragment implements
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
     }
 
 }

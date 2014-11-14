@@ -45,6 +45,7 @@ import java.text.Normalizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
@@ -80,7 +81,7 @@ public class CertRequestFormFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             String pin = intent.getStringExtra(PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) launchUserCertRequestService(pin);
@@ -97,7 +98,7 @@ public class CertRequestFormFragment extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -105,7 +106,7 @@ public class CertRequestFormFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "progressVisible: ");
+        LOGD(TAG + ".onCreateView(...)", "progressVisible: ");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.cert_request_form, container, false);
         mainLayout = (FrameLayout)rootView.findViewById(R.id.mainLayout);
@@ -141,7 +142,7 @@ public class CertRequestFormFragment extends Fragment {
         nifText.setOnKeyListener(new OnKeyListener() {
             // android:imeOptions="actionDone" doesn't work
             @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
+                //LOGD(TAG + ".onKey(...)", " - keyCode: " + keyCode);
                 if (event != null && keyCode == KeyEvent.KEYCODE_ENTER) {
                     submitForm();
                     return true;
@@ -170,7 +171,7 @@ public class CertRequestFormFragment extends Fragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+		LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
                 getActivity().onBackPressed();
@@ -205,7 +206,7 @@ public class CertRequestFormFragment extends Fragment {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -214,7 +215,7 @@ public class CertRequestFormFragment extends Fragment {
     }
 
     private boolean validateForm () {
-    	Log.d(TAG + ".validateForm()", "");
+    	LOGD(TAG + ".validateForm()", "");
         nif = NifUtils.validate(nifText.getText().toString());
     	if(nif == null) {
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
@@ -266,12 +267,12 @@ public class CertRequestFormFragment extends Fragment {
     			deviceId = UUID.randomUUID().toString();
     		}
     	}
-		Log.d(TAG + ".validateForm() ", "deviceId: " + deviceId);
+		LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
     	return true;
     }
 
     private void launchUserCertRequestService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
+        LOGD(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 UserCertRequestService.class);
         startIntent.putExtra(PIN_KEY, pin);

@@ -37,6 +37,8 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * from https://android.googlesource.com/platform/development/+/master/samples/RSSReader/
  */
@@ -82,7 +84,7 @@ public class RssService extends Service  implements Runnable {
         * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, this, "rss_service_thread");
         thr.start();
-        Log.i(TAG + ".onCreate(...) ", "RssService created");
+        LOGD(TAG + ".onCreate", "RssService created");
     }
 
     // When the service is destroyed, get rid of our persistent icon.
@@ -100,7 +102,7 @@ public class RssService extends Service  implements Runnable {
         GregorianCalendar nextCheckTime = new GregorianCalendar();
         nextCheckTime = (GregorianCalendar) lastCheckedTime.clone();
         nextCheckTime.add(GregorianCalendar.MINUTE, UPDATE_FREQUENCY_IN_MINUTES);
-        Log.d(TAG + ".queryIfPeriodicRefreshRequired(...) ", "last checked time:" +
+        LOGD(TAG + ".queryIfPeriodicRefreshRequired", "last checked time:" +
                 lastCheckedTime.toString() + " - Next checked time: " + nextCheckTime.toString());
 
         if(lastCheckedTime.before(nextCheckTime)) queryRssItems();
@@ -133,7 +135,7 @@ public class RssService extends Service  implements Runnable {
     // Query all feeds. If the new feed has a newer pubDate than the previous,
     // then update it.
     void queryRssItems(){
-        Log.d(TAG + ".queryRssItems() ", "");
+        LOGD(TAG + ".queryRssItems() ", "");
         cursor = getContentResolver().query(RssContentProvider.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()){
             // Get the URL for the feed from the cursor.
@@ -153,7 +155,7 @@ public class RssService extends Service  implements Runnable {
         try {
             URL wrappedUrl = new URL(url);
             String rssFeed = readRss(wrappedUrl);
-            Log.d(TAG + ".queryItem(...)", "RSS Feed " + url + ":\n " + rssFeed);
+            LOGD(TAG + ".queryItem(...)", "RSS Feed " + url + ":\n " + rssFeed);
             if(TextUtils.isEmpty(rssFeed)) {
                 return false;
             }
@@ -203,7 +205,7 @@ public class RssService extends Service  implements Runnable {
     private String readRss(URL url){
         String html = "<html><body><h2>No data</h2></body></html>";
         try {
-            Log.d(TAG + ".readRss(...)", "url:" + url.toString());
+            LOGD(TAG + ".readRss(...)", "url:" + url.toString());
             BufferedReader inStream = new BufferedReader(new InputStreamReader(url.openStream()),
                             1024);
             String line;

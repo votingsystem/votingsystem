@@ -17,6 +17,8 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 
 /**
  * @author jgzornoza
@@ -38,7 +40,7 @@ public class TransactionVSService extends IntentService {
         String fromUserIBAN = arguments.getString(ContextVS.IBAN_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
-        Log.d(TAG + ".onHandleIntent(...) ", " - transactionVS: " + transactionVS.toString()  );
+        LOGD(TAG + ".onHandleIntent", "transactionVS: " + transactionVS.toString());
         ResponseVS responseVS = null;
         String caption = null;
         String message = null;
