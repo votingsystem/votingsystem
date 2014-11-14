@@ -315,11 +315,10 @@
     <string name="send_message_lbl">enviar mensaje</string>
     <string name="update_user_info_pin_msg">para obtener los datos necesita firmar una solicitud</string>
     <string name="vicket_user_info_request_msg_subject">solicitud de información de cuentas</string>
-    <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en caja]]></string>
+    <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s]]></string>
     <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
     <string name="vicket_last_request_info_lbl"><![CDATA[última actualización el <u><b>\'%1$s\'</b></u>]]></string>
-    <string name="time_remaining_info_lbl"><![CDATA[lo que no gastes antes del domingo a las 24:00 horas se repartirá
-        entre el resto de usuarios]]></string>
+    <string name="time_remaining_info_lbl">tienes que gastar \'%1$s\' antes del domingo a las 24:00 horas</string>
     <string name="cash_request_dialog_caption">retirar dinero</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
@@ -442,4 +441,5 @@
     <string name="lapsed_lbl">caducado</string>
     <string name="rejected_lbl">rechazado</string>
     <string name="currency_lbl">divisa</string>
+    <string name="in_lbl">en</string>
 </resources>

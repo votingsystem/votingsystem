@@ -7,8 +7,8 @@
 
         <size android:width="76dip" android:height="76dip" />
         <gradient android:type="sweep" android:useLevel="false"
-            android:startColor="@color/loading_data"
-            android:endColor="@color/drawer_list_item"
+            android:startColor="@color/bkg_vs"
+            android:endColor="@color/frg_vs"
             android:angle="0" />
     </shape>
 </rotate> 

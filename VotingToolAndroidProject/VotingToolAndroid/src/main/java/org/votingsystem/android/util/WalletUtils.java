@@ -36,14 +36,15 @@ public class WalletUtils {
     private static List<Vicket> vicketList = null;
 
     public static List<Vicket> getVicketList() {
-        return vicketList;
+        if(vicketList == null) return null;
+        else return new ArrayList<Vicket>(vicketList);
     }
 
     public static List<Vicket> getVicketList(String password, Context context) throws Exception {
         JSONArray storedWalletJSON = getWallet(password, context);
         if(storedWalletJSON == null) vicketList = new ArrayList<Vicket>();
         else vicketList = getVicketListFromJSONArray(storedWalletJSON);
-        return vicketList;
+        return new ArrayList<Vicket>(vicketList);
     }
 
     public static List<Vicket> getVicketListFromJSONArray(JSONArray jsonArray) throws Exception {
@@ -56,17 +57,18 @@ public class WalletUtils {
         return vicketList;
     }
 
-    public static void saveVicketList(Collection<Vicket> vicketList, String password,
+    public static void saveVicketList(Collection<Vicket> newVicketList, String password,
             Context context) throws Exception {
         Object wallet = getWallet(password, context);
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
         else storedWalletJSON = (JSONArray) wallet;
-        List<Map> serializedVicketList = getSerializedVicketList(vicketList);
+        List<Map> serializedVicketList = getSerializedVicketList(newVicketList);
         for(Map vicket : serializedVicketList) {
             storedWalletJSON.put(new JSONObject(vicket));
         }
         WalletUtils.saveWallet(storedWalletJSON, password, context);
+        vicketList = getVicketListFromJSONArray(storedWalletJSON);
     }
 
     public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection)

@@ -33,6 +33,7 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSAccountsInfo;
@@ -206,7 +207,7 @@ public class UserVSAccountsFragment extends Fragment {
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
             UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
             if(userInfo != null) {
-                Map<String, TagVS> tagVSBalancesMap = userInfo.getTagVSBalancesMap(
+                Map<String, TagVSInfo> tagVSBalancesMap = userInfo.getTagVSBalancesMap(
                         Currency.getInstance("EUR").getCurrencyCode());
                 if(tagVSBalancesMap != null) {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
@@ -304,11 +305,11 @@ public class UserVSAccountsFragment extends Fragment {
 
     public class AccountVSInfoAdapter extends ArrayAdapter<String> {
         private final Context context;
-        private Map<String, TagVS> tagVSListBalances;
+        private Map<String, TagVSInfo> tagVSListBalances;
         private List<String> tagVSList;
         private String currencyCode;
 
-        public AccountVSInfoAdapter(Context context, Map<String, TagVS> tagVSListBalances,
+        public AccountVSInfoAdapter(Context context, Map<String, TagVSInfo> tagVSListBalances,
                     String currencyCode, String[] tagArray) {
             super(context, R.layout.accountvs_info, tagArray);
             this.context = context;
@@ -322,8 +323,8 @@ public class UserVSAccountsFragment extends Fragment {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
-            String selectedtag = tagVSList.get(position);
-            final BigDecimal accountBalance = tagVSListBalances.get(selectedtag).getTotal();
+            TagVSInfo selectedTag = tagVSListBalances.get(tagVSList.get(position));
+            final BigDecimal accountBalance = selectedTag.getCash();
             Button request_button = (Button) accountView.findViewById(R.id.cash_button);
             if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                 request_button.setOnClickListener(new OnClickListener() {
@@ -337,21 +338,21 @@ public class UserVSAccountsFragment extends Fragment {
                 });
                 request_button.setVisibility(View.VISIBLE);
             } else request_button.setVisibility(View.GONE);
-            /*String time_remaining_msg =     Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                    DateUtils.getDayWeekDateStr(timePeriod.getDateTo())));*/
-
-
-//"cash_info time_limited_text
             TextView tag_text = (TextView)accountView.findViewById(R.id.tag_text);
-            String tag_text_msg = "'" + selectedtag +  "' " + getString(R.string.currency_lbl) +
-                    " " + currencyCode;
+            String tag_text_msg = "'" + MsgUtils.getTagVSMessage(selectedTag.getName(), getActivity()) +
+                    "' " + getString(R.string.currency_lbl) + " " + currencyCode;
             tag_text.setText(tag_text_msg);
             TextView cash_info = (TextView)accountView.findViewById(R.id.cash_info);
             cash_info.setText(Html.fromHtml(getString(R.string.account_amount_info_lbl,
                     accountBalance, currencyCode)));
-            //vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
-            //        accountBalance, currencyCode)));
-
+            if(selectedTag.getTimeLimitedRemaining().compareTo(BigDecimal.ZERO) > 0) {
+                String timeLimitedMsg = selectedTag.getTimeLimitedRemaining().toPlainString() +
+                        " " + currencyCode + " " + getString(R.string.in_lbl) + " " +
+                        selectedTag.getName();
+                TextView time_limited_text = ((TextView)accountView.findViewById(R.id.time_limited_text));
+                time_limited_text.setText(getString(R.string.time_remaining_info_lbl, timeLimitedMsg));
+                time_limited_text.setVisibility(View.VISIBLE);
+            }
             return accountView;
         }
     }

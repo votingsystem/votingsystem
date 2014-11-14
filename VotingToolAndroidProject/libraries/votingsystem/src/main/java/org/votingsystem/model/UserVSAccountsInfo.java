@@ -28,6 +28,7 @@ public class UserVSAccountsInfo {
     private Map<String, Map<String, TagVS>> balancesToMap;
     private Map<String, Map<String, TagVS>> balancesFromMap;
     private Map<String, Map<String, TagVS>> balancesCashMap;
+    private Map<String, Map<String, TagVSInfo>> balancesInfo;
 
     public List<TransactionVS> getTransactionList() {
         List<TransactionVS> result = new ArrayList<TransactionVS>();
@@ -88,12 +89,34 @@ public class UserVSAccountsInfo {
         throw new ExceptionVS("User has not account for tag '" + tagStr + "' with currency '" + currencyCode +"'");
     }
 
-    public Map<String, TagVS> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
-        if(balancesCashMap.containsKey(currencyCode)) {
-            return balancesCashMap.get(currencyCode);
+    public Map<String, TagVSInfo> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
+        if(balancesInfo.containsKey(currencyCode)) {
+            return balancesInfo.get(currencyCode);
         } else {
-            Log.d(TAG + ".getTagVSBalancesMap", "User has not accounts for currency '" + currencyCode +"'");
+            Log.d(TAG + ".getTagVSBalancesMap", "user has not accounts for currency '" +
+                    currencyCode + "'");
             return null;
+        }
+    }
+
+    private void processBalances() throws ExceptionVS {
+        balancesInfo = new HashMap<String, Map<String, TagVSInfo>>();
+        Set<String> currencySet = balancesToMap.keySet();
+        for(String currency : currencySet) {
+            Map<String, TagVSInfo> currencyInfoMap = new HashMap<String, TagVSInfo>();
+            Map<String, TagVS> currencyMap = balancesToMap.get(currency);
+            for(TagVS tagVS: currencyMap.values()) {
+                TagVSInfo tagVSInfo = new TagVSInfo(tagVS.getName(), currency);
+                tagVSInfo.setTotal(tagVS.getTotal());
+                tagVSInfo.setTimeLimited(tagVS.getTimeLimited());
+                if(balancesFromMap != null && balancesFromMap.get(currency) != null &&
+                        balancesFromMap.get(currency).get(tagVS.getName()) != null) {
+                    tagVSInfo.setFrom(balancesFromMap.get(currency).get(tagVS.getName()).getTotal());
+                }
+                tagVSInfo.checkResult(balancesCashMap.get(currency).get(tagVS.getName()).getTotal());
+                currencyInfoMap.put(tagVS.getName(), tagVSInfo);
+            }
+            balancesInfo.put(currency, currencyInfoMap);
         }
     }
 
@@ -112,6 +135,7 @@ public class UserVSAccountsInfo {
                 parseBalanceMap(jsonData.getJSONObject("balancesTo")));
         if(jsonData.has("balancesCash")) result.setBalancesCashMap(
                 parseBalanceMap(jsonData.getJSONObject("balancesCash")));
+        result.processBalances();
         return result;
     }
 
@@ -145,7 +169,8 @@ public class UserVSAccountsInfo {
         Map<String, Map<String, TagVS>> result = new HashMap<String, Map<String, TagVS>>();
         while(currencyIterator.hasNext()) {
             String currencyStr = (String) currencyIterator.next();
-            Map<String, TagVS> tagVSBalanceMap = TagVS.parseTagVSBalanceMap(jsonData.getJSONObject(currencyStr));
+            Map<String, TagVS> tagVSBalanceMap = TagVS.parseTagVSBalanceMap(
+                    jsonData.getJSONObject(currencyStr));
             result.put(currencyStr, tagVSBalanceMap);
         }
         return result;
@@ -189,4 +214,5 @@ public class UserVSAccountsInfo {
     public void setBalancesCashMap(Map<String, Map<String, TagVS>> balancesCashMap) {
         this.balancesCashMap = balancesCashMap;
     }
+
 }

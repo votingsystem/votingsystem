@@ -26,14 +26,11 @@ public class TagVS  implements Serializable {
 
     private Long id;
     private String name;
-    private BigDecimal total;
-    private BigDecimal timeLimited;
+    private BigDecimal total = BigDecimal.ZERO;
+    private BigDecimal timeLimited = BigDecimal.ZERO;
     private Long frequency;
     private Date dateCreated;
     private Date lastUpdated;
-
-
-    private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
 
     public TagVS() { }
 
@@ -61,14 +58,6 @@ public class TagVS  implements Serializable {
     
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<EventTagVS> getEventTagVSes() {
-        return this.eventTagVSes;
-    }
-    
-    public void setEventTagVSes(Set<EventTagVS> eventTagVSes) {
-        this.eventTagVSes = eventTagVSes;
     }
 
     public void setFrequency(Long frequency) {
@@ -155,4 +144,5 @@ public class TagVS  implements Serializable {
     public void setTimeLimited(BigDecimal timeLimited) {
         this.timeLimited = timeLimited;
     }
+
 }
