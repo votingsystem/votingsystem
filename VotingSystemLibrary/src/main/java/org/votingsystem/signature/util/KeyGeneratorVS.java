@@ -47,7 +47,7 @@ public enum KeyGeneratorVS {
     }
 
     public byte[] getSalt() {
-        random.setSeed(new Date().getTime());
+        random.setSeed(System.currentTimeMillis());
         final byte[] sernobytes = new byte[noOctets];
         random.nextBytes(sernobytes);
         return  sernobytes;

@@ -583,7 +583,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
                                 (String) operationVS.getDocument().get("dateFormat"));
                         String stringFormat = null;
-                        if (operationVS.getDocument().get("stringFormat") == null && !JSONNull.getInstance().equals(
+                        if (operationVS.getDocument().get("stringFormat") != null && !JSONNull.getInstance().equals(
                                 operationVS.getDocument().get("stringFormat"))) {
                             stringFormat = (String) operationVS.getDocument().get("stringFormat");
                         }

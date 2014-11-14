@@ -19,6 +19,7 @@ package org.votingsystem.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -31,7 +32,7 @@ import org.votingsystem.model.OperationVS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class FragmentContainerActivity extends ActivityBase {
+public class FragmentContainerActivity extends FragmentActivity {
 
 	public static final String TAG = FragmentContainerActivity.class.getSimpleName();
 

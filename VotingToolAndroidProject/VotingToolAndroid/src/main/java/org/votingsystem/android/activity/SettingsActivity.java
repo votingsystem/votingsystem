@@ -38,6 +38,7 @@ public class SettingsActivity extends PreferenceActivity
     private static final String TAG = makeLogTag(SettingsActivity.class);
 
     @Override protected void onCreate(Bundle savedInstanceState) {
+        LOGD(TAG + ".onCreate", " - savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.ic_drawer_settings));
@@ -45,7 +46,7 @@ public class SettingsActivity extends PreferenceActivity
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected(...)", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -57,7 +58,7 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        setupSimplePreferencesScreen();
+        addPreferencesFromResource(R.xml.preferences);
         PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
         Preference button = (Preference)findPreference("requestCertButton");
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -75,9 +76,6 @@ public class SettingsActivity extends PreferenceActivity
         PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
     }
 
-    private void setupSimplePreferencesScreen() {
-        addPreferencesFromResource(R.xml.preferences);
-    }
 
     @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         LOGD(TAG, ".onSharedPreferenceChanged(...) - key: " + key);

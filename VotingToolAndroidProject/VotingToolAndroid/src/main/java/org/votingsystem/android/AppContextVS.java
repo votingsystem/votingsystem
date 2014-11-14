@@ -263,17 +263,16 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 VICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
-                        responseVS.getNotificationMessage())).setSmallIcon(responseVS.getIconId())
-                .setContentIntent(pendingIntent);
+                responseVS.getNotificationMessage())).setContentIntent(pendingIntent);
+        if(responseVS.getIconId() != null) builder.setSmallIcon(responseVS.getIconId());
         Notification note = builder.build();
-        // hide the notification after its selected
-        note.flags |= Notification.FLAG_AUTO_CANCEL;
+        note.flags |= Notification.FLAG_AUTO_CANCEL; // hide the notification after its selected
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
     }
 
     public void broadcastResponse(ResponseVS responseVS) {
-        LOGD(TAG + ".broadcastResponse(...) ", "statusCode: " + responseVS.getStatusCode() +
+        LOGD(TAG + ".broadcastResponse", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());

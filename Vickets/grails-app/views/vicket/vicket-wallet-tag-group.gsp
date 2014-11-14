@@ -67,8 +67,8 @@
                 else return tag
             },
             dateInfo:function(vicket) {
-                var notBefore = getDateFormatted(vicket.notBefore,"yyyy/MM/dd' 'HH:mm:ss", null, null)
-                var notAfter = getDateFormatted(vicket.notAfter,"yyyy/MM/dd' 'HH:mm:ss", null, null)
+                var notBefore = getDateFormatted(vicket.notBefore,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
+                var notAfter = getDateFormatted(vicket.notAfter,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
                 return "<g:message code="dateRangeMsg"/>".format(notBefore, notAfter)
             },
             isTimeLimited:function(vicket) {

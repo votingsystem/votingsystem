@@ -30,11 +30,17 @@ public class WalletUtils {
 
     private static final String TAG = makeLogTag(WalletUtils.class.getSimpleName());
 
+    private static List<Vicket> vicketList = null;
+
+    public static List<Vicket> getVicketList() {
+        return vicketList;
+    }
 
     public static List<Vicket> getVicketList(String password, Context context) throws Exception {
         JSONArray storedWalletJSON = getWallet(password, context);
-        if(storedWalletJSON == null) return new ArrayList<Vicket>();
-        return getVicketListFromJSONArray(storedWalletJSON);
+        if(storedWalletJSON == null) vicketList = new ArrayList<Vicket>();
+        else vicketList = getVicketListFromJSONArray(storedWalletJSON);
+        return vicketList;
     }
 
     public static List<Vicket> getVicketListFromJSONArray(JSONArray jsonArray) throws Exception {

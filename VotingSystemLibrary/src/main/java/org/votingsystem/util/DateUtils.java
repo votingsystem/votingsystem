@@ -307,8 +307,9 @@ public class DateUtils {
     public static String getDayWeekDateStr (Date date) {
         Date lastYear = addDays(Calendar.getInstance().getTime(), -364);
         Date nextYear = addDays(Calendar.getInstance().getTime(), 364);
-        if(date.before(lastYear) || date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
-        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
+        if(date.before(lastYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        if(date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
 
     public static Date getDayWeekDate (String dateStr) throws ParseException {

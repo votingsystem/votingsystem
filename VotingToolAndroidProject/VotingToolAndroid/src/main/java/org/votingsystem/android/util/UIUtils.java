@@ -42,15 +42,20 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.fragment.VicketGridFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
+import org.votingsystem.model.Vicket;
 import org.votingsystem.util.ResponseVS;
 
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -61,17 +66,8 @@ import static org.votingsystem.android.util.LogUtils.makeLogTag;
  * An assortment of UI helpers.
  */
 public class UIUtils  {
+
     private static final String TAG = makeLogTag(UIUtils.class);
-
-
-    public static final String TARGET_FORM_FACTOR_HANDSET = "handset";
-    public static final String TARGET_FORM_FACTOR_TABLET = "tablet";
-
-    /**
-     * Flags used with {@link android.text.format.DateUtils#formatDateRange}.
-     */
-    private static final int TIME_FLAGS = DateUtils.FORMAT_SHOW_TIME
-            | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY;
 
     /**
      * Regex to search for HTML escape sequences.
@@ -79,12 +75,11 @@ public class UIUtils  {
      * <p></p>Searches for any continuous string of characters starting with an ampersand and ending with a
      * semicolon. (Example: &amp;amp;)
      */
+    public static final String TARGET_FORM_FACTOR_HANDSET = "handset";
+    public static final String TARGET_FORM_FACTOR_TABLET = "tablet";
     private static final Pattern REGEX_HTML_ESCAPE = Pattern.compile(".*&\\S;.*");
-
-
     public static final int ANIMATION_FADE_IN_TIME = 250;
     public static final String TRACK_ICONS_TAG = "tracks";
-
     private static SimpleDateFormat sDayOfWeekFormat = new SimpleDateFormat("E");
     private static DateFormat sShortTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
@@ -104,22 +99,6 @@ public class UIUtils  {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         context.startActivity(intent);
-    }
-
-    public static String formatEventVSSubtitle(Context context,String paramas) {
-        return null;
-    }
-
-    public static String formatIntervalTimeString(long intervalStart, long intervalEnd,
-            StringBuilder recycle, Context context) {
-        if (recycle == null) {
-            recycle = new StringBuilder();
-        } else {
-            recycle.setLength(0);
-        }
-        Formatter formatter = new Formatter(recycle);
-        return DateUtils.formatDateRange(context, formatter, intervalStart, intervalEnd, TIME_FLAGS,
-                PrefUtils.getDisplayTimeZone(context).getID()).toString();
     }
 
     public static boolean isSameDayDisplay(long time1, long time2, Context context) {
@@ -167,25 +146,20 @@ public class UIUtils  {
      */
     public static Spannable buildStyledSnippet(String snippet) {
         final SpannableStringBuilder builder = new SpannableStringBuilder(snippet);
-
         // Walk through string, inserting bold snippet spans
         int startIndex, endIndex = -1, delta = 0;
         while ((startIndex = snippet.indexOf('{', endIndex)) != -1) {
             endIndex = snippet.indexOf('}', startIndex);
-
             // Remove braces from both sides
             builder.delete(startIndex - delta, startIndex - delta + 1);
             builder.delete(endIndex - delta - 1, endIndex - delta);
-
             // Insert bold style
             builder.setSpan(new StyleSpan(Typeface.BOLD),
                     startIndex - delta, endIndex - delta - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             //builder.setSpan(new ForegroundColorSpan(0xff111111),
             //        startIndex - delta, endIndex - delta - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
             delta += 2;
         }
-
         return builder;
     }
 
@@ -197,15 +171,6 @@ public class UIUtils  {
                 break;
             }
         }
-    }
-
-    public static String getHashtagsString(String hashtags) {
-        if (!TextUtils.isEmpty(hashtags)) {
-            if (!hashtags.startsWith("#")) {
-                hashtags = "#" + hashtags;
-            }
-        }
-        return null;
     }
 
     public static Drawable getLogoIcon(Context context, int iconId) {
@@ -247,8 +212,6 @@ public class UIUtils  {
         sp.edit().putBoolean(key, true).commit();
         return fired;
     }
-
-
 
     private static final int[] RES_IDS_ACTION_BAR_SIZE = { android.R.attr.actionBarSize };
 
@@ -315,15 +278,10 @@ public class UIUtils  {
         }
     }
 
-    public static String getTagVSMessage(String tag, Context context) {
-        if(TagVS.WILDTAG.equals(tag)) return context.getString(R.string.wildtag_lbl);
-        else return tag;
-    }
-
-    public static String getVicketRequestMessage(TransactionVS transactionVS, Context context) {
-        String tagMessage = getTagVSMessage(transactionVS.getTagVS().getName(), context);
-        return context.getString(R.string.vicket_request_msg, transactionVS.getAmount().toPlainString(),
-                transactionVS.getCurrencyCode(), tagMessage);
+    public static void launchEmbeddedFragment(String className, Context context) {
+        Intent intent = new Intent(context, FragmentContainerActivity.class);
+        intent.putExtra(ContextVS.FRAGMENT_KEY, className);
+        context.startActivity(intent);
     }
 
     public static void killApp(boolean killSafely) {

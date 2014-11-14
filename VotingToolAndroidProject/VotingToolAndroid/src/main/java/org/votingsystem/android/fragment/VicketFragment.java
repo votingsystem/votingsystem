@@ -21,11 +21,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
@@ -34,11 +35,9 @@ import org.votingsystem.model.Vicket;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.security.cert.X509Certificate;
-import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * @author jgzornoza
@@ -48,34 +47,16 @@ public class VicketFragment extends Fragment {
 
     public static final String TAG = VicketFragment.class.getSimpleName();
 
-    private AppContextVS contextVS;
     private Vicket selectedVicket;
-    private TextView vicketSubject;
-    private TextView vicket_content;
-    private TextView vicket_cancellation_date;
-
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private TextView vicket_amount, vicket_state, vicket_currency, date_info;
     private SMIMEMessage selectedVicketSMIME;
     private String broadCastId = null;
-    private String userCertInfo;
-    private Button cancel_button;
-    private int cursorPosition;
-
-
-    public static Fragment newInstance(int cursorPosition) {
-        VicketFragment fragment = new VicketFragment();
-        Bundle args = new Bundle();
-        args.putInt(ContextVS.CURSOR_POSITION_KEY, cursorPosition);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVicketCancellation();
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
             else {
                 ((ActivityVS)getActivity()).refreshingStateChanged(false);
                 ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
@@ -84,84 +65,36 @@ public class VicketFragment extends Fragment {
         }
     };
 
-    private void launchVicketCancellation() {
-        Log.d(TAG + ".launchVicketRequest(...) ", "");
-        try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    VicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_CANCEL);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.ITEM_ID_KEY, cursorPosition);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
-        cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        byte[] serializedVicket = getArguments().getByteArray(ContextVS.VICKET_KEY);
-        broadCastId = VicketFragment.class.getSimpleName() + "_" + cursorPosition;
+        selectedVicket = (Vicket) getArguments().getSerializable(ContextVS.VICKET_KEY);
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
+        broadCastId = VicketFragment.class.getSimpleName() + "_" + selectedVicket.getHashCertVS();
         View rootView = inflater.inflate(R.layout.vicket, container, false);
-        LinearLayout vicketDataContainer = (LinearLayout) rootView.
-                findViewById(R.id.vicket_data_container);
-        vicket_content = (TextView)rootView.findViewById(R.id.vicket_content);
-        vicket_cancellation_date = (TextView)rootView.findViewById(R.id.vicket_cancellation_date);
-        vicket_content.setMovementMethod(LinkMovementMethod.getInstance());
-        vicketSubject = (TextView)rootView.findViewById(R.id.vicket_subject);
-        cancel_button = (Button)rootView.findViewById(R.id.cancel_button);
+        vicket_amount = (TextView)rootView.findViewById(R.id.vicket_amount);
+        vicket_state = (TextView)rootView.findViewById(R.id.vicket_state);
+        vicket_currency = (TextView)rootView.findViewById(R.id.vicket_currency);
+        date_info = (TextView)rootView.findViewById(R.id.date_info);
+        initVicketScreen(selectedVicket);
         setHasOptionsMenu(true);
-        if(savedInstanceState != null) {
-            selectedVicket = (Vicket) savedInstanceState.getSerializable(ContextVS.RECEIPT_KEY);
-            initVicketScreen(selectedVicket);
-        } else {
-            try {
-                selectedVicket = (Vicket) ObjectUtils.deSerializeObject(serializedVicket);
-                initVicketScreen(selectedVicket);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         return rootView;
     }
 
     private void initVicketScreen(Vicket vicket) {
-        Log.d(TAG + ".initVicketScreen(...)", "type: " + vicket.getTypeVS() + " - messageId: " +
-            vicket.getMessageId());
         try {
+            vicket_amount.setText(vicket.getAmount().toPlainString());
+            vicket_currency.setText(vicket.getCurrencyCode());
             selectedVicketSMIME = vicket.getReceipt();
-            X509Certificate certificate = selectedVicket.getCertificationRequest().getCertificate();
-            userCertInfo = getActivity().getString(R.string.cert_info_formated_msg,
-                    certificate.getSubjectDN().toString(),
-                    certificate.getIssuerDN().toString(),
-                    certificate.getSerialNumber().toString(),
-                    DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
-                    DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
-            if(selectedVicket != null) {
-                vicketSubject.setText("ID: " + selectedVicket.getLocalId() +
-                        " - State: " + selectedVicket.getState());
-                if(selectedVicket.getReceipt() != null)
-                    vicket_content.setText(Html.fromHtml(getVicketContentFormatted(selectedVicket)));
-                else vicket_content.setText(Html.fromHtml(userCertInfo));
-            }
-            if(Vicket.State.OK == selectedVicket.getState()) {
-                cancel_button.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                getString(R.string.cancel_vicket_dialog_msg), false, null);
-                    }
-                });
-                cancel_button.setVisibility(View.VISIBLE);
-            } else if(Vicket.State.CANCELLED == selectedVicket.getState()) {
-                vicket_cancellation_date.setText(getString(R.string.cancellation_date_lbl,
-                        DateUtils.getDayWeekDateStr(selectedVicket.getCancellationDate())));
-                vicket_cancellation_date.setVisibility(View.VISIBLE);
+            getActivity().setTitle(MsgUtils.getVicketDescriptionMessage(vicket, getActivity()));
+            date_info.setText(getString(R.string.vicket_date_info,
+                    DateUtils.getDateStr(vicket.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
+                    DateUtils.getDateStr(vicket.getValidTo(), "dd MMM yyyy' 'HH:mm")));
+            if(Vicket.State.OK != selectedVicket.getState()) {
+                vicket_state.setText(MsgUtils.getVicketStateMessage(selectedVicket, getActivity()));
+                vicket_state.setVisibility(View.VISIBLE);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -173,16 +106,13 @@ public class VicketFragment extends Fragment {
         if(selectedVicket != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedVicket);
     }
 
-
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
@@ -207,11 +137,13 @@ public class VicketFragment extends Fragment {
         try {
             switch (item.getItemId()) {
                 case android.R.id.home:
-                    getActivity().onBackPressed();
+                    getFragmentManager().popBackStackImmediate();
+                    //getActivity().finish();
                     return true;
                 case R.id.cert_info:
-                    dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.
-                            vicket_cert_caption)).setMessage(Html.fromHtml(userCertInfo)).show();
+                    MessageDialogFragment.showDialog(null, getString(R.string.vicket_cert_caption),
+                            MsgUtils.getCertInfoMessage(selectedVicket.getCertificationRequest().
+                            getCertificate(), getActivity()), getFragmentManager());
                     break;
                 case R.id.show_timestamp_info:
                     TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
@@ -242,10 +174,6 @@ public class VicketFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setActionBar() {
-        Log.d(TAG + ".setActionBar() ", "");
-    }
-
     public class VicketDownloader extends AsyncTask<String, String, ResponseVS> {
 
         public VicketDownloader() { }
@@ -257,18 +185,17 @@ public class VicketFragment extends Fragment {
             return HttpHelper.getData(vicketURL, null);
         }
 
-        @Override  protected void onProgressUpdate(String... progress) { }
+        @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
+        @Override protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     selectedVicket.setReceiptBytes(responseVS.getMessageBytes());
                     initVicketScreen(selectedVicket);
-                    setActionBar();
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
-                            ex.getMessage());
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.exception_lbl), ex.getMessage(), getFragmentManager());
                 }
             } else {
                 ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
@@ -278,18 +205,5 @@ public class VicketFragment extends Fragment {
         }
     }
 
-
-    public String getVicketContentFormatted(ReceiptContainer selectedVicket) {
-        String result = null;
-        try {
-            switch(selectedVicket.getTypeVS()) {
-                default:
-                    return selectedVicket.getReceipt().getSignedContent();
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return result;
-    }
 
 }

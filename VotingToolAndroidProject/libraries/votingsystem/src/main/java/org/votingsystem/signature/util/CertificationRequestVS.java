@@ -144,8 +144,9 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public void initSigner (byte[] signedCsr) {
+    public CertificationRequestVS initSigner (byte[] signedCsr) {
         this.signedCsr = signedCsr;
+        return this;
     }
 
     public SMIMEMessage getSMIME(String fromUser, String toUser,

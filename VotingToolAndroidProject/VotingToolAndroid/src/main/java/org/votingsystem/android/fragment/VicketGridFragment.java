@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -22,12 +21,8 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.activity.VicketPagerActivity;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -35,13 +30,12 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
-import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+
+import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 public class VicketGridFragment extends Fragment {
 
@@ -51,10 +45,8 @@ public class VicketGridFragment extends Fragment {
     private View rootView;
     private GridView gridView;
     private VicketListAdapter adapter = null;
-    private Integer firstVisiblePosition = null;
-    private List<Vicket> vicketList = new ArrayList<Vicket>();
+    private List<Vicket> vicketList;
     private String broadCastId = VicketGridFragment.class.getSimpleName();
-    private boolean isAuthenticated = false;
     private ModalProgressDialogFragment progressDialog = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -69,7 +61,6 @@ public class VicketGridFragment extends Fragment {
                         vicketList = WalletUtils.getVicketList(pin, getActivity());
                         adapter.setItemList(vicketList);
                         adapter.notifyDataSetChanged();
-                        isAuthenticated = true;
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
@@ -113,24 +104,20 @@ public class VicketGridFragment extends Fragment {
         });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Intent intent = new Intent(getActivity().getApplicationContext(),VicketPagerActivity.class);
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(FRAGMENT_KEY, VicketFragment.class.getName());
                 intent.putExtra(ContextVS.VICKET_KEY, vicketList.get(position));
                 startActivity(intent);
             }
         });
-        if(savedInstanceState != null) {
-            isAuthenticated = savedInstanceState.getBoolean(AUTHENTICATED_KEY);
-            String serializedArrayStr = savedInstanceState.getString(ContextVS.LIST_STATE_KEY);
-            try {
-                vicketList = WalletUtils.getVicketListFromJSONArray(new JSONArray(serializedArrayStr));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        vicketList = WalletUtils.getVicketList();
+        if(vicketList == null) {
+            PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
+            vicketList = new ArrayList<Vicket>();
         }
         adapter = new VicketListAdapter(vicketList, getActivity().getApplicationContext());
         gridView.setAdapter(adapter);
-        if(!isAuthenticated) PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
         return rootView;
     }
 
@@ -230,15 +217,6 @@ public class VicketGridFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Parcelable gridState = gridView.onSaveInstanceState();
-        try {
-            JSONArray serializedVicket = WalletUtils.getSerializedVicketArray(adapter.getItemList());
-            outState.putString(ContextVS.LIST_STATE_KEY, serializedVicket.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        outState.putBoolean(AUTHENTICATED_KEY, isAuthenticated);
     }
 
     @Override public void onResume() {

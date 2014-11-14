@@ -28,6 +28,7 @@ import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
@@ -93,7 +94,7 @@ public class UserVSAccountsFragment extends Fragment {
                     if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
                         transactionVS = (TransactionVS) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                UIUtils.getVicketRequestMessage(transactionVS, getActivity()),
+                                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
                                 false, TypeVS.VICKET_REQUEST);
                     } else {
                         UIUtils.launchMessageActivity(getActivity(), responseVS);
@@ -148,7 +149,7 @@ public class UserVSAccountsFragment extends Fragment {
         setHasOptionsMenu(true);
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
-            transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);;
+            transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
         }
         return rootView;
     }
@@ -235,9 +236,7 @@ public class UserVSAccountsFragment extends Fragment {
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
                 return true;
             case R.id.open_vicket_grid:
-                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, VicketGridFragment.class.getName());
-                startActivity(intent);
+                UIUtils.launchEmbeddedFragment(VicketGridFragment.class.getName(), getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -255,7 +254,7 @@ public class UserVSAccountsFragment extends Fragment {
 
     private void sendVicketRequest(String pin) {
         progressDialog = ModalProgressDialogFragment.showDialog(getFragmentManager(),
-                UIUtils.getVicketRequestMessage(transactionVS, getActivity()),
+                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
                 getString(R.string.vicket_request_msg_subject));
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
@@ -322,8 +321,7 @@ public class UserVSAccountsFragment extends Fragment {
             tagVSList.addAll(tagVSListBalances.keySet());
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        @Override public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
@@ -352,7 +350,6 @@ public class UserVSAccountsFragment extends Fragment {
             vicket_cash_info.setText("vicket_cash_info ");
             return accountView;
         }
-
     }
 
 }

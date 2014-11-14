@@ -127,11 +127,12 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
         vicketHashLbl.setText(vicket.getHashCertVS());
         vicketValueLbl.setText(vicket.getAmount().toPlainString());
         currencyLbl.setText(vicket.getCurrencyCode());
-        vicketTagLbl.setText(vicket.getTag().getName());
+        vicketTagLbl.setText(Utils.getTagDescription(vicket.getTag().getName()));
         operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
         operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED_DARK));
-        String vicketDateInfoLbl = ContextVS.getMessage("dateInfoLbl", DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
-                DateUtils.getDayWeekDateStr(vicket.getValidTo()));
+        String vicketDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
+                DateUtils.getDateStr(vicket.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
+                DateUtils.getDateStr(vicket.getValidTo(), "dd MMM yyyy' 'HH:mm"));
         dateInfoLbl.setText(vicketDateInfoLbl);
         operationsLbl.setOnMouseClicked(new EventHandler<MouseEvent>() {
                  @Override public void handle(MouseEvent event) {
@@ -158,7 +159,8 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
                 String amountStr = vicket.getAmount() + " " + vicket.getCurrencyCode() + " " +
                         Utils.getTagForDescription(vicket.getTag().getName());
                 msg = ContextVS.getMessage("vicketInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
-                        DateUtils.getDayWeekDateStr(vicket.getValidFrom()), DateUtils.getDayWeekDateStr(vicket.getValidTo()));
+                        DateUtils.getDateStr(vicket.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
+                        DateUtils.getDateStr(vicket.getValidTo()), "dd MMM yyyy' 'HH:mm");
             }
             showMessage(msg, Boolean.TRUE);
         }

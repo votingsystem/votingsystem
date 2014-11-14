@@ -30,8 +30,6 @@ public class Vicket extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = Vicket.class.getSimpleName();
-
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     private Long localId = -1L;
@@ -87,7 +85,10 @@ public class Vicket extends ReceiptContainer {
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {
-        certificationRequest.initSigner(csrBytes);
+        load(certificationRequest.initSigner(csrBytes));
+    }
+
+    private void load(CertificationRequestVS certificationRequest) throws IOException, JSONException, ExceptionVS {
         x509AnonymousCert = certificationRequest.getCertificate();
         JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
@@ -104,8 +105,8 @@ public class Vicket extends ReceiptContainer {
                 "' has signed amount  '" + toUserVSAmount + "'");
         if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS(getErrorPrefix() +
                 "currencyCode '" + currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
-        if(!signedTagVS.equals(messageJSON.getString("tag"))) throw new ExceptionVS(getErrorPrefix() + "tag '" +
-                signedTagVS + "' has signed tag  '" + messageJSON.getString("tag"));
+        if(!getSignedTagVS().equals(messageJSON.getString("tag"))) throw new ExceptionVS(getErrorPrefix() + "tag '" +
+                getSignedTagVS() + "' has signed tag  '" + messageJSON.getString("tag"));
         Date signatureTime = smimeMessage.getTimeStampToken(x509AnonymousCert).getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
@@ -245,6 +246,14 @@ public class Vicket extends ReceiptContainer {
         return certSubject;
     }
 
+    public String getSignedTagVS() {
+        return signedTagVS;
+    }
+
+    public void setSignedTagVS(String signedTagVS) {
+        this.signedTagVS = signedTagVS;
+    }
+
     public String getHashCertVS() {
         return hashCertVS;
     }
@@ -313,11 +322,11 @@ public class Vicket extends ReceiptContainer {
         certSubject = new Vicket.CertSubject(subjectDN, hashCertVS);
         amount = new BigDecimal(certExtensionData.getString("vicketValue"));
         currencyCode = certExtensionData.getString("currencyCode");
-        signedTagVS = certExtensionData.getString("tag");
+        setSignedTagVS(certExtensionData.getString("tag"));
         if(!certSubject.getVicketServerURL().equals(vicketServerURL) ||
                 certSubject.getVicketValue().compareTo(amount) != 0 ||
                 !certSubject.getCurrencyCode().equals(currencyCode) ||
-                !certSubject.getTag().equals(signedTagVS))
+                !certSubject.getTag().equals(getSignedTagVS()))
                     throw new ExceptionVS("Vicket with errors. SubjectDN: '" +
                 subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
         return this;
@@ -389,7 +398,7 @@ public class Vicket extends ReceiptContainer {
             validFrom = x509AnonymousCert.getNotBefore();
             validTo = x509AnonymousCert.getNotAfter();
         }
-
+        if(certificationRequest != null) load(certificationRequest);
     }
 
 }
