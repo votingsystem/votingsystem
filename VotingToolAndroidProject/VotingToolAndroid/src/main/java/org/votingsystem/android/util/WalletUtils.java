@@ -1,6 +1,7 @@
 package org.votingsystem.android.util;
 
 import android.content.Context;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -12,6 +13,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 /**

@@ -3,7 +3,6 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;

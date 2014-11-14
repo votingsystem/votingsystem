@@ -1,7 +1,5 @@
 package org.votingsystem.android.callable;
 
-import android.util.Log;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;

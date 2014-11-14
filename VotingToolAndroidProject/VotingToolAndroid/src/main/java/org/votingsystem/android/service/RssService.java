@@ -19,7 +19,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventsVSActivity;

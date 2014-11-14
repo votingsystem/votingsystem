@@ -1,7 +1,5 @@
 package org.votingsystem.android.callable;
 
-import android.util.Log;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;

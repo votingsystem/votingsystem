@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;

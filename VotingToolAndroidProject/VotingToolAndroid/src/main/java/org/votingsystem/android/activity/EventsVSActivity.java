@@ -22,7 +22,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,7 +45,6 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.ScreenUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -176,7 +174,7 @@ public class EventsVSActivity extends ActivityBase
         inflater.inflate(R.menu.activity_eventsvs, menu);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
         //        Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { }
-        double diagonalInches = ScreenUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
+        double diagonalInches = UIUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
         if(diagonalInches < 4) {
             //2 -> index of publish documents menu item on main.xml
             menu.getItem(2).setVisible(false);

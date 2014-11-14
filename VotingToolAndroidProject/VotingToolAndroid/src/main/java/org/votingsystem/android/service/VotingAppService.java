@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.util.PrefUtils;

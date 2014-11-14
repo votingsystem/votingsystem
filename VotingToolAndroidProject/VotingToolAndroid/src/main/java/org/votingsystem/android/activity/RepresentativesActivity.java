@@ -2,7 +2,6 @@ package org.votingsystem.android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;

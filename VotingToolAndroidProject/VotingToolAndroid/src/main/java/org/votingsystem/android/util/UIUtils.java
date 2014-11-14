@@ -35,28 +35,21 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
 
-import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
-import org.votingsystem.android.fragment.VicketGridFragment;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.Vicket;
 import org.votingsystem.util.ResponseVS;
 
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Formatter;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -109,6 +102,24 @@ public class UIUtils  {
         cal2.setTimeInMillis(time2);
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
                 && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    //http://stackoverflow.com/questions/15055458/detect-7-inch-and-10-inch-tablet-programmatically
+    public static double getDiagonalInches(Display display) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        int widthPixels = metrics.widthPixels;
+        int heightPixels = metrics.heightPixels;
+        //float scaleFactor = metrics.density;
+        //float widthDp = widthPixels / scaleFactor;
+        //float heightDp = heightPixels / scaleFactor;
+        float widthDpi = metrics.xdpi;
+        float heightDpi = metrics.ydpi;
+        float widthInches = widthPixels / widthDpi;
+        float heightInches = heightPixels / heightDpi;
+        double diagonalInches = Math.sqrt((widthInches * widthInches) +
+                (heightInches * heightInches));
+        return diagonalInches;
     }
 
     /**

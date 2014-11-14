@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
