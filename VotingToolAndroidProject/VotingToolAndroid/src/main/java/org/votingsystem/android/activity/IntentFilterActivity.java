@@ -77,7 +77,7 @@ public class IntentFilterActivity extends FragmentActivity {
                             responseIntent = new Intent(getBaseContext(), CertResponseActivity.class);
                             break;
                         case WITH_CERTIFICATE:
-                            responseIntent = new Intent(getBaseContext(), EventsVSActivity.class);
+                            responseIntent = new Intent(getBaseContext(), EventVSListActivity.class);
                             break;
                     }
                     if(intent != null) {
@@ -143,7 +143,7 @@ public class IntentFilterActivity extends FragmentActivity {
 
             } catch(Exception ex) {ex.printStackTrace();}
         } else {
-            Intent intent = new Intent(this, EventsVSActivity.class);
+            Intent intent = new Intent(this, EventVSListActivity.class);
             startActivity(intent);
             finish();
         }

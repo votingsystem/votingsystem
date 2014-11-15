@@ -38,7 +38,7 @@ public class CertRequestActivity extends FragmentActivity {
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), EventsVSActivity.class);
+                Intent intent = new Intent(getBaseContext(), EventVSListActivity.class);
                 startActivity(intent);
             }
         });

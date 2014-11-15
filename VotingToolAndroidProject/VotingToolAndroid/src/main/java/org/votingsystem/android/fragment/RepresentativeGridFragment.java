@@ -32,11 +32,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.NewRepresentativeActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -48,13 +46,11 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class RepresentativeGridFragment extends Fragment
@@ -62,6 +58,7 @@ public class RepresentativeGridFragment extends Fragment
 
     public static final String TAG = RepresentativeGridFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog = null;
     private View rootView;
     private GridView gridView;
     private RepresentativeListAdapter adapter = null;
@@ -87,7 +84,7 @@ public class RepresentativeGridFragment extends Fragment
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage(), getFragmentManager());
             } else MessageDialogFragment.showDialog(responseStatusCode, caption, message,
@@ -113,7 +110,7 @@ public class RepresentativeGridFragment extends Fragment
             signedContentDataMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
             signedContentDataMap.put("UUID", UUID.randomUUID().toString());
             startIntent.putExtra(ContextVS.MESSAGE_KEY, new JSONObject(signedContentDataMap).toString());
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -175,7 +172,7 @@ public class RepresentativeGridFragment extends Fragment
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
+                setProgressDialogVisible(true);
         }
     }
 
@@ -191,7 +188,7 @@ public class RepresentativeGridFragment extends Fragment
         if (gridView.getAdapter() == null || gridView.getAdapter().getCount() == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
-        if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset <
+        if(loadMore && !  isProgressDialogVisible() && offset <
                 UserContentProvider.getNumTotalRepresentatives() &&
                 totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
             LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
@@ -205,8 +202,22 @@ public class RepresentativeGridFragment extends Fragment
         return this.offset;
     }
 
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
+
     private void showHTTPError() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
         if(gridView.getAdapter().getCount() == 0)
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
     }
@@ -218,8 +229,8 @@ public class RepresentativeGridFragment extends Fragment
             return;
         }
         LOGD(TAG +  ".fetchItems", "offset: " + offset);
-        if(((ActivityVS)getActivity()).isRefreshing()) return;
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        if(isProgressDialogVisible()) return;
+        else setProgressDialogVisible(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 RepresentativeService.class);
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
@@ -299,7 +310,7 @@ public class RepresentativeGridFragment extends Fragment
         if(UserContentProvider.getNumTotalRepresentatives() == null)
             fetchItems(offset);
         else {
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);

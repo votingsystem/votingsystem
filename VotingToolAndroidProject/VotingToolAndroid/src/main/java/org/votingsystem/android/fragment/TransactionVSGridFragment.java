@@ -28,10 +28,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VicketService;
@@ -43,13 +41,11 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class TransactionVSGridFragment extends Fragment
@@ -57,6 +53,7 @@ public class TransactionVSGridFragment extends Fragment
 
     public static final String TAG = TransactionVSGridFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private GridView gridView;
     private TransactionVSListAdapter adapter = null;
@@ -82,7 +79,7 @@ public class TransactionVSGridFragment extends Fragment
                 case VICKET_USER_INFO:
                     break;
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
         }
         }
     };
@@ -100,7 +97,7 @@ public class TransactionVSGridFragment extends Fragment
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -157,8 +154,22 @@ public class TransactionVSGridFragment extends Fragment
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
+                setProgressDialogVisible(true);
         }
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -224,7 +235,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
         if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
         firstVisiblePosition = null;
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);

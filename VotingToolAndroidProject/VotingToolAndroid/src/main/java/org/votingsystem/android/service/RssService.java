@@ -21,7 +21,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.EventsVSActivity;
+import org.votingsystem.android.activity.EventVSListActivity;
 import org.votingsystem.android.contentprovider.RssContentProvider;
 import org.votingsystem.model.ContextVS;
 
@@ -59,7 +59,7 @@ public class RssService extends Service  implements Runnable {
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        clickIntent.setClassName(this, EventsVSActivity.class.getName());
+        clickIntent.setClassName(this, EventVSListActivity.class.getName());
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         Notification note = new NotificationCompat.Builder(this)
                 .setContentTitle(getString(R.string.rss_service_lbl))

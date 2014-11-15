@@ -27,6 +27,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
@@ -55,6 +56,7 @@ public class NewRepresentativeActivity extends ActivityBase {
     private static final int SELECT_PICTURE   = 1;
     private static final int CONFIRM_PICTURE  = 2;
 
+    private ModalProgressDialogFragment progressDialog;
     private TypeVS operationType;
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
@@ -94,7 +96,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                         NewRepresentativeActivity.this.onBackPressed();
                     }
                 } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
-                    refreshingStateChanged(false);
+                    setProgressDialogVisible(false);
                     showMessage(responseStatusCode, caption, message);
                     if(ResponseVS.SC_OK != responseStatusCode) {
                         editorFragment.setEditable(true);
@@ -113,7 +115,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
                         printRepresentativeData(representative);
                     }
-                    refreshingStateChanged(false);
+                    setProgressDialogVisible(false);
                 }
             }
         }
@@ -134,7 +136,7 @@ public class NewRepresentativeActivity extends ActivityBase {
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
             startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);
-            refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -181,8 +183,17 @@ public class NewRepresentativeActivity extends ActivityBase {
             if(representativeImageUri != null) {
                 setRepresentativeImage(representativeImageUri, representativeImageName);
             }
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) refreshingStateChanged(true);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) setProgressDialogVisible(true);
         }
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getSupportFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     private void showNifDialog() {
@@ -201,7 +212,7 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     private void loadRepresentativeData(String representativeNif) {
         Toast.makeText(this, getString(R.string.loading_data_msg), Toast.LENGTH_SHORT).show();
-        refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         Intent startIntent = new Intent(this, RepresentativeService.class);
         startIntent.putExtra(ContextVS.NIF_KEY, representativeNif);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);

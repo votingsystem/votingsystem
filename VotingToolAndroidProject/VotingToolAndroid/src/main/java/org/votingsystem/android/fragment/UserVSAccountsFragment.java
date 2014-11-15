@@ -20,11 +20,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityBase;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.android.util.MsgUtils;
@@ -32,14 +29,12 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -47,7 +42,6 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -116,7 +110,7 @@ public class UserVSAccountsFragment extends Fragment {
                         responseVS.getCaption(), responseVS.getNotificationMessage(),
                         getFragmentManager());
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
             if(progressDialog != null) progressDialog.dismiss();
         }
         }
@@ -148,10 +142,6 @@ public class UserVSAccountsFragment extends Fragment {
         if(savedInstanceState != null) {
             transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
         }
-        if(getActivity() instanceof ActivityBase) {
-            ((ActivityBase)getActivity()).enableDisableSwipeRefresh(false);
-        }
-
         return rootView;
     }
 
@@ -241,12 +231,26 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
+
     private void sendUserInfoRequest() {
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
 
@@ -260,7 +264,7 @@ public class UserVSAccountsFragment extends Fragment {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
 
@@ -271,7 +275,7 @@ public class UserVSAccountsFragment extends Fragment {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
 
@@ -282,7 +286,7 @@ public class UserVSAccountsFragment extends Fragment {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
 

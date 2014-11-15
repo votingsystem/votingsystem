@@ -16,6 +16,7 @@ import android.webkit.WebViewClient;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.service.WebSocketService;
@@ -38,6 +39,7 @@ public class BrowserVSActivity extends ActivityBase {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private String viewerURL = null;
     private TypeVS operationType;
     private AppContextVS contextVS = null;
@@ -60,7 +62,7 @@ public class BrowserVSActivity extends ActivityBase {
             if(responseVS != null && TypeVS.MESSAGEVS_GET == responseVS.getTypeVS()) {
                 String jsCommand = "javascript:updateMessageVSList('" +
                         responseVS.getMessageJSON().toString() + "')";
-                runOnUiThread(new Runnable() { @Override public void run() { refreshingStateChanged(false); } });
+                runOnUiThread(new Runnable() { @Override public void run() { setProgressDialogVisible(false); } });
                 webView.loadUrl(jsCommand);
             } else if(responseVS.getOperation() != null) {
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
@@ -82,7 +84,7 @@ public class BrowserVSActivity extends ActivityBase {
             Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -111,7 +113,7 @@ public class BrowserVSActivity extends ActivityBase {
         LOGD(TAG + ".viewerURL", " - viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
-        refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webView.setClickable(true);
@@ -121,10 +123,19 @@ public class BrowserVSActivity extends ActivityBase {
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 if(jsCommand != null) webView.loadUrl(jsCommand);
-                refreshingStateChanged(false);
+                setProgressDialogVisible(false);
             }
         });
         webView.loadUrl(viewerURL);
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getSupportFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
@@ -167,7 +178,7 @@ public class BrowserVSActivity extends ActivityBase {
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
-        runOnUiThread(new Runnable() { @Override public void run() { refreshingStateChanged(true); } });
+        runOnUiThread(new Runnable() { @Override public void run() { setProgressDialogVisible(true); } });
         startService(startIntent);
     }
 
@@ -204,7 +215,7 @@ public class BrowserVSActivity extends ActivityBase {
         JSONObject messageJSON = new JSONObject(resultMap);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
-        refreshingStateChanged(false);
+        setProgressDialogVisible(false);
     }
 
 
@@ -213,7 +224,7 @@ public class BrowserVSActivity extends ActivityBase {
                 " - callbackFunction: " + callbackFunction);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
-        refreshingStateChanged(false);
+        setProgressDialogVisible(false);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

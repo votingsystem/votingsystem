@@ -26,11 +26,9 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
@@ -42,11 +40,9 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
@@ -58,6 +54,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     public static final String TAG = VotingEventFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private TypeVS operation = TypeVS.VOTEVS;
     private EventVS eventVS;
     private VoteVS vote;
@@ -68,7 +65,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private View rootView;
     private String broadCastId = null;
 
-    private ProgressDialog progressDialog = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -124,7 +120,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             startIntent.putExtra(ContextVS.VOTE_KEY, vote);
             if(operation == TypeVS.CANCEL_VOTE) cancelVoteButton.setEnabled(false);
             else setOptionButtonsEnabled(false);
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -181,6 +177,20 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                 onClickSubject(view);
                 break;
         }
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -330,12 +340,11 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
     }
 
     @Override public void onDestroy() {
         super.onDestroy();
-        if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -346,8 +355,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
         if(bundle != null) {
-            if(bundle.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
             vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
         }
         if(vote != null && vote.getVoteReceipt() != null) setReceiptScreen(vote);

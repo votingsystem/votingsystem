@@ -22,9 +22,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.model.ContextVS;
@@ -33,9 +31,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
-
 import java.util.Date;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class ReceiptGridFragment extends Fragment implements
@@ -43,6 +39,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     public static final String TAG = ReceiptGridFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private ReceiptGridAdapter adapter = null;
     private VoteVS vote = null;
@@ -107,7 +104,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount());
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
@@ -124,6 +121,14 @@ public class ReceiptGridFragment extends Fragment implements
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
            int visibleItemCount, int totalItemCount) { }
 
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
 
     public class ReceiptGridAdapter extends CursorAdapter {
 

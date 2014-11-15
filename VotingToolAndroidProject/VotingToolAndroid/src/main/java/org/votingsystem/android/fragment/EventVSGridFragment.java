@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -26,24 +28,21 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Comparator;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -55,6 +54,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     //private TextView searchTextView;
     private GridView gridView;
@@ -161,8 +161,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
-        }
+                setProgressDialogVisible(true);
+        } else setProgressDialogVisible(true);
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -170,6 +170,29 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         return true;
     }
 
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            if(progressDialog != null && progressDialog.isVisible()) return;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    progressDialog = ModalProgressDialogFragment.showDialog(
+                            getString(R.string.loading_data_msg),
+                            getString(R.string.loading_page_msg),
+                            getFragmentManager());
+                }
+            });
+        } else if(progressDialog != null) {
+            //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
+            new Handler(){
+                @Override public void handleMessage(Message msg) {progressDialog.dismiss();}
+            }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
+        }
+    }
 
     @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
 
@@ -191,8 +214,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         if(numTotalEvents == null) fetchItems(offset);
         else {
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
-            if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset < numTotalEvents &&
-                    cursorCount < numTotalEvents) {
+            if(loadMore && !  (isProgressDialogVisible() && offset < numTotalEvents &&
+                    cursorCount < numTotalEvents)) {
                 LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
                         totalItemCount + " - numTotalEvents: " + numTotalEvents +
@@ -209,17 +232,16 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     private void showHTTPError() {
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
         if(gridView.getAdapter().getCount() == 0)
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
     }
 
     public void fetchItems(Long offset) {
         LOGD(TAG +  ".fetchItems", "offset: " + offset + " - progressVisible: " +
-                ((ActivityVS)getActivity()).isRefreshing() +
+                isProgressDialogVisible() +
                 " - groupPosition: " + groupPosition + " - eventState: " + eventState);
-        if(((ActivityVS)getActivity()).isRefreshing()) return;
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        if(isProgressDialogVisible()) return;
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 EventVSService.class);
         startIntent.putExtra(ContextVS.STATE_KEY, eventState);
@@ -294,7 +316,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 contextVS.getAccessControl() != null)
             fetchItems(offset);
         else {
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            //bug, without thread triggers 'Can not perform this action inside of onLoadFinished'
+            setProgressDialogVisible(false);
+
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             else cursor.moveToFirst();
             firstVisiblePosition = null;

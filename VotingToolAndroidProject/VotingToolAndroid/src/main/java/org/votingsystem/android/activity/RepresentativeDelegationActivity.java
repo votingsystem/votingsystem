@@ -25,6 +25,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.DownloadReceiptDialogFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
@@ -57,6 +58,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
 
+    private ModalProgressDialogFragment progressDialog;
     private TypeVS operationType;
     private Button acceptButton;
     private CheckBox anonymousCheckBox;
@@ -84,7 +86,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                             responseVS.getNotificationMessage(), (String) responseVS.getData(),
                             typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-                    refreshingStateChanged(false);
+                    setProgressDialogVisible(false);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -128,10 +130,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
                     ContentTypeVS.JSON_SIGNED);
-
-
             startIntent.putExtra(ContextVS.USER_KEY, representative);
-            refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -167,14 +167,12 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         webView.loadUrl("file:///android_asset/" + editorFileName);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                refreshingStateChanged(false);
+                setProgressDialogVisible(false);
             }
         });
-        refreshingStateChanged(true);
-
+        setProgressDialogVisible(true);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(getString(R.string.representative_delegation_lbl));
-
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
             int selectedCheckBoxId = -1;
@@ -187,6 +185,15 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             }
             if(selectedCheckBoxId > 0) onCheckboxClicked(selectedCheckBoxId);
         }
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getSupportFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     public void onCheckboxClicked(View view) {

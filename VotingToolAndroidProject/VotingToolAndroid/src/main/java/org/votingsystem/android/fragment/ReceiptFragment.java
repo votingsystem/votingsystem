@@ -25,12 +25,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
@@ -44,10 +42,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.math.BigDecimal;
 import java.util.Date;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -57,6 +53,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
+    private ModalProgressDialogFragment progressDialog;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -75,7 +72,7 @@ public class ReceiptFragment extends Fragment {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
                     getActivity().onBackPressed();
                 }
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                         responseVS.getCaption(), responseVS.getNotificationMessage(),
                         getFragmentManager());
@@ -89,7 +86,7 @@ public class ReceiptFragment extends Fragment {
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
 
@@ -324,6 +321,20 @@ public class ReceiptFragment extends Fragment {
                 unregisterReceiver(broadcastReceiver);
     }
 
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
+
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" +
                 selectedReceipt.getTypeVS());
@@ -428,7 +439,7 @@ public class ReceiptFragment extends Fragment {
         public ReceiptDownloader() { }
 
         @Override protected void onPreExecute() {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true); }
+            setProgressDialogVisible(true);}
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String receiptURL = urls[0];
@@ -456,7 +467,7 @@ public class ReceiptFragment extends Fragment {
                 MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage(), getFragmentManager());
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
         }
     }
 

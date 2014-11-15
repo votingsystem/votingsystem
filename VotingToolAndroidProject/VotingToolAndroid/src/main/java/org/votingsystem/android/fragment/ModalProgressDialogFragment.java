@@ -36,7 +36,7 @@ public class ModalProgressDialogFragment extends DialogFragment {
     private String progressMessage = null;
     private String caption = null;
 
-    public static ModalProgressDialogFragment showDialog(String progressMessage, String caption,
+    public static ModalProgressDialogFragment showDialog(String caption, String progressMessage,
             FragmentManager fragmentManager) {
         ModalProgressDialogFragment dialog = new ModalProgressDialogFragment();
         Bundle args = new Bundle();
@@ -47,15 +47,6 @@ public class ModalProgressDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if(savedInstanceState != null) {
-            progressMessage = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
-            progress_text.setText(progressMessage);
-        }
-        this.setCancelable(false);
-    }
-
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         progressMessage = getArguments().getString(ContextVS.MESSAGE_KEY);
         caption = getArguments().getString(ContextVS.CAPTION_KEY);
@@ -63,6 +54,7 @@ public class ModalProgressDialogFragment extends DialogFragment {
         progress_text = (TextView) view.findViewById(R.id.progress_text);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
         progress_text.setText(progressMessage);
+        this.setCancelable(false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setView(view);
         return builder.create();
     }

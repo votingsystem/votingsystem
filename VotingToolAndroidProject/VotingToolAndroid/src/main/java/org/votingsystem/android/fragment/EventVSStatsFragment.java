@@ -26,18 +26,15 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -45,6 +42,7 @@ public class EventVSStatsFragment extends Fragment {
 	
 	public static final String TAG = EventVSStatsFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private EventVS eventVS;
     private AppContextVS contextVS;
@@ -86,7 +84,7 @@ public class EventVSStatsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
+                setProgressDialogVisible(true);
             htmlContent = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
             baseURL = savedInstanceState.getString(ContextVS.URL_KEY);
             if(htmlContent != null && baseURL != null) loadHTMLContent(baseURL, htmlContent);
@@ -122,7 +120,7 @@ public class EventVSStatsFragment extends Fragment {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webview.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
             }
         });
         webview.loadUrl(serverURL);
@@ -134,6 +132,20 @@ public class EventVSStatsFragment extends Fragment {
         webview.loadDataWithBaseURL(baseURL, htmlContent, "text/html", "UTF-8", "");
     }
 
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
+
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 
         private ContentTypeVS contentType = null;
@@ -141,7 +153,7 @@ public class EventVSStatsFragment extends Fragment {
         public GetDataTask(ContentTypeVS contentType) { }
 
         @Override protected void onPreExecute() {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
@@ -161,7 +173,7 @@ public class EventVSStatsFragment extends Fragment {
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 MessageDialogFragment.showDialog(responseVS, getFragmentManager());
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
         }
     }
 }

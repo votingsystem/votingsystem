@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,13 +38,10 @@ import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
-import org.votingsystem.android.ui.widget.MultiSwipeRefreshLayout;
-import org.votingsystem.android.ui.widget.SwipeRefreshLayout;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.LPreviewUtils;
 import org.votingsystem.android.util.LPreviewUtilsBase;
-import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
@@ -54,23 +50,18 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 
-public abstract class ActivityBase extends FragmentActivity implements ActivityVS,
-        MultiSwipeRefreshLayout.CanChildScrollUpCallback  {
+public abstract class ActivityBase extends FragmentActivity {
 
     private static final String TAG = makeLogTag(ActivityBase.class);
 
     private ModalProgressDialogFragment progressDialog = null;
-    private AtomicBoolean isRefreshing = new AtomicBoolean(false);
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
     private AppContextVS contextVS = null;
@@ -123,8 +114,7 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
 
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
     private View[] mNavDrawerItemViews = null;
-    // SwipeRefreshLayout allows the user to swipe the screen down to trigger a manual refresh
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     // handle to our sync observer (that notifies us about changes in our sync state)
     private Object mSyncObserverHandle;
@@ -197,31 +187,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         mLPreviewUtils = LPreviewUtils.getInstance(this);
     }
 
-    private void trySetupSwipeRefresh() {
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.setColorScheme(
-                    R.color.refresh_progress_1,
-                    R.color.refresh_progress_2,
-                    R.color.refresh_progress_3,
-                    R.color.refresh_progress_4);
-            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override  public void onRefresh() {
-                    requestDataRefresh();
-                }
-            });
-            if (mSwipeRefreshLayout instanceof MultiSwipeRefreshLayout) {
-                MultiSwipeRefreshLayout mswrl = (MultiSwipeRefreshLayout) mSwipeRefreshLayout;
-                mswrl.setCanChildScrollUpCallback(this);
-            }
-        }
-    }
-
-    private void updateSwipeRefreshProgressBarTop() {
-        if (mSwipeRefreshLayout == null) return;
-        if (mActionBarShown) mSwipeRefreshLayout.setProgressBarTop(mProgressBarTopWhenActionBarShown);
-        else  mSwipeRefreshLayout.setProgressBarTop(0);
-    }
 
     /**
      * Returns the navigation drawer item that corresponds to this Activity. Subclasses
@@ -358,20 +323,14 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
     }
 
     public void requestDataRefresh() {
-        LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing: ");
+        LOGD(TAG + ".requestDataRefresh", "requestDataRefresh");
     }
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
         setupAccountBox();
-        trySetupSwipeRefresh();
-        updateSwipeRefreshProgressBarTop();
-        View mainContent = findViewById(R.id.main_content);
-        if (mainContent != null) {
-           // mainContent.setAlpha(0);
-           // mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        } else LOGW(TAG, "No view with ID main_content to fade in.");
+        requestDataRefresh();
     }
 
     private void setupAccountBox() {
@@ -433,18 +392,13 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-        refreshingStateChanged(false);
-    }
-
-    public boolean isRefreshing() {
-        return isRefreshing.get();
     }
 
     private void goToNavDrawerItem(int item) {
         Intent intent;
         switch (item) {
             case NAVDRAWER_ITEM_POLLS:
-                intent = new Intent(this, EventsVSActivity.class);
+                intent = new Intent(this, EventVSListActivity.class);
                 startActivity(intent);
                 finish();
                 break;
@@ -478,11 +432,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
             goToNavDrawerItem(itemId);
             // change the active item on the list so the user can see the item changed
             setSelectedNavDrawerItem(itemId);
-            // fade out the main content
-            View mainContent = findViewById(R.id.main_content);
-            /*if (mainContent != null) {
-                mainContent.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
-            }*/
         }
         mDrawerLayout.closeDrawer(Gravity.START);
     }
@@ -693,19 +642,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         }
     };
 
-    public void refreshingStateChanged(boolean refreshing) {
-        this.isRefreshing.set(refreshing);
-        if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.setRefreshing(refreshing);
-        }
-    }
-
-    public void enableDisableSwipeRefresh(boolean enable) {
-        if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.setEnabled(enable);
-        }
-    }
-
     protected void registerHideableHeaderView(View hideableHeaderView) {
         if (!mHideableHeaderViews.contains(hideableHeaderView)) {
             mHideableHeaderViews.add(hideableHeaderView);
@@ -747,7 +683,6 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         }
         mStatusBarColorAnimator.setEvaluator(ARGB_EVALUATOR);
         mStatusBarColorAnimator.start();
-        updateSwipeRefreshProgressBarTop();
         for (View view : mHideableHeaderViews) {
             if (shown) {
                 view.animate().translationY(0).alpha(1).setDuration(HEADER_HIDE_ANIM_DURATION)
@@ -759,20 +694,12 @@ public abstract class ActivityBase extends FragmentActivity implements ActivityV
         }
     }
 
-    @Override
-    public boolean canSwipeRefreshChildScrollUp() {
-        return false;
-    }
-
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) refreshingStateChanged(true);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        boolean refreshing = (progressDialog != null && progressDialog.isVisible()) || isRefreshing.get();
-        outState.putBoolean(ContextVS.LOADING_KEY, refreshing);
     }
 
 }

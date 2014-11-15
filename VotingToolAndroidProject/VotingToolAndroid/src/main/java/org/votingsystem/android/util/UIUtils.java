@@ -62,6 +62,7 @@ public class UIUtils  {
 
     private static final String TAG = makeLogTag(UIUtils.class);
 
+    public static final int EMPTY_MESSAGE = 1;
     /**
      * Regex to search for HTML escape sequences.
      *

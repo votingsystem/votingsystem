@@ -27,11 +27,9 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.EventsVSActivity;
+import org.votingsystem.android.activity.EventVSListActivity;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
@@ -43,14 +41,12 @@ import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -60,8 +56,8 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 public class PublishEventVSFragment extends Fragment {
 	
 	public static final String TAG = PublishEventVSFragment.class.getSimpleName();
-	
 
+    private ModalProgressDialogFragment progressDialog = null;
 	private TypeVS formType;
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
@@ -101,7 +97,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                     return;
                 }
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
                 GroupPosition selectedSubsystem = null;
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     caption = getString(R.string.operation_ok_msg);
@@ -126,7 +122,7 @@ public class PublishEventVSFragment extends Fragment {
                             new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Intent intent = new Intent(getActivity().getApplicationContext(),
-                                    EventsVSActivity.class);
+                                    EventVSListActivity.class);
                             intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
                                     groupPosition.getPosition());
                             startActivity(intent);
@@ -247,7 +243,7 @@ public class PublishEventVSFragment extends Fragment {
             startIntent.putExtra(ContextVS.MESSAGE_KEY, eventVS.toJSON().toString());
             Toast.makeText(getActivity(), getString(
                     R.string.publishing_document_msg), Toast.LENGTH_SHORT).show();
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -334,7 +330,7 @@ public class PublishEventVSFragment extends Fragment {
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).refreshingStateChanged(true);
+                setProgressDialogVisible(true);
             optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
             for(String optionContent:optionList) {
                 addEventOption(optionContent);
@@ -355,6 +351,20 @@ public class PublishEventVSFragment extends Fragment {
         }
         LOGD(TAG + ".onCreate", "formType: " + formType + " - serverURL: " + serverURL);
         getActivity().setTitle(screenTitle);
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     private void addEventOption(final String optionContent) {

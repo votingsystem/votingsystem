@@ -23,10 +23,8 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
@@ -35,9 +33,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -50,6 +46,7 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
+    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private String broadCastId = null;
     private AppContextVS contextVS;
@@ -71,7 +68,7 @@ public class RepresentativeFragment extends Fragment {
                 UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                         cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
                 printRepresentativeData(representative);
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
             }
         }
         }
@@ -114,7 +111,7 @@ public class RepresentativeFragment extends Fragment {
         if(representative.getDescription() != null) {
             printRepresentativeData(representative);
         } else {
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     RepresentativeService.class);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
@@ -141,6 +138,20 @@ public class RepresentativeFragment extends Fragment {
             caption = getString(R.string.operation_error_msg);
             showMessage(statusCode, caption, message);
         }
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     private void printRepresentativeData(UserVS representative) {

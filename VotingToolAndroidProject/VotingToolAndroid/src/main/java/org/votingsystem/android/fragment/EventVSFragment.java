@@ -25,11 +25,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
@@ -38,11 +36,9 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
@@ -54,6 +50,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = EventVSFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private Button signAndSendButton;
     private EventVS eventVS;
     private AppContextVS contextVS;
@@ -80,7 +77,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
             }
         }
     };
@@ -105,7 +102,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 JSONObject signatureContent = eventVS.getSignatureContentJSON();
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(true);
+            setProgressDialogVisible(true);
             signAndSendButton.setEnabled(false);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -155,7 +152,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
-                ContextVS.LOADING_KEY, false)) ((ActivityVS)getActivity()).refreshingStateChanged(true);
+                ContextVS.LOADING_KEY, false)) setProgressDialogVisible(true);
         broadCastId = EventVSFragment.class.getSimpleName() + "_" + eventVS.getId();
         return rootView;
     }
@@ -194,6 +191,20 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     @Override public void onStop() {
         super.onStop();
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     public void onClickSubject(View v) {
@@ -289,7 +300,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        setProgressDialogVisible(false);
     }
 
     @Override public void onResume() {

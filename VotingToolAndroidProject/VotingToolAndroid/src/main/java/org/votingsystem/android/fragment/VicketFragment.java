@@ -16,10 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -28,7 +26,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -40,6 +37,7 @@ public class VicketFragment extends Fragment {
 
     public static final String TAG = VicketFragment.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     private Vicket selectedVicket;
     private TextView vicket_amount, vicket_state, vicket_currency, date_info;
     private SMIMEMessage selectedVicketSMIME;
@@ -51,7 +49,7 @@ public class VicketFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
             else {
-                ((ActivityVS)getActivity()).refreshingStateChanged(false);
+                setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                         responseVS.getCaption(), responseVS.getNotificationMessage(),
                         getFragmentManager());
@@ -93,6 +91,20 @@ public class VicketFragment extends Fragment {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private boolean isProgressDialogVisible() {
+        if(progressDialog == null) return false;
+        else return progressDialog.isVisible();
+    }
+
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -172,7 +184,7 @@ public class VicketFragment extends Fragment {
 
         public VicketDownloader() { }
 
-        @Override protected void onPreExecute() {((ActivityVS)getActivity()).refreshingStateChanged(true); }
+        @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String vicketURL = urls[0];
@@ -196,7 +208,7 @@ public class VicketFragment extends Fragment {
                         getString(R.string.error_lbl), responseVS.getMessage(),
                         getFragmentManager());
             }
-            ((ActivityVS)getActivity()).refreshingStateChanged(false);
+            setProgressDialogVisible(false);
         }
     }
 

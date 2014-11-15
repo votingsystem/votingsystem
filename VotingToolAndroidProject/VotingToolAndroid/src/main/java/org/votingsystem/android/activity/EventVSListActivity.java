@@ -37,8 +37,8 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
-import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
@@ -55,16 +55,17 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventsVSActivity extends ActivityBase
+public class EventVSListActivity extends ActivityBase
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-	public static final String TAG = EventsVSActivity.class.getSimpleName();
+	public static final String TAG = EventVSListActivity.class.getSimpleName();
 
+    private ModalProgressDialogFragment progressDialog;
     WeakReference<EventVSGridFragment> weakRefToFragment;
     private boolean mSpinnerConfigured = false;
     private AppContextVS contextVS = null;
     private Menu mainMenu;
-    private String broadCastId = EventsVSActivity.class.getSimpleName();
+    private String broadCastId = EventVSListActivity.class.getSimpleName();
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -124,7 +125,7 @@ public class EventsVSActivity extends ActivityBase
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
         PrefUtils.registerPreferenceChangeListener(this, this);
         if(!PrefUtils.isDataBootstrapDone(this)) {
-            refreshingStateChanged(true);
+            setProgressDialogVisible(true);
         }
     }
 
@@ -182,6 +183,15 @@ public class EventsVSActivity extends ActivityBase
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void setProgressDialogVisible(boolean isVisible) {
+        if(isVisible){
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_page_msg),
+                    getSupportFragmentManager());
+        } else if(progressDialog != null) progressDialog.dismiss();
+    }
+
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected",
                 " - Title: " + item.getTitle() + " - ItemId: " + item.getItemId());
@@ -191,7 +201,7 @@ public class EventsVSActivity extends ActivityBase
                 onSearchRequested();
                 return true;
             case R.id.publish_document:
-                intent = new Intent(EventsVSActivity.this, FragmentContainerActivity.class);
+                intent = new Intent(EventVSListActivity.this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
                 intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
                 startActivity(intent);
@@ -207,7 +217,7 @@ public class EventsVSActivity extends ActivityBase
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl).
                 setIcon(R.drawable.view_detailed_32).setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(EventsVSActivity.this, FragmentContainerActivity.class);
+                Intent intent = new Intent(EventVSListActivity.this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
                 switch (which) {
                     case 0:
@@ -362,7 +372,7 @@ public class EventsVSActivity extends ActivityBase
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
         if(ContextVS.BOOTSTRAP_DONE.equals(key)) {
-            refreshingStateChanged(false);
+            setProgressDialogVisible(false);
             requestDataRefresh();
         }
     }
