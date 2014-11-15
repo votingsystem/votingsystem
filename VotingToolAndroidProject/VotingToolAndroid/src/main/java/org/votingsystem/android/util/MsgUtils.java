@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import org.votingsystem.android.R;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.Vicket;
@@ -78,6 +79,18 @@ public class MsgUtils {
             default:return null;
         }
     }
+
+    public static String getVotingStateMessage(EventVS.State state, Context context) {
+        switch(state) {
+            case ACTIVE: return context.getString(R.string.eventvs_election_active);
+            case CANCELLED:
+            case TERMINATED:
+                return context.getString(R.string.eventvs_election_closed);
+            case PENDING: return context.getString(R.string.eventvs_election_pending);
+            default: return null;
+        }
+    }
+
 
     public static String getVicketRequestMessage(TransactionVS transactionVS, Context context) {
         String tagMessage = getTagVSMessage(transactionVS.getTagVS().getName(), context);

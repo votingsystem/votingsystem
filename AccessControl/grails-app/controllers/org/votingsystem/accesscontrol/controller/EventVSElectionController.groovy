@@ -19,10 +19,6 @@ class EventVSElectionController {
     def eventVSElectionService
     def eventVSService
 
-    /**
-     * @httpMethod [GET]
-     * @return La página principal de la aplicación web de votación.
-     */
     def elections() {
         render(view:"elections")
     }

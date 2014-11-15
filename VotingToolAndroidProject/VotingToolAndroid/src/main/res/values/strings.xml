@@ -444,4 +444,9 @@
     <string name="currency_lbl">divisa</string>
     <string name="in_lbl">en</string>
     <string name="uservs_accounts_lbl">cuentas de usuario</string>
+    <string name="eventvs_election_active">votaciones abiertas</string>
+    <string name="eventvs_election_closed">votaciones cerradas</string>
+    <string name="eventvs_election_pending">votaciones pendientes</string>
+    <string name="eventvs_election_search_msg">resultado de la búsqueda de \'%1$s\' en \'%2$s\'</string>
+    <string name="search_result">resultado de la búsqueda</string>
 </resources>

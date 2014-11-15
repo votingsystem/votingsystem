@@ -1,7 +1,6 @@
 package org.votingsystem.android.callable;
 
 import org.votingsystem.android.AppContextVS;
-import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;

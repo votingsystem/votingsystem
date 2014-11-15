@@ -50,10 +50,11 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 
@@ -329,7 +330,6 @@ public abstract class ActivityBase extends FragmentActivity {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
         setupAccountBox();
-        requestDataRefresh();
     }
 
     private void setupAccountBox() {

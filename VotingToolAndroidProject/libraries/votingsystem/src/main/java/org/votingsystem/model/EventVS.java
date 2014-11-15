@@ -28,6 +28,8 @@ public class EventVS implements Serializable {
 
     public enum State {ACTIVE, TERMINATED, CANCELLED, PENDING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM}
 
+    public enum Type { CLAIM, MANIFEST, ELECTION }
+
     public enum Cardinality { MULTIPLE, EXCLUSIVE}
 
     private Long id;

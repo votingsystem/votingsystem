@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.TransactionVSService;
@@ -35,6 +36,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,6 +44,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

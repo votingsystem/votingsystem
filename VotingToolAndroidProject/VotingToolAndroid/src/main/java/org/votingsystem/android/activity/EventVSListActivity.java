@@ -18,12 +18,11 @@ package org.votingsystem.android.activity;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,11 +35,11 @@ import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
+import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
@@ -50,7 +49,6 @@ import org.votingsystem.model.TypeVS;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -66,10 +64,6 @@ public class EventVSListActivity extends ActivityBase
     private ModalProgressDialogFragment progressDialog;
     WeakReference<EventVSGridFragment> weakRefToFragment;
     private boolean mSpinnerConfigured = false;
-    private AppContextVS contextVS = null;
-    private Menu mainMenu;
-    private String broadCastId = EventVSListActivity.class.getSimpleName();
-    private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -77,10 +71,9 @@ public class EventVSListActivity extends ActivityBase
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vs);
         getLPreviewUtils().trySetActionBar();
-        contextVS = (AppContextVS) getApplicationContext();
+        Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
         weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
-        Bundle args = getIntent().getExtras();
         if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.TYPEVS_KEY, NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
@@ -89,19 +82,16 @@ public class EventVSListActivity extends ActivityBase
         fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
-
         View spinnerContainer = LayoutInflater.from(getActionBar().getThemedContext())
                 .inflate(R.layout.actionbar_spinner, null);
         EventVSSpinnerAdapter mTopLevelSpinnerAdapter = new EventVSSpinnerAdapter(true);
         mTopLevelSpinnerAdapter.clear();
-
         mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
                 getString(R.string.open_voting_lbl), false, 0);
         mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
                 getString(R.string.pending_voting_lbl), false, 0);
         mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
                 getString(R.string.closed_voting_lbl), false, 0);
-
         Spinner spinner = (Spinner) spinnerContainer.findViewById(R.id.actionbar_spinner);
         spinner.setAdapter(mTopLevelSpinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -115,7 +105,6 @@ public class EventVSListActivity extends ActivityBase
                 else if(position == 2) requestDataRefresh(EventVS.State.CANCELLED,
                         NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
             }
-
             @Override public void onNothingSelected(AdapterView<?> adapterView) { }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
@@ -127,8 +116,15 @@ public class EventVSListActivity extends ActivityBase
         getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
         PrefUtils.registerPreferenceChangeListener(this, this);
-        if(!PrefUtils.isDataBootstrapDone(this)) {
-            setProgressDialogVisible(true);
+        if(args != null && args.getString(SearchManager.QUERY) != null) {
+            String queryStr = args.getString(SearchManager.QUERY);
+            Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
+            Intent startIntent = new Intent(this, EventVSService.class);
+            startIntent.putExtra(ContextVS.STATE_KEY, bundled.getSerializable(ContextVS.STATE_KEY));
+            startIntent.putExtra(ContextVS.QUERY_KEY, queryStr);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_EVENT);
+            startIntent.putExtra(ContextVS.OFFSET_KEY, 0L);
+            startService(startIntent);
         }
     }
 
@@ -163,6 +159,16 @@ public class EventVSListActivity extends ActivityBase
         fragment.fetchItems(fragment.getOffset());
     }
 
+    private void setProgressDialogVisible(final boolean isVisible) {
+        if (isVisible) {
+            progressDialog = ModalProgressDialogFragment.showDialog(
+                    getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg),
+                    getSupportFragmentManager());
+        } else if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
     public void requestDataRefresh(EventVS.State eventState, NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing - eventState: " +
                 eventState.toString() + " - groupPosition: " + groupPosition.toString());
@@ -172,9 +178,8 @@ public class EventVSListActivity extends ActivityBase
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
-        this.mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_eventsvs, menu);
+        inflater.inflate(R.menu.eventvs_grid, menu);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
         //        Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { }
         double diagonalInches = UIUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
@@ -183,23 +188,6 @@ public class EventVSListActivity extends ActivityBase
             menu.getItem(2).setVisible(false);
         }
         return super.onCreateOptionsMenu(menu);
-    }
-
-    private void setProgressDialogVisible(final boolean isVisible) {
-        isProgressDialogVisible.set(isVisible);
-        //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
-        new Handler(){
-            @Override public void handleMessage(Message msg) {
-                if (isVisible) {
-                    progressDialog = ModalProgressDialogFragment.showDialog(
-                            getString(R.string.loading_data_msg),
-                            getString(R.string.loading_info_msg),
-                            getSupportFragmentManager());
-                } else if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
-            }
-        }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -220,8 +208,15 @@ public class EventVSListActivity extends ActivityBase
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     };
+
+    @Override public boolean onSearchRequested() {
+        Bundle appData = new Bundle();
+        EventVSGridFragment fragment = weakRefToFragment.get();
+        appData.putSerializable(ContextVS.STATE_KEY, fragment.getState());
+        startSearch(null, false, appData, false);
+        return true;
+    }
 
     private void showPublishDialog(){
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl)
@@ -381,9 +376,6 @@ public class EventVSListActivity extends ActivityBase
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        if(ContextVS.BOOTSTRAP_DONE.equals(key)) {
-            setProgressDialogVisible(false);
-            requestDataRefresh();
-        }
+        if(ContextVS.BOOTSTRAP_DONE.equals(key)) { }
     }
 }

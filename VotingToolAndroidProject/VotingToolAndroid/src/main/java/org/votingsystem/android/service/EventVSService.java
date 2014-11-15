@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.EventVSSearchResultActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -57,13 +58,14 @@ public class EventVSService extends IntentService {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
+        LOGD(TAG, "onHandleIntent");
         ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
         contextVS = (AppContextVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.TYPEVS_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
-            String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+            String queryStr = arguments.getString(ContextVS.QUERY_KEY);
             EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
             TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
@@ -71,9 +73,12 @@ public class EventVSService extends IntentService {
                 LOGD(TAG, "AccessControl not initialized");
                 return;
             }
-            String serviceURL = contextVS.getAccessControl().getEventVSURL(
-                    eventState, EventVS.getURLPart(eventType),
-                    ContextVS.EVENTS_PAGE_SIZE, offset);
+            if(queryStr != null) {
+                processSearch(queryStr, eventState);
+                return;
+            }
+            String serviceURL = contextVS.getAccessControl().getEventVSURL(eventState,
+                    EventVS.getURLPart(eventType), ContextVS.EVENTS_PAGE_SIZE, offset);
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
@@ -153,8 +158,19 @@ public class EventVSService extends IntentService {
                     responseVS = ResponseVS.getExceptionResponse(ex, this);
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
-        }
-        contextVS.broadcastResponse(responseVS);
+            contextVS.broadcastResponse(responseVS);
+        } else LOGD(TAG + ".onHandleIntent", "missing params");
     }
 
+    private void processSearch(String queryStr, EventVS.State eventState) {
+        String serviceURL = contextVS.getAccessControl().getSearchServiceURL(null, null, queryStr,
+                EventVS.Type.ELECTION, eventState);
+        ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+        Intent intent = new Intent(this, EventVSSearchResultActivity.class);
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        intent.putExtra(ContextVS.EVENT_STATE_KEY, eventState);
+        intent.putExtra(ContextVS.QUERY_KEY, queryStr);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 }

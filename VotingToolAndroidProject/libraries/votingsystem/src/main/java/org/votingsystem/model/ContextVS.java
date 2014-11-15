@@ -108,6 +108,7 @@ public class ContextVS {
     public static final String HASH_CERT_KEY               = "HASH_CERT_KEY";
     public static final String TIME_KEY                    = "TIME_KEY";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
+    public static final String QUERY_KEY                   = "QUERY_KEY";
 
     public static final String RSS_LAST_CHECKED_KEY = "RSS_LAST_CHECKED_KEY";
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =

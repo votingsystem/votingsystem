@@ -80,6 +80,16 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/search/find?max=" + max + "&offset=" + offset;
     }
 
+    public String getSearchServiceURL (Integer offset, Integer max, String searchText,
+            EventVS.Type eventType, EventVS.State state) {
+        String offsetStr = (offset != null? offset.toString():"");
+        String maxStr = (max != null? max.toString():"");
+        String stateStr = (state != null? state.toString():"");
+        String typeStr = (eventType != null? eventType.toString():"");
+        return getServerURL() + "/search/eventVS?max=" + maxStr + "&offset=" + offsetStr +
+                "&eventVSState=" + stateStr + "&eventvsType=" + typeStr + "&searchText=" + searchText;
+    }
+
     public String getEventVSURL () {
         return getServerURL() + "/eventVS";
     }
