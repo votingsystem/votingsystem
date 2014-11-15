@@ -20,7 +20,8 @@
     <string name="author_lbl">publicado por</string>
     <string name="init_lbl">inicio</string>
     <string name="finish_lbl">fin</string>
-    <string name="remain_lbl">quedan %1$s horas</string>
+    <string name="remaining_lbl">%1$s horas para cerrar</string>
+    <string name="pending_lbl">%1$s horas para abrir</string>
     <string name="option_selected_msg">seleccionada opción \'%1$s\'</string>
     <string name="voting_system_lbl">sistema de votación</string>
     <string name="access_control_lbl">control de acceso</string>
@@ -41,7 +42,7 @@
     <string name="publish_voting_lbl">publicar votación</string>
     <string name="publish_manifest_lbl">publicar manifiesto</string>
     <string name="publish_claim_lbl">publicar reclamación</string>
-    <string name="loading_page_msg">cargando página, por favor espere</string>
+    <string name="loading_info_msg">cargando información, por favor espere</string>
     <string name="pdf_signed_by_lbl">firmado electrónicamente por</string>
     <string name="BACKUP_REQUEST">solicitud de copia de seguridad</string>
     <string name="MANIFEST_PUBLISHING">publicación de documento para recoger firmas</string>

@@ -39,6 +39,8 @@ import org.votingsystem.util.ResponseVS;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
@@ -56,7 +58,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private AppContextVS contextVS;
     private Map<Integer, EditText> fieldsMap;
     private String broadCastId = null;
-
+    private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     public static EventVSFragment newInstance(String eventJSONStr) {
         EventVSFragment fragment = new EventVSFragment();
@@ -193,16 +195,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onStop();
     }
 
-    private boolean isProgressDialogVisible() {
-        if(progressDialog == null) return false;
-        else return progressDialog.isVisible();
-    }
-
     private void setProgressDialogVisible(boolean isVisible) {
+        isProgressDialogVisible.set(isVisible);
         if(isVisible){
             progressDialog = ModalProgressDialogFragment.showDialog(
                     getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
+                    getString(R.string.loading_info_msg),
                     getFragmentManager());
         } else if(progressDialog != null) progressDialog.dismiss();
     }

@@ -6,15 +6,12 @@
     android:paddingLeft="5dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
-    <ImageView
-        android:id="@+id/header_image"
-        android:src="@drawable/system_users_22"
+    <ImageView android:id="@+id/header_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"/>
 
-    <TextView
-        android:id="@+id/lblListHeader"
+    <TextView android:id="@+id/lblListHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Representantes"

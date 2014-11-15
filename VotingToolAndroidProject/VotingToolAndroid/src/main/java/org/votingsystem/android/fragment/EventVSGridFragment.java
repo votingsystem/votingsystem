@@ -40,9 +40,12 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -69,20 +72,16 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private Integer firstVisiblePosition = null;
     private int loaderId = -1;
     private String broadCastId = null;
+    private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
             MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
     };
-
-    public GroupPosition getGroupPosition() {
-        return groupPosition;
-    }
 
     public EventVS.State getState() {
         return eventState;
@@ -170,19 +169,15 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         return true;
     }
 
-    private boolean isProgressDialogVisible() {
-        if(progressDialog == null) return false;
-        else return progressDialog.isVisible();
-    }
-
     private void setProgressDialogVisible(boolean isVisible) {
+        isProgressDialogVisible.set(isVisible);
         if(isVisible){
             if(progressDialog != null && progressDialog.isVisible()) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override public void run() {
                     progressDialog = ModalProgressDialogFragment.showDialog(
                             getString(R.string.loading_data_msg),
-                            getString(R.string.loading_page_msg),
+                            getString(R.string.loading_info_msg),
                             getFragmentManager());
                 }
             });
@@ -214,7 +209,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         if(numTotalEvents == null) fetchItems(offset);
         else {
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
-            if(loadMore && !  (isProgressDialogVisible() && offset < numTotalEvents &&
+            if(loadMore && !  (isProgressDialogVisible.get() && offset < numTotalEvents &&
                     cursorCount < numTotalEvents)) {
                 LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
@@ -239,9 +234,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     public void fetchItems(Long offset) {
         LOGD(TAG +  ".fetchItems", "offset: " + offset + " - progressVisible: " +
-                isProgressDialogVisible() +
+                isProgressDialogVisible.get() +
                 " - groupPosition: " + groupPosition + " - eventState: " + eventState);
-        if(isProgressDialogVisible()) return;
+        if(isProgressDialogVisible.get()) return;
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 EventVSService.class);
         startIntent.putExtra(ContextVS.STATE_KEY, eventState);
@@ -318,7 +313,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         else {
             //bug, without thread triggers 'Can not perform this action inside of onLoadFinished'
             setProgressDialogVisible(false);
-
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             else cursor.moveToFirst();
             firstVisiblePosition = null;
@@ -366,19 +360,12 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     public class EventListAdapter  extends CursorAdapter {
 
-        private LayoutInflater inflater = null;
-
         public EventListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
-            inflater = LayoutInflater.from(context);
         }
 
-        /*@Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_eventvs, viewGroup, false);
-        }*/
-
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_representative, viewGroup, false);
+            return LayoutInflater.from(context).inflate(R.layout.election_card, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {
@@ -386,78 +373,38 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 String eventJSONData = cursor.getString(cursor.getColumnIndex(
                         EventVSContentProvider.JSON_DATA_COL));
                 EventVS eventVS = EventVS.parse(new JSONObject(eventJSONData));
-                LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                linearLayout.setBackgroundColor(Color.WHITE);
-                TextView representativeName = (TextView)view.findViewById(R.id.representative_name);
-                TextView delegationInfo = (TextView) view.findViewById(
-                        R.id.representative_delegations);
-                representativeName.setText("eventId: " + eventVS.getId().toString());
-                delegationInfo.setText(eventVS.getTypeVS() + " - " + eventVS.getState());
-                //ImageView imgView = (ImageView)view.findViewById(R.id.representative_icon);
-                //imgView.setImageDrawable();
+                int state_color = R.color.frg_vs;
+                String tameInfoMsg = null;
+                switch(eventVS.getState()) {
+                    case ACTIVE:
+                        state_color = R.color.active_vs;
+                        tameInfoMsg = getString(R.string.remaining_lbl, DateUtils.
+                                getElapsedTimeStr(eventVS.getDateFinish()));
+                        break;
+                    case CANCELLED:
+                    case TERMINATED:
+                        state_color = R.color.terminated_vs;
+                        tameInfoMsg = getString(R.string.voting_closed_lbl);
+                        break;
+                    case PENDING:
+                        state_color = R.color.pending_vs;
+                        tameInfoMsg = getString(R.string.pending_lbl, DateUtils.
+                                getElapsedTimeStr(eventVS.getDateBegin()));
+                        break;
+                }
+                if(eventVS.getUserVS() != null && !eventVS.getUserVS().getFullName().isEmpty()) {
+                    ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUserVS().getFullName());
+                }
+                ((LinearLayout)view.findViewById(R.id.subject_layout)).setBackgroundColor(
+                        getResources().getColor(state_color));
+                ((TextView)view.findViewById(R.id.subject)).setText(eventVS.getSubject());
+                TextView time_info = ((TextView)view.findViewById(R.id.time_info));
+                time_info.setText(tameInfoMsg);
+                time_info.setTextColor(getResources().getColor(state_color));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
         }
-
-        /*@Override public void bindView(View view, Context context, Cursor cursor) {
-            try {
-                String eventJSONData = cursor.getString(cursor.getColumnIndex(
-                        EventVSContentProvider.JSON_DATA_COL));
-                EventVS eventVS = EventVS.parse(new JSONObject(eventJSONData));
-                if (eventVS != null) {
-                    LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                    linearLayout.setBackgroundColor(Color.WHITE);
-                    TextView subject = (TextView) view.findViewById(R.id.event_subject);
-                    TextView dateInfo = (TextView) view.findViewById(R.id.event_date_info);
-                    TextView author = (TextView) view.findViewById(R.id.event_author);
-                    subject.setText(eventVS.getSubject());
-                    String dateInfoStr = null;
-                    ImageView imgView = (ImageView)view.findViewById(R.id.event_icon);
-                    LOGD(TAG + ".bindView", "cursor.getPosition(): "  + cursor.getPosition() +
-                        " - eventState:"+ eventVS.getState()+ " - eventJSONData: " + eventJSONData);
-                    switch(eventVS.getState()) {
-                        case ACTIVE:
-                            imgView.setImageResource(R.drawable.open);
-                            dateInfoStr = "<b>" + getActivity().getApplicationContext().
-                                    getString(R.string.remain_lbl, DateUtils.
-                                            getElapsedTimeStr(eventVS.getDateFinish()))  +"</b>";
-                            break;
-                        case PENDING:
-                            imgView.setImageResource(R.drawable.pending);
-                            dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getDayWeekDateStr(eventVS.getDateBegin()) + " - " +
-                                    "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getDayWeekDateStr(eventVS.getDateFinish());
-                            break;
-                        case CANCELLED:
-                        case TERMINATED:
-                            imgView.setImageResource(R.drawable.closed);
-                            dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getDayWeekDateStr(eventVS.getDateBegin()) + " - " +
-                                    "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getDayWeekDateStr(eventVS.getDateFinish());
-                            break;
-                        default:
-                            LOGD(TAG +  ".bindView", "unknown event state: " +
-                                    eventVS.getState());
-                    }
-                    if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
-                    else dateInfo.setVisibility(View.GONE);
-                    if(eventVS.getUserVS() != null && !eventVS.getUserVS().getFullName().isEmpty()) {
-                        String authorStr =  "<b>" + getActivity().getApplicationContext().getString(
-                                R.string.author_lbl) + "</b>: " + eventVS.getUserVS().getFullName();
-                        author.setText(Html.fromHtml(authorStr));
-                    }
-                } else LOGD(TAG +  ".bindView", "Event null");
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }*/
     }
 
 }

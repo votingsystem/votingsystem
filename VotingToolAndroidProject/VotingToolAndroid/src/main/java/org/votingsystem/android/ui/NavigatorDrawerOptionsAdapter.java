@@ -59,7 +59,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int VICKET_LIST_POSITION           = 1;
 
     public enum GroupPosition {
-        VOTING(VOTING_GROUP_POSITION, R.drawable.poll_32, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
+        VOTING(VOTING_GROUP_POSITION, R.drawable.mail_mark_unread_32, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
         MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_32, SubSystemVS.MANIFESTS,
                 TypeVS.MANIFEST_EVENT, Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING,

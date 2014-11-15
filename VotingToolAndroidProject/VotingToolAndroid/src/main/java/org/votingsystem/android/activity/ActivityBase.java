@@ -131,7 +131,6 @@ public abstract class ActivityBase extends FragmentActivity {
 
     // A Runnable that we should execute when the navigation drawer finishes its closing animation
     private Runnable mDeferredOnDrawerClosedRunnable;
-    private int mProgressBarTopWhenActionBarShown;
     private static final TypeEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
 
     private String broadCastId = ActivityBase.class.getSimpleName();
@@ -598,7 +597,6 @@ public abstract class ActivityBase extends FragmentActivity {
                 onNavDrawerItemClicked(itemId);
             }
         });
-
         return view;
     }
 
@@ -612,8 +610,7 @@ public abstract class ActivityBase extends FragmentActivity {
 
     private void formatNavDrawerItem(View view, int itemId, boolean selected) {
         if (isSeparator(itemId)) {
-            // not applicable
-            return;
+            return;// not applicable
         }
         ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         TextView titleView = (TextView) view.findViewById(R.id.title);

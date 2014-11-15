@@ -9,7 +9,7 @@
     <TextView android:id="@+id/error_message"
         android:layout_width="wrap_content"
         android:text="@string/empty_field_error_lbl"
-        android:textColor="@color/terminated"
+        android:textColor="@color/terminated_vs"
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
         android:layout_height="wrap_content"

@@ -150,7 +150,7 @@ public class EventVSPagerActivity extends FragmentActivity {
                 }
                 break;
             case VOTING_EVENT:
-                getActionBar().setLogo(R.drawable.poll_32);
+                getActionBar().setLogo(R.drawable.mail_mark_unread_32);
                 switch(event.getState()) {
                     case ACTIVE:
                         getActionBar().setTitle(getString(R.string.voting_open_lbl,

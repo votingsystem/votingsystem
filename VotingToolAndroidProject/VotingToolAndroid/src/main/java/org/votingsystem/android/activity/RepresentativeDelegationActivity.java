@@ -191,7 +191,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         if(isVisible){
             progressDialog = ModalProgressDialogFragment.showDialog(
                     getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
+                    getString(R.string.loading_info_msg),
                     getSupportFragmentManager());
         } else if(progressDialog != null) progressDialog.dismiss();
     }

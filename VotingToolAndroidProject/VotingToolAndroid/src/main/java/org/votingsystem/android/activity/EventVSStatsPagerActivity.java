@@ -152,7 +152,7 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
                 }
                 break;
             case VOTING_EVENT:
-                getActionBar().setLogo(R.drawable.poll_32);
+                getActionBar().setLogo(R.drawable.mail_mark_unread_32);
                 title = getString(R.string.voting_info_lbl) + " '"+ event.getSubject() + "'";
                 switch(event.getState()) {
                     case ACTIVE:

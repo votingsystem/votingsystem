@@ -11,6 +11,8 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -41,6 +43,7 @@ import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -51,6 +54,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class RepresentativeGridFragment extends Fragment
@@ -68,6 +73,7 @@ public class RepresentativeGridFragment extends Fragment
     private Integer firstVisiblePosition = null;
     private String broadCastId;
     private int loaderId = -1;
+    private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -171,8 +177,6 @@ public class RepresentativeGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                setProgressDialogVisible(true);
         }
     }
 
@@ -188,7 +192,7 @@ public class RepresentativeGridFragment extends Fragment
         if (gridView.getAdapter() == null || gridView.getAdapter().getCount() == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
-        if(loadMore && !  isProgressDialogVisible() && offset <
+        if(loadMore && !  isProgressDialogVisible.get() && offset <
                 UserContentProvider.getNumTotalRepresentatives() &&
                 totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
             LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
@@ -202,18 +206,21 @@ public class RepresentativeGridFragment extends Fragment
         return this.offset;
     }
 
-    private boolean isProgressDialogVisible() {
-        if(progressDialog == null) return false;
-        else return progressDialog.isVisible();
-    }
-
-    private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
-                    getFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+    private void setProgressDialogVisible(final boolean isVisible) {
+        isProgressDialogVisible.set(isVisible);
+        //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
+        new Handler(){
+            @Override public void handleMessage(Message msg) {
+                if (isVisible) {
+                    progressDialog = ModalProgressDialogFragment.showDialog(
+                            getString(R.string.loading_data_msg),
+                            getString(R.string.loading_info_msg),
+                            getFragmentManager());
+                } else if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
+            }
+        }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
 
     private void showHTTPError() {
@@ -229,7 +236,7 @@ public class RepresentativeGridFragment extends Fragment
             return;
         }
         LOGD(TAG +  ".fetchItems", "offset: " + offset);
-        if(isProgressDialogVisible()) return;
+        if(isProgressDialogVisible.get()) return;
         else setProgressDialogVisible(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 RepresentativeService.class);

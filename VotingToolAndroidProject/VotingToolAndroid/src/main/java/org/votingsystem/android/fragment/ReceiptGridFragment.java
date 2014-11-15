@@ -125,7 +125,7 @@ public class ReceiptGridFragment extends Fragment implements
         if(isVisible){
             progressDialog = ModalProgressDialogFragment.showDialog(
                     getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
+                    getString(R.string.loading_info_msg),
                     getFragmentManager());
         } else if(progressDialog != null) progressDialog.dismiss();
     }

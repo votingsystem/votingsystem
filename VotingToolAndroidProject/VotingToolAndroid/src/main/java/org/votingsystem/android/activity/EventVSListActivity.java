@@ -22,6 +22,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,6 +50,7 @@ import org.votingsystem.model.TypeVS;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -66,7 +69,7 @@ public class EventVSListActivity extends ActivityBase
     private AppContextVS contextVS = null;
     private Menu mainMenu;
     private String broadCastId = EventVSListActivity.class.getSimpleName();
-
+    private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -84,7 +87,7 @@ public class EventVSListActivity extends ActivityBase
         args.putSerializable(ContextVS.CHILD_POSITION_KEY, NavigatorDrawerOptionsAdapter.ChildPosition.OPEN);
         fragment.setArguments(getIntent().getExtras());
         fragment.setArguments(args);
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
 
         View spinnerContainer = LayoutInflater.from(getActionBar().getThemedContext())
@@ -121,7 +124,7 @@ public class EventVSListActivity extends ActivityBase
         mSpinnerConfigured = true;
         updateActionBarNavigation();
 
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.poll_32));
+        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
         PrefUtils.registerPreferenceChangeListener(this, this);
         if(!PrefUtils.isDataBootstrapDone(this)) {
@@ -167,7 +170,6 @@ public class EventVSListActivity extends ActivityBase
         fragment.fetchItems(eventState, groupPosition);
     }
 
-
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
         this.mainMenu = menu;
@@ -183,13 +185,21 @@ public class EventVSListActivity extends ActivityBase
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
-                    getSupportFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+    private void setProgressDialogVisible(final boolean isVisible) {
+        isProgressDialogVisible.set(isVisible);
+        //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
+        new Handler(){
+            @Override public void handleMessage(Message msg) {
+                if (isVisible) {
+                    progressDialog = ModalProgressDialogFragment.showDialog(
+                            getString(R.string.loading_data_msg),
+                            getString(R.string.loading_info_msg),
+                            getSupportFragmentManager());
+                } else if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
+            }
+        }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -214,8 +224,8 @@ public class EventVSListActivity extends ActivityBase
     };
 
     private void showPublishDialog(){
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl).
-                setIcon(R.drawable.view_detailed_32).setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl)
+                .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(EventVSListActivity.this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());

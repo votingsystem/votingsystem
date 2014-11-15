@@ -16,7 +16,7 @@
             android:text="@string/add_tag_lbl"
             android:gravity="center"
             android:padding="5dp"
-            android:textSize="24sp" />
+            android:textSize="23sp" />
     </LinearLayout>
 
     <View android:layout_width="fill_parent"

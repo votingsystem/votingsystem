@@ -231,16 +231,11 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
-    private boolean isProgressDialogVisible() {
-        if(progressDialog == null) return false;
-        else return progressDialog.isVisible();
-    }
-
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
             progressDialog = ModalProgressDialogFragment.showDialog(
                     getString(R.string.loading_data_msg),
-                    getString(R.string.loading_page_msg),
+                    getString(R.string.loading_info_msg),
                     getFragmentManager());
         } else if(progressDialog != null) progressDialog.dismiss();
     }

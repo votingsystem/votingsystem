@@ -271,7 +271,6 @@ public class RepresentativeService extends IntentService {
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                     Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
                     responseVS.setUri(uri);
-                    responseVS.setIconId(R.drawable.system_users_22);
                     responseVS.setCaption(getString(R.string.anonymous_delegation_caption));
                     responseVS.setNotificationMessage(getString(R.string.anonymous_delegation_msg,
                             representative.getFullName(), weeksOperationActive));
@@ -423,7 +422,7 @@ public class RepresentativeService extends IntentService {
         int resultIcon = R.drawable.cancel_22;
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             title = getString(R.string.new_representative_ok_notification_msg);
-            resultIcon = R.drawable.system_users_22;
+            resultIcon = R.drawable.accept_22;
         }
         else title = getString(R.string.signature_error_notification_msg);
         NotificationManager notificationManager = (NotificationManager)

@@ -12,7 +12,6 @@
             android:id="@+id/publish_document"
             android:orderInCategory="2"
             android:showAsAction="never"
-            android:icon="@drawable/view_detailed_22"
             android:title="@string/publish_poll_lbl"/>
     </group>
 

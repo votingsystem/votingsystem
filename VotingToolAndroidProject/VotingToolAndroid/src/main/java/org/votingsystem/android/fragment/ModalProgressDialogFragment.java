@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -50,7 +49,7 @@ public class ModalProgressDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         progressMessage = getArguments().getString(ContextVS.MESSAGE_KEY);
         caption = getArguments().getString(ContextVS.CAPTION_KEY);
-        View view = getActivity().getLayoutInflater().inflate(R.layout.modal_progress_dialog, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.progress_dialog, null);
         progress_text = (TextView) view.findViewById(R.id.progress_text);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
         progress_text.setText(progressMessage);

@@ -2,9 +2,6 @@
 <resources>
     <color name="dialog_caption">#33b5e5</color>
     <color name="empty_field_form">#f00</color>
-    <color name="terminated">#cc1606</color>
-    <color name="pending">#fba131</color>
-    <color name="active">#388746</color>
     <color name="progress_text">#8e8e8e</color>
     <color name="event_progress_text_lbl">#FFF</color>
     <color name="white_background">#FFF</color>
@@ -16,6 +13,10 @@
     <color name="representative_name">#005b92</color>
     <color name="form_background">#eeeeee</color>
     <color name="theme_primary_dark">#303f9f</color>
+
+    <color name="active_vs">#388746</color>
+    <color name="terminated_vs">#cc1606</color>
+    <color name="pending_vs">#fba131</color>
 
     <color name="bkg_vs">#ba0011</color>
     <color name="frg_vs">#fefefe</color>
