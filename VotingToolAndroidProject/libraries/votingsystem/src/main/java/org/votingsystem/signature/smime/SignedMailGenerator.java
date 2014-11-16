@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import javax.mail.Address;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.Session;

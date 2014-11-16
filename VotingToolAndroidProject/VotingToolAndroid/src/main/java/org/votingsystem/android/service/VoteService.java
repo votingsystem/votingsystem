@@ -22,14 +22,8 @@ import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
-import java.io.Serializable;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -47,156 +41,94 @@ public class VoteService extends IntentService {
     private AppContextVS contextVS;
 
     @Override protected void onHandleIntent(Intent intent) {
+        contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
-        String caption = null;
-        String message = null;
+        String eventSubject = vote.getEventVS().getSubject();
+        if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
         try {
-            contextVS = (AppContextVS) getApplicationContext();
-            String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
-            LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - receiverName: " +
-                    receiverName + " - event: " + vote.getEventVS().getId());
-            if(receiverName == null) receiverName = contextVS.getAccessControl().getNameNormalized();
-            ControlCenterVS controlCenter = vote.getEventVS().getControlCenter();
-            X509Certificate controlCenterCert = contextVS.getCert(controlCenter.getServerURL());
-            if(controlCenterCert == null) {
-                responseVS = HttpHelper.getData(controlCenter.getCertChainURL(), null);
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    caption = getString(R.string.operation_error_msg);
-                    message = getString(R.string.get_cert_error_msg, controlCenter.getName());
-                } else {
-                    Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
-                            responseVS.getMessageBytes());
-                    controlCenterCert = certChain.iterator().next();
-                    contextVS.putCert(controlCenter.getServerURL(), controlCenterCert);
-                }
-            }
-            if(controlCenterCert != null) {
-                controlCenter.setCertificate(controlCenterCert);
+            LOGD(TAG + ".onHandleIntent", "operation: " + operation +
+                    " - event: " + vote.getEventVS().getId());
+            if(contextVS.getControlCenter() == null) {
+                ControlCenterVS controlCenter = (ControlCenterVS) contextVS.getActorVS(vote.getEventVS().
+                        getControlCenter().getServerURL());
                 contextVS.setControlCenter(controlCenter);
-                switch(operation) {
-                    case VOTEVS:
-                        responseVS = processVote(vote);
-                        break;
-                    case CANCEL_VOTE:
-                        JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                        responseVS = processCancellation(receiverName, cancelDataJSON.toString());
-                        break;
-                }
-                showNotification(responseVS, vote.getEventVS().getSubject(), operation, vote);
-                switch(operation) {
-                    case VOTEVS:
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            VoteVS voteReceipt = (VoteVS)responseVS.getData();
-                            message = getString(R.string.vote_ok_msg, vote.getEventVS().getSubject(),
-                                    vote.getOptionSelected().getContent());
-                        } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                            caption = getString(R.string.access_request_repeated_caption);
-                            message = getString( R.string.access_request_repeated_msg,
-                                    vote.getEventVS().getSubject(), responseVS.getMessage());
-                        } else {
-                            caption = getString(R.string.error_lbl);
-                            message = Html.fromHtml(responseVS.getMessage()).toString();
-                        }
-                        break;
-                    case CANCEL_VOTE:
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            SMIMEMessage cancelReceipt = responseVS.getSMIME();
-                            vote.setCancelVoteReceipt(cancelReceipt);
-                            message = getString(R.string.cancel_vote_result_msg,
-                                    vote.getEventVS().getSubject());
-                            if(vote.getLocalId() > 0) {//Update local receipt database
-                                ContentValues values = new ContentValues();
-                                vote.setTypeVS(TypeVS.VOTEVS_CANCELLED);
-                                values.put(ReceiptContentProvider.URL_COL, cancelReceipt.getMessageID());
-                                values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                                        ObjectUtils.serializeObject(vote));
-                                values.put(ReceiptContentProvider.TYPE_COL, vote.getTypeVS().toString());
-                                values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL,
-                                        System.currentTimeMillis());
-                                getContentResolver().update(ReceiptContentProvider.getReceiptURI(
-                                        vote.getLocalId()), values, null, null);
-                            }
-                        } else {
-                            caption = getString(R.string.error_lbl);
-                            message = responseVS.getMessage();
-                        }
-                        break;
-                }
             }
-            responseVS.setCaption(caption).setNotificationMessage(message).setData(vote);
+            switch(operation) {
+                case VOTEVS:
+                    VoteSender voteSender = new VoteSender(vote, contextVS);
+                    responseVS = voteSender.call();
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        VoteVS voteReceipt = (VoteVS)responseVS.getData();
+                        responseVS.setCaption(getString(R.string.vote_ok_caption)).
+                                setNotificationMessage(getString(
+                                R.string.vote_ok_msg, eventSubject,
+                                vote.getOptionSelected().getContent()));
+                    } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                        responseVS.setCaption(getString(R.string.access_request_repeated_caption)).
+                                setNotificationMessage(getString( R.string.access_request_repeated_msg,
+                                eventSubject, responseVS.getMessage()));
+                    } else {
+                        responseVS.setCaption(getString(R.string.vote_error_caption)).
+                                setNotificationMessage(
+                                Html.fromHtml(responseVS.getMessage()).toString());
+                    }
+                    break;
+                case CANCEL_VOTE:
+                    JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
+                    SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
+                            contextVS.getUserVS().getNif(), contextVS.getAccessControl().getNameNormalized(),
+                            contextVS.getAccessControl().getCancelVoteServiceURL(), cancelDataJSON.toString(),
+                            ContentTypeVS.JSON_SIGNED, getString(R.string.cancel_vote_msg_subject),
+                            contextVS.getAccessControl().getCertificate(),
+                            (AppContextVS)getApplicationContext());
+                    responseVS = smimeSignedSender.call();
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        SMIMEMessage cancelReceipt = responseVS.getSMIME();
+                        vote.setCancelVoteReceipt(cancelReceipt);
+                        if(vote.getLocalId() > 0) {//Update local receipt database
+                            ContentValues values = new ContentValues();
+                            vote.setTypeVS(TypeVS.VOTEVS_CANCELLED);
+                            values.put(ReceiptContentProvider.URL_COL, cancelReceipt.getMessageID());
+                            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                                    ObjectUtils.serializeObject(vote));
+                            values.put(ReceiptContentProvider.TYPE_COL, vote.getTypeVS().toString());
+                            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL,
+                                    System.currentTimeMillis());
+                            getContentResolver().update(ReceiptContentProvider.getReceiptURI(
+                                    vote.getLocalId()), values, null, null);
+                        }
+                        responseVS.setCaption(getString(R.string.cancel_vote_ok_caption)).
+                                setNotificationMessage(getString(R.string.cancel_vote_result_msg,
+                                eventSubject));
+                    } else {
+                        responseVS.setCaption(getString(R.string.cancel_vote_error_caption)).
+                                setNotificationMessage(responseVS.getMessage());
+                    }
+                    break;
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
-            sendMessage(responseVS);
+            showNotification(responseVS);
+            broadcastResponse(responseVS, vote);
         }
     }
 
-    private ResponseVS processVote(VoteVS vote) {
-        ResponseVS responseVS = null;
-        try {
-            VoteSender voteSender = new VoteSender(vote, (AppContextVS)getApplicationContext());
-            responseVS = voteSender.call();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
-        }
-        return responseVS;
-    }
-
-
-    private ResponseVS processCancellation(String toUser, String signatureContent) {
-        ResponseVS responseVS = null;
-        String subject = getString(R.string.cancel_vote_msg_subject);
-        String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
-        try {
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                    contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
-                    ContentTypeVS.JSON_SIGNED, subject,
-                    contextVS.getAccessControl().getCertificate(),
-                    (AppContextVS)getApplicationContext());
-            responseVS = smimeSignedSender.call();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
-        } finally { return responseVS; }
-    }
-
-    private void showNotification(ResponseVS responseVS, String eventSubject, TypeVS operation,
-            VoteVS vote){
-        String title = null;
-        String message = null;
-        if(eventSubject != null) {
-            if(eventSubject.length() > 50) message = eventSubject.substring(0, 50);
-            else message = eventSubject;
-        }
+    private void showNotification(ResponseVS responseVS){
         Integer notificationIcon = null;
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            notificationIcon = R.drawable.accept_16;
-            if(TypeVS.VOTEVS == operation) {
-                title = getString(R.string.vote_ok_notification_msg);
-            } else  if(TypeVS.CANCEL_VOTE == operation) {
-                title = getString(R.string.cancel_vote_ok_notification_msg);
-            }
-        } else {
-            title = getString(R.string.signature_error_notification_msg);
-            notificationIcon = R.drawable.cancel_16;
-            if(TypeVS.VOTEVS == operation) {
-                title = getString(R.string.vote_error_notification_msg);
-            } else  if(TypeVS.CANCEL_VOTE == operation) {
-                title = getString(R.string.cancel_vote_error_notification_msg);
-            }
-        }
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) notificationIcon = R.drawable.accept_16;
+        else notificationIcon = R.drawable.cancel_16;
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        if(title != null) builder.setContentTitle(title);
-        if(message != null) builder.setContentText(message);
+        builder.setContentTitle(responseVS.getCaption()).setContentText(
+                responseVS.getNotificationMessage());
         if(notificationIcon != null) builder.setSmallIcon(notificationIcon);
         //Intent clickIntent = new Intent(Intent.ACTION_MAIN);
         //clickIntent.setClassName(this, EventsVSActivity.class.getName());
@@ -207,15 +139,14 @@ public class VoteService extends IntentService {
         notificationManager.notify(ContextVS.VOTE_SERVICE_NOTIFICATION_ID, note);
     }
 
-    private void sendMessage(ResponseVS responseVS) {
+    private void broadcastResponse(ResponseVS responseVS, VoteVS vote) {
         LOGD(TAG + ".sendMessage", "statusCode: " + responseVS.getStatusCode() +
                 " - serviceCaller: " + responseVS.getServiceCaller() + " - operation: " +
                 responseVS.getTypeVS() + " - caption: " + responseVS.getCaption() +
                 " - message: " + responseVS.getNotificationMessage());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        if(responseVS.getData() != null) intent.putExtra(ContextVS.VOTE_KEY,
-                (Serializable) responseVS.getData());
+        intent.putExtra(ContextVS.VOTE_KEY, vote);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

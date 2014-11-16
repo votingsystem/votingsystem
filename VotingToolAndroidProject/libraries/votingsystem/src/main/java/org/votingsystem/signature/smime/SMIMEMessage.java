@@ -24,7 +24,6 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
-import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
@@ -39,7 +38,6 @@ import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JsonUtils;
-import org.votingsystem.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -52,7 +50,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.security.cert.CertificateException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -75,13 +72,11 @@ import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedByteArrayInputStream;
 
-import static org.votingsystem.model.ContextVS.DEFAULT_SIGNED_FILE_NAME;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 
 

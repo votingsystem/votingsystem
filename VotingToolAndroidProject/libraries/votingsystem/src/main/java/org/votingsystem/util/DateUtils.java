@@ -6,10 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 
-import java.io.File;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

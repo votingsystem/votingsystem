@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:indeterminateDrawable="@drawable/progress_loading"/>
         <TextView android:id="@+id/progress_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:layout_weight="1"

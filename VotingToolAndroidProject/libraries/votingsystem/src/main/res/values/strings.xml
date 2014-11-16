@@ -14,7 +14,7 @@
     <string name="option_error_msg"><![CDATA[<html>la opción del recibo no coincide con la del voto.
         <br/> ¿desea anular la operación?</html>]]></string>
     <string name="vote_ok_msg"><![CDATA[en el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
-
+    <string name="vote_ok_caption">voto enviado</string>
 
     <string name="open_voting_lbl">abiertas</string>
     <string name="pending_voting_lbl">pendientes</string>

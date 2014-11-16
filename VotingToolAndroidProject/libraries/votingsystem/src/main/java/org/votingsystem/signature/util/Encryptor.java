@@ -27,8 +27,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

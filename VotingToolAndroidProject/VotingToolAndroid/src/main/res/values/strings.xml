@@ -185,10 +185,9 @@
     <string name="websocket_service_conn_lbl">conectado mensajería del sistema de votación</string>
     <string name="signature_ok_notification_msg">documento firmado y enviado</string>
     <string name="signature_error_notification_msg">error firmando documento</string>
-    <string name="vote_ok_notification_msg">voto enviado</string>
-    <string name="cancel_vote_ok_notification_msg">voto cancelado</string>
-    <string name="vote_error_notification_msg">error en votación</string>
-    <string name="cancel_vote_error_notification_msg">error cancelando voto</string>
+    <string name="cancel_vote_ok_caption">voto cancelado</string>
+    <string name="vote_error_caption">error en votación</string>
+    <string name="cancel_vote_error_caption">error cancelando voto</string>
     <string name="sending_vote_lbl">enviando voto</string>
     <string name="vote_option_mismatch">problemas graves en el servicio de voto, por favor, inténtelo mas tarde</string>
     <string name="cert_info_formated_msg"><![CDATA[<html><b>asunto: </b>%1$s<br/><b>emisor del certificado: </b> %2$s <br/> \n \

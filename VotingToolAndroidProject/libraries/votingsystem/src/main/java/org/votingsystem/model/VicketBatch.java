@@ -2,9 +2,6 @@ package org.votingsystem.model;
 
 import android.util.Log;
 
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;

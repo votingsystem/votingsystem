@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.activity.SMIMESignerActivity;
@@ -23,6 +24,7 @@ import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.UserVS;
@@ -32,6 +34,7 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
@@ -188,6 +191,24 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         //X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
         PrivateKey privateKey = keyEntry.getPrivateKey();
         return Encryptor.decryptCMS(privateKey, encryptedBytes);
+    }
+
+    //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
+    public ActorVS getActorVS(String serverURL) {
+        ActorVS targetServer = getServer(serverURL);
+        if(targetServer == null) {
+            try {
+                ResponseVS responseVS = HttpHelper.getData(
+                        ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    targetServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                    setServer(targetServer);
+                }
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return targetServer;
     }
 
     //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException

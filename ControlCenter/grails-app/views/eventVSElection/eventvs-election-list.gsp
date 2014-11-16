@@ -55,7 +55,7 @@
                             </div>
                         </template>
                     </div>
-                    <vs-pager on-pager-change="{{pagerChange}}" max="${params.max}" style="margin: 0 0 100px 0;"
+                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="${params.max}" style="margin: 0 0 100px 0;"
                               next="<g:message code="nextLbl"/>" previous="<g:message code="previousLbl"/>"
                               first="<g:message code="firstLbl"/>" last="<g:message code="lastLbl"/>"
                               offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
@@ -97,6 +97,17 @@
                 console.log(this.tagName + " - closeEventVSDetails")
                 this.$.innerpageSignal.fireSignal()
                 this.page = 0;
+            },
+            pagerChange:function(e) {
+                var optionSelected = this.$.eventVSStateSelect.value
+                console.log("eventVSStateSelect: " + optionSelected)
+                this.$.vspager.style.display = 'none'
+                targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" +
+                        optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
+                history.pushState(null, null, targetURL);
+                this.$.ajax.url = targetURL
+                this.$.ajax.go()
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")

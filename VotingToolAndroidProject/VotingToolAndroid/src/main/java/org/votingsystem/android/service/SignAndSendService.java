@@ -124,7 +124,7 @@ public class SignAndSendService extends IntentService {
     private void processOperation(OperationVS operation, String serviceCaller) {
         LOGD(TAG + ".processOperation", "operation: " + operation.getTypeVS() +
                 " - serviceCaller: " + serviceCaller);
-        ActorVS targetServer = getActorVS(operation.getServerURL());
+        ActorVS targetServer = contextVS.getActorVS(operation.getServerURL());
         ResponseVS responseVS = null;
         if(targetServer == null) {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, contextVS.getString(
@@ -141,7 +141,7 @@ public class SignAndSendService extends IntentService {
         LOGD(TAG + ".sendMessageVS", "operationVS: " + operationVS.getTypeVS());
         //operationVS.getContentType(); -> MessageVS
         ResponseVS responseVS = null;
-        ActorVS targetServer = getActorVS(operationVS.getServerURL());
+        ActorVS targetServer = contextVS.getActorVS(operationVS.getServerURL());
         List signedDataList = new ArrayList();
         List encryptedDataList = new ArrayList();
         try {
@@ -208,22 +208,6 @@ public class SignAndSendService extends IntentService {
             responseVS.setIconId(R.drawable.fa_times_32);
         } else responseVS.setIconId(R.drawable.fa_check_32);
         return responseVS;
-    }
-
-    public ActorVS getActorVS(String serverURL) {
-        ActorVS targetServer = contextVS.getServer(serverURL);
-        if(targetServer == null) {
-            try {
-                ResponseVS responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    targetServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                    contextVS.setServer(targetServer);
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        return targetServer;
     }
 
 }
