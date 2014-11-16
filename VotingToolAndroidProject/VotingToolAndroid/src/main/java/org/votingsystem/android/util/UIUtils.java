@@ -42,7 +42,9 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -208,6 +210,35 @@ public class UIUtils  {
         int searchImgId = context.getResources().getIdentifier("android:id/search_button", null, null);
         ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
         v.setImageResource(R.drawable.ic_search_white_18dp);
+    }
+
+    public static EditText addFormField(String label, Integer type, LinearLayout mFormView, int id,
+                Context context) {
+        TextView textView = new TextView(context);
+        textView.setTextSize(context.getResources().getDimension(R.dimen.claim_field_text_size));
+        textView.setText(label);
+        EditText fieldText = new EditText(context.getApplicationContext());
+        fieldText.setLayoutParams(UIUtils.getFormItemParams(false));
+        fieldText.setTextColor(Color.BLACK);
+        // setting an unique id is important in order to save the state
+        // (content) of this view across screen configuration changes
+        fieldText.setId(id);
+        fieldText.setInputType(type);
+        mFormView.addView(textView);
+        mFormView.addView(fieldText);
+        return fieldText;
+    }
+
+    public static LinearLayout.LayoutParams getFormItemParams(boolean isLabel) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        if (isLabel) {
+            params.bottomMargin = 5;
+            params.topMargin = 10;
+        }
+        params.leftMargin = 20;
+        params.rightMargin = 20;
+        return params;
     }
 
     // Whether a feedback notification was fired for a particular session. In the event that a

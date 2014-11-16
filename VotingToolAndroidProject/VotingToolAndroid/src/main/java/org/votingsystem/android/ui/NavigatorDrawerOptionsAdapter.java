@@ -45,8 +45,6 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final String GROUP_POSITION_KEY = "groupPosition";
 
     public static final int VOTING_GROUP_POSITION          = 0;
-    public static final int MANIFESTS_GROUP_POSITION       = -1;
-    public static final int CLAIMS_GROUP_POSITION          = -1;
     public static final int REPRESENTATIVES_GROUP_POSITION = 1;
     public static final int RECEIPTS_GROUP_POSITION        = 2;
     public static final int VICKETS_GROUP_POSITION         = 3;
@@ -60,11 +58,6 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
     public enum GroupPosition {
         VOTING(VOTING_GROUP_POSITION, R.drawable.mail_mark_unread_32, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
-                Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_32, SubSystemVS.MANIFESTS,
-                TypeVS.MANIFEST_EVENT, Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING,
-                ChildPosition.CLOSED)),
-        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.fa_exclamation_triangle_32, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
         REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_32,
                 SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
@@ -110,8 +103,6 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
         public String getURLPart() {
             switch(this) {
-                case CLAIMS: return "/eventVSClaim";
-                case MANIFESTS: return "/eventVSManifest";
                 case VOTING: return "/eventVSElection";
                 case REPRESENTATIVES: return "/representative";
             }
@@ -133,8 +124,6 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         public String getDescription(Context context) {
             switch(this) {
                 case VOTING: return context.getString(R.string.voting_drop_down_lbl);
-                case MANIFESTS: return context.getString(R.string.manifiests_drop_down_lbl);
-                case CLAIMS: return context.getString(R.string.claims_drop_down_lbl);
                 case REPRESENTATIVES: return context.getString(R.string.representatives_drop_down_lbl);
                 case RECEIPTS: return context.getString(R.string.receipts_drop_down_lbl);
                 case VICKETS: return context.getString(R.string.vickets_drop_down_lbl);

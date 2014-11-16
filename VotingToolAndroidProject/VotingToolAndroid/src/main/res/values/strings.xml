@@ -6,14 +6,8 @@
     <string name="wait_msg">por favor, espere</string>
     <string name="sending_data_lbl">enviando datos ... </string>
     <string name="back_to_cancel_lbl">pulsar \'atrás\' para cancelar</string>
-    <string name="manifest_pendind_lbl">manifiesto pendiente de abrir</string>
-    <string name="claim_pending_lbl">reclamacion pendiente de abrir</string>
     <string name="voting_pending_lbl">votación pendiente de abrir</string>
-    <string name="manifest_closed_lbl">manifiesto cerrado</string>
-    <string name="claim_closed_lbl">reclamación cerrada</string>
     <string name="voting_closed_lbl">votación cerrada</string>
-    <string name="manifest_open_lbl">manifiesto abierto, quedan %1$s horas</string>
-    <string name="claim_open_lbl">reclamación abierta, quedan %1$s horas</string>
     <string name="voting_open_lbl">votación abierta, quedan %1$s horas</string>
     <string name="already_voted_lbl">usted ha elegido en este asunto la opción \'%1$s\'</string>
     <string name="closed_upper_lbl">cerrado</string>
@@ -152,7 +146,6 @@
     <string name="request_certificate_form_lbl">datos del certificado de usuario</string>
 	<string name="empty_fields_msg">debe rellenar todos los campos</string>
 	<string name="password_error_msg">las contraseñas no coinciden</string>
-	<string name="claim_fields_dialog_caption">rellenar los campos</string>
 	<string name="error_lbl">error</string>
 	<string name="msg_lbl">mensaje</string>
 	<string name="operation_ok_msg">operación completada con éxito</string>
@@ -178,8 +171,6 @@
     <string name="get_cert_error_msg">error obteniendo certificado de \'%1$s\'</string>
     <string name="event_canceled">evento cancelado</string>
     <string name="info_lbl">información</string>
-    <string name="manifest_info_lbl">datos sobre el manifiesto</string>
-    <string name="claim_info_lbl">datos sobre la reclamación</string>
     <string name="voting_info_lbl">datos sobre la votación</string>
     <string name="eventfields_dialog_caption">campos de la reclamación</string>
     <string name="check_representative_button">comprobar mi representante</string>
@@ -236,15 +227,11 @@
     <string name="control_center_missing_error_lbl">debe seleccionar un centro de control</string>
     <string name="empty_field_error_lbl">el contenido del campo no puede ir vacío</string>
     <string name="add_vote_option_lbl">añadir opción de votación</string>
-    <string name="add_claim_option_lbl">añadir campo de reclamación</string>
     <string name="add_vote_option_msg">introduzca el texto que aparecerá como opción en la votación</string>
-    <string name="add_claim_option_msg">introduzca el texto que aparecerá como campo de la reclamación</string>
     <string name="delete_option_lbl">borrar opción</string>
     <string name="num_vote_options_error_msg">debe añadir al menos un par de opciones en la votación</string>
     <string name="vote_options_lbl">opciones de la votación</string>
-    <string name="claim_options_lbl">campos de la reclamación</string>
     <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
-    <string name="claim_published_ok_msg">la reclamación se ha publicado corréctamente</string>
     <string name="election_published_ok_msg">la votación se ha publicado corréctamente</string>
     <string name="representative_image_lbl">imagen del representante</string>
     <string name="new_representative_title">dar de alta representante</string>

@@ -78,56 +78,24 @@ public class EventVSService extends IntentService {
                 return;
             }
             String serviceURL = contextVS.getAccessControl().getEventVSURL(eventState,
-                    EventVS.getURLPart(eventType), ContextVS.EVENTS_PAGE_SIZE, offset);
+                    ContextVS.EVENTS_PAGE_SIZE, offset);
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     EventVSResponse response = EventVSResponse.parse(responseVS.getMessage(), eventType);
-                    if(response.getNumEventsVSClaimInSystem() != null) {
-                        switch (eventState) {
-                            case ACTIVE:
-                                EventVSContentProvider.setNumTotalClaimsActive(
-                                        Long.valueOf(response.getNumEventsVSClaimInSystem()));
-                                break;
-                            case PENDING:
-                                EventVSContentProvider.setNumTotalClaimsPending(
-                                        Long.valueOf(response.getNumEventsVSClaimInSystem()));
-                                break;
-                            case TERMINATED:
-                                EventVSContentProvider.setNumTotalClaimsTerminated(
-                                        Long.valueOf(response.getNumEventsVSClaimInSystem()));
-                                break;
-                        }
-                    } else if(response.getNumEventsVSElectionInSystem() != null) {
-                        switch (eventState) {
-                            case ACTIVE:
-                                EventVSContentProvider.setNumTotalElectionsActive(
-                                        Long.valueOf(response.getNumEventsVSElectionInSystem()));
-                                break;
-                            case PENDING:
-                                EventVSContentProvider.setNumTotalElectionsPending(
-                                        Long.valueOf(response.getNumEventsVSElectionInSystem()));
-                                break;
-                            case TERMINATED:
-                                EventVSContentProvider.setNumTotalElectionsTerminated(
-                                        Long.valueOf(response.getNumEventsVSElectionInSystem()));
-                                break;
-                        }
-                    } else if(response.getNumEventsVSManifestInSystem() != null) {
-                        switch (eventState) {
-                            case ACTIVE:
-                                EventVSContentProvider.setNumTotalManifestsActive(
-                                        Long.valueOf(response.getNumEventsVSManifestInSystem()));
-                                break;
-                            case PENDING:
-                                EventVSContentProvider.setNumTotalManifestsPending(
-                                        Long.valueOf(response.getNumEventsVSManifestInSystem()));
-                                break;
-                            case TERMINATED:
-                                EventVSContentProvider.setNumTotalManifestsTerminated(
-                                        Long.valueOf(response.getNumEventsVSManifestInSystem()));
-                                break;
-                        }
+                    switch (eventState) {
+                        case ACTIVE:
+                            EventVSContentProvider.setNumTotalElectionsActive(
+                                    Long.valueOf(response.getNumEventsVSElectionInSystem()));
+                            break;
+                        case PENDING:
+                            EventVSContentProvider.setNumTotalElectionsPending(
+                                    Long.valueOf(response.getNumEventsVSElectionInSystem()));
+                            break;
+                        case TERMINATED:
+                            EventVSContentProvider.setNumTotalElectionsTerminated(
+                                    Long.valueOf(response.getNumEventsVSElectionInSystem()));
+                            break;
                     }
                     List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                     for(EventVS eventVS : response.getEvents()) {

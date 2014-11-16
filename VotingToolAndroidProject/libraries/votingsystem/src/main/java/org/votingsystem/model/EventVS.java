@@ -231,28 +231,7 @@ public class EventVS implements Serializable {
     }
 
     public String getURLstats() {
-        String basePath = accessControl.getServerURL();
-        switch(this.getTypeVS()) {
-            case VOTING_EVENT:
-                basePath = basePath + "/eventVSElection/";
-                break;
-            case CLAIM_EVENT:
-                basePath = basePath + "/eventVSClaim/";
-                break;
-            case MANIFEST_EVENT:
-                basePath = basePath + "/eventVSManifest/";
-                break;
-        }
-        return basePath + id + "/stats";
-    }
-
-    public static String getURLPart(TypeVS typeVS) {
-        switch(typeVS) {
-            case CLAIM_EVENT: return "/eventVSClaim";
-            case MANIFEST_EVENT: return "/eventVSManifest";
-            case VOTING_EVENT: return "/eventVSElection";
-        }
-        return "/eventVS";
+        return accessControl.getServerURL() + "/eventVSElection/" + id + "/stats";
     }
 
     public boolean isActive() {
@@ -278,7 +257,6 @@ public class EventVS implements Serializable {
     }
 
     public JSONObject getSignatureContentJSON() throws JSONException {
-
         Map<String, Object> map = new HashMap<String, Object>();
         if(accessControl != null) {
             Map<String, Object> accessControlMap = new HashMap<String, Object>();
@@ -293,9 +271,6 @@ public class EventVS implements Serializable {
         map.put("content", content);
         map.put("UUID", UUID.randomUUID().toString());
         map.put("URL", URL);
-        if(TypeVS.CLAIM_EVENT == typeVS) {
-            map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE.toString());
-        }
         JSONObject jsonObject = new JSONObject(map);
         if (fieldEventVSSet != null) {
             JSONArray jsonArray = new JSONArray();

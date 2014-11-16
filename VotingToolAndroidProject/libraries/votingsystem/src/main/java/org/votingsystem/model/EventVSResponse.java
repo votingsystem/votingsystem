@@ -17,12 +17,8 @@ public class EventVSResponse implements Serializable {
 
 	public static final String TAG = EventVSResponse.class.getSimpleName();
 
-    private Integer numEventsVSManifest;
-    private Integer numEventsVSManifestInSystem;
     private Integer numEventsVSElection;
     private Integer numEventsVSElectionInSystem;
-    private Integer numEventsVSClaim;
-    private Integer numEventsVSClaimInSystem;
     private Integer numEventVSInRequest;
     private Integer numEventVSInSystem;
     
@@ -61,14 +57,6 @@ public class EventVSResponse implements Serializable {
                 eventVSResponse.setNumEventsVSElection(eventsArray.length());
                 eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("totalCount"));
                 break;
-            case CLAIM_EVENT:
-                eventVSResponse.setNumEventsVSClaim(eventsArray.length());
-                eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("totalCount"));
-                break;
-            case MANIFEST_EVENT:
-                eventVSResponse.setNumEventsVSManifest(eventsArray.length());
-                eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("totalCount"));
-                break;
             default:
                 Log.d(TAG + ".parse", "unknown eventType: " + eventType.toString());
 
@@ -78,22 +66,6 @@ public class EventVSResponse implements Serializable {
         if (jsonObject.has("offset")) eventVSResponse.setOffset(jsonObject.getInt("offset"));
         eventVSResponse.setEvents(eventList);
         return eventVSResponse;
-    }
-
-    public int getNumEventsVSManifest() {
-        return numEventsVSManifest;
-    }
-
-    public void setNumEventsVSManifest(int numEventsVSManifest) {
-        this.numEventsVSManifest = numEventsVSManifest;
-    }
-
-    public Integer getNumEventsVSManifestInSystem() {
-        return numEventsVSManifestInSystem;
-    }
-
-    public void setNumEventsVSManifestInSystem(int numEventsVSManifestInSystem) {
-        this.numEventsVSManifestInSystem = numEventsVSManifestInSystem;
     }
 
     public int getNumEventsVSElection() {
@@ -110,22 +82,6 @@ public class EventVSResponse implements Serializable {
 
     public void setNumEventsVSElectionInSystem(int numEventsVSElectionInSystem) {
         this.numEventsVSElectionInSystem = numEventsVSElectionInSystem;
-    }
-
-    public int getNumEventsVSClaim() {
-        return numEventsVSClaim;
-    }
-
-    public void setNumEventsVSClaim(int numEventsVSClaim) {
-        this.numEventsVSClaim = numEventsVSClaim;
-    }
-
-    public Integer getNumEventsVSClaimInSystem() {
-        return numEventsVSClaimInSystem;
-    }
-
-    public void setNumEventsVSClaimInSystem(int numEventsVSClaimInSystem) {
-        this.numEventsVSClaimInSystem = numEventsVSClaimInSystem;
     }
 
     public int getNumEventVSInRequest() {

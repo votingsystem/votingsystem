@@ -31,6 +31,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -54,7 +55,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = EventVSFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private Button signAndSendButton;
     private EventVS eventVS;
     private AppContextVS contextVS;
@@ -72,40 +72,32 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
-            else {
-                ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
-                        ContextVS.RESPONSEVS_KEY);
-                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage());
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
-                setProgressDialogVisible(false);
-            }
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+        else {
+            ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
+                    ContextVS.RESPONSEVS_KEY);
+            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
+            setProgressDialogVisible(false);
+        }
         }
     };
 
     private void launchSignAndSendService() {
-        LOGD(TAG + ".launchSignAndSendService", "");
+        LOGD(TAG + ".launchSignAndSendService", "launchSignAndSendService");
         try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    SignAndSendService.class);
+            Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
-            } else {
-                startIntent.putExtra(ContextVS.URL_KEY,
-                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
-                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                        ContentTypeVS.JSON_SIGNED);
-                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
-                        + eventVS.getSubject();
-                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-                JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
-            }
+            startIntent.putExtra(ContextVS.URL_KEY,
+                    contextVS.getAccessControl().getEventVSClaimCollectorURL());
+            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY, ContentTypeVS.JSON_SIGNED);
+            String messageSubject = getActivity().getString(R.string.signature_msg_subject)
+                    + eventVS.getSubject();
+            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
+            JSONObject signatureContent = eventVS.getSignatureContentJSON();
+            startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             setProgressDialogVisible(true);
             signAndSendButton.setEnabled(false);
             getActivity().startService(startIntent);
@@ -142,14 +134,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         signAndSendButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG + "- signAndSendButton -", " - state: " + contextVS.getState().toString());
-                if (eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    if(eventVS.getFieldsEventVS() != null && !eventVS.getFieldsEventVS().isEmpty()) {
-                        showClaimFieldsDialog();
-                        return;
-                    }
-                }
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        null, false, null);
+                PinDialogFragment.showPinScreen(getFragmentManager(),broadCastId, null,false, null);
             }
         });
         setHasOptionsMenu(true);
@@ -177,7 +162,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(getActivity().getApplicationContext(),
+                Intent intent = new Intent(getActivity(),
                         EventVSStatsPagerActivity.class);
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
                 intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
@@ -189,28 +174,19 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    @Override public void onDestroy() {
-        super.onDestroy();
-    };
-
-    @Override public void onStop() {
-        super.onStop();
-    }
-
     private void setProgressDialogVisible(boolean isVisible) {
         isProgressDialogVisible.set(isVisible);
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     public void onClickSubject(View v) {
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
+            MessageDialogFragment.showDialog(null, getActivity().getString(R.string.subject_lbl),
+                    eventVS.getSubject(), getFragmentManager());
         }
     }
 
@@ -227,11 +203,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
         errorMsgTextView.setVisibility(View.GONE);
         Set<FieldEventVS> fields = eventVS.getFieldsEventVS();
-
         fieldsMap = new HashMap<Integer, EditText>();
         for (FieldEventVS field : fields) {
-            addFormField(field.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
-                    mFormView, field.getId().intValue());
+            fieldsMap.put(field.getId().intValue(), UIUtils.addFormField(field.getContent(),
+                    InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+                    mFormView, field.getId().intValue(), getActivity()));
         }
         builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
                 setPositiveButton(getString(R.string.accept_lbl), null).
@@ -264,60 +240,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
-    private void addFormField(String label, int type, LinearLayout mFormView, int id) {
-        LOGD(TAG + ".addFormField", "field: " + label);
-        TextView textView = new TextView(getActivity().getApplicationContext());
-        textView.setTextSize(getResources().getDimension(R.dimen.claim_field_text_size));
-        textView.setText(label);
-        EditText fieldText = new EditText(getActivity().getApplicationContext());
-        fieldText.setLayoutParams(getDefaultParams(false));
-        fieldText.setTextColor(Color.BLACK);
-
-        // setting an unique id is important in order to save the state
-        // (content) of this view across screen configuration changes
-        fieldText.setId(id);
-        fieldText.setInputType(type);
-        mFormView.addView(textView);
-        mFormView.addView(fieldText);
-        fieldsMap.put(id, fieldText);
-    }
-
-    private LinearLayout.LayoutParams getDefaultParams(boolean isLabel) {
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        if (isLabel) {
-            params.bottomMargin = 5;
-            params.topMargin = 10;
-        }
-        params.leftMargin = 20;
-        params.rightMargin = 20;
-        return params;
-    }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        setProgressDialogVisible(false);
-    }
-
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
 }
 

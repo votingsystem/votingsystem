@@ -209,28 +209,10 @@ public class EventVSContentProvider extends ContentProvider {
     }
 
     public static Long getNumTotal(TypeVS eventType, EventVS.State evenState) {
-        switch(eventType) {
-            case MANIFEST_EVENT:
-                switch(evenState) {
-                    case ACTIVE: return numTotalManifestsActive;
-                    case PENDING: return numTotalManifestsPending;
-                    case TERMINATED: return numTotalManifestsTerminated;
-                    default: return -1L;
-                }
-            case CLAIM_EVENT:
-                switch(evenState) {
-                    case ACTIVE: return numTotalClaimsActive;
-                    case PENDING: return numTotalClaimsPending;
-                    case TERMINATED: return numTotalClaimsTerminated;
-                    default: return -1L;
-                }
-            case VOTING_EVENT:
-                switch(evenState) {
-                    case ACTIVE: return numTotalElectionsActive;
-                    case PENDING: return numTotalElectionsPending;
-                    case TERMINATED: return numTotalElectionsTerminated;
-                    default: return -1L;
-                }
+        switch(evenState) {
+            case ACTIVE: return numTotalElectionsActive;
+            case PENDING: return numTotalElectionsPending;
+            case TERMINATED: return numTotalElectionsTerminated;
             default: return -1L;
         }
     }

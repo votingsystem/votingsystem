@@ -36,8 +36,14 @@
     <style name="ActionBarVS" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/bkg_vs</item>
         <item name="android:titleTextStyle">@style/ThemeVS.ActionBar.TitleTextStyle</item>
+        <item name="android:subtitleTextStyle">@style/ThemeVS.ActionBar.SubTitleTextStyle</item>
     </style>
-    <style name="ThemeVS.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+    <style name="ThemeVS.ActionBar.TitleTextStyle"
+        parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/frg_vs</item>
+    </style>
+    <style name="ThemeVS.ActionBar.SubTitleTextStyle"
+        parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
         <item name="android:textColor">@color/frg_vs</item>
     </style>
 </resources>

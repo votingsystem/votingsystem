@@ -74,101 +74,29 @@ public class EventVSPagerActivity extends FragmentActivity {
     private void setActionBarTitle() {
         String eventJSON = cursor.getString(cursor.getColumnIndex(
                 EventVSContentProvider.JSON_DATA_COL));
-        EventVS event = null;
         try {
-            event = EventVS.parse(new JSONObject(eventJSON));
+            EventVS event = EventVS.parse(new JSONObject(eventJSON));
+            String subtTitle = null;
+            getActionBar().setLogo(R.drawable.mail_mark_unread_32);
+            switch(event.getState()) {
+                case ACTIVE:
+                    getActionBar().setTitle(getString(R.string.voting_open_lbl,
+                            DateUtils.getElapsedTimeStr(event.getDateFinish())));
+                    break;
+                case PENDING:
+                    getActionBar().setTitle(getString(R.string.voting_pending_lbl));
+                    subtTitle = getString(R.string.init_lbl) + ": " +
+                            DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
+                            "" + getString(R.string.finish_lbl) + ": " +
+                            DateUtils.getDayWeekDateStr(event.getDateFinish());
+                    break;
+                default:
+                    getActionBar().setTitle(getString(R.string.voting_closed_lbl));
+            }
+            if(subtTitle != null) getActionBar().setSubtitle(subtTitle);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        String subtTitle = null;
-        switch(event.getTypeVS()) {
-            case MANIFEST_EVENT:
-                getActionBar().setLogo(R.drawable.manifest_32);
-                switch(event.getState()) {
-                    case ACTIVE:
-                        getActionBar().setTitle(getString(R.string.manifest_open_lbl,
-                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
-                        break;
-                    case PENDING:
-                        getActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish());
-                        break;
-                    case CANCELLED:
-                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl) + " - (" +
-                                getString(R.string.event_canceled) + ")");
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish()) +
-                                " (" +  getString(R.string.event_canceled)  + ")";
-                        break;
-                    case TERMINATED:
-                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl));
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish());
-                        break;
-                    default:
-                        getActionBar().setTitle(getString(R.string.manifest_closed_lbl));
-                }
-                break;
-            case CLAIM_EVENT:
-                getActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
-                switch(event.getState()) {
-                    case ACTIVE:
-                        getActionBar().setTitle(getString(R.string.claim_open_lbl,
-                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
-                        break;
-                    case PENDING:
-                        getActionBar().setTitle(getString(R.string.claim_pending_lbl));
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish());
-                        break;
-                    case CANCELLED:
-                        getActionBar().setTitle(getString(R.string.claim_closed_lbl) + " - (" +
-                                getString(R.string.event_canceled) + ")");
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish()) +
-                                " (" +  getString(R.string.event_canceled)  + ")";
-                        break;
-                    case TERMINATED:
-                        setTitle(getString(R.string.claim_closed_lbl));
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish());
-                    default:
-                        getActionBar().setTitle(getString(R.string.claim_closed_lbl));
-                }
-                break;
-            case VOTING_EVENT:
-                getActionBar().setLogo(R.drawable.mail_mark_unread_32);
-                switch(event.getState()) {
-                    case ACTIVE:
-                        getActionBar().setTitle(getString(R.string.voting_open_lbl,
-                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
-                        break;
-                    case PENDING:
-                        getActionBar().setTitle(getString(R.string.voting_pending_lbl));
-                        subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateBegin()) + " - " +
-                                "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDayWeekDateStr(event.getDateFinish());
-                        break;
-                    default:
-                        getActionBar().setTitle(getString(R.string.voting_closed_lbl));
-                }
-                break;
-        }
-        if(subtTitle != null) getActionBar().setSubtitle(subtTitle);
     }
 
     @Override public AppContextVS getApplicationContext() {

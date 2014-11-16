@@ -4,6 +4,7 @@
     <item android:id="@+id/search_item"
           android:title="@string/searchLabel"
           votingSystem:showAsAction="always"
+          android:icon="@android:drawable/ic_menu_search"
           android:actionViewClass="android.widget.SearchView" />
 
     <group android:id="@+id/general_items">
