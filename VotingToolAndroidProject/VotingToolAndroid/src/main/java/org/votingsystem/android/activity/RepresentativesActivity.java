@@ -24,7 +24,7 @@ public class RepresentativesActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_vs);
+        setContentView(R.layout.activity_base);
         getLPreviewUtils().trySetActionBar();
         RepresentativeGridFragment fragment = new RepresentativeGridFragment();
         weakRefToFragment = new WeakReference<RepresentativeGridFragment>(fragment);

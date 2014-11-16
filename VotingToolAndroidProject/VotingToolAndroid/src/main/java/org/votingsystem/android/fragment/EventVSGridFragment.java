@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -40,11 +41,9 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -58,9 +57,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     private ModalProgressDialogFragment progressDialog;
     private View rootView;
-    //private TextView searchTextView;
     private GridView gridView;
-    //private ListView gridView;
     private EventListAdapter mAdapter = null;
     private EventVS.State eventState = null;
     private GroupPosition groupPosition = GroupPosition.VOTING;
@@ -135,9 +132,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                             getString(R.string.loading_data_msg),
                             getString(R.string.loading_info_msg),
                             getFragmentManager());
-                } else if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
+                } else ModalProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
@@ -146,24 +141,20 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        /*LOGD(TAG + ".onScroll", "firstVisibleItem: " + firstVisibleItem +
-                " - visibleItemCount: " + visibleItemCount + " - visibleItemCount: " +
-                visibleItemCount + " - groupPosition: " + groupPosition + " - eventState: " +
-                eventState);*/
         if(contextVS.getAccessControl() == null) {
             LOGD(TAG +  ".onScroll", "Missing Access Control. Waiting for data");
+            Toast.makeText(getActivity(), getString(R.string.waiting_for_access_control_connection),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
         if (totalItemCount == 0 || firstVisibleItem == 0) return ;
-        /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         Long numTotalEvents = EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(),
                 eventState);
         if(numTotalEvents == null) fetchItems(offset);
         else {
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
-            if(loadMore && !  (isProgressDialogVisible.get() && offset < numTotalEvents &&
-                    cursorCount < numTotalEvents)) {
+            if(loadMore && !isProgressDialogVisible.get() && (cursorCount < numTotalEvents)) {
                 LOGD(TAG +  ".onScroll", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
                         totalItemCount + " - numTotalEvents: " + numTotalEvents +

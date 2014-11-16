@@ -29,12 +29,8 @@
         android:layout_width="match_parent"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="4dp"
-        android:textColor="#f9f9f9"
-        android:color="#f9f9f9"
-        android:background="#f9f9f9"
-        android:textSize="18sp"/>
+        android:textColor="@color/frg_vs"
+        android:textSize="16dp"/>
 
     <TextView android:id="@+id/normal_text"
         android:layout_height="wrap_content"
@@ -45,7 +41,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:gravity="center_vertical|start"
-        android:textSize="18sp"
-        android:textColor="#f9f9f9"
+        android:textSize="16dp"
+        android:textColor="@color/frg_vs"
         android:background="@color/bkg_vs"/>
 </LinearLayout>

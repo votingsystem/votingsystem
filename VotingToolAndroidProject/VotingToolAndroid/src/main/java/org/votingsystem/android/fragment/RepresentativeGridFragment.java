@@ -218,9 +218,7 @@ public class RepresentativeGridFragment extends Fragment
                             getString(R.string.loading_data_msg),
                             getString(R.string.loading_info_msg),
                             getFragmentManager());
-                } else if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
+                } else ModalProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }

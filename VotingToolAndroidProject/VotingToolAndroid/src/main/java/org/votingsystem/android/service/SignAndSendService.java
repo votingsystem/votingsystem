@@ -57,13 +57,10 @@ public class SignAndSendService extends IntentService {
                 default:
                     processOperation(operationVS, serviceCaller);
             }
-
             return;
         }
         ResponseVS responseVS = null;
-        int resultIcon = R.drawable.fa_times_32;
         try {
-            Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
@@ -73,16 +70,12 @@ public class SignAndSendService extends IntentService {
             ContentTypeVS contentType = (ContentTypeVS)intent.getSerializableExtra(
                     ContextVS.CONTENT_TYPE_KEY);
             String caption = null;
-            byte[] pdfBytes = null;
             String notificationMessage = null;
             LOGD(TAG + ".onHandleIntent", "operationType: " + operationType +
                     " - contentType: " + contentType);
             switch(operationType) {
                 case VOTING_PUBLISHING:
-                case CLAIM_PUBLISHING:
-                case CONTROL_CENTER_ASSOCIATION:
                 case SMIME_CLAIM_SIGNATURE:
-                case CLAIM_EVENT:
                 case REPRESENTATIVE_REVOKE:
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
@@ -99,23 +92,15 @@ public class SignAndSendService extends IntentService {
             }
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 switch(operationType) {
-                    case CLAIM_PUBLISHING:
-                        notificationMessage = getString(R.string.claim_published_ok_msg);
-                        break;
                     case VOTING_PUBLISHING:
                         notificationMessage = getString(R.string.election_published_ok_msg);
-                        break;
-                    case REPRESENTATIVE_REVOKE:
-                        notificationMessage = getString(R.string.representative_revoke_ok_msg);
                         break;
                     default:
                         notificationMessage = getString(R.string.signature_ok_notification_msg);
                 }
                 caption = getString(R.string.operation_ok_msg);
-                resultIcon = R.drawable.signature_ok_32;
             } else {
                 caption = getString(R.string.signature_error_notification_msg);
-                notificationMessage = responseVS.getMessage();
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
                     try {
                         JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
@@ -124,17 +109,14 @@ public class SignAndSendService extends IntentService {
                     } catch(Exception ex) {
                         ex.printStackTrace();
                     }
-                }
+                } else notificationMessage = responseVS.getMessage();
             }
-            responseVS.setCaption(caption);
-            responseVS.setNotificationMessage(notificationMessage);
+            responseVS.setCaption(caption).setNotificationMessage(notificationMessage);
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
-            responseVS.setIconId(resultIcon);
-            responseVS.setTypeVS(operationType);
-            responseVS.setServiceCaller(serviceCaller);
+            responseVS.setTypeVS(operationType).setServiceCaller(serviceCaller);
             contextVS.showNotification(responseVS);
             contextVS.broadcastResponse(responseVS);
         }
@@ -149,11 +131,8 @@ public class SignAndSendService extends IntentService {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, contextVS.getString(
                     R.string.connection_error_msg));
             responseVS.setIconId(R.drawable.fa_times_32);
-        } else {
-            responseVS = sendSMIME(targetServer, operation);
-        }
-        responseVS.setTypeVS(operation.getTypeVS());
-        responseVS.setServiceCaller(serviceCaller);
+        } else responseVS = sendSMIME(targetServer, operation);
+        responseVS.setTypeVS(operation.getTypeVS()).setServiceCaller(serviceCaller);
         responseVS.setOperation(operation);
         contextVS.showNotification(responseVS);
         contextVS.broadcastResponse(responseVS);
@@ -209,8 +188,7 @@ public class SignAndSendService extends IntentService {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         } finally {
             responseVS.setOperation(operationVS);
-            responseVS.setServiceCaller(serviceCaller);
-            responseVS.setTypeVS(operationVS.getTypeVS());
+            responseVS.setTypeVS(operationVS.getTypeVS()).setServiceCaller(serviceCaller);
             contextVS.broadcastResponse(responseVS);
         }
     }

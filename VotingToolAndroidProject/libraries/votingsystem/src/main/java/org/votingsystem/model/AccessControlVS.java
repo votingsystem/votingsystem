@@ -128,13 +128,8 @@ public class AccessControlVS extends ActorVS implements Serializable {
                 "&eventVSState=" + eventState.toString();
     }
 
-    public String getPublishServiceURL(TypeVS formType) {
-        switch(formType) {
-            case CLAIM_PUBLISHING:return getServerURL() + "/eventVSClaim";
-            case MANIFEST_PUBLISHING:return getServerURL() + "/eventVSManifest";
-            case VOTING_PUBLISHING:return getServerURL() + "/eventVSElection";
-        }
-        return null;
+    public String getPublishServiceURL() {
+        return getServerURL() + "/eventVSElection";
     }
 
     public String getUserCSRServiceURL (Long csrRequestId) {

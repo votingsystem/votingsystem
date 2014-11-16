@@ -27,6 +27,8 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 public class ModalProgressDialogFragment extends DialogFragment {
 
     public static final String TAG = ModalProgressDialogFragment.class.getSimpleName();
@@ -44,6 +46,14 @@ public class ModalProgressDialogFragment extends DialogFragment {
         dialog.setArguments(args);
         dialog.show(fragmentManager, ModalProgressDialogFragment.TAG);
         return dialog;
+    }
+
+    public static void hide(FragmentManager fragmentManager) {
+        if(fragmentManager != null && fragmentManager.findFragmentByTag(
+                ModalProgressDialogFragment.TAG) != null) {
+            ((ModalProgressDialogFragment) fragmentManager.
+                    findFragmentByTag(ModalProgressDialogFragment.TAG)).dismiss();
+        } else LOGD(TAG +  ".hide", "ModalProgressDialogFragment not found");
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

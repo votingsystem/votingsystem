@@ -100,7 +100,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                     showMessage(responseStatusCode, caption, message);
                     if(ResponseVS.SC_OK != responseStatusCode) {
                         editorFragment.setEditable(true);
-                        if(menu != null) getMenuInflater().inflate(R.menu.editor, menu);
+                        if(menu != null) getMenuInflater().inflate(R.menu.text_editor, menu);
                     } else {
                         imageCaption.setOnClickListener(null);
                     }
@@ -193,7 +193,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getSupportFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     private void showNifDialog() {
@@ -250,7 +250,7 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         LOGD(TAG + ".onCreateOptionsMenu", "");
-        getMenuInflater().inflate(R.menu.editor, menu);
+        getMenuInflater().inflate(R.menu.text_editor, menu);
         this.menu = menu;
         if(operationType == TypeVS.REPRESENTATIVE && representative == null)
             this.menu.setGroupVisible(R.id.general_items, false);

@@ -158,8 +158,8 @@ public class LPreviewUtilsBase {
     public void setOrAnimatePlusCheckIcon(final ImageView imageView, boolean isCheck,
             boolean allowAnimate) {
         final int imageResId = isCheck
-                ? R.drawable.add_schedule_button_icon_checked
-                : R.drawable.add_schedule_button_icon_unchecked;
+                ? R.drawable.accept_22
+                : R.drawable.signature_ok_22;
 
         if (imageView.getTag() != null) {
             if (imageView.getTag() instanceof Animator) {

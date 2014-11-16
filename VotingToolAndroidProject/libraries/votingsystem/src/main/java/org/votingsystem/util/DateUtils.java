@@ -82,7 +82,20 @@ public class DateUtils {
     public static Calendar addDays(int numDias) {
         Calendar today = Calendar.getInstance();
         today.add(Calendar.DATE, numDias);
-        return (today);
+        return today;
+    }
+
+    public static Calendar getEventVSElectionDateBeginCalendar(
+            int year, int monthOfYear,int dayOfMonth) {
+        Calendar electionCalendar = Calendar.getInstance();
+        electionCalendar.set(Calendar.YEAR, year);
+        electionCalendar.set(Calendar.MONTH, monthOfYear);
+        electionCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        electionCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        electionCalendar.set(Calendar.MINUTE, 0);
+        electionCalendar.set(Calendar.SECOND, 0);
+        electionCalendar.set(Calendar.MILLISECOND, 0);
+        return electionCalendar;
     }
 
     public static Date addDays(Date date, int days){

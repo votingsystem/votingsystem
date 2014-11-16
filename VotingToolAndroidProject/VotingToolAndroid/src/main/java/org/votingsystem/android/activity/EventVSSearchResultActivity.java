@@ -54,11 +54,13 @@ public class EventVSSearchResultActivity extends FragmentActivity {
         String searchMsg = getString(R.string.eventvs_election_search_msg, queryStr,
                 MsgUtils.getVotingStateMessage(eventState, this));
         textView.setText(searchMsg);
-        textView.setVisibility(View.VISIBLE);
+        findViewById(R.id.search_query_Container).setVisibility(View.VISIBLE);
         ResponseVS responseVS = args.getParcelable(ContextVS.RESPONSEVS_KEY);
         try {
             EventVSResponse eventResponse= EventVSResponse.parse(responseVS.getMessage(), TypeVS.VOTING_EVENT);
             eventVSList = eventResponse.getEvents();
+            ((TextView) findViewById(R.id.num_results)).setText(getString(R.string.num_matches,
+                    eventVSList.size()));
             EventListAdapter eventListAdapter = new EventListAdapter(eventVSList, this);
             gridView.setAdapter(eventListAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -69,7 +71,6 @@ public class EventVSSearchResultActivity extends FragmentActivity {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

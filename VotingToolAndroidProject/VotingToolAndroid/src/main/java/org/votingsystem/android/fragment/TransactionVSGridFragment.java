@@ -167,7 +167,7 @@ public class TransactionVSGridFragment extends Fragment
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {

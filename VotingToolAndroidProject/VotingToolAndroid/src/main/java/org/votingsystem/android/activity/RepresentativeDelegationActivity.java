@@ -193,7 +193,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getSupportFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     public void onCheckboxClicked(View view) {

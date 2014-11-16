@@ -149,7 +149,7 @@ public class RepresentativeFragment extends Fragment {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     private void printRepresentativeData(UserVS representative) {

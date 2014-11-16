@@ -39,9 +39,14 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
+import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.model.ContextVS;
@@ -194,8 +199,15 @@ public class UIUtils  {
 
     public static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK)
-                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    public static void changeSearchIcon(Menu menu, Context context) {
+        MenuItem searchViewMenuItem = menu.findItem(R.id.search_item);
+        SearchView mSearchView = (SearchView) searchViewMenuItem.getActionView();
+        int searchImgId = context.getResources().getIdentifier("android:id/search_button", null, null);
+        ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
+        v.setImageResource(R.drawable.ic_search_white_18dp);
     }
 
     // Whether a feedback notification was fired for a particular session. In the event that a

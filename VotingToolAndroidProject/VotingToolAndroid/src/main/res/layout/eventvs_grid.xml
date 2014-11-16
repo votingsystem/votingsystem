@@ -4,44 +4,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView android:id="@+id/search_query"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/msg_content_vs"
-        android:visibility="gone"
-        android:gravity="center_vertical|center_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <FrameLayout android:id="@+id/gridContainer"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <!-- <ListView android:id="@id/android:list"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout android:id="@+id/search_query_Container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:drawSelectorOnTop="false"/>-->
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+            <TextView android:id="@+id/num_results"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/msg_content_vs"
+                android:gravity="center_vertical|center_horizontal"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView android:id="@+id/search_query"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:textColor="@color/msg_content_vs"
+                android:gravity="center_vertical|center_horizontal"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
 
-        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/gridview"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:columnWidth="250dp"
-            android:numColumns="auto_fit"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:verticalSpacing="4dp"
-            android:horizontalSpacing="4dp"
-            android:stretchMode="columnWidth"
-            android:gravity="center"
-            android:drawSelectorOnTop="false"/>
+        <FrameLayout android:id="@+id/gridContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    </FrameLayout>
+            <GridView android:id="@+id/gridview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:columnWidth="250dp"
+                android:numColumns="auto_fit"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:verticalSpacing="4dp"
+                android:horizontalSpacing="4dp"
+                android:stretchMode="columnWidth"
+                android:gravity="center"
+                android:drawSelectorOnTop="false"/>
+
+        </FrameLayout>
+    </LinearLayout>
 
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"

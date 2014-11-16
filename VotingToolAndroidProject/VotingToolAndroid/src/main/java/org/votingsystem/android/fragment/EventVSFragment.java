@@ -204,7 +204,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     public void onClickSubject(View v) {

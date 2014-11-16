@@ -34,7 +34,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertResponseActivity;
-import org.votingsystem.android.activity.EventVSListActivity;
+import org.votingsystem.android.activity.EventVSMainActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.NifUtils;
@@ -117,7 +117,7 @@ public class CertRequestFormFragment extends Fragment {
             public void onClick(View v) {
                 //finish();
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventVSListActivity.class);
+                        EventVSMainActivity.class);
                 startActivity(intent);
             }
         });

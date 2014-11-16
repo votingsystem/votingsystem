@@ -135,7 +135,7 @@ public class BrowserVSActivity extends ActivityBase {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getSupportFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {

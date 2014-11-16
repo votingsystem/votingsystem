@@ -23,7 +23,7 @@
             android:gravity="center"
             android:layout_weight="1"
             android:padding="5dp"
-            android:textSize="28sp" />
+            android:textSize="21sp" />
     </LinearLayout>
 
     <View android:layout_width="fill_parent"
@@ -37,6 +37,6 @@
         android:padding="10dp"
         android:layout_gravity="center"
         android:textColor="@color/msg_content_vs"
-        android:textSize="18sp" />
+        android:textSize="17sp" />
 
 </LinearLayout>

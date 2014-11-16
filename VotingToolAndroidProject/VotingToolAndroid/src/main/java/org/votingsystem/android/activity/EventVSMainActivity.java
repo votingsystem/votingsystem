@@ -17,9 +17,7 @@
 package org.votingsystem.android.activity;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -29,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
@@ -38,7 +35,7 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
-import org.votingsystem.android.fragment.PublishEventVSFragment;
+import org.votingsystem.android.fragment.EventVSPublishFragment;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.PrefUtils;
@@ -56,10 +53,10 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSListActivity extends ActivityBase
+public class EventVSMainActivity extends ActivityBase
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-	public static final String TAG = EventVSListActivity.class.getSimpleName();
+	public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
     private ModalProgressDialogFragment progressDialog;
     WeakReference<EventVSGridFragment> weakRefToFragment;
@@ -69,7 +66,7 @@ public class EventVSListActivity extends ActivityBase
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_vs);
+        setContentView(R.layout.activity_base);
         getLPreviewUtils().trySetActionBar();
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
@@ -83,7 +80,7 @@ public class EventVSListActivity extends ActivityBase
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
         View spinnerContainer = LayoutInflater.from(getActionBar().getThemedContext())
-                .inflate(R.layout.actionbar_spinner, null);
+                .inflate(R.layout.spinner_eventvs_actionbar, null);
         EventVSSpinnerAdapter mTopLevelSpinnerAdapter = new EventVSSpinnerAdapter(true);
         mTopLevelSpinnerAdapter.clear();
         mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
@@ -117,7 +114,7 @@ public class EventVSListActivity extends ActivityBase
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
         PrefUtils.registerPreferenceChangeListener(this, this);
         if(args != null && args.getString(SearchManager.QUERY) != null) {
-            String queryStr = args.getString(SearchManager.QUERY);
+            String queryStr = getIntent().getExtras().getString(SearchManager.QUERY);
             Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
             Intent startIntent = new Intent(this, EventVSService.class);
             startIntent.putExtra(ContextVS.STATE_KEY, bundled.getSerializable(ContextVS.STATE_KEY));
@@ -165,9 +162,7 @@ public class EventVSListActivity extends ActivityBase
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getSupportFragmentManager());
-        } else if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
+        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
     public void requestDataRefresh(EventVS.State eventState, NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing - eventState: " +
@@ -199,11 +194,10 @@ public class EventVSListActivity extends ActivityBase
                 onSearchRequested();
                 return true;
             case R.id.publish_document:
-                intent = new Intent(EventVSListActivity.this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
+                intent = new Intent(EventVSMainActivity.this, FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, EventVSPublishFragment.class.getName());
                 intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
                 startActivity(intent);
-                //showPublishDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -216,30 +210,6 @@ public class EventVSListActivity extends ActivityBase
         appData.putSerializable(ContextVS.STATE_KEY, fragment.getState());
         startSearch(null, false, appData, false);
         return true;
-    }
-
-    private void showPublishDialog(){
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl)
-                .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(EventVSListActivity.this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
-                switch (which) {
-                    case 0:
-                        intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
-                        break;
-                    case 1:
-                        intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MANIFEST_PUBLISHING);
-                        break;
-                    case 2:
-                        intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CLAIM_PUBLISHING);
-                        break;
-                }
-                startActivity(intent);
-            }
-        }).show();
-        //to avoid avoid dissapear on screen orientation change
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
     @Override protected void onDestroy() {
@@ -306,7 +276,7 @@ public class EventVSListActivity extends ActivityBase
         @Override
         public View getDropDownView(int position, View view, ViewGroup parent) {
             if (view == null || !view.getTag().toString().equals("DROPDOWN")) {
-                view = getLayoutInflater().inflate(R.layout.eventvs_spinner_item_dropdown,
+                view = getLayoutInflater().inflate(R.layout.spinner_eventvs_item_dropdown,
                         parent, false);
                 view.setTag("DROPDOWN");
             }
@@ -333,8 +303,8 @@ public class EventVSListActivity extends ActivityBase
         public View getView(int position, View view, ViewGroup parent) {
             if (view == null || !view.getTag().toString().equals("NON_DROPDOWN")) {
                 view = getLayoutInflater().inflate(mTopLevel
-                                ? R.layout.eventvs_spinner_item_actionbar
-                                : R.layout.eventvs_spinner_item,
+                                ? R.layout.spinner_eventvs_item_actionbar
+                                : R.layout.spinner_eventvs_item,
                         parent, false);
                 view.setTag("NON_DROPDOWN");
             }

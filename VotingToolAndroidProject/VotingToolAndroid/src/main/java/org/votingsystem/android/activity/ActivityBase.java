@@ -397,7 +397,7 @@ public abstract class ActivityBase extends FragmentActivity {
         Intent intent;
         switch (item) {
             case NAVDRAWER_ITEM_POLLS:
-                intent = new Intent(this, EventVSListActivity.class);
+                intent = new Intent(this, EventVSMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;

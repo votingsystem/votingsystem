@@ -112,14 +112,6 @@ public class NewFieldDialogFragment extends DialogFragment {
     }
 
     private void cancelRequest() {
-        Intent intent = new Intent(dialogCaller);
-        intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
-        if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY,
-                fieldEditText.getText().toString());
-        intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, ResponseVS.SC_ERROR);
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                sendBroadcast(intent);
         alertDialog.dismiss();
     }
 

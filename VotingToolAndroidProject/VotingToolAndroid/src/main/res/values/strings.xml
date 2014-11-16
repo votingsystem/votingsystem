@@ -30,25 +30,15 @@
     <string name="processing_lbl">procesando</string>
     <string name="initializing_app_lbl">preparando aplicación</string>
     <string name="publish_voting_caption">publicando votación</string>
-    <string name="publish_claim_caption">publicando reclamación</string>
-    <string name="publish_manifest_caption">publicando manifiesto</string>
     <string name="publishing_document_msg">publicando documento...</string>
-    <string name="publish_claim_OK_prefix_msg">la reclamación</string>
     <string name="publish_voting_OK_prefix_msg">la votación</string>
-    <string name="publish_manifest_OK_prefix_msg">el manifiesto</string>
     <string name="publish_document_OK_sufix_msg">se ha publicado correctamente</string>    
     <string name="publish_document_ERROR_msg">error publicando el documento</string>
     <string name="publish_document_lbl">publicar documento</string>
     <string name="publish_voting_lbl">publicar votación</string>
-    <string name="publish_manifest_lbl">publicar manifiesto</string>
-    <string name="publish_claim_lbl">publicar reclamación</string>
     <string name="loading_info_msg">cargando información, por favor espere</string>
     <string name="pdf_signed_by_lbl">firmado electrónicamente por</string>
     <string name="BACKUP_REQUEST">solicitud de copia de seguridad</string>
-    <string name="MANIFEST_PUBLISHING">publicación de documento para recoger firmas</string>
-    <string name="MANIFEST_SIGN">firma de manifiesto</string>
-    <string name="CLAIM_PUBLISHING">publicación de documento de reclamación</string>
-    <string name="SMIME_CLAIM_SIGNATURE">enviando reclamación</string>
     <string name="VOTING_PUBLISHING">publicación de documento de votación</string>
     <string name="EVENT_CANCELLATION">cancelar evento</string>
     <string name="operationNotFoundErrorMsg">operación desconocida</string>
@@ -239,9 +229,7 @@
     <string name="date_finish_lbl">fecha finalización</string>
     <string name="date_error_lbl">debe seleccionar una fecha válida posterior a la fecha actual</string>
     <string name="subject_error_lbl">debe rellenar el campo asunto</string>
-    <string name="publish_claim_msg_subject">solicitud de publicación de reclamación</string>
     <string name="publish_election_msg_subject">solicitud de publicación de votación</string>
-    <string name="publish_manifest_msg_subject">solicitud de publicación de manifiesto</string>
     <string name="date_begin_lbl">fecha inicio</string>
     <string name="date_init_after_finish_error_lbl">la fecha de inicio no puede ser posterior a la fecha de finalización</string>
     <string name="select_control_center_lbl">seleccione un centro de control</string>
@@ -449,4 +437,7 @@
     <string name="eventvs_election_pending">votaciones pendientes</string>
     <string name="eventvs_election_search_msg">resultado de la búsqueda de \'%1$s\' en \'%2$s\'</string>
     <string name="search_result">resultado de la búsqueda</string>
+    <string name="waiting_for_access_control_connection">esperando conexión con Control de Acceso</string>
+    <string name="num_matches">\'%1$s\' coincidencias</string>
+    <string name="date_election_lbl">fecha de la consulta</string>
 </resources>

@@ -330,7 +330,7 @@ public class ReceiptFragment extends Fragment {
                     getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg),
                     getFragmentManager());
-        } else if(progressDialog != null) progressDialog.dismiss();
+        } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

@@ -12,7 +12,7 @@
 
      	<!-- <activity android:label="@string/app_name" android:noHistory="true"
             android:name=".MainActivity" android:screenOrientation="portrait">-->
-        <activity android:name=".activity.EventVSListActivity"
+        <activity android:name=".activity.EventVSMainActivity"
             android:label="@string/app_name"
             android:theme="@style/ThemeVS">
             <intent-filter>

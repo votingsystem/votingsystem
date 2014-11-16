@@ -141,7 +141,7 @@ public class CertResponseActivity extends FragmentActivity {
         goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	Intent intent = new Intent(getBaseContext(), EventVSListActivity.class);
+            	Intent intent = new Intent(getBaseContext(), EventVSMainActivity.class);
             	startActivity(intent);
             }
         });
