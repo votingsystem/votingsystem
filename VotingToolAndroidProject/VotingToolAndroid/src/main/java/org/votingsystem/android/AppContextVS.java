@@ -159,7 +159,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void setAccessControlVS(AccessControlVS accessControl) {
         LOGD(TAG + ".setAccessControlVS", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
-        PrefUtils.markAccessControlLoaded(this);
+        PrefUtils.markAccessControlLoaded(this, accessControl.getServerURL());
         state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
     }
 
@@ -250,7 +250,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         Notification note = builder.build();
         note.flags |= Notification.FLAG_AUTO_CANCEL; // hide the notification after its selected
         //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
+        notificationManager.notify(ContextVS.VOTING_SYSTEM_NOTIFICATION_ID, note);
     }
 
     public void broadcastResponse(ResponseVS responseVS) {
@@ -321,15 +321,15 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        if(accessControl != null) {
+        if(accessControl != null) {//listen cert state changes
             String accessControlStateKey = STATE_KEY + "_" + accessControl.getServerURL();
             if(accessControlStateKey.equals(key)) {
-               this.state = PrefUtils.getAppCertState(this, accessControl.getServerURL());
+                this.state = PrefUtils.getAppCertState(this, accessControl.getServerURL());
             }
         }
         if(USER_KEY.equals(key)) {
             userVS = PrefUtils.getSessionUserVS(this);
         }
     }
+
 }

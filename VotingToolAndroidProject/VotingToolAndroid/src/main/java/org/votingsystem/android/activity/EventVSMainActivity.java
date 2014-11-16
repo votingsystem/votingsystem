@@ -19,7 +19,6 @@ package org.votingsystem.android.activity;
 import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,11 +33,10 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.EventVSPublishFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
-import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -53,8 +51,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSMainActivity extends ActivityBase
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class EventVSMainActivity extends ActivityBase {
 
 	public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
@@ -112,7 +109,6 @@ public class EventVSMainActivity extends ActivityBase
 
         getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getActionBar().setSubtitle(getString(R.string.polls_lbl));
-        PrefUtils.registerPreferenceChangeListener(this, this);
         if(args != null && args.getString(SearchManager.QUERY) != null) {
             String queryStr = getIntent().getExtras().getString(SearchManager.QUERY);
             Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
@@ -210,11 +206,6 @@ public class EventVSMainActivity extends ActivityBase
         appData.putSerializable(ContextVS.STATE_KEY, fragment.getState());
         startSearch(null, false, appData, false);
         return true;
-    }
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        PrefUtils.unregisterPreferenceChangeListener(this, this);
     }
 
     private class EventVSSpinnerItem {
@@ -343,9 +334,4 @@ public class EventVSMainActivity extends ActivityBase
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        if(ContextVS.BOOTSTRAP_DONE.equals(key)) { }
-    }
 }

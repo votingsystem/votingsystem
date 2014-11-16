@@ -6,9 +6,9 @@
     <string name="wait_msg">por favor, espere</string>
     <string name="sending_data_lbl">enviando datos ... </string>
     <string name="back_to_cancel_lbl">pulsar \'atrás\' para cancelar</string>
-    <string name="voting_pending_lbl">votación pendiente de abrir</string>
     <string name="voting_closed_lbl">votación cerrada</string>
-    <string name="voting_open_lbl">votación abierta, quedan %1$s horas</string>
+    <string name="voting_pending_lbl">faltan %1$s horas para abrir</string>
+    <string name="voting_open_lbl">faltan %1$s horas para cerrar</string>
     <string name="already_voted_lbl">usted ha elegido en este asunto la opción \'%1$s\'</string>
     <string name="closed_upper_lbl">cerrado</string>
     <string name="author_lbl">publicado por</string>
@@ -72,7 +72,7 @@
     <string name="getting_representatives_lbl">obteniendo representantes...</string>
     <string name="cert_state_msg">comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">el certificado de usuario está disponible</string>
-    <string name="request_msg_subject">[solicitud acceso]-%1$s</string>
+    <string name="request_msg_subject">[solicitud acceso - %1$s]</string>
     <string name="vote_msg_subject">[voto]</string>
     <string name="cancel_vote_msg_subject">[anulación de voto]</string>
     <string name="canceled_lbl">anulado</string>
@@ -189,7 +189,7 @@
     <string name="cancel_vote_ok_notification_msg">voto cancelado</string>
     <string name="vote_error_notification_msg">error en votación</string>
     <string name="cancel_vote_error_notification_msg">error cancelando voto</string>
-    <string name="send_vote_caption">enviando voto</string>
+    <string name="sending_vote_lbl">enviando voto</string>
     <string name="vote_option_mismatch">problemas graves en el servicio de voto, por favor, inténtelo mas tarde</string>
     <string name="cert_info_formated_msg"><![CDATA[<html><b>asunto: </b>%1$s<br/><b>emisor del certificado: </b> %2$s <br/> \n \
     <b>num. serie del certificado: </b> %3$s <br/><b>valido desde: </b> %4$s<br/> \n \

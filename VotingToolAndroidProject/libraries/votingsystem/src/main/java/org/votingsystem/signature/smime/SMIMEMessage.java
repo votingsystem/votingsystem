@@ -113,8 +113,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         CommandMap.setDefaultCommandMap(mc);
     }
 
-    private String messageId;
-    private String contentType;
+
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private boolean isValidSignature = false;

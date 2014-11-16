@@ -20,7 +20,7 @@
         android:background="@color/bkg_vs"/>
 
     <TextView android:id="@+id/msg"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/msg_content_vs"
         android:padding="10dp"

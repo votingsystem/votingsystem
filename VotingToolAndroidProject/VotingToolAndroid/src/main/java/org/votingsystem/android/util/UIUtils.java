@@ -18,7 +18,9 @@ package org.votingsystem.android.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -32,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -39,12 +42,17 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -52,14 +60,19 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.util.ResponseVS;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 /**
@@ -289,6 +302,51 @@ public class UIUtils  {
         float size = att.getDimension(0, 0);
         att.recycle();
         return (int) size;
+    }
+
+
+    public static Map<Integer, EditText> showClaimFieldsDialog(final Set<FieldEventVS> fields,
+               final View.OnClickListener listener, Activity activity) {
+        AlertDialog.Builder builder= new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        ScrollView mScrollView = (ScrollView) inflater.inflate(R.layout.claim_dinamic_form,
+                (ViewGroup) activity.getCurrentFocus());
+        LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
+        final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
+        errorMsgTextView.setVisibility(View.GONE);
+        final Map<Integer, EditText> fieldsMap = new HashMap<Integer, EditText>();
+        for (FieldEventVS field : fields) {
+            fieldsMap.put(field.getId().intValue(), UIUtils.addFormField(field.getContent(),
+                    InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+                    mFormView, field.getId().intValue(), activity));
+        }
+        builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
+                setPositiveButton(activity.getString(R.string.accept_lbl), null).
+                setNegativeButton(R.string.cancel_lbl, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) { }
+                });
+        final AlertDialog dialog = builder.create();
+        dialog.show();//to get positiveButton this must be called first
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View onClick) {
+                for (FieldEventVS field : fields) {
+                    EditText editText = fieldsMap.get(field.getId().intValue());
+                    String fieldValue = editText.getText().toString();
+                    if (fieldValue.isEmpty()) {
+                        errorMsgTextView.setVisibility(View.VISIBLE);
+                        return;
+                    } else field.setValue(fieldValue);
+                    LOGD(TAG + ".showClaimFieldsDialog", "field id: " + field.getId() +
+                            " - text: " + fieldValue);
+                }
+                //listener.onClick();
+                dialog.dismiss();
+            }
+        });
+        //to avoid avoid dissapear on screen orientation change
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        return fieldsMap;
     }
 
     public static int setColorAlpha(int color, float alpha) {

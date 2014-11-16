@@ -408,8 +408,9 @@ public class ResponseVS<T> implements Parcelable {
         return notificationMessage;
     }
 
-    public void setNotificationMessage(String notificationMessage) {
+    public ResponseVS setNotificationMessage(String notificationMessage) {
         this.notificationMessage = notificationMessage;
+        return this;
     }
 
     public OperationVS getOperation() {

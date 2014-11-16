@@ -1,6 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +16,7 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.VotingEventFragment;
+import org.votingsystem.android.fragment.EventVSFragment;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -89,7 +88,7 @@ public class EventVSSearchResultActivity extends FragmentActivity {
         EventVS eventVS = eventVSList.get(position);
         try {
             Intent intent = new Intent(this, FragmentContainerActivity.class);
-            intent.putExtra(FRAGMENT_KEY, VotingEventFragment.class.getName());
+            intent.putExtra(FRAGMENT_KEY, EventVSFragment.class.getName());
             intent.putExtra(ContextVS.EVENTVS_KEY, eventVS.toJSON().toString());
             startActivity(intent);
         } catch (JSONException e) {

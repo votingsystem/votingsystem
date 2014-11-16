@@ -39,7 +39,9 @@ public class PrefUtils {
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
+        sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
     }
 
     public static void markDataBootstrapDone(final Context context) {
@@ -48,10 +50,10 @@ public class PrefUtils {
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, true).commit();
     }
 
-    public static void markAccessControlLoaded(final Context context) {
+    public static void markAccessControlLoaded(final Context context, String accessControlURL) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        sp.edit().putBoolean(ContextVS.ACCESS_CONTROL_URL_KEY, true).commit();
+        sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL).commit();
     }
 
     public static boolean isDataBootstrapDone(final Context context) {

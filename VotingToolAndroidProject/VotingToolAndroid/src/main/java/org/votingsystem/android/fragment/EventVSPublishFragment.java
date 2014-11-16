@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -35,6 +34,7 @@ import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;

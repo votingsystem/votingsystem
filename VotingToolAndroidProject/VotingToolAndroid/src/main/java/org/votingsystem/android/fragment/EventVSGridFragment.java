@@ -41,9 +41,11 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -284,8 +286,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
         if(ContextVS.ACCESS_CONTROL_URL_KEY.equals(key)) {
+            LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
             Long numTotalEvents = EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(),
                     eventState);
             if(numTotalEvents == null) fetchItems(eventState, groupPosition);

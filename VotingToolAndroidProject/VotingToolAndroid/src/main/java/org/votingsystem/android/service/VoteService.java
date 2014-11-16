@@ -56,7 +56,6 @@ public class VoteService extends IntentService {
         String message = null;
         try {
             contextVS = (AppContextVS) getApplicationContext();
-            Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
             LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - receiverName: " +
                     receiverName + " - event: " + vote.getEventVS().getId());
@@ -128,15 +127,12 @@ public class VoteService extends IntentService {
                         break;
                 }
             }
-            responseVS.setCaption(caption);
-            responseVS.setNotificationMessage(message);
-            responseVS.setData(vote);
+            responseVS.setCaption(caption).setNotificationMessage(message).setData(vote);
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
-            responseVS.setServiceCaller(serviceCaller);
-            responseVS.setTypeVS(operation);
+            responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
             sendMessage(responseVS);
         }
     }
@@ -148,7 +144,7 @@ public class VoteService extends IntentService {
             responseVS = voteSender.call();
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
         }
         return responseVS;
     }

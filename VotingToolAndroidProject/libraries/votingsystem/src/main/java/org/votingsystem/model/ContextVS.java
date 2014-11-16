@@ -126,6 +126,7 @@ public class ContextVS {
     public static final int RECEIPT_LOADER_ID = 1;
 
     //Notifications IDs
+    public static final int VOTING_SYSTEM_NOTIFICATION_ID            = 1;
     public static final int RSS_SERVICE_NOTIFICATION_ID            = 1;
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 2;
     public static final int VOTE_SERVICE_NOTIFICATION_ID           = 3;
