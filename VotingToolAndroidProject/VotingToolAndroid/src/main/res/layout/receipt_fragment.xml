@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+    <ScrollView android:id="@+id/scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+        <LinearLayout android:id="@+id/receipt_data_container"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView android:id="@+id/receipt_subject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/event_subject"
+                android:textSize="19sp"/>
+            <WebView android:id="@+id/receipt_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textSize="17sp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

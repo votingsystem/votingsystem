@@ -11,7 +11,7 @@
         <item android:id="@+id/save_editor"
             android:showAsAction="always"
             votingSystem:showAsAction="always"
-            android:icon="@drawable/ic_save_white_18dp"
+            android:icon="@android:drawable/ic_menu_save"
             android:title="@string/save_editor_lbl"/>
     </group>
 

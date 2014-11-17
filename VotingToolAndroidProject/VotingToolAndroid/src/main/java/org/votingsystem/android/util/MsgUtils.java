@@ -1,6 +1,7 @@
 package org.votingsystem.android.util;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
@@ -9,6 +10,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.Vicket;
+import org.votingsystem.model.VoteVS;
 
 import java.security.cert.X509Certificate;
 import java.util.Formatter;
@@ -98,4 +100,12 @@ public class MsgUtils {
                 transactionVS.getCurrencyCode(), tagMessage);
     }
 
+    public static String getVoteVSStateMsg(VoteVS.State voteState, Context context) {
+        switch (voteState) {
+            case OK: return context.getString(R.string.votevs_ok_msg);
+            case CANCELLED: return context.getString(R.string.votevs_cancelled_msg);
+            case ERROR: return context.getString(R.string.votevs_error_msg);
+            default: return voteState.toString();
+        }
+    }
 }

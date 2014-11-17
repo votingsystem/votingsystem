@@ -190,18 +190,19 @@
     <string name="cancel_vote_error_caption">error cancelando voto</string>
     <string name="sending_vote_lbl">enviando voto</string>
     <string name="vote_option_mismatch">problemas graves en el servicio de voto, por favor, inténtelo mas tarde</string>
-    <string name="cert_info_formated_msg"><![CDATA[<html><b>asunto: </b>%1$s<br/><b>emisor del certificado: </b> %2$s <br/> \n \
+    <string name="cert_info_formated_msg"><![CDATA[<html>%1$s<br/><b>emisor del certificado: </b> %2$s <br/> \n \
     <b>num. serie del certificado: </b> %3$s <br/><b>valido desde: </b> %4$s<br/> \n \
     <b>valido hasta: </b> %5$s<br/></html>]]></string>
-    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>fecha: </b>%1$s<br/><b>num. serie del sello de tiempo:</b><br/> %2$s <br/> \n \
+    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>fecha: </b>%1$s<br/><br/><b>num. serie del sello de tiempo:</b><br/> %2$s \n \
     <br/><b>certificado firmante:</b><br/> %3$s<br/><b>num. serie de certificado: </b> %4$s ]]></string>
     <string name="share_receipt_lbl">compartir recibo</string>
-    <string name="check_receipt_lbl">comprobar voto en el recuento</string>
+    <string name="check_receipt_lbl">comprobar estado del voto</string>
     <string name="delete_receipt_lbl">borrar recibo</string>
     <string name="open_receipt_lbl">abrir recibo</string>
     <string name="signers_part_lbl">datos de los certificados firmantes:</string>
-    <string name="show_signers_info_lbl">datos de los firmantes del recibo</string>
-    <string name="show_timestamp_info_lbl">datos del sello de tiempo</string>
+    <string name="num_signers_lbl"><![CDATA[<b>documento con %1$s firmantes</b>]]></string>
+    <string name="signers_info_lbl">datos de los firmantes del recibo</string>
+    <string name="timestamp_info_lbl">datos del sello de tiempo</string>
     <string name="date_saved_lbl">guardado</string>
     <string name="date_updated_lbl">actualizado</string>
     <string name="cancel_vote_from_receipt_msg"><![CDATA[si continua anulará el voto del asunto \'<b>%1$s</b>\'<br/> \n \
@@ -264,7 +265,6 @@
     <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">actualizando datos del representante</string>
     <string name="download_lbl">descargar copia</string>
-    <string name="smime_subject_msg">asunto: %1$s</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
     duración de la delegación: \'%1$s\' semanas<br/><br/>delegación activa desde: \'%2$s\'
     <br/><br/>fecha fin de la delegación: \'%3$s\'<br/>
@@ -426,4 +426,13 @@
     <string name="waiting_for_access_control_connection">esperando conexión con Control de Acceso</string>
     <string name="num_matches">\'%1$s\' coincidencias</string>
     <string name="date_election_lbl">fecha de la consulta</string>
+    <string name="votevs_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
+        asunto de la votación: <b>\'%2$s\'</b><br/> opción seleccionada: <b>\'%3$s\'</b>]]></string>
+    <string name="signature_content">contenido de la firma</string>
+    <string name="checking_vote_state_lbl">comprobando el estado del voto</string>
+    <string name="votevs_ok_msg">voto válido</string>
+    <string name="votevs_cancelled_msg">voto cancelado</string>
+    <string name="votevs_error_msg">voto con inválido</string>
+    <string name="votvs_value_msg">opción seleccionada \'%1$s\'</string>
+
 </resources>

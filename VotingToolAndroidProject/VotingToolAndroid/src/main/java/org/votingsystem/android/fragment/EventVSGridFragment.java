@@ -298,7 +298,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return LayoutInflater.from(context).inflate(R.layout.election_card, viewGroup, false);
+            return LayoutInflater.from(context).inflate(R.layout.eventvs_card, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {

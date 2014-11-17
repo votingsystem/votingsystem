@@ -30,9 +30,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
@@ -56,16 +58,30 @@ import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle2.cms.SignerId;
+import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle2.util.CollectionStore;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.FieldEventVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
+import java.math.BigInteger;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +129,53 @@ public class UIUtils  {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         context.startActivity(intent);
+    }
+
+    public static void showSignersInfoDialog(Set<UserVS> signers, FragmentManager fragmentManager,
+             Context context) {
+        StringBuilder signersInfo = new StringBuilder(context.getString(R.string.num_signers_lbl,
+                signers.size()) + "<br/><br/>");
+        for(UserVS signer : signers) {
+            X509Certificate certificate = signer.getCertificate();
+            signersInfo.append(context.getString(R.string.cert_info_formated_msg,
+                    certificate.getSubjectDN().toString(),
+                    certificate.getIssuerDN().toString(),
+                    certificate.getSerialNumber().toString(),
+                    DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
+                    DateUtils.getDayWeekDateStr(certificate.getNotAfter())) + "<br/>");
+        }
+        MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
+                R.string.signers_info_lbl), signersInfo.toString(), fragmentManager);
+    }
+
+    public static Drawable getEmptyLogo(Context context) {
+        Drawable drawable = new ColorDrawable(context.getResources().getColor(android.R.color.transparent));
+        return drawable;
+    }
+    public static void showTimeStampInfoDialog(TimeStampToken timeStampToken,
+           FragmentManager fragmentManager, Context context) {
+        try {
+            TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
+            String certificateInfo = null;
+            SignerId signerId = timeStampToken.getSID();
+            String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
+            CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
+            Collection<X509CertificateHolder> matches = store.getMatches(signerId);
+            X509CertificateHolder certificateHolder = matches.iterator().next();
+            LOGD(TAG + ".showTimeStampInfoDialog", "serial number: '" +
+                    certificateHolder.getSerialNumber() + "'");
+            X509Certificate certificate = new JcaX509CertificateConverter().
+                    getCertificate(certificateHolder);
+            certificateInfo = context.getString(R.string.timestamp_info_formated_msg, dateInfoStr,
+                    tsInfo.getSerialNumber().toString(),
+                    certificate.getSubjectDN(),
+                    timeStampToken.getSID().getSerialNumber().toString());
+            MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
+                    R.string.timestamp_info_lbl), certificateInfo, fragmentManager);
+        } catch (Exception ex) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, context.getString(
+                    R.string.timestamp_info_lbl), ex.getMessage(), fragmentManager);
+        }
     }
 
     public static boolean isSameDayDisplay(long time1, long time2, Context context) {
@@ -222,7 +285,7 @@ public class UIUtils  {
         SearchView mSearchView = (SearchView) searchViewMenuItem.getActionView();
         int searchImgId = context.getResources().getIdentifier("android:id/search_button", null, null);
         ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.ic_search_white_18dp);
+        v.setImageResource(R.drawable.abc_ic_search);
     }
 
     public static EditText addFormField(String label, Integer type, LinearLayout mFormView, int id,

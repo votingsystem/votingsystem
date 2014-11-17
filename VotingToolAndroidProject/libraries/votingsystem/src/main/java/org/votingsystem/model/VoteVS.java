@@ -35,7 +35,9 @@ public class VoteVS extends ReceiptContainer {
     private static final long serialVersionUID = 1L;
 
 	public static final String TAG = VoteVS.class.getSimpleName();
-    
+
+    public enum State{OK, CANCELLED, ERROR}
+
     private Long localId = -1L;
     private transient SMIMEMessage voteReceipt;
     private transient SMIMEMessage cancelVoteReceipt;

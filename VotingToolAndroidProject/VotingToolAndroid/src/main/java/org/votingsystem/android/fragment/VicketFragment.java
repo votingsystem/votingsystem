@@ -20,6 +20,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Vicket;
@@ -39,6 +40,7 @@ public class VicketFragment extends Fragment {
 
     public static final String TAG = VicketFragment.class.getSimpleName();
 
+    private AppContextVS contextVS;
     private Vicket selectedVicket;
     private TextView vicket_amount, vicket_state, vicket_currency, date_info;
     private SMIMEMessage selectedVicketSMIME;
@@ -62,6 +64,7 @@ public class VicketFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         selectedVicket = (Vicket) getArguments().getSerializable(ContextVS.VICKET_KEY);
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
@@ -145,10 +148,8 @@ public class VicketFragment extends Fragment {
                             getCertificate(), getActivity()), getFragmentManager());
                     break;
                 case R.id.show_timestamp_info:
-                    TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
-                            selectedVicket.getReceipt().getSigner().getTimeStampToken(),
-                            (AppContextVS) getActivity().getApplicationContext());
-                    newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
+                    UIUtils.showTimeStampInfoDialog(selectedVicket.getReceipt().getSigner().
+                            getTimeStampToken(), getFragmentManager(), getActivity());
                     break;
                 case R.id.cancel_vicket:
                     PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -173,9 +174,9 @@ public class VicketFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public class VicketDownloader extends AsyncTask<String, String, ResponseVS> {
+    public class VicketFetcher extends AsyncTask<String, String, ResponseVS> {
 
-        public VicketDownloader() { }
+        public VicketFetcher() { }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 

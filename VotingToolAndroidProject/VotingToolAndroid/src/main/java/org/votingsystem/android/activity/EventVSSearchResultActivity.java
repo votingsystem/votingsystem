@@ -102,7 +102,7 @@ public class EventVSSearchResultActivity extends FragmentActivity {
         private Context context;
 
         public EventListAdapter(List<EventVS> itemList, Context ctx) {
-            super(ctx, R.layout.election_card, itemList);
+            super(ctx, R.layout.eventvs_card, itemList);
             this.itemList = itemList;
             this.context = ctx;
         }
@@ -127,7 +127,7 @@ public class EventVSSearchResultActivity extends FragmentActivity {
             if (itemView == null) {
                 LayoutInflater inflater =
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                itemView = inflater.inflate(R.layout.election_card, null);
+                itemView = inflater.inflate(R.layout.eventvs_card, null);
             }
             int state_color = R.color.frg_vs;
             String tameInfoMsg = null;

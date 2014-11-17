@@ -136,7 +136,7 @@ public class TransactionVSFragment extends Fragment {
                 DateUtils.getDayWeekDateStr(transactionvs.getDateCreated()),
                 transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         messageSMIME = transactionvs.getMessageSMIME();
-        transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
+        transactionvsSubject.setText(selectedTransactionVS.getSubject());
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
         receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
         from_user.setVisibility(View.GONE);

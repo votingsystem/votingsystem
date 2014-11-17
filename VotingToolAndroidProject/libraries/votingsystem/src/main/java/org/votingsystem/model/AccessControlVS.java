@@ -206,4 +206,8 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/revoke";
     }
 
+    public String getVoteVSCheckServiceURL(String hashHex) {
+        return getServerURL() + "/voteVS/hash/" + hashHex;
+    }
+
 }

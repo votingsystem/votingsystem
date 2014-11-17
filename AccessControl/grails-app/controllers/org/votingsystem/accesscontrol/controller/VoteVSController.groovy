@@ -6,13 +6,12 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.VoteVS
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter
+
 /**
- * @infoController Servicio de Votos
- * @descController Servicio que procesa los votos recibidos.
- *
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
- * */
+ */
 class VoteVSController {
 
 	def voteVSService
@@ -21,15 +20,14 @@ class VoteVSController {
     def index() { }
 	
 	/**
-	 * Servicio que recoge los votos enviados por los Centrol de Control
+	 * Service that receives and checks the votes signed by the Control Center
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. El archivo voto firmado por el
-	 *        <a href="https://github.com/votingsystem/votingsystem/wiki/Certificado-de-voto">certificado de VoteVS.</a>
-	 *        y el certificado del Centro de Control.
+	 * @requestContentType [application/x-pkcs7-signature] Required. The vote signed by the user anonymous certificate
+     *                      and the Control Center
 	 * @responseContentType [application/x-pkcs7-signature]
-	 * @return  <a href="https://github.com/votingsystem/votingsystem/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
+	 * @return  The vote signed by the user anonymous certificate, the Control Center and the Access Control
 	 */
     def save() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -38,13 +36,12 @@ class VoteVSController {
 	}
 	
 	/**
-	 * Servicio que devuelve la información de un voto a partir del identificador
-	 * del mismo en la base de datos
+	 * Service that returns the data of the vote associated with the in passed as parameter
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVS/${id}]
-	 * @param [id] Obligatorio. Identificador del voto en la base de datos
+	 * @param [id] Required. The VoteVS identifier in the database
 	 * @responseContentType [application/json]
-	 * @return documento JSON con la información del voto solicitado.
+	 * @return the vote
 	 */
 	def get() {
 		VoteVS voteVS
@@ -57,6 +54,31 @@ class VoteVSController {
                 message(code: 'voteNotFound', args:[params.id]))]
 		else render voteVSMap as JSON
 	}
+
+
+    /**
+     * Service that returns the state and the value of the vote associated with the hash received as parameter
+     * @httpMethod [GET]
+     * @serviceURL [/voteVS/hash/${hashHex}]
+     * @param [hashHex] Required. The VoteVS associated hash in hexadecimal
+     * @responseContentType [application/json]
+     * @return the state {OK, CANCELLED, ERROR} and the value of the vote
+     */
+    def getByHash() {
+        VoteVS voteVS
+        Map  voteVSMap
+        if(params.hashHex) {
+            VoteVS.withTransaction {
+                voteVS = VoteVS.where {
+                    certificateVS.hashCertVSBase64 == new String(new HexBinaryAdapter().unmarshal(params.hashHex))
+                }.find()
+                if(voteVS) voteVSMap = [state:voteVS.state.toString(), value:voteVS.optionSelected.content]
+            }
+        }
+        if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.hashHex]))]
+        else render voteVSMap as JSON
+    }
 
     /**
      * Invoked if any method in this controller throws an Exception.

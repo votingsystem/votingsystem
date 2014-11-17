@@ -95,7 +95,7 @@ import static org.votingsystem.model.ContextVS.PROVIDER;
 */
 public class SMIMEMessage extends MimeMessage implements Serializable {
 
-    public static final String TAG = "SMIMEMessage";
+    public static final String TAG = SMIMEMessage.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
@@ -164,42 +164,6 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     }
 
     public X509Certificate getVicketCert() {return vicketCert;}
-
-    /**
-     * verify that the sig is correct and that it was generated when the 
-     * certificate was current(assuming the cert is contained in the message).
-     */
-    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
-        // certificates and crls passed in the signature
-        Store certs = smimeSigned.getCertificates();
-        // SignerInfo blocks which contain the signatures
-        SignerInformationStore  signers = smimeSigned.getSignerInfos();
-		Log.d(TAG + ".isValidSignature ", "signers.size(): " + signers.size());
-        Iterator it = signers.getSigners().iterator();
-        boolean result = false;
-        // check each signer
-        while (it.hasNext()) {
-            SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getMatches(signer.getSID());
-    		Log.d(TAG + ".isValidSignature ", "Collection matches: " + certCollection.size());
-            Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(PROVIDER).getCertificate(
-                    (X509CertificateHolder)certIt.next());
-    		Log.d(TAG + ".isValidSignature ", "cert.getSubjectDN(): " + cert.getSubjectDN());
-    		Log.d(TAG + ".isValidSignature ", "cert.getNotBefore(): " + cert.getNotBefore());
-    		Log.d(TAG + ".isValidSignature ", "cert.getNotAfter(): " + cert.getNotAfter());
-
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(PROVIDER).build(cert))){
-        		Log.d(TAG + ".isValidSignature ", "signature verified");
-                result = true;
-            } else {
-            	Log.d(TAG + ".isValidSignature ", "signature failed!");
-                result = false;
-            }
-        }
-        return result;
-    }
 
     public boolean isValidSignature() throws Exception {
         if(contentInfo == null) contentInfo = new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
@@ -327,78 +291,6 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             signerVS = signers.iterator().next();
         }
         return signerVS;
-    }
-
-    public SignedMailValidator.ValidationResult verify(PKIXParameters params) throws Exception {
-        SignedMailValidator validator = new SignedMailValidator(this, params);
-        // iterate over all signatures and print results
-        Iterator it = validator.getSignerInformationStore().getSigners().iterator();
-        Locale loc = Locale.ENGLISH;
-        //only one signer supposed!!!
-        SignedMailValidator.ValidationResult result = null;
-        while (it.hasNext()) {
-            SignerInformation signer = (SignerInformation) it.next();
-            result = validator.getValidationResult(signer);
-            if (result.isValidSignature()){
-                Log.d(TAG, "isValidSignature");
-            }
-            else {
-                Log.d(TAG, "sigInvalid");
-                Log.d(TAG, "Errors:");
-                Iterator errorsIt = result.getErrors().iterator();
-                while (errorsIt.hasNext()) {
-                    Log.d(TAG, "ERROR - " + errorsIt.next().toString());
-                }
-            }
-            if (!result.getNotifications().isEmpty()) {
-                Log.d(TAG, "Notifications:");
-                Iterator notIt = result.getNotifications().iterator();
-                while (notIt.hasNext()) {
-                    Log.d(TAG, "NOTIFICACION - " + notIt.next());
-                }
-            }
-            PKIXCertPathReviewer review = result.getCertPathReview();
-            if (review != null) {
-                if (review.isValidCertPath()) {
-                    Log.d(TAG, "Certificate path valid");
-                }
-                else {
-                    Log.d(TAG, "Certificate path invalid");
-                }
-                Log.d(TAG, "Certificate path validation results:");
-                Iterator errorsIt = review.getErrors(-1).iterator();
-                while (errorsIt.hasNext()) {
-                    Log.d(TAG, "ERROR - " + errorsIt.next().toString());
-                }
-                Iterator notificationsIt = review.getNotifications(-1)
-                        .iterator();
-                while (notificationsIt.hasNext()) {
-                    Log.d(TAG, "NOTIFICACION - " + notificationsIt.next().toString());
-                }
-                // per certificate errors and notifications
-                Iterator certIt = review.getCertPath().getCertificates().iterator();
-                int i = 0;
-                while (certIt.hasNext()) {
-                    X509Certificate cert = (X509Certificate) certIt.next();
-                    Log.d(TAG, "Certificate " + i + "-------------------");
-                    Log.d(TAG, "Issuer: " + cert.getIssuerDN().getName());
-                    Log.d(TAG, "Subject: " + cert.getSubjectDN().getName());
-                    Log.d(TAG, "Errors:");
-                    errorsIt = review.getErrors(i).iterator();
-                    while (errorsIt.hasNext())  {
-                        Log.d(TAG,  errorsIt.next().toString());
-                    }
-                    // notifications
-                    Log.d(TAG, "Notifications:");
-                    notificationsIt = review.getNotifications(i).iterator();
-                    while (notificationsIt.hasNext()) {
-                        Log.d(TAG, notificationsIt.next().toString());
-                    }
-                    i++;
-                }
-            }
-        }
-        return result;
     }
 
     public TimeStampToken getTimeStampToken(X509Certificate requestCert) throws Exception {

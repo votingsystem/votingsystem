@@ -2,37 +2,34 @@
 
     <item android:id="@+id/show_signers_info"
         android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/show_signers_info_lbl"/>
+        android:title="@string/signers_info_lbl"/>
 
     <item android:id="@+id/show_timestamp_info"
         android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/show_timestamp_info_lbl"/>
+        android:title="@string/timestamp_info_lbl"/>
 
     <item android:id="@+id/save_receipt"
         android:orderInCategory="2"
-        android:showAsAction="never"
         android:title="@string/save_receipt_lbl"/>
 
     <item android:id="@+id/share_receipt"
         android:orderInCategory="3"
-        android:showAsAction="never"
         android:title="@string/share_receipt_lbl"/>
 
-    <item android:id="@+id/check_receipt"
+    <item android:id="@+id/signature_content"
         android:orderInCategory="4"
-        android:showAsAction="never"
+        android:title="@string/signature_content"/>
+
+    <item android:id="@+id/check_receipt"
+        android:orderInCategory="5"
         android:title="@string/check_receipt_lbl"/>
 
     <item android:id="@+id/delete_receipt"
-        android:orderInCategory="5"
-        android:showAsAction="never"
+        android:orderInCategory="6"
         android:title="@string/delete_receipt_lbl"/>
 
     <item android:id="@+id/cancel_vote"
-        android:orderInCategory="6"
-        android:showAsAction="never"
+        android:orderInCategory="7"
         android:title="@string/cancel_vote_lbl"/>
 
 </menu>

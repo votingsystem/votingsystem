@@ -15,7 +15,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,12 +33,15 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
+import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
@@ -46,6 +49,7 @@ import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -64,8 +68,7 @@ public class ReceiptFragment extends Fragment {
     private TransactionVS transaction;
     private Menu menu;
     private TextView receiptSubject;
-    private TextView receipt_content;
-    private TextView receipt;
+    private WebView receipt_content;
     private SMIMEMessage selectedReceiptSMIME;
     private String broadCastId = null;
 
@@ -103,7 +106,7 @@ public class ReceiptFragment extends Fragment {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
                     getActivity().onBackPressed();
                 }
-                setProgressDialogVisible(false);
+                setProgressDialogVisible(false, null, null);
                 MessageDialogFragment.showDialog(responseVS, getFragmentManager());
             }
         }
@@ -114,7 +117,8 @@ public class ReceiptFragment extends Fragment {
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 
@@ -128,13 +132,11 @@ public class ReceiptFragment extends Fragment {
                 broadcastReceiver, new IntentFilter(broadCastId));
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        View rootView = inflater.inflate(R.layout.message_smime, container, false);
+        View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
-        receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);
-        receipt_content.setMovementMethod(LinkMovementMethod.getInstance());
+        receipt_content = (WebView)rootView.findViewById(R.id.receipt_content);
         receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
-        receipt = (TextView)rootView.findViewById(R.id.receipt);
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -157,7 +159,7 @@ public class ReceiptFragment extends Fragment {
         if(selectedReceipt != null) {
             try {
                 if(selectedReceipt.getReceipt() == null) {
-                    ReceiptDownloader getDataTask = new ReceiptDownloader();
+                    ReceiptFetcher getDataTask = new ReceiptFetcher();
                     getDataTask.execute(selectedReceipt.getURL());
                 } else initReceiptScreen(selectedReceipt);
             } catch(Exception ex) {
@@ -188,7 +190,7 @@ public class ReceiptFragment extends Fragment {
                         ex.printStackTrace();
                     }
                 } else {
-                    ReceiptDownloader getDataTask = new ReceiptDownloader();
+                    ReceiptFetcher getDataTask = new ReceiptFetcher();
                     getDataTask.execute(receiptURL);
                 }
             } else {
@@ -216,8 +218,7 @@ public class ReceiptFragment extends Fragment {
         LOGD(TAG + ".initReceiptScreen", "type: " + receiptContainer.getTypeVS() +
                 " - messageId: " + receiptContainer.getMessageId());
         try {
-            String contentFormatted = null;
-            String bas64EncodedSMIMEChild = null;
+            String contentFormatted = "";
             JSONObject dataJSON = null;
             BigDecimal totalAmount = null;
             String currency = null;
@@ -245,26 +246,21 @@ public class ReceiptFragment extends Fragment {
                     contentFormatted = getString(R.string.vicket_request_formatted,
                             totalAmount.toPlainString(), currency, numVickets, vicketValueStr, serverURL);
                     break;
-                default: contentFormatted = receiptContainer.getReceipt().getSignedContent();
+                case VOTEVS:
+                    VoteVS voteVS = (VoteVS)receiptContainer;
+                    contentFormatted = getString(R.string.votevs_info_formatted,
+                            CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
+                            voteVS.getEventVS().getSubject(), voteVS.getOptionSelected().getContent(),
+                            receiptContainer.getReceipt().getSignedContent());
+
+                    break;
+                default:
+                    contentFormatted = receiptContainer.getReceipt().getSignedContent();
+
             }
-            receiptSubject.setText(getString(R.string.smime_subject_msg, receiptSubjectStr));
-            receipt_content.setText(Html.fromHtml(contentFormatted));
-            /*if(receiptContainer.getTypeVS() == TypeVS.USER_ALLOCATION_INPUT) {
-                receipt.setText(Html.fromHtml(getString(R.string.user_allocation_receipt_url, "")));
-                receipt.setVisibility(View.VISIBLE);
-                final byte[] selectedReceiptChildBytes = Base64.decode(bas64EncodedSMIMEChild);
-                receipt.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        selectedReceiptChild = new ReceiptContainer(
-                                TypeVS.USER_ALLOCATION_INPUT_RECEIPT, null);
-                        try {
-                            selectedReceiptChild.setReceiptBytes(selectedReceiptChildBytes);
-                            initReceiptScreen(selectedReceiptChild);
-                            setActionBar(selectedReceiptChild);
-                        } catch(Exception ex) {ex.printStackTrace();}
-                    }
-                });
-            } else receipt.setVisibility(View.GONE);*/
+            receiptSubject.setText(receiptSubjectStr);
+            //Html.fromHtml(contentFormatted)
+            receipt_content.loadData(contentFormatted, "text/html; charset=UTF-8", null);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -301,7 +297,7 @@ public class ReceiptFragment extends Fragment {
             ((FragmentActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
             ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
                     receiptContainer.getTypeDescription(getActivity()));
-            ((FragmentActivity)getActivity()).getActionBar().setLogo(R.drawable.receipt_32);
+            ((FragmentActivity)getActivity()).getActionBar().setLogo(UIUtils.getEmptyLogo(getActivity()));
         }
     }
 
@@ -315,10 +311,9 @@ public class ReceiptFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    private void setProgressDialogVisible(boolean isVisible) {
+    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
+            ModalProgressDialogFragment.showDialog(caption, message, getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
@@ -341,19 +336,12 @@ public class ReceiptFragment extends Fragment {
                     return true;
                 } else return false;
             case R.id.show_signers_info:
-                try {
-                    SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
-                            selectedReceiptSMIME.getBytes());
-                    newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
-                }catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                UIUtils.showSignersInfoDialog(selectedReceiptSMIME.getSigners(),
+                        getFragmentManager(), getActivity());
                 break;
             case R.id.show_timestamp_info:
-                TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
-                        selectedReceiptSMIME.getSigner().getTimeStampToken(),
-                        (AppContextVS) getActivity().getApplicationContext());
-                newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
+                UIUtils.showTimeStampInfoDialog(selectedReceiptSMIME.getSigner().getTimeStampToken(),
+                        getFragmentManager(), getActivity());
                 break;
             case R.id.share_receipt:
                 try {
@@ -378,7 +366,14 @@ public class ReceiptFragment extends Fragment {
                         ReceiptContentProvider.CONTENT_URI, values);
                 menu.removeItem(R.id.save_receipt);
                 break;
+            case R.id.signature_content:
+                MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.signature_content),
+                        selectedReceiptSMIME.getSignedContent(), getFragmentManager());
+                break;
             case R.id.check_receipt:
+                if(selectedReceipt instanceof VoteVS) {
+                    new VoteVSChecker().execute(((VoteVS)selectedReceipt).getHashCertVSBase64());
+                }
                 return true;
             case R.id.delete_receipt:
                 dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
@@ -421,12 +416,51 @@ public class ReceiptFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public class ReceiptDownloader extends AsyncTask<String, String, ResponseVS> {
+    private class VoteVSChecker extends AsyncTask<String, Void, ResponseVS> {
 
-        public ReceiptDownloader() { }
+        @Override protected void onPostExecute(ResponseVS responseVS) {
+            super.onPostExecute(responseVS);
+            setProgressDialogVisible(false, null, null);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
+                    responseVS, getFragmentManager());
+            else {
+                try {
+                    VoteVS.State voteState =  VoteVS.State.valueOf(responseVS.getMessageJSON().
+                            getString("state"));
+                    String voteValue = responseVS.getMessageJSON().getString("value");
+                    MessageDialogFragment.showDialog(ResponseVS.SC_OK,
+                            MsgUtils.getVoteVSStateMsg(voteState, getActivity()),
+                            getString(R.string.votvs_value_msg, voteValue), getFragmentManager());
+                } catch (Exception ex) {ex.printStackTrace();}
+            }
+        }
 
         @Override protected void onPreExecute() {
-            setProgressDialogVisible(true);}
+            super.onPreExecute();
+            setProgressDialogVisible(true, getString(R.string.wait_msg),
+                    getString(R.string.checking_vote_state_lbl));
+        }
+
+        @Override protected ResponseVS doInBackground(String... params) {
+            ResponseVS responseVS = null;
+            try {
+                String hashHex = CMSUtils.getBase64ToHexStr(params[0]);
+                responseVS = HttpHelper.getData(contextVS.getAccessControl().
+                        getVoteVSCheckServiceURL(hashHex), ContentTypeVS.JSON);
+            } catch(Exception ex) {
+                responseVS = ResponseVS.getExceptionResponse(ex, getActivity());
+            } finally {return responseVS;}
+        }
+    }
+
+    public class ReceiptFetcher extends AsyncTask<String, String, ResponseVS> {
+
+        public ReceiptFetcher() { }
+
+        @Override protected void onPreExecute() {
+            setProgressDialogVisible(true, getString(R.string.checking_vote_state_lbl),
+                    getString(R.string.wait_msg));
+        }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String receiptURL = urls[0];
@@ -454,7 +488,7 @@ public class ReceiptFragment extends Fragment {
                 MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage(), getFragmentManager());
             }
-            setProgressDialogVisible(false);
+            setProgressDialogVisible(false, null, null);
         }
     }
 

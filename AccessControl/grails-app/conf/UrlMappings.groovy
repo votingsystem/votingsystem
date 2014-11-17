@@ -15,25 +15,42 @@ class UrlMappings {
         "/"(controller:"/eventVSElection")
         "500"(view:'/error500')
 
+        "/accessRequestVS" {
+            controller = "accessRequestVS"
+            action = [POST:"processFileMap"]
+        }
+
+        "/accessRequestVS/$id" {
+            controller = "accessRequestVS"
+            action = [GET:"index"]
+        }
+
+        "/accessRequestVS/eventVS/$eventId/nif/$nif" {
+            controller = "accessRequestVS"
+            action = [GET:"findByNif"]
+        }
+
+        "/accessRequestVS/hashHex/$hashHex" {
+            controller = "accessRequestVS"
+            action = [GET:"hashHex"]
+        }
+
         "/android/VotingToolAndroid.apk" {
             controller = "android"
             action = "app"
         }
 
-        "/voteVSCanceller" {
-            controller = "voteVSCanceller"
-            action = [POST:"post"]
+        "/backupVS/download/$id" {
+            controller = "backupVS"
+            action = [GET:"download"]
+            constraints {
+                id(matches:/\d*/)
+            }
         }
 
-        "/voteVSCanceller/$hashHex" {
-            controller = "voteVSCanceller"
-            action = "index"
-        }
-
-
-        "/voteVSCanceller/voteVS/$id"{
-            controller = "voteVSCanceller"
-            action = "get"
+        "/backupVS/$id" {
+            controller = "backupVS"
+            action = [GET:"get"]
             constraints {
                 id(matches:/\d*/)
             }
@@ -120,7 +137,6 @@ class UrlMappings {
                 id(matches:/\d*/)
             }
         }
-
 
         "/eventVSClaim" {
             controller = "eventVSClaim"
@@ -220,6 +236,14 @@ class UrlMappings {
             }
         }
 
+        "/eventVSManifestCollector/$id?" {
+            controller = "eventVSManifestCollector"
+            action = "index"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
         "/messageSMIME/$id" {
             controller = "messageSMIME"
             action = "index"
@@ -228,14 +252,6 @@ class UrlMappings {
         "/messageSMIME/receipt/$requestMessageId" {
             controller = "messageSMIME"
             action = "receipt"
-        }
-
-        "/eventVSManifestCollector/$id?" {
-            controller = "eventVSManifestCollector"
-            action = "index"
-            constraints {
-                id(matches:/\d*/)
-            }
         }
 
         "/representative" {
@@ -290,42 +306,6 @@ class UrlMappings {
             }
         }
 
-        "/accessRequestVS" {
-            controller = "accessRequestVS"
-            action = [POST:"processFileMap"]
-        }
-
-        "/accessRequestVS/$id" {
-            controller = "accessRequestVS"
-            action = [GET:"index"]
-        }
-
-        "/accessRequestVS/eventVS/$eventId/nif/$nif" {
-            controller = "accessRequestVS"
-            action = [GET:"findByNif"]
-        }
-
-        "/accessRequestVS/hashHex/$hashHex" {
-            controller = "accessRequestVS"
-            action = [GET:"hashHex"]
-        }
-
-        "/backupVS/download/$id" {
-            controller = "backupVS"
-            action = [GET:"download"]
-            constraints {
-                id(matches:/\d*/)
-            }
-        }
-
-        "/backupVS/$id" {
-            controller = "backupVS"
-            action = [GET:"get"]
-            constraints {
-                id(matches:/\d*/)
-            }
-        }
-
         "/subscriptionVS/claims/$feedType?"{
             controller = "subscriptionVS"
             action = "claims"
@@ -351,9 +331,31 @@ class UrlMappings {
             action = [POST:"save"]
         }
 
-
         "/voteVS/$id" {
             controller = "voteVS"
+            action = "get"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/voteVS/hash/$hashHex" {
+            controller = "voteVS"
+            action = "getByHash"
+        }
+
+        "/voteVSCanceller" {
+            controller = "voteVSCanceller"
+            action = [POST:"post"]
+        }
+
+        "/voteVSCanceller/$hashHex" {
+            controller = "voteVSCanceller"
+            action = "index"
+        }
+
+        "/voteVSCanceller/voteVS/$id"{
+            controller = "voteVSCanceller"
             action = "get"
             constraints {
                 id(matches:/\d*/)

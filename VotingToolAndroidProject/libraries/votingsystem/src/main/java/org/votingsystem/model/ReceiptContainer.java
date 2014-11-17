@@ -56,10 +56,10 @@ public class ReceiptContainer implements Serializable {
             case VOTEVS:
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
-                return R.drawable.poll_16;
+                return R.drawable.poll_32;
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                return R.drawable.system_users_16;
+                return R.drawable.system_users_32;
             default:
                 return R.drawable.receipt_32;
         }

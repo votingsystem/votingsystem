@@ -1,5 +1,9 @@
 package org.votingsystem.signature.smime;
 
+import android.util.Log;
+
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
@@ -29,12 +33,19 @@ import org.bouncycastle2.asn1.x509.CertificateList;
 import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.SignerInformation;
+import org.bouncycastle2.cms.SignerInformationStore;
+import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle2.mail.smime.SMIMESigned;
+import org.bouncycastle2.util.Store;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.DateUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +64,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -64,11 +76,15 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import static org.votingsystem.model.ContextVS.PROVIDER;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class CMSUtils {
+
+    public static final String TAG = CMSUtils.class.getSimpleName();
 
     public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
     public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
@@ -179,6 +195,12 @@ public class CMSUtils {
         return octGen.getOctetOutputStream();
     }
 
+    public static String getTimeStampDateStr(TimeStampToken timeStampToken) {
+        TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
+        String certificateInfo = null;
+        return DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
+    }
+
     static TBSCertificateStructure getTBSCertificateStructure(
         X509Certificate cert) throws CertificateEncodingException {
         try {
@@ -233,6 +255,42 @@ public class CMSUtils {
         IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
                 .getIssuer(), tbs.getSerialNumber().getValue());
         return new SignerIdentifier(encSid);
+    }
+
+    /**
+     * verify that the sig is correct and that it was generated when the
+     * certificate was current(assuming the cert is contained in the message).
+     */
+    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
+        // certificates and crls passed in the signature
+        Store certs = smimeSigned.getCertificates();
+        // SignerInfo blocks which contain the signatures
+        SignerInformationStore signers = smimeSigned.getSignerInfos();
+        Log.d(TAG + ".isValidSignature ", "signers.size(): " + signers.size());
+        Iterator it = signers.getSigners().iterator();
+        boolean result = false;
+        // check each signer
+        while (it.hasNext()) {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection certCollection = certs.getMatches(signer.getSID());
+            Log.d(TAG + ".isValidSignature ", "Collection matches: " + certCollection.size());
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(PROVIDER).getCertificate(
+                    (X509CertificateHolder)certIt.next());
+            Log.d(TAG + ".isValidSignature ", "cert.getSubjectDN(): " + cert.getSubjectDN());
+            Log.d(TAG + ".isValidSignature ", "cert.getNotBefore(): " + cert.getNotBefore());
+            Log.d(TAG + ".isValidSignature ", "cert.getNotAfter(): " + cert.getNotAfter());
+
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
+                    setProvider(PROVIDER).build(cert))){
+                Log.d(TAG + ".isValidSignature ", "signature verified");
+                result = true;
+            } else {
+                Log.d(TAG + ".isValidSignature ", "signature failed!");
+                result = false;
+            }
+        }
+        return result;
     }
 
    /**
