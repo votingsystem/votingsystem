@@ -86,7 +86,7 @@ public class ConfirmImageActivity extends FragmentActivity {
         if(result == Activity.RESULT_OK) {
             resultIntent = new Intent();
             resultIntent.setData(imageUri);
-            LOGD(TAG + ".onActivityResult", "printedBitmap.getWidth(): " + printedBitmap.getWidth() +
+            LOGD(TAG + ".sendResult", "printedBitmap.getWidth(): " + printedBitmap.getWidth() +
                     " - view.getHeight(): " + printedBitmap.getHeight());
             //image.setDrawingCacheEnabled(true);
             //Bitmap capturedBitmap = Bitmap.createBitmap(image.getDrawingCache());

@@ -112,7 +112,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
         messageTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        builder.setIcon(R.drawable.signature_ok_32);
+        builder.setIcon(R.drawable.fa_cert_32);
         AlertDialog dialog = builder.create();
         dialog.setView(view);
         //to avoid avoid dissapear on screen orientation change

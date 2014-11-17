@@ -26,9 +26,9 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VicketPagerActivity extends ActivityBase {
+public class FinanceMainActivity extends ActivityBase {
 
-    public static final String TAG = VicketPagerActivity.class.getSimpleName();
+    public static final String TAG = FinanceMainActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
 
@@ -37,24 +37,12 @@ public class VicketPagerActivity extends ActivityBase {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.activity_vickets);
-        getLPreviewUtils().trySetActionBar();
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
-        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
-        LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
-                " - savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
         getActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
-    }
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -77,7 +65,7 @@ public class VicketPagerActivity extends ActivityBase {
     }
 
     @Override protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_VICKETS;// we only have a nav drawer if we are in top-level
+        return NAVDRAWER_ITEM_FINANCE;// we only have a nav drawer if we are in top-level
     }
 
     @Override public void requestDataRefresh() {

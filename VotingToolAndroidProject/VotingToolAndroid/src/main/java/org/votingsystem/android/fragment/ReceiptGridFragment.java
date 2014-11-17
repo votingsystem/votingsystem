@@ -13,7 +13,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -42,20 +41,18 @@ public class ReceiptGridFragment extends Fragment implements
 
     public static final String TAG = ReceiptGridFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private ReceiptGridAdapter adapter = null;
     private VoteVS vote = null;
     private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
-    private Menu menu;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+                   Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.message_smime_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new ReceiptGridAdapter(getActivity().getApplicationContext(), null,false);
+        adapter = new ReceiptGridAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -75,8 +72,7 @@ public class ReceiptGridFragment extends Fragment implements
 
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +
-                " -id: " + id);
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
@@ -126,10 +122,8 @@ public class ReceiptGridFragment extends Fragment implements
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 

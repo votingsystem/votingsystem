@@ -57,7 +57,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private GridView gridView;
     private EventListAdapter mAdapter = null;
@@ -102,7 +101,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
-        mAdapter = new EventListAdapter(getActivity().getApplicationContext(), null,false);
+        mAdapter = new EventListAdapter(getActivity(), null,false);
         gridView.setAdapter(mAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -113,7 +112,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         setHasOptionsMenu(true);
         broadCastId = EventVSGridFragment.class.getSimpleName() + "_" + groupPosition.toString() +
                 "_" + eventState.toString();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
@@ -130,10 +129,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         new Handler(){
             @Override public void handleMessage(Message msg) {
                 if (isVisible) {
-                    progressDialog = ModalProgressDialogFragment.showDialog(
-                            getString(R.string.loading_data_msg),
-                            getString(R.string.loading_info_msg),
-                            getFragmentManager());
+                    ModalProgressDialogFragment.showDialog( getString(R.string.loading_data_msg),
+                            getString(R.string.loading_info_msg), getFragmentManager());
                 } else ModalProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);

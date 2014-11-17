@@ -156,8 +156,7 @@ public class EventVSPublishFragment extends Fragment {
             eventVS.setFieldsEventVS(voteOptionSet);
         }
         try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    SignAndSendService.class);
+            Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
@@ -312,13 +311,12 @@ public class EventVSPublishFragment extends Fragment {
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 

@@ -77,14 +77,14 @@ class VoteVSService {
         if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
             SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(
                     responseVSControlCenter.message.getBytes()))
-            if(!smimeMessageResp.isValidSignature() || !smimeMessageReq.contentDigestStr.equals(
-                    smimeMessageResp.contentDigestStr))  throw new ValidationExceptionVS(
+            smimeMessageResp.isValidSignature()
+            if(!smimeMessage.contentDigestStr.equals(smimeMessageResp.contentDigestStr)) throw new ValidationExceptionVS(
                     "smimeContentMismatchError", MetaInfMsg.getErrorMsg(methodName, "smimeContentMismatchError"))
             signatureVSService.validateSignersCerts(smimeMessageResp)
             messageSMIME.setType(TypeVS.CANCEL_VOTE).setSMIME(smimeMessageResp).save()
         } else {
-            responseVSControlCenter.eventVS = certificateVS.eventVSElection
-            responseVSControlCenter.metaInf = MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationControlCenterCancellationError")
+            responseVSControlCenter.setMetaInf(MetaInfMsg.getErrorMsg(methodName,
+                    "voteVSCancellationControlCenterCancellationError")).eventVS = certificateVS.eventVSElection
             return responseVSControlCenter
         }
         VoteVSCanceller voteCanceller = new VoteVSCanceller(messageSMIME:messageSMIME, accessRequestVS:accessRequestVS,

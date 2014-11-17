@@ -3,12 +3,19 @@ package org.votingsystem.signature.smime;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.BEROctetStringGenerator;
 import org.bouncycastle2.asn1.BERSet;
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERNull;
+import org.bouncycastle2.asn1.DERObject;
+import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.cms.Attribute;
+import org.bouncycastle2.asn1.cms.AttributeTable;
+import org.bouncycastle2.asn1.cms.CMSAttributes;
 import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle2.asn1.cms.SignerIdentifier;
@@ -23,6 +30,7 @@ import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
@@ -302,5 +310,31 @@ public class CMSUtils {
         }
         return algId;
     }
-    
+
+    public static byte[] getSignerDigest(SignerInformation signer) throws CMSException {
+        DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
+                CMSAttributes.messageDigest, "message-digest");
+        ASN1OctetString signedMessageDigest = (ASN1OctetString)derObject;
+        return signedMessageDigest.getOctets();
+    }
+
+    public static DERObject getSingleValuedSignedAttribute(AttributeTable signedAttrTable,
+            DERObjectIdentifier attrOID, String printableName) throws CMSException {
+        if (signedAttrTable == null) return null;
+        ASN1EncodableVector vector = signedAttrTable.getAll(attrOID);
+        switch (vector.size()) {
+            case 0:
+                return null;
+            case 1:
+                Attribute t = (Attribute)vector.get(0);
+                ASN1Set attrValues = t.getAttrValues();
+                if (attrValues.size() != 1) throw new CMSException("A " + printableName +
+                        " attribute MUST have a single attribute value");
+                return attrValues.getObjectAt(0).getDERObject();
+            default: throw new CMSException(
+                "The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
+                + printableName + " attribute");
+        }
+    }
+
 }

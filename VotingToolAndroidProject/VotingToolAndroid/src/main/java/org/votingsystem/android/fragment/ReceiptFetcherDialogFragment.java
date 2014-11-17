@@ -21,13 +21,13 @@ import org.votingsystem.model.TypeVS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DownloadReceiptDialogFragment extends DialogFragment {
+public class ReceiptFetcherDialogFragment extends DialogFragment {
 
-    public static final String TAG = DownloadReceiptDialogFragment.class.getSimpleName();
+    public static final String TAG = ReceiptFetcherDialogFragment.class.getSimpleName();
 
-    public static DownloadReceiptDialogFragment newInstance(Integer statusCode, String caption,
+    public static ReceiptFetcherDialogFragment newInstance(Integer statusCode, String caption,
                     String message, String url, TypeVS typeVS){
-        DownloadReceiptDialogFragment frag = new DownloadReceiptDialogFragment();
+        ReceiptFetcherDialogFragment frag = new ReceiptFetcherDialogFragment();
         Bundle args = new Bundle();
         if(statusCode != null) args.putInt(ContextVS.RESPONSE_STATUS_KEY, statusCode);
         args.putString(ContextVS.CAPTION_KEY, caption);

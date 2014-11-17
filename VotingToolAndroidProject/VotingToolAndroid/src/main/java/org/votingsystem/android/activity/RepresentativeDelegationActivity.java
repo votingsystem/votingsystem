@@ -23,7 +23,7 @@ import android.widget.LinearLayout;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.DownloadReceiptDialogFragment;
+import org.votingsystem.android.fragment.ReceiptFetcherDialogFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
@@ -58,7 +58,6 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
 
-    private ModalProgressDialogFragment progressDialog;
     private TypeVS operationType;
     private Button acceptButton;
     private CheckBox anonymousCheckBox;
@@ -81,7 +80,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         else {
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 try {
-                    DownloadReceiptDialogFragment newFragment = DownloadReceiptDialogFragment.newInstance(
+                    ReceiptFetcherDialogFragment newFragment = ReceiptFetcherDialogFragment.newInstance(
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
                             responseVS.getNotificationMessage(), (String) responseVS.getData(),
                             typeVS);
@@ -189,10 +188,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getSupportFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 

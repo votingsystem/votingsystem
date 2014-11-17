@@ -86,8 +86,7 @@ public class CertRequestFormFragment extends Fragment {
             if(pin != null) launchUserCertRequestService(pin);
             else {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    Intent resultIntent = new Intent(getActivity().getApplicationContext(),
-                            CertResponseActivity.class);
+                    Intent resultIntent = new Intent(getActivity(), CertResponseActivity.class);
                     startActivity(resultIntent);
                 } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getMessage());
@@ -116,8 +115,7 @@ public class CertRequestFormFragment extends Fragment {
         cancelButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 //finish();
-                Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventVSMainActivity.class);
+                Intent intent = new Intent(getActivity(), EventVSMainActivity.class);
                 startActivity(intent);
             }
         });
@@ -272,8 +270,7 @@ public class CertRequestFormFragment extends Fragment {
 
     private void launchUserCertRequestService(String pin) {
         LOGD(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                UserCertRequestService.class);
+        Intent startIntent = new Intent(getActivity(), UserCertRequestService.class);
         startIntent.putExtra(PIN_KEY, pin);
         startIntent.putExtra(DEVICE_ID_KEY, deviceId);
         startIntent.putExtra(PHONE_KEY, phone);

@@ -183,7 +183,7 @@
     <string name="representative_data_lbl">datos del representante</string>
     <string name="rss_service_lbl">servicio de subscripciones</string>
     <string name="websocket_service_conn_lbl">conectado mensajería del sistema de votación</string>
-    <string name="signature_ok_notification_msg">documento firmado y enviado</string>
+    <string name="fa_cert_notification_msg">documento firmado y enviado</string>
     <string name="signature_error_notification_msg">error firmando documento</string>
     <string name="cancel_vote_ok_caption">voto cancelado</string>
     <string name="vote_error_caption">error en votación</string>

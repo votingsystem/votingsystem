@@ -59,7 +59,7 @@ public class IntentFilterActivity extends FragmentActivity {
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS ||
                             operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
-                        Intent newIntent = new Intent(getBaseContext(), VicketPagerActivity.class);
+                        Intent newIntent = new Intent(getBaseContext(), FinanceMainActivity.class);
                         newIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(newIntent);

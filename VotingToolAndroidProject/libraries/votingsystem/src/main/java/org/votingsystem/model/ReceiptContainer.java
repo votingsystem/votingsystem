@@ -92,12 +92,9 @@ public class ReceiptContainer implements Serializable {
 
     public SMIMEMessage getReceipt() throws Exception {
         if(receipt == null && receiptBytes != null) {
-            try {
-                receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
         }
+        receipt.isValidSignature();
         return receipt;
     }
 

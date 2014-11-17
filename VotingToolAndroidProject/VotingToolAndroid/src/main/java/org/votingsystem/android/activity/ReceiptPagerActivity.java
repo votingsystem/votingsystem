@@ -41,11 +41,9 @@ public class ReceiptPagerActivity extends FragmentActivity {
                 " - savedInstanceState: " + savedInstanceState);
         ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null,
-                null);
+        cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
-        getActionBar().setLogo(R.drawable.receipt_32);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

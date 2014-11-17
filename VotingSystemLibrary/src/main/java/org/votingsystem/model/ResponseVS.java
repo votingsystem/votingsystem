@@ -279,8 +279,9 @@ public class ResponseVS<T> implements Serializable {
         return metaInf;
     }
 
-    public void setMetaInf(String metaInf) {
+    public ResponseVS setMetaInf(String metaInf) {
         this.metaInf = metaInf;
+        return this;
     }
 
     public String getUrl() {

@@ -124,12 +124,10 @@ public class CashDialogFragment extends DialogFragment {
                     Intent intent = null;
                     switch(appState) {
                         case WITH_CSR:
-                            intent = new Intent(getActivity().getApplicationContext(),
-                                    CertResponseActivity.class);
+                            intent = new Intent(getActivity(), CertResponseActivity.class);
                             break;
                         case WITHOUT_CSR:
-                            intent = new Intent(getActivity().getApplicationContext(),
-                                    CertRequestActivity.class);
+                            intent = new Intent(getActivity(), CertRequestActivity.class);
                             break;
                     }
                     if(intent != null) startActivity(intent);
@@ -191,8 +189,7 @@ public class CashDialogFragment extends DialogFragment {
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     private void setTagVS(TagVS tagVS) {

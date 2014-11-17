@@ -105,8 +105,7 @@ public class NewFieldDialogFragment extends DialogFragment {
             if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
             if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY,
                     fieldEditText.getText().toString());
-            LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                    sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
             alertDialog.dismiss();
         }
     }

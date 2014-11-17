@@ -56,7 +56,6 @@ public class TransactionVSGridFragment extends Fragment
 
     public static final String TAG = TransactionVSGridFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private GridView gridView;
     private TransactionVSListAdapter adapter = null;
@@ -96,8 +95,7 @@ public class TransactionVSGridFragment extends Fragment
     private void launchUpdateUserInfoService() {
         LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    VicketService.class);
+            Intent startIntent = new Intent(getActivity(), VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);
@@ -131,7 +129,7 @@ public class TransactionVSGridFragment extends Fragment
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.generic_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new TransactionVSListAdapter(getActivity().getApplicationContext(), null,false);
+        adapter = new TransactionVSListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
@@ -163,10 +161,8 @@ public class TransactionVSGridFragment extends Fragment
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
@@ -215,8 +211,7 @@ public class TransactionVSGridFragment extends Fragment
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +" -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity().getApplicationContext(),
-                TransactionVSPagerActivity.class);
+        Intent intent = new Intent(getActivity(), TransactionVSPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -288,7 +283,7 @@ public class TransactionVSGridFragment extends Fragment
                     LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                     linearLayout.setBackgroundColor(Color.WHITE);
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
-                    transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
+                    transaction_type.setText(transactionVS.getDescription(getActivity()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
                     week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated()));
 
@@ -298,7 +293,7 @@ public class TransactionVSGridFragment extends Fragment
                     currency.setText(transactionVS.getCurrencyCode());
 
                     ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
-                            transactionVS.getIconId(getActivity().getApplicationContext()));
+                            transactionVS.getIconId(getActivity()));
                 }
             }
         }
@@ -314,14 +309,13 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
 }

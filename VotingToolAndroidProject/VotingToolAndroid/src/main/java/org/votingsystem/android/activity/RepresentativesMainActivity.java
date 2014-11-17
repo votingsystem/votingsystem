@@ -1,6 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -14,9 +13,9 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativesActivity extends ActivityBase {
+public class RepresentativesMainActivity extends ActivityBase {
 
-	public static final String TAG = RepresentativesActivity.class.getSimpleName();
+	public static final String TAG = RepresentativesMainActivity.class.getSimpleName();
 
     WeakReference<RepresentativeGridFragment> weakRefToFragment;
 
@@ -25,7 +24,6 @@ public class RepresentativesActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        getLPreviewUtils().trySetActionBar();
         RepresentativeGridFragment fragment = new RepresentativeGridFragment();
         weakRefToFragment = new WeakReference<RepresentativeGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
@@ -36,22 +34,10 @@ public class RepresentativesActivity extends ActivityBase {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
-        /*switch (item.getItemId()) {
-            case android.R.id.home:
-                //super.onBackPressed();
-                return true;
-        }*/
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override public void onResume() {
-        super.onResume();
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override protected int getSelfNavDrawerItem() {

@@ -79,10 +79,6 @@ public class LPreviewUtilsBase {
         return mDrawerToggleWrapper;
     }
 
-    public void trySetActionBar() {
-        // Do nothing pre-L
-    }
-
     public boolean hasLPreviewAPIs() {
         return false;
     }
@@ -159,7 +155,7 @@ public class LPreviewUtilsBase {
             boolean allowAnimate) {
         final int imageResId = isCheck
                 ? R.drawable.accept_22
-                : R.drawable.signature_ok_22;
+                : R.drawable.fa_cert_22;
 
         if (imageView.getTag() != null) {
             if (imageView.getTag() instanceof Animator) {

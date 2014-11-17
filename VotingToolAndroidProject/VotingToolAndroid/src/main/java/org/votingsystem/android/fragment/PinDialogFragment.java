@@ -124,12 +124,10 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     Intent intent = null;
                     switch(appState) {
                         case WITH_CSR:
-                            intent = new Intent(getActivity().getApplicationContext(),
-                                    CertResponseActivity.class);
+                            intent = new Intent(getActivity(), CertResponseActivity.class);
                             break;
                         case WITHOUT_CSR:
-                            intent = new Intent(getActivity().getApplicationContext(),
-                                    CertRequestActivity.class);
+                            intent = new Intent(getActivity(), CertRequestActivity.class);
                             break;
                     }
                     if(intent != null) startActivity(intent);

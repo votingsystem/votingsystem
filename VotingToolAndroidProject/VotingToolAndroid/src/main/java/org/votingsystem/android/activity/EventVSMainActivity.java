@@ -55,7 +55,6 @@ public class EventVSMainActivity extends ActivityBase {
 
 	public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     WeakReference<EventVSGridFragment> weakRefToFragment;
     private boolean mSpinnerConfigured = false;
 
@@ -64,7 +63,6 @@ public class EventVSMainActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        getLPreviewUtils().trySetActionBar();
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
         weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
@@ -72,7 +70,6 @@ public class EventVSMainActivity extends ActivityBase {
         args.putSerializable(ContextVS.TYPEVS_KEY, NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
         args.putSerializable(ContextVS.CHILD_POSITION_KEY, NavigatorDrawerOptionsAdapter.ChildPosition.OPEN);
-        fragment.setArguments(getIntent().getExtras());
         fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
@@ -154,15 +151,14 @@ public class EventVSMainActivity extends ActivityBase {
 
     private void setProgressDialogVisible(final boolean isVisible) {
         if (isVisible) {
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getSupportFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
-    public void requestDataRefresh(EventVS.State eventState, NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {
-        LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing - eventState: " +
-                eventState.toString() + " - groupPosition: " + groupPosition.toString());
+    public void requestDataRefresh(EventVS.State eventState,
+           NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {
+        LOGD(TAG + ".requestDataRefresh", "eventState: " + eventState.toString() +
+                " - groupPosition: " + groupPosition.toString());
         EventVSGridFragment fragment = weakRefToFragment.get();
         fragment.fetchItems(eventState, groupPosition);
     }

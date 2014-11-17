@@ -3,7 +3,6 @@ package org.votingsystem.android.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -85,9 +84,9 @@ public abstract class ActivityBase extends FragmentActivity {
     // it's a list of all possible items.
     protected static final int NAVDRAWER_ITEM_POLLS = 0;
     protected static final int NAVDRAWER_ITEM_REPRESENTATIVES = 1;
-    protected static final int NAVDRAWER_ITEM_VICKETS = 2;
-
-    protected static final int NAVDRAWER_ITEM_SETTINGS = 3;
+    protected static final int NAVDRAWER_ITEM_RECEIPTS = 2;
+    protected static final int NAVDRAWER_ITEM_FINANCE = 3;
+    protected static final int NAVDRAWER_ITEM_SETTINGS = 4;
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
@@ -96,6 +95,7 @@ public abstract class ActivityBase extends FragmentActivity {
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
             R.string.polls_lbl,
             R.string.representative_lbl,
+            R.string.receipts_lbl,
             R.string.finance_lbl,
             R.string.navdrawer_item_settings,
     };
@@ -104,6 +104,7 @@ public abstract class ActivityBase extends FragmentActivity {
     private static final int[] NAVDRAWER_ICON_RES_ID = new int[] {
             R.drawable.poll_32,
             R.drawable.system_users_32,
+            R.drawable.fa_cert_32,
             R.drawable.fa_money_32,
             R.drawable.ic_drawer_settings,
     };
@@ -115,7 +116,6 @@ public abstract class ActivityBase extends FragmentActivity {
 
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
     private View[] mNavDrawerItemViews = null;
-
 
     // handle to our sync observer (that notifies us about changes in our sync state)
     private Object mSyncObserverHandle;
@@ -177,16 +177,9 @@ public abstract class ActivityBase extends FragmentActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
-            Intent intent = new Intent(this, WelcomeActivity.class);
-            startActivity(intent);
-            finish();
-        }*/
-        ActionBar ab = getActionBar();
-        if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
         mLPreviewUtils = LPreviewUtils.getInstance(this);
     }
-
 
     /**
      * Returns the navigation drawer item that corresponds to this Activity. Subclasses
@@ -274,7 +267,9 @@ public abstract class ActivityBase extends FragmentActivity {
         mNavDrawerItems.add(NAVDRAWER_ITEM_POLLS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_REPRESENTATIVES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
-        mNavDrawerItems.add(NAVDRAWER_ITEM_VICKETS);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_RECEIPTS);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_FINANCE);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
         createNavDrawerItems();
@@ -402,12 +397,17 @@ public abstract class ActivityBase extends FragmentActivity {
                 finish();
                 break;
             case NAVDRAWER_ITEM_REPRESENTATIVES:
-                intent = new Intent(this, RepresentativesActivity.class);
+                intent = new Intent(this, RepresentativesMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;
-            case NAVDRAWER_ITEM_VICKETS:
-                intent = new Intent(this, VicketPagerActivity.class);
+            case NAVDRAWER_ITEM_RECEIPTS:
+                intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case NAVDRAWER_ITEM_FINANCE:
+                intent = new Intent(this, FinanceMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;
@@ -480,14 +480,6 @@ public abstract class ActivityBase extends FragmentActivity {
             }
         });
         mDataBootstrapThread.start();
-    }
-
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override public void onStop() {
-        super.onStop();
     }
 
     private void initActionBarAutoHide() {

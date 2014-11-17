@@ -56,42 +56,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
-    private ModalProgressDialogFragment progressDialog;
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
-            TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                switch(typeVS) {
-                    case CANCEL_VOTE:
-                        launchVoteCancellation((VoteVS)selectedReceipt);
-                        break;
-                }
-            } else {
-                if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
-                    getActivity().onBackPressed();
-                }
-                setProgressDialogVisible(false);
-                MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                        responseVS.getCaption(), responseVS.getNotificationMessage(),
-                        getFragmentManager());
-            }
-        }
-    };
-
-    private void launchVoteCancellation(VoteVS vote) {
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                VoteService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-        setProgressDialogVisible(true);
-        getActivity().startService(startIntent);
-    }
 
     private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
@@ -122,12 +87,45 @@ public class ReceiptFragment extends Fragment {
         return fragment;
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(typeVS) {
+                    case CANCEL_VOTE:
+                        launchVoteCancellation((VoteVS)selectedReceipt);
+                        break;
+                }
+            } else {
+                if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
+                    getActivity().onBackPressed();
+                }
+                setProgressDialogVisible(false);
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            }
+        }
+    };
+
+    private void launchVoteCancellation(VoteVS vote) {
+        Intent startIntent = new Intent(getActivity(), VoteService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.VOTE_KEY, vote);
+        setProgressDialogVisible(true);
+        getActivity().startService(startIntent);
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.message_smime, container, false);
@@ -195,7 +193,7 @@ public class ReceiptFragment extends Fragment {
                 }
             } else {
                 int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-                Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                Cursor cursor = getActivity().getContentResolver().query(
                         ReceiptContentProvider.CONTENT_URI, null, null, null, null);
                 cursor.moveToPosition(cursorPosition);
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
@@ -205,6 +203,7 @@ public class ReceiptFragment extends Fragment {
                     selectedReceipt = (ReceiptContainer) ObjectUtils.
                             deSerializeObject(serializedReceiptContainer);
                     selectedReceipt.setLocalId(receiptId);
+
                     initReceiptScreen(selectedReceipt);
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -271,7 +270,6 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-
     private void setActionBar(ReceiptContainer receiptContainer) {
         if(receiptContainer == null) return;
         switch(receiptContainer.getTypeVS()) {
@@ -312,24 +310,15 @@ public class ReceiptFragment extends Fragment {
         if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY,selectedReceipt);
     }
 
-    @Override public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
-    }
-
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 

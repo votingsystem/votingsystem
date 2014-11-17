@@ -34,13 +34,11 @@ public class VoteVS extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "VoteVS";
+	public static final String TAG = VoteVS.class.getSimpleName();
     
     private Long localId = -1L;
     private transient SMIMEMessage voteReceipt;
-    private transient byte[] voteReceiptBytes;
     private transient SMIMEMessage cancelVoteReceipt;
-    private transient byte[] cancelVoteReceiptBytes;
     private transient TimeStampToken timeStampToken;
     private X509Certificate x509Certificate;
     private byte[] encryptedKey = null;
@@ -52,7 +50,6 @@ public class VoteVS extends ReceiptContainer {
     private String representativeURL;
     private String accessControlURL;
     private String originHashCertVote;
-    private String hashCertVoteHex;
     private String hashCertVSBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
@@ -68,7 +65,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public void genVote() throws NoSuchAlgorithmException {
-        Log.d(TAG + ".genVote()", "");
+        Log.d(TAG + ".genVote", "genVote");
         originHashAccessRequest = UUID.randomUUID().toString();
         setHashAccessRequestBase64(CMSUtils.getHashBase64(originHashAccessRequest,
                 ContextVS.VOTING_DATA_DIGEST));
@@ -77,7 +74,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public HashMap getVoteDataMap() {
-        Log.d(TAG + ".getVoteDataMap()", "");
+        Log.d(TAG + ".getVoteDataMap", "getVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
         map.put("eventURL", eventVS.getURL());
@@ -90,7 +87,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public HashMap getAccessRequestDataMap() {
-        Log.d(TAG + ".getAccessRequestDataMap()", "");
+        Log.d(TAG + ".getAccessRequestDataMap", "getAccessRequestDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.ACCESS_REQUEST.toString());
         map.put("eventId", eventVS.getId());
@@ -101,7 +98,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public HashMap getCancelVoteDataMap() {
-        Log.d(TAG + ".getCancelVoteDataMap()", "");
+        Log.d(TAG + ".getCancelVoteDataMap", "getCancelVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.CANCEL_VOTE.toString());
         map.put("originHashCertVote", originHashCertVote);
@@ -115,7 +112,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public Map getDataMap() {
-        Log.d(TAG + ".getDataMap()", "");
+        Log.d(TAG + ".getDataMap", "getDataMap");
         Map resultMap = new HashMap();
         try {
             if(optionSelected != null) {
@@ -158,13 +155,6 @@ public class VoteVS extends ReceiptContainer {
     }
 
 	public SMIMEMessage getCancelVoteReceipt() {
-        if(cancelVoteReceipt == null && cancelVoteReceiptBytes != null) {
-            try {
-                cancelVoteReceipt = new SMIMEMessage(new ByteArrayInputStream(cancelVoteReceiptBytes));
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         return cancelVoteReceipt;
 	}
 
@@ -173,13 +163,6 @@ public class VoteVS extends ReceiptContainer {
 	}
 
     public SMIMEMessage getVoteReceipt() {
-        if(voteReceipt == null && voteReceiptBytes != null) {
-            try {
-                voteReceipt = new SMIMEMessage(new ByteArrayInputStream(voteReceiptBytes));
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         return voteReceipt;
     }
 
@@ -372,10 +355,14 @@ public class VoteVS extends ReceiptContainer {
 
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
-        voteReceiptBytes = (byte[]) s.readObject();
-        cancelVoteReceiptBytes = (byte[]) s.readObject();
+        byte[] voteReceiptBytes = (byte[]) s.readObject();
+        if(voteReceiptBytes != null) voteReceipt = new SMIMEMessage(
+                new ByteArrayInputStream(voteReceiptBytes));
+        byte[] cancelVoteReceiptBytes = (byte[]) s.readObject();
+        if(cancelVoteReceiptBytes != null) cancelVoteReceipt = new SMIMEMessage(
+                new ByteArrayInputStream(cancelVoteReceiptBytes));
     }
 
 
@@ -403,12 +390,14 @@ public class VoteVS extends ReceiptContainer {
         return voteVS;
     }
 
-    public SMIMEMessage getReceipt() {
+    public SMIMEMessage getReceipt() throws Exception {
         switch(getTypeVS()) {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
+                cancelVoteReceipt.isValidSignature();
                 return cancelVoteReceipt;
             case VOTEVS:
+                voteReceipt.isValidSignature();
                 return voteReceipt;
             default: return null;
         }
@@ -416,14 +405,14 @@ public class VoteVS extends ReceiptContainer {
 
     public String getMessageId() {
         String result = null;
-        SMIMEMessage receipt = getReceipt();
-        if(receipt != null) {
-            try {
+        try {
+            SMIMEMessage receipt = getReceipt();
+            if(receipt != null) {
                 String[] headers = receipt.getHeader("Message-ID");
                 if(headers != null && headers.length >0) return headers[0];
-            } catch(Exception ex) {
-                ex.printStackTrace();
             }
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
         return result;
     }

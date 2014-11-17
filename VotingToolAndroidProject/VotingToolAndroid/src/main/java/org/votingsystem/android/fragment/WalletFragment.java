@@ -87,11 +87,6 @@ public class WalletFragment extends Fragment {
         }
     };
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    };
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.wallet_lbl), null, null);
@@ -116,13 +111,10 @@ public class WalletFragment extends Fragment {
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
             vicketList = new ArrayList<Vicket>();
         }
-        adapter = new VicketListAdapter(vicketList, getActivity().getApplicationContext());
+        adapter = new VicketListAdapter(vicketList, getActivity());
         gridView.setAdapter(adapter);
+        setHasOptionsMenu(true);
         return rootView;
-    }
-
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     private void isProgressDialogVisible(boolean isVisible) {
@@ -209,10 +201,6 @@ public class WalletFragment extends Fragment {
         }
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
@@ -221,8 +209,7 @@ public class WalletFragment extends Fragment {
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
 }

@@ -44,7 +44,6 @@ public class EventVSStatsFragment extends Fragment {
 	
 	public static final String TAG = EventVSStatsFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private EventVS eventVS;
     private AppContextVS contextVS;
@@ -63,7 +62,7 @@ public class EventVSStatsFragment extends Fragment {
                Bundle savedInstanceState) {
         Long eventId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+        Cursor cursor = getActivity().getContentResolver().query(
                 EventVSContentProvider.getEventURI(eventId), null, null, null, null);
         cursor.moveToFirst();
         String eventJSONData = cursor.getString(cursor.getColumnIndex(
@@ -136,10 +135,8 @@ public class EventVSStatsFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog( getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         }  else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 

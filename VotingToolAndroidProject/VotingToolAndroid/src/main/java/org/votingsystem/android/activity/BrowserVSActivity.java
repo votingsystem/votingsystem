@@ -39,7 +39,6 @@ public class BrowserVSActivity extends ActivityBase {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private String viewerURL = null;
     private TypeVS operationType;
     private AppContextVS contextVS = null;
@@ -131,10 +130,8 @@ public class BrowserVSActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getSupportFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 

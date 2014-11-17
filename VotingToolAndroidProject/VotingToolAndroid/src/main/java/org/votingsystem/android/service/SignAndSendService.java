@@ -95,7 +95,7 @@ public class SignAndSendService extends IntentService {
                         notificationMessage = getString(R.string.election_published_ok_msg);
                         break;
                     default:
-                        notificationMessage = getString(R.string.signature_ok_notification_msg);
+                        notificationMessage = getString(R.string.fa_cert_notification_msg);
                 }
                 caption = getString(R.string.operation_ok_msg);
             } else {

@@ -38,7 +38,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.NewRepresentativeActivity;
+import org.votingsystem.android.activity.RepresentativeRegisterActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
@@ -104,8 +104,7 @@ public class RepresentativeGridFragment extends Fragment
     private void launchSignAndSendService() {
         LOGD(TAG + ".launchSignAndSendService", "");
         try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    SignAndSendService.class);
+            Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY,
@@ -153,7 +152,7 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
+        adapter = new RepresentativeListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -238,8 +237,7 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".fetchItems", "offset: " + offset);
         if(isProgressDialogVisible.get()) return;
         else setProgressDialogVisible(true);
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                RepresentativeService.class);
+        Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
                 getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
@@ -265,7 +263,7 @@ public class RepresentativeGridFragment extends Fragment
             case R.id.cancel_anonymouys_representatioin:
                 return true;
             case R.id.new_representative:
-                Intent intent = new Intent(getActivity(), NewRepresentativeActivity.class);
+                Intent intent = new Intent(getActivity(), RepresentativeRegisterActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.cancel_representative:
@@ -283,7 +281,7 @@ public class RepresentativeGridFragment extends Fragment
                 dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.edit_representative:
-                Intent editIntent = new Intent(getActivity(), NewRepresentativeActivity.class);
+                Intent editIntent = new Intent(getActivity(), RepresentativeRegisterActivity.class);
                 editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
                 startActivity(editIntent);
                 return true;
@@ -296,8 +294,7 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity().getApplicationContext(),
-                RepresentativePagerActivity.class);
+        Intent intent = new Intent(getActivity(), RepresentativePagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -388,13 +385,12 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 }

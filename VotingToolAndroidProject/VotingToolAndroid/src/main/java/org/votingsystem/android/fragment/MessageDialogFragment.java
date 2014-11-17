@@ -43,8 +43,8 @@ public class MessageDialogFragment extends DialogFragment {
     }
 
     public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
-        showDialog(responseVS.getStatusCode(), responseVS.getCaption(), responseVS.getMessage(),
-                fragmentManager);
+        showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                responseVS.getNotificationMessage(), fragmentManager);
     }
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,

@@ -75,13 +75,13 @@
         <activity android:name=".activity.EventVSStatsPagerActivity"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.NewRepresentativeActivity"
+        <activity android:name=".activity.RepresentativeRegisterActivity"
             android:label="@string/new_representative_title" android:theme="@style/ThemeVS"/>
 
         <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.RepresentativesActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.RepresentativesMainActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.SMIMESignerActivity" android:theme="@style/ThemeVS"/>
 
@@ -89,6 +89,9 @@
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativePagerActivity"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.ReceiptsMainActivity"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.ReceiptPagerActivity"
@@ -103,7 +106,7 @@
         <activity android:name=".activity.TransactionVSPagerActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.VicketPagerActivity"
+        <activity android:name=".activity.FinanceMainActivity"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativeDelegationActivity"

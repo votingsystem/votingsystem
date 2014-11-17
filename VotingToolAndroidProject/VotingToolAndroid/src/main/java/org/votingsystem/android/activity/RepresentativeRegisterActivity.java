@@ -49,14 +49,13 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class NewRepresentativeActivity extends ActivityBase {
+public class RepresentativeRegisterActivity extends ActivityBase {
 	
-	public static final String TAG = NewRepresentativeActivity.class.getSimpleName();
+	public static final String TAG = RepresentativeRegisterActivity.class.getSimpleName();
 
     private static final int SELECT_PICTURE   = 1;
     private static final int CONFIRM_PICTURE  = 2;
 
-    private ModalProgressDialogFragment progressDialog;
     private TypeVS operationType;
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
@@ -84,7 +83,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                         String representativeNif = NifUtils.validate(message);
                         if(representativeNif == null) {
                             new AlertDialog.Builder(
-                                    NewRepresentativeActivity.this).setTitle(getString(R.string.error_lbl)).
+                                    RepresentativeRegisterActivity.this).setTitle(getString(R.string.error_lbl)).
                                     setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -93,7 +92,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                                     }).setCancelable(false).show();
                         } else loadRepresentativeData(representativeNif);
                     } else {
-                        NewRepresentativeActivity.this.onBackPressed();
+                        RepresentativeRegisterActivity.this.onBackPressed();
                     }
                 } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
                     setProgressDialogVisible(false);
@@ -107,7 +106,7 @@ public class NewRepresentativeActivity extends ActivityBase {
                 } else if(TypeVS.ITEM_REQUEST == broadcastType) {
                     if(ResponseVS.SC_OK == responseStatusCode) {
                         Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
-                        Cursor cursor = NewRepresentativeActivity.this.getApplicationContext().
+                        Cursor cursor = RepresentativeRegisterActivity.this.getApplicationContext().
                                 getContentResolver().query(representativeURI,
                                 null, null, null, null);
                         cursor.moveToFirst();
@@ -189,10 +188,8 @@ public class NewRepresentativeActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getSupportFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 

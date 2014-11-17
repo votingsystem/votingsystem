@@ -286,6 +286,7 @@ public class SMIMEMessage extends MimeMessage {
      * Digest for storing unique MessageSMIME in database
      */
     public String getContentDigestStr() throws Exception {
+        if(contentInfo == null) isValidSignature();
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         return Base64.getEncoder().encodeToString(messageDigest.digest(signedContent.getBytes()));
     }

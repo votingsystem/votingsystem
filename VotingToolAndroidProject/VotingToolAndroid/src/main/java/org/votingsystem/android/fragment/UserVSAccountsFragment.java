@@ -56,7 +56,6 @@ public class UserVSAccountsFragment extends Fragment {
 	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
 
     private String currencyCode;
-    private ModalProgressDialogFragment progressDialog;
     private TransactionVS transactionVS;
     private View rootView;
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
@@ -113,8 +112,7 @@ public class UserVSAccountsFragment extends Fragment {
                         responseVS.getCaption(), responseVS.getNotificationMessage(),
                         getFragmentManager());
             }
-            setProgressDialogVisible(false);
-            if(progressDialog != null) progressDialog.dismiss();
+            setProgressDialogVisible(false, null, null);
         }
         }
     };
@@ -234,70 +232,63 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
-    private void setProgressDialogVisible(boolean isVisible) {
+    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(caption, message, getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     private void sendUserInfoRequest() {
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                VicketService.class);
+        Intent startIntent = new Intent(getActivity(), VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 
     private void sendVicketRequest(String pin) {
-        progressDialog = ModalProgressDialogFragment.showDialog(
-                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
-                getString(R.string.vicket_request_msg_subject), getFragmentManager());
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                VicketService.class);
+        Intent startIntent = new Intent(getActivity(), VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(true, getString(R.string.vicket_request_msg_subject),
+                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()));
         getActivity().startService(startIntent);
     }
 
     private void sendVicket() {
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                VicketService.class);
+        Intent startIntent = new Intent(getActivity(), VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 
     private void sendTransactionVS() {
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                TransactionVSService.class);
+        Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

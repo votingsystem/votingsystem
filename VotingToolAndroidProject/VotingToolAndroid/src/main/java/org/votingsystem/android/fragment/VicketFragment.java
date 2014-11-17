@@ -39,7 +39,6 @@ public class VicketFragment extends Fragment {
 
     public static final String TAG = VicketFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog;
     private Vicket selectedVicket;
     private TextView vicket_amount, vicket_state, vicket_currency, date_info;
     private SMIMEMessage selectedVicketSMIME;
@@ -97,10 +96,8 @@ public class VicketFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
@@ -111,14 +108,13 @@ public class VicketFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

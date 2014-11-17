@@ -39,8 +39,7 @@ public class FragmentContainerActivity extends FragmentActivity {
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
-                " - intent extras: " + getIntent().getExtras());
+        LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.generic_fragment_container_activity);
@@ -54,13 +53,11 @@ public class FragmentContainerActivity extends FragmentActivity {
             Class clazz = Class.forName(fragmentClass);
             Fragment fragment = (Fragment)clazz.newInstance();
             fragment.setArguments(getIntent().getExtras());
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, fragment,
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                             ((Object)fragment).getClass().getSimpleName()).commit();
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
@@ -79,28 +76,5 @@ public class FragmentContainerActivity extends FragmentActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public void processOperation(OperationVS operationVS) {
-        EditorFragment fragment = (EditorFragment)getSupportFragmentManager().
-                findFragmentByTag(EditorFragment.class.getSimpleName());
-        if (fragment != null) fragment.processOperation(operationVS);
-
-    }
-
-
-
-    /*@Override public void onBackPressed() {
-        EditorFragment fragment = (EditorFragment)getSupportFragmentManager().
-                findFragmentByTag(EditorFragment.TAG);
-        if (fragment != null) fragment.onBackPressed();
-        else  super.onBackPressed();
-    }*/
 
 }

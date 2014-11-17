@@ -168,9 +168,9 @@ public class TransactionVSFragment extends Fragment {
         if(getActivity() instanceof FragmentActivity) {
             ((FragmentActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
             ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
-                    selectedTransactionVS.getDescription(getActivity().getApplicationContext()));
+                    selectedTransactionVS.getDescription(getActivity()));
             ((FragmentActivity)getActivity()).getActionBar().setLogo(
-                    selectedTransactionVS.getIconId(getActivity().getApplicationContext()));
+                    selectedTransactionVS.getIconId(getActivity()));
         }
     }
 
@@ -181,14 +181,13 @@ public class TransactionVSFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

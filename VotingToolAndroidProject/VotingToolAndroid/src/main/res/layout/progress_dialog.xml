@@ -38,10 +38,9 @@
             android:layout_height="wrap_content"
             android:indeterminateDrawable="@drawable/progress_loading"/>
         <TextView android:id="@+id/progress_text"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_weight="1"
             android:layout_gravity="center"
             android:text="@string/sending_data_lbl"
             android:layout_marginLeft="10dip"

@@ -244,7 +244,7 @@ public class WebSocketRequest implements Parcelable {
         ResponseVS responseVS = new ResponseVS(statusCode, message);
         if(ResponseVS.SC_OK == statusCode) {
             if(TypeVS.MESSAGEVS_FROM_DEVICE == typeVS) {
-                responseVS.setIconId(R.drawable.signature_ok_22);
+                responseVS.setIconId(R.drawable.fa_cert_22);
                 responseVS.setCaption(context.getString(R.string.sign_document_lbl));
                 responseVS.setMessage(context.getString(R.string.sign_document_result_ok_msg));
             }

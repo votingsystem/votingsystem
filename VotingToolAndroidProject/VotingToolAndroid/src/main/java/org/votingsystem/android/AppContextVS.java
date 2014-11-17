@@ -89,6 +89,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             String accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
             LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
                     vicketServerURL);
+            /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
+            Intent intent = new Intent(this, WelcomeActivity.class);
+            startActivity(intent);
+            finish();}*/
             if(accessControl == null || vicketServer == null) {
                 Intent startIntent = new Intent(this, BootStrapService.class);
                 startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);

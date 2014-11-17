@@ -49,7 +49,6 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
-    private ModalProgressDialogFragment progressDialog;
     private View rootView;
     private String broadCastId = null;
     private AppContextVS contextVS;
@@ -64,9 +63,8 @@ public class RepresentativeFragment extends Fragment {
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
             if(TypeVS.ITEM_REQUEST == typeVS) {
-                Cursor cursor = getActivity().getApplicationContext().getContentResolver().
-                        query(UserContentProvider.getRepresentativeURI(representativeId),
-                                null, null, null, null);
+                Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
+                        getRepresentativeURI(representativeId), null, null, null, null);
                 cursor.moveToFirst();
                 UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                         cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
@@ -93,9 +91,8 @@ public class RepresentativeFragment extends Fragment {
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         representativeId =  getArguments().getLong(ContextVS.USER_KEY);
-        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                UserContentProvider.getRepresentativeURI(representativeId),
-                null, null, null, null);
+        Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
+                getRepresentativeURI(representativeId), null, null, null, null);
         cursor.moveToFirst();
         final UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
@@ -115,8 +112,7 @@ public class RepresentativeFragment extends Fragment {
             printRepresentativeData(representative);
         } else {
             setProgressDialogVisible(true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    RepresentativeService.class);
+            Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEM_REQUEST);
@@ -145,10 +141,8 @@ public class RepresentativeFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
-                    getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg),
-                    getFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg), getFragmentManager());
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
@@ -194,7 +188,6 @@ public class RepresentativeFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -208,8 +201,7 @@ public class RepresentativeFragment extends Fragment {
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
