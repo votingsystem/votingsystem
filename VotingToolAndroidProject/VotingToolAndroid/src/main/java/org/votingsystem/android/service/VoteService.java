@@ -130,11 +130,16 @@ public class VoteService extends IntentService {
         builder.setContentTitle(responseVS.getCaption()).setContentText(
                 responseVS.getNotificationMessage());
         if(notificationIcon != null) builder.setSmallIcon(notificationIcon);
-        //Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        //clickIntent.setClassName(this, EventsVSActivity.class.getName());
-        //PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
-        //builder.setContentIntent(pIntent);
+        /*Intent clickIntent = new Intent(Intent.ACTION_MAIN);
+        clickIntent.setClassName(this, EventsVSActivity.class.getName());
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
+                VOTE_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
+                .setContentIntent(pendingIntent);
+        builder.setContentIntent(pendingIntent);*/
         Notification note =  builder.build();
+        //note.flags |= Notification.FLAG_AUTO_CANCEL;
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.VOTE_SERVICE_NOTIFICATION_ID, note);
     }

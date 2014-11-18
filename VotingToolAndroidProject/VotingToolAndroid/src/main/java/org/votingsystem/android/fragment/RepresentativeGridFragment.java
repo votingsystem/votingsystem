@@ -39,7 +39,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
-import org.votingsystem.android.activity.RepresentativeRegisterActivity;
+import org.votingsystem.android.activity.RepresentativeNewActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
@@ -86,7 +86,7 @@ public class RepresentativeGridFragment extends Fragment
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode)  showHTTPError();
-            ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(
+            ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
                     ContextVS.RESPONSEVS_KEY);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
@@ -151,6 +151,15 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+
+        rootView.setOnClickListener(
+            new View.OnClickListener() {
+                public void onClick(View v) {
+                    LOGD(TAG +  ".R.id.empty", "R.id.empty");
+                }
+        });
+
+
         adapter = new RepresentativeListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -262,7 +271,7 @@ public class RepresentativeGridFragment extends Fragment
             case R.id.cancel_anonymouys_representatioin:
                 return true;
             case R.id.new_representative:
-                Intent intent = new Intent(getActivity(), RepresentativeRegisterActivity.class);
+                Intent intent = new Intent(getActivity(), RepresentativeNewActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.cancel_representative:
@@ -280,7 +289,7 @@ public class RepresentativeGridFragment extends Fragment
                 dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.edit_representative:
-                Intent editIntent = new Intent(getActivity(), RepresentativeRegisterActivity.class);
+                Intent editIntent = new Intent(getActivity(), RepresentativeNewActivity.class);
                 editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
                 startActivity(editIntent);
                 return true;

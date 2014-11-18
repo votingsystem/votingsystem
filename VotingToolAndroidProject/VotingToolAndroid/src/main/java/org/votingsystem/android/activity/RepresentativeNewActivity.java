@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,9 +50,9 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeRegisterActivity extends ActivityBase {
+public class RepresentativeNewActivity extends ActivityBase {
 	
-	public static final String TAG = RepresentativeRegisterActivity.class.getSimpleName();
+	public static final String TAG = RepresentativeNewActivity.class.getSimpleName();
 
     private static final int SELECT_PICTURE   = 1;
     private static final int CONFIRM_PICTURE  = 2;
@@ -65,6 +66,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
     private String representativeImageName = null;
     private String editorContent = null;
     private Uri representativeImageUri = null;
+    private byte[] imageBytes;
     private Menu menu;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -76,14 +78,14 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                     ResponseVS.SC_ERROR);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) newRepresentative();
             else {
                 if(TypeVS.NIF_REQUEST == broadcastType) {
                     if(ResponseVS.SC_OK == responseStatusCode) {
                         String representativeNif = NifUtils.validate(message);
                         if(representativeNif == null) {
                             new AlertDialog.Builder(
-                                    RepresentativeRegisterActivity.this).setTitle(getString(R.string.error_lbl)).
+                                    RepresentativeNewActivity.this).setTitle(getString(R.string.error_lbl)).
                                     setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -92,7 +94,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                                     }).setCancelable(false).show();
                         } else loadRepresentativeData(representativeNif);
                     } else {
-                        RepresentativeRegisterActivity.this.onBackPressed();
+                        RepresentativeNewActivity.this.onBackPressed();
                     }
                 } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
                     setProgressDialogVisible(false);
@@ -106,7 +108,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                 } else if(TypeVS.ITEM_REQUEST == broadcastType) {
                     if(ResponseVS.SC_OK == responseStatusCode) {
                         Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
-                        Cursor cursor = RepresentativeRegisterActivity.this.getApplicationContext().
+                        Cursor cursor = RepresentativeNewActivity.this.getApplicationContext().
                                 getContentResolver().query(representativeURI,
                                 null, null, null, null);
                         cursor.moveToFirst();
@@ -120,8 +122,8 @@ public class RepresentativeRegisterActivity extends ActivityBase {
         }
     };
 
-    private void launchSignAndSendService() {
-        LOGD(TAG + ".launchSignAndSendService", "");
+    private void newRepresentative() {
+        LOGD(TAG + ".newRepresentative", "");
         editorFragment.setEditable(false);
         String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
@@ -130,6 +132,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NEW_REPRESENTATIVE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
+            startIntent.putExtra(ContextVS.IMAGE_KEY, imageBytes);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
                     ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
@@ -150,6 +153,8 @@ public class RepresentativeRegisterActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.representative_new);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
@@ -179,6 +184,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
         if(savedInstanceState != null) {
             representativeImageUri = (Uri) savedInstanceState.getParcelable(ContextVS.URI_KEY);
             representativeImageName = savedInstanceState.getString(ContextVS.ICON_KEY);
+            imageBytes = savedInstanceState.getByteArray(ContextVS.IMAGE_KEY);
             if(representativeImageUri != null) {
                 setRepresentativeImage(representativeImageUri, representativeImageName);
             }
@@ -187,8 +193,8 @@ public class RepresentativeRegisterActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getSupportFragmentManager());
+            ModalProgressDialogFragment.showDialog(getString(R.string.sending_data_lbl),
+                    getString(R.string.representative_new_msg), getSupportFragmentManager());
         } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
@@ -227,7 +233,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                     editorContent = editorFragment.getEditorData();
                     menu.removeGroup(R.id.general_items);
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                            null, false, null);
+                            getString(R.string.enter_pin_signature_device_msg), false, null);
                 }
                 return true;
             default:
@@ -254,7 +260,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
     }
 
     private boolean validateForm () {
-        LOGD(TAG + ".validateForm()", "");
+        LOGD(TAG + ".validateForm", "validateForm");
         if(editorFragment == null || editorFragment.isEditorDataEmpty()) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.editor_empty_error_lbl));
@@ -274,14 +280,9 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                 resultCode); //Activity.RESULT_OK;
         if(SELECT_PICTURE == requestCode) {
             if(data != null && data.getData() != null) {
-                try {
-                    Intent intent = new Intent(this, ConfirmImageActivity.class);
-                    intent.putExtra(ContextVS.URI_KEY, data.getData());
-                    startActivityForResult(intent, CONFIRM_PICTURE);
-                    //setRepresentativeImage(representativeImageUri, representativeImageName);
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                }
+                Intent intent = new Intent(this, ConfirmImageActivity.class);
+                intent.putExtra(ContextVS.URI_KEY, data.getData());
+                startActivityForResult(intent, CONFIRM_PICTURE);
             }
         } else if(CONFIRM_PICTURE == requestCode) {
             if(Activity.RESULT_OK == resultCode) {
@@ -292,23 +293,14 @@ public class RepresentativeRegisterActivity extends ActivityBase {
                     representativeImageName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
-                File representativeDataFile = new File(getApplicationContext().getFilesDir(),
-                        ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
-                try {
-                    byte[] serializedRepresentative = FileUtils.getBytesFromFile(
-                            representativeDataFile);
-                    UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
-                            serializedRepresentative);
-                    setRepresentativeImage(representativeData.getImageBytes(), representativeImageName);
-                }catch(Exception ex) {
-                    ex.printStackTrace();
-                }
+                setRepresentativeImage(data.getByteArrayExtra(ContextVS.IMAGE_KEY), representativeImageName);
             }
         }
     }
 
     private void setRepresentativeImage(byte[] imageBytes, String imageName) {
         try {
+            this.imageBytes = imageBytes;
             Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             ImageView image = (ImageView)findViewById(R.id.representative_image);
             image.setImageBitmap(bitmap);
@@ -347,6 +339,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
         outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
+        outState.putByteArray(ContextVS.IMAGE_KEY, imageBytes);
         LOGD(TAG + ".onSaveInstanceState", "outState: " + outState);
     }
 

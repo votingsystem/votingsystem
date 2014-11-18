@@ -10,6 +10,7 @@
     <color name="drawer_list_header">#333333</color>
     <color name="event_subject">#005b92</color>
     <color name="loading_data">#33b5e5</color>
+    <color name="empty_msg">#33b5e5</color>
     <color name="representative_name">#005b92</color>
     <color name="form_background">#eeeeee</color>
     <color name="theme_primary_dark">#303f9f</color>

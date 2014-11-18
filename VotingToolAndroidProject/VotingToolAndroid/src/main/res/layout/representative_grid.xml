@@ -23,8 +23,9 @@
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textSize="20sp"
         android:visibility="gone"
-        android:textColor="@color/drawer_list_item"
+        android:textColor="@color/empty_msg"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/empty_search_lbl"/>
 

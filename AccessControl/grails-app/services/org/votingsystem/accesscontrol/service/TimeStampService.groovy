@@ -102,7 +102,7 @@ class TimeStampService {
         if(tsToken == null) throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
                 locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
         SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
-        if(!sigVerifier)throw new ExceptionVS("TimeStamp service not initialized")
+        if(!sigVerifier) throw new ExceptionVS("TimeStamp service not initialized")
         X509CertificateHolder certHolder = sigVerifier.getAssociatedCertificate();
         DigestCalculator calc = sigVerifier.getDigestCalculator(tsToken.certID.getHashAlgorithm());
         OutputStream cOut = calc.getOutputStream();

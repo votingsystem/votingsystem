@@ -36,6 +36,8 @@ public class PrefUtils {
         return TimeZone.getDefault();
     }
 
+    private static UserVS representative;
+
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -211,6 +213,30 @@ public class PrefUtils {
         if(serializedUserVS != null) {
             UserVS userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
             return userVS;
+        }
+        return null;
+    }
+
+    public static void putRepresentative(final Context context, UserVS userVS) {
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
+        try {
+            editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, new String(serializedUserVS, "UTF-8"));
+            editor.commit();
+            representative = userVS;
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static UserVS getRepresentative(final Context context) {
+        if(representative != null) return representative;
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String serializedUserVS = settings.getString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, null);
+        if(serializedUserVS != null) {
+            representative = (UserVS) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
+            return representative;
         }
         return null;
     }

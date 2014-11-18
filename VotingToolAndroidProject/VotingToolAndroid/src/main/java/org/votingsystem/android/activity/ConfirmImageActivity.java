@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -46,7 +47,9 @@ public class ConfirmImageActivity extends ActionBarActivity {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.confirm_image);
+        setContentView(R.layout.confirm_image_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         image = (ImageView) findViewById(R.id.selected_image);
         imageUri = (Uri) getIntent().getParcelableExtra(ContextVS.URI_KEY);
         String title = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
@@ -58,8 +61,6 @@ public class ConfirmImageActivity extends ActionBarActivity {
                 FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
                 printedBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
                 parcelFileDescriptor.close();
-
-
                 image.setImageBitmap(printedBitmap);
                 Button accept_button = (Button) findViewById(R.id.accept_button);
                 accept_button.setOnClickListener(new View.OnClickListener() {
@@ -106,30 +107,7 @@ public class ConfirmImageActivity extends ActionBarActivity {
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
             LOGD(TAG + ".onActivityResult", "captured byteArray length: " + byteArray.length);
-            File representativeDataFile = new File(getApplicationContext().getFilesDir(),
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
-            UserVS representativeData = null;
-            if(representativeDataFile.exists()) {
-                try {
-                    byte[] serializedRepresentative = FileUtils.getBytesFromFile(
-                            representativeDataFile);
-                    representativeData = (UserVS) ObjectUtils.deSerializeObject(
-                            serializedRepresentative);
-                }catch(Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else representativeData = new UserVS();
-            representativeData.setImageBytes(byteArray);
-            byte[] representativeDataBytes = ObjectUtils.serializeObject(representativeData);
-            FileOutputStream outputStream;
-            try {
-                outputStream = openFileOutput(ContextVS.REPRESENTATIVE_DATA_FILE_NAME,
-                        Context.MODE_PRIVATE);
-                outputStream.write(representativeDataBytes);
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            resultIntent.putExtra(ContextVS.IMAGE_KEY, byteArray);
         }
         setResult(result, resultIntent);
         finish();

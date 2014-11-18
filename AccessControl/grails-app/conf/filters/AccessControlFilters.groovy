@@ -51,7 +51,6 @@ class AccessControlFilters {
 
         filemapFilter(action:'FileMap', find:true) {
             before = {
-                log.debug "filemapFilter - before "
                 if (!(request instanceof MultipartHttpServletRequest)) {
                     return printOutputStream(response,  new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
@@ -113,7 +112,7 @@ class AccessControlFilters {
                                 return printOutput(response, responseVS)
                         } else {
                             params[key] = fileMap.get(key)?.getBytes()
-                            log.debug "---- filemapFilter - before - file: '${key}' -> without ContentTypeVS"
+                            log.debug "filemapFilter - before - file: '${key}' -> without ContentTypeVS"
                         }
                     }
                 } catch(Exception ex) {

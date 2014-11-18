@@ -50,7 +50,6 @@ class VicketFilters {
 
         filemapFilter(action:'FileMap', find:true) {
             before = {
-                log.debug "filemapFilter - before "
                 if (!(request instanceof MultipartHttpServletRequest)) {
                     return printOutputStream(response,  new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
@@ -63,7 +62,7 @@ class VicketFilters {
                         String[] keySplitted = key.split(":")
                         String fileName = keySplitted[0]
                         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
-                        log.debug "- filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
+                        log.debug "filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
                         if(contentTypeVS == null) {
                             return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                     messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
@@ -106,7 +105,7 @@ class VicketFilters {
                             return printOutput(response, responseVS)
                     } else {
                         params[key] = fileMap.get(key)?.getBytes()
-                        log.debug "---- filemapFilter - before - file: '${key}' -> without ContentTypeVS"
+                        log.debug "filemapFilter - before - file: '${key}' -> without ContentTypeVS"
                     }
                 }
             }

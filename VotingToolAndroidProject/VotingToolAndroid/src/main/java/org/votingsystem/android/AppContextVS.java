@@ -244,6 +244,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         }
     }
 
+    public ResponseVS signMessage(String toUser, String textToSign, String subject) {
+        return signMessage(toUser, textToSign, subject, getTimeStampServiceURL());
+    }
+
     public void setControlCenter(ControlCenterVS controlCenter) {
         this.controlCenter = controlCenter;
     }

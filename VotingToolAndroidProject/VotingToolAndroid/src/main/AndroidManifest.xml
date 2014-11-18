@@ -75,7 +75,7 @@
         <activity android:name=".activity.EventVSStatsPagerActivity"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.RepresentativeRegisterActivity"
+        <activity android:name=".activity.RepresentativeNewActivity"
             android:label="@string/new_representative_title" android:theme="@style/ThemeVS"/>
 
         <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
