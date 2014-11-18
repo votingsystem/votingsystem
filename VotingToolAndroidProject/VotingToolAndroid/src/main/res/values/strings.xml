@@ -434,5 +434,6 @@
     <string name="votevs_cancelled_msg">voto cancelado</string>
     <string name="votevs_error_msg">voto con inválido</string>
     <string name="votvs_value_msg">opción seleccionada \'%1$s\'</string>
+    <string name="timestamp_error_lbl">error comprobando sello de tiempo</string>
 
 </resources>

@@ -341,7 +341,7 @@ public class ReceiptFragment extends Fragment {
                 break;
             case R.id.show_timestamp_info:
                 UIUtils.showTimeStampInfoDialog(selectedReceiptSMIME.getSigner().getTimeStampToken(),
-                        getFragmentManager(), getActivity());
+                        contextVS.getTimeStampCert(), getFragmentManager(), getActivity());
                 break;
             case R.id.share_receipt:
                 try {

@@ -149,7 +149,7 @@ public class RepresentativeRegisterActivity extends ActivityBase {
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
-        setContentView(R.layout.new_representative);
+        setContentView(R.layout.representative_new);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
@@ -182,7 +182,6 @@ public class RepresentativeRegisterActivity extends ActivityBase {
             if(representativeImageUri != null) {
                 setRepresentativeImage(representativeImageUri, representativeImageName);
             }
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) setProgressDialogVisible(true);
         }
     }
 

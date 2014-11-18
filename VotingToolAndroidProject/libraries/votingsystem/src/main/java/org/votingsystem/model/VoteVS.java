@@ -169,6 +169,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public void setVoteReceipt(SMIMEMessage voteReceipt) throws Exception {
+        voteReceipt.isValidSignature();
         JSONObject receiptContentJSON = new JSONObject(voteReceipt.getSignedContent());
         JSONObject receiptOptionSelected = receiptContentJSON.getJSONObject("optionSelected");
         if(optionSelected.getId() != receiptOptionSelected.getLong("id") ||

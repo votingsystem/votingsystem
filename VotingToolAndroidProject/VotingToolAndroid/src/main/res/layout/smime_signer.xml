@@ -3,6 +3,9 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:foreground="@drawable/shape_window_dim" >
+
+    <include layout="@layout/toolbar_vs" />
+
     <ScrollView android:id="@+id/scroller"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

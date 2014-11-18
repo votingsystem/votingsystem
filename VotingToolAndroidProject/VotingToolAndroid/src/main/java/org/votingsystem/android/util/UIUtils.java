@@ -64,6 +64,7 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
+import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
@@ -150,8 +151,9 @@ public class UIUtils  {
         Drawable drawable = new ColorDrawable(context.getResources().getColor(android.R.color.transparent));
         return drawable;
     }
+
     public static void showTimeStampInfoDialog(TimeStampToken timeStampToken,
-           FragmentManager fragmentManager, Context context) {
+           X509Certificate timeStampServerCert, FragmentManager fragmentManager, Context context) {
         try {
             TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
             String certificateInfo = null;
@@ -159,7 +161,14 @@ public class UIUtils  {
             String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
             CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
             Collection<X509CertificateHolder> matches = store.getMatches(signerId);
-            X509CertificateHolder certificateHolder = matches.iterator().next();
+            X509CertificateHolder certificateHolder = null;
+            if(matches.size() == 0) {
+                LOGD(TAG + ".showTimeStampInfoDialog",
+                        "no cert matches found, validating with timestamp server cert");
+                certificateHolder = new X509CertificateHolder(timeStampServerCert.getEncoded());
+                timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                        ContextVS.PROVIDER).build(certificateHolder));
+            } else certificateHolder = matches.iterator().next();
             LOGD(TAG + ".showTimeStampInfoDialog", "serial number: '" +
                     certificateHolder.getSerialNumber() + "'");
             X509Certificate certificate = new JcaX509CertificateConverter().
@@ -171,8 +180,10 @@ public class UIUtils  {
             MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
                     R.string.timestamp_info_lbl), certificateInfo, fragmentManager);
         } catch (Exception ex) {
+            ex.printStackTrace();
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, context.getString(
-                    R.string.timestamp_info_lbl), ex.getMessage(), fragmentManager);
+                    R.string.error_lbl), context.getString(R.string.timestamp_error_lbl),
+                    fragmentManager);
         }
     }
 

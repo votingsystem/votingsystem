@@ -90,7 +90,7 @@ public class WalletFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.wallet_lbl), null, null);
-        rootView = inflater.inflate(R.layout.generic_grid, container, false);
+        rootView = inflater.inflate(R.layout.grid_container, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {

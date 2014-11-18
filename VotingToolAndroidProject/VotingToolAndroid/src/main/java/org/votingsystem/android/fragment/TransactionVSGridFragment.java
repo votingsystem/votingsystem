@@ -127,7 +127,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.generic_grid, container, false);
+        rootView = inflater.inflate(R.layout.grid_container, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new TransactionVSListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
@@ -154,8 +154,6 @@ public class TransactionVSGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                setProgressDialogVisible(true);
         }
     }
 

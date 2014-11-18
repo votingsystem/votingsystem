@@ -38,14 +38,15 @@
             android:layout_height="wrap_content"
             android:indeterminateDrawable="@drawable/progress_loading"/>
         <TextView android:id="@+id/progress_text"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_gravity="center"
             android:text="@string/sending_data_lbl"
+            android:layout_weight="1"
             android:layout_marginLeft="10dip"
             android:textColor="@color/msg_content_vs"
-            android:textSize="17sp" />
+            android:textSize="17sp"
+            android:gravity="center_horizontal" />
     </LinearLayout>
 
 </LinearLayout>

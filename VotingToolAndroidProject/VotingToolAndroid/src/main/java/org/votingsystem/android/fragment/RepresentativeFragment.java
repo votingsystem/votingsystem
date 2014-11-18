@@ -204,9 +204,4 @@ public class RepresentativeFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-    }
-
 }

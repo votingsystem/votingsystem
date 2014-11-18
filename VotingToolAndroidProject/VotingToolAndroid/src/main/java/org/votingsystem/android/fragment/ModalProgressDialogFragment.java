@@ -18,9 +18,11 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -64,8 +66,18 @@ public class ModalProgressDialogFragment extends DialogFragment {
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
         progress_text.setText(progressMessage);
         this.setCancelable(false);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setView(view);
-        return builder.create();
+        Dialog dialog = new AlertDialog.Builder(getActivity()).setView(view).create();
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    ((ModalProgressDialogFragment) getFragmentManager().
+                            findFragmentByTag(ModalProgressDialogFragment.TAG)).dismiss();
+                    return true;
+                }
+                return false;
+            }
+        });
+        return dialog;
     }
 
     public void setProgressMessage(String progressMessage) {

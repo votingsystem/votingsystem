@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -86,6 +87,8 @@ public class SMIMESignerActivity extends ActionBarActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.smime_signer);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         contextVS = (AppContextVS) getApplicationContext();
         request =  getIntent().getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         operationVS = request.getOperationVS();

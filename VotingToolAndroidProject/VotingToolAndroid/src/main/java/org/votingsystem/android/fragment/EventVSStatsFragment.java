@@ -84,8 +84,6 @@ public class EventVSStatsFragment extends Fragment {
         LOGD(TAG +  ".onActivityCreated", "");
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                setProgressDialogVisible(true);
             htmlContent = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
             baseURL = savedInstanceState.getString(ContextVS.URL_KEY);
             if(htmlContent != null && baseURL != null) loadHTMLContent(baseURL, htmlContent);
@@ -161,13 +159,13 @@ public class EventVSStatsFragment extends Fragment {
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            setProgressDialogVisible(false);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 htmlContent = responseVS.getMessage();
                 loadHTMLContent(baseURL, htmlContent);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 MessageDialogFragment.showDialog(responseVS, getFragmentManager());
             }
-            setProgressDialogVisible(false);
         }
     }
 }

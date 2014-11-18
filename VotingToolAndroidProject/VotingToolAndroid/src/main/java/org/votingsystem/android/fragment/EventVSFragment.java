@@ -58,7 +58,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = EventVSFragment.class.getSimpleName();
 
-    private TypeVS operation = TypeVS.VOTEVS;
     private EventVS eventVS;
     private VoteVS vote;
     private List<Button> optionButtonList;
@@ -68,12 +67,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private View rootView;
     private String broadCastId = null;
 
-
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVoteService();
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
+                launchVoteService(responseVS.getTypeVS());
             else {
                 vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
                 if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
@@ -106,24 +105,20 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    private void launchVoteService() {
-        LOGD(TAG + ".launchVoteService", "launchVoteService");
-        try {
-            Intent startIntent = new Intent(getActivity(), VoteService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-            String caption = null;
-            if(operation == TypeVS.CANCEL_VOTE) {
-                cancelVoteButton.setEnabled(false);
-                caption = getString(R.string.cancel_vote_lbl);
-            } else caption = getString(R.string.sending_vote_lbl);
-            setProgressDialogVisible(true, caption);
-            setOptionButtonsEnabled(false);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+    private void launchVoteService(TypeVS operation) {
+        LOGD(TAG + ".launchVoteService", "operation: " + operation.toString());
+        Intent startIntent = new Intent(getActivity(), VoteService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.VOTE_KEY, vote);
+        String caption = null;
+        if(operation == TypeVS.CANCEL_VOTE) {
+            cancelVoteButton.setEnabled(false);
+            caption = getString(R.string.cancel_vote_lbl);
+        } else caption = getString(R.string.sending_vote_lbl);
+        setProgressDialogVisible(true, caption);
+        setOptionButtonsEnabled(false);
+        getActivity().startService(startIntent);
     }
 
     public static EventVSFragment newInstance(String eventJSONStr) {
@@ -148,14 +143,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        rootView = inflater.inflate(R.layout.eventvs_vote, container, false);
+        rootView = inflater.inflate(R.layout.eventvs_fragment, container, false);
         saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
-        cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
-        setHasOptionsMenu(true);
-        Button cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
-        cancelVoteButton.setOnClickListener(this);
-        Button saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
         saveReceiptButton.setOnClickListener(this);
+        cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
+        cancelVoteButton.setOnClickListener(this);
+        setHasOptionsMenu(true);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         broadCastId = EventVSFragment.class.getSimpleName() + "_" + eventVS.getId();
@@ -180,12 +173,18 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
+    @Override public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
+        if(bundle != null) vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
+        if(vote != null && vote.getVoteReceipt() != null) showReceiptScreen(vote);
+        else setEventScreen(eventVS);
+    }
+
     @Override public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_vote_button:
-                operation = TypeVS.CANCEL_VOTE;
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.cancel_vote_msg), false, null);
+                        getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
                 break;
             case R.id.save_receipt_button:
                 ContentValues values = new ContentValues();
@@ -266,7 +265,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private void setEventScreen(final EventVS event) {
         LOGD(TAG + ".setEventScreen", "setEventScreen");
-        ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
@@ -303,13 +301,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private void processSelectedOption(FieldEventVS optionSelected) {
         LOGD(TAG + ".processSelectedOption", "processSelectedOption");
-        operation = TypeVS.VOTEVS;
         vote = new VoteVS(eventVS, optionSelected);
         String pinMsgPart = optionSelected.getContent().length() >
                 ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
                 ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                getString(R.string.option_selected_msg, pinMsgPart), false, null);
+                getString(R.string.option_selected_msg, pinMsgPart), false, TypeVS.VOTEVS);
     }
 
     @Override public void onResume() {
@@ -333,15 +330,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(ContextVS.VOTE_KEY, vote);
-    }
-
-    @Override public void onActivityCreated(Bundle bundle) {
-        super.onActivityCreated(bundle);
-        if(bundle != null) {
-            vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
-        }
-        if(vote != null && vote.getVoteReceipt() != null) showReceiptScreen(vote);
-        else setEventScreen(eventVS);
     }
 
     public void saveCancelReceipt(VoteVS vote) {

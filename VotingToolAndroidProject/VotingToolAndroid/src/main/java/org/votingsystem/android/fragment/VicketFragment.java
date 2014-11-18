@@ -149,7 +149,8 @@ public class VicketFragment extends Fragment {
                     break;
                 case R.id.show_timestamp_info:
                     UIUtils.showTimeStampInfoDialog(selectedVicket.getReceipt().getSigner().
-                            getTimeStampToken(), getFragmentManager(), getActivity());
+                            getTimeStampToken(), contextVS.getTimeStampCert(),
+                            getFragmentManager(), getActivity());
                     break;
                 case R.id.cancel_vicket:
                     PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
