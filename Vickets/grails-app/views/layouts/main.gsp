@@ -7,9 +7,9 @@
     <title><g:message code="appTitle"/></title>
     <asset:stylesheet src="vickets.css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">

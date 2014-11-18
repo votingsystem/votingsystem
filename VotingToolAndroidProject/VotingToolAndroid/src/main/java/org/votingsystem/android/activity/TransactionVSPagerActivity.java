@@ -3,10 +3,10 @@ package org.votingsystem.android.activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
@@ -24,7 +24,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionVSPagerActivity extends FragmentActivity {
+public class TransactionVSPagerActivity extends ActionBarActivity {
 
     public static final String TAG = TransactionVSPagerActivity.class.getSimpleName();
 
@@ -37,7 +37,7 @@ public class TransactionVSPagerActivity extends FragmentActivity {
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +

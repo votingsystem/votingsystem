@@ -9,7 +9,7 @@
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
             .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
-                background-color: #fff; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
+                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
             }
         </style>
         <vs-innerpage-signal id="innerpageSignal" title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>

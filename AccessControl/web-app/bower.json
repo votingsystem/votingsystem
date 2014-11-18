@@ -1,12 +1,12 @@
 {
-  "name": "Vickets",
-  "version": "0.1.0",
+  "name": "AccesControl",
+  "version": "0.5.0",
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
   "description": "Voting System Access Control",
   "keywords": [
-    "vickets",
+    "access-control",
     "voting-system"
   ],
   "license": "Apache 2",

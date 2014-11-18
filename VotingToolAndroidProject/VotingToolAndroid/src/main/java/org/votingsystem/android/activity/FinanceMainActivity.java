@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
@@ -36,13 +37,15 @@ public class FinanceMainActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        setContentView(R.layout.activity_vickets);
+        setContentView(R.layout.finance_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
-        getActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
+        getSupportActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

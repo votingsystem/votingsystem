@@ -3,10 +3,11 @@ package org.votingsystem.android.activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.json.JSONObject;
@@ -25,7 +26,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSStatsPagerActivity extends FragmentActivity {
+public class EventVSStatsPagerActivity extends ActionBarActivity {
 
     public static final String TAG = EventVSStatsPagerActivity.class.getSimpleName();
 
@@ -55,8 +56,10 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
             }
         } else cursor.moveToPosition(cursorPosition);
         setContentView(R.layout.pager_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventVSPagerAdapter eventsPagerAdapter = new EventVSPagerAdapter(getSupportFragmentManager(),
                 eventState.toString(), eventType.toString());
         mViewPager.setAdapter(eventsPagerAdapter);
@@ -76,7 +79,6 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
         try {
             EventVS event = EventVS.parse(new JSONObject(eventJSON));
             String subtTitle = null;
-            getActionBar().setLogo(R.drawable.mail_mark_unread_32);
             String title = getString(R.string.voting_info_lbl) + " '"+ event.getSubject() + "'";
             switch(event.getState()) {
                 case ACTIVE:
@@ -93,8 +95,8 @@ public class EventVSStatsPagerActivity extends FragmentActivity {
                 default:
                     subtTitle = getString(R.string.voting_closed_lbl);
             }
-            if(title != null) getActionBar().setTitle(title);
-            if(subtTitle != null) getActionBar().setSubtitle(subtTitle);
+            if(title != null) getSupportActionBar().setTitle(title);
+            if(subtTitle != null) getSupportActionBar().setSubtitle(subtTitle);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

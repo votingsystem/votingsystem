@@ -3,7 +3,7 @@
 <head>
     <title></title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
     <style>

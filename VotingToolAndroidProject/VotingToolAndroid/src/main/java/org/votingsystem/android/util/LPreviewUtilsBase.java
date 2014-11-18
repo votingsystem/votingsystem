@@ -28,6 +28,7 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -90,9 +91,9 @@ public class LPreviewUtilsBase {
     public void showHideActionBarIfPartOfDecor(boolean show) {
         // pre-L, action bar is always part of the window decor
         if (show) {
-            mActivity.getActionBar().show();
+            ((ActionBarActivity)mActivity).getSupportActionBar().show();
         } else {
-            mActivity.getActionBar().hide();
+            ((ActionBarActivity)mActivity).getSupportActionBar().hide();
         }
     }
 

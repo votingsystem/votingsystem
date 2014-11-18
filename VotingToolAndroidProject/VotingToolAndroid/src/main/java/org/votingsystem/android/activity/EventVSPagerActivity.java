@@ -3,10 +3,11 @@ package org.votingsystem.android.activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
@@ -22,7 +23,7 @@ import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSPagerActivity extends FragmentActivity {
+public class EventVSPagerActivity extends ActionBarActivity {
 
     public static final String TAG = EventVSPagerActivity.class.getSimpleName();
 
@@ -32,6 +33,8 @@ public class EventVSPagerActivity extends FragmentActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
         String eventStateStr = getIntent().getStringExtra(EVENT_STATE_KEY);
         String eventTypeStr = getIntent().getStringExtra(TYPEVS_KEY);
@@ -41,7 +44,7 @@ public class EventVSPagerActivity extends FragmentActivity {
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
                 null, selection, new String[]{eventTypeStr, eventStateStr}, null);
         cursor.moveToPosition(cursorPosition);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager(),
                 eventStateStr, eventTypeStr);
         mViewPager.setAdapter(eventsPagerAdapter);

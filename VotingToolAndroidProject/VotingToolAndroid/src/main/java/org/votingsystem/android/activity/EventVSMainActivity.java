@@ -16,10 +16,11 @@
 
 package org.votingsystem.android.activity;
 
-import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,6 +64,8 @@ public class EventVSMainActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
         weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
@@ -73,8 +76,8 @@ public class EventVSMainActivity extends ActivityBase {
         fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
-        View spinnerContainer = LayoutInflater.from(getActionBar().getThemedContext())
-                .inflate(R.layout.spinner_eventvs_actionbar, null);
+        View spinnerContainer = LayoutInflater.from(this).inflate(
+                R.layout.spinner_eventvs_actionbar, null);
         EventVSSpinnerAdapter mTopLevelSpinnerAdapter = new EventVSSpinnerAdapter(true);
         mTopLevelSpinnerAdapter.clear();
         mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
@@ -100,12 +103,13 @@ public class EventVSMainActivity extends ActivityBase {
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        getActionBar().setCustomView(spinnerContainer, lp);
+
+
         mSpinnerConfigured = true;
         updateActionBarNavigation();
-
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
-        getActionBar().setSubtitle(getString(R.string.polls_lbl));
+        getSupportActionBar().setCustomView(spinnerContainer, lp);
+        getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
+        getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
         if(args != null && args.getString(SearchManager.QUERY) != null) {
             String queryStr = getIntent().getExtras().getString(SearchManager.QUERY);
             Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
@@ -120,22 +124,21 @@ public class EventVSMainActivity extends ActivityBase {
 
     private void updateActionBarNavigation() {
         boolean show = mSpinnerConfigured && !isNavDrawerOpen();
-        ActionBar ab = getActionBar();
         if (show) {
-            ab.setDisplayShowCustomEnabled(true);
-            ab.setDisplayShowTitleEnabled(false);
-            ab.setDisplayUseLogoEnabled(false);
+            getSupportActionBar().setDisplayShowCustomEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayUseLogoEnabled(false);
         } else if (getLPreviewUtils().shouldChangeActionBarForDrawer()) {
-            ab.setDisplayShowCustomEnabled(false);
-            ab.setDisplayShowTitleEnabled(false);
-            ab.setDisplayUseLogoEnabled(true);
+            getSupportActionBar().setDisplayShowCustomEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
         }
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
-        getActionBar().setTitle(title);
-        if(subTitle != null) getActionBar().setSubtitle(subTitle);
-        if(iconId != null) getActionBar().setLogo(iconId);
+        getSupportActionBar().setTitle(title);
+        if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
+        if(iconId != null) getSupportActionBar().setLogo(iconId);
     }
 
     @Override protected int getSelfNavDrawerItem() {

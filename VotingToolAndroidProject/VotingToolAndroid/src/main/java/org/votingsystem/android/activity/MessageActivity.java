@@ -5,7 +5,7 @@ import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,7 +21,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MessageActivity extends FragmentActivity {
+public class MessageActivity extends ActionBarActivity {
 	
 	public static final String TAG = MessageActivity.class.getSimpleName();
 
@@ -32,7 +32,7 @@ public class MessageActivity extends FragmentActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState -getIntent().getExtras(): " +
                 getIntent().getExtras());
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.generic_fragment_container_activity);
+        setContentView(R.layout.fragment_container_activity);
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
             LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,7 +50,6 @@ import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -294,10 +294,10 @@ public class ReceiptFragment extends Fragment {
             menu.removeItem(R.id.delete_receipt);
         } else menu.removeItem(R.id.save_receipt);
         if(getActivity() instanceof FragmentActivity) {
-            ((FragmentActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
-            ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                     receiptContainer.getTypeDescription(getActivity()));
-            ((FragmentActivity)getActivity()).getActionBar().setLogo(UIUtils.getEmptyLogo(getActivity()));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(UIUtils.getEmptyLogo(getActivity()));
         }
     }
 

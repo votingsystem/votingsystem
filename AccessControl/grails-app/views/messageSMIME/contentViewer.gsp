@@ -3,7 +3,7 @@
 <head>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

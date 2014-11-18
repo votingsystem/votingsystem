@@ -13,9 +13,9 @@ import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,11 +57,10 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 
-public abstract class ActivityBase extends FragmentActivity {
+public abstract class ActivityBase extends ActionBarActivity {
 
     private static final String TAG = makeLogTag(ActivityBase.class);
 
-    private ModalProgressDialogFragment progressDialog = null;
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
     private AppContextVS contextVS = null;
@@ -144,7 +143,7 @@ public abstract class ActivityBase extends FragmentActivity {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
-                        progressDialog = ModalProgressDialogFragment.showDialog(
+                        ModalProgressDialogFragment.showDialog(
                                 getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
@@ -155,7 +154,7 @@ public abstract class ActivityBase extends FragmentActivity {
                 }
             } else if(request != null) {
                 LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
-                if(progressDialog != null) progressDialog.dismiss();
+                ModalProgressDialogFragment.hide(getSupportFragmentManager());
                 switch(request.getTypeVS()) {
                     case INIT_VALIDATED_SESSION:
                         if(ResponseVS.SC_OK == request.getStatusCode()) {
@@ -177,7 +176,7 @@ public abstract class ActivityBase extends FragmentActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mLPreviewUtils = LPreviewUtils.getInstance(this);
     }
 
@@ -237,8 +236,8 @@ public abstract class ActivityBase extends FragmentActivity {
             }
         });
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         populateNavDrawer();
         mDrawerToggle.syncState();
         // When the user runs the app for the first time, we want to land them with the

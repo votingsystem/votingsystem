@@ -21,11 +21,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -40,25 +40,16 @@ public class SettingsActivity extends PreferenceActivity
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", " - savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.ic_drawer_settings));
-        getActionBar().setTitle(R.string.navdrawer_item_settings);
-    }
-
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
+        setContentView(R.layout.settings_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                SettingsActivity.super.onBackPressed();
+            }
+        });
+        toolbar.setTitle(R.string.navdrawer_item_settings);
         PrefUtils.registerPreferenceChangeListener(this, this);
         Preference button = (Preference)findPreference("requestCertButton");
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

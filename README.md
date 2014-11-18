@@ -16,6 +16,9 @@ Para poder construir la aplicación es necesario tener instalado Bower(http://bo
 
     gradle installAllBowerComponents
 
+En los directorios '/web-app/bower_components/polymer.html' de cada aplicación web se ha cambiado la referencia a
+'polymer.js' por 'polymer.min.js'
+
 #### Generación de los certificados de pruebas
 
 Para generar los certificados de pruebas:

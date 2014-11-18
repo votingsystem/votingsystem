@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>vs-socket</title>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
     <style type="text/css" media="screen"></style>
 </head>

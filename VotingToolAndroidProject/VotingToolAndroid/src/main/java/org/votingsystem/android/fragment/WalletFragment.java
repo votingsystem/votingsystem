@@ -47,7 +47,7 @@ public class WalletFragment extends Fragment {
     private VicketListAdapter adapter = null;
     private List<Vicket> vicketList;
     private String broadCastId = WalletFragment.class.getSimpleName();
-    private ModalProgressDialogFragment progressDialog = null;
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -118,9 +118,9 @@ public class WalletFragment extends Fragment {
     }
 
     private void isProgressDialogVisible(boolean isVisible) {
-        if(isVisible) progressDialog = ModalProgressDialogFragment.showDialog(
+        if(isVisible) ModalProgressDialogFragment.showDialog(
                 getString(R.string.unlocking_wallet_msg), getString(R.string.wait_msg), getFragmentManager());
-        else if(progressDialog != null) progressDialog.dismiss();
+        else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {

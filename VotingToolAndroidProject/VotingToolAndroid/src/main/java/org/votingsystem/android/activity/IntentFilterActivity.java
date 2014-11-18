@@ -8,8 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
@@ -34,7 +34,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class IntentFilterActivity extends FragmentActivity {
+public class IntentFilterActivity extends ActionBarActivity {
 	
 	public static final String TAG = IntentFilterActivity.class.getSimpleName();
 

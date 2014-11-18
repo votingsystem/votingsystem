@@ -3,7 +3,7 @@ package org.votingsystem.android.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +34,7 @@ import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSSearchResultActivity extends FragmentActivity {
+public class EventVSSearchResultActivity extends ActionBarActivity {
 
     public static final String TAG = EventVSSearchResultActivity.class.getSimpleName();
 
@@ -44,7 +44,7 @@ public class EventVSSearchResultActivity extends FragmentActivity {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.eventvs_grid);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         GridView gridView = (GridView) findViewById(R.id.gridview);
         TextView textView = (TextView) findViewById(R.id.search_query);
         Bundle args = getIntent().getExtras();

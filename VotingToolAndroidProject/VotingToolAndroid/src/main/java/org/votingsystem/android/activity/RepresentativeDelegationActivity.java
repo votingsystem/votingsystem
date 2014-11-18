@@ -23,10 +23,10 @@ import android.widget.LinearLayout;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.ReceiptFetcherDialogFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.fragment.ReceiptFetcherDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
@@ -170,8 +170,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             }
         });
         setProgressDialogVisible(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setTitle(getString(R.string.representative_delegation_lbl));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
             int selectedCheckBoxId = -1;

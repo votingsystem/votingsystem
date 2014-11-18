@@ -8,8 +8,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
@@ -54,7 +54,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CertResponseActivity extends FragmentActivity {
+public class CertResponseActivity extends ActionBarActivity {
 	
 	public static final String TAG = CertResponseActivity.class.getSimpleName();
 	
@@ -135,8 +135,8 @@ public class CertResponseActivity extends FragmentActivity {
         broadCastId = CertResponseActivity.class.getSimpleName();
         LOGD(TAG + ".onCreate", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
-        getActionBar().setTitle(getString(R.string.voting_system_lbl));
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
         goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {

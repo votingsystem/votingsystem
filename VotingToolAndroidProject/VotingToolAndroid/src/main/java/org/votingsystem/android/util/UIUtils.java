@@ -35,6 +35,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
@@ -63,7 +64,6 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
-import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
@@ -75,8 +75,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
-import java.math.BigInteger;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -285,7 +283,7 @@ public class UIUtils  {
         SearchView mSearchView = (SearchView) searchViewMenuItem.getActionView();
         int searchImgId = context.getResources().getIdentifier("android:id/search_button", null, null);
         ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.abc_ic_search);
+        v.setImageResource(R.drawable.action_search);
     }
 
     public static EditText addFormField(String label, Integer type, LinearLayout mFormView, int id,
@@ -424,7 +422,7 @@ public class UIUtils  {
     }
 
     public static boolean hasActionBar(Activity activity) {
-        return activity.getActionBar() != null;
+        return (((ActionBarActivity)activity).getSupportActionBar() != null);
     }
 
     public static void setStartPadding(final Context context, View view, int padding) {

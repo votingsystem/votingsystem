@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -166,10 +167,10 @@ public class TransactionVSFragment extends Fragment {
                     selectedTransactionVS.getType());
         }
         if(getActivity() instanceof FragmentActivity) {
-            ((FragmentActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
-            ((FragmentActivity)getActivity()).getActionBar().setSubtitle(
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                     selectedTransactionVS.getDescription(getActivity()));
-            ((FragmentActivity)getActivity()).getActionBar().setLogo(
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
                     selectedTransactionVS.getIconId(getActivity()));
         }
     }

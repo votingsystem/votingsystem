@@ -1,6 +1,7 @@
 package org.votingsystem.android.activity;
 
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
@@ -24,12 +25,14 @@ public class RepresentativesMainActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         RepresentativeGridFragment fragment = new RepresentativeGridFragment();
         weakRefToFragment = new WeakReference<RepresentativeGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                         ((Object)fragment).getClass().getSimpleName()).commit();
-        getActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
+        getSupportActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

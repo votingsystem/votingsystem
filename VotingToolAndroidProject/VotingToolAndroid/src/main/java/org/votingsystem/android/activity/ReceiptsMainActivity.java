@@ -1,7 +1,7 @@
 package org.votingsystem.android.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
@@ -28,14 +28,16 @@ public class ReceiptsMainActivity extends ActivityBase {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.activity_base);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         ReceiptGridFragment fragment = new ReceiptGridFragment();
         weakRefToFragment = new WeakReference<ReceiptGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object)fragment).getClass().getSimpleName()).commit();
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
-        getActionBar().setLogo(null);
-        getActionBar().setTitle(getString(R.string.receipts_lbl));
+        getSupportActionBar().setLogo(null);
+        getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

@@ -16,16 +16,14 @@
 
 package org.votingsystem.android.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -33,7 +31,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class FragmentContainerActivity extends FragmentActivity {
+public class FragmentContainerActivity extends ActionBarActivity {
 
 	public static final String TAG = FragmentContainerActivity.class.getSimpleName();
 
@@ -41,8 +39,10 @@ public class FragmentContainerActivity extends FragmentActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        setContentView(R.layout.generic_fragment_container_activity);
+        setContentView(R.layout.fragment_container_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // if we're being restored from a previous state should return or else
         // we could end up with overlapping fragments.
         if (savedInstanceState != null) {
@@ -61,9 +61,9 @@ public class FragmentContainerActivity extends FragmentActivity {
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
-        getActionBar().setTitle(title);
-        if(subTitle != null) getActionBar().setSubtitle(subTitle);
-        if(iconId != null) getActionBar().setLogo(iconId);
+        getSupportActionBar().setTitle(title);
+        if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
+        if(iconId != null) getSupportActionBar().setLogo(iconId);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

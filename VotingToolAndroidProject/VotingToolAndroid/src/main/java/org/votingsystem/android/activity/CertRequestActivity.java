@@ -4,7 +4,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +24,7 @@ import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CertRequestActivity extends FragmentActivity {
+public class CertRequestActivity extends ActionBarActivity {
 	
 	public static final String TAG = CertRequestActivity.class.getSimpleName();
 
@@ -35,6 +36,8 @@ public class CertRequestActivity extends FragmentActivity {
         LOGD(TAG + ".onCreate", "appContextVS.getState(): " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_advice);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -52,7 +55,7 @@ public class CertRequestActivity extends FragmentActivity {
             }
         });
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         switch(appContextVS.getState()) {
             case WITH_CSR:
                 startActivity(new Intent(this, CertResponseActivity.class));
@@ -82,7 +85,7 @@ public class CertRequestActivity extends FragmentActivity {
         if(getIntent().getStringExtra(ContextVS.OPERATIONVS_KEY) != null) {
             cancelButton.setVisibility(View.GONE);
         }
-        getActionBar().setTitle(getString(R.string.cert_request_lbl));
+        getSupportActionBar().setTitle(getString(R.string.cert_request_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

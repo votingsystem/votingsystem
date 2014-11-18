@@ -3,10 +3,11 @@ package org.votingsystem.android.activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
@@ -21,7 +22,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ReceiptPagerActivity extends FragmentActivity {
+public class ReceiptPagerActivity extends ActionBarActivity {
 
     public static final String TAG = ReceiptPagerActivity.class.getSimpleName();
 
@@ -33,8 +34,10 @@ public class ReceiptPagerActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +

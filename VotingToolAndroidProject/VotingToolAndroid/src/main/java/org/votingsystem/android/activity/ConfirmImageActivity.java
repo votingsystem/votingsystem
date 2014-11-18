@@ -8,7 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -33,7 +33,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ConfirmImageActivity extends FragmentActivity {
+public class ConfirmImageActivity extends ActionBarActivity {
 	
 	public static final String TAG = ConfirmImageActivity.class.getSimpleName();
 
@@ -77,8 +77,8 @@ public class ConfirmImageActivity extends FragmentActivity {
                 ex.printStackTrace();
             }
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setTitle(title);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(title);
     }
 
     private void sendResult(int result) {

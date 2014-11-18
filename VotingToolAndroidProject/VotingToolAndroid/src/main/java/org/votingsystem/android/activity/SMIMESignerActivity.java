@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,7 +35,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SMIMESignerActivity extends FragmentActivity {
+public class SMIMESignerActivity extends ActionBarActivity {
 	
 	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
 
@@ -99,8 +99,8 @@ public class SMIMESignerActivity extends FragmentActivity {
         TextView textView = (TextView) findViewById(R.id.deviceName);
         textView.setText(getString(R.string.signature_request_from_device,
                 request.getOperationVS().getDeviceFromName()));
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setTitle(getString(R.string.sign_request_lbl));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.sign_request_lbl));
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
         }

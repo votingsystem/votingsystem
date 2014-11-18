@@ -38,8 +38,8 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.RepresentativeRegisterActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
+import org.votingsystem.android.activity.RepresentativeRegisterActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
@@ -65,7 +65,6 @@ public class RepresentativeGridFragment extends Fragment
 
     public static final String TAG = RepresentativeGridFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog = null;
     private View rootView;
     private GridView gridView;
     private RepresentativeListAdapter adapter = null;
@@ -213,7 +212,7 @@ public class RepresentativeGridFragment extends Fragment
         new Handler(){
             @Override public void handleMessage(Message msg) {
                 if (isVisible) {
-                    progressDialog = ModalProgressDialogFragment.showDialog(
+                    ModalProgressDialogFragment.showDialog(
                             getString(R.string.loading_data_msg),
                             getString(R.string.loading_info_msg),
                             getFragmentManager());

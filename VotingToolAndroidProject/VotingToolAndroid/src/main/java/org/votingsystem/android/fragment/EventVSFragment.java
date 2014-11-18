@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -161,19 +162,21 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         String subtTitle = null;
         switch(eventVS.getState()) {
             case ACTIVE:
-                getActivity().getActionBar().setTitle(getString(R.string.voting_open_lbl,
+                ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+                        getString(R.string.voting_open_lbl,
                         DateUtils.getElapsedTimeStr(eventVS.getDateFinish())));
                 break;
             case PENDING:
-                getActivity().getActionBar().setTitle(getString(R.string.voting_pending_lbl,
+                ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+                        getString(R.string.voting_pending_lbl,
                         DateUtils.getElapsedTimeStr(eventVS.getDateBegin())));
                 subtTitle = getString(R.string.init_lbl) + ": " +
                         DateUtils.getDayWeekDateStr(eventVS.getDateBegin());
                 break;
             default:
-                getActivity().getActionBar().setTitle(getString(R.string.voting_closed_lbl));
+                ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.voting_closed_lbl));
         }
-        if(subtTitle != null) getActivity().getActionBar().setSubtitle(subtTitle);
+        if(subtTitle != null) ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(subtTitle);
         return rootView;
     }
 

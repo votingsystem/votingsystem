@@ -4,8 +4,11 @@
     <item android:id="@+id/search_item"
           android:title="@string/searchLabel"
           votingSystem:showAsAction="always"
+          votingSystem:theme="@style/searchViewVS"
+          android:orderInCategory="0"
           android:icon="@android:drawable/ic_menu_search"
-          android:actionViewClass="android.widget.SearchView" />
+          android:actionViewClass="android.support.v7.widget.SearchView" />
+
 
     <group android:id="@+id/general_items">
         <item android:id="@+id/publish_document"

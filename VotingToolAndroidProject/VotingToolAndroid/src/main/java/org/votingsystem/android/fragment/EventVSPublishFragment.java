@@ -53,7 +53,7 @@ public class EventVSPublishFragment extends Fragment {
 	
 	public static final String TAG = EventVSPublishFragment.class.getSimpleName();
 
-    private ModalProgressDialogFragment progressDialog = null;
+
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
     private EditText dateElectionText;
@@ -227,7 +227,7 @@ public class EventVSPublishFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            progressDialog = ModalProgressDialogFragment.showDialog(
+            ModalProgressDialogFragment.showDialog(
                     getString(R.string.publishing_document_msg),
                     getString(R.string.publish_election_msg_subject),
                     getFragmentManager());
