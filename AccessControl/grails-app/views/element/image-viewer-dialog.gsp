@@ -1,12 +1,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 
 <polymer-element name="image-viewer-dialog" attributes="url description">
     <template>
-        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .dialog {
                 box-sizing: border-box;
@@ -34,7 +35,7 @@
             <div layout horizontal center center-justified>
                 <img src="{{url}}" style="width:100%; height: 100%;"></img>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('image-viewer-dialog', {

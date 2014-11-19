@@ -5,13 +5,14 @@
 <link href="../paper-input/paper-input.html" rel="import">
 <link href="../core-icons/core-icons.html" rel="import">
 <link href="../paper-button/paper-button.html" rel="import">
-<link href="../vs-dialog/vs-dialog.html" rel="import">
+<link href="../paper-dialog/paper-dialog.html" rel="import">
+<link href="../paper-dialog/paper-dialog-transition.html" rel="import">
 <link rel="import" href="../vs-i18n/vs-i18n.html">
 
 
 <polymer-element name="vs-advanced-search-dialog" attributes="opened transition">
 <template>
-    <vs-dialog id="xDialog" class="advancedSearchDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <paper-dialog id="xDialog" layered backdrop class="advancedSearchDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
             .advancedSearchDialog {
                 box-sizing: border-box;
@@ -92,7 +93,7 @@
                 {{messages.acceptLbl}}
             </paper-button>
         </div>
-    </vs-dialog>
+    </paper-dialog>
 </template>
 <script>
     Polymer('vs-advanced-search-dialog', {

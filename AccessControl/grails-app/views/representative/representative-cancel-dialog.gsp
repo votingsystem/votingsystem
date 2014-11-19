@@ -1,11 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
-
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 <polymer-element name="representative-cancel-dialog">
     <template>
-        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .dialog {
@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('representative-cancel-dialog', {

@@ -144,8 +144,6 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         setContentView(R.layout.representative_delegation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
-
-
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
@@ -153,19 +151,18 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         EditText et = (EditText) findViewById(R.id.weeks_delegation);
         et.setFilters(new InputFilter[]{
                 new InputFilterMinMax(1, ContextVS.MAX_WEEKS_ANONYMOUS_DELEGATION)});
-
-        String editorFileName = "delegation_message_" +
+        String fileToLoad = "delegation_message_" +
                 Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
-            if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                LOGD(TAG + ".loadEditor", "missing editorFileName: " + editorFileName);
-                editorFileName = "delegation_message_es.html";
+            if(!Arrays.asList(getResources().getAssets().list("")).contains(fileToLoad)) {
+                LOGD(TAG + ".onCreate", "missing fileToLoad: " + fileToLoad);
+                fileToLoad = "delegation_message_es.html";
             }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
         WebView webView = (WebView)findViewById(R.id.representative_description);
-        webView.loadUrl("file:///android_asset/" + editorFileName);
+        webView.loadUrl("file:///android_asset/" + fileToLoad);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 setProgressDialogVisible(false);

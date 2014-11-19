@@ -1,11 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
     <template>
-        <vs-dialog id="xDialog"  title="<g:message code="sendMessageVSDialogCaption"/>"
+        <paper-dialog id="xDialog" layered backdrop title="<g:message code="sendMessageVSDialogCaption"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style> </style>
             <g:include view="/include/styles.gsp"/>
@@ -23,7 +24,7 @@
                     </div>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('messagevs-send-dialog', {

@@ -3,13 +3,14 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-i18n', file: 'vs-i18n.html')}">
 
 
 <polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
 <template>
-    <vs-dialog id="xDialog" title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <paper-dialog id="xDialog" layered backdrop title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
             .selectTagDialog {
                 box-sizing: border-box;
@@ -76,7 +77,7 @@
         </div>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
-    </vs-dialog>
+    </paper-dialog>
 </template>
 <script>
     Polymer('tagvs-select-dialog', {

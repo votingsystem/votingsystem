@@ -1,10 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/message-smime']"/>">
 
 <polymer-element name="message-smime-dialog" attributes="transactionvsURL opened">
     <template>
-        <vs-dialog id="xDialog" class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{transactionvsURL}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="json"></core-ajax>
             <div style="display:{{isProcessing? 'block':'none'}}">

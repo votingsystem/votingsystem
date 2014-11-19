@@ -1,5 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
@@ -14,7 +15,7 @@
 <polymer-element name="balance-uservs" attributes="url balance">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <vs-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <transactionvs-data id="transactionViewer"></transactionvs-data>
         </vs-dialog>
         <style no-shim>

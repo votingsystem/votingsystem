@@ -1,7 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-progress', file: 'paper-progress.html')}">
 
 <polymer-element name="vicket-wallet-tag-group" attributes="tag, vicketArray">

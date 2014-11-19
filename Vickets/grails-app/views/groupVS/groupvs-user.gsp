@@ -1,11 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <vs-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
+        <paper-dialog id="xDialog" layered backdrop class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
             <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>

@@ -1,10 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
+
 
 <polymer-element name="eventvs-backup-request-dialog" attributes="opened">
     <template>
-        <vs-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim></style>
             <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
                 <div layout horizontal center center-justified>
@@ -42,7 +44,7 @@
                     </div>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('eventvs-backup-request-dialog', {

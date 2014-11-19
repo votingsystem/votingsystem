@@ -1,12 +1,14 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
+
 
 <polymer-element name="add-voting-option-dialog" attributes="opened">
     <template>
         <style></style>
-        <vs-dialog flex vertical id="xDialog" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
+        <paper-dialog id="xDialog" layered backdrop opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
             <g:include view="/include/styles.gsp"/>
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
@@ -57,7 +59,7 @@
                 </div>
                <content></content>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
 <script>
     Polymer('add-voting-option-dialog', {

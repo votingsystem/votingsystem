@@ -1,7 +1,8 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 
 <polymer-element name="message-smime-transactionvs-from-bankvs" attributes="signedDocument smimeMessage
         isClientToolConnected timeStampDate">

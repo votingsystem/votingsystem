@@ -1,10 +1,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-dialog', file: 'vs-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 
 <polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
     <template>
-        <vs-dialog id="xDialog" class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
+        <paper-dialog id="xDialog" layered backdrop class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}" style="overflow: auto;">
         <style no-shim>
             .uservsSearchDialog {  width: 600px;  min-height: 300px; padding: 10px 20px; }
@@ -29,7 +30,7 @@
                     </div>
                 </div>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('uservs-selector-dialog', {
