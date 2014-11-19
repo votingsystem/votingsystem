@@ -1,4 +1,4 @@
-package org.votingsystem.android.fragment;
+package org.votingsystem.android.activity;
 
 import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
@@ -6,16 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -26,6 +25,11 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.EditorFragment;
+import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.NewFieldDialogFragment;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -49,19 +53,17 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSPublishFragment extends Fragment {
+public class EventVSNewActivity extends ActivityBase {
 	
-	public static final String TAG = EventVSPublishFragment.class.getSimpleName();
+	public static final String TAG = EventVSNewActivity.class.getSimpleName();
 
 
-    private EditorFragment editorFragment;
     private AppContextVS contextVS;
     private EditText dateElectionText;
     private TextView optionCaption;
     private EditText subjectEditText;
     private LinearLayout optionContainer;
-    private View rootView;
-    private String broadCastId = EventVSPublishFragment.class.getSimpleName();
+    private String broadCastId = EventVSNewActivity.class.getSimpleName();
     private List<String> optionList = new ArrayList<String>();
     private Calendar dateElectionCalendar = null;
 
@@ -75,15 +77,16 @@ public class EventVSPublishFragment extends Fragment {
                 setProgressDialogVisible(false);
                 String fragment = intent.getStringExtra(ContextVS.FRAGMENT_KEY);
                 if(MessageDialogFragment.class.getSimpleName().equals(fragment)) {
-                    getActivity().onBackPressed();
+                    EventVSNewActivity.this.onBackPressed();
                     return;
                 }
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     if(optionList.contains(message)) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getActivity().
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                                 getString(R.string.error_lbl), getString(
-                                R.string.option_repeated_msg, message), getFragmentManager());
+                                R.string.option_repeated_msg, message),
+                                getSupportFragmentManager());
                     } else {
                         optionList.add(message);
                         addEventOption(message);
@@ -93,13 +96,13 @@ public class EventVSPublishFragment extends Fragment {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     MessageDialogFragment.showDialog(ResponseVS.SC_OK,
                             responseVS.getCaption(), responseVS.getNotificationMessage(),
-                            broadCastId, TypeVS.VOTING_PUBLISHING, getFragmentManager());
+                            broadCastId, TypeVS.VOTING_PUBLISHING, getSupportFragmentManager());
                     /*message = message + " " + getString(R.string.publish_document_OK_sufix_msg);
-                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(caption).
+                    AlertDialog dialog = new AlertDialog.Builder(this).setTitle(caption).
                             setMessage(message).setPositiveButton(R.string.ok_lbl,
                             new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            Intent intent = new Intent(getActivity().getApplicationContext(),
+                            Intent intent = new Intent(this.getApplicationContext(),
                                     EventVSMainActivity.class);
                             startActivity(intent);
                         }
@@ -109,7 +112,7 @@ public class EventVSPublishFragment extends Fragment {
                 } else {
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(), getString(
                             R.string.publish_document_ERROR_msg), Html.fromHtml(
-                            responseVS.getNotificationMessage()).toString(), getFragmentManager());
+                            responseVS.getNotificationMessage()).toString(), getSupportFragmentManager());
                 }
             }
         }
@@ -126,7 +129,7 @@ public class EventVSPublishFragment extends Fragment {
             if(todayCalendar.after(electionCalendar)) {
                 MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
                         R.string.error_lbl), getString(R.string.date_error_lbl),
-                        getFragmentManager());
+                        getSupportFragmentManager());
             } else {
                 dateElectionCalendar = electionCalendar;
                 dateElectionText.setText(DateUtils.getDayWeekDateStr(
@@ -142,7 +145,8 @@ public class EventVSPublishFragment extends Fragment {
         String signedMessageSubject = null;
         EventVS eventVS = new EventVS();
         eventVS.setSubject(subjectEditText.getText().toString());
-        eventVS.setContent(editorFragment.getEditorData());
+        eventVS.setContent(((EditorFragment) getSupportFragmentManager().
+                findFragmentByTag(EditorFragment.TAG)).getEditorData());
         signedMessageSubject = getString(R.string.publish_election_msg_subject);
         eventVS.setDateBegin(dateElectionCalendar.getTime());
         eventVS.setDateFinish(DateUtils.addDays(dateElectionCalendar.getTime(), 1));
@@ -156,7 +160,7 @@ public class EventVSPublishFragment extends Fragment {
             eventVS.setFieldsEventVS(voteOptionSet);
         }
         try {
-            Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
+            Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
@@ -166,32 +170,34 @@ public class EventVSPublishFragment extends Fragment {
             JSONObject documentToSign = eventVS.toJSON();
             documentToSign.put("UUID", UUID.randomUUID().toString());
             startIntent.putExtra(ContextVS.MESSAGE_KEY, documentToSign.toString());
-            Toast.makeText(getActivity(), getString(
+            Toast.makeText(this, getString(
                     R.string.publishing_document_msg), Toast.LENGTH_SHORT).show();
             setProgressDialogVisible(true);
-            getActivity().startService(startIntent);
+            this.startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = EventVSPublishFragment.class.getSimpleName();
-        rootView = inflater.inflate(R.layout.eventvs_election_publish, container, false);
-        optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
-        optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
+        contextVS = (AppContextVS) this.getApplicationContext();
+        broadCastId = EventVSNewActivity.class.getSimpleName();
+        setContentView(R.layout.eventvs_new);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
+        optionContainer = (LinearLayout) findViewById(R.id.optionContainer);
+        optionCaption = (TextView) findViewById(R.id.eventFieldsCaption);
         List<String> controlCenterNameList = new ArrayList<String>();
         controlCenterNameList.add(getString(R.string.select_control_center_lbl));
         controlCenterNameList.add(contextVS.getAccessControl().getControlCenter().getName());
-        dateElectionText = (EditText) rootView.findViewById(R.id.date_election);
+        dateElectionText = (EditText) findViewById(R.id.date_election);
         dateElectionText.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 LOGD(TAG + ".dateElectionText", "setOnClickListener");
                 if(dateElectionCalendar == null) dateElectionCalendar = DateUtils.addDays(1);
-                DatePickerDialog dialog = new DatePickerDialog(getActivity(), dateElectionListener,
+                DatePickerDialog dialog = new DatePickerDialog(EventVSNewActivity.this,
+                        dateElectionListener,
                         dateElectionCalendar.get(Calendar.YEAR), dateElectionCalendar.get(Calendar.MONTH),
                         dateElectionCalendar.get(Calendar.DAY_OF_MONTH));
                 dialog.setTitle(getString(R.string.date_begin_lbl));
@@ -199,43 +205,34 @@ public class EventVSPublishFragment extends Fragment {
             }
         });
         dateElectionText.setKeyListener(null);
-        subjectEditText = (EditText) rootView.findViewById(R.id.subject);
+        subjectEditText = (EditText) findViewById(R.id.subject);
         if(optionCaption != null) optionCaption.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 addOption();
             }
         });
-        // if set to true savedInstanceState will be allways null
-        //setRetainInstance(true);
-        setHasOptionsMenu(true);
-        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        return rootView;
-    }
-
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
-        LOGD(TAG +  ".onActivityCreated", "");
-        super.onActivityCreated(savedInstanceState);
-        editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
             optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
             for(String optionContent:optionList) {
                 addEventOption(optionContent);
             }
         }
-        getActivity().setTitle(getString(R.string.publish_voting_caption));
+        this.setTitle(getString(R.string.publish_voting_caption));
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
     }
+
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
             ModalProgressDialogFragment.showDialog(
                     getString(R.string.publishing_document_msg),
                     getString(R.string.publish_election_msg_subject),
-                    getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+                    getSupportFragmentManager());
+        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     private void addEventOption(final String optionContent) {
-        final LinearLayout newOptionView = (LinearLayout) getActivity().getLayoutInflater().
+        final LinearLayout newOptionView = (LinearLayout) this.getLayoutInflater().
                 inflate(R.layout.new_eventvs_field, null);
         Button remove_option_button = (Button) newOptionView.findViewById(
                 R.id.remove_option_button);
@@ -258,18 +255,20 @@ public class EventVSPublishFragment extends Fragment {
         LOGD(TAG +  ".onSaveInstanceState", "");
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.text_editor, menu);
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        LOGD(TAG + ".onCreateOptionsMenu", "");
+        getMenuInflater().inflate(R.menu.text_editor, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                getActivity().onBackPressed();
+                this.onBackPressed();
                 return true;
             case R.id.save_editor:
-                if(validateForm()) PinDialogFragment.showPinScreen(getFragmentManager(),
+                if(validateForm()) PinDialogFragment.showPinScreen(getSupportFragmentManager(),
                         broadCastId, getString(R.string.ping_to_sign_msg), false, null);
                 return true;
             default:
@@ -281,29 +280,31 @@ public class EventVSPublishFragment extends Fragment {
         NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(
                 getString(R.string.add_vote_option_lbl),
                 getString(R.string.add_vote_option_msg), broadCastId,  TypeVS.ITEM_REQUEST);
-        newFieldDialog.show(getFragmentManager(), NewFieldDialogFragment.TAG);
+        newFieldDialog.show(getSupportFragmentManager(), NewFieldDialogFragment.TAG);
     }
 
     private boolean validateForm () {
         if(dateElectionCalendar == null) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                     getString(R.string.error_lbl),
-                    getString(R.string.date_error_lbl), getFragmentManager());
+                    getString(R.string.date_error_lbl), getSupportFragmentManager());
             return false;
         }
         if(optionList.size() < ContextVS.NUM_MIN_OPTIONS) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.num_vote_options_error_msg), getFragmentManager());
+                    getString(R.string.num_vote_options_error_msg), getSupportFragmentManager());
             return false;
         }
-        if(editorFragment.isEditorDataEmpty()) {
+        FragmentManager fm = this.getSupportFragmentManager();
+        if(((EditorFragment) this.getSupportFragmentManager().
+                findFragmentByTag(EditorFragment.TAG)).isEditorDataEmpty()) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.editor_empty_error_lbl), getFragmentManager());
+                    getString(R.string.editor_empty_error_lbl), getSupportFragmentManager());
             return false;
         }
         if(TextUtils.isEmpty(subjectEditText.getText())) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.subject_error_lbl), getFragmentManager());
+                    getString(R.string.subject_error_lbl), getSupportFragmentManager());
             return false;
         }
         return true;
@@ -311,12 +312,12 @@ public class EventVSPublishFragment extends Fragment {
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+        LocalBroadcastManager.getInstance(this).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 

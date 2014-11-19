@@ -33,8 +33,6 @@ public class EditorFragment extends Fragment {
 	public static final String TAG = EditorFragment.class.getSimpleName();
 	
 	private WebView webView;
-    private FrameLayout mainLayout;
-    private TextView textview;
     private View rootView;
     private String editorDataStr = "";
     private boolean isEditable = true;
@@ -45,8 +43,6 @@ public class EditorFragment extends Fragment {
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.editor_fragment, container, false);
         webView = (WebView) rootView.findViewById(R.id.webview);
-        textview = (TextView) rootView.findViewById(R.id.textview);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         return rootView;
     }
 

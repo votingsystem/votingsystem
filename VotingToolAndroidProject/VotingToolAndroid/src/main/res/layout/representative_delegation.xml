@@ -13,11 +13,11 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="@color/form_background"
             android:orientation="vertical">
             <WebView android:id="@+id/webview"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:background="@color/bkg_screen_vs"/>
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

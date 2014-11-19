@@ -96,25 +96,11 @@ public class RepresentativeGridFragment extends Fragment
 
     private void revokeRepresentative() {
         LOGD(TAG + ".revokeRepresentative", "revokeRepresentative");
-        try {
-            Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URL_KEY,
-                    contextVS.getAccessControl().getRepresentativeRevokeServiceURL());
-            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED);
-            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
-                    getString(R.string.revoke_representative_msg_subject));
-            Map signedContentDataMap = new HashMap();
-            signedContentDataMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
-            signedContentDataMap.put("UUID", UUID.randomUUID().toString());
-            startIntent.putExtra(ContextVS.MESSAGE_KEY, new JSONObject(signedContentDataMap).toString());
-            setProgressDialogVisible(true);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        setProgressDialogVisible(true);
+        getActivity().startService(startIntent);
     }
 
     /**
@@ -238,11 +224,6 @@ public class RepresentativeGridFragment extends Fragment
         getActivity().startService(startIntent);
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        LOGD(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
-        menu.removeGroup(R.id.general_items);
-        inflater.inflate(R.menu.representative_grid, menu);
-    }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
@@ -260,18 +241,18 @@ public class RepresentativeGridFragment extends Fragment
                 startActivity(intent);
                 return true;
             case R.id.cancel_representative:
-                AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(
-                        R.string.remove_representative_caption)).
-                        setMessage(R.string.remove_representative_msg).setPositiveButton(
-                        R.string.continue_lbl, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.remove_representative_caption),
+                        getString(R.string.remove_representative_msg), getActivity());
+                builder.setPositiveButton(getString(R.string.continue_lbl),
+                        new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                        getString(R.string.remove_representative_caption),
+                                PinDialogFragment.showPinScreen(getFragmentManager(),
+                                        broadCastId, getString(R.string.enter_signature_pin_msg),
                                         false, null);
                             }
-                        }).setNegativeButton(R.string.cancel_lbl,null).show();
-                //to avoid avoid dissapear on screen orientation change
-                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.edit_representative:
                 Intent editIntent = new Intent(getActivity(), RepresentativeNewActivity.class);

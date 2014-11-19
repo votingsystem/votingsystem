@@ -33,6 +33,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
@@ -69,39 +70,38 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
-                launchVoteService(responseVS.getTypeVS());
-            else {
-                vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
-                if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(vote);
-                    else if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
-                        setOptionButtonsEnabled(true);
-                    }
-                    MessageDialogFragment.showDialog(responseVS, getFragmentManager());
-                } else if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        setEventScreen(eventVS);
-                        AlertDialog dialog  = new AlertDialog.Builder(getActivity()).setTitle(
-                            getString(R.string.msg_lbl)).setMessage(Html.fromHtml(
-                            responseVS.getNotificationMessage())).
-                            setPositiveButton(R.string.save_receipt_lbl,
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            saveCancelReceipt(vote);
-                                        }
-                                    }).setNegativeButton(R.string.cancel_lbl, null).show();
-                        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                    } else {
-                        cancelVoteButton.setEnabled(true);
-                        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
-                    }
+        LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
+            launchVoteService(responseVS.getTypeVS());
+        else {
+            vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
+            if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
+                if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(vote);
+                else if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
+                    setOptionButtonsEnabled(true);
                 }
-                setProgressDialogVisible(false, null);
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            } else if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    setEventScreen(eventVS);
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            getString(R.string.msg_lbl),responseVS.getNotificationMessage(),
+                            getActivity());
+                    builder.setPositiveButton(getString(R.string.continue_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                saveCancelReceipt(vote);
+                            }
+                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                    builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                } else {
+                    cancelVoteButton.setEnabled(true);
+                    MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                }
             }
+            setProgressDialogVisible(false, null);
+        }
         }
     };
 

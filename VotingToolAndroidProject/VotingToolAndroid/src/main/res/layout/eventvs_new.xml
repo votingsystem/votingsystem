@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_vs" />
 
     <ScrollView android:id="@+id/scroller"
         android:layout_width="fill_parent"
@@ -30,7 +32,6 @@
                 android:gravity="center_vertical|center_horizontal">
             </EditText>
             <fragment android:name="org.votingsystem.android.fragment.EditorFragment"
-                xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/editor"
                 android:tag="EditorFragment"
                 android:layout_width="match_parent"
@@ -59,4 +60,4 @@
                 android:orientation="vertical"/>
         </LinearLayout>
     </ScrollView>
-</FrameLayout>
+</LinearLayout>

@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -76,6 +75,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendDelegation();
         else {
+            setProgressDialogVisible(false);
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 try {
                     ReceiptFetcherDialogFragment newFragment = ReceiptFetcherDialogFragment.newInstance(
@@ -83,15 +83,14 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                             responseVS.getNotificationMessage(), (String) responseVS.getData(),
                             responseVS.getTypeVS());
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-                    setProgressDialogVisible(false);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
                     responseVS = ResponseVS.getExceptionResponse(ex, getApplication());
                 }
-            }
-            MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage(), getSupportFragmentManager());
+            } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                    responseVS.getCaption(), responseVS.getNotificationMessage(),
+                    getSupportFragmentManager());
         }
         }
     };

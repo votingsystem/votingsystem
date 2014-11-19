@@ -12,7 +12,6 @@
     <color name="loading_data">#33b5e5</color>
     <color name="empty_msg">#33b5e5</color>
     <color name="representative_name">#005b92</color>
-    <color name="form_background">#eeeeee</color>
     <color name="theme_primary_dark">#303f9f</color>
 
     <color name="active_vs">#388746</color>
@@ -21,6 +20,7 @@
 
     <color name="bkg_vs">#ba0011</color>
     <color name="frg_vs">#fefefe</color>
+    <color name="bkg_screen_vs">#eeeeee</color>
     <color name="msg_content_vs">#888</color>
     <color name="theme_accent_2">#e91e63</color>
     <color name="theme_accent_1">#00b0ff</color>

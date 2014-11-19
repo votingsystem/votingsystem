@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
-import org.votingsystem.android.fragment.EventVSPublishFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
@@ -189,9 +188,7 @@ public class EventVSMainActivity extends ActivityBase {
                 onSearchRequested();
                 return true;
             case R.id.publish_document:
-                intent = new Intent(EventVSMainActivity.this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, EventVSPublishFragment.class.getName());
-                intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
+                intent = new Intent(this, EventVSNewActivity.class);
                 startActivity(intent);
                 return true;
             default:

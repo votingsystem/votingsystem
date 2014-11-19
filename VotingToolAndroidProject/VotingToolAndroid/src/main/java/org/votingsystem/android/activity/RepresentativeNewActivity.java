@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -92,12 +94,17 @@ public class RepresentativeNewActivity extends ActivityBase {
                     } else RepresentativeNewActivity.this.onBackPressed();
                 } else if(TypeVS.NEW_REPRESENTATIVE == responseVS.getTypeVS()) {
                     setProgressDialogVisible(false);
-                    MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         editorFragment.setEditable(true);
-                        if(menu != null) getMenuInflater().inflate(R.menu.text_editor, menu);
+                        MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
                     } else {
-                        imageCaption.setOnClickListener(null);
+                        UIUtils.getMessageDialogBuilder(responseVS, RepresentativeNewActivity.this).
+                            setPositiveButton(getString(R.string.accept_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    RepresentativeNewActivity.this.finish();
+                                }
+                            }).show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                     }
                 } else if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -225,7 +232,6 @@ public class RepresentativeNewActivity extends ActivityBase {
             case R.id.save_editor:
                 if(validateForm()) {
                     editorContent = editorFragment.getEditorData();
-                    menu.removeGroup(R.id.general_items);
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
                             getString(R.string.enter_signature_pin_msg), false, null);
                 }

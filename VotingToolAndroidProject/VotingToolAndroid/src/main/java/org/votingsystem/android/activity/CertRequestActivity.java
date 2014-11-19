@@ -15,6 +15,7 @@ import android.widget.Button;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CertRequestFormFragment;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -61,25 +62,25 @@ public class CertRequestActivity extends ActionBarActivity {
                 startActivity(new Intent(this, CertResponseActivity.class));
                 break;
             case WITH_CERTIFICATE:
-                AlertDialog dialog= new AlertDialog.Builder(this).setTitle(getString(R.string.
-                        request_certificate_menu)).setMessage(Html.fromHtml(
-                        getString(R.string.request_cert_again_msg))).setPositiveButton(getString(
-                        R.string.ok_lbl), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Intent intent = new Intent(CertRequestActivity.this,
-                                FragmentContainerActivity.class);
-                        intent.putExtra(FRAGMENT_KEY, CertRequestFormFragment.class.getName());
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                }).setNegativeButton(getString(R.string.cancel_lbl),
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.request_certificate_menu),
+                        getString(R.string.request_cert_again_msg), this);
+                builder.setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                CertRequestActivity.super.onBackPressed();
+                                Intent intent = new Intent(CertRequestActivity.this,
+                                        FragmentContainerActivity.class);
+                                intent.putExtra(FRAGMENT_KEY, CertRequestFormFragment.class.getName());
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
                             }
-                }).show();
-                //to avoid avoid dissapear on screen orientation change
-                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                        }).setNegativeButton(getString(R.string.cancel_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    CertRequestActivity.super.onBackPressed();
+                                }
+                            });
+                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
         if(getIntent().getStringExtra(ContextVS.OPERATIONVS_KEY) != null) {

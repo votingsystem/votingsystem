@@ -6,21 +6,18 @@
 
     <include layout="@layout/toolbar_vs" />
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/mainLayout"
+    <FrameLayout android:id="@+id/mainLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
 
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/scroller"
+        <ScrollView android:id="@+id/scroller"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
             <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical">
                 <fragment android:name="org.votingsystem.android.fragment.EditorFragment"
-                    xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/editor"
                     android:tag="EditorFragment"
                     android:layout_width="match_parent"

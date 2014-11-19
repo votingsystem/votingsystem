@@ -30,6 +30,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -40,6 +41,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.ui.HorizontalNumberPicker;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
@@ -116,24 +118,27 @@ public class CashDialogFragment extends DialogFragment {
         currencyCode = getArguments().getString(ContextVS.CURRENCY_KEY);
         final ContextVS.State appState = contextVS.getState();
         if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
-                    getString(R.string.cert_not_found_caption)).setMessage(
-                    Html.fromHtml(getString(R.string.cert_not_found_msg))).setPositiveButton(
-                    R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = null;
-                    switch(appState) {
-                        case WITH_CSR:
-                            intent = new Intent(getActivity(), CertResponseActivity.class);
-                            break;
-                        case WITHOUT_CSR:
-                            intent = new Intent(getActivity(), CertRequestActivity.class);
-                            break;
-                    }
-                    if(intent != null) startActivity(intent);
-                }
-            }).setNegativeButton(R.string.cancel_lbl, null);
-            return builder.create();
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.cert_not_found_caption),
+                    getString(R.string.cert_not_found_msg), getActivity());
+            builder.setPositiveButton(getString(R.string.request_certificate_menu),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent intent = null;
+                            switch(appState) {
+                                case WITH_CSR:
+                                    intent = new Intent(getActivity(), CertResponseActivity.class);
+                                    break;
+                                case WITHOUT_CSR:
+                                    intent = new Intent(getActivity(), CertRequestActivity.class);
+                                    break;
+                            }
+                            if(intent != null) startActivity(intent);
+                        }
+                    }).setNegativeButton(getString(R.string.cancel_lbl), null);
+            Dialog dialog = builder.show();
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            return dialog;
         } else {
             View view = inflater.inflate(R.layout.cash_dialog_fragment, null);
             tag_text = (TextView) view.findViewById(R.id.tag_text);

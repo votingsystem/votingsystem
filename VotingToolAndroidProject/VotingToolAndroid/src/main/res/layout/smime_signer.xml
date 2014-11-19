@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="@color/form_background"
+            android:background="@color/bkg_screen_vs"
             android:orientation="vertical">
             <TextView android:id="@+id/deviceName"
                 android:layout_width="fill_parent"

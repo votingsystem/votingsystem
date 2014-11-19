@@ -266,7 +266,7 @@ class RepresentativeController {
                         type:ImageVS.Type.REPRESENTATIVE) }
                 dataMap = [fileName:"imageRepresentative_${representative.id}"]
 				if(!image) msg = message(code:'representativeWithoutImageErrorMsg', args:[params.representativeId])
-			} else  msg = message(code:'representativeIdErrorMsg', args[params.representativeId])
+			} else  msg = message(code:'representativeIdErrorMsg', args:[params.representativeId])
 		}
 		if (image) return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.IMAGE,
                     messageBytes: image.fileBytes, data:dataMap)]

@@ -36,6 +36,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.activity.EventVSMainActivity;
 import org.votingsystem.android.service.UserCertRequestService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ResponseVS;
@@ -183,20 +184,18 @@ public class CertRequestFormFragment extends Fragment {
                 Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validateForm ()) {
-            AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-            Dialog dialog = builder.setTitle(getString(R.string.request_certificate_form_lbl)).
-                    setMessage(Html.fromHtml(getString(R.string.cert_data_confirm_msg, givenname,
-                            surname, nif, phone, email))).setPositiveButton(getString(
-                    R.string.continue_lbl), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
-                            broadCastId, getString(R.string.keyguard_password_enter_first_pin_code));
-                }
-            }).setNegativeButton(getString(R.string.cancel_lbl), null).show();
-            //to avoid avoid dissapear on screen orientation change
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
-            textView.setGravity(Gravity.CENTER);
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.request_certificate_form_lbl),
+                    getString(R.string.cert_data_confirm_msg, givenname,
+                            surname, nif, phone, email), getActivity());
+            builder.setPositiveButton(getString(R.string.continue_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
+                                    broadCastId, getString(R.string.keyguard_password_enter_first_pin_code));
+                        }
+                    }).setNegativeButton(getString(R.string.cancel_lbl), null);
+            builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
       	}
     }
 

@@ -7,16 +7,34 @@
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
-    <application android:name=".AppContextVS"
-        android:allowBackup="true"
-
+    <application android:name=".AppContextVS" android:allowBackup="true"
         android:icon="@drawable/mail_mark_unread_48" android:label="@string/app_name">
 
      	<!-- <activity android:label="@string/app_name" android:noHistory="true"
             android:name=".MainActivity" android:screenOrientation="portrait">-->
+
+        <meta-data android:name="android.app.default_searchable" android:value=".app.Search" />
+
+        <activity android:name=".activity.BrowserVSActivity"
+            android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
+            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.CertResponseActivity" android:noHistory="true"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.ConfirmImageActivity"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".ui.debug.DebugActionRunnerActivity" android:noHistory="true"
+            android:label="@string/debug_tests" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.EventVSStatsPagerActivity"
+            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
+
         <activity android:name=".activity.EventVSMainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/ThemeVS">
+            android:label="@string/app_name" android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -24,25 +42,37 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
         </activity>
 
+        <activity android:name=".activity.EventVSNewActivity"
+            android:label="@string/publish_poll_lbl" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.EventVSPagerActivity" android:label="@string/app_name"
+            android:theme="@style/ThemeVS"/>
+
         <activity android:name=".activity.EventVSSearchResultActivity"
             android:label="@string/search_result"
             android:theme="@style/ThemeVS">
         </activity>
-     	<activity android:label="@string/app_name" android:noHistory="true"
-            android:name=".activity.IntentFilterActivity"
-            android:theme="@style/ThemeVS">
+
+        <activity android:name=".activity.FinanceMainActivity"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.FragmentContainerActivity"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.IntentFilterActivity" android:theme="@style/ThemeVS"
+            android:label="@string/app_name" android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-       		<intent-filter>
-		       	<data android:scheme="http" android:host="sistemavotacion.org"/>
-	       	    <data android:path="/AccessControl/app/androidClient"/>
-		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>
-     		    <category android:name="android.intent.category.BROWSABLE" />
-	        </intent-filter>
+            <intent-filter>
+                <data android:scheme="http" android:host="sistemavotacion.org"/>
+                <data android:path="/AccessControl/app/androidClient"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
 
             <intent-filter>
                 <data android:scheme="http" android:host="vickets"/>
@@ -58,37 +88,17 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
-     	</activity>
+        </activity>
 
-        <meta-data android:name="android.app.default_searchable" android:value=".app.Search" />
+        <activity android:name=".activity.MessageActivity" android:theme="@style/Theme.Transparent"/>
 
-        <activity android:name=".activity.FragmentContainerActivity"
-            android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
-            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".ui.debug.DebugActionRunnerActivity" android:noHistory="true"
-            android:label="@string/debug_tests" android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.CertResponseActivity" android:noHistory="true"
-            android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.EventVSStatsPagerActivity"
-            android:label="@string/app_name" android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.RepresentativeDelegationActivity"
+            android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativeNewActivity"
             android:label="@string/new_representative_title" android:theme="@style/ThemeVS"/>
 
-        <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
-            android:theme="@style/ThemeVS"/>
-
         <activity android:name=".activity.RepresentativesMainActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.SMIMESignerActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.SettingsActivity"
-            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativePagerActivity"
             android:theme="@style/ThemeVS"/>
@@ -99,23 +109,14 @@
         <activity android:name=".activity.ReceiptPagerActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.MessageActivity"
-            android:theme="@style/Theme.Transparent"/>
-
-        <activity android:name=".activity.ConfirmImageActivity"
+        <activity android:name=".activity.SettingsActivity"
             android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.SMIMESignerActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.TransactionVSPagerActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.FinanceMainActivity"
-            android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.RepresentativeDelegationActivity"
-            android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
-
-        <activity android:name=".activity.BrowserVSActivity"
-            android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->

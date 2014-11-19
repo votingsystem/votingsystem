@@ -2,10 +2,13 @@ package org.votingsystem.android.activity;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
+import org.votingsystem.android.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -41,6 +44,14 @@ public class RepresentativesMainActivity extends ActivityBase {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
+        MenuInflater inflater = getMenuInflater();
+        menu.removeGroup(R.id.general_items);
+        inflater.inflate(R.menu.representative_grid, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override protected int getSelfNavDrawerItem() {

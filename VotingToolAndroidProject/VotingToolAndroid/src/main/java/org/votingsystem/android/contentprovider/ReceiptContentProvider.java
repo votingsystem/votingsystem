@@ -154,7 +154,10 @@ public class ReceiptContentProvider extends ContentProvider {
     @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
         String idColStr = String.valueOf(ContentUris.parseId(uri));
-        int rowCount = database.delete(TABLE_NAME, ID_COL + " = ?", new String[]{idColStr});
+        Integer rowCount = null;
+        if(selection == null) {
+            rowCount = database.delete(TABLE_NAME, ID_COL + " = ?", new String[]{idColStr});
+        } else  rowCount = database.delete(TABLE_NAME, selection, selectionArgs);
         // Notify any listeners and return the deleted row count.
         LOGD(TAG + ".delete", "receipt id: " + idColStr);
         getContext().getContentResolver().notifyChange(uri, null);

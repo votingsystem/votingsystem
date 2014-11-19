@@ -480,6 +480,11 @@ public class UIUtils  {
         return new AlertDialog.Builder(context).setView(view);
     }
 
+    public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,
+            Context context) {
+        return getMessageDialogBuilder(responseVS.getCaption(), responseVS.getMessage(), context);
+    }
+
     public static void killApp(boolean killSafely) {
         if (killSafely) {
             /*

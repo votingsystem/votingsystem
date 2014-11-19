@@ -75,7 +75,6 @@ public class SignAndSendService extends IntentService {
                     " - contentType: " + contentType);
             switch(operationType) {
                 case VOTING_PUBLISHING:
-                case REPRESENTATIVE_REVOKE:
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(

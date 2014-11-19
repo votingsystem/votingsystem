@@ -36,6 +36,7 @@ import org.votingsystem.util.ResponseVS;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.mail.MessagingException;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -77,7 +80,33 @@ public class RepresentativeService extends IntentService {
             newRepresentative(intent.getExtras(), serviceCaller, operation);
         } else if(operation == TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION) {
             anonymousDelegation(intent.getExtras(), serviceCaller, operation);
+        } else if(operation == TypeVS.REPRESENTATIVE_REVOKE) {
+            revokeRepresentative(serviceCaller);
         }
+    }
+
+    private void revokeRepresentative(String serviceCaller) {
+        Map contentToSignMap = new HashMap();
+        contentToSignMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
+        contentToSignMap.put("UUID", UUID.randomUUID().toString());
+        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                new JSONObject(contentToSignMap).toString(),
+                getString(R.string.revoke_representative_msg_subject));
+        try {
+            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(), ContentTypeVS.JSON_SIGNED,
+                    contextVS.getAccessControl().getRepresentativeRevokeServiceURL());
+            String selection = UserContentProvider.NIF_COL + " = ?";
+            String[] selectionArgs = { contextVS.getUserVS().getNif() };
+            getContentResolver().delete(UserContentProvider.CONTENT_URI, selection, selectionArgs);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                PrefUtils.putRepresentative(this, null);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
+        }
+        responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_REVOKE);
+        contextVS.broadcastResponse(responseVS);
     }
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
@@ -258,8 +287,6 @@ public class RepresentativeService extends IntentService {
     }
 
     private void newRepresentative(Bundle arguments, String serviceCaller, TypeVS operationType) {
-        String caption = null;
-        String message = null;
         ResponseVS responseVS = null;
         try {
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
@@ -275,8 +302,7 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("base64ImageHash", base64ResultDigest);
             contentToSignMap.put("representativeInfo", editorContent);
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
-            responseVS = contextVS.signMessage(
-                    contextVS.getAccessControl().getNameNormalized(),
+            responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
                     new JSONObject(contentToSignMap).toString(), messageSubject);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
@@ -298,6 +324,7 @@ public class RepresentativeService extends IntentService {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         }
+        responseVS.setTypeVS(TypeVS.NEW_REPRESENTATIVE).setServiceCaller(serviceCaller);
         contextVS.broadcastResponse(responseVS);
     }
 

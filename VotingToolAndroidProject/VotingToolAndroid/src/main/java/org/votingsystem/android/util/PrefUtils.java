@@ -223,7 +223,9 @@ public class PrefUtils {
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
         try {
-            editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, new String(serializedUserVS, "UTF-8"));
+            if(userVS == null) editor.remove(ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
+            else  editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME,
+                    new String(serializedUserVS, "UTF-8"));
             editor.commit();
             representative = userVS;
         } catch(Exception ex) {ex.printStackTrace();}
