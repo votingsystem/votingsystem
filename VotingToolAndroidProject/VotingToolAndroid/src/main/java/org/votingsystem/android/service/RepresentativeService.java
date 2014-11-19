@@ -1,29 +1,19 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
-
-import com.sun.mail.iap.Response;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.AnonymousSMIMESender;
-import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -36,19 +26,14 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -60,8 +45,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
-import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
 /**
  * @author jgzornoza

@@ -28,6 +28,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
@@ -71,42 +72,35 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
-            TypeVS broadcastType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                    ResponseVS.SC_ERROR);
-            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) newRepresentative();
             else {
-                if(TypeVS.NIF_REQUEST == broadcastType) {
-                    if(ResponseVS.SC_OK == responseStatusCode) {
-                        String representativeNif = NifUtils.validate(message);
-                        if(representativeNif == null) {
-                            new AlertDialog.Builder(
-                                    RepresentativeNewActivity.this).setTitle(getString(R.string.error_lbl)).
-                                    setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_lbl),
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            showNifDialog();
-                                        }
-                                    }).setCancelable(false).show();
-                        } else loadRepresentativeData(representativeNif);
-                    } else {
-                        RepresentativeNewActivity.this.onBackPressed();
-                    }
-                } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
+                if(TypeVS.NIF_REQUEST == responseVS.getTypeVS()) {
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        try {
+                            String representativeNif = NifUtils.validate(
+                                    message, RepresentativeNewActivity.this);
+                            loadRepresentativeData(representativeNif);
+                        }
+                        catch(Exception ex) {
+                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                    getString(R.string.error_lbl), ex.getMessage(),
+                                    getSupportFragmentManager());
+                        }
+                    } else RepresentativeNewActivity.this.onBackPressed();
+                } else if(TypeVS.NEW_REPRESENTATIVE == responseVS.getTypeVS()) {
                     setProgressDialogVisible(false);
-                    showMessage(responseStatusCode, caption, message);
-                    if(ResponseVS.SC_OK != responseStatusCode) {
+                    MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         editorFragment.setEditable(true);
                         if(menu != null) getMenuInflater().inflate(R.menu.text_editor, menu);
                     } else {
                         imageCaption.setOnClickListener(null);
                     }
-                } else if(TypeVS.ITEM_REQUEST == broadcastType) {
-                    if(ResponseVS.SC_OK == responseStatusCode) {
+                } else if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
                         Cursor cursor = RepresentativeNewActivity.this.getApplicationContext().
                                 getContentResolver().query(representativeURI,
@@ -262,13 +256,14 @@ public class RepresentativeNewActivity extends ActivityBase {
     private boolean validateForm () {
         LOGD(TAG + ".validateForm", "validateForm");
         if(editorFragment == null || editorFragment.isEditorDataEmpty()) {
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.editor_empty_error_lbl));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.editor_empty_error_lbl), getSupportFragmentManager());
             return false;
         }
         if(representativeImageUri == null && operationType != TypeVS.REPRESENTATIVE) {
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.missing_representative_img_error_msg));
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.missing_representative_img_error_msg),
+                    getSupportFragmentManager());
             return false;
         }
         return true;

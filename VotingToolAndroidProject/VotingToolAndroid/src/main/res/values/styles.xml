@@ -22,7 +22,6 @@
         <item name="android:actionBarWidgetTheme">@style/ThemeVS</item>
         <item name="android:panelFullBackground">@color/bkg_vs</item>
         <item name="android:itemTextAppearance">@style/ItemVS</item>
-        <item name="searchViewStyle">@style/SearchViewVS</item>
     </style>
     <style name="ItemVS">
         <item name="android:textColor">@color/frg_vs</item>
@@ -34,14 +33,8 @@
     <style name="ToolBarVS" parent="Theme.AppCompat">
         <item name="android:itemTextAppearance">@style/ItemVS</item>
         <item name="android:background">@color/bkg_vs</item>
-        <item name="searchViewStyle">@style/SearchViewVS</item>
         <item name="android:titleTextStyle">@style/ToolBarVS.TitleTextStyle</item>
         <item name="android:subtitleTextStyle">@style/ToolBarVS.SubTitleTextStyle</item>
-    </style>
-
-    <style name="SearchViewVS" parent="Widget.AppCompat.SearchView">
-        <item name="queryBackground">@color/bkg_vs</item>
-        <item name="submitBackground">@color/bkg_vs</item>
     </style>
 
     <style name="ToolBarVS.TitleTextStyle"

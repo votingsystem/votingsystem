@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import android.content.Context;
+import org.votingsystem.android.lib.R;
 
 public class NifUtils {
 	    
@@ -8,22 +10,18 @@ public class NifUtils {
         return numberStr + getNifLetter(number);
     }
 
-    public static String validate(String nif) {
-        if(nif == null) return null;
-        nif  = nif.toUpperCase();
-        if(nif.length() <= 9) {
-            int numberZeros = 9 - nif.length();
-            for(int i = 0; i < numberZeros ; i++) {
-                nif = "0" + nif;
-            }
-        } else return null;
-        String number = nif.substring(0, 8);
-        String letter = nif.substring(8, 9);
+    public static String validate(String nif, Context contex) throws ExceptionVS {
+        String result = null;
         try {
-            if(!letter.equals(getNifLetter(new Integer(number)))) return null;
-            else return nif;
-        } catch (Exception ex) {
-            return null;
+            if(nif != null && nif.length() <= 9) {
+                String number = nif.substring(0, nif.length() -1);
+                String letter = nif.substring(nif.length() -1, nif.length()).toUpperCase();
+                if(letter.equals(getNifLetter(new Integer(number))))
+                    result = String.format("%08d", Integer.valueOf(number)) + letter;
+            }
+        } catch(Exception ex) {} finally {
+            if(result != null) return result;
+            else throw new ExceptionVS(contex.getString(R.string.nif_with_errors_msg));
         }
     }
 

@@ -161,8 +161,8 @@ public abstract class ActivityBase extends ActionBarActivity {
                             connectionStatusText.setText(getString(R.string.connected_lbl));
                             connectionStatusView.setVisibility(View.VISIBLE);
                         } else if(ResponseVS.SC_ERROR == request.getStatusCode())
-                                ActivityBase.this.showMessage(request.getStatusCode(),
-                                request.getCaption(), request.getMessage());
+                            MessageDialogFragment.showDialog(request.getStatusCode(),
+                                request.getCaption(), request.getMessage(), getSupportFragmentManager());
                         break;
                     case WEB_SOCKET_CLOSE:
                         connectionStatusText.setText(getString(R.string.disconnected_lbl));
@@ -377,14 +377,6 @@ public abstract class ActivityBase extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void showMessage(int statusCode, String caption, String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
     }
 
     private void goToNavDrawerItem(int item) {

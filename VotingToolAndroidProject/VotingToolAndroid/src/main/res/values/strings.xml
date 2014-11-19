@@ -57,7 +57,6 @@
 	<string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
 	<string name="password_mismatch">los códigos pin no coinciden, inténtelo de nuevo</string>
 	<string name="repeat_password">vuelva a introducir el código pin</string>
-	<string name="nif_error">nif con errores, por favor vuelva a intentarlo</string>
 	<string name="givenname_missing_msg">introduzca el nombre</string>
 	<string name="surname_missing_msg">introduzca los apellidos</string>
 	<string name="searchLabel">buscar</string>
@@ -436,5 +435,5 @@
     <string name="votvs_value_msg">opción seleccionada \'%1$s\'</string>
     <string name="timestamp_error_lbl">error comprobando sello de tiempo</string>
     <string name="representative_new_msg">dando de alta representante</string>
-
+    <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
 </resources>

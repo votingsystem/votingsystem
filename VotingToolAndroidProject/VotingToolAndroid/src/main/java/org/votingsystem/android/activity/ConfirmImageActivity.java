@@ -1,7 +1,6 @@
 package org.votingsystem.android.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,14 +16,9 @@ import android.widget.ImageView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

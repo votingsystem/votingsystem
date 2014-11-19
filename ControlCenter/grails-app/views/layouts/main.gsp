@@ -7,6 +7,7 @@
     <title><g:message code="serverNameLbl"/></title>
     <asset:stylesheet src="votingSystem.css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
+    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">

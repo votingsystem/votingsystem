@@ -38,8 +38,8 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.activity.RepresentativeNewActivity;
+import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
@@ -78,30 +78,24 @@ public class RepresentativeGridFragment extends Fragment
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver",
-                "extras:" + intent.getExtras());
-        int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                ResponseVS.SC_ERROR);
-        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) revokeRepresentative();
         else {
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode)  showHTTPError();
-            ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
-                    ContextVS.RESPONSEVS_KEY);
-            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
             if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
                 setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage(), getFragmentManager());
-            } else MessageDialogFragment.showDialog(responseStatusCode, caption, message,
-                    getFragmentManager());
+            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            }
         }
         }
     };
 
-    private void launchSignAndSendService() {
-        LOGD(TAG + ".launchSignAndSendService", "");
+    private void revokeRepresentative() {
+        LOGD(TAG + ".revokeRepresentative", "revokeRepresentative");
         try {
             Intent startIntent = new Intent(getActivity(), SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
@@ -151,15 +145,6 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-
-        rootView.setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    LOGD(TAG +  ".R.id.empty", "R.id.empty");
-                }
-        });
-
-
         adapter = new RepresentativeListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

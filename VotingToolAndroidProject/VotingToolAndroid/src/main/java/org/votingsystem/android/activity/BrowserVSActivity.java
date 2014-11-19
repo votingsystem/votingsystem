@@ -16,6 +16,7 @@ import android.webkit.WebViewClient;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
@@ -71,8 +72,8 @@ public class BrowserVSActivity extends ActivityBase {
                     sendMessageToBrowserApp(responseVS.getStatusCode(),
                             responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
                 }
-            } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage());
+            } else MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage(), getSupportFragmentManager());
         }
         }
     };

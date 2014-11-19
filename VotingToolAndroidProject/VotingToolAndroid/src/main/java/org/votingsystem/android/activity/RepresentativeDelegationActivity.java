@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -64,7 +65,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     private CheckBox publicCheckBox;
     private EditText weeks_delegation;
     private AppContextVS contextVS = null;
-    private String broadCastId = null;
+    private String broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     private UserVS representative = null;
     private Date anonymousDelegationFromDate;
     private Date anonymousDelegationToDate;
@@ -74,16 +75,14 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendDelegation();
         else {
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 try {
                     ReceiptFetcherDialogFragment newFragment = ReceiptFetcherDialogFragment.newInstance(
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
                             responseVS.getNotificationMessage(), (String) responseVS.getData(),
-                            typeVS);
+                            responseVS.getTypeVS());
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
                     setProgressDialogVisible(false);
                     return;
@@ -91,14 +90,14 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     ex.printStackTrace();
                 }
             }
-            showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage());
+            MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage(), getSupportFragmentManager());
         }
         }
     };
 
-    private void launchSignAndSendService() {
-        LOGD(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
+    private void sendDelegation() {
+        LOGD(TAG + ".sendDelegation", "sendDelegation");
         try {
             Intent startIntent = null;
             String serviceURL = null;
@@ -139,11 +138,14 @@ public class RepresentativeDelegationActivity extends ActivityBase {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
-        broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
+
+
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
@@ -225,8 +227,9 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                 String confirmDialogMsg = null;
                 if(anonymousCheckBox.isChecked()) {
                     if(TextUtils.isEmpty(weeks_delegation.getText())) {
-                        showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                                getString(R.string.anonymous_delegation_time_msg));
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), getString(
+                                        R.string.anonymous_delegation_time_msg), getSupportFragmentManager());
                         ((EditText)findViewById(R.id.weeks_delegation)).requestFocus();
                         return;
                     }
@@ -259,9 +262,9 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         }
     }
 
-    private void sendResult(int result, String message) {
+    private void sendResult(int result, ResponseVS responseVS) {
         Intent resultIntent = new Intent();
-        resultIntent.putExtra(ContextVS.MESSAGE_KEY, message);
+        resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         setResult(result, resultIntent);
         finish();
     }

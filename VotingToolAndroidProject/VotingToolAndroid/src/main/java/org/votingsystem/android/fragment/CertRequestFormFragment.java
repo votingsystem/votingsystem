@@ -183,12 +183,10 @@ public class CertRequestFormFragment extends Fragment {
                 Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validateForm ()) {
-    		String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
-
-			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
             Dialog dialog = builder.setTitle(getString(R.string.request_certificate_form_lbl)).
                     setMessage(Html.fromHtml(getString(R.string.cert_data_confirm_msg, givenname,
-                    surname, nif, phone, email))).setPositiveButton(getString(
+                            surname, nif, phone, email))).setPositiveButton(getString(
                     R.string.continue_lbl), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
@@ -197,7 +195,7 @@ public class CertRequestFormFragment extends Fragment {
             }).setNegativeButton(getString(R.string.cancel_lbl), null).show();
             //to avoid avoid dissapear on screen orientation change
             dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-    		TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
+            TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
             textView.setGravity(Gravity.CENTER);
       	}
     }
@@ -213,12 +211,12 @@ public class CertRequestFormFragment extends Fragment {
 
     private boolean validateForm () {
     	LOGD(TAG + ".validateForm()", "");
-        nif = NifUtils.validate(nifText.getText().toString());
-    	if(nif == null) {
-    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.nif_error));
-    		return false;
-    	}
+        try {
+            nif = NifUtils.validate(nifText.getText().toString().toUpperCase(), getActivity());
+        } catch(Exception ex) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+        }
     	if(TextUtils.isEmpty(givennameText.getText().toString())){
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.givenname_missing_msg));

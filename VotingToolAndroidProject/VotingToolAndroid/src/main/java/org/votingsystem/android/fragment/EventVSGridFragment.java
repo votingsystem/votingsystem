@@ -75,7 +75,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
-            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            if(ResponseVS.SC_OK != responseVS.getStatusCode())
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
     };
 
@@ -129,8 +130,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         new Handler(){
             @Override public void handleMessage(Message msg) {
                 if (isVisible) {
-                    ModalProgressDialogFragment.showDialog( getString(R.string.loading_data_msg),
-                            getString(R.string.loading_info_msg), getFragmentManager());
+                    ModalProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
+                            getString(R.string.loading_data_msg), getFragmentManager());
                 } else ModalProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
