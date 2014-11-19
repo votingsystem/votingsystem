@@ -14,13 +14,13 @@ import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -30,6 +30,7 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ReceiptFetcherDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -37,7 +38,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -72,8 +72,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver",
-                "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendDelegation();
         else {
@@ -88,6 +87,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
+                    responseVS = ResponseVS.getExceptionResponse(ex, getApplication());
                 }
             }
             MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
@@ -126,8 +126,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
             String messageSubject = getString(R.string.representative_delegation_lbl);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED);
+            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY, ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.USER_KEY, representative);
             setProgressDialogVisible(true);
             startService(startIntent);
@@ -144,6 +143,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         setContentView(R.layout.representative_delegation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
@@ -161,7 +162,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        WebView webView = (WebView)findViewById(R.id.representative_description);
+        WebView webView = (WebView)findViewById(R.id.webview);
         webView.loadUrl("file:///android_asset/" + fileToLoad);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
@@ -169,8 +170,6 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             }
         });
         setProgressDialogVisible(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
             int selectedCheckBoxId = -1;
@@ -245,16 +244,17 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                              representative.getFullName());
                     operationType = TypeVS.REPRESENTATIVE_SELECTION;
                 }
-                AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
-                        getString(R.string.representative_delegation_lbl)).
-                        setMessage(Html.fromHtml(confirmDialogMsg)).setPositiveButton(getString(R.string.ok_lbl),
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.representative_delegation_lbl), confirmDialogMsg, this);
+                builder.setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, null, false, null);
+                                        broadCastId, getString(R.string.enter_signature_pin_msg),
+                                        false, null);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                AlertDialog dialog = builder.show();
+                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
     }

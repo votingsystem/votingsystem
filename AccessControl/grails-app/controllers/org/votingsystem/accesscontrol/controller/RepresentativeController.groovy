@@ -140,9 +140,9 @@ class RepresentativeController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/revoke]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. documento firmado
+	 * @requestContentType [application/pkcs7-signature] Obligatorio. documento firmado
 	 *                     en formato SMIME con los datos de la baja.
-	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
+	 * @responseContentType [application/pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * 
 	 */
 	def revoke() {
@@ -161,7 +161,7 @@ class RepresentativeController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/accreditations]
 	 * 
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 * @requestContentType [application/pkcs7-signature] Obligatorio.
 	 * 					   documento firmado en formato SMIME con los datos de la solicitud
 	 */
 	def accreditations() {
@@ -178,7 +178,7 @@ class RepresentativeController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/history]
 	 * 
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 * @requestContentType [application/pkcs7-signature] Obligatorio.
 	 *                     documento en formato SMIME con los datos del representante consultado.
 	 * @return 
 	 */
@@ -189,19 +189,18 @@ class RepresentativeController {
 	}
 	
 	/**
-	 * 
-	 * Servicio que guarda las selecciones de representantes echas por los usuarios
+	 * Service that saves the user selected representatives
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/delegation]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
+	 * @requestContentType [application/pkcs7-signature] Obligatorio. documento firmado
 	 *                     por el usuario que está eligiendo el representante.
-	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
+	 * @responseContentType [application/pkcs7-signature] Recibo firmado por el sistema.
 	 * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
 	 */
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
 		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME)
 		if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
@@ -219,7 +218,7 @@ if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(messa
 	 * @requestContentType [image/gif] Posible type de contenido asociado al parámetro 'image' 
 	 * @requestContentType [image/jpeg] Posible type de contenido asociado al parámetro 'image' 
 	 * @requestContentType [image/png] Posible type de contenido asociado al parámetro 'image' 
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] El type de contenido 
+	 * @requestContentType [application/pkcs7-signature] El type de contenido
 	 * 					   asociado a los datos del representante. 
 	 */
     def processFileMap() { 
@@ -303,15 +302,14 @@ if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(messa
 
 
     /**
-     *
-     * Servicio que guarda las selecciones anónimas de representantes echas por los usuarios
+     * Service that process the user anonymous representative selection
      *
      * @httpMethod [POST]
      * @serviceURL [/representative/anonymousDelegation]
-     * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado por
-     *                      el usuario con un certificado anónimo en el que figuran los datos del representante.
-     * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
-     * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
+     * @requestContentType [application/pkcs7-signature] Required. Document signed by an anonymous certificate with
+     *                      the data of the representative selected.
+     * @responseContentType [application/pkcs7-signature]
+     * @return If it's all fine the request signed by the system.
      */
     def anonymousDelegation() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -321,13 +319,13 @@ if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(messa
     }
 
     /**
-     * Servicio que valida las delegaciones anónimas de representantes.
+     * Service that provides the anonymous certificate required to select representative anonymously
      *
      * @httpMethod [POST]
      * @serviceURL [/representative/anonymousDelegationRequest]
-     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de certificado de delegación.
-     * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
-     * @return La solicitud de certificado de delegación anónima firmada.
+     * @requestContentType [application/pkcs7-signature] The signed request
+     * @param [csr] Required. the anonymous certificate CSR.
+     * @return the anonymous certificate signed.
      */
     def processAnonymousDelegationRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
@@ -348,14 +346,14 @@ if(!messageSMIMEReq) return [responseVS:ResponseVS.getErrorRequestResponse(messa
     }
 
     /**
-     * Servicio que cancela delegaciones anónimas de representantes.
+     * Service that cancels anonymous delegations
      *
      * @httpMethod [POST]
      * @serviceURL [/representative/cancelAnonymousDelegation]
-     * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
-     *                     por el usuario en el que figuran los datos de la cancelación.
-     * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
-     * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
+     * @requestContentType [application/pkcs7-signature] Required. Document signed by the user with the data required
+     *                      to cancel an anonymoous certificate
+     * @responseContentType [application/pkcs7-signature]
+     * @return If it's all fine the request signed by the system.
      */
     def cancelAnonymousDelegation() {
         MessageSMIME messageSMIME = request.messageSMIMEReq

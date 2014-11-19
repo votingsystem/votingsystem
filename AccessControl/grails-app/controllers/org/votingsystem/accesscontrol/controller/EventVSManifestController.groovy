@@ -114,7 +114,7 @@ class EventVSManifestController {
 	 * 
 	 * @httpMethod [POST]
      * @serviceURL [/eventVSManifest/$id]
-     * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. El archivo PDF con 
+     * @requestContentType [application/pdf,application/pkcs7-signature] Obligatorio. El archivo PDF con
      * 				el manifiesto que se desea publicar firmado por el autor.
 	 * @param [id] Obligatorio. El identificador en la base de datos del manifiesto. 
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.

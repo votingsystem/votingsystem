@@ -13,6 +13,9 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import org.votingsystem.model.UserVS;
+import org.votingsystem.util.ObjectUtils;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -132,6 +135,20 @@ public class UserContentProvider extends ContentProvider {
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
+    }
+
+    public static ContentValues getContentValues(UserVS userVS) {
+        ContentValues values = new ContentValues();
+        values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
+        values.put(UserContentProvider.ID_COL, userVS.getId());
+        values.put(UserContentProvider.URL_COL, userVS.getURL());
+        values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
+        values.put(UserContentProvider.FULL_NAME_COL, userVS.getFullName());
+        values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
+                ObjectUtils.serializeObject(userVS));
+        values.put(UserContentProvider.NIF_COL, userVS.getNif());
+        values.put(UserContentProvider.NUM_REPRESENTATIONS_COL, userVS.getNumRepresentations());
+        return values;
     }
 
     @Override public Uri insert(Uri requestUri, ContentValues values) {

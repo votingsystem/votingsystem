@@ -96,7 +96,7 @@ class EventVSElectionController {
 	 * 
 	 * @httpMethod [POST]
 	 * @serviceURL [/eventVS]
-	 * @contentType [application/x-pkcs7-signature] Obligatorio. El archivo con los datos de la votación firmado
+	 * @contentType [application/pkcs7-signature] Obligatorio. El archivo con los datos de la votación firmado
 	 * 		  por el usuario que la publica y el Control de Acceso en el que se publica.
 	 */
 	def save () {
@@ -238,7 +238,7 @@ class EventVSElectionController {
 	/**
 	 * Servicio de cancelación de votaciones 
 	 *
-	 * @contentType [application/x-pkcs7-signature] Obligatorio. Archivo con los datos de la votación que se 
+	 * @contentType [application/pkcs7-signature] Obligatorio. Archivo con los datos de la votación que se
 	 * 			desea cancelar firmado por el Control de Acceso que publicó la votación y por el usuario que
 	 *          la publicó o un administrador de sistema.
 	 * @httpMethod [POST]

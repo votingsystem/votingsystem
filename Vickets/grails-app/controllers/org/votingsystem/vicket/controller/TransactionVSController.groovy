@@ -136,9 +136,9 @@ class TransactionVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/transactionVS]
-     * @requestContentType [application/x-pkcs7-signature] Obligatorio.
+     * @requestContentType [application/pkcs7-signature] Obligatorio.
      *                     documento SMIME firmado con un model emitido por el sistema.
-     * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
+     * @responseContentType [application/pkcs7-signature]. Recibo firmado por el sistema.
      * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
      */
     def post() {

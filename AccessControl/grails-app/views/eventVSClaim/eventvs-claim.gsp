@@ -143,7 +143,7 @@
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SMIME_CLAIM_SIGNATURE)
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
                 webAppMessage.signedMessageSubject = this.eventvs.subject
-                webAppMessage.contentType = 'application/x-pkcs7-signature'
+                webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.documentURL = this.eventvs.URL
                 this.eventvs.operation = Operation.SMIME_CLAIM_SIGNATURE

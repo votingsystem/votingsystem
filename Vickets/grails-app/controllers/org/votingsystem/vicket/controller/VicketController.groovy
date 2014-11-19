@@ -57,7 +57,7 @@ class VicketController {
      *
      * @httpMethod [POST]
      * @serviceURL [/vicket/request]
-     * @requestContentType [application/x-pkcs7-signature] The request with the amount required signed by the user
+     * @requestContentType [application/pkcs7-signature] The request with the amount required signed by the user
      * @param [csr] Required. The anonymous certificate request for the cash.
      * @return The anonymous certificate request signed (with this you can make secured anonymous transactions).
      */

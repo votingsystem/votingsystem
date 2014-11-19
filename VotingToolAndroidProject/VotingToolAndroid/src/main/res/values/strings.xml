@@ -337,7 +337,7 @@
     <string name="vicket_repeated_error_msg">en la operación se han mezclado vickets usados, por favor, vuelva a intentarlo</string>
     <string name="browswevs_lbl">sistema de votación</string>
     <string name="test_lbl">test</string>
-    <string name="enter_pin_signature_device_msg">introduzca el pin de su dispositivo de firma</string>
+    <string name="enter_signature_pin_msg">introduzca el pin de su dispositivo de firma</string>
     <string name="admin_vickets_menu_item">administración de vickets</string>
     <string name="connecting_lbl">conectando...</string>
     <string name="phone_lbl">teléfono móvil</string>

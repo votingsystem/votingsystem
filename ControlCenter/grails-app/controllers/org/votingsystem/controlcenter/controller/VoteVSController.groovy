@@ -20,7 +20,7 @@ class VoteVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @contentType [application/x-pkcs7-signature] required. The vote signed with the anonymous certificate
+	 * @contentType [application/pkcs7-signature] required. The vote signed with the anonymous certificate
 	 */
 	def index() {
         MessageSMIME messageSMIME = request.messageSMIMEReq

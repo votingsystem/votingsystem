@@ -328,7 +328,7 @@ public abstract class ActivityBase extends ActionBarActivity {
 
     private void setupAccountBox() {
         final View chosenAccountView = findViewById(R.id.chosen_account_view);
-        if(chosenAccountView != null) { //there are Activitys withou
+        if(chosenAccountView != null) {
             chosenAccountView.setVisibility(View.VISIBLE);
             TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
             TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);

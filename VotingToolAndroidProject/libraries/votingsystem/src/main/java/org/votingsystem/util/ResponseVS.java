@@ -17,7 +17,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.ByteArrayInputStream;
 
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

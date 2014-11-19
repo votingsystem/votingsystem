@@ -784,17 +784,12 @@ class RepresentativeService {
 	}
 		
 	public Map getRepresentativeMap(UserVS representative) {
-		//log.debug("getRepresentativeMap: ${representative.id} ")
 		String representativeMessageURL = 
 			"${grailsApplication.config.grails.serverURL}/messageSMIME/${representative.representativeMessage?.id}"
-		ImageVS image
-		ImageVS.withTransaction {
-			image = ImageVS.findByTypeAndUserVS (ImageVS.Type.REPRESENTATIVE, representative)
-		}
 		String imageURL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}/image"
 		String URL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}"
 		def numRepresentations = UserVS.countByRepresentative(representative) + 1//plus the representative itself
-		def representativeMap = [id: representative.id, nif:representative.nif,
+		def representativeMap = [id: representative.id, nif:representative.nif, type:representative.type.toString(),
              URL:URL, representativeMessageURL:representativeMessageURL,
 			 imageURL:imageURL, numRepresentations:numRepresentations,
 			 name: representative.name, firstName:representative.firstName, lastName:representative.lastName]

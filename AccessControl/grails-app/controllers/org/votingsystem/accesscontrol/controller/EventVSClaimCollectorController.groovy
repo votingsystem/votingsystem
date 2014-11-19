@@ -21,9 +21,9 @@ class EventVSClaimCollectorController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/eventVSClaimCollector]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
+	 * @requestContentType [application/pkcs7-signature] Obligatorio.
 	 *                     documento SMIME firmado con la reclamación.
-	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
+	 * @responseContentType [application/pkcs7-signature]. Recibo firmado por el sistema.
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def index() {

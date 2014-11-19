@@ -207,7 +207,7 @@ class UserVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/userVS/userInfo]
-     * @requestContentType [application/x-pkcs7-signature] Required. JSON signed with the request data..
+     * @requestContentType [application/pkcs7-signature] Required. JSON signed with the request data..
      * @return JSON with the response
      */
     def userInfoTest() {

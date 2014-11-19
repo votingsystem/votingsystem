@@ -194,7 +194,7 @@ public class BrowserVSActivity extends ActivityBase {
     private void processSignatureOperation(OperationVS operationVS) {
         LOGD(TAG + ".processSignatureOperation", "processSignatureOperation");
         PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                getString(R.string.enter_pin_signature_device_msg), false, null);
+                getString(R.string.enter_signature_pin_msg), false, null);
     }
 
     private void sendResult(int result, String message) {

@@ -48,7 +48,7 @@
             webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEACTIVATE,
                 groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
                 uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}, reason:e.detail}
-            webAppMessage.contentType = 'application/x-pkcs7-signature'
+            webAppMessage.contentType = 'application/pkcs7-signature'
             webAppMessage.setCallback(function(appMessage) {
                     console.log("deActivateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
@@ -89,7 +89,7 @@
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_ACTIVATE,
             groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
             uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}}
-        webAppMessage.contentType = 'application/x-pkcs7-signature'
+        webAppMessage.contentType = 'application/pkcs7-signature'
         webAppMessage.setCallback(function(appMessage) {
                 console.log("activateUserCallback - message: " + appMessage);
                 var appMessageJSON = toJSON(appMessage)

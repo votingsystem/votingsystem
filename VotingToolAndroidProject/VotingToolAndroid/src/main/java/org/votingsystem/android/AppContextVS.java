@@ -33,6 +33,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
@@ -282,12 +283,15 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         notificationManager.notify(ContextVS.VOTING_SYSTEM_NOTIFICATION_ID, note);
     }
 
-    public void broadcastResponse(ResponseVS responseVS) {
+    public void broadcastResponse(ResponseVS responseVS, ArgVS... args ) {
         LOGD(TAG + ".broadcastResponse", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        if(args != null) {
+            for(ArgVS argVS: args) intent.putExtra(argVS.getKey(), argVS.getValue());
+        }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

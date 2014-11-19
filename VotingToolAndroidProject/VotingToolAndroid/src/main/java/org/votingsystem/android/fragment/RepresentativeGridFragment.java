@@ -284,16 +284,14 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +
-                " -id: " + id);
-        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Intent intent = new Intent(getActivity(), RepresentativePagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        LOGD(TAG + ".onCreateLoader", "");
+        LOGD(TAG + ".onCreateLoader", "onCreateLoader");
         String selection = UserContentProvider.TYPE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, selection,
@@ -337,15 +335,14 @@ public class RepresentativeGridFragment extends Fragment
 
     public class RepresentativeListAdapter  extends CursorAdapter {
 
-        private LayoutInflater inflater = null;
 
         public RepresentativeListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
-            inflater = LayoutInflater.from(context);
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_representative, viewGroup, false);
+            return LayoutInflater.from(context).inflate(
+                    R.layout.representative_card, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {
@@ -354,18 +351,13 @@ public class RepresentativeGridFragment extends Fragment
                         UserContentProvider.FULL_NAME_COL));
                 int numRepresentations = cursor.getInt(cursor.getColumnIndex(
                         UserContentProvider.NUM_REPRESENTATIONS_COL));
-                LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                linearLayout.setBackgroundColor(Color.WHITE);
-                TextView representativeName = (TextView)view.findViewById(R.id.representative_name);
-                TextView delegationInfo = (TextView) view.findViewById(
-                        R.id.representative_delegations);
-                representativeName.setText(fullName);
-                delegationInfo.setText(context.getString(R.string.num_representations_lbl,
+                ((TextView)view.findViewById(R.id.representative_name)).setText(fullName);
+                ((TextView) view.findViewById(R.id.representative_delegations)).setText(
+                        context.getString(R.string.num_representations_lbl,
                         String.valueOf(numRepresentations)));
-                ImageView imgView = (ImageView)view.findViewById(R.id.representative_icon);
-                //imgView.setImageDrawable();
             }
         }
+
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -386,4 +378,5 @@ public class RepresentativeGridFragment extends Fragment
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
+
 }

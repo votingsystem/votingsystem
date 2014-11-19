@@ -167,7 +167,7 @@
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:this.groupvs.userVS.name,
                     id:this.groupvs.userVS.id}
-                webAppMessage.contentType = 'application/x-pkcs7-signature'
+                webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
                     var caption = '<g:message code="groupCancelERRORLbl"/>'
@@ -200,7 +200,7 @@
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.userVS.id + "/subscribe"
             webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
             webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
-            webAppMessage.contentType = 'application/x-pkcs7-signature'
+            webAppMessage.contentType = 'application/pkcs7-signature'
             webAppMessage.setCallback(function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)

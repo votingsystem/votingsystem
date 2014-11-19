@@ -42,7 +42,7 @@
             webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                 changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
-            webAppMessage.contentType = 'application/x-pkcs7-signature'
+            webAppMessage.contentType = 'application/pkcs7-signature'
             webAppMessage.setCallback(function(appMessage) {
                 document.querySelector("#certData").url = "${createLink( controller:'certificateVS', action:'cert')}/" + certMap.serialNumber + "?menu=" + menuType
             })

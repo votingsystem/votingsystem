@@ -106,9 +106,9 @@ class EventVSElectionController {
 	 * @serviceURL [/eventVSElection]
 	 * @httpMethod [POST]
 	 * 
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. documento firmado
+	 * @requestContentType [application/pkcs7-signature] Obligatorio. documento firmado
 	 *                     en formato SMIME con los datos de la votación que se desea publicar
-	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
+	 * @responseContentType [application/pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * 
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor.
 	 */

@@ -7,9 +7,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -22,9 +20,11 @@ import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
+import java.util.ArrayList;
+import java.util.List;
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -45,6 +45,7 @@ public class VoteService extends IntentService {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
+        List<ArgVS> argVSList = new ArrayList<ArgVS>();
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
         String eventSubject = vote.getEventVS().getSubject();
@@ -110,13 +111,14 @@ public class VoteService extends IntentService {
                     }
                     break;
             }
+            argVSList.add(new ArgVS(ContextVS.VOTE_KEY, vote));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
             showNotification(responseVS);
-            broadcastResponse(responseVS, vote);
+            contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
         }
     }
 
@@ -142,17 +144,6 @@ public class VoteService extends IntentService {
         //note.flags |= Notification.FLAG_AUTO_CANCEL;
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.VOTE_SERVICE_NOTIFICATION_ID, note);
-    }
-
-    private void broadcastResponse(ResponseVS responseVS, VoteVS vote) {
-        LOGD(TAG + ".sendMessage", "statusCode: " + responseVS.getStatusCode() +
-                " - serviceCaller: " + responseVS.getServiceCaller() + " - operation: " +
-                responseVS.getTypeVS() + " - caption: " + responseVS.getCaption() +
-                " - message: " + responseVS.getNotificationMessage());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        intent.putExtra(ContextVS.VOTE_KEY, vote);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
 }

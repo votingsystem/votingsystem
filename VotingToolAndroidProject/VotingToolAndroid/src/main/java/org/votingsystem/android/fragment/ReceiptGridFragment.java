@@ -163,33 +163,19 @@ public class ReceiptGridFragment extends Fragment implements
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
                 TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
-
                 subject.setText(receiptContainer.getSubject());
                 typeTextView.setText(receiptContainer.getTypeDescription(context));
-
                 ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
                         receiptContainer.getLogoId());
-
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
                 if(state == ReceiptContainer.State.CANCELLED) {
                     receiptState.setText(getString(R.string.vote_canceled_receipt_lbl));
                     receiptState.setVisibility(View.VISIBLE);
-                } else {
-                    receiptState.setVisibility(View.GONE);
-                }
+                } else receiptState.setVisibility(View.GONE);
             }
         }
     }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

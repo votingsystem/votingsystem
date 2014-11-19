@@ -40,9 +40,9 @@ class EncryptorController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/getMultiSignedMessage]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+	 * @requestContentType [application/pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
 	 *                     documento SMIME firmado.
-	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
+	 * @responseContentType [application/pkcs7-signature]. Recibo firmado por el sistema.
 	 * @return  Recibo que consiste en el documento recibido con la signatureVS añadida del servidor.
 	 */
 	def getMultiSignedMessage() {

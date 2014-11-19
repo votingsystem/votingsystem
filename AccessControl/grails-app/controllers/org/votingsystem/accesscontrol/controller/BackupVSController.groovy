@@ -24,7 +24,7 @@ class BackupVSController {
 	 *
 	 * @httpMethod [POST]
      * @serviceURL [/backupVS]
-     * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. 
+     * @requestContentType [application/pdf,application/pkcs7-signature] Obligatorio.
      *              El archivo PDF con los datos de la copia de seguridad.
 	 * @return Si los datos son correctos el solicitante recibirá un
 	 *         email con información para poder get la copia de seguridad.

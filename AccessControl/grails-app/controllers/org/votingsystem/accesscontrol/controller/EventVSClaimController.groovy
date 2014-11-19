@@ -165,8 +165,8 @@ class EventVSClaimController {
 	 * Claim publishing service.
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType [application/x-pkcs7-signature] required. The content of the event to publish.
-	 * @responseContentType [application/x-pkcs7-signature] required. The request signed by the system.
+	 * @requestContentType [application/pkcs7-signature] required. The content of the event to publish.
+	 * @responseContentType [application/pkcs7-signature] required. The request signed by the system.
 	 */
     def save () {
 		MessageSMIME messageSMIME = request.messageSMIMEReq

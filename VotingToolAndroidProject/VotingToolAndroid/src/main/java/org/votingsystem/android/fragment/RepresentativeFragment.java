@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -23,7 +24,6 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
@@ -32,11 +32,9 @@ import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -49,37 +47,31 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
+    private AppContextVS contextVS = null;
     private View rootView;
     private String broadCastId = null;
-    private AppContextVS contextVS;
     private Button selectButton;
     private Long representativeId;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private UserVS representative;
+    private ImageView representative_image;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver",
-                "extras:" + intent.getExtras());
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
-            if(TypeVS.ITEM_REQUEST == typeVS) {
-                Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
-                        getRepresentativeURI(representativeId), null, null, null, null);
-                cursor.moveToFirst();
-                UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                        cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-                printRepresentativeData(representative);
+            if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
+                printRepresentativeData((UserVS) intent.getSerializableExtra(ContextVS.USER_KEY));
                 setProgressDialogVisible(false);
             }
         }
         }
     };
 
-
     public static Fragment newInstance(Long representativeId) {
         RepresentativeFragment fragment = new RepresentativeFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.USER_KEY, representativeId);
+        args.putLong(ContextVS.CURSOR_POSITION_KEY, representativeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -89,14 +81,15 @@ public class RepresentativeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
-        representativeId =  getArguments().getLong(ContextVS.USER_KEY);
+        representativeId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
         Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
                 getRepresentativeURI(representativeId), null, null, null, null);
         cursor.moveToFirst();
         final UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative, container, false);
+        representative_image = (ImageView) rootView.findViewById(R.id.representative_image);
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -108,9 +101,8 @@ public class RepresentativeFragment extends Fragment {
         selectButton.setVisibility(View.GONE);
         setHasOptionsMenu(true);
         broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
-        if(representative.getDescription() != null) {
-            printRepresentativeData(representative);
-        } else {
+        if(representative.getDescription() != null) printRepresentativeData(representative);
+        else {
             setProgressDialogVisible(true);
             Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
@@ -124,19 +116,13 @@ public class RepresentativeFragment extends Fragment {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
-        int statusCode = -1;
-        String caption = null;
         String message = null;
         if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
         if(Activity.RESULT_OK == requestCode) {
-            statusCode = ResponseVS.SC_OK;
-            caption = getString(R.string.operation_ok_msg);
-            showMessage(statusCode, caption, message);
-        } else if(message != null) {
-            statusCode = ResponseVS.SC_ERROR;
-            caption = getString(R.string.operation_error_msg);
-            showMessage(statusCode, caption, message);
-        }
+            MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.operation_ok_msg),
+                    message, getFragmentManager());
+        } else if(message != null) MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    getString(R.string.operation_error_msg), message, getFragmentManager());
     }
 
     private void setProgressDialogVisible(boolean isVisible) {
@@ -146,39 +132,34 @@ public class RepresentativeFragment extends Fragment {
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
-    private void printRepresentativeData(UserVS representative) {
-        if(representative.getImageBytes() != null) {
-            final Bitmap bmp = BitmapFactory.decodeByteArray(representative.getImageBytes(), 0,
-                    representative.getImageBytes().length);
-            ImageView image = (ImageView) rootView.findViewById(R.id.representative_image);
-            image.setImageBitmap(bmp);
-            image.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    ImageView imageView = new ImageView(getActivity());
-                    imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT));
-                    imageView.setImageBitmap(bmp);
-                    new AlertDialog.Builder(getActivity()).setView(imageView).show();
-                }
-            });
-        }
-        if(representative.getDescription() != null) {
-            String representativeDescription =
-                    "<html style='background-color:#eeeeee;margin: 5px 10px 10px 10px;'>" +
-                    representative.getDescription() + "</html>";
-            ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                    representativeDescription, "text/html", "utf-8");
-        }
-        selectButton.setVisibility(View.VISIBLE);
+    private void setRepresentativeImage(byte[] imageBytes) {
+        final Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        representative_image.setImageBitmap(bmp);
+        representative_image.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ImageView imageView = new ImageView(getActivity());
+                imageView.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                imageView.setImageBitmap(bmp);
+                new AlertDialog.Builder(getActivity()).setView(imageView).show();
+            }
+        });
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    private void printRepresentativeData(UserVS representative) {
+        this.representative = representative;
+        if(representative.getImageBytes() != null)
+            setRepresentativeImage(representative.getImageBytes());
+        else new ImageDownloaderTask(representativeId).execute();
+        if(representative.getDescription() != null) {
+            String representativeDescription =
+                    "<html style='background-color:#eeeeee;'>" +
+                    representative.getDescription() + "</html>";
+            ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
+                    representativeDescription, "text/html; charset=UTF-8", "UTF-8");
+        }
+        selectButton.setVisibility(View.VISIBLE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -202,6 +183,35 @@ public class RepresentativeFragment extends Fragment {
     @Override public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+    }
+
+    public class ImageDownloaderTask extends AsyncTask<String, Void, ResponseVS> {
+
+        Long representativeId;
+
+        public ImageDownloaderTask(Long representativeId) {
+            this.representativeId = representativeId;
+        }
+
+        @Override protected void onPreExecute() { setProgressDialogVisible(true); }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            return  HttpHelper.getData(contextVS.getAccessControl().
+                    getRepresentativeImageURL(representativeId), null);
+        }
+
+        @Override  protected void onPostExecute(ResponseVS responseVS) {
+            LOGD(TAG + "ImageDownloaderTask.onPostExecute() ", " - statusCode: " +
+                    responseVS.getStatusCode());
+            setProgressDialogVisible(false);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                setRepresentativeImage(responseVS.getMessageBytes());
+                representative.setImageBytes(responseVS.getMessageBytes());
+                getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
+                        UserContentProvider.getContentValues(representative));
+            } else MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        }
+
     }
 
 }

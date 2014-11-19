@@ -108,7 +108,7 @@ class EventVSController {
 	 * Servicio que cancela eventos
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType application/x-pkcs7-signature Obligatorio. Archivo con los datos del eventVS que se desea
+	 * @requestContentType application/pkcs7-signature Obligatorio. Archivo con los datos del eventVS que se desea
 	 * 				cancelar firmado por el usuario que publicó o un administrador de sistema.
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */

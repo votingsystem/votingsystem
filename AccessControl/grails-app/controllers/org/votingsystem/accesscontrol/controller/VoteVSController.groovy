@@ -24,9 +24,9 @@ class VoteVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @requestContentType [application/x-pkcs7-signature] Required. The vote signed by the user anonymous certificate
+	 * @requestContentType [application/pkcs7-signature] Required. The vote signed by the user anonymous certificate
      *                      and the Control Center
-	 * @responseContentType [application/x-pkcs7-signature]
+	 * @responseContentType [application/pkcs7-signature]
 	 * @return  The vote signed by the user anonymous certificate, the Control Center and the Access Control
 	 */
     def save() {

@@ -27,11 +27,13 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.security.MessageDigest;
@@ -88,18 +90,7 @@ public class RepresentativeService extends IntentService {
                         response.getNumTotalRepresentatives());
                 List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                 for(UserVS representative : response.getUsers()) {
-                    ContentValues values = new ContentValues();
-                    values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
-                    values.put(UserContentProvider.ID_COL, representative.getId());
-                    values.put(UserContentProvider.URL_COL, representative.getURL());
-                    values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
-                    values.put(UserContentProvider.FULL_NAME_COL, representative.getFullName());
-                    values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
-                            ObjectUtils.serializeObject(representative));
-                    values.put(UserContentProvider.NIF_COL, representative.getNif());
-                    values.put(UserContentProvider.NUM_REPRESENTATIONS_COL,
-                            representative.getNumRepresentations());
-                    contentValuesList.add(values);
+                    contentValuesList.add(UserContentProvider.getContentValues(representative));
                 }
                 if(!contentValuesList.isEmpty()) {
                     int numRowsCreated = getContentResolver().bulkInsert(
@@ -145,6 +136,7 @@ public class RepresentativeService extends IntentService {
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         ResponseVS responseVS = null;
+        List<ArgVS> argVSList = new ArrayList<ArgVS>();
         try {
             responseVS = HttpHelper.getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
@@ -156,26 +148,17 @@ public class RepresentativeService extends IntentService {
                 representative.setImageBytes(representativeImageBytes);
                 Uri representativeURI = UserContentProvider.getRepresentativeURI(
                         representative.getId());
-                ContentValues values = new ContentValues();
-                values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true);
-                values.put(UserContentProvider.ID_COL, representative.getId());
-                values.put(UserContentProvider.URL_COL, representative.getURL());
-                values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
-                values.put(UserContentProvider.FULL_NAME_COL, representative.getFullName());
-                values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
-                        ObjectUtils.serializeObject(representative));
-                values.put(UserContentProvider.NIF_COL, representative.getNif());
-                values.put(UserContentProvider.NUM_REPRESENTATIONS_COL,
-                        representative.getNumRepresentations());
-                getContentResolver().insert(UserContentProvider.CONTENT_URI, values);
+                getContentResolver().insert(UserContentProvider.CONTENT_URI,
+                        UserContentProvider.getContentValues(representative));
                 responseVS.setUri(representativeURI);
+                argVSList.add(new ArgVS(ContextVS.USER_KEY, representative));
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEM_REQUEST);
-        contextVS.broadcastResponse(responseVS);
+        contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
     }
 
     private void anonymousDelegation(Bundle arguments, String serviceCaller, TypeVS operationType) {
@@ -237,10 +220,8 @@ public class RepresentativeService extends IntentService {
                         (AppContextVS)getApplicationContext());
                 responseVS = anonymousSender.call();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessage delegationReceipt = Encryptor.decryptSMIME(
-                            responseVS.getMessageBytes(),
-                            anonymousDelegation.getCertificationRequest().getKeyPair().getPrivate());
-
+                    SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
+                            responseVS.getMessageBytes()));
                     anonymousDelegation.setDelegationReceipt(delegationReceipt);
                     ContentValues values = new ContentValues();
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(anonymousDelegation));
@@ -346,7 +327,6 @@ public class RepresentativeService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-
         return imageBytes;
     }
 

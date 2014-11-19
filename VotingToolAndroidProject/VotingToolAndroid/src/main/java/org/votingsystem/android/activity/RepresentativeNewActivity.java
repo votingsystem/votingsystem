@@ -227,7 +227,7 @@ public class RepresentativeNewActivity extends ActivityBase {
                     editorContent = editorFragment.getEditorData();
                     menu.removeGroup(R.id.general_items);
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                            getString(R.string.enter_pin_signature_device_msg), false, null);
+                            getString(R.string.enter_signature_pin_msg), false, null);
                 }
                 return true;
             default:

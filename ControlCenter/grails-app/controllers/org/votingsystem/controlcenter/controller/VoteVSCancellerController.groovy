@@ -23,7 +23,7 @@ class VoteVSCancellerController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVSCanceller?url=${urlEventVS}]
 	 * @param [urlEventVS] Obligatorio. URL en el control de acceso del evento al que está asociada la anulación
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento firmado en formato
+	 * @requestContentType [application/pkcs7-signature] Obligatorio. Documento firmado en formato
 	 * 			SMIME con el <a href="https://github.com/votingsystem/votingsystem/wiki/Anulador-de-voto">El anulador de voto</a>
 	 * @return Recibo firmado con el certificado del servidor
 	 */

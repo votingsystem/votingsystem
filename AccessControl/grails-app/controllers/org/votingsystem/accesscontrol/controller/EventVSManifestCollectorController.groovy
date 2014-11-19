@@ -24,7 +24,7 @@ class EventVSManifestCollectorController {
 	 * @httpMethod [POST]
      * @serviceURL [/eventVSManifestCollector/$id]
 	 * @param [id] Obligatorio. El identificador en la base de datos del manifiesto que se está firmando.
-     * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. El archivo PDF con la signatureVS.
+     * @requestContentType [application/pdf,application/pkcs7-signature] Obligatorio. El archivo PDF con la signatureVS.
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def index() {

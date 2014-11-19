@@ -44,7 +44,7 @@ class AccessRequestVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/accessRequestVS]
-	 * @requestContentType [application/x-pkcs7-signature] User signed access request.
+	 * @requestContentType [application/pkcs7-signature] User signed access request.
 	 * @param [csr] Required. CSR to get the anonymous certificate which signs the vote.
 	 * @return CSR signed.
 	 */
