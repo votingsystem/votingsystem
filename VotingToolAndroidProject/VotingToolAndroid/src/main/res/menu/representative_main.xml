@@ -1,0 +1,42 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
+
+    <item android:id="@+id/representative_list"
+        android:orderInCategory="1"
+        android:showAsAction="never"
+        android:title="@string/representative_list_lbl"/>
+
+    <item android:id="@+id/check_representation_state"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/check_representation_state_lbl"/>
+
+    <!--<item android:id="@+id/options_for_representatives" android:orderInCategory="3"
+        android:title="@string/options_for_representatives_lbl" > <menu> </menu></item> -->
+
+    <group android:id="@+id/options_for_uservs">
+        <item android:id="@+id/cancel_anonymouys_representation"
+            android:orderInCategory="5"
+            android:showAsAction="never"
+            android:title="@string/cancel_anonymouys_representation_lbl"/>
+        <item
+            android:id="@+id/new_representative"
+            android:orderInCategory="6"
+            android:showAsAction="never"
+            android:title="@string/new_representative_lbl"/>
+    </group>
+
+    <group android:id="@+id/options_for_representatives">
+        <item
+            android:id="@+id/cancel_representative"
+            android:orderInCategory="10"
+            android:showAsAction="never"
+            android:title="@string/cancel_representative_button"/>
+        <item
+            android:id="@+id/edit_representative"
+            android:orderInCategory="11"
+            android:showAsAction="never"
+            android:title="@string/edit_representative_lbl"/>
+    </group>
+
+</menu>

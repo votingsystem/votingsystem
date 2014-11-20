@@ -337,8 +337,8 @@ public class VicketService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 UserVSAccountsInfo accountsInfo = UserVSAccountsInfo.parse(
                         responseVS.getMessageJSON());
-                PrefUtils.putUserVSAccountsInfo(contextVS, accountsInfo,
-                        DateUtils.getCurrentWeekPeriod());
+                PrefUtils.putUserVSAccountsInfo(accountsInfo, DateUtils.getCurrentWeekPeriod(),
+                        contextVS);
                 TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, accountsInfo);
             } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {

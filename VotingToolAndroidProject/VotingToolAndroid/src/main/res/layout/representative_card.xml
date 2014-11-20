@@ -9,8 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="3dp"
-        android:background="@color/frg_vs">
+        android:padding="3dp">
         <TextView
             android:id="@+id/representative_name"
             android:layout_width="fill_parent"

@@ -62,8 +62,9 @@ public class UserCertRequestService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 certificationRequest.setHashPin(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
-                PrefUtils.putCsrRequest(this, requestId, certificationRequest);
-                PrefUtils.putAppCertState(this, contextVS.getAccessControl().getServerURL(), State.WITH_CSR, null);
+                PrefUtils.putCsrRequest(requestId, certificationRequest, this);
+                PrefUtils.putAppCertState(contextVS.getAccessControl().getServerURL(),
+                        State.WITH_CSR, null, this);
             }
             String caption = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

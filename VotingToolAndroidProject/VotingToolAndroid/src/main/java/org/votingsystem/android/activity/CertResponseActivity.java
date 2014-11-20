@@ -113,11 +113,11 @@ public class CertResponseActivity extends ActionBarActivity {
                         Context.MODE_PRIVATE);
                 outputStream.write(userDataBytes);
                 outputStream.close();
-                PrefUtils.putAppCertState(appContextVS, appContextVS.getAccessControl().getServerURL(),
-                        State.WITH_CERTIFICATE, user.getNif());
-                PrefUtils.putPin(appContextVS, pin);
+                PrefUtils.putAppCertState(appContextVS.getAccessControl().getServerURL(),
+                        State.WITH_CERTIFICATE, user.getNif(), appContextVS);
+                PrefUtils.putPin(pin, appContextVS);
                 setMessage(getString(R.string.request_cert_result_activity_ok));
-                PrefUtils.putSessionUserVS(this, user);
+                PrefUtils.putSessionUserVS(user, this);
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {

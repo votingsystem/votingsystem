@@ -15,19 +15,18 @@ class RepresentativeController {
 	
 	/**
 	 * @httpMethod [GET]
-	 * @return Página a partir de la que se pueden crear representantes.
+	 * @return Form to activate representatives
 	 */
 	def newRepresentative() {
 		render(view:"newRepresentative")
 	}
 	
 	/**
-	 * @httpMethod [GET]
-	 *
+	 * Service tha provides form completed with representative data that matches the NIF requested
+     * @httpMethod [GET]
 	 * @serviceURL [/representative/edit/$nif] 
-	 * @param [nif] NIF del representante que se desea consultar.
-	 * @responseContentType [application/json]
-	 * @return documento JSON con datos del representante
+	 * @param [nif] Required. Representative NIF
+	 * @return HTML form
 	 */
 	def edit() {
         if(params.nif) {
@@ -52,20 +51,53 @@ class RepresentativeController {
         } else render(view:"editRepresentative")
 	}
 
+    /**
+     * Service tha provides representation state of the NIF passed as param
+     * @httpMethod [GET]
+     * @serviceURL [/representative/state/$nif]
+     * @param [nif] Required. The NIF to check
+     * @return representation state in JSON format
+     */
+    def state() {
+        if(params.nif) {
+            Map resultMap = representativeDelegationService.checkRepresentationState(params.nif)
+            render resultMap as JSON
+        } else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'missingParamErrorMsg', args:['nif']))]
+    }
+
+    /**
+     * Service tha provides the representative data that matches the NIF requested
+     * @httpMethod [GET]
+     * @serviceURL [/representative/nif/$nif]
+     * @param [nif] Required. Representante NIF
+     * @responseContentType [application/json]
+     * @return representative data in JSON format
+     */
+    def getByNif() {
+        String nif = NifUtils.validate(params.nif)
+        if(!nif) {
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
+        }
+        UserVS representative
+        UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
+        if(!representative) {
+            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'representativeNifErrorMsg', args:[nif]))]
+        } else {
+            def resultMap = [representativeId: representative.id,
+                             representativeName:"${representative.name} ${representative.firstName}",
+                             representativeNIF:representative.nif]
+            render resultMap as JSON
+        }
+    }
+
 	/**
-	 * @httpMethod [GET]
-	 * @return Página de la sección de administración PARA representantes.
-	 */
-	def representativeAdmin() {
-		render(view:"representativeAdmin")
-	}
-	
-	/**
-	 * Servicio de consulta de representantes
-	 *
+	 * Service tha provides the list of representatives
 	 * @httpMethod [GET]
 	 * @serviceURL [/representative/$id?]
-	 * @param [id] Opcional. El identificador del representante en la base de datos.
+	 * @param [id] Optional. The representante identifier in the database.
 	 * @responseContentType [application/json]
 	 */
 	def index() {
@@ -103,47 +135,14 @@ class RepresentativeController {
             render representativeMap as JSON
 		} else render(view:"index")
 	}
+
 	
 	/**
-	 *
-	 * Servicio que sirve para get información básica de un representante
-	 * a partir de su NIF
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/representative/nif/$nif]
-	 * @param [nif] NIF del representante que se desea consultar.
-	 * @responseContentType [application/json]
-	 * @return documento JSON con datos del representante
-	 */
-	def getByNif() {
-		String nif = NifUtils.validate(params.nif)
-		if(!nif) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
-		}
-		UserVS representative
-		UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
-		if(!representative) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'representativeNifErrorMsg', args:[nif]))]
-		} else {
-			def resultMap = [representativeId: representative.id,
-                    representativeName:"${representative.name} ${representative.firstName}",
-				    representativeNIF:representative.nif]
-			render resultMap as JSON
-		}
-	}
-	
-	/**
-	 *
-	 * Servicio que da de baja un representante
-	 *
+	 * Service thar revokes representatives
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/revoke]
-	 * @requestContentType [application/pkcs7-signature] Obligatorio. documento firmado
-	 *                     en formato SMIME con los datos de la baja.
-	 * @responseContentType [application/pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
-	 * 
+	 * @requestContentType [application/pkcs7-signature] required. Signed documet
+	 * @responseContentType [application/pkcs7-signature] request signed by system
 	 */
 	def revoke() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -189,7 +188,7 @@ class RepresentativeController {
 	}
 	
 	/**
-	 * Service that saves the user selected representatives
+	 * Service that saves the representative selected by the user
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/delegation]
@@ -289,7 +288,6 @@ class RepresentativeController {
 	def accreditationsBackupForEvent() {
 		EventVSElection event = null
 		EventVSElection.withTransaction { event = EventVSElection.get(params.long('id')) }
-		String msg = null
 		if(!event) return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventVSNotFound'))]
 		else {
             if(event.isActive(Calendar.getInstance().getTime())) {

@@ -271,8 +271,9 @@ public class ResponseVS<T> implements Serializable {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public ResponseVS setReason(String reason) {
         this.reason = reason;
+        return this;
     }
 
     public String getMetaInf() {

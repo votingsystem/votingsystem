@@ -36,6 +36,7 @@ public enum TypeVS {
     VICKET_SEND,
     VICKET_USER_INFO,
 
+    STATE,
     TRANSACTIONVS,
 
     MESSAGEVS,

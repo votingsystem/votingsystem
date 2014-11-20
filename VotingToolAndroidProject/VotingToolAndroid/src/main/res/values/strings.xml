@@ -436,4 +436,8 @@
     <string name="timestamp_error_lbl">error comprobando sello de tiempo</string>
     <string name="representative_new_msg">dando de alta representante</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
+    <string name="representatives_lbl">representantes</string>
+    <string name="check_representation_state_lbl">comprobar mi representación</string>
+    <string name="representation_state_missing_lbl">seleccione la opción \'consultar estado de mi representación\'</string>
+    <string name="representation_last_checked_msg">fecha de la última actualización: \'%1$s\'</string>
 </resources>

@@ -278,7 +278,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(contextVS, this);
+        PrefUtils.unregisterPreferenceChangeListener(this, contextVS);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 

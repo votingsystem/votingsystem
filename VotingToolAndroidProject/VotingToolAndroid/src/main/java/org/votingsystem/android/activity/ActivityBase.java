@@ -93,7 +93,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     // titles for navdrawer items (indices must correspond to the above)
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
             R.string.polls_lbl,
-            R.string.representative_lbl,
+            R.string.representatives_lbl,
             R.string.receipts_lbl,
             R.string.finance_lbl,
             R.string.navdrawer_item_settings,

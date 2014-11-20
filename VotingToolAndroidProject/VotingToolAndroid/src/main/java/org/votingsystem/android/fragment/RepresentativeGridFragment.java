@@ -72,36 +72,27 @@ public class RepresentativeGridFragment extends Fragment
     private AppContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
-    private String broadCastId;
+    private String broadCastId = RepresentativeGridFragment.class.getSimpleName();
     private int loaderId = -1;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) revokeRepresentative();
-        else {
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            setProgressDialogVisible(false);
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+                if(gridView.getAdapter().getCount() == 0)
+                    rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+            }
             if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage(), getFragmentManager());
             } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 MessageDialogFragment.showDialog(responseVS, getFragmentManager());
             }
         }
-        }
     };
-
-    private void revokeRepresentative() {
-        LOGD(TAG + ".revokeRepresentative", "revokeRepresentative");
-        Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        setProgressDialogVisible(true);
-        getActivity().startService(startIntent);
-    }
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -116,7 +107,6 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = RepresentativeGridFragment.class.getSimpleName();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
@@ -201,11 +191,6 @@ public class RepresentativeGridFragment extends Fragment
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
 
-    private void showHTTPError() {
-        setProgressDialogVisible(false);
-        if(gridView.getAdapter().getCount() == 0)
-            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-    }
 
     public void fetchItems(Long offset) {
         if(contextVS.getAccessControl() == null) {
@@ -229,36 +214,6 @@ public class RepresentativeGridFragment extends Fragment
         LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
-            /*case R.id.reload:
-                fetchItems(offset);
-                //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                //getLoaderManager().restartLoader(loaderId, null, this);
-                return true;*/
-            case R.id.cancel_anonymouys_representatioin:
-                return true;
-            case R.id.new_representative:
-                Intent intent = new Intent(getActivity(), RepresentativeNewActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.cancel_representative:
-                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                        getString(R.string.remove_representative_caption),
-                        getString(R.string.remove_representative_msg), getActivity());
-                builder.setPositiveButton(getString(R.string.continue_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getFragmentManager(),
-                                        broadCastId, getString(R.string.enter_signature_pin_msg),
-                                        false, null);
-                            }
-                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                return true;
-            case R.id.edit_representative:
-                Intent editIntent = new Intent(getActivity(), RepresentativeNewActivity.class);
-                editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
-                startActivity(editIntent);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

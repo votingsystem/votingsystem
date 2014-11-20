@@ -22,11 +22,11 @@ import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
+import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -36,7 +36,6 @@ import org.votingsystem.util.ResponseVS;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -46,8 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.mail.MessagingException;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -82,6 +79,42 @@ public class RepresentativeService extends IntentService {
             anonymousDelegation(intent.getExtras(), serviceCaller, operation);
         } else if(operation == TypeVS.REPRESENTATIVE_REVOKE) {
             revokeRepresentative(serviceCaller);
+        } else if(operation == TypeVS.STATE) {
+            checkRepresentationStat(serviceCaller);
+        }
+    }
+
+    private void checkRepresentationStat(String serviceCaller) {
+        String serviceURL = contextVS.getAccessControl().getRepresentationStateServiceURL(
+                contextVS.getUserVS().getNif());
+        ResponseVS responseVS = null;
+        try {
+            responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                Representation representation = new Representation(Calendar.getInstance().getTime(),
+                        Representation.State.valueOf(
+                        responseVS.getMessageJSON().getString("state")), null, null);
+                switch (representation.getState()) {
+                    case REPRESENTATIVE:
+                    case WITH_PUBLIC_REPRESENTATION:
+                        representation.setRepresentative(UserVS.parse(responseVS.getMessageJSON().
+                                getJSONObject("representative")));
+                        break;
+                    case WITH_ANONYMOUS_REPRESENTATION:
+                        representation.setDateTo(DateUtils.getDayWeekDate(
+                                responseVS.getMessageJSON().getString("dateTo")));
+                        break;
+                    case WITHOUT_REPRESENTATION:
+                        break;
+                }
+                PrefUtils.putRepresentationState(representation, this);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
+        } finally {
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 
@@ -99,7 +132,8 @@ public class RepresentativeService extends IntentService {
             String[] selectionArgs = { contextVS.getUserVS().getNif() };
             getContentResolver().delete(UserContentProvider.CONTENT_URI, selection, selectionArgs);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                PrefUtils.putRepresentative(this, null);
+                PrefUtils.putRepresentationState(new Representation(Calendar.getInstance().getTime(),
+                        Representation.State.WITHOUT_REPRESENTATION, null, null), this);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -317,7 +351,8 @@ public class RepresentativeService extends IntentService {
                 UserVS representativeData = contextVS.getUserVS();
                 representativeData.setDescription(editorContent);
                 representativeData.setImageBytes(imageBytes);
-                PrefUtils.putRepresentative(this, representativeData);
+                PrefUtils.putRepresentationState(new Representation(Calendar.getInstance().getTime(),
+                        Representation.State.REPRESENTATIVE, representativeData, null), this);
             }
             responseVS.setNotificationMessage(getString(R.string.new_representative_ok_notification_msg));
         } catch(Exception ex) {

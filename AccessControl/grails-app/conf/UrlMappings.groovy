@@ -259,9 +259,22 @@ class UrlMappings {
             action = [POST:"processFileMap"]
         }
 
+        "/representative/accreditationsBackupForEvent/$id" {
+            controller = "representative"
+            action = "accreditationsBackupForEvent"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
         "/representative/anonymousDelegationRequest" {
             controller = "representative"
             action = [POST:"processAnonymousDelegationRequestFileMap"]
+        }
+
+        "/representative/state/$nif" {
+            controller = "representative"
+            action = "state"
         }
 
         "/representative/$id?" {
@@ -295,14 +308,6 @@ class UrlMappings {
             action = [GET:"image"]
             constraints {
                 representativeId(matches:/\d*/)
-            }
-        }
-
-        "/representative/accreditationsBackupForEvent/$id" {
-            controller = "representative"
-            action = "accreditationsBackupForEvent"
-            constraints {
-                id(matches:/\d*/)
             }
         }
 

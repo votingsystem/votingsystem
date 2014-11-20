@@ -53,7 +53,6 @@ public class HelpUtils {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-
         new AboutDialog().show(ft, "dialog_about");
     }
 
@@ -61,12 +60,9 @@ public class HelpUtils {
 
         private static final String VERSION_UNAVAILABLE = "N/A";
 
-        public AboutDialog() {
-        }
+        public AboutDialog() { }
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Get app version
+        @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
             PackageManager pm = getActivity().getPackageManager();
             String packageName = getActivity().getPackageName();
             String versionName;
@@ -76,11 +72,8 @@ public class HelpUtils {
             } catch (PackageManager.NameNotFoundException e) {
                 versionName = VERSION_UNAVAILABLE;
             }
-
-            // Build the about body view and append the link to see OSS licenses
             SpannableStringBuilder aboutBody = new SpannableStringBuilder();
             aboutBody.append(Html.fromHtml(getString(R.string.about_body, versionName)));
-
             SpannableString licensesLink = new SpannableString(getString(R.string.about_licenses));
             licensesLink.setSpan(new ClickableSpan() {
                 @Override
@@ -90,7 +83,6 @@ public class HelpUtils {
             }, 0, licensesLink.length(), 0);
             aboutBody.append("\n\n");
             aboutBody.append(licensesLink);
-
             SpannableString eulaLink = new SpannableString(getString(R.string.about_eula));
             eulaLink.setSpan(new ClickableSpan() {
                 @Override
@@ -100,24 +92,21 @@ public class HelpUtils {
             }, 0, eulaLink.length(), 0);
             aboutBody.append("\n\n");
             aboutBody.append(eulaLink);
-
             LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
-            TextView aboutBodyView = (TextView) layoutInflater.inflate(R.layout.dialog_about, null);
-            aboutBodyView.setText(aboutBody);
-            aboutBodyView.setMovementMethod(new LinkMovementMethod());
-
-            return new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.title_about)
-                    .setView(aboutBodyView)
-                    .setPositiveButton(R.string.ok_lbl,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    dialog.dismiss();
-                                }
-                            }
-                    )
-                    .create();
+            View view = layoutInflater.inflate(R.layout.message_dialog, null);
+            TextView messageTextView = (TextView)view.findViewById(R.id.message);
+            ((TextView) view.findViewById(R.id.caption_text)).setText(R.string.title_about);
+            messageTextView.setText(aboutBody);
+            messageTextView.setMovementMethod(new LinkMovementMethod());
+            return new AlertDialog.Builder(getActivity()).setView(view)
+                .setPositiveButton(R.string.accept_lbl,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.dismiss();
+                        }
+                    }
+                ).create();
         }
     }
 

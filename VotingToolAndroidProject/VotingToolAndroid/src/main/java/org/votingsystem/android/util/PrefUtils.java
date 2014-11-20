@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Representation;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSAccountsInfo;
 import org.votingsystem.signature.smime.CMSUtils;
@@ -36,7 +37,7 @@ public class PrefUtils {
         return TimeZone.getDefault();
     }
 
-    private static UserVS representative;
+    private static Representation representation;
 
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
@@ -46,25 +47,25 @@ public class PrefUtils {
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
     }
 
-    public static void markDataBootstrapDone(final Context context) {
+    public static void markDataBootstrapDone(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, true).commit();
     }
 
-    public static void markAccessControlLoaded(final Context context, String accessControlURL) {
+    public static void markAccessControlLoaded(String accessControlURL, Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL).commit();
     }
 
-    public static boolean isDataBootstrapDone(final Context context) {
+    public static boolean isDataBootstrapDone(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getBoolean(ContextVS.BOOTSTRAP_DONE, false);
     }
 
-    public static String getApplicationId(final Context context)  {
+    public static String getApplicationId(Context context)  {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String applicationId = settings.getString(ContextVS.APPLICATION_ID_KEY, null);
@@ -78,7 +79,7 @@ public class PrefUtils {
         return applicationId;
     }
 
-    public static Calendar getLastPendingOperationCheckedTime(final Context context) {
+    public static Calendar getLastPendingOperationCheckedTime(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         Calendar lastCheckedTime = Calendar.getInstance();
@@ -86,28 +87,28 @@ public class PrefUtils {
         return lastCheckedTime;
     }
 
-    public static void markPendingOperationCheckedNow(final Context context) {
+    public static void markPendingOperationCheckedNow(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis()).commit();
     }
 
-    public static void registerPreferenceChangeListener(final Context context,
+    public static void registerPreferenceChangeListener(Context context,
         SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.registerOnSharedPreferenceChangeListener(listener);
     }
 
-    public static void unregisterPreferenceChangeListener(final Context context,
-            SharedPreferences.OnSharedPreferenceChangeListener listener) {
+    public static void unregisterPreferenceChangeListener(
+            SharedPreferences.OnSharedPreferenceChangeListener listener, Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    public static Date getUserVSAccountsLastCheckDate(final Context context) {
+    public static Date getUserVSAccountsLastCheckDate(Context context) {
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         GregorianCalendar lastCheckedTime = new GregorianCalendar();
@@ -118,7 +119,7 @@ public class PrefUtils {
         } else return null;
     }
 
-    public static UserVSAccountsInfo getUserVSAccountsInfo(final Context context) throws Exception {
+    public static UserVSAccountsInfo getUserVSAccountsInfo(Context context) throws Exception {
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
@@ -128,8 +129,8 @@ public class PrefUtils {
         else return null;
     }
 
-    public static void putUserVSAccountsInfo(final Context context,
-              UserVSAccountsInfo userInfo, DateUtils.TimePeriod timePeriod) throws Exception {
+    public static void putUserVSAccountsInfo(UserVSAccountsInfo userInfo,
+             DateUtils.TimePeriod timePeriod, Context context) throws Exception {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -140,7 +141,7 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putPin(final Context context, String pin) {
+    public static void putPin(String pin, Context context) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -151,14 +152,14 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static String getStoredPasswordHash(final Context context) throws NoSuchAlgorithmException,
+    public static String getStoredPasswordHash(Context context) throws NoSuchAlgorithmException,
             ExceptionVS {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.PIN_KEY, null);
     }
 
-    public static String getCsrRequest(final Context context) {
+    public static String getCsrRequest(Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.CSR_KEY, null);
@@ -172,8 +173,10 @@ public class PrefUtils {
         return State.valueOf(stateStr);
     }
 
-    public static void putAppCertState(final Context context, String accessControlURL, State state, String nif) {
-        LOGD(TAG + ".putAppCertState", STATE_KEY + "_" + accessControlURL +  " - state: " + state.toString());
+    public static void putAppCertState(String accessControlURL, State state, String nif,
+           Context context) {
+        LOGD(TAG + ".putAppCertState", STATE_KEY + "_" + accessControlURL +
+                " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -182,8 +185,8 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putCsrRequest(final Context context, Long requestId,
-             CertificationRequestVS certificationRequest) {
+    public static void putCsrRequest(Long requestId, CertificationRequestVS certificationRequest,
+             Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -195,7 +198,7 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putSessionUserVS(final Context context, UserVS userVS) {
+    public static void putSessionUserVS(UserVS userVS, Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -206,7 +209,7 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static UserVS getSessionUserVS(final Context context) {
+    public static UserVS getSessionUserVS(Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);
@@ -217,30 +220,34 @@ public class PrefUtils {
         return null;
     }
 
-    public static void putRepresentative(final Context context, UserVS userVS) {
+    public static void putRepresentationState(Representation representationState, Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
+        byte[] serializedState = ObjectUtils.serializeObject(representationState);
         try {
-            if(userVS == null) editor.remove(ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
-            else  editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME,
-                    new String(serializedUserVS, "UTF-8"));
+            editor.putString(Representation.class.getSimpleName(),
+                    new String(serializedState, "UTF-8"));
             editor.commit();
-            representative = userVS;
+            representation = representationState;
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static UserVS getRepresentative(final Context context) {
-        if(representative != null) return representative;
+    public static Representation getRepresentationState(Context context) {
+        if(representation != null) return representation;
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String serializedUserVS = settings.getString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, null);
-        if(serializedUserVS != null) {
-            representative = (UserVS) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
-            return representative;
-        }
-        return null;
+
+        SharedPreferences.Editor editor = settings.edit();
+
+        String serializedRepresentation = settings.getString(
+                Representation.class.getSimpleName(), null);
+        editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, null);
+        if(serializedRepresentation != null) {
+            representation = (Representation) ObjectUtils.deSerializeObject(
+                    serializedRepresentation.getBytes());
+            return representation;
+        } return null;
     }
 
 }

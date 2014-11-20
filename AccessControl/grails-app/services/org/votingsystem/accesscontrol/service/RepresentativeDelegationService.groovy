@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
@@ -26,19 +27,15 @@ class RepresentativeDelegationService {
 	def eventVSService
 	LinkGenerator grailsLinkGenerator
 
-	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
 	public synchronized ResponseVS saveDelegation(MessageSMIME messageSMIMEReq) {
 		//def future = callAsync {}
 		//return future.get(30, TimeUnit.SECONDS)
-		MessageSMIME messageSMIME = null
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
-		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
-		String msg = null
         ResponseVS responseVS = checkUserDelegationStatus(userVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
         if(userVS.nif == requestValidatedNIF) throw new ExceptionVS(messageSource.getMessage('representativeSameUserNifErrorMsg',
                 [requestValidatedNIF].toArray(), locale))
@@ -50,31 +47,24 @@ class RepresentativeDelegationService {
         if(!representative)  throw new ExceptionVS(
                 messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale))
         userVS.representative = representative
-        RepresentationDocumentVS.withTransaction {
-            representationDocument = RepresentationDocumentVS.findWhere(
-                    userVS:userVS, state:RepresentationDocumentVS.State.OK)
-            if(representationDocument) {
-                representationDocument.state = RepresentationDocumentVS.State.CANCELLED
-                representationDocument.cancellationSMIME = messageSMIMEReq
-                representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
-                representationDocument.save(flush:true)
-                log.debug("saveDelegation - cancelled representationDocument ${representationDocument.id} " +
-                        "by user '${userVS.nif}'")
-            } else log.debug("saveDelegation - user '${userVS.nif}' firs public delegation")
-            representationDocument = new RepresentationDocumentVS(activationSMIME:messageSMIMEReq,
-                    userVS:userVS, representative:representative, state:RepresentationDocumentVS.State.OK).save()
-        }
-
-        msg = messageSource.getMessage('representativeAssociatedMsg',
+        RepresentationDocumentVS representationDocument = RepresentationDocumentVS.findWhere(
+                userVS:userVS, state:RepresentationDocumentVS.State.OK)
+        if(representationDocument) {
+            representationDocument.state = RepresentationDocumentVS.State.CANCELLED
+            representationDocument.cancellationSMIME = messageSMIMEReq
+            representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
+            representationDocument.save(flush:true)
+            log.debug("saveDelegation - cancelled representationDocument ${representationDocument.id} " +
+                    "by user '${userVS.nif}'")
+        } else log.debug("saveDelegation - user '${userVS.nif}' firs public delegation")
+        representationDocument = new RepresentationDocumentVS(activationSMIME:messageSMIMEReq,
+                userVS:userVS, representative:representative, state:RepresentationDocumentVS.State.OK).save()
+        String msg = messageSource.getMessage('representativeAssociatedMsg',
                 [messageJSON.representativeName, userVS.nif].toArray(), locale)
-        log.debug "saveDelegation - ${msg}"
-
         String fromUser = grailsApplication.config.vs.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
-                fromUser, toUser, smimeMessage, subject)
-        messageSMIMEReq.setSMIME(smimeMessageResp)
+        messageSMIMEReq.setSMIME(signatureVSService.getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject))
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEReq,
                 type:TypeVS.REPRESENTATIVE_SELECTION)
 	}
@@ -87,12 +77,8 @@ class RepresentativeDelegationService {
         }
         int statusCode = ResponseVS.SC_OK
         String userDelegationURL = null
-        AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
-                status:AnonymousDelegation.Status.OK)
-        if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
-            anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED)
-        }
-        if(anonymousDelegation && AnonymousDelegation.Status.OK == anonymousDelegation.getStatus()) {
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS:userVS)
+        if(anonymousDelegation) {
             statusCode = ResponseVS.SC_ERROR_REQUEST_REPEATED
             msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
                     anonymousDelegation.getDateTo().format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
@@ -102,19 +88,52 @@ class RepresentativeDelegationService {
         return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
+    private AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
+        AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
+                status:AnonymousDelegation.Status.OK)
+        if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
+            anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED)
+            anonymousDelegation.save()
+            return null
+        }
+        return anonymousDelegation
+    }
+
+    public Map checkRepresentationState(String nifToCheck) {
+        nifToCheck = NifUtils.validate(nifToCheck)
+        UserVS userVS  = UserVS.findWhere(nif:nifToCheck)
+        if(!userVS) throw new ExceptionVS(messageSource.getMessage('userVSNotFoundByNIF', [nifToCheck].toArray(), locale))
+        if(userVS.representative) {
+            return [state:RepresentationState.WITH_PUBLIC_REPRESENTATION, representative:
+                    ((RepresentativeService)grailsApplication.mainContext.getBean(
+                    "representativeService")).getRepresentativeDetailedMap(userVS.representative)]
+        }
+        if(UserVS.Type.REPRESENTATIVE == userVS.type) {
+            return [state:RepresentationState.REPRESENTATIVE, representative:
+                    ((RepresentativeService)grailsApplication.mainContext.getBean(
+                            "representativeService")).getRepresentativeDetailedMap(userVS)]
+        }
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
+        if(anonymousDelegation) {
+            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION, dateTo: DateUtils.getDayWeekDateStr(
+                    anonymousDelegation.getDateTo())]
+        }
+        return [state:RepresentationState.WITHOUT_REPRESENTATION]
+    }
+
+
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
-        ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
+        ResponseVS responseVS = checkUserDelegationStatus(userVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             log.error("$methodName - ${responseVS.message}")
-            responseVS.metaInf = MetaInfMsg.getErrorMsg(methodName, "delegationStatusError")
-            responseVS.reason = responseVS.message
-            return responseVS
+            return responseVS.setMetaInf(MetaInfMsg.getErrorMsg(methodName, "delegationStatusError")).setReason(
+                    responseVS.message)
         }
-        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if (!messageJSON.accessControlURL || !messageJSON.weeksOperationActive ||
                 (TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
@@ -182,32 +201,28 @@ class RepresentativeDelegationService {
     public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq) {
         SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
-        String msg
         MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
                 userVS:userVS)
         if(!userDelegation) {
             return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:messageSource.
-                    getMessage('userWithoutAnonymousDelegationErrorMsg',
-                    [userVS.nif].toArray(), locale))
+                    getMessage('userWithoutAnonymousDelegationErrorMsg', [userVS.nif].toArray(), locale))
         }
-        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         throw new ExceptionVS(" === TODO ====")
     }
 
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
-		RepresentationDocumentVS.withTransaction {
-			RepresentationDocumentVS representationDocument = RepresentationDocumentVS.
-				findWhere(userVS:userVS, state:RepresentationDocumentVS.State.OK)
-			if(representationDocument) {
-				log.debug("cancelRepresentationDocument - User changing representative")
-				representationDocument.state = RepresentationDocumentVS.State.CANCELLED
-				representationDocument.cancellationSMIME = messageSMIMEReq
-				representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
-				representationDocument.save(flush:true)
-				log.debug("cancelRepresentationDocument - user '${userVS.nif}' " +
-                        " - representationDocument ${representationDocument.id}")
-			} else log.debug("cancelRepresentationDocument - user '${userVS.nif}' doesn't have representative")
-		}
+        RepresentationDocumentVS representationDocument = RepresentationDocumentVS.
+                findWhere(userVS:userVS, state:RepresentationDocumentVS.State.OK)
+        if(representationDocument) {
+            log.debug("cancelRepresentationDocument - User changing representative")
+            representationDocument.state = RepresentationDocumentVS.State.CANCELLED
+            representationDocument.cancellationSMIME = messageSMIMEReq
+            representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
+            representationDocument.save(flush:true)
+            log.debug("cancelRepresentationDocument - user '${userVS.nif}' " +
+                    " - representationDocument ${representationDocument.id}")
+        } else log.debug("cancelRepresentationDocument - user '${userVS.nif}' doesn't have representative")
 	}
 	
 	//{"operation":"REPRESENTATIVE_ACCREDITATIONS_REQUEST","representativeNif":"...",

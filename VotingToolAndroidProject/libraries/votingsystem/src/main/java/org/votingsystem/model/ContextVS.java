@@ -80,6 +80,7 @@ public class ContextVS {
     public static final String VALUE_KEY = "VALUE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
+    public static final String REPRESENTATIVE_KEY = "REPRESENTATIVE_KEY";
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
     public static final String ERROR_PANEL_KEY = "ERROR_PANEL";

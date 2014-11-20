@@ -167,7 +167,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void setAccessControlVS(AccessControlVS accessControl) {
         LOGD(TAG + ".setAccessControlVS", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
-        PrefUtils.markAccessControlLoaded(this, accessControl.getServerURL());
+        PrefUtils.markAccessControlLoaded(accessControl.getServerURL(), this);
         state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
     }
 
