@@ -28,6 +28,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -40,7 +42,6 @@ import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
@@ -468,6 +469,22 @@ public class UIUtils  {
         Intent intent = new Intent(context, FragmentContainerActivity.class);
         intent.putExtra(ContextVS.FRAGMENT_KEY, className);
         context.startActivity(intent);
+    }
+
+
+    public static void setImage(ImageView imageView, byte[] imageBytes, final Context context) {
+        final Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        imageView.setImageBitmap(bmp);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ImageView imageView = new ImageView(context);
+                imageView.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                imageView.setImageBitmap(bmp);
+                new AlertDialog.Builder(context).setView(imageView).show();
+            }
+        });
     }
 
     public static AlertDialog.Builder getMessageDialogBuilder(String caption, String message,

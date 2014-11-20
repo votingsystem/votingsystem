@@ -201,15 +201,6 @@ public abstract class ActivityBase extends ActionBarActivity {
         if (mDrawerLayout == null) {
             return;
         }
-        if (selfItem == NAVDRAWER_ITEM_INVALID) {
-            // do not show a nav drawer
-            View navDrawer = mDrawerLayout.findViewById(R.id.navdrawer);
-            if (navDrawer != null) {
-                ((ViewGroup) navDrawer.getParent()).removeView(navDrawer);
-            }
-            mDrawerLayout = null;
-            return;
-        }
         mDrawerToggle = mLPreviewUtils.setupDrawerToggle(mDrawerLayout, new DrawerLayout.DrawerListener() {
             @Override public void onDrawerClosed(View drawerView) {
                 // run deferred action, if we have one

@@ -1,15 +1,12 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,32 +17,24 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.RepresentativeNewActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
-import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -53,9 +42,6 @@ import org.votingsystem.util.ResponseVS;
 
 import java.text.Collator;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -78,19 +64,19 @@ public class RepresentativeGridFragment extends Fragment
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            setProgressDialogVisible(false);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
-                if(gridView.getAdapter().getCount() == 0)
-                    rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-            }
-            if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage(), getFragmentManager());
-            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
-            }
+        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        setProgressDialogVisible(false);
+        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+            if(gridView.getAdapter().getCount() == 0)
+                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+        }
+        if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
+            MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage(), getFragmentManager());
+        } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        }
         }
     };
 
@@ -113,6 +99,8 @@ public class RepresentativeGridFragment extends Fragment
             queryStr = data.getString(SearchManager.QUERY);
         }
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+                getString(R.string.representative_list_lbl));
         setHasOptionsMenu(true);
     };
 
@@ -181,12 +169,12 @@ public class RepresentativeGridFragment extends Fragment
         //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
         new Handler(){
             @Override public void handleMessage(Message msg) {
-                if (isVisible) {
-                    ModalProgressDialogFragment.showDialog(
-                            getString(R.string.loading_data_msg),
-                            getString(R.string.loading_info_msg),
-                            getFragmentManager());
-                } else ModalProgressDialogFragment.hide(getFragmentManager());
+            if (isVisible) {
+                ModalProgressDialogFragment.showDialog(
+                        getString(R.string.loading_data_msg),
+                        getString(R.string.loading_info_msg),
+                        getFragmentManager());
+            } else ModalProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
@@ -270,7 +258,6 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     public class RepresentativeListAdapter  extends CursorAdapter {
-
 
         public RepresentativeListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);

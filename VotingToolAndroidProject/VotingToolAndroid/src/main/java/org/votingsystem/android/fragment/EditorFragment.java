@@ -11,8 +11,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;

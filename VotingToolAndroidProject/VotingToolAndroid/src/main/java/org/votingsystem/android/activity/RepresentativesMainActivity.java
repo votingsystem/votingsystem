@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
@@ -14,14 +13,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.webkit.WebView;
-import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.fragment.RepresentationStateFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.util.PrefUtils;
@@ -29,11 +27,9 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.lang.ref.WeakReference;
-import java.util.Date;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -41,13 +37,11 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativesMainActivity extends ActivityBase implements
-        SharedPreferences.OnSharedPreferenceChangeListener {
+public class RepresentativesMainActivity extends ActivityBase {
 
 	public static final String TAG = RepresentativesMainActivity.class.getSimpleName();
 
     private AppContextVS contextVS = null;
-    private Representation representation;
     private String broadCastId = RepresentativesMainActivity.class.getSimpleName();
     private WeakReference<RepresentativeGridFragment> weakRefToFragment;
 
@@ -84,38 +78,24 @@ public class RepresentativesMainActivity extends ActivityBase implements
                 " - intent extras: " + getIntent().getExtras());
         contextVS = (AppContextVS) getApplicationContext();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.representative_main);
+        setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
-        ((WebView)findViewById(R.id.representative_description)).setBackgroundColor(
-                getResources().getColor(R.color.bkg_screen_vs));
-        setRepresentationView(PrefUtils.getRepresentationState(this));
+        RepresentationStateFragment fragment = new RepresentationStateFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragment, RepresentationStateFragment.TAG).commit();
     }
 
-    private void setRepresentationView(Representation representation) {
-        this.representation = representation;
-        if(representation == null) {
-            ((TextView)findViewById(R.id.last_checked_date)).setText(getString(
-                    R.string.representation_state_missing_lbl));
-        } else {
-            ((TextView) findViewById(R.id.last_checked_date)).setText(getString(
-                    R.string.representation_last_checked_msg,
-                    DateUtils.getDayWeekDateStr(representation.getLastCheckedDate())));
-        }
-    }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
                 /*case R.id.reload:
                 fetchItems(offset);
-                //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                //getLoaderManager().restartLoader(loaderId, null, this);
+                rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
+                getLoaderManager().restartLoader(loaderId, null, this);
                 return true;*/
-            case R.id.check_representation_state:
-                launchRepresentativeService(TypeVS.STATE);
-                return true;
             case R.id.cancel_anonymouys_representation:
                 return true;
             case R.id.new_representative:
@@ -137,17 +117,14 @@ public class RepresentativesMainActivity extends ActivityBase implements
                 builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.edit_representative:
-                Intent editIntent = new Intent(RepresentativesMainActivity.this,
-                        RepresentativeNewActivity.class);
+                Intent editIntent = new Intent(this, RepresentativeNewActivity.class);
                 editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
                 startActivity(editIntent);
                 return true;
             case R.id.representative_list:
-                RepresentativeGridFragment fragment = new RepresentativeGridFragment();
-                weakRefToFragment = new WeakReference<RepresentativeGridFragment>(fragment);
-                fragment.setArguments(getIntent().getExtras());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        fragment, RepresentativeGridFragment.TAG).commit();
+                intent = new Intent(this, FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, RepresentativeGridFragment.class.getName());
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -159,6 +136,7 @@ public class RepresentativesMainActivity extends ActivityBase implements
         MenuInflater inflater = getMenuInflater();
         menu.removeGroup(R.id.general_items);
         inflater.inflate(R.menu.representative_main, menu);
+        Representation representation = PrefUtils.getRepresentationState(this);
         if(representation != null) {
             switch(representation.getState()) {
                 case REPRESENTATIVE:
@@ -212,11 +190,5 @@ public class RepresentativesMainActivity extends ActivityBase implements
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(Representation.class.getSimpleName().equals(key)) {
-            LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
-            setRepresentationView(PrefUtils.getRepresentationState(this));
-        }
-    }
+
 }

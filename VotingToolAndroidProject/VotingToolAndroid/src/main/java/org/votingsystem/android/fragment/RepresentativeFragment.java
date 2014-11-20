@@ -24,17 +24,20 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -132,29 +135,13 @@ public class RepresentativeFragment extends Fragment {
         } else ModalProgressDialogFragment.hide(getFragmentManager());
     }
 
-    private void setRepresentativeImage(byte[] imageBytes) {
-        final Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-        representative_image.setImageBitmap(bmp);
-        representative_image.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ImageView imageView = new ImageView(getActivity());
-                imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT));
-                imageView.setImageBitmap(bmp);
-                new AlertDialog.Builder(getActivity()).setView(imageView).show();
-            }
-        });
-    }
-
     private void printRepresentativeData(UserVS representative) {
         this.representative = representative;
         if(representative.getImageBytes() != null)
-            setRepresentativeImage(representative.getImageBytes());
+            UIUtils.setImage(representative_image, representative.getImageBytes(), getActivity());
         else new ImageDownloaderTask(representativeId).execute();
         if(representative.getDescription() != null) {
-            String representativeDescription =
-                    "<html style='background-color:#eeeeee;'>" +
+            String representativeDescription = "<html style='background-color:#eeeeee;'>" +
                     representative.getDescription() + "</html>";
             ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                     representativeDescription, "text/html; charset=UTF-8", "UTF-8");
@@ -201,11 +188,11 @@ public class RepresentativeFragment extends Fragment {
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            LOGD(TAG + "ImageDownloaderTask.onPostExecute() ", " - statusCode: " +
+            LOGD(TAG + "ImageDownloaderTask.onPostExecute() ", "statusCode: " +
                     responseVS.getStatusCode());
             setProgressDialogVisible(false);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                setRepresentativeImage(responseVS.getMessageBytes());
+                UIUtils.setImage(representative_image, responseVS.getMessageBytes(), getActivity());
                 representative.setImageBytes(responseVS.getMessageBytes());
                 getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
                         UserContentProvider.getContentValues(representative));

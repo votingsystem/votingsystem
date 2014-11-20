@@ -1,7 +1,6 @@
 package org.votingsystem.android.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,17 +33,16 @@ import org.votingsystem.android.fragment.ModalProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
-import java.io.File;
 import java.io.FileDescriptor;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -65,7 +63,7 @@ public class RepresentativeNewActivity extends ActivityBase {
     private AppContextVS contextVS;
     private TextView imageCaption;
     private UserVS representative;
-    private String broadCastId = null;
+    private String broadCastId = RepresentativeNewActivity.class.getSimpleName();
     private String representativeImageName = null;
     private String editorContent = null;
     private Uri representativeImageUri = null;
@@ -74,82 +72,71 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) newRepresentative();
-            else {
-                if(TypeVS.NIF_REQUEST == responseVS.getTypeVS()) {
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        try {
-                            String representativeNif = NifUtils.validate(
-                                    message, RepresentativeNewActivity.this);
-                            loadRepresentativeData(representativeNif);
-                        }
-                        catch(Exception ex) {
-                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                    getString(R.string.error_lbl), ex.getMessage(),
-                                    getSupportFragmentManager());
-                        }
-                    } else RepresentativeNewActivity.this.onBackPressed();
-                } else if(TypeVS.NEW_REPRESENTATIVE == responseVS.getTypeVS()) {
-                    setProgressDialogVisible(false);
-                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                        editorFragment.setEditable(true);
-                        MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
-                    } else {
-                        UIUtils.getMessageDialogBuilder(responseVS, RepresentativeNewActivity.this).
-                            setPositiveButton(getString(R.string.accept_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    RepresentativeNewActivity.this.finish();
-                                }
-                            }).show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) newRepresentative();
+        else {
+            if(TypeVS.NIF_REQUEST == responseVS.getTypeVS()) {
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    try {
+                        String representativeNif = NifUtils.validate(
+                                message, RepresentativeNewActivity.this);
+                        loadRepresentativeData(representativeNif);
                     }
-                } else if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
-                        Cursor cursor = RepresentativeNewActivity.this.getApplicationContext().
-                                getContentResolver().query(representativeURI,
-                                null, null, null, null);
-                        cursor.moveToFirst();
-                        UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                                cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-                        printRepresentativeData(representative);
+                    catch(Exception ex) {
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), ex.getMessage(),
+                                getSupportFragmentManager());
                     }
-                    setProgressDialogVisible(false);
+                } else RepresentativeNewActivity.this.onBackPressed();
+            } else if(TypeVS.NEW_REPRESENTATIVE == responseVS.getTypeVS()) {
+                setProgressDialogVisible(false);
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                    editorFragment.setEditable(true);
+                    MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+                } else {
+                    UIUtils.getMessageDialogBuilder(responseVS, RepresentativeNewActivity.this).
+                        setPositiveButton(getString(R.string.accept_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        RepresentativeNewActivity.this.finish();
+                                    }
+                                }).show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 }
+            } else if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
+                    Cursor cursor = RepresentativeNewActivity.this.getApplicationContext().
+                            getContentResolver().query(representativeURI,
+                            null, null, null, null);
+                    cursor.moveToFirst();
+                    UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                            cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+                    setRepresentativeData(representative);
+                }
+                setProgressDialogVisible(false);
             }
+        }
         }
     };
 
     private void newRepresentative() {
         LOGD(TAG + ".newRepresentative", "");
         editorFragment.setEditable(false);
-        String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
-        String signedMessageSubject = null;
-        try {
-            Intent startIntent = new Intent(getApplicationContext(), RepresentativeService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NEW_REPRESENTATIVE);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
-            startIntent.putExtra(ContextVS.IMAGE_KEY, imageBytes);
-            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED);
-            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
-            startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
-            startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);
-            setProgressDialogVisible(true);
-            startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        Intent startIntent = new Intent(getApplicationContext(), RepresentativeService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NEW_REPRESENTATIVE);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.IMAGE_KEY, imageBytes);
+        startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
+        startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);
+        setProgressDialogVisible(true);
+        startService(startIntent);
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        broadCastId = ((Object)this).getClass().getSimpleName();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
@@ -166,20 +153,9 @@ public class RepresentativeNewActivity extends ActivityBase {
             }
         });
         if(operationType != null && TypeVS.REPRESENTATIVE == operationType) {
-            File representativeDataFile = new File(getApplicationContext().getFilesDir(),
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
-            if(!representativeDataFile.exists()) showNifDialog();
-            else {
-                try {
-                    byte[] serializedRepresentative = FileUtils.getBytesFromFile(
-                            representativeDataFile);
-                    UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
-                            serializedRepresentative);
-                    printRepresentativeData(representativeData);
-                }catch(Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
+            Representation representation = PrefUtils.getRepresentationState(this);
+            if(representation == null) showNifDialog();
+            else setRepresentativeData(representation.getRepresentative());
             getSupportActionBar().setTitle(getString(R.string.edit_representative_lbl));
         }
         if(savedInstanceState != null) {
@@ -200,14 +176,13 @@ public class RepresentativeNewActivity extends ActivityBase {
     }
 
     private void showNifDialog() {
-        String caption = getString(R.string.edit_representative_lbl);
-        String message = getString(R.string.representative_nif_lbl);
-        NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(caption,
-                message, broadCastId,  TypeVS.NIF_REQUEST);
+        NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(
+                getString(R.string.edit_representative_lbl), getString(
+                R.string.representative_nif_lbl), broadCastId,  TypeVS.NIF_REQUEST);
         newFieldDialog.show(getSupportFragmentManager(), NewFieldDialogFragment.TAG);
     }
 
-    private void printRepresentativeData(UserVS representativeData) {
+    private void setRepresentativeData(UserVS representativeData) {
         this.representative = representativeData;
         editorFragment.setEditorData(representativeData.getDescription());
         setRepresentativeImage(representativeData.getImageBytes(), null);

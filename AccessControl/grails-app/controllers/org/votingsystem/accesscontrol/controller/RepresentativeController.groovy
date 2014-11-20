@@ -331,8 +331,7 @@ class RepresentativeController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = representativeDelegationService.validateAnonymousRequest(
-                messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = representativeDelegationService.validateAnonymousRequest(messageSMIMEReq)
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
             ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest)

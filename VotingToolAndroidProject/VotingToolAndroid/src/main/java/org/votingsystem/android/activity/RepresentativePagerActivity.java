@@ -9,10 +9,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.model.ContextVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

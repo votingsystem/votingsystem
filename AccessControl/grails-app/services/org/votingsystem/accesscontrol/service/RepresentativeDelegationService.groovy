@@ -6,6 +6,7 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
+import org.votingsystem.model.RepresentationState
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -100,25 +101,27 @@ class RepresentativeDelegationService {
     }
 
     public Map checkRepresentationState(String nifToCheck) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         nifToCheck = NifUtils.validate(nifToCheck)
         UserVS userVS  = UserVS.findWhere(nif:nifToCheck)
         if(!userVS) throw new ExceptionVS(messageSource.getMessage('userVSNotFoundByNIF', [nifToCheck].toArray(), locale))
         if(userVS.representative) {
-            return [state:RepresentationState.WITH_PUBLIC_REPRESENTATION, representative:
+            return [state:RepresentationState.WITH_PUBLIC_REPRESENTATION.toString(), representative:
                     ((RepresentativeService)grailsApplication.mainContext.getBean(
                     "representativeService")).getRepresentativeDetailedMap(userVS.representative)]
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-            return [state:RepresentationState.REPRESENTATIVE, representative:
+            return [state:RepresentationState.REPRESENTATIVE.toString(), representative:
                     ((RepresentativeService)grailsApplication.mainContext.getBean(
                             "representativeService")).getRepresentativeDetailedMap(userVS)]
         }
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
         if(anonymousDelegation) {
-            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION, dateTo: DateUtils.getDayWeekDateStr(
+            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateTo: DateUtils.getDayWeekDateStr(
                     anonymousDelegation.getDateTo())]
         }
-        return [state:RepresentationState.WITHOUT_REPRESENTATION]
+        log.debug("$methodName: " + org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString())
+        return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
     }
 
 

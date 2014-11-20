@@ -440,4 +440,8 @@
     <string name="check_representation_state_lbl">comprobar mi representación</string>
     <string name="representation_state_missing_lbl">seleccione la opción \'consultar estado de mi representación\'</string>
     <string name="representation_last_checked_msg">fecha de la última actualización: \'%1$s\'</string>
+    <string name="without_representative_msg">no tiene activa ninguna representación</string>
+    <string name="with_public_representation_msg">tiene activa una representación NO ANONIMA</string>
+    <string name="with_anonymous_representation_msg">tiene activa una REPRESENTACION ANONIMA que termina el \'%1$s\'</string>
+    <string name="representative_msg">está dado de alta como representante</string>
 </resources>

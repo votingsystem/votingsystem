@@ -80,11 +80,11 @@ public class RepresentativeService extends IntentService {
         } else if(operation == TypeVS.REPRESENTATIVE_REVOKE) {
             revokeRepresentative(serviceCaller);
         } else if(operation == TypeVS.STATE) {
-            checkRepresentationStat(serviceCaller);
+            checkRepresentationState(serviceCaller);
         }
     }
 
-    private void checkRepresentationStat(String serviceCaller) {
+    private void checkRepresentationState(String serviceCaller) {
         String serviceURL = contextVS.getAccessControl().getRepresentationStateServiceURL(
                 contextVS.getUserVS().getNif());
         ResponseVS responseVS = null;
@@ -99,6 +99,13 @@ public class RepresentativeService extends IntentService {
                     case WITH_PUBLIC_REPRESENTATION:
                         representation.setRepresentative(UserVS.parse(responseVS.getMessageJSON().
                                 getJSONObject("representative")));
+                        ResponseVS representativeImageReponse = HttpHelper.getData(
+                                contextVS.getAccessControl().getRepresentativeImageURL(
+                                representation.getRepresentative().getId()), null);
+                        if (ResponseVS.SC_OK == representativeImageReponse.getStatusCode()) {
+                            representation.getRepresentative().setImageBytes(
+                                    responseVS.getMessageBytes());
+                        }
                         break;
                     case WITH_ANONYMOUS_REPRESENTATION:
                         representation.setDateTo(DateUtils.getDayWeekDate(
@@ -323,7 +330,7 @@ public class RepresentativeService extends IntentService {
     private void newRepresentative(Bundle arguments, String serviceCaller, TypeVS operationType) {
         ResponseVS responseVS = null;
         try {
-            String serviceURL = arguments.getString(ContextVS.URL_KEY);
+            String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             byte[] imageBytes = arguments.getByteArray(ContextVS.IMAGE_KEY);

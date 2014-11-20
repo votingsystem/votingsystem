@@ -182,8 +182,11 @@ public class UserContentProvider extends ContentProvider {
 
     @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int rowCount = database.delete(TABLE_NAME, ID_COL + " = ?",
-                new String[]{String.valueOf(ContentUris.parseId(uri))});
+        int rowCount = 0;
+        if(selection == null) {
+            rowCount = database.delete(TABLE_NAME, ID_COL + " = ?", new String[]{
+                    String.valueOf(ContentUris.parseId(uri))});
+        } else  rowCount = database.delete(TABLE_NAME, selection, selectionArgs);
         // Notify any listeners and return the deleted row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
