@@ -27,23 +27,19 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
-import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class RepresentativeGridFragment extends Fragment
@@ -59,7 +55,7 @@ public class RepresentativeGridFragment extends Fragment
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = RepresentativeGridFragment.class.getSimpleName();
-    private int loaderId = -1;
+    private static final int loaderId = 0;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -93,7 +89,6 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);

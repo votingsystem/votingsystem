@@ -31,20 +31,16 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.EventVSService;
-import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -69,9 +65,7 @@ public class EventVSMainActivity extends ActivityBase {
         EventVSGridFragment fragment = new EventVSGridFragment();
         weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
         if(args == null) args = new Bundle();
-        args.putSerializable(ContextVS.TYPEVS_KEY, NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
-        args.putSerializable(ContextVS.CHILD_POSITION_KEY, NavigatorDrawerOptionsAdapter.ChildPosition.OPEN);
         fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
@@ -91,12 +85,9 @@ public class EventVSMainActivity extends ActivityBase {
             @Override
             public void onItemSelected(AdapterView<?> spinner, View view, int position, long itemId) {
                 LOGD(TAG + ".onItemSelected", "position:" + position);
-                if(position == 0) requestDataRefresh(EventVS.State.ACTIVE,
-                        NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
-                else if(position == 1) requestDataRefresh(EventVS.State.PENDING,
-                        NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
-                else if(position == 2) requestDataRefresh(EventVS.State.CANCELLED,
-                        NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
+                if(position == 0) requestDataRefresh(EventVS.State.ACTIVE);
+                else if(position == 1) requestDataRefresh(EventVS.State.PENDING);
+                else if(position == 2) requestDataRefresh(EventVS.State.CANCELLED);
             }
             @Override public void onNothingSelected(AdapterView<?> adapterView) { }
         });
@@ -157,12 +148,10 @@ public class EventVSMainActivity extends ActivityBase {
                     getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
-    public void requestDataRefresh(EventVS.State eventState,
-           NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {
-        LOGD(TAG + ".requestDataRefresh", "eventState: " + eventState.toString() +
-                " - groupPosition: " + groupPosition.toString());
+    public void requestDataRefresh(EventVS.State eventState) {
+        LOGD(TAG + ".requestDataRefresh", "eventState: " + eventState.toString());
         EventVSGridFragment fragment = weakRefToFragment.get();
-        fragment.fetchItems(eventState, groupPosition);
+        fragment.fetchItems(eventState);
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {

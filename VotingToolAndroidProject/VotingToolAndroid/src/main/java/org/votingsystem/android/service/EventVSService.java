@@ -58,16 +58,14 @@ public class EventVSService extends IntentService {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
-        LOGD(TAG, "onHandleIntent");
+        LOGD(TAG + ".onHandleIntent", "onHandleIntent ");
         ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
         contextVS = (AppContextVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
-                && arguments.containsKey(ContextVS.TYPEVS_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
             String queryStr = arguments.getString(ContextVS.QUERY_KEY);
             EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
-            TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
             if(contextVS.getAccessControl() == null) {
                 LOGD(TAG, "AccessControl not initialized");
@@ -82,7 +80,8 @@ public class EventVSService extends IntentService {
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    EventVSResponse response = EventVSResponse.parse(responseVS.getMessage(), eventType);
+                    EventVSResponse response = EventVSResponse.parse(responseVS.getMessage(),
+                            TypeVS.VOTING_EVENT);
                     switch (eventState) {
                         case ACTIVE:
                             EventVSContentProvider.setNumTotalElectionsActive(
@@ -117,7 +116,7 @@ public class EventVSService extends IntentService {
                                 EventVSContentProvider.CONTENT_URI, contentValuesList.toArray(
                                 new ContentValues[contentValuesList.size()]));
                         LOGD(TAG + ".onHandleIntent", "inserted: " + numRowsCreated + " rows" +
-                            " - eventType: " + eventType + " - eventState: " + eventState);
+                            " - eventState: " + eventState);
                     } else { //To notify ContentProvider Listeners
                         getContentResolver().insert(EventVSContentProvider.CONTENT_URI, null);
                     }

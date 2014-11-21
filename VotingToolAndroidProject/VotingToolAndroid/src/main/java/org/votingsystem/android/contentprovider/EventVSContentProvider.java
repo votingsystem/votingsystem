@@ -12,10 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-
 import org.votingsystem.model.EventVS;
-import org.votingsystem.model.TypeVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -54,32 +51,6 @@ public class EventVSContentProvider extends ContentProvider {
     private static Long numTotalElectionsPending = null;
     private static Long numTotalElectionsTerminated = null;
 
-    private static Long numTotalClaimsActive = null;
-    private static Long numTotalClaimsPending = null;
-    private static Long numTotalClaimsTerminated = null;
-
-    private static Long numTotalManifestsActive = null;
-    private static Long numTotalManifestsPending = null;
-    private static Long numTotalManifestsTerminated = null;
-
-    public static void setNumTotalClaimsActive(Long numTotal) {
-        numTotalClaimsActive = numTotal;
-    }
-    public static void setNumTotalClaimsPending(Long numTotal) {
-        numTotalClaimsPending = numTotal;
-    }
-    public static void setNumTotalClaimsTerminated(Long numTotal) {
-        numTotalClaimsTerminated = numTotal;
-    }
-    public static void setNumTotalManifestsActive(Long numTotal) {
-        numTotalManifestsActive = numTotal;
-    }
-    public static void setNumTotalManifestsPending(Long numTotal) {
-        numTotalManifestsPending = numTotal;
-    }
-    public static void setNumTotalManifestsTerminated(Long numTotal) {
-        numTotalManifestsTerminated = numTotal;
-    }
     public static void setNumTotalElectionsActive(Long numTotal) {
         numTotalElectionsActive = numTotal;
     }
@@ -208,7 +179,7 @@ public class EventVSContentProvider extends ContentProvider {
         return rowCount;
     }
 
-    public static Long getNumTotal(TypeVS eventType, EventVS.State evenState) {
+    public static Long getNumTotal(EventVS.State evenState) {
         switch(evenState) {
             case ACTIVE: return numTotalElectionsActive;
             case PENDING: return numTotalElectionsPending;

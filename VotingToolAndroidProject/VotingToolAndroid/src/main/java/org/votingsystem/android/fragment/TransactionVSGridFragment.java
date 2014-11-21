@@ -28,13 +28,11 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VicketService;
-import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -42,13 +40,11 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.text.Collator;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class TransactionVSGridFragment extends Fragment
@@ -64,7 +60,7 @@ public class TransactionVSGridFragment extends Fragment
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = TransactionVSGridFragment.class.getName();
-    private int loaderId = -1;
+    private static final int loaderId = 0;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -118,7 +114,6 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);

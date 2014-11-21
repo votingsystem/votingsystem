@@ -20,12 +20,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
@@ -37,6 +38,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ResponseVS;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,6 +46,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -76,25 +79,20 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         else {
             setProgressDialogVisible(null, null, false);
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                runOnUiThread(new Runnable() {
-                    @Override public void run() {
-                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                        getString(R.string.error_lbl),
-                        responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
-                            setPositiveButton(getString(R.string.open_receipt_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.error_lbl),
+                    responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
+                    setPositiveButton(getString(R.string.open_receipt_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
                                     Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
                                     intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
                                     intent.putExtra(ContextVS.TYPEVS_KEY, responseVS.getTypeVS());
                                     intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
                                     startActivity(intent);
-                                    }
-                                });
-                    builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                    }
-                });
-
+                                }
+                            });
+                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                     responseVS.getCaption(), responseVS.getNotificationMessage(),
                     getSupportFragmentManager());

@@ -46,6 +46,7 @@ public class ReceiptGridFragment extends Fragment implements
     private VoteVS vote = null;
     private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
+    private static final int loaderId = 0;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                    Bundle savedInstanceState) {
@@ -66,7 +67,7 @@ public class ReceiptGridFragment extends Fragment implements
             }
         });
         gridView.setOnScrollListener(this);
-        getLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
+        getLoaderManager().initLoader(loaderId, null, this);
         return rootView;
     }
 
@@ -93,8 +94,7 @@ public class ReceiptGridFragment extends Fragment implements
         }
         Cursor cursor = getActivity().getContentResolver().query(
                 ReceiptContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
-        getLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
-                deliverResult(cursor);
+        getLoaderManager().getLoader(loaderId).deliverResult(cursor);
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {

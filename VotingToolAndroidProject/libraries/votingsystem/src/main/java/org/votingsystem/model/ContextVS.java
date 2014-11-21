@@ -96,7 +96,6 @@ public class ContextVS {
     public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
-    public static final String CHILD_POSITION_KEY  = "CHILD_POSITION";
     public static final String EVENTVS_KEY  = "EVENTVS";
     public static final String CURRENCY_KEY  = "CURRENCY_KEY";
     public static final String IBAN_KEY  = "IBAN_KEY";
@@ -123,9 +122,6 @@ public class ContextVS {
 
     //Num. max of weeks for anonymous delegations. 52 -> one year
     public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;
-
-    //loader IDs
-    public static final int RECEIPT_LOADER_ID = 1;
 
     //Notifications IDs
     public static final int VOTING_SYSTEM_NOTIFICATION_ID            = 1;
