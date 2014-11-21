@@ -9,7 +9,7 @@
     <item android:id="@+id/check_representation_state"
         android:orderInCategory="2"
         android:showAsAction="never"
-        android:title="@string/check_representation_state_lbl"/>
+        android:title="@string/check_representative_lbl"/>
 
     <!--<item android:id="@+id/options_for_representatives" android:orderInCategory="3"
         android:title="@string/options_for_representatives_lbl" > <menu> </menu></item> -->

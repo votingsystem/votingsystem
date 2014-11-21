@@ -130,9 +130,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         new Handler(){
             @Override public void handleMessage(Message msg) {
                 if (isVisible) {
-                    ModalProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
+                    ProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
                             getString(R.string.loading_data_msg), getFragmentManager());
-                } else ModalProgressDialogFragment.hide(getFragmentManager());
+                } else ProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }

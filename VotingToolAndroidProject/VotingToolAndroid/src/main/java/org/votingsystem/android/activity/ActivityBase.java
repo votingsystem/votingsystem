@@ -33,7 +33,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
@@ -143,7 +143,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
-                        ModalProgressDialogFragment.showDialog(
+                        ProgressDialogFragment.showDialog(
                                 getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
@@ -154,7 +154,7 @@ public abstract class ActivityBase extends ActionBarActivity {
                 }
             } else if(request != null) {
                 LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
-                ModalProgressDialogFragment.hide(getSupportFragmentManager());
+                ProgressDialogFragment.hide(getSupportFragmentManager());
                 switch(request.getTypeVS()) {
                     case INIT_VALIDATED_SESSION:
                         if(ResponseVS.SC_OK == request.getStatusCode()) {

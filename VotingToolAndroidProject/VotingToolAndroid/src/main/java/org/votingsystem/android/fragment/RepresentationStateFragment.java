@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,10 +46,10 @@ public class RepresentationStateFragment extends Fragment implements
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
-            else setProgressDialogVisible(false);
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
+        else setProgressDialogVisible(false);
         }
     };
 
@@ -83,6 +82,7 @@ public class RepresentationStateFragment extends Fragment implements
             case WITHOUT_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.without_representative_msg));
+                rootView.findViewById(R.id.representative_container).setVisibility(View.GONE);
                 break;
             case WITH_PUBLIC_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
@@ -99,8 +99,8 @@ public class RepresentationStateFragment extends Fragment implements
                         R.string.representative_msg));
                 ((TextView)rootView.findViewById(R.id.representative_name)).setText(
                         representation.getRepresentative().getFullName());
-                String representativeDescription = "<html style='background-color:#eeeeee;margin:0 auto;'>" +
-                                representation.getRepresentative().getDescription() + "</html>";
+                String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
+                                representation.getRepresentative().getDescription() + "</body></html>";
                 ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                         representativeDescription, "text/html; charset=UTF-8", "UTF-8");
                 UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
@@ -111,7 +111,7 @@ public class RepresentationStateFragment extends Fragment implements
     }
 
     private void launchRepresentativeService(TypeVS operationType) {
-        LOGD(TAG + ".revokeRepresentative", "revokeRepresentative");
+        LOGD(TAG + ".launchRepresentativeService", "operation:" + operationType.toString());
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
@@ -121,9 +121,9 @@ public class RepresentationStateFragment extends Fragment implements
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     @Override public void onResume() {

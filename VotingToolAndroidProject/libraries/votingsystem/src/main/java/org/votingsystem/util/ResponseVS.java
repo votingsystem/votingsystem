@@ -212,14 +212,13 @@ public class ResponseVS<T> implements Parcelable {
 
     public JSONObject getMessageJSON() {
         if(messageJSON != null) return messageJSON;
-        JSONObject result = null;
         try {
             String message = getMessage();
-            if(message != null) result = new JSONObject(message);
+            if(message != null) messageJSON = new JSONObject(message);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return result;
+        return messageJSON;
     }
 
 

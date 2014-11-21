@@ -494,7 +494,7 @@ public class UIUtils  {
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
         messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        return new AlertDialog.Builder(context).setView(view);
+        return new AlertDialog.Builder(context).setView(view).setCancelable(false);
     }
 
     public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,

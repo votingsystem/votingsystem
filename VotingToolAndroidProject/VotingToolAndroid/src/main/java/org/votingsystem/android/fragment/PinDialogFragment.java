@@ -39,6 +39,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
@@ -116,9 +117,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         final ContextVS.State appState = contextVS.getState();
         if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
-                    getString(R.string.cert_not_found_caption)).setMessage(
-                    Html.fromHtml(getString(R.string.cert_not_found_msg))).setPositiveButton(
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.cert_not_found_caption),
+                    getString(R.string.cert_not_found_msg), getActivity()).setPositiveButton(
                     R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialogInterface, int i) {
                     Intent intent = null;
@@ -139,10 +140,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             msgTextView = (TextView) view.findViewById(R.id.msg);
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
-                msgTextView.setVisibility(View.GONE);
-            } else {
-                msgTextView.setVisibility(View.VISIBLE);
+            if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
                 msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
             }
             withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
@@ -175,7 +173,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
             }
         }
-
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
             String storedPasswordHash = PrefUtils.getStoredPasswordHash(contextVS);

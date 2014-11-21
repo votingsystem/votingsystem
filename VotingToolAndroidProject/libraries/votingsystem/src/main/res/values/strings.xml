@@ -47,4 +47,5 @@
     <string name="vicket_request_subtitle">obtención de Vickets</string>
     <string name="vicket_cancellation">cancelación de vickets</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
+    <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
 </resources>

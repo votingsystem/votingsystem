@@ -170,11 +170,11 @@ public class RepresentativeGridFragment extends Fragment
         new Handler(){
             @Override public void handleMessage(Message msg) {
             if (isVisible) {
-                ModalProgressDialogFragment.showDialog(
+                ProgressDialogFragment.showDialog(
                         getString(R.string.loading_data_msg),
                         getString(R.string.loading_info_msg),
                         getFragmentManager());
-            } else ModalProgressDialogFragment.hide(getFragmentManager());
+            } else ProgressDialogFragment.hide(getFragmentManager());
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }

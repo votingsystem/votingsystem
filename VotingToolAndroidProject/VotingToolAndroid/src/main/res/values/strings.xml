@@ -172,7 +172,7 @@
     <string name="info_lbl">información</string>
     <string name="voting_info_lbl">datos sobre la votación</string>
     <string name="eventfields_dialog_caption">campos de la reclamación</string>
-    <string name="check_representative_button">comprobar mi representante</string>
+    <string name="check_representative_lbl">comprobar mi representante</string>
     <string name="cancel_representative_button">dar de baja como representante</string>
     <string name="edit_representative_lbl">editar datos de representante</string>
     <string name="editor_empty_error_lbl">debe rellenar el campo del editor</string>
@@ -197,7 +197,7 @@
     <string name="share_receipt_lbl">compartir recibo</string>
     <string name="check_receipt_lbl">comprobar estado del voto</string>
     <string name="delete_receipt_lbl">borrar recibo</string>
-    <string name="open_receipt_lbl">abrir recibo</string>
+    <string name="open_receipt_lbl">ver recibo</string>
     <string name="signers_part_lbl">datos de los certificados firmantes:</string>
     <string name="num_signers_lbl"><![CDATA[<b>documento con %1$s firmantes</b>]]></string>
     <string name="signers_info_lbl">datos de los firmantes del recibo</string>
@@ -244,7 +244,7 @@
     <string name="select_representative_image_lbl">seleccione una imagen asociada al representante</string>
     <string name="new_representative_error_caption">error dando de alta representante</string>
     <string name="new_representative_ok_notification_msg">usuario dado de alta como representante</string>
-    <string name="new_representative_progress_lbl">dando de alta representante</string>
+    <string name="new_representative_progress_lbl">enviando datos del representante</string>
     <string name="remove_representative_caption">dar de baja como representante</string>
     <string name="remove_representative_msg"> <![CDATA[para darse de baja como representante deberá firmar
         la solicitud con su certificado, la solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
@@ -437,11 +437,11 @@
     <string name="representative_new_msg">dando de alta representante</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
     <string name="representatives_lbl">representantes</string>
-    <string name="check_representation_state_lbl">comprobar mi representación</string>
     <string name="representation_state_missing_lbl">seleccione la opción \'consultar estado de mi representación\'</string>
     <string name="representation_last_checked_msg">fecha de la última actualización: \'%1$s\'</string>
     <string name="without_representative_msg">no tiene activa ninguna representación</string>
     <string name="with_public_representation_msg">tiene activa una representación NO ANONIMA</string>
     <string name="with_anonymous_representation_msg">tiene activa una REPRESENTACION ANONIMA que termina el \'%1$s\'</string>
     <string name="representative_msg">está dado de alta como representante</string>
+    <string name="fetching_receipt_lbl">obteniendo recibo</string>
 </resources>

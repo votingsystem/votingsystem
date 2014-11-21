@@ -46,6 +46,8 @@ public class ReceiptContainer implements Serializable {
                 return context.getString(R.string.receipt_anonimous_representative_request_subtitle);
             case VICKET_REQUEST:
                 return context.getString(R.string.vicket_request_subtitle);
+            case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                return context.getString(R.string.anonymous_representative_selection_lbl);
             default:
                 return context.getString(R.string.receipt_lbl) + ": " + getTypeVS().toString();
         }

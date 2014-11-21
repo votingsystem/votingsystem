@@ -234,8 +234,8 @@ public class UserVSAccountsFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(caption, message, getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+            ProgressDialogFragment.showDialog(caption, message, getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     private void sendUserInfoRequest() {

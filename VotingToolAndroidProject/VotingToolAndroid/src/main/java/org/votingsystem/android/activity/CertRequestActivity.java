@@ -63,8 +63,7 @@ public class CertRequestActivity extends ActionBarActivity {
             case WITH_CERTIFICATE:
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                         getString(R.string.request_certificate_menu),
-                        getString(R.string.request_cert_again_msg), this);
-                builder.setPositiveButton(getString(R.string.ok_lbl),
+                        getString(R.string.request_cert_again_msg), this).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 Intent intent = new Intent(CertRequestActivity.this,

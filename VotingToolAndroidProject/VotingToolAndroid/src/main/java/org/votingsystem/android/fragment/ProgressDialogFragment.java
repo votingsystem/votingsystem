@@ -31,30 +31,30 @@ import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
-public class ModalProgressDialogFragment extends DialogFragment {
+public class ProgressDialogFragment extends DialogFragment {
 
-    public static final String TAG = ModalProgressDialogFragment.class.getSimpleName();
+    public static final String TAG = ProgressDialogFragment.class.getSimpleName();
 
     private TextView progress_text;
     private String progressMessage = null;
     private String caption = null;
 
-    public static ModalProgressDialogFragment showDialog(String caption, String progressMessage,
+    public static ProgressDialogFragment showDialog(String caption, String progressMessage,
             FragmentManager fragmentManager) {
-        ModalProgressDialogFragment dialog = new ModalProgressDialogFragment();
+        ProgressDialogFragment dialog = new ProgressDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
         args.putString(ContextVS.CAPTION_KEY, caption);
         dialog.setArguments(args);
-        dialog.show(fragmentManager, ModalProgressDialogFragment.TAG);
+        dialog.show(fragmentManager, ProgressDialogFragment.TAG);
         return dialog;
     }
 
     public static void hide(FragmentManager fragmentManager) {
         if(fragmentManager != null && fragmentManager.findFragmentByTag(
-                ModalProgressDialogFragment.TAG) != null) {
-            ((ModalProgressDialogFragment) fragmentManager.
-                    findFragmentByTag(ModalProgressDialogFragment.TAG)).dismiss();
+                ProgressDialogFragment.TAG) != null) {
+            ((ProgressDialogFragment) fragmentManager.
+                    findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
         } else LOGD(TAG +  ".hide", "ModalProgressDialogFragment not found");
     }
 
@@ -70,8 +70,8 @@ public class ModalProgressDialogFragment extends DialogFragment {
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    ((ModalProgressDialogFragment) getFragmentManager().
-                            findFragmentByTag(ModalProgressDialogFragment.TAG)).dismiss();
+                    ((ProgressDialogFragment) getFragmentManager().
+                            findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
                     return true;
                 }
                 return false;

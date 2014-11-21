@@ -59,13 +59,14 @@
                         android:textAppearance="?android:attr/textAppearanceMedium" />
                     <EditText android:id="@+id/weeks_delegation"
                         android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
+                        android:layout_width="100dp"
                         android:textSize="25sp"
                         android:layout_gravity="center"
                         android:layout_marginLeft="40dip"
                         android:layout_marginRight="40dip"
                         android:inputType="number"
                         android:maxLength="4"
+                        android:gravity="center_horizontal"
                         android:textAppearance="?android:attr/textAppearanceMedium" >
                     </EditText>
                 </LinearLayout>

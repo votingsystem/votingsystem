@@ -17,7 +17,7 @@ import android.view.WindowManager;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.RepresentationStateFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
@@ -53,12 +53,15 @@ public class RepresentativesMainActivity extends ActivityBase {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
                 launchRepresentativeService(TypeVS.REPRESENTATIVE_REVOKE);
             else {
-                setProgressDialogVisible(false);
-                if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                    MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                            responseVS.getNotificationMessage(), getSupportFragmentManager());
-                } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                setProgressDialogVisible(null, null, false);
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+                } else {
+                    if(responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
+                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                                getString(R.string.revoke_representative_msg_subject),
+                                getString(R.string.operation_ok_msg), getSupportFragmentManager());
+                    }
                 }
             }
         }
@@ -69,7 +72,8 @@ public class RepresentativesMainActivity extends ActivityBase {
         Intent startIntent = new Intent(this, RepresentativeService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(getString(R.string.wait_msg),
+                getString(R.string.revoke_representative_msg_subject),true);
         startService(startIntent);
     }
 
@@ -161,11 +165,10 @@ public class RepresentativesMainActivity extends ActivityBase {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void setProgressDialogVisible(final boolean isVisible) {
-        if (isVisible) {
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getSupportFragmentManager());
-        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
+    private void setProgressDialogVisible(String caption, String message, boolean isVisible) {
+        if (isVisible) ProgressDialogFragment.showDialog(
+                caption, message, getSupportFragmentManager());
+        else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     @Override protected int getSelfNavDrawerItem() {

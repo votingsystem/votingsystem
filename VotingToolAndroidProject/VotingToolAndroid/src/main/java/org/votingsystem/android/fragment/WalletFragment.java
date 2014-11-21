@@ -118,9 +118,9 @@ public class WalletFragment extends Fragment {
     }
 
     private void isProgressDialogVisible(boolean isVisible) {
-        if(isVisible) ModalProgressDialogFragment.showDialog(
+        if(isVisible) ProgressDialogFragment.showDialog(
                 getString(R.string.unlocking_wallet_msg), getString(R.string.wait_msg), getFragmentManager());
-        else ModalProgressDialogFragment.hide(getFragmentManager());
+        else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {

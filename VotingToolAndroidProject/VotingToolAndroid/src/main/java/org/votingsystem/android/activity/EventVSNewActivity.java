@@ -26,7 +26,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
@@ -223,11 +223,11 @@ public class EventVSNewActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(
+            ProgressDialogFragment.showDialog(
                     getString(R.string.publishing_document_msg),
                     getString(R.string.publish_election_msg_subject),
                     getSupportFragmentManager());
-        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     private void addEventOption(final String optionContent) {

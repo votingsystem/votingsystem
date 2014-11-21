@@ -20,14 +20,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
-import org.votingsystem.android.fragment.ReceiptFetcherDialogFragment;
+import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.util.UIUtils;
@@ -38,7 +37,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,7 +44,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -74,22 +71,30 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendDelegation();
         else {
-            setProgressDialogVisible(false);
+            setProgressDialogVisible(null, null, false);
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                try {
-                    ReceiptFetcherDialogFragment newFragment = ReceiptFetcherDialogFragment.newInstance(
-                            responseVS.getStatusCode(), getString(R.string.error_lbl),
-                            responseVS.getNotificationMessage(), (String) responseVS.getData(),
-                            responseVS.getTypeVS());
-                    newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-                    return;
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                    responseVS = ResponseVS.getExceptionResponse(ex, getApplication());
-                }
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.error_lbl),
+                        responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
+                            setPositiveButton(getString(R.string.open_receipt_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                    Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
+                                    intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
+                                    intent.putExtra(ContextVS.TYPEVS_KEY, responseVS.getTypeVS());
+                                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                                    startActivity(intent);
+                                    }
+                                });
+                    builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                    }
+                });
+
             } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                     responseVS.getCaption(), responseVS.getNotificationMessage(),
                     getSupportFragmentManager());
@@ -129,7 +134,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY, ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.USER_KEY, representative);
-            setProgressDialogVisible(true);
+            setProgressDialogVisible(getString(R.string.wait_msg),
+                    getString(R.string.sending_data_lbl), true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -164,13 +170,15 @@ public class RepresentativeDelegationActivity extends ActivityBase {
             ex.printStackTrace();
         }
         WebView webView = (WebView)findViewById(R.id.webview);
+        webView.setBackgroundColor(getResources().getColor(R.color.bkg_screen_vs));
         webView.loadUrl("file:///android_asset/" + fileToLoad);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                setProgressDialogVisible(false);
+                setProgressDialogVisible(null, null, false);
             }
         });
-        setProgressDialogVisible(true);
+        setProgressDialogVisible(getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg), true);
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
             int selectedCheckBoxId = -1;
@@ -185,11 +193,10 @@ public class RepresentativeDelegationActivity extends ActivityBase {
         }
     }
 
-    private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getSupportFragmentManager());
-        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
+    private void setProgressDialogVisible(String caption, String message, boolean isVisible) {
+        if(isVisible) ProgressDialogFragment.showDialog(
+                caption, message, getSupportFragmentManager());
+        else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     public void onCheckboxClicked(View view) {
@@ -230,7 +237,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                         ((EditText)findViewById(R.id.weeks_delegation)).requestFocus();
                         return;
                     }
-                    Calendar calendar = DateUtils.getMonday(Calendar.getInstance());
+                    Calendar calendar = DateUtils.getMonday(DateUtils.addDays(7));//7 -> next week monday
                     anonymousDelegationFromDate = calendar.getTime();
                     Integer weeksDelegation = Integer.valueOf(weeks_delegation.getText().toString());
                     calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);

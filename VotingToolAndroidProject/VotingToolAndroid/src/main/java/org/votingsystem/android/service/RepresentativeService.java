@@ -66,25 +66,40 @@ public class RepresentativeService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         LOGD(TAG + ".onHandleIntent", "operation: " + operation);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        if(operation == TypeVS.ITEMS_REQUEST) {
-            requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
-        } else if (operation == TypeVS.ITEM_REQUEST) {
-            requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
-        } else if (operation == TypeVS.NIF_REQUEST) {
-            String nif = arguments.getString(ContextVS.NIF_KEY);
-            requestRepresentativeByNif(nif, serviceCaller);
-        } else if(operation == TypeVS.NEW_REPRESENTATIVE) {
-            newRepresentative(intent.getExtras(), serviceCaller, operation);
-        } else if(operation == TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION) {
-            anonymousDelegation(intent.getExtras(), serviceCaller, operation);
-        } else if(operation == TypeVS.REPRESENTATIVE_REVOKE) {
-            revokeRepresentative(serviceCaller);
-        } else if(operation == TypeVS.STATE) {
-            checkRepresentationState(serviceCaller);
+        switch(operation) {
+            case ITEMS_REQUEST:
+                requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
+                break;
+            case ITEM_REQUEST:
+                requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
+                break;
+            case NIF_REQUEST:
+                String nif = arguments.getString(ContextVS.NIF_KEY);
+                requestRepresentativeByNif(nif, serviceCaller);
+                break;
+            case NEW_REPRESENTATIVE:
+                newRepresentative(intent.getExtras(), serviceCaller, operation);
+                break;
+            case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                anonymousDelegation(intent.getExtras(), serviceCaller, operation);
+                break;
+            case REPRESENTATIVE_REVOKE:
+                revokeRepresentative(serviceCaller);
+                break;
+            case STATE:
+                checkRepresentationState(serviceCaller);
+                break;
+            default: LOGD(TAG + ".onHandleIntent", "unhandled operation: " + operation.toString());
         }
     }
 
     private void checkRepresentationState(String serviceCaller) {
+        ResponseVS responseVS = updateRepresentationState();
+        responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
+        contextVS.broadcastResponse(responseVS);
+    }
+
+    private ResponseVS updateRepresentationState() {
         String serviceURL = contextVS.getAccessControl().getRepresentationStateServiceURL(
                 contextVS.getUserVS().getNif());
         ResponseVS responseVS = null;
@@ -93,7 +108,7 @@ public class RepresentativeService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Representation representation = new Representation(Calendar.getInstance().getTime(),
                         Representation.State.valueOf(
-                        responseVS.getMessageJSON().getString("state")), null, null);
+                                responseVS.getMessageJSON().getString("state")), null, null);
                 switch (representation.getState()) {
                     case REPRESENTATIVE:
                     case WITH_PUBLIC_REPRESENTATION:
@@ -101,10 +116,10 @@ public class RepresentativeService extends IntentService {
                                 getJSONObject("representative")));
                         ResponseVS representativeImageReponse = HttpHelper.getData(
                                 contextVS.getAccessControl().getRepresentativeImageURL(
-                                representation.getRepresentative().getId()), null);
+                                        representation.getRepresentative().getId()), null);
                         if (ResponseVS.SC_OK == representativeImageReponse.getStatusCode()) {
                             representation.getRepresentative().setImageBytes(
-                                    responseVS.getMessageBytes());
+                                    representativeImageReponse.getMessageBytes());
                         }
                         break;
                     case WITH_ANONYMOUS_REPRESENTATION:
@@ -120,8 +135,7 @@ public class RepresentativeService extends IntentService {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
-            contextVS.broadcastResponse(responseVS);
+            return responseVS;
         }
     }
 
@@ -138,10 +152,7 @@ public class RepresentativeService extends IntentService {
             String selection = UserContentProvider.NIF_COL + " = ?";
             String[] selectionArgs = { contextVS.getUserVS().getNif() };
             getContentResolver().delete(UserContentProvider.CONTENT_URI, selection, selectionArgs);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                PrefUtils.putRepresentationState(new Representation(Calendar.getInstance().getTime(),
-                        Representation.State.WITHOUT_REPRESENTATION, null, null), this);
-            }
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) updateRepresentationState();
         } catch (Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
@@ -278,14 +289,15 @@ public class RepresentativeService extends IntentService {
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
                 String toUser = contextVS.getAccessControl().getNameNormalized();
                 //delegation signed with anonymous certificate (with representative data)
+                smimeContentMap.put("weeksOperationActive", weeksOperationActive);
+                smimeContentMap.put("dateFrom", DateUtils.getDayWeekDateStr(anonymousDelegationFromDate));
+                smimeContentMap.put("dateTo", DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
                 smimeContentMap.put("representativeNif", representative.getNif());
                 smimeContentMap.put("representativeName", representative.getFullName());
                 smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, new JSONObject(smimeContentMap).toString(), messageSubject, null,
-                        contextVS.getAccessControl().getAnonymousDelegationServiceURL(),
-                        contextVS.getAccessControl().getCertificate(),
-                        ContentTypeVS.JSON_SIGNED,
+                        contextVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
                         (AppContextVS)getApplicationContext());
                 responseVS = anonymousSender.call();
@@ -309,13 +321,9 @@ public class RepresentativeService extends IntentService {
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                    try {
-                        JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
-                        responseVS.setNotificationMessage(responseJSON.getString("message"));
-                        responseVS.setData(responseJSON.getString("URL"));
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    JSONObject responseJSON = responseVS.getMessageJSON();
+                    responseVS.setNotificationMessage(responseJSON.getString("message"));
+                    responseVS.setData(responseJSON.getString("URL"));
                 } else responseVS.setNotificationMessage(responseVS.getMessage());
             }
         } catch(Exception ex) {
@@ -355,11 +363,10 @@ public class RepresentativeService extends IntentService {
                 responseVS.setCaption(getString(R.string.new_representative_error_caption));
             } else {
                 responseVS.setCaption(getString(R.string.operation_ok_msg));
-                UserVS representativeData = contextVS.getUserVS();
-                representativeData.setDescription(editorContent);
-                representativeData.setImageBytes(imageBytes);
-                PrefUtils.putRepresentationState(new Representation(Calendar.getInstance().getTime(),
-                        Representation.State.REPRESENTATIVE, representativeData, null), this);
+                new Thread(
+                    new Runnable() { @Override public void run() {updateRepresentationState();}
+                }).start();
+
             }
             responseVS.setNotificationMessage(getString(R.string.new_representative_ok_notification_msg));
         } catch(Exception ex) {

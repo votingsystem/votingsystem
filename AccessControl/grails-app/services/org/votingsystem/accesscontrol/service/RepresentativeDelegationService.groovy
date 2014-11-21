@@ -15,7 +15,7 @@ import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
 
-@Transactional
+//@Transactional
 class RepresentativeDelegationService {
 	
 	enum State {WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
@@ -78,7 +78,7 @@ class RepresentativeDelegationService {
         }
         int statusCode = ResponseVS.SC_OK
         String userDelegationURL = null
-        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS:userVS)
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
         if(anonymousDelegation) {
             statusCode = ResponseVS.SC_ERROR_REQUEST_REPEATED
             msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
@@ -89,7 +89,7 @@ class RepresentativeDelegationService {
         return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
-    private AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
+    @Transactional private AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
         AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
                 status:AnonymousDelegation.Status.OK)
         if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
@@ -120,7 +120,6 @@ class RepresentativeDelegationService {
             return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateTo: DateUtils.getDayWeekDateStr(
                     anonymousDelegation.getDateTo())]
         }
-        log.debug("$methodName: " + org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString())
         return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
     }
 

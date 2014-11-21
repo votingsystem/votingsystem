@@ -92,23 +92,23 @@ public class ReceiptFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                switch(typeVS) {
-                    case CANCEL_VOTE:
-                        launchVoteCancellation((VoteVS)selectedReceipt);
-                        break;
-                }
-            } else {
-                if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
-                    getActivity().onBackPressed();
-                }
-                setProgressDialogVisible(false, null, null);
-                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            switch(typeVS) {
+                case CANCEL_VOTE:
+                    launchVoteCancellation((VoteVS)selectedReceipt);
+                    break;
             }
+        } else {
+            if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
+                getActivity().onBackPressed();
+            }
+            setProgressDialogVisible(null, null, false);
+            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        }
         }
     };
 
@@ -117,8 +117,8 @@ public class ReceiptFragment extends Fragment {
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                getString(R.string.loading_info_msg));
+        setProgressDialogVisible(getString(R.string.loading_data_msg),
+                getString(R.string.loading_info_msg), true);
         getActivity().startService(startIntent);
     }
 
@@ -159,8 +159,7 @@ public class ReceiptFragment extends Fragment {
         if(selectedReceipt != null) {
             try {
                 if(selectedReceipt.getReceipt() == null) {
-                    ReceiptFetcher getDataTask = new ReceiptFetcher();
-                    getDataTask.execute(selectedReceipt.getURL());
+                    new ReceiptFetcher().execute(selectedReceipt.getURL());
                 } else initReceiptScreen(selectedReceipt);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -190,8 +189,7 @@ public class ReceiptFragment extends Fragment {
                         ex.printStackTrace();
                     }
                 } else {
-                    ReceiptFetcher getDataTask = new ReceiptFetcher();
-                    getDataTask.execute(receiptURL);
+                    new ReceiptFetcher().execute(receiptURL);
                 }
             } else {
                 int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
@@ -252,7 +250,6 @@ public class ReceiptFragment extends Fragment {
                             CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
                             voteVS.getEventVS().getSubject(), voteVS.getOptionSelected().getContent(),
                             receiptContainer.getReceipt().getSignedContent());
-
                     break;
                 default:
                     contentFormatted = receiptContainer.getReceipt().getSignedContent();
@@ -287,6 +284,8 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.cancel_vote);
                 menu.removeItem(R.id.check_receipt);
                 break;
+            case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                break;
             default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +
                     receiptContainer.getTypeVS());
         }
@@ -311,10 +310,10 @@ public class ReceiptFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
+    private void setProgressDialogVisible(String caption, String message, boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(caption, message, getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+            ProgressDialogFragment.showDialog(caption, message, getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -420,7 +419,7 @@ public class ReceiptFragment extends Fragment {
 
         @Override protected void onPostExecute(ResponseVS responseVS) {
             super.onPostExecute(responseVS);
-            setProgressDialogVisible(false, null, null);
+            setProgressDialogVisible(null, null, false);
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
                     responseVS, getFragmentManager());
             else {
@@ -437,8 +436,8 @@ public class ReceiptFragment extends Fragment {
 
         @Override protected void onPreExecute() {
             super.onPreExecute();
-            setProgressDialogVisible(true, getString(R.string.wait_msg),
-                    getString(R.string.checking_vote_state_lbl));
+            setProgressDialogVisible(getString(R.string.wait_msg),
+                    getString(R.string.checking_vote_state_lbl), true);
         }
 
         @Override protected ResponseVS doInBackground(String... params) {
@@ -458,16 +457,13 @@ public class ReceiptFragment extends Fragment {
         public ReceiptFetcher() { }
 
         @Override protected void onPreExecute() {
-            setProgressDialogVisible(true, getString(R.string.checking_vote_state_lbl),
-                    getString(R.string.wait_msg));
+            setProgressDialogVisible(getString(R.string.fetching_receipt_lbl),
+                    getString(R.string.wait_msg), true);
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            String receiptURL = urls[0];
-            return HttpHelper.getData(receiptURL, null);
+            return HttpHelper.getData(urls[0], ContentTypeVS.TEXT);
         }
-
-        @Override  protected void onProgressUpdate(String... progress) { }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -488,9 +484,8 @@ public class ReceiptFragment extends Fragment {
                 MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage(), getFragmentManager());
             }
-            setProgressDialogVisible(false, null, null);
+            setProgressDialogVisible(null, null, false);
         }
     }
-
 
 }

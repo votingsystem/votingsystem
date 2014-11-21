@@ -8,6 +8,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
+import java.io.ByteArrayInputStream;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
@@ -31,13 +32,11 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
     private String subject;
     private String serviceURL;
     private X509Certificate receiverCert;
-    private ContentTypeVS contentType;
     private Header header;
 
     public AnonymousSMIMESender(String fromUser, String toUser, String textToSign, String subject,
             Header header, String serviceURL, X509Certificate receiverCert,
-            ContentTypeVS contentType,CertificationRequestVS certificationRequest,
-            AppContextVS context) {
+            CertificationRequestVS certificationRequest,  AppContextVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
@@ -46,7 +45,6 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         this.serviceURL = serviceURL;
         this.receiverCert = receiverCert;
         this.contextVS = context;
-        this.contentType = contentType;
         this.certificationRequest = certificationRequest;
     }
 
@@ -63,11 +61,22 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
                 return responseVS;
             }
             signedMessage = timeStamper.getSMIME();
-            byte[] messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
+            byte[] messageToSend = null;
+            ContentTypeVS contentType = null;
+            if(receiverCert != null) {
+                contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED;
+                messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
+            } else {
+                contentType = ContentTypeVS.JSON_SIGNED;
+                messageToSend = signedMessage.getBytes();
+            }
             responseVS = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage receipt = Encryptor.decryptSMIME(responseVS.getMessageBytes(),
-                        certificationRequest.getKeyPair().getPrivate());
+                SMIMEMessage receipt = null;
+                if(contentType == ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED) {
+                    receipt = Encryptor.decryptSMIME(responseVS.getMessageBytes(),
+                            certificationRequest.getKeyPair().getPrivate());
+                } else receipt = new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes()));
                 responseVS.setSMIME(receipt);
             } else return responseVS;
         } catch(Exception ex) {

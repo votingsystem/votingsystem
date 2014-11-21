@@ -122,9 +122,9 @@ public class ReceiptGridFragment extends Fragment implements
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     public class ReceiptGridAdapter extends CursorAdapter {

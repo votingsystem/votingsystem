@@ -29,7 +29,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
@@ -170,9 +170,9 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.sending_data_lbl),
+            ProgressDialogFragment.showDialog(getString(R.string.sending_data_lbl),
                     getString(R.string.representative_new_msg), getSupportFragmentManager());
-        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     private void showNifDialog() {

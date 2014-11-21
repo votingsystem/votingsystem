@@ -25,7 +25,7 @@ Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>",
                     dateBegin:"2014/10/17 00:00:00", dateFinish:"2014/11/22 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
-                       numRepresentatives:0, numRepresentativesWithVote:0,
+                       numRepresentatives:2, numRepresentativesWithVote:0,
                        numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,

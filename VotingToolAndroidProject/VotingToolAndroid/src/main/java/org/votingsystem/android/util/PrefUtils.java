@@ -45,6 +45,9 @@ public class PrefUtils {
         //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
+        new Thread(new Runnable() {
+            @Override public void run() { getRepresentationState(context); }
+        }).start();
     }
 
     public static void markDataBootstrapDone(Context context) {
@@ -237,17 +240,15 @@ public class PrefUtils {
         if(representation != null) return representation;
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-
         SharedPreferences.Editor editor = settings.edit();
-
         String serializedRepresentation = settings.getString(
                 Representation.class.getSimpleName(), null);
         editor.putString(ContextVS.REPRESENTATIVE_DATA_FILE_NAME, null);
         if(serializedRepresentation != null) {
             representation = (Representation) ObjectUtils.deSerializeObject(
                     serializedRepresentation.getBytes());
-            return representation;
-        } return null;
+        }
+        return representation;
     }
 
 }

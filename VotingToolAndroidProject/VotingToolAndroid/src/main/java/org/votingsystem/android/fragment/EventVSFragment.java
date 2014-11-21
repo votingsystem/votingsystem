@@ -209,9 +209,9 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private void setProgressDialogVisible(boolean isVisible, String caption) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(caption,
+            ProgressDialogFragment.showDialog(caption,
                     getString(R.string.wait_msg), getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

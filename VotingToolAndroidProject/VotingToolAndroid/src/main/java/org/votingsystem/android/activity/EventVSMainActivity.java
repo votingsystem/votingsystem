@@ -34,7 +34,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
-import org.votingsystem.android.fragment.ModalProgressDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
@@ -153,9 +153,9 @@ public class EventVSMainActivity extends ActivityBase {
 
     private void setProgressDialogVisible(final boolean isVisible) {
         if (isVisible) {
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getSupportFragmentManager());
-        } else ModalProgressDialogFragment.hide(getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
     public void requestDataRefresh(EventVS.State eventState,
            NavigatorDrawerOptionsAdapter.GroupPosition groupPosition) {

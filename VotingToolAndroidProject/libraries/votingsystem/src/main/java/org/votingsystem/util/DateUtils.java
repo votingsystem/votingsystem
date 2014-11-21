@@ -218,10 +218,11 @@ public class DateUtils {
     public static Calendar getMonday(Calendar calendar) {
         Calendar result = (Calendar) calendar.clone();
         result.add(Calendar.DAY_OF_YEAR, -7);
-        result.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        result.set(Calendar.HOUR_OF_DAY, 0);
+        result.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        result.set(Calendar.HOUR_OF_DAY, 24);
         result.set(Calendar.MINUTE, 0);
         result.set(Calendar.SECOND, 0);
+        result.set(Calendar.MILLISECOND, 0);
         return result;
     }
 

@@ -1,14 +1,11 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,7 +20,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -104,6 +100,8 @@ public class RepresentativeFragment extends Fragment {
         selectButton.setVisibility(View.GONE);
         setHasOptionsMenu(true);
         broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
         if(representative.getDescription() != null) printRepresentativeData(representative);
         else {
             setProgressDialogVisible(true);
@@ -130,9 +128,9 @@ public class RepresentativeFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
-            ModalProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
+            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getFragmentManager());
-        } else ModalProgressDialogFragment.hide(getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
     private void printRepresentativeData(UserVS representative) {
@@ -161,12 +159,6 @@ public class RepresentativeFragment extends Fragment {
         }
     }
 
-    @Override public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
-    }
-
     @Override public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
@@ -180,7 +172,7 @@ public class RepresentativeFragment extends Fragment {
             this.representativeId = representativeId;
         }
 
-        @Override protected void onPreExecute() { setProgressDialogVisible(true); }
+        @Override protected void onPreExecute() { }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             return  HttpHelper.getData(contextVS.getAccessControl().
@@ -190,7 +182,6 @@ public class RepresentativeFragment extends Fragment {
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + "ImageDownloaderTask.onPostExecute() ", "statusCode: " +
                     responseVS.getStatusCode());
-            setProgressDialogVisible(false);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 UIUtils.setImage(representative_image, responseVS.getMessageBytes(), getActivity());
                 representative.setImageBytes(responseVS.getMessageBytes());
