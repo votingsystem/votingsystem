@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,11 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
@@ -63,8 +60,6 @@ public abstract class ActivityBase extends ActionBarActivity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private AppContextVS contextVS = null;
-    // allows access to L-Preview APIs through an abstract interface so we can compile with
-    // both the L Preview SDK and with the API 19 SDK
     private ObjectAnimator mStatusBarColorAnimator;
     private ViewGroup mDrawerItemsListContainer;
 
@@ -105,11 +100,6 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.drawable.ic_drawer_settings,
     };
 
-    // fade in and fade out durations for the main content when switching between
-    // different Activities of the app through the Nav Drawer
-    private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
-    private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
-
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
     private View[] mNavDrawerItemViews = null;
 
@@ -119,9 +109,6 @@ public abstract class ActivityBase extends ActionBarActivity {
 
     // variables that control the Action Bar auto hide behavior (aka "quick recall")
     private boolean mActionBarAutoHideEnabled = false;
-    private int mActionBarAutoHideSensivity = 0;
-    private int mActionBarAutoHideMinY = 0;
-    private int mActionBarAutoHideSignal = 0;
     private boolean mActionBarShown = true;
     private TextView connectionStatusText;
     private ImageView connectionStatusView;
@@ -224,32 +211,23 @@ public abstract class ActivityBase extends ActionBarActivity {
         };
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
+            @Override public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
                 drawerListener.onDrawerClosed(drawerView);
             }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
+            @Override public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 drawerListener.onDrawerOpened(drawerView);
             }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
+            @Override public void onDrawerStateChanged(int newState) {
                 super.onDrawerStateChanged(newState);
                 drawerListener.onDrawerStateChanged(newState);
             }
-
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            @Override public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
                 drawerListener.onDrawerSlide(drawerView, slideOffset);
             }
         };
-
-
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -488,61 +466,12 @@ public abstract class ActivityBase extends ActionBarActivity {
         mDataBootstrapThread.start();
     }
 
-    private void initActionBarAutoHide() {
-        mActionBarAutoHideEnabled = true;
-        mActionBarAutoHideMinY = getResources().getDimensionPixelSize(
-                R.dimen.action_bar_auto_hide_min_y);
-        mActionBarAutoHideSensivity = getResources().getDimensionPixelSize(
-                R.dimen.action_bar_auto_hide_sensivity);
-    }
-
-    /**
-     * Indicates that the main content has scrolled (for the purposes of showing/hiding
-     * the action bar for the "action bar auto hide" effect). currentY and deltaY may be exact
-     * (if the underlying view supports it) or may be approximate indications:
-     * deltaY may be INT_MAX to mean "scrolled forward indeterminately" and INT_MIN to mean
-     * "scrolled backward indeterminately".  currentY may be 0 to mean "somewhere close to the
-     * start of the list" and INT_MAX to mean "we don't know, but not at the start of the list"
-     */
-    private void onMainContentScrolled(int currentY, int deltaY) {
-        if (deltaY > mActionBarAutoHideSensivity) {
-            deltaY = mActionBarAutoHideSensivity;
-        } else if (deltaY < -mActionBarAutoHideSensivity) {
-            deltaY = -mActionBarAutoHideSensivity;
-        }
-        if (Math.signum(deltaY) * Math.signum(mActionBarAutoHideSignal) < 0) {
-            // deltaY is a motion opposite to the accumulated signal, so reset signal
-            mActionBarAutoHideSignal = deltaY;
-        } else mActionBarAutoHideSignal += deltaY;
-        boolean shouldShow = currentY < mActionBarAutoHideMinY ||
-                (mActionBarAutoHideSignal <= -mActionBarAutoHideSensivity);
-        autoShowOrHideActionBar(shouldShow);
-    }
-
     protected void autoShowOrHideActionBar(boolean show) {
         if (show == mActionBarShown)  return;
         mActionBarShown = show;
         if (show) getSupportActionBar().show();
         else getSupportActionBar().hide();
         onActionBarAutoShowOrHide(show);
-    }
-
-    protected void enableActionBarAutoHide(final ListView listView) {
-        initActionBarAutoHide();
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            final static int ITEMS_THRESHOLD = 3;
-            int lastFvi = 0;
-            @Override public void onScrollStateChanged(AbsListView view, int scrollState) { }
-
-            @Override public void onScroll(AbsListView view, int firstVisibleItem,
-                               int visibleItemCount, int totalItemCount) {
-                onMainContentScrolled(firstVisibleItem <= ITEMS_THRESHOLD ? 0 : Integer.MAX_VALUE,
-                        lastFvi - firstVisibleItem > 0 ? Integer.MIN_VALUE :
-                                lastFvi == firstVisibleItem ? 0 : Integer.MAX_VALUE
-                );
-                lastFvi = firstVisibleItem;
-            }
-        });
     }
 
     private void showConnectionStatusDialog() {
@@ -649,7 +578,6 @@ public abstract class ActivityBase extends ActionBarActivity {
             mHideableHeaderViews.remove(hideableHeaderView);
         }
     }
-
 
     private void updateStatusBarForNavDrawerSlide(float slideOffset) {
         if (mStatusBarColorAnimator != null) {

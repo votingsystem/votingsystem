@@ -1,5 +1,4 @@
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:iosched="http://schemas.android.com/apk/res-auto">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
     <FrameLayout
         android:id="@+id/chosen_account_view"
         android:layout_width="match_parent"

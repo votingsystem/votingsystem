@@ -148,7 +148,7 @@ public class EventVSNewActivity extends ActivityBase {
                 findFragmentByTag(EditorFragment.TAG)).getEditorData());
         signedMessageSubject = getString(R.string.publish_election_msg_subject);
         eventVS.setDateBegin(dateElectionCalendar.getTime());
-        eventVS.setDateFinish(DateUtils.addDays(dateElectionCalendar.getTime(), 1));
+        eventVS.setDateFinish(DateUtils.addDays(dateElectionCalendar.getTime(), 1).getTime());
         if(!optionList.isEmpty()) {
             Set<FieldEventVS> voteOptionSet = new HashSet<FieldEventVS>();
             for(String optionContent:optionList) {

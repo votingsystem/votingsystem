@@ -176,9 +176,9 @@ public class WalletFragment extends Fragment {
             linearLayout.setBackgroundColor(Color.WHITE);
             TextView date_data = (TextView)view.findViewById(R.id.date_data);
             String dateData = getString(R.string.vicket_data_info_lbl,
-                    DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
-                    DateUtils.getDayWeekDateStr(vicket.getValidTo()));
-            date_data.setText(DateUtils.getDayWeekDateStr(vicket.getValidFrom()));
+                    DateUtils.getDayWeekDateStr(vicket.getDateFrom()),
+                    DateUtils.getDayWeekDateStr(vicket.getDateTo()));
+            date_data.setText(DateUtils.getDayWeekDateStr(vicket.getDateFrom()));
 
             TextView vicket_state = (TextView) view.findViewById(R.id.vicket_state);
             vicket_state.setText(vicket.getState().toString());

@@ -82,6 +82,13 @@ public class DateUtils {
         return today;
     }
 
+    public static Calendar addDays(Date date, int days){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal;
+    }
+
     public static Calendar getEventVSElectionDateBeginCalendar(
             int year, int monthOfYear,int dayOfMonth) {
         Calendar electionCalendar = Calendar.getInstance();
@@ -94,13 +101,6 @@ public class DateUtils {
         electionCalendar.set(Calendar.MILLISECOND, 0);
         return electionCalendar;
     }
-
-    public static Date addDays(Date date, int days){
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, days); //minus number would decrement the days
-        return cal.getTime();
-    }
     
     public static String getDayHourElapsedTime (Date date1, Date date2, Context context) {
         Calendar cal1 = Calendar.getInstance();
@@ -111,8 +111,8 @@ public class DateUtils {
     }
 
     public static String getDayWeekDateStr (Date date) {
-        Date lastYear = addDays(Calendar.getInstance().getTime(), -364);
-        Date nextYear = addDays(Calendar.getInstance().getTime(), 364);
+        Date lastYear = addDays(Calendar.getInstance().getTime(), -364).getTime();
+        Date nextYear = addDays(Calendar.getInstance().getTime(), 364).getTime();
         if(date.before(lastYear) || date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
         else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }

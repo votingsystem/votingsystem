@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import android.content.Context;
 
+import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
@@ -27,6 +28,12 @@ public class ReceiptContainer implements Serializable {
     public ReceiptContainer(TypeVS typeVS, String url) {
         this.typeVS = typeVS;
         this.url = url;
+    }
+
+    public ReceiptContainer(TransactionVS transactionVS) {
+        this.typeVS = transactionVS.getTypeVS();
+        this.url = transactionVS.getMessageSMIMEURL();
+        receiptBytes = transactionVS.getMessageSMIMEBytes();
     }
 
     private static final long serialVersionUID = 1L;
@@ -76,6 +83,10 @@ public class ReceiptContainer implements Serializable {
         if(receiptBytes != null) {
             receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
             subject = receipt.getSubject();
+            receipt.isValidSignature();
+            JSONObject signedJSON = new JSONObject(receipt.getSignedContent());
+            if(signedJSON.has("operation"))
+                this.typeVS = TypeVS.valueOf(signedJSON.getString("operation"));
         }
     }
 
@@ -100,11 +111,18 @@ public class ReceiptContainer implements Serializable {
         return receipt;
     }
 
+    public boolean hashReceipt() {
+        return (receipt != null || receiptBytes != null);
+    }
+
     public String getSubject() {
         return subject;
     }
 
     public TypeVS getTypeVS() {
+        if(typeVS == null) {
+
+        }
         return typeVS;
     }
 
@@ -112,7 +130,7 @@ public class ReceiptContainer implements Serializable {
         this.typeVS = typeVS;
     }
 
-    public Date getValidFrom() {
+    public Date getDateFrom() {
         Date result = null;
         try {
             result = getReceipt().getSigner().getCertificate().getNotBefore();
@@ -122,7 +140,7 @@ public class ReceiptContainer implements Serializable {
         return result;
     }
 
-    public Date getValidTo() {
+    public Date getDateTo() {
         Date result = null;
         try {
             result = getReceipt().getSigner().getCertificate().getNotAfter();

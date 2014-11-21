@@ -4,6 +4,8 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.votingsystem.util.ValidationExceptionVS
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.model.RepresentationState
@@ -26,6 +28,7 @@ class RepresentativeDelegationService {
 	def mailSenderService
 	def signatureVSService
 	def eventVSService
+    def csrService
 	LinkGenerator grailsLinkGenerator
 
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
@@ -117,49 +120,30 @@ class RepresentativeDelegationService {
         }
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
         if(anonymousDelegation) {
-            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateTo: DateUtils.getDayWeekDateStr(
+            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateTo: DateUtils.getDateStr(
                     anonymousDelegation.getDateTo())]
         }
         return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
     }
 
 
-    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq) {
+    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
-        String msg
         ResponseVS responseVS = checkUserDelegationStatus(userVS)
-        if(ResponseVS.SC_OK != responseVS.statusCode) {
-            log.error("$methodName - ${responseVS.message}")
-            return responseVS.setMetaInf(MetaInfMsg.getErrorMsg(methodName, "delegationStatusError")).setReason(
-                    responseVS.message)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS.setMetaInf(MetaInfMsg.getErrorMsg(methodName,
+                "delegationStatusError")).setReason(responseVS.message)
+        AnonymousDelegationRequest request = new AnonymousDelegationRequest(
+                smimeMessageReq.getSignedContent()).validateRequest()
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(userVS.getNif(), smimeMessageReq, null)
+        messageSMIMEReq.setType(request.operation).setSMIME(smimeMessageResp)
+        responseVS = csrService.signAnonymousDelegationCert(csrRequest)
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            new AnonymousDelegation(status:AnonymousDelegation.Status.OK, delegationSMIME:messageSMIMEReq,
+                    userVS:userVS, dateFrom:request.dateFrom, dateTo:request.dateTo).save();
         }
-        JSONObject messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        if (!messageJSON.accessControlURL || !messageJSON.weeksOperationActive ||
-                (TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
-            log.error("$methodName - msg: ${msg} - ${messageJSON}")
-            return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, reason: msg,
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "paramsError"), type:TypeVS.ERROR,
-                    contentType:ContentTypeVS.JSON, data:[statusCode: ResponseVS.SC_ERROR_REQUEST, message:msg])
-        }
-        messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
-        Calendar calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_YEAR, 7);
-        Date dateFrom = DateUtils.getMonday(calendar).getTime()
-        calendar.add(Calendar.DAY_OF_YEAR, 7 * Integer.valueOf(messageJSON.weeksOperationActive));
-        Date dateTo = calendar.getTime()
-        msg = messageSource.getMessage('anonymousDelegationRangeMsg', [userVS.getNif(),
-                   DateUtils.getDateStr(dateFrom), DateUtils.getDateStr(dateTo)].toArray(), locale)
-        log.debug("$methodName - ${msg}")
-        AnonymousDelegation anonymousDelegation = new AnonymousDelegation(status:AnonymousDelegation.Status.OK,
-                delegationSMIME:messageSMIMEReq, userVS:userVS, dateFrom:dateFrom, dateTo:dateTo).save();
-        return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                userVS:userVS)
+        return responseVS
     }
 
     @Transactional
@@ -283,5 +267,46 @@ class RepresentativeDelegationService {
 				type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		}
 	}
+
+    private static class AnonymousDelegationRequest {
+        String representativeNif, representativeName, accessControlURL;
+        Integer weeksOperationActive;
+        Date dateFrom, dateTo;
+        TypeVS operation;
+        JSONObject messageJSON;
+
+        public AnonymousDelegationRequest(String signedContent) throws ExceptionVS {
+            messageJSON = JSON.parse(signedContent)
+            operation = TypeVS.valueOf(messageJSON.operation)
+            accessControlURL = messageJSON.accessControlURL;
+            weeksOperationActive = Integer.valueOf(messageJSON.weeksOperationActive)
+            if(!weeksOperationActive) throw new ValidationExceptionVS(this.getClass(), "missing param 'weeksOperationActive'")
+            dateFrom = DateUtils.getDateFromString(messageJSON.dateFrom)
+            if(!dateFrom) throw new ValidationExceptionVS(this.getClass(), "missing param 'dateFrom'")
+            dateTo = DateUtils.getDateFromString(messageJSON.dateTo)
+            if(!dateTo) throw new ValidationExceptionVS(this.getClass(), "missing param 'dateTo'")
+            if(dateFrom.after(dateTo)) throw new ValidationExceptionVS(this.getClass(), "'dateFrom' after 'dateTo'")
+            Date dateFromCheck = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
+            if(dateFrom.compareTo(dateFromCheck) != 0) throw new ValidationExceptionVS(this.getClass(),
+                    "dateFrom expected '${dateFromCheck}' received '${dateFrom}'")
+            Date dateToCheck = DateUtils.addDays(dateFromCheck, weeksOperationActive * 7).getTime();
+            if(dateTo.compareTo(dateToCheck) != 0) throw new ValidationExceptionVS(this.getClass(),
+                    "dateTo expected '${dateToCheck}' received '${dateTo}'")
+        }
+        public AnonymousDelegationRequest validateRequest() throws ExceptionVS {
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != operation) throw new ValidationExceptionVS(this.getClass(),
+                    "expected operation 'ANONYMOUS_REPRESENTATIVE_REQUEST' but found '" + operation.toString() + "'")
+            return this;
+        }
+        public AnonymousDelegationRequest validateDelegation() throws ExceptionVS {
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operation) throw new ValidationExceptionVS(this.getClass(),
+                    "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION' but found '" + operation.toString() + "'")
+            representativeNif = messageJSON.representativeNif;
+            if(!representativeNif) throw new ValidationExceptionVS(this.getClass(), "missing param 'representativeNif'")
+            representativeName = messageJSON.representativeName
+            if(!representativeNif) throw new ValidationExceptionVS(this.getClass(), "missing param 'representativeName'")
+            return this;
+        }
+    }
 
 }

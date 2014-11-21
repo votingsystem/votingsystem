@@ -19,6 +19,7 @@ package org.votingsystem.android.util;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -47,6 +48,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -495,6 +497,19 @@ public class UIUtils  {
         messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         return new AlertDialog.Builder(context).setView(view).setCancelable(false);
+    }
+
+    public static void showMessageDialog(AlertDialog.Builder builder) {
+        final Dialog dialog = builder.show();
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    dialog.dismiss();
+                    return true;
+                } else return false;
+            }
+        });
     }
 
     public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,

@@ -81,7 +81,10 @@ public class RepresentativeService extends IntentService {
                 newRepresentative(intent.getExtras(), serviceCaller, operation);
                 break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                anonymousDelegation(intent.getExtras(), serviceCaller, operation);
+                anonymousDelegation(intent.getExtras(), serviceCaller);
+                break;
+            case REPRESENTATIVE_SELECTION:
+                publicDelegation(intent.getExtras(), serviceCaller);
                 break;
             case REPRESENTATIVE_REVOKE:
                 revokeRepresentative(serviceCaller);
@@ -123,7 +126,7 @@ public class RepresentativeService extends IntentService {
                         }
                         break;
                     case WITH_ANONYMOUS_REPRESENTATION:
-                        representation.setDateTo(DateUtils.getDayWeekDate(
+                        representation.setDateTo(DateUtils.getDateFromString(
                                 responseVS.getMessageJSON().getString("dateTo")));
                         break;
                     case WITHOUT_REPRESENTATION:
@@ -242,29 +245,52 @@ public class RepresentativeService extends IntentService {
         contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
     }
 
-    private void anonymousDelegation(Bundle arguments, String serviceCaller, TypeVS operationType) {
-        X509Certificate destinationCert = contextVS.getAccessControl().getCertificate();
-        String weeksOperationActive = arguments.getString(ContextVS.TIME_KEY);
-        Calendar calendar = DateUtils.getMonday(Calendar.getInstance());
-        Date anonymousDelegationFromDate = calendar.getTime();
+    private void publicDelegation(Bundle arguments, String serviceCaller) {
+        ResponseVS responseVS = null;
+        UserVS representative = (UserVS) arguments.getSerializable(ContextVS.USER_KEY);
+        String serviceURL = contextVS.getAccessControl().getRepresentativeDelegationServiceURL();
+        String messageSubject = getString(R.string.representative_delegation_lbl);
+        try {
+            Map signatureDataMap = new HashMap();
+            signatureDataMap.put("operation", TypeVS.REPRESENTATIVE_SELECTION.toString());
+            signatureDataMap.put("UUID", UUID.randomUUID().toString());
+            signatureDataMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
+            signatureDataMap.put("representativeNif", representative.getNif());
+            signatureDataMap.put("representativeName", representative.getFullName());
+            JSONObject signatureContent = new JSONObject(signatureDataMap);
+            responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                    signatureContent.toString(), messageSubject);
+            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                    ContentTypeVS.JSON_SIGNED, serviceURL);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                responseVS.setCaption(getString(R.string.error_lbl));
+                if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    JSONObject responseJSON = responseVS.getMessageJSON();
+                    responseVS.setNotificationMessage(responseJSON.getString("message"));
+                    responseVS.setData(responseJSON.getString("URL"));
+                } else responseVS.setNotificationMessage(responseVS.getMessage());
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
+        } finally {
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_SELECTION);
+            contextVS.broadcastResponse(responseVS);
+        }
+    }
+
+    private void anonymousDelegation(Bundle arguments, String serviceCaller) {
+        Integer weeksOperationActive = Integer.valueOf(arguments.getString(ContextVS.TIME_KEY));
+        Date dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         Integer weeksDelegation = Integer.valueOf(weeksOperationActive);
-        calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);
-        Date anonymousDelegationToDate = calendar.getTime();
+        Date dateTo = DateUtils.addDays(dateFrom, weeksDelegation * 7).getTime();
         UserVS representative = (UserVS) arguments.getSerializable(ContextVS.USER_KEY);
         ResponseVS responseVS = null;
         try {
-            String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
-            AnonymousDelegationVS anonymousDelegation = new AnonymousDelegationVS(
-                    weeksOperationActive, contextVS.getAccessControl().getServerURL());
+            String messageSubject = getString(R.string.representative_delegation_lbl);
+            AnonymousDelegationVS anonymousDelegation = new AnonymousDelegationVS(weeksOperationActive,
+                    dateFrom, dateTo, contextVS.getAccessControl().getServerURL());
             String fromUser = contextVS.getUserVS().getNif();
-            Map smimeContentMap = new HashMap();
-            smimeContentMap.put("weeksOperationActive", weeksOperationActive);
-            smimeContentMap.put("dateFrom", DateUtils.getDayWeekDateStr(anonymousDelegationFromDate));
-            smimeContentMap.put("dateTo", DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
-            smimeContentMap.put("UUID", UUID.randomUUID().toString());
-            smimeContentMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
-            smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
-            JSONObject requestJSON = new JSONObject(smimeContentMap);
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED.getName();
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
@@ -274,7 +300,7 @@ public class RepresentativeService extends IntentService {
             //request signed with user certificate (data signed without representative data)
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
                     contextVS.getAccessControl().getNameNormalized(),
-                    requestJSON.toString(), mapToSend, messageSubject, null,
+                    anonymousDelegation.getRequest().toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
                     representativeDataFileName,
                     (AppContextVS)getApplicationContext());
@@ -283,20 +309,15 @@ public class RepresentativeService extends IntentService {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 X509Certificate anonymousCert = anonymousDelegation.getCertificationRequest().
                         getCertificate();
-                anonymousDelegation.setValidFrom(anonymousCert.getNotBefore());
-                anonymousDelegation.setValidTo(anonymousCert.getNotAfter());
+                anonymousDelegation.setDateFrom(anonymousCert.getNotBefore());
+                anonymousDelegation.setDateTo(anonymousCert.getNotAfter());
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
                 String toUser = contextVS.getAccessControl().getNameNormalized();
                 //delegation signed with anonymous certificate (with representative data)
-                smimeContentMap.put("weeksOperationActive", weeksOperationActive);
-                smimeContentMap.put("dateFrom", DateUtils.getDayWeekDateStr(anonymousDelegationFromDate));
-                smimeContentMap.put("dateTo", DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
-                smimeContentMap.put("representativeNif", representative.getNif());
-                smimeContentMap.put("representativeName", representative.getFullName());
-                smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
-                        toUser, new JSONObject(smimeContentMap).toString(), messageSubject, null,
+                        toUser, anonymousDelegation.getDelegation(representative.getNif(),
+                        representative.getFullName()).toString(), messageSubject, null,
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
                         (AppContextVS)getApplicationContext());
@@ -330,7 +351,8 @@ public class RepresentativeService extends IntentService {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(operationType);
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(
+                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
             contextVS.broadcastResponse(responseVS);
         }
     }

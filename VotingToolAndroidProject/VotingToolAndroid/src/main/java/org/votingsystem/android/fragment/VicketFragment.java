@@ -86,8 +86,8 @@ public class VicketFragment extends Fragment {
             selectedVicketSMIME = vicket.getReceipt();
             getActivity().setTitle(MsgUtils.getVicketDescriptionMessage(vicket, getActivity()));
             date_info.setText(getString(R.string.vicket_date_info,
-                    DateUtils.getDateStr(vicket.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
-                    DateUtils.getDateStr(vicket.getValidTo(), "dd MMM yyyy' 'HH:mm")));
+                    DateUtils.getDateStr(vicket.getDateFrom(), "dd MMM yyyy' 'HH:mm"),
+                    DateUtils.getDateStr(vicket.getDateTo(), "dd MMM yyyy' 'HH:mm")));
             if(Vicket.State.OK != selectedVicket.getState()) {
                 vicket_state.setText(MsgUtils.getVicketStateMessage(selectedVicket, getActivity()));
                 vicket_state.setVisibility(View.VISIBLE);

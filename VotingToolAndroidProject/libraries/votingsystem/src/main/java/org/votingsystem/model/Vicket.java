@@ -146,11 +146,11 @@ public class Vicket extends ReceiptContainer {
         return subject;
     }
 
-    @Override public Date getValidFrom() {
+    @Override public Date getDateFrom() {
         return certificationRequest.getCertificate().getNotBefore();
     }
 
-    @Override public Date getValidTo() {
+    @Override public Date getDateTo() {
         return certificationRequest.getCertificate().getNotAfter();
     }
 

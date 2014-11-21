@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -106,6 +107,15 @@ public class MessageDialogFragment extends DialogFragment {
             else dialog.setIcon(R.drawable.fa_times_32);
         }
         this.setCancelable(false);
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    ((MessageDialogFragment) getFragmentManager().
+                            findFragmentByTag(MessageDialogFragment.TAG)).dismiss();
+                    return true;
+                } else return false;
+            }
+        });
         return dialog;
     }
 

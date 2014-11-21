@@ -198,11 +198,11 @@ public class VoteVS extends ReceiptContainer {
         this.dateUpdated = dateUpdated;
     }
 
-    @Override public Date getValidFrom() {
+    @Override public Date getDateFrom() {
         return eventVS.getDateBegin();
     }
 
-    @Override public Date getValidTo() {
+    @Override public Date getDateTo() {
         return eventVS.getDateFinish();
     }
 

@@ -73,8 +73,7 @@ public class ProgressDialogFragment extends DialogFragment {
                     ((ProgressDialogFragment) getFragmentManager().
                             findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
                     return true;
-                }
-                return false;
+                } else return false;
             }
         });
         return dialog;

@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
@@ -24,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -36,6 +34,7 @@ import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
@@ -44,6 +43,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
@@ -61,16 +61,16 @@ public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
 
-
     private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
     private ReceiptContainer selectedReceiptChild;
     private TransactionVS transaction;
-    private Menu menu;
     private TextView receiptSubject;
     private WebView receipt_content;
     private SMIMEMessage selectedReceiptSMIME;
-    private String broadCastId = null;
+    private String broadCastId;
+    private String receiptURL;
+    private Menu menu;
 
 
     public static Fragment newInstance(int cursorPosition) {
@@ -133,8 +133,6 @@ public class ReceiptFragment extends Fragment {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
-        LinearLayout receiptDataContainer = (LinearLayout) rootView.
-                findViewById(R.id.receipt_data_container);
         receipt_content = (WebView)rootView.findViewById(R.id.receipt_content);
         receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
         setHasOptionsMenu(true);
@@ -144,27 +142,15 @@ public class ReceiptFragment extends Fragment {
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        String receiptURL = getArguments().getString(ContextVS.URL_KEY);
+        receiptURL = getArguments().getString(ContextVS.URL_KEY);
         selectedReceipt = (ReceiptContainer) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
         transaction = (TransactionVS) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
-        if(transaction != null) {
-            selectedReceipt = new ReceiptContainer(transaction.getTypeVS(),
-                    transaction.getMessageSMIMEURL());
-            try {
-                selectedReceipt.setReceiptBytes(transaction.getMessageSMIMEBytes());
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        if(transaction != null) selectedReceipt = new ReceiptContainer(transaction);
         if(selectedReceipt != null) {
-            try {
-                if(selectedReceipt.getReceipt() == null) {
-                    new ReceiptFetcher().execute(selectedReceipt.getURL());
-                } else initReceiptScreen(selectedReceipt);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        } else if(savedInstanceState != null) {
+            if(selectedReceipt.hashReceipt()) initReceiptScreen(selectedReceipt);
+            else receiptURL = selectedReceipt.getURL();
+        }
+        if(savedInstanceState != null) {
             selectedReceipt = (ReceiptContainer) savedInstanceState.getSerializable(
                     ContextVS.RECEIPT_KEY);
             initReceiptScreen(selectedReceipt);
@@ -188,11 +174,10 @@ public class ReceiptFragment extends Fragment {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-                } else {
-                    new ReceiptFetcher().execute(receiptURL);
+                    receiptURL = null;
                 }
             } else {
-                int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+                Integer cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
                 Cursor cursor = getActivity().getContentResolver().query(
                         ReceiptContentProvider.CONTENT_URI, null, null, null, null);
                 cursor.moveToPosition(cursorPosition);
@@ -203,7 +188,6 @@ public class ReceiptFragment extends Fragment {
                     selectedReceipt = (ReceiptContainer) ObjectUtils.
                             deSerializeObject(serializedReceiptContainer);
                     selectedReceipt.setLocalId(receiptId);
-
                     initReceiptScreen(selectedReceipt);
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -251,26 +235,46 @@ public class ReceiptFragment extends Fragment {
                             voteVS.getEventVS().getSubject(), voteVS.getOptionSelected().getContent(),
                             receiptContainer.getReceipt().getSignedContent());
                     break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    JSONObject signedData = new JSONObject(selectedReceiptSMIME.getSignedContent());
+                    AnonymousDelegationVS delegation = AnonymousDelegationVS.parse(signedData);
+                    contentFormatted = getString(R.string.anonymous_representative_selection_formatted,
+                            delegation.getWeeksOperationActive(),
+                            DateUtils.getDateStr(delegation.getDateFrom(), "EEE dd MMM yyyy' 'HH:mm"),
+                            DateUtils.getDateStr(delegation.getDateTo()), "EEE dd MMM yyyy' 'HH:mm");
+                    break;
                 default:
                     contentFormatted = receiptContainer.getReceipt().getSignedContent();
 
             }
             receiptSubject.setText(receiptSubjectStr);
             //Html.fromHtml(contentFormatted)
+            contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
+                    contentFormatted + "</body></html>";
             receipt_content.loadData(contentFormatted, "text/html; charset=UTF-8", null);
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+                    receiptContainer.getTypeDescription(getActivity()));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
+                    UIUtils.getEmptyLogo(getActivity()));
+            setActionBarMenu(menu);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void setActionBar(ReceiptContainer receiptContainer) {
-        if(receiptContainer == null) return;
-        switch(receiptContainer.getTypeVS()) {
+    private void setActionBarMenu(Menu menu) {
+        if(menu == null) {
+            LOGD(TAG + ".setActionBarMenu", "menu null");
+            return;
+        }
+        switch(selectedReceipt.getTypeVS()) {
             case VOTEVS:
-                if(((VoteVS)receiptContainer).getEventVS().getDateFinish().before(
+                if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
+                menu.setGroupVisible(R.id.vote_items, true);
                 break;
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
@@ -286,18 +290,18 @@ public class ReceiptFragment extends Fragment {
                 break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 break;
-            default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +
-                    receiptContainer.getTypeVS());
+            default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +
+                    selectedReceipt.getTypeVS());
         }
-        if(receiptContainer.getLocalId() < 0) {
-            menu.removeItem(R.id.delete_receipt);
-        } else menu.removeItem(R.id.save_receipt);
-        if(getActivity() instanceof FragmentActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    receiptContainer.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(UIUtils.getEmptyLogo(getActivity()));
-        }
+        if(selectedReceipt.getLocalId() < 0) menu.removeItem(R.id.delete_receipt);
+        else menu.removeItem(R.id.save_receipt);
+    }
+
+    @Override public void onStart() {
+        LOGD(TAG + ".onStart", "onStart");
+        super.onStart();
+        if(receiptURL != null) new ReceiptFetcher().execute(receiptURL);
+        if(selectedReceipt != null) setActionBarMenu(menu);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -319,9 +323,9 @@ public class ReceiptFragment extends Fragment {
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" +
                 selectedReceipt.getTypeVS());
-        menuInflater.inflate(R.menu.receipt_fragment, menu);
         this.menu = menu;
-        setActionBar(selectedReceipt);
+        menuInflater.inflate(R.menu.receipt_fragment, menu);
+        if(selectedReceipt != null && selectedReceipt.hashReceipt()) setActionBarMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -474,7 +478,6 @@ public class ReceiptFragment extends Fragment {
                         TransactionVSContentProvider.updateTransaction(contextVS, transaction);
                     }
                     initReceiptScreen(selectedReceipt);
-                    setActionBar(selectedReceipt);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),

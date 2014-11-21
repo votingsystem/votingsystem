@@ -4,7 +4,7 @@
     <string name="vote_canceled_receipt_lbl">recibo de anulación de voto</string>
     <string name="loading_data_msg">cargando datos...</string>
     <string name="wait_msg">por favor, espere</string>
-    <string name="sending_data_lbl">enviando datos ... </string>
+    <string name="sending_data_lbl">enviando datos</string>
     <string name="back_to_cancel_lbl">pulsar \'atrás\' para cancelar</string>
     <string name="voting_closed_lbl">votación cerrada</string>
     <string name="voting_pending_lbl">faltan %1$s horas para abrir</string>
@@ -195,7 +195,7 @@
     <string name="timestamp_info_formated_msg"><![CDATA[<html><b>fecha: </b>%1$s<br/><br/><b>num. serie del sello de tiempo:</b><br/> %2$s \n \
     <br/><b>certificado firmante:</b><br/> %3$s<br/><b>num. serie de certificado: </b> %4$s ]]></string>
     <string name="share_receipt_lbl">compartir recibo</string>
-    <string name="check_receipt_lbl">comprobar estado del voto</string>
+    <string name="check_vote_lbl">comprobar estado del voto</string>
     <string name="delete_receipt_lbl">borrar recibo</string>
     <string name="open_receipt_lbl">ver recibo</string>
     <string name="signers_part_lbl">datos de los certificados firmantes:</string>
@@ -443,4 +443,7 @@
     <string name="with_anonymous_representation_msg">tiene activa una REPRESENTACION ANONIMA que termina el \'%1$s\'</string>
     <string name="representative_msg">está dado de alta como representante</string>
     <string name="fetching_receipt_lbl">obteniendo recibo</string>
+    <string name="anonymous_representative_selection_formatted"><![CDATA[delegación anónima de representante
+        de <b>\'%1$s\' semanas de duración</b><br/><br/>Fecha de comienzo:  <b>\'%2$s\'</b><br/>
+        Fecha de finalización:  <b>\'%3$s\'</b>]]></string>
 </resources>

@@ -3,7 +3,6 @@ package org.votingsystem.util;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,11 +21,17 @@ public class DateUtils {
 
     private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
 
-    public static Date addDays(Date date, int days){
+    public static Calendar addDays(Date date, int days){
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.DATE, days); //minus number would decrement the days
-        return cal.getTime();
+        return cal;
+    }
+
+    public static Calendar addDays(int numDias) {
+        Calendar today = Calendar.getInstance();
+        today.add(Calendar.DATE, numDias);
+        return today;
     }
 
     public static int getDayOfMonthFromDate (Date date) {
@@ -311,8 +316,8 @@ public class DateUtils {
     }
 
     public static String getDayWeekDateStr (Date date) {
-        Date lastYear = addDays(Calendar.getInstance().getTime(), -364);
-        Date nextYear = addDays(Calendar.getInstance().getTime(), 364);
+        Date lastYear = addDays(Calendar.getInstance().getTime(), -364).getTime();
+        Date nextYear = addDays(Calendar.getInstance().getTime(), 364).getTime();
         if(date.before(lastYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
         if(date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
         return getDateStr(date, "EEE dd MMM' 'HH:mm");

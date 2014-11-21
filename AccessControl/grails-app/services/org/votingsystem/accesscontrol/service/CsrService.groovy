@@ -132,7 +132,7 @@ class CsrService {
 
     public ResponseVS<X509Certificate> signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
         Date dateBegin = Calendar.getInstance().getTime();
-        Date dateFinish = DateUtils.addDays(dateBegin, 365) //one year
+        Date dateFinish = DateUtils.addDays(dateBegin, 365).getTime() //one year
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.content);
         X509Certificate issuedCert = signatureVSService.signCSR(csr, null,dateBegin, dateFinish, null)
         if (!issuedCert) throw new ExceptionVS(messageSource.getMessage("csrValidationErrorMsg", null, locale))
@@ -197,7 +197,8 @@ class CsrService {
             byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                    data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
+                    contentType: ContentTypeVS.TEXT_STREAM, data:data, message:"certificateVS_${certificate.id}",
+                    messageBytes:issuedCertPEMBytes)
         }
     }
 

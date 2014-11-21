@@ -261,6 +261,12 @@ class SignatureVSService {
         return getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject);
     }
 
+    public synchronized SMIMEMessage getSMIMEMultiSigned (String toUser, final SMIMEMessage smimeMessage,
+              String subject) {
+        return getSignedMailGenerator().getSMIMEMultiSigned(
+                grailsApplication.config.vs.serverName, toUser, smimeMessage, subject);
+    }
+
     public CertificateVS getCACertificate(long numSerie) {
         log.debug("getCACertificate - numSerie: '${numSerie}'")
         return trustedCertsHashMap.get(numSerie)

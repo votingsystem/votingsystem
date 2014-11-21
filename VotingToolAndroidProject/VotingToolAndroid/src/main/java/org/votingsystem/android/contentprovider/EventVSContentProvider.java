@@ -12,7 +12,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
 import org.votingsystem.model.EventVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

@@ -11,7 +11,6 @@ class RepresentativeController {
     def representativeDelegationService
 	def signatureVSService
 	def grailsApplication
-    def csrService
 	
 	/**
 	 * @httpMethod [GET]
@@ -151,18 +150,13 @@ class RepresentativeController {
 	}
 	
 	/**
-	 *
-	 * Servicio que tramita solicitudes de información sobre las acreditaciones que tiene
-	 * un representante. 
-	 * El solicitante debe proporcionar una dirección de email en la que recibirá 
-	 * instrucciones de descarga de las acreditaciones en vigor del representante.
+     * Service that generates a zip file with the representative state.
 	 * 
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/accreditations]
-	 * 
-	 * @requestContentType [application/pkcs7-signature] Obligatorio.
-	 * 					   documento firmado en formato SMIME con los datos de la solicitud
-	 */
+	 * @requestContentType [application/pkcs7-signature] Required. Signed document with the request data
+     * @return When the zip is generated the system sends an email with download instructions
+     */
 	def accreditations() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
@@ -170,16 +164,12 @@ class RepresentativeController {
 	}
 	
 	/**
-	 *
-	 * Servicio que guarda las consultas de historiales de votaciones de los
-	 * representantes
+     * Service that provides a zip file with the representative voting history
 	 *                     
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/history]
-	 * 
-	 * @requestContentType [application/pkcs7-signature] Obligatorio.
-	 *                     documento en formato SMIME con los datos del representante consultado.
-	 * @return 
+	 * @requestContentType [application/pkcs7-signature] Required. Signed document with the request data
+	 * @return When the zip is generated the system sends an email with download instructions
 	 */
 	def history() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -192,10 +182,9 @@ class RepresentativeController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/delegation]
-	 * @requestContentType [application/pkcs7-signature] Obligatorio. documento firmado
-	 *                     por el usuario que está eligiendo el representante.
-	 * @responseContentType [application/pkcs7-signature] Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
+	 * @requestContentType [application/pkcs7-signature] Required. Document signed with the selected representative data.
+	 * @responseContentType [application/pkcs7-signature]
+	 * @return The signed request with the additional system signature
 	 */
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -208,17 +197,12 @@ class RepresentativeController {
 	}
 	
 	/**
-	 * Servicio que valida las solicitudes de representación
+	 * Service that registers representatives
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative]
-	 * @param [image] Obligatorio. La imagen asociada al representante.
-	 * @param [representativeData] Obligatorio. Los datos del representante firmados en un archivo SMIME.
-	 * @requestContentType [image/gif] Posible type de contenido asociado al parámetro 'image' 
-	 * @requestContentType [image/jpeg] Posible type de contenido asociado al parámetro 'image' 
-	 * @requestContentType [image/png] Posible type de contenido asociado al parámetro 'image' 
-	 * @requestContentType [application/pkcs7-signature] El type de contenido
-	 * 					   asociado a los datos del representante. 
+	 * @param [image] Required. The image associated with the repsentative.
+	 * @param [representativeData] Required. Document signed with the representative data.
 	 */
     def processFileMap() { 
 		byte[] imageBytes = params[ContextVS.IMAGE_FILE_NAME]
@@ -242,13 +226,12 @@ class RepresentativeController {
 	}
 
 	/**
-	 * Servicio que devuelve la imagen asociada a un representante
+	 * Service tha returns the image associated with one representative
 	 * 
 	 * @httpMethod [GET]
-	 * @serviceURL [/representative/image/$id]
-     * @serviceURL [/representative/$representativeId/image]
-	 * @param [id] Obligatorio. El id de la imagen en la base de datos.
-	 * @param [representativeId] Obligatorio. El id del representante en la base de datos.
+	 * @serviceURL [/representative/image/$id, /representative/$representativeId/image]
+	 * @param [id] Optional. The image identifier in the database
+	 * @param [representativeId] Optional. The representante identifier in the database
 	 */
 	def image() {
 		ImageVS image;
@@ -273,17 +256,13 @@ class RepresentativeController {
 	}
 	
 	/**
-	 * Servicio que devuelve la copia de seguridad en formato zip con los datos de los 
-	 * representantes en el momento en el que ha finalizado una votación.
-	 * 
-	 * Este archivo se utiliza para hacer los recuentos definitivos.
+	 * Service that generates a zip file with the representative state data when the election finish in order to make
+     * the re-count
 	 *
 	 * @httpMethod [GET]
 	 * @serviceURL [/representative/accreditationsBackupForEvent/$id]
-	 * @param [id] Obligatorio. El id del eventVS en la base de datos del Control de Acceso
-	 * 							en que se publicó
-	 * @return El archivo zip con todos los datos necesarios para establecer el valor 
-	 * del voto de los representates en el momento en que finaliza una votación.
+	 * @param [id] Required. The eventVS identifier in the Access Control database
+	 * @return Zip file with all the files necessary to verify de representative state when the eventVS finish
 	 */
 	def accreditationsBackupForEvent() {
 		EventVSElection event = null
@@ -297,7 +276,6 @@ class RepresentativeController {
             }
         }
 	}
-
 
     /**
      * Service that process the user anonymous representative selection
@@ -327,19 +305,11 @@ class RepresentativeController {
      */
     def processAnonymousDelegationRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
-        request.messageSMIMEReq = messageSMIMEReq
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = representativeDelegationService.validateAnonymousRequest(messageSMIMEReq)
-        if (ResponseVS.SC_OK == responseVS.statusCode) {
-            byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest)
-            if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
-                csrValidationResponse.setContentType(ContentTypeVS.TEXT_STREAM)
-                return [responseVS:csrValidationResponse]
-            } else return [responseVS:csrValidationResponse]
-        } else return [responseVS:responseVS]
+        } else request.messageSMIMEReq = messageSMIMEReq
+        return [responseVS:representativeDelegationService.validateAnonymousRequest(
+                messageSMIMEReq, params[ContextVS.CSR_FILE_NAME])]
     }
 
     /**

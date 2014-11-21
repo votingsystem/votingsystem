@@ -20,8 +20,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
-import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -29,7 +27,6 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.service.RepresentativeService;
-import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -38,15 +35,10 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -87,12 +79,11 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
                                     intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
-                                    intent.putExtra(ContextVS.TYPEVS_KEY, responseVS.getTypeVS());
                                     intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
                                     startActivity(intent);
                                 }
                             });
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                UIUtils.showMessageDialog(builder);
             } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                     responseVS.getCaption(), responseVS.getNotificationMessage(),
                     getSupportFragmentManager());
@@ -102,42 +93,16 @@ public class RepresentativeDelegationActivity extends ActivityBase {
 
     private void sendDelegation() {
         LOGD(TAG + ".sendDelegation", "sendDelegation");
-        try {
-            Intent startIntent = null;
-            String serviceURL = null;
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType) {
-                serviceURL = contextVS.getAccessControl().
-                        getAnonymousDelegationRequestServiceURL();
-                startIntent = new Intent(this, RepresentativeService.class);
-                Map dataData = new HashMap();
-                startIntent.putExtra(ContextVS.USER_KEY, representative);
-                startIntent.putExtra(ContextVS.TIME_KEY, weeks_delegation.getText().toString());
-            } else {
-                serviceURL = contextVS.getAccessControl().
-                        getRepresentativeDelegationServiceURL();
-                startIntent = new Intent(this, SignAndSendService.class);
-                Map signatureDataMap = new HashMap();
-                signatureDataMap.put("operation", operationType.toString());
-                signatureDataMap.put("UUID", UUID.randomUUID().toString());
-                signatureDataMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
-                signatureDataMap.put("representativeNif", representative.getNif());
-                signatureDataMap.put("representativeName", representative.getFullName());
-                JSONObject signatureContent = new JSONObject(signatureDataMap);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
-            }
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
-            String messageSubject = getString(R.string.representative_delegation_lbl);
-            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY, ContentTypeVS.JSON_SIGNED);
-            startIntent.putExtra(ContextVS.USER_KEY, representative);
-            setProgressDialogVisible(getString(R.string.wait_msg),
-                    getString(R.string.sending_data_lbl), true);
-            startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
+        Intent startIntent = new Intent(this, RepresentativeService.class);
+        if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType) {
+            startIntent.putExtra(ContextVS.TIME_KEY, weeks_delegation.getText().toString());
         }
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.USER_KEY, representative);
+        setProgressDialogVisible(
+                getString(R.string.sending_data_lbl), getString(R.string.wait_msg), true);
+        startService(startIntent);
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {

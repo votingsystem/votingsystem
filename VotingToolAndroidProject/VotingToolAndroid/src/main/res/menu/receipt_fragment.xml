@@ -20,16 +20,18 @@
         android:orderInCategory="4"
         android:title="@string/signature_content"/>
 
-    <item android:id="@+id/check_receipt"
-        android:orderInCategory="5"
-        android:title="@string/check_receipt_lbl"/>
-
     <item android:id="@+id/delete_receipt"
-        android:orderInCategory="6"
+        android:orderInCategory="5"
         android:title="@string/delete_receipt_lbl"/>
 
-    <item android:id="@+id/cancel_vote"
-        android:orderInCategory="7"
-        android:title="@string/cancel_vote_lbl"/>
+    <group android:id="@+id/vote_items"
+        android:visible="false">
+        <item android:id="@+id/check_receipt"
+            android:orderInCategory="6"
+            android:title="@string/check_vote_lbl"/>
+        <item android:id="@+id/cancel_vote"
+            android:orderInCategory="7"
+            android:title="@string/cancel_vote_lbl"/>
+    </group>
 
 </menu>

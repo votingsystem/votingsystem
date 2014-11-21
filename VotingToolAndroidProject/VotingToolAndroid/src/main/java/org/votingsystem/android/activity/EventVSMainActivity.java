@@ -31,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
@@ -39,8 +40,10 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

@@ -25,7 +25,7 @@ class CsrService {
         if(vicketBatchRequest.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
         else {
             Date dateFrom = Calendar.getInstance().getTime()
-            Date dateTo = DateUtils.addDays(dateFrom, 365) //one year
+            Date dateTo = DateUtils.addDays(dateFrom, 365).getTime() //one year
             timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo)
         }
         Collection<Vicket> vicketCollection = vicketBatchRequest.getVicketsMap().values()
