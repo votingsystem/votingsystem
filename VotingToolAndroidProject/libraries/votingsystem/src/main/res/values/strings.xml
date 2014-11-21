@@ -20,13 +20,6 @@
     <string name="pending_voting_lbl">pendientes</string>
     <string name="closed_voting_lbl">cerradas</string>
 
-    <string name="open_claim_lbl">abiertas</string>
-    <string name="pending_claim_lbl">pendientes</string>
-    <string name="closed_claim_lbl">cerradas</string>
-
-    <string name="open_manifest_lbl">abiertos</string>
-    <string name="pending_manifest_lbl">pendientes</string>
-    <string name="closed_manifest_lbl">cerrados</string>
     <string name="unknown_event_state_lbl">evento de tipo desconocido</string>
     <string name="exception_lbl">excepción</string>
     <string name="timestamp_service_error_caption">error con el sellado de tiempo</string>

@@ -263,7 +263,6 @@
         <b>\'%4$s\'</b>]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">actualizando datos del representante</string>
-    <string name="download_lbl">descargar copia</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
     duración de la delegación: \'%1$s\' semanas<br/><br/>delegación activa desde: \'%2$s\'
     <br/><br/>fecha fin de la delegación: \'%3$s\'<br/>
