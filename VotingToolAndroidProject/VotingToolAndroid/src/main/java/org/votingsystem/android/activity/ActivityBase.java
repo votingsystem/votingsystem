@@ -13,6 +13,7 @@ import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -39,8 +40,6 @@ import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
-import org.votingsystem.android.util.LPreviewUtils;
-import org.votingsystem.android.util.LPreviewUtilsBase;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketRequest;
@@ -62,11 +61,10 @@ public abstract class ActivityBase extends ActionBarActivity {
     private static final String TAG = makeLogTag(ActivityBase.class);
 
     private DrawerLayout mDrawerLayout;
-    private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
+    private ActionBarDrawerToggle mDrawerToggle;
     private AppContextVS contextVS = null;
     // allows access to L-Preview APIs through an abstract interface so we can compile with
     // both the L Preview SDK and with the API 19 SDK
-    private LPreviewUtilsBase mLPreviewUtils;
     private ObjectAnimator mStatusBarColorAnimator;
     private ViewGroup mDrawerItemsListContainer;
 
@@ -76,7 +74,6 @@ public abstract class ActivityBase extends ActionBarActivity {
     private ArrayList<View> mHideableHeaderViews = new ArrayList<View>();
     // Durations for certain animations we use:
     private static final int HEADER_HIDE_ANIM_DURATION = 300;
-    private static final int ACCOUNT_BOX_EXPAND_ANIM_DURATION = 200;
 
     // symbols for navdrawer items (indices must correspond to array below). This is
     // not a list of items that are necessarily *present* in the Nav Drawer; rather,
@@ -177,7 +174,6 @@ public abstract class ActivityBase extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mLPreviewUtils = LPreviewUtils.getInstance(this);
     }
 
     /**
@@ -201,7 +197,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         if (mDrawerLayout == null) {
             return;
         }
-        mDrawerToggle = mLPreviewUtils.setupDrawerToggle(mDrawerLayout, new DrawerLayout.DrawerListener() {
+        final DrawerLayout.DrawerListener drawerListener =  new DrawerLayout.DrawerListener() {
             @Override public void onDrawerClosed(View drawerView) {
                 // run deferred action, if we have one
                 if (mDeferredOnDrawerClosedRunnable != null) {
@@ -225,7 +221,35 @@ public abstract class ActivityBase extends ActionBarActivity {
                 updateStatusBarForNavDrawerSlide(slideOffset);
                 onNavDrawerSlide(slideOffset);
             }
-        });
+        };
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                drawerListener.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                drawerListener.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                super.onDrawerStateChanged(newState);
+                drawerListener.onDrawerStateChanged(newState);
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                drawerListener.onDrawerSlide(drawerView, slideOffset);
+            }
+        };
+
+
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -498,7 +522,8 @@ public abstract class ActivityBase extends ActionBarActivity {
     protected void autoShowOrHideActionBar(boolean show) {
         if (show == mActionBarShown)  return;
         mActionBarShown = show;
-        getLPreviewUtils().showHideActionBarIfPartOfDecor(show);
+        if (show) getSupportActionBar().show();
+        else getSupportActionBar().hide();
         onActionBarAutoShowOrHide(show);
     }
 
@@ -625,16 +650,10 @@ public abstract class ActivityBase extends ActionBarActivity {
         }
     }
 
-    public LPreviewUtilsBase getLPreviewUtils() {
-        return mLPreviewUtils;
-    }
 
     private void updateStatusBarForNavDrawerSlide(float slideOffset) {
         if (mStatusBarColorAnimator != null) {
             mStatusBarColorAnimator.cancel();
-        }
-        if (!mActionBarShown) {
-            mLPreviewUtils.setStatusBarColor(Color.BLACK);
         }
     }
 

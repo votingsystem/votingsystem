@@ -118,7 +118,7 @@ public class EventVSMainActivity extends ActivityBase {
             getSupportActionBar().setDisplayShowCustomEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayUseLogoEnabled(false);
-        } else if (getLPreviewUtils().shouldChangeActionBarForDrawer()) {
+        } else {
             getSupportActionBar().setDisplayShowCustomEnabled(false);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayUseLogoEnabled(true);
