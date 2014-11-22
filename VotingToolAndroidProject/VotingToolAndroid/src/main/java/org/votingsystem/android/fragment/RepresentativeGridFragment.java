@@ -97,14 +97,14 @@ public class RepresentativeGridFragment extends Fragment
             queryStr = data.getString(SearchManager.QUERY);
         }
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
-                getString(R.string.representative_list_lbl));
         setHasOptionsMenu(true);
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+                getString(R.string.representative_list_lbl));
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new RepresentativeListAdapter(getActivity(), null,false);

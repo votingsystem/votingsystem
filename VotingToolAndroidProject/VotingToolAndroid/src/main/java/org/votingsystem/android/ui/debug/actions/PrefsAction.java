@@ -29,16 +29,14 @@ public class PrefsAction implements DebugAction {
 
     private static final String TAG = PrefsAction.class.getSimpleName();
 
-    @Override
-    public void run(final Context context, final Callback callback) {
+    @Override public void run(final Context context, final Callback callback) {
         PrefUtils.putCsrRequest(1L, null,context);
         PrefUtils.putPin("pins", context);
         PrefUtils.putAppCertState(((AppContextVS)context.getApplicationContext()).
                 getAccessControl().getServerURL(), ContextVS.State.WITHOUT_CSR, null, context);
     }
 
-    @Override
-    public String getLabel() {
+    @Override public String getLabel() {
         return "Change PrefsUtil";
     }
 

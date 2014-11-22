@@ -238,7 +238,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 " - numTotal: " + EventVSContentProvider.getNumTotal(eventState) +
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if(EventVSContentProvider.getNumTotal(eventState) == null && contextVS.getAccessControl() != null)
+        if((EventVSContentProvider.getNumTotal(eventState) == null)
+                && contextVS.getAccessControl() != null)
             fetchItems(offset);
         else {
             //bug, without thread triggers 'Can not perform this action inside of onLoadFinished'

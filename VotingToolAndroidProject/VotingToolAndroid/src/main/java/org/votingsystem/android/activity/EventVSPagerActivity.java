@@ -35,18 +35,17 @@ public class EventVSPagerActivity extends ActionBarActivity {
         setContentView(R.layout.pager_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
         String eventStateStr = getIntent().getStringExtra(EVENT_STATE_KEY);
-        String eventTypeStr = getIntent().getStringExtra(TYPEVS_KEY);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
-                null, selection, new String[]{eventTypeStr, eventStateStr}, null);
+                null, selection, new String[]{TypeVS.VOTING_EVENT.toString(), eventStateStr}, null);
         cursor.moveToPosition(cursorPosition);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager(),
-                eventStateStr, eventTypeStr);
+                eventStateStr);
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -71,15 +70,12 @@ public class EventVSPagerActivity extends ActionBarActivity {
     public class EventsPagerAdapter extends FragmentStatePagerAdapter {
 
         private Cursor cursor;
-        private TypeVS eventType;
-
-        public EventsPagerAdapter(FragmentManager fm, String eventStateStr, String eventTypeStr) {
+        public EventsPagerAdapter(FragmentManager fm, String eventStateStr) {
             super(fm);
-            eventType = TypeVS.valueOf(eventTypeStr);
             String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                     EventVSContentProvider.STATE_COL + "= ? ";
             cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
-                    null, selection, new String[]{eventTypeStr, eventStateStr}, null);
+                null, selection, new String[]{TypeVS.VOTING_EVENT.toString(), eventStateStr}, null);
         }
 
         @Override public Fragment getItem(int i) {

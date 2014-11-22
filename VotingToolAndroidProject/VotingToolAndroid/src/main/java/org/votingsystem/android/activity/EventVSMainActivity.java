@@ -90,14 +90,12 @@ public class EventVSMainActivity extends ActivityBase {
                 LOGD(TAG + ".onItemSelected", "position:" + position);
                 if(position == 0) requestDataRefresh(EventVS.State.ACTIVE);
                 else if(position == 1) requestDataRefresh(EventVS.State.PENDING);
-                else if(position == 2) requestDataRefresh(EventVS.State.CANCELLED);
+                else if(position == 2) requestDataRefresh(EventVS.State.TERMINATED);
             }
             @Override public void onNothingSelected(AdapterView<?> adapterView) { }
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-
         mSpinnerConfigured = true;
         updateActionBarNavigation();
         getSupportActionBar().setCustomView(spinnerContainer, lp);
@@ -172,8 +170,8 @@ public class EventVSMainActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected",
-                " - Title: " + item.getTitle() + " - ItemId: " + item.getItemId());
+        LOGD(TAG + ".onOptionsItemSelected", "Title: " + item.getTitle() +
+                " - ItemId: " + item.getItemId());
         Intent intent = null;
         switch (item.getItemId()) {
             case R.id.search_item:
