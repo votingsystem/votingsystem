@@ -32,7 +32,7 @@
 
     <string name="receipt_vote_subtitle">voto</string>
     <string name="receipt_cancel_vote_subtitle">cancelación de voto</string>
-    <string name="receipt_anonimous_representative_request_subtitle">delegación anónima de representante</string>
+    <string name="anonimous_representative_request_lbl">solicitud de delegación anónima</string>
     <string name="receipt_lbl">recibo</string>
     <string name="account_input">ingreso en cuenta</string>
     <string name="account_output">tetirada de efectivo</string>
@@ -41,4 +41,6 @@
     <string name="vicket_cancellation">cancelación de vickets</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
+    <string name="delegation_lbl">delegación</string>
+    <string name="representative_selection_lbl">delegación pública de representante</string>
 </resources>

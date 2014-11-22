@@ -63,7 +63,6 @@ public class ReceiptFragment extends Fragment {
 
     private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
-    private ReceiptContainer selectedReceiptChild;
     private TransactionVS transaction;
     private TextView receiptSubject;
     private WebView receipt_content;
@@ -212,10 +211,12 @@ public class ReceiptFragment extends Fragment {
                 case ANONYMOUS_REPRESENTATIVE_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     contentFormatted = getString(R.string.anonymous_representative_request_formatted,
-                            dataJSON.getString("weeksOperationActive"),
-                            dataJSON.getString("dateFrom"),
-                            dataJSON.getString("dateTo"),
-                            dataJSON.getString("accessControlURL"));
+                        dataJSON.getString("weeksOperationActive"),
+                        DateUtils.getDateStr(DateUtils.getDateFromString(dataJSON.getString("dateFrom")),
+                                "EEE dd MMM yyyy' 'HH:mm"),
+                        DateUtils.getDateStr(DateUtils.getDateFromString(dataJSON.getString("dateTo")),
+                                "EEE dd MMM yyyy' 'HH:mm"),
+                        dataJSON.getString("accessControlURL"));
                     break;
                 case VICKET_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
@@ -333,11 +334,7 @@ public class ReceiptFragment extends Fragment {
         AlertDialog dialog = null;
         switch (item.getItemId()) {
             case android.R.id.home:
-                if(selectedReceiptChild != null) {
-                    initReceiptScreen(selectedReceipt);
-                    selectedReceiptChild = null;
-                    return true;
-                } else return false;
+                break;
             case R.id.show_signers_info:
                 UIUtils.showSignersInfoDialog(selectedReceiptSMIME.getSigners(),
                         getFragmentManager(), getActivity());

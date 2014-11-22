@@ -50,15 +50,26 @@ public class ReceiptContainer implements Serializable {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
-            case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                return context.getString(R.string.receipt_anonimous_representative_request_subtitle);
+                return context.getString(R.string.anonimous_representative_request_lbl);
             case VICKET_REQUEST:
                 return context.getString(R.string.vicket_request_subtitle);
+            case REPRESENTATIVE_SELECTION:
+            case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                return context.getString(R.string.delegation_lbl);
+            default:
+                return context.getString(R.string.receipt_lbl) + ": " + getTypeVS().toString();
+        }
+    }
+
+    public String getCardSubject(Context context) {
+        switch(getTypeVS()) {
+            case REPRESENTATIVE_SELECTION:
+                return context.getString(R.string.representative_selection_lbl);
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 return context.getString(R.string.anonymous_representative_selection_lbl);
             default:
-                return context.getString(R.string.receipt_lbl) + ": " + getTypeVS().toString();
+                return subject;
         }
     }
 

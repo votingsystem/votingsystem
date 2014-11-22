@@ -1,6 +1,8 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -21,7 +23,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
@@ -46,16 +47,18 @@ public class ReceiptGridFragment extends Fragment implements
     private GridView gridView;
     private static final int loaderId = 0;
 
+    CharSequence[] gridItemMenuOptions;
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                    Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.receipt_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+        gridItemMenuOptions = new CharSequence[] {getString(R.string.delete_lbl)};
         adapter = new ReceiptGridAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v, pos, id);
             }
         });
@@ -69,7 +72,6 @@ public class ReceiptGridFragment extends Fragment implements
         return rootView;
     }
 
-
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
@@ -80,6 +82,19 @@ public class ReceiptGridFragment extends Fragment implements
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
         LOGD(TAG + ".onLongListItemClick", "id: " + id);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setItems(gridItemMenuOptions, new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface dialog, int position) {
+                //gridItemMenuOptions[position]
+                Cursor cursor = adapter.getCursor();
+                cursor.moveToPosition(position);
+                Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
+                LOGD(TAG + ".onLongListItemClick", "position: " + position + " - receiptId: " +
+                        receiptId);
+                getActivity().getContentResolver().delete(ReceiptContentProvider.
+                        getReceiptURI(receiptId), null, null);
+            }
+        }).show();
         return true;
     }
 
@@ -151,19 +166,17 @@ public class ReceiptGridFragment extends Fragment implements
                 }
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
-                Long lastUpdatedMillis = cursor.getLong(cursor.getColumnIndex(
-                        ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
-                Date lastUpdated = new Date(lastUpdatedMillis);
-                String dateInfoStr = context.getString(R.string.last_updated_msg,
-                        DateUtils.getDayWeekDateStr(lastUpdated));
+                Long createdMillis = cursor.getLong(cursor.getColumnIndex(
+                        ReceiptContentProvider.TIMESTAMP_CREATED_COL));
+                String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
-                TextView subject = (TextView) view.findViewById(R.id.receipt_subject);
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
                 TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
-                subject.setText(receiptContainer.getSubject());
+                ((TextView) view.findViewById(R.id.receipt_subject)).setText(
+                        receiptContainer.getCardSubject(context));
                 typeTextView.setText(receiptContainer.getTypeDescription(context));
                 ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
                         receiptContainer.getLogoId());

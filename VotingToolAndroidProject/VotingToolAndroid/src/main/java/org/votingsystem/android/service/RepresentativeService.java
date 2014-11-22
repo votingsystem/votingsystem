@@ -302,8 +302,7 @@ public class RepresentativeService extends IntentService {
                     contextVS.getAccessControl().getNameNormalized(),
                     anonymousDelegation.getRequest().toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
-                    representativeDataFileName,
-                    (AppContextVS)getApplicationContext());
+                    representativeDataFileName, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
@@ -327,15 +326,15 @@ public class RepresentativeService extends IntentService {
                             responseVS.getMessageBytes()));
                     anonymousDelegation.setDelegationReceipt(delegationReceipt);
                     ContentValues values = new ContentValues();
-                    values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(anonymousDelegation));
+                    values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                            ObjectUtils.serializeObject(anonymousDelegation));
                     values.put(ReceiptContentProvider.URL_COL, anonymousDelegation.getMessageId());
                     values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getTypeVS().toString());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                     Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
-                    responseVS.setUri(uri);
-                    responseVS.setCaption(getString(R.string.anonymous_delegation_caption));
-                    responseVS.setNotificationMessage(getString(R.string.anonymous_delegation_msg,
-                            representative.getFullName(), weeksOperationActive));
+                    responseVS.setCaption(getString(R.string.anonymous_delegation_caption)).setNotificationMessage(
+                            getString(R.string.anonymous_delegation_msg,
+                            representative.getFullName(), weeksOperationActive)).setUri(uri);
                 } else {
                     LOGD(TAG + ".anonymousDelegation", " _ TODO _ cancel anonymous delegation");
                 }

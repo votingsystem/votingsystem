@@ -25,7 +25,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = "AnonymousDelegationVS";
+    public static final String TAG = AnonymousDelegationVS.class.getSimpleName();
 
     private Long localId = -1L;
     private transient SMIMEMessage delegationReceipt;
@@ -37,8 +37,6 @@ public class AnonymousDelegationVS extends ReceiptContainer {
     private Integer weeksOperationActive;
     private String serverURL;
     private CertificationRequestVS certificationRequest;
-    private Header header;
-    private TypeVS type;
     private Date dateFrom;
     private Date dateTo;
 
@@ -70,10 +68,6 @@ public class AnonymousDelegationVS extends ReceiptContainer {
 
     @Override public String getSubject() {
         return null;
-    }
-
-    public void setType(TypeVS type) {
-        this.type = type;
     }
 
     @Override public Date getDateFrom() {
@@ -126,10 +120,6 @@ public class AnonymousDelegationVS extends ReceiptContainer {
 
     public CertificationRequestVS getCertificationRequest() {
         return certificationRequest;
-    }
-
-    public Header getHeader() {
-        return header;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

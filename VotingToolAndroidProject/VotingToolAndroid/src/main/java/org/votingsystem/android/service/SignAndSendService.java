@@ -77,8 +77,7 @@ public class SignAndSendService extends IntentService {
                 case VOTING_PUBLISHING:
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                             contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
-                            contentType, messageSubject, contextVS.getAccessControl().getCertificate(),
-                            (AppContextVS)getApplicationContext());
+                            contentType, messageSubject, null, (AppContextVS)getApplicationContext());
                     responseVS = smimeSignedSender.call();
                     break;
                 default:

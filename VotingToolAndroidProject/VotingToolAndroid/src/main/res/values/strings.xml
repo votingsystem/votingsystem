@@ -228,6 +228,7 @@
     <string name="add_vote_option_lbl">añadir opción de votación</string>
     <string name="add_vote_option_msg">introduzca el texto que aparecerá como opción en la votación</string>
     <string name="delete_option_lbl">borrar opción</string>
+    <string name="delete_lbl">borrar</string>
     <string name="num_vote_options_error_msg">debe añadir al menos un par de opciones en la votación</string>
     <string name="vote_options_lbl">opciones de la votación</string>
     <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
@@ -263,16 +264,11 @@
         <b>\'%4$s\'</b>]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">actualizando datos del representante</string>
-    <string name="anonymous_representative_request_formatted"><![CDATA[
-    duración de la delegación: \'%1$s\' semanas<br/><br/>delegación activa desde: \'%2$s\'
-    <br/><br/>fecha fin de la delegación: \'%3$s\'<br/>
-    <br/>url de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
     <string name="vicket_request_formatted"><![CDATA[importe total de la operación: <b>%1$s %2$ss</b><br/>
     %3$s vickets de %4$s %2$ss<br/><br/>url de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
     <string name="receipt_vote_subtitle">voto</string>
     <string name="receipt_cancel_vote_subtitle">cancelación de voto</string>
-    <string name="receipt_anonimous_representative_request_subtitle">delegación anónima de representante</string>
-    <string name="last_updated_msg">última actualización <b>\'%1$s\'</b></string>
+    <string name="anonimous_representative_request_lbl">delegación anónima de representante</string>
     <string name="vickets_drop_down_lbl">finanzas</string>
     <string name="vickets_list_lbl">últimos movimientos</string>
     <string name="vicket_lbl">vickets</string>
@@ -446,4 +442,8 @@
     <string name="anonymous_representative_selection_formatted"><![CDATA[delegación anónima de representante
         de <b>\'%1$s\' semanas de duración</b><br/><br/>Fecha de comienzo:  <b>\'%2$s\'</b><br/>
         Fecha de finalización:  <b>\'%3$s\'</b>]]></string>
+    <string name="anonymous_representative_request_formatted"><![CDATA[
+        duración de la delegación: \'%1$s\' semanas<br/><br/>activa desde: \'%2$s\'
+        <br/>activa hasta: \'%3$s\'
+        <br/>url de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
 </resources>
