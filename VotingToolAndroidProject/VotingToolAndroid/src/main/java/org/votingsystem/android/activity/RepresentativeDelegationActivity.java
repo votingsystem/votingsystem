@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -28,17 +29,18 @@ import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ResponseVS;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
