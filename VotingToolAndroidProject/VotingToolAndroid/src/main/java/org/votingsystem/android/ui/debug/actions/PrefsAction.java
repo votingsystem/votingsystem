@@ -22,13 +22,12 @@ import org.votingsystem.android.ui.debug.DebugAction;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
-
 /**
  * A DebugAction that runs an immediate full sync.
  */
 public class PrefsAction implements DebugAction {
-    private static final String TAG = makeLogTag(PrefsAction.class);
+
+    private static final String TAG = PrefsAction.class.getSimpleName();
 
     @Override
     public void run(final Context context, final Callback callback) {

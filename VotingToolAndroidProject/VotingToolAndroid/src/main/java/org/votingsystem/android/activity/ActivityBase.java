@@ -34,7 +34,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
-import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
+import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.PrefUtils;
@@ -362,7 +362,9 @@ public abstract class ActivityBase extends ActionBarActivity {
                 return true;
             case R.id.menu_debug:
                 if (BuildConfig.DEBUG) {
-                    startActivity(new Intent(this, DebugActionRunnerActivity.class));
+                    Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
+                    startActivity(intent);
                 }
                 return true;
             case R.id.close_app:

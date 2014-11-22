@@ -364,28 +364,24 @@ public class UIUtils  {
         if (context == null) {
             return 0;
         }
-
         Resources.Theme curTheme = context.getTheme();
         if (curTheme == null) {
             return 0;
         }
-
         TypedArray att = curTheme.obtainStyledAttributes(RES_IDS_ACTION_BAR_SIZE);
         if (att == null) {
             return 0;
         }
-
         float size = att.getDimension(0, 0);
         att.recycle();
         return (int) size;
     }
 
-
-    public static Map<Integer, EditText> showClaimFieldsDialog(final Set<FieldEventVS> fields,
+    public static Map<Integer, EditText> showDynamicFormDialog(final Set<FieldEventVS> fields,
                final View.OnClickListener listener, Activity activity) {
         AlertDialog.Builder builder= new AlertDialog.Builder(activity);
         LayoutInflater inflater = activity.getLayoutInflater();
-        ScrollView mScrollView = (ScrollView) inflater.inflate(R.layout.claim_dinamic_form,
+        ScrollView mScrollView = (ScrollView) inflater.inflate(R.layout.dinamic_form,
                 (ViewGroup) activity.getCurrentFocus());
         LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
@@ -413,7 +409,7 @@ public class UIUtils  {
                         errorMsgTextView.setVisibility(View.VISIBLE);
                         return;
                     } else field.setValue(fieldValue);
-                    LOGD(TAG + ".showClaimFieldsDialog", "field id: " + field.getId() +
+                    LOGD(TAG + ".showDynamicFormDialog", "field id: " + field.getId() +
                             " - text: " + fieldValue);
                 }
                 //listener.onClick();
@@ -549,6 +545,6 @@ public class UIUtils  {
              */
             android.os.Process.killProcess(android.os.Process.myPid());
         }
-
     }
+
 }

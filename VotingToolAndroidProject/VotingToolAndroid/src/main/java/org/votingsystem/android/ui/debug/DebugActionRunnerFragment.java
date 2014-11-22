@@ -16,8 +16,8 @@
 
 package org.votingsystem.android.ui.debug;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,17 +31,17 @@ import org.votingsystem.android.ui.debug.actions.PrefsAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
+
 
 public class DebugActionRunnerFragment extends Fragment {
 
-    private static final String TAG = makeLogTag(DebugActionRunnerFragment.class);
+    private static final String TAG = DebugActionRunnerFragment.class.getSimpleName();
 
     private TextView mLogArea;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.debug_action_runner, null);
         mLogArea = (TextView) rootView.findViewById(R.id.logArea);

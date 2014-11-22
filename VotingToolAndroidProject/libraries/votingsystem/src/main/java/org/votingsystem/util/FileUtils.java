@@ -24,7 +24,7 @@ import java.util.List;
 */
 public class FileUtils {
 
-    public static final String TAG = "FileUtils";
+    public static final String TAG = FileUtils.class.getSimpleName();
 	
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
@@ -34,34 +34,32 @@ public class FileUtils {
         return b;
     }
     
-    public static byte[] getBytesFromInputStream(InputStream entrada) throws IOException {
-    	ByteArrayOutputStream salida = new ByteArrayOutputStream();
+    public static byte[] getBytesFromInputStream(InputStream input) throws IOException {
+    	ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buf =new byte[1024];
         int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
+        while((len = input.read(buf)) > 0){
+            output.write(buf,0,len);
         }
-        salida.close();
-        entrada.close();
-        return salida.toByteArray();
+        output.close();
+        input.close();
+        return output.toByteArray();
     }
 
-   public static File copyFileToFile(File inputFile, File outputFile)
-         throws Exception {
+   public static File copyFileToFile(File inputFile, File outputFile) throws Exception {
        FileInputStream fs = new FileInputStream(inputFile);
        return copyStreamToFile(fs, outputFile);
     }
 
-    public static File copyStreamToFile(InputStream entrada, File outputFile)
-         throws Exception {
-        OutputStream salida = new FileOutputStream(outputFile);
+    public static File copyStreamToFile(InputStream input, File outputFile) throws Exception {
+        OutputStream output = new FileOutputStream(outputFile);
         byte[] buf =new byte[1024];
         int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
+        while((len = input.read(buf)) > 0){
+            output.write(buf,0,len);
         }
-        salida.close();
-        entrada.close();
+        output.close();
+        input.close();
         return outputFile;
     }
 	
@@ -75,8 +73,7 @@ public class FileUtils {
         out.close();
     }
      
-    public static String getStringFromFile (File file) 
-            throws FileNotFoundException, IOException {
+    public static String getStringFromFile (File file) throws FileNotFoundException, IOException {
         FileInputStream stream = new FileInputStream(file);
         try {
             FileChannel fc = stream.getChannel();
@@ -89,28 +86,25 @@ public class FileUtils {
         }
      }
 
-    public static void save(String content, String filePath,
-            String fileExtension) {
-        String rutaCompletaArchivo = filePath;
+    public static void save(String content, String filePath, String fileExtension) {
         if (!(fileExtension == null || fileExtension.equals("")))
-            rutaCompletaArchivo = filePath + "." + fileExtension;
+            filePath = filePath + "." + fileExtension;
         try {
-            File archivoSalida = new File(rutaCompletaArchivo);
-            FileWriter out = new FileWriter(archivoSalida);
+            FileWriter out = new FileWriter(new File(filePath));
             out.write(content);
             out.close();
         } catch (IOException ex) {
-        	Log.e("FileUtils", ex.getMessage(), ex);
+            ex.printStackTrace();
         }
     }
 
     public static FileOutputStream openFileOutputStream(String filename, Context context) {
-        Log.d(TAG + ".openFileOutputStream", " - filename: " + filename);
+        Log.d(TAG + ".openFileOutputStream", "filename: " + filename);
         FileOutputStream fout = null;
         try {
             fout = context.openFileOutput(filename, Context.MODE_PRIVATE);
         } catch(Exception ex) {
-            Log.e(TAG + ".openFileOutputStream", ex.getMessage(), ex);
+            ex.printStackTrace();
         }
         return fout;
     }
@@ -120,10 +114,9 @@ public class FileUtils {
         try {
             //File sdCard = Environment.getExternalStorageDirectory();
             file = new File(context.getFilesDir(), filename);
-            Log.d(TAG + ".getFile", " - file.getAbsolutePath(): "
-                    + file.getAbsolutePath());
+            Log.d(TAG + ".getFile", "file.getAbsolutePath(): " + file.getAbsolutePath());
         } catch(Exception ex) {
-            Log.e(TAG + ".getFile", ex.getMessage(), ex);
+            ex.printStackTrace();
         }
         return file;
     }

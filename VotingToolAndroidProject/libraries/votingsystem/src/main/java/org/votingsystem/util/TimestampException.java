@@ -4,7 +4,7 @@ package org.votingsystem.util;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TimestampException extends Exception {
+public class TimestampException extends ExceptionVS {
 
 	private static final long serialVersionUID = 1L;
 
