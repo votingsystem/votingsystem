@@ -12,7 +12,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -97,9 +96,6 @@ public class BrowserVSActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setTitle(getString(R.string.browswevs_lbl));
-        getSupportActionBar().hide();
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
         }
@@ -110,7 +106,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     private void loadUrl(String viewerURL, final String jsCommand) {
-        LOGD(TAG + ".viewerURL", " - viewerURL: " + viewerURL);
+        LOGD(TAG + ".viewerURL", "viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
         setProgressDialogVisible(true);
@@ -226,7 +222,7 @@ public class BrowserVSActivity extends ActivityBase {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();

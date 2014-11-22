@@ -1,6 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
@@ -17,12 +17,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -33,14 +33,12 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
@@ -57,9 +55,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 public class CertResponseActivity extends ActionBarActivity {
 	
 	public static final String TAG = CertResponseActivity.class.getSimpleName();
-	
-	
-	private ProgressDialog progressDialog = null;
+
 	private String CSR_SIGNED = "csrSigned";
 	private String csrSigned = null;
 	private String SCREEN_MESSAGE = "screenMessage";
@@ -70,13 +66,12 @@ public class CertResponseActivity extends ActionBarActivity {
     private Button insertPinButton;
     private Button requestCertButton;
     private AppContextVS appContextVS;
-    private String broadCastId;
+    private String broadCastId = CertResponseActivity.class.getSimpleName();;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver",
-                    "extras:" + intent.getExtras());
-            if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore(intent.getStringExtra(PIN_KEY));
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore(intent.getStringExtra(PIN_KEY));
         }
     };
 
@@ -90,11 +85,10 @@ public class CertResponseActivity extends ActionBarActivity {
                 keyStore.load(null);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest(this).getBytes());
-
                 String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(certificationRequest.getHashPin())) {
-                    showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                            getString(R.string.pin_error_msg));
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                            getString(R.string.pin_error_msg), getSupportFragmentManager());
                     return;
                 }
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
@@ -107,7 +101,6 @@ public class CertResponseActivity extends ActionBarActivity {
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
                 keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, null, certsArray);
-
                 byte[] userDataBytes = ObjectUtils.serializeObject(user);
                 FileOutputStream outputStream = openFileOutput(USER_DATA_FILE_NAME,
                         Context.MODE_PRIVATE);
@@ -115,14 +108,15 @@ public class CertResponseActivity extends ActionBarActivity {
                 outputStream.close();
                 PrefUtils.putAppCertState(appContextVS.getAccessControl().getServerURL(),
                         State.WITH_CERTIFICATE, user.getNif(), appContextVS);
-                PrefUtils.putPin(pin, appContextVS);
+                PrefUtils.putPin(Integer.valueOf(pin), appContextVS);
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(user, this);
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl), getString(R.string.pin_error_msg));
+                MessageDialogFragment.showDialog(ResponseVS.getExceptionResponse(ex, this),
+                        getSupportFragmentManager());
             }
         }
         goAppButton.setVisibility(View.VISIBLE);
@@ -131,8 +125,9 @@ public class CertResponseActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.cert_request_form_response);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         appContextVS = (AppContextVS) getApplicationContext();
-        broadCastId = CertResponseActivity.class.getSimpleName();
         LOGD(TAG + ".onCreate", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
@@ -149,9 +144,9 @@ public class CertResponseActivity extends ActionBarActivity {
         insertPinButton.setVisibility(View.GONE);
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                PinDialogFragment.showPinScreenWithoutHashValidation(
-                        getSupportFragmentManager(), broadCastId,
-                        getString(R.string.enter_pin_import_cert_msg));
+            PinDialogFragment.showPinScreenWithoutHashValidation(
+                    getSupportFragmentManager(), broadCastId,
+                    getString(R.string.enter_pin_import_cert_msg));
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);
@@ -192,20 +187,9 @@ public class CertResponseActivity extends ActionBarActivity {
                         VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
 	        	LOGD(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
-                GetDataTask getDataTask = new GetDataTask(null);
-                getDataTask.execute(appContextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
+                new GetDataTask(null).execute(
+                        appContextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
-    }
-
-    private void showProgressDialog(String title, String dialogMessage) {
-        if (progressDialog == null)
-            progressDialog = new ProgressDialog(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(title);
-        progressDialog.setMessage(dialogMessage);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.show();
     }
 
 	@Override public void onSaveInstanceState(Bundle outState) {
@@ -260,17 +244,9 @@ public class CertResponseActivity extends ActionBarActivity {
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private void showMessage(Integer statusCode,String caption,String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-    }
-
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 
-        public static final String TAG = "GetDataTask";
+        public final String TAG = GetDataTask.class.getSimpleName();
 
         private ContentTypeVS contentType = null;
 
@@ -279,11 +255,12 @@ public class CertResponseActivity extends ActionBarActivity {
         }
 
         @Override protected void onPreExecute() {
-            showProgressDialog(getString(R.string.connecting_caption), getString(R.string.cert_state_msg));
+            ProgressDialogFragment.showDialog(getString(R.string.connecting_caption),
+                    getString(R.string.cert_state_msg), getSupportFragmentManager());
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            LOGD(TAG + ".doInBackground", " - url: " + urls[0]);
+            LOGD(TAG + ".doInBackground", "url: " + urls[0]);
             return  HttpHelper.getData(urls[0], contentType);
         }
 
@@ -292,9 +269,7 @@ public class CertResponseActivity extends ActionBarActivity {
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
+            ProgressDialogFragment.hide(getSupportFragmentManager());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 setCsrSigned(responseVS.getMessage());
                 setMessage(getString(R.string.cert_downloaded_msg));
@@ -303,8 +278,8 @@ public class CertResponseActivity extends ActionBarActivity {
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 String certificationAddresses = appContextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
-            } else showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.request_user_cert_error_msg));
+            } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.request_user_cert_error_msg), getSupportFragmentManager());
             goAppButton.setVisibility(View.VISIBLE);
         }
     }

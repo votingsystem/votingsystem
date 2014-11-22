@@ -144,12 +144,12 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putPin(String pin, Context context) {
+    public static void putPin(Integer pin, Context context) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            String hashPin = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            String hashPin = CMSUtils.getHashBase64(pin.toString(), ContextVS.VOTING_DATA_DIGEST);
             editor.putString(ContextVS.PIN_KEY, hashPin);
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}

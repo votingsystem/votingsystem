@@ -1,10 +1,8 @@
 package org.votingsystem.android.fragment;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -20,20 +18,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
@@ -43,11 +38,9 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
@@ -61,7 +54,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private EventVS eventVS;
     private VoteVS vote;
-    private List<Button> optionButtonList;
+    private List<Button> voteOptionsButtonList;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
     private AppContextVS contextVS;
@@ -70,38 +63,29 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
-            launchVoteService(responseVS.getTypeVS());
-        else {
-            vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
-            if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
-                if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(vote);
-                else if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
-                    setOptionButtonsEnabled(true);
-                }
-                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
-            } else if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    setEventScreen(eventVS);
-                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                            getString(R.string.msg_lbl),responseVS.getNotificationMessage(),
-                            getActivity());
-                    builder.setPositiveButton(getString(R.string.continue_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                saveCancelReceipt(vote);
-                            }
-                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                    builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                } else {
-                    cancelVoteButton.setEnabled(true);
+            LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
+                launchVoteService(responseVS.getTypeVS());
+            else {
+                vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
+                if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(vote);
+                    else if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
+                        setOptionButtonsEnabled(false);
+                    }
+                    MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                } else if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        setEventScreen(eventVS);
+                        ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).
+                                setVisibility(View.GONE);
+                        setOptionButtonsEnabled(true);
+                    } else cancelVoteButton.setEnabled(true);
                     MessageDialogFragment.showDialog(responseVS, getFragmentManager());
                 }
+                setProgressDialogVisible(false, null);
             }
-            setProgressDialogVisible(false, null);
-        }
         }
     };
 
@@ -248,15 +232,15 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<FieldEventVS> fieldsEventVS = vote.getEventVS().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
-        if(optionButtonList == null) {
-            optionButtonList = new ArrayList<Button>();
+        if(voteOptionsButtonList == null) {
+            voteOptionsButtonList = new ArrayList<Button>();
             FrameLayout.LayoutParams paramsButton = new
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
             paramsButton.setMargins(15, 15, 15, 15);
             for (final FieldEventVS option:fieldsEventVS) {
                 Button optionButton = new Button(getActivity());
                 optionButton.setText(option.getContent());
-                optionButtonList.add(optionButton);
+                voteOptionsButtonList.add(optionButton);
                 optionButton.setEnabled(false);
                 linearLayout.addView(optionButton, paramsButton);
             }
@@ -277,8 +261,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<FieldEventVS> fieldsEventVS = event.getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
-        if(optionButtonList != null) linearLayout.removeAllViews();
-        optionButtonList = new ArrayList<Button>();
+        if(voteOptionsButtonList != null) linearLayout.removeAllViews();
+        voteOptionsButtonList = new ArrayList<Button>();
         FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
                 LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         paramsButton.setMargins(15, 15, 15, 15);
@@ -293,7 +277,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     processSelectedOption(optionSelected);
                 }
             });
-            optionButtonList.add(optionButton);
+            voteOptionsButtonList.add(optionButton);
             if (!event.isActive()) optionButton.setEnabled(false);
             linearLayout.addView(optionButton, paramsButton);
         }
@@ -321,8 +305,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setOptionButtonsEnabled(boolean areEnabled) {
-        if(optionButtonList == null) return;
-        for(Button button:optionButtonList) {
+        if(voteOptionsButtonList == null) return;
+        for(Button button: voteOptionsButtonList) {
             button.setEnabled(areEnabled);
         }
     }

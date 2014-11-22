@@ -31,9 +31,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
-
 import java.util.Date;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class ReceiptGridFragment extends Fragment implements
@@ -146,17 +144,19 @@ public class ReceiptGridFragment extends Fragment implements
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
                 ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
+                if(receiptContainer.getTypeVS() == null) {
+                    LOGD(TAG + ".bindView", "receiptContainer id: " + receiptContainer.getLocalId() +
+                            " has null TypeVS");
+                    return;
+                }
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
-
                 Long lastUpdatedMillis = cursor.getLong(cursor.getColumnIndex(
                         ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
                 Date lastUpdated = new Date(lastUpdatedMillis);
                 String dateInfoStr = context.getString(R.string.last_updated_msg,
                         DateUtils.getDayWeekDateStr(lastUpdated));
-
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
-
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView subject = (TextView) view.findViewById(R.id.receipt_subject);

@@ -1,11 +1,11 @@
 package org.votingsystem.model;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessage;
-
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
@@ -15,6 +15,8 @@ import java.util.Date;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class ReceiptContainer implements Serializable {
+
+    public static final String TAG = ReceiptContainer.class.getSimpleName();
 
     private Long localId = -1L;
     private transient SMIMEMessage receipt;
@@ -96,9 +98,7 @@ public class ReceiptContainer implements Serializable {
             try {
                 String[] headers = receipt.getHeader("Message-ID");
                 if(headers != null && headers.length >0) return headers[0];
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
+            } catch(Exception ex) { ex.printStackTrace(); }
         }
         return result;
     }
@@ -120,8 +120,13 @@ public class ReceiptContainer implements Serializable {
     }
 
     public TypeVS getTypeVS() {
-        if(typeVS == null) {
-
+        if(typeVS == null && (receipt != null || receiptBytes != null)) {
+            try {
+                JSONObject signedContent = new JSONObject(getReceipt().getSignedContent());
+                if(signedContent.has("operation")) {
+                    typeVS = TypeVS.valueOf(signedContent.getString("operation"));
+                }
+            } catch (Exception ex) { ex.printStackTrace(); }
         }
         return typeVS;
     }
@@ -134,9 +139,7 @@ public class ReceiptContainer implements Serializable {
         Date result = null;
         try {
             result = getReceipt().getSigner().getCertificate().getNotBefore();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch(Exception ex) { ex.printStackTrace(); }
         return result;
     }
 
@@ -144,9 +147,7 @@ public class ReceiptContainer implements Serializable {
         Date result = null;
         try {
             result = getReceipt().getSigner().getCertificate().getNotAfter();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch(Exception ex) { ex.printStackTrace(); }
         return result;
     }
 
