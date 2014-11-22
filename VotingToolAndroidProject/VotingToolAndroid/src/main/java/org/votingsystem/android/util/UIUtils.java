@@ -90,16 +90,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 /**
  * An assortment of UI helpers.
  */
 public class UIUtils  {
 
-    private static final String TAG = makeLogTag(UIUtils.class);
+    private static final String TAG = UIUtils.class.getSimpleName();
 
     public static final int EMPTY_MESSAGE = 1;
     /**

@@ -29,6 +29,7 @@ import org.votingsystem.model.UserVSRepresentativesInfo;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
@@ -40,6 +41,7 @@ import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -279,6 +281,39 @@ public class RepresentativeService extends IntentService {
         }
     }
 
+    private void cancelAnonymousDelegation(Bundle arguments, String serviceCaller) {
+        LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
+        ResponseVS responseVS = null;
+        try {
+            AnonymousDelegationVS anonymousDelegation = PrefUtils.getAnonymousDelegation(this);
+            responseVS = cancelAnonymousDelegation(anonymousDelegation);
+        } catch (Exception ex) {
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
+        } finally {
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(
+                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+            contextVS.broadcastResponse(responseVS);
+        }
+    }
+
+    private ResponseVS cancelAnonymousDelegation(
+            AnonymousDelegationVS anonymousDelegation) throws Exception {
+        LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
+        JSONObject requestJSON = anonymousDelegation.getCancellationRequest();
+        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                requestJSON.toString(), getString(R.string.anonymous_delegation_cancellation_lbl));
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
+                    responseVS.getMessageBytes()));
+            delegationReceipt.isValidSignature();
+            Collection matches = delegationReceipt.checkSignerCert(
+                    contextVS.getAccessControl().getCertificate());
+            if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+            responseVS.setSMIME(delegationReceipt);
+        }
+        return responseVS;
+    }
+
     private void anonymousDelegation(Bundle arguments, String serviceCaller) {
         Integer weeksOperationActive = Integer.valueOf(arguments.getString(ContextVS.TIME_KEY));
         Date dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
@@ -324,20 +359,15 @@ public class RepresentativeService extends IntentService {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
                             responseVS.getMessageBytes()));
-                    anonymousDelegation.setDelegationReceipt(delegationReceipt);
-                    ContentValues values = new ContentValues();
-                    values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                            ObjectUtils.serializeObject(anonymousDelegation));
-                    values.put(ReceiptContentProvider.URL_COL, anonymousDelegation.getMessageId());
-                    values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getTypeVS().toString());
-                    values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-                    Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
+                    delegationReceipt.isValidSignature();
+                    Collection matches = delegationReceipt.checkSignerCert(
+                            contextVS.getAccessControl().getCertificate());
+                    if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+                    PrefUtils.putAnonymousDelegation(anonymousDelegation, this);
                     responseVS.setCaption(getString(R.string.anonymous_delegation_caption)).setNotificationMessage(
                             getString(R.string.anonymous_delegation_msg,
-                            representative.getFullName(), weeksOperationActive)).setUri(uri);
-                } else {
-                    LOGD(TAG + ".anonymousDelegation", " _ TODO _ cancel anonymous delegation");
-                }
+                                    representative.getFullName(), weeksOperationActive));
+                } else cancelAnonymousDelegation(anonymousDelegation);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {

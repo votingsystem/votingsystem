@@ -96,7 +96,7 @@ class RepresentativeController {
 	 * Service tha provides the list of representatives
 	 * @httpMethod [GET]
 	 * @serviceURL [/representative/$id?]
-	 * @param [id] Optional. The representante identifier in the database.
+	 * @param [id] Optional. The representative identifier in the database.
 	 * @responseContentType [application/json]
 	 */
 	def index() {

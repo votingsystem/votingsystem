@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import org.json.JSONObject;
+import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.UserVS;
@@ -38,6 +39,7 @@ public class PrefUtils {
     }
 
     private static Representation representation;
+    private static AnonymousDelegationVS anonymousDelegation;
 
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
@@ -251,4 +253,29 @@ public class PrefUtils {
         return representation;
     }
 
+    public static void putAnonymousDelegation(AnonymousDelegationVS delegation, Context context) {
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        byte[] serializedObject = ObjectUtils.serializeObject(delegation);
+        try {
+            editor.putString(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY,
+                    new String(serializedObject, "UTF-8"));
+            editor.commit();
+            anonymousDelegation = delegation;
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static AnonymousDelegationVS getAnonymousDelegation(Context context) {
+        if(anonymousDelegation != null) return anonymousDelegation;
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String serializedObject = settings.getString(
+                ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, null);
+        if(serializedObject != null) {
+            anonymousDelegation = (AnonymousDelegationVS) ObjectUtils.
+                    deSerializeObject(serializedObject.getBytes());
+        }
+        return anonymousDelegation;
+    }
 }

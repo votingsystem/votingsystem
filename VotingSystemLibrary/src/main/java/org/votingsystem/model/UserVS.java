@@ -229,8 +229,9 @@ public class UserVS implements Serializable {
 		return representative;
 	}
 
-	public void setRepresentative(UserVS representative) {
+	public UserVS setRepresentative(UserVS representative) {
 		this.representative = representative;
+        return this;
 	}
 
 	public Type getType() {
@@ -255,8 +256,9 @@ public class UserVS implements Serializable {
 		return representativeMessage;
 	}
 
-	public void setRepresentativeMessage(MessageSMIME representativeMessage) {
+	public UserVS setRepresentativeMessage(MessageSMIME representativeMessage) {
 		this.representativeMessage = representativeMessage;
+        return this;
 	}
 
 	public TimeStampToken getTimeStampToken() {

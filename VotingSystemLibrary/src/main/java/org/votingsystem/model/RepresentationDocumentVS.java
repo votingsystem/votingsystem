@@ -84,8 +84,9 @@ public class RepresentationDocumentVS implements Serializable {
 		return cancellationSMIME;
 	}
 
-	public void setCancellationSMIME(MessageSMIME cancellationSMIME) {
+	public RepresentationDocumentVS setCancellationSMIME(MessageSMIME cancellationSMIME) {
 		this.cancellationSMIME = cancellationSMIME;
+        return this;
 	}
 
 	public UserVS getRepresentative() {

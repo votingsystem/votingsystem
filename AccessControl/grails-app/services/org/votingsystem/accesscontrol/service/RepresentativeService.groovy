@@ -2,7 +2,10 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.votingsystem.util.ExceptionVS
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -353,47 +356,26 @@ class RepresentativeService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap, message:backupURL)
 	}
 
-	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
-        RepresentationDocumentVS representationDocument = RepresentationDocumentVS.
-                findWhere(userVS:userVS, state:RepresentationDocumentVS.State.OK)
-        if(representationDocument) {
-            log.debug("cancelRepresentationDocument - User changing representative")
-            representationDocument.state = RepresentationDocumentVS.State.CANCELLED
-            representationDocument.cancellationSMIME = messageSMIMEReq
-            representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
-            representationDocument.save(flush:true)
-            log.debug("cancelRepresentationDocument - user '${userVS.nif}' " +
-                    " - representationDocument ${representationDocument.id}")
-        } else log.debug("cancelRepresentationDocument - user '${userVS.nif}' doesn't have representative")
-	}
-	
+    @Transactional
     ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, byte[] imageBytes) {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS()
-		log.debug("saveRepresentativeData - userVS: ${userVS.nif}")
 		String msg
-        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         String base64ImageHash = messageJSON.base64ImageHash
         MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
         byte[] resultDigest =  messageDigest.digest(imageBytes);
         String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
-        log.debug("saveRepresentativeData - base64ImageHash: ${base64ImageHash}" +
-                " - server calculated base64ImageHash: ${base64ResultDigest}")
-        if(!base64ResultDigest.equals(base64ImageHash)) {
-            msg = messageSource.getMessage('imageHashErrorMsg', null, locale)
-            log.error("saveRepresentativeData - ERROR ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    message:msg, type:TypeVS.REPRESENTATIVE_DATA_ERROR)
-        }
+        if(!base64ResultDigest.equals(base64ImageHash)) throw new ExceptionVS(
+                messageSource.getMessage('imageHashErrorMsg', null, locale))
         //String base64EncodedImage = messageJSON.base64RepresentativeEncodedImage
         //BASE64Decoder decoder = new BASE64Decoder();
         //byte[] imageFileBytes = decoder.decodeBuffer(base64EncodedImage);
         ImageVS newImage = new ImageVS(userVS:userVS, messageSMIME:messageSMIMEReq,
                 type:ImageVS.Type.REPRESENTATIVE, fileBytes:imageBytes)
         if(UserVS.Type.REPRESENTATIVE != userVS.type) {
-            userVS.type = UserVS.Type.REPRESENTATIVE
-            userVS.representativeRegisterDate = Calendar.getInstance().getTime()
-            userVS.representative = null
+            userVS.setType(UserVS.Type.REPRESENTATIVE).setRepresentative(null).setRepresentativeRegisterDate(
+                    Calendar.getInstance().getTime())
             representativeDelegationService.cancelRepresentationDocument(messageSMIMEReq, userVS);
             msg = messageSource.getMessage('representativeDataCreatedOKMsg',
                     [userVS.firstName, userVS.lastName].toArray(), locale)
@@ -402,27 +384,17 @@ class RepresentativeService {
             msg = messageSource.getMessage('representativeDataUpdatedMsg',
                     [userVS.firstName, userVS.lastName].toArray(), locale)
         }
-        userVS.setDescription(messageJSON.representativeInfo)
-        userVS.representativeMessage = messageSMIMEReq
-        UserVS.withTransaction { userVS.save(flush:true) }
-        ImageVS.withTransaction {
-            def images = ImageVS.findAllWhere(userVS:userVS,
-                    type:ImageVS.Type.REPRESENTATIVE)
-            images?.each {
-                it.type = ImageVS.Type.REPRESENTATIVE_CANCELLED
-                it.save()
-            }
-            newImage.save(flush:true)
+        userVS.setDescription(messageJSON.representativeInfo).setRepresentativeMessage(messageSMIMEReq).save()
+        List<ImageVS> images = ImageVS.findAllWhere(userVS:userVS, type:ImageVS.Type.REPRESENTATIVE)
+        for(ImageVS imageVS : images) {
+            imageVS.setType(ImageVS.Type.REPRESENTATIVE_CANCELLED).save()
         }
-        MessageSMIME.withTransaction {
-            def previousMessages = MessageSMIME.findAllWhere(userVS:userVS, type:TypeVS.REPRESENTATIVE_DATA)
-            previousMessages?.each {message ->
-                message.type = TypeVS.REPRESENTATIVE_DATA_OLD
-                message.save()
-            }
+        newImage.save()
+        List<MessageSMIME>  previousMessages = MessageSMIME.findAllWhere(userVS:userVS, type:TypeVS.REPRESENTATIVE_DATA)
+        for(MessageSMIME message: previousMessages) {
+            message.setType(TypeVS.REPRESENTATIVE_DATA_OLD).save()
         }
         log.debug "saveRepresentativeData - user:${userVS.nif} - image: ${newImage.id}"
-        //http://sistemavotacion.org/AccessControl/representative/49
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,  type:TypeVS.REPRESENTATIVE_DATA)
     }
 
@@ -598,10 +570,9 @@ class RepresentativeService {
         }
         userVS.representativeMessage = messageSMIMEReq
         userVS.setType(UserVS.Type.USER).save()
-        String fromUser = grailsApplication.config.vs.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('unsubscribeRepresentativeValidationSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject)
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(toUser, smimeMessage, subject)
         messageSMIMEReq.setSMIME(smimeMessageResp)
         msg =  messageSource.getMessage('representativeRevokeMsg', [userVS.getNif()].toArray(), locale)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIMEReq, userVS:userVS,

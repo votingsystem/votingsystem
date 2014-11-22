@@ -9,6 +9,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.NifUtils
+import org.votingsystem.util.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
@@ -164,11 +165,8 @@ class CsrService {
                     break;
             }
         }
-        if(!certAttributeJSON) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error("signAnonymousDelegationCert - missing certAttributeJSON")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-        }
+        if(!certAttributeJSON) throw new ValidationExceptionVS(
+                this.getClass(), messageSource.getMessage('csrRequestErrorMsg', null, locale))
         String serverURL = grailsApplication.config.grails.serverURL
         String accessControlURL = StringUtils.checkURL(certAttributeJSON.accessControlURL)
         if (!serverURL.equals(accessControlURL) || !certAttributeJSON.hashCertVS ) {
@@ -176,8 +174,6 @@ class CsrService {
             log.error("- signAnonymousDelegationCert - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
         }
-        //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
         Date certValidFrom = DateUtils.getMonday(Calendar.getInstance()).getTime()
         Calendar calendarValidTo = Calendar.getInstance();

@@ -84,8 +84,9 @@ public class CertificateVS implements Serializable {
         return messageSMIME;
     }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) {
+    public CertificateVS setMessageSMIME(MessageSMIME messageSMIME) {
         this.messageSMIME = messageSMIME;
+        return this;
     }
 
     public byte[] getContent() {

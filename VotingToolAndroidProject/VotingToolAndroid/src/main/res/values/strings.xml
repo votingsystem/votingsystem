@@ -446,4 +446,5 @@
         duración de la delegación: \'%1$s\' semanas<br/><br/>activa desde: \'%2$s\'
         <br/>activa hasta: \'%3$s\'
         <br/>url de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
+    <string name="anonymous_delegation_cancellation_lbl">cancelación de representación anónima</string>
 </resources>

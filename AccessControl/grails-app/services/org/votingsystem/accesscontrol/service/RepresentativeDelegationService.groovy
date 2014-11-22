@@ -4,6 +4,8 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.votingsystem.signature.util.CMSUtils
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
@@ -126,7 +128,7 @@ class RepresentativeDelegationService {
         return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
     }
 
-
+    @Transactional
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
@@ -149,52 +151,50 @@ class RepresentativeDelegationService {
     @Transactional
     public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName)
-        MessageSMIME messageSMIME = null
         SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
-        X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
-        CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
-                type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK)
-        if(!certificateVS) throw new ExceptionVS(messageSource.getMessage('certificateVSUnknownErrorMsg' , null, locale))
-        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-        String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-        if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
-                (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
-            throw new ExceptionVS(messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale))
-        }
-        UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
-        if(!representative) throw new ExceptionVS(
-                messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale))
 
-        String fromUser = grailsApplication.config.vs.serverName
+        X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
+        JSONObject certExtensionData = CertUtils.getCertExtensionData(x509UserCert,
+                ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID)
+        log.debug(" ======= certExtensionData ${certExtensionData}")
+
+
+
+        CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
+                type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK,
+                hashCertVSBase64:certExtensionData.hashCertVS)
+        if(!certificateVS) throw new ExceptionVS(messageSource.getMessage('certificateVSUnknownErrorMsg', null, locale))
+        AnonymousDelegationRequest request = new AnonymousDelegationRequest(
+                smimeMessage.getSignedContent()).validateDelegation()
         String toUser = certificateVS.hashCertVSBase64
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(
-                fromUser, toUser, smimeMessage, subject)
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(toUser, smimeMessage, subject)
         messageSMIMEReq.setSMIME(smimeMessageResp)
-        certificateVS.state = CertificateVS.State.USED
-        certificateVS.messageSMIME = messageSMIMEReq
-        certificateVS.save()
-        RepresentationDocumentVS representationDocument =new RepresentationDocumentVS(representative:representative,
-                activationSMIME:messageSMIMEReq, state:RepresentationDocumentVS.State.OK).save();
+        certificateVS.setState(CertificateVS.State.USED).setMessageSMIME(messageSMIMEReq).save()
+        RepresentationDocumentVS representationDocument = new RepresentationDocumentVS(representative:
+                request.representative, activationSMIME:messageSMIMEReq, state:RepresentationDocumentVS.State.OK).save();
         String msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
-                [messageJSON.representativeName].toArray(), locale)
+                [request.representativeName].toArray(), locale)
         log.debug "$methodName - representationDocument: ${representationDocument.id}"
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, messageSMIME: messageSMIMEReq,
                 type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
+    @Transactional
     public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq) {
         SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
         UserVS userVS = messageSMIMEReq.getUserVS()
-        MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
-                userVS:userVS)
-        if(!userDelegation) {
-            return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:messageSource.
-                    getMessage('userWithoutAnonymousDelegationErrorMsg', [userVS.nif].toArray(), locale))
-        }
-        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
-        throw new ExceptionVS(" === TODO ====")
+        AnonymousDelegationRequest request = new AnonymousDelegationRequest(
+                smimeMessage.getSignedContent()).validateAnonymousDelegationCancellation(userVS)
+        request.anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELLED).setCancellationSMIME(
+                messageSMIMEReq).setDateCancelled(Calendar.getInstance().getTime()).save()
+        request.representationDocumentVS.setCancellationSMIME(messageSMIMEReq).save()
+        request.anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELLED).setCancellationSMIME(
+                messageSMIMEReq).save()
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(userVS.getNif(), smimeMessage, null)
+        messageSMIMEReq.setSMIME(smimeMessageResp)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIMEReq, userVS:userVS,
+                type:request.operation, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
@@ -268,12 +268,16 @@ class RepresentativeDelegationService {
 		}
 	}
 
-    private static class AnonymousDelegationRequest {
-        String representativeNif, representativeName, accessControlURL;
+    private class AnonymousDelegationRequest {
+        String representativeNif, representativeName, accessControlURL, hashCertVSBase64, originHashCertVSBase64;
         Integer weeksOperationActive;
         Date dateFrom, dateTo;
         TypeVS operation;
         JSONObject messageJSON;
+        UserVS representative
+        AnonymousDelegation anonymousDelegation
+        CertificateVS certificateVS
+        RepresentationDocumentVS representationDocumentVS
 
         public AnonymousDelegationRequest(String signedContent) throws ExceptionVS {
             messageJSON = JSON.parse(signedContent)
@@ -301,10 +305,32 @@ class RepresentativeDelegationService {
         public AnonymousDelegationRequest validateDelegation() throws ExceptionVS {
             if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operation) throw new ValidationExceptionVS(this.getClass(),
                     "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION' but found '" + operation.toString() + "'")
-            representativeNif = messageJSON.representativeNif;
+            representativeNif = NifUtils.validate(messageJSON.representativeNif);
             if(!representativeNif) throw new ValidationExceptionVS(this.getClass(), "missing param 'representativeNif'")
             representativeName = messageJSON.representativeName
-            if(!representativeNif) throw new ValidationExceptionVS(this.getClass(), "missing param 'representativeName'")
+            if(!representativeName) throw new ValidationExceptionVS(this.getClass(), "missing param 'representativeName'")
+            representative = UserVS.findWhere(nif:representativeNif, type:UserVS.Type.REPRESENTATIVE)
+            if(!representative) throw new ValidationExceptionVS(this.getClass(),
+                    messageSource.getMessage('representativeNifErrorMsg', [representativeNif].toArray(), locale))
+            return this;
+        }
+
+        public AnonymousDelegationRequest validateAnonymousDelegationCancellation(UserVS userVS) {
+            validateDelegation()
+            anonymousDelegation = getAnonymousDelegation(userVS)
+            if(!anonymousDelegation)  throw new ValidationExceptionVS(this.getClass(), message:messageSource.
+                    getMessage('userWithoutAnonymousDelegationErrorMsg', [userVS.nif].toArray(), locale))
+            hashCertVSBase64 =  messageJSON.hashCertVSBase64
+            if(!hashCertVSBase64) throw new ValidationExceptionVS(this.getClass(), "missing param 'hashCertVSBase64'")
+            originHashCertVSBase64 = messageJSON.originHashCertVSBase64
+            if(!originHashCertVSBase64) throw new ValidationExceptionVS(this.getClass(), "missing param 'originHashCertVSBase64'")
+            if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVSBase64,ContextVS.VOTING_DATA_DIGEST)))
+                    throw new ValidationExceptionVS(this.getClass(), "provided origin doesn't match hash origin")
+            certificateVS = CertificateVS.findWhere(state:CertificateVS.State.USED, hashCertVSBase64:hashCertVSBase64)
+            if(!certificateVS) throw new ValidationExceptionVS(this.getClass(), "data doesn't macth param CertificateVS")
+            representationDocumentVS = RepresentationDocumentVS.findWhere(activationSMIME:certificateVS.messageSMIME)
+            if(!representationDocumentVS) throw new ValidationExceptionVS(this.getClass(),
+                    "data doesn't macth param RepresentationDocumentVS")
             return this;
         }
     }

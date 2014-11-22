@@ -53,7 +53,9 @@ public class ContextVS {
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String WEBSOCKET_REQUEST_KEY = "WEBSOCKET_REQUEST_KEY";
 
+
     public static final String PIN_KEY = "PIN";
+    public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
     public static final String PERIOD_KEY = "PERIOD";
     public static final String URL_KEY = "URL";
     public static final String TAG_KEY = "TAG";

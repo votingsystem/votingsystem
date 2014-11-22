@@ -61,8 +61,9 @@ public class AnonymousDelegation implements Serializable {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public AnonymousDelegation setStatus(Status status) {
         this.status = status;
+        return this;
     }
 
     public Date getDateCreated() {
@@ -93,16 +94,18 @@ public class AnonymousDelegation implements Serializable {
         return cancellationSMIME;
     }
 
-    public void setCancellationSMIME(MessageSMIME cancellationSMIME) {
+    public AnonymousDelegation setCancellationSMIME(MessageSMIME cancellationSMIME) {
         this.cancellationSMIME = cancellationSMIME;
+        return this;
     }
 
     public Date getDateCancelled() {
         return dateCancelled;
     }
 
-    public void setDateCancelled(Date dateCancelled) {
+    public AnonymousDelegation setDateCancelled(Date dateCancelled) {
         this.dateCancelled = dateCancelled;
+        return this;
     }
 
     public UserVS getUserVS() {

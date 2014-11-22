@@ -176,6 +176,19 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         return new JSONObject(result);
     }
 
+    public JSONObject getCancellationRequest() {
+        Map result = new HashMap();
+        result.put("weeksOperationActive", getWeeksOperationActive());
+        result.put("dateFrom", DateUtils.getDateStr(dateFrom));
+        result.put("dateTo", DateUtils.getDateStr(dateTo));
+        result.put("accessControlURL", serverURL);
+        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+        result.put("hashCertVSBase64", hashCertVSBase64);
+        result.put("originHashCertVSBase64", originHashCertVS);
+        result.put("UUID", UUID.randomUUID().toString());
+        return new JSONObject(result);
+    }
+
     public JSONObject getDelegation(String representativeNif, String representativeName) {
         Map result = new HashMap();
         result.put("representativeNif", representativeNif);

@@ -34,6 +34,7 @@ import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.util.encoders.Base64;
+import org.bouncycastle2.x509.X509CertStoreSelector;
 import org.json.JSONObject;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -60,6 +61,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.security.cert.PKIXParameters;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -291,6 +293,14 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             signerVS = signers.iterator().next();
         }
         return signerVS;
+    }
+
+    public Collection checkSignerCert(X509Certificate x509Cert) {
+        Store certs = smimeSigned.getCertificates();
+        X509CertSelector certSelector = new X509CertSelector();
+        certSelector.setCertificate(x509Cert);
+        X509CertStoreSelector selector = X509CertStoreSelector.getInstance(certSelector);
+        return certs.getMatches(selector);
     }
 
     public TimeStampToken getTimeStampToken(X509Certificate requestCert) throws Exception {

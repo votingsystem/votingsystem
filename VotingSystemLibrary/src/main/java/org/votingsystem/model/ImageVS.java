@@ -79,9 +79,10 @@ public class ImageVS implements java.io.Serializable {
 	}
 
 
-	 public void setType(Type type) {
+	 public ImageVS setType(Type type) {
 		this.type = type;
-	}
+        return this;
+    }
 
 
 	 public byte[] getFileBytes() {

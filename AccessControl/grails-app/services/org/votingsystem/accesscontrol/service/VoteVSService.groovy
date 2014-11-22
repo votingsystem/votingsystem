@@ -64,11 +64,10 @@ class VoteVSService {
                 'timestampDateErrorMsg', [timeStampDate, certificateVS.eventVSElection.dateBegin,
                 certificateVS.eventVSElection.getDateFinish()].toArray(), locale),
                 MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationOutOfDate"))
-        String fromUser = grailsApplication.config.vs.serverName
         String toUser = certificateVS.eventVSElection.controlCenterVS.serverURL
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
         smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIME.id}")
-        SMIMEMessage smimeMessageReq = signatureVSService.getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject)
+        SMIMEMessage smimeMessageReq = signatureVSService.getSMIMEMultiSigned(toUser, smimeMessage, subject)
         String controlCenterURL = certificateVS.eventVSElection.controlCenterVS.serverURL
         String eventURL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${certificateVS.eventVSElection.id}"
         String voteCancellerURL = "${controlCenterURL}/voteVSCanceller?url=${eventURL}"
