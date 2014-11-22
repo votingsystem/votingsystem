@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -22,12 +21,11 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ArgVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -62,6 +60,16 @@ public class VoteService extends IntentService {
                 contextVS.setControlCenter(controlCenter);
             }
             switch(operation) {
+                case VOTING_PUBLISHING:
+                    String textToSign = arguments.getString(ContextVS.MESSAGE_KEY);
+                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                            textToSign, getString(R.string.publish_election_msg_subject));
+                    responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                            ContentTypeVS.JSON_SIGNED, contextVS.getAccessControl().
+                            getPublishServiceURL());
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS.
+                            setNotificationMessage(getString(R.string.election_published_ok_msg));
+                    break;
                 case VOTEVS:
                     VoteSender voteSender = new VoteSender(vote, contextVS);
                     responseVS = voteSender.call();

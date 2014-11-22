@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +59,7 @@ public class RepresentationStateFragment extends Fragment implements
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
+        this.representation = PrefUtils.getRepresentationState(getActivity());
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.representative_state, container, false);
@@ -68,7 +71,6 @@ public class RepresentationStateFragment extends Fragment implements
     }
 
     private void setRepresentationView() {
-        this.representation = PrefUtils.getRepresentationState(getActivity());
         if(representation == null) {
             ((TextView)rootView.findViewById(R.id.last_checked_date)).setText(getString(
                     R.string.representation_state_missing_lbl));
@@ -106,6 +108,15 @@ public class RepresentationStateFragment extends Fragment implements
                 UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
                         representation.getRepresentative().getImageBytes(), getActivity());
                 rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        if(representation == null) return;
+        switch(representation.getState()) {
+            case WITH_ANONYMOUS_REPRESENTATION:
+                menu.removeItem(R.id.new_representative);
                 break;
         }
     }

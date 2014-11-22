@@ -3,11 +3,9 @@ package org.votingsystem.android.fragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
@@ -17,7 +15,6 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
 /**
@@ -36,29 +33,9 @@ public class MessageDialogFragment extends DialogFragment {
         newFragment.show(fragmentManager, MessageDialogFragment.TAG);
     }
 
-    public static void showDialog(Integer statusCode, String caption, String message,
-        String callerId, TypeVS typeVS , FragmentManager fragmentManager) {
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message, callerId, typeVS);
-        newFragment.show(fragmentManager, MessageDialogFragment.TAG);
-    }
-
     public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
         showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage(), fragmentManager);
-    }
-
-    public static MessageDialogFragment newInstance(Integer statusCode, String caption,
-            String message, String callerId, TypeVS typeVS){
-        MessageDialogFragment frag = new MessageDialogFragment();
-        Bundle args = new Bundle();
-        if(statusCode != null) args.putInt(ContextVS.RESPONSE_STATUS_KEY, statusCode);
-        args.putString(ContextVS.CAPTION_KEY, caption);
-        args.putString(ContextVS.CALLER_KEY, callerId);
-        args.putString(ContextVS.MESSAGE_KEY, message);
-        args.putSerializable(ContextVS.TYPEVS_KEY, typeVS);
-        frag.setArguments(args);
-        return frag;
     }
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,
@@ -78,22 +55,12 @@ public class MessageDialogFragment extends DialogFragment {
         int statusCode = getArguments().getInt(ContextVS.RESPONSE_STATUS_KEY, -1);
         String caption = getArguments().getString(ContextVS.CAPTION_KEY);
         String message = getArguments().getString(ContextVS.MESSAGE_KEY);
-        final String callerId = getArguments().getString(ContextVS.CALLER_KEY);
-        final TypeVS typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setPositiveButton(
-                getString(R.string.accept_lbl),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if(callerId != null) {
-                            Intent intent = new Intent(callerId);
-                            intent.putExtra(ContextVS.FRAGMENT_KEY,
-                                    MessageDialogFragment.class.getSimpleName());
-                            intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-                        }
-                        MessageDialogFragment.this.dismiss();
-                    }
-                });
+            getString(R.string.accept_lbl),  new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    MessageDialogFragment.this.dismiss();
+                }
+            });
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
         TextView captionTextView = (TextView) view.findViewById(R.id.caption_text);
         if(caption != null) captionTextView.setText(caption);

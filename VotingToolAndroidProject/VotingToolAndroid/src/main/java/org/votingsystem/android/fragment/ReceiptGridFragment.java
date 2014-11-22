@@ -23,6 +23,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
@@ -32,7 +33,9 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+
 import java.util.Date;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class ReceiptGridFragment extends Fragment implements
@@ -52,7 +55,7 @@ public class ReceiptGridFragment extends Fragment implements
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                    Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.receipt_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.receipt_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridItemMenuOptions = new CharSequence[] {getString(R.string.delete_lbl)};
         adapter = new ReceiptGridAdapter(getActivity(), null,false);

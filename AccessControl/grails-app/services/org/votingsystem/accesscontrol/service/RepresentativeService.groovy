@@ -5,6 +5,7 @@ import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
@@ -361,6 +362,9 @@ class RepresentativeService {
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg
+        AnonymousDelegation anonymousDelegation = representativeDelegationService.getAnonymousDelegation(userVS)
+        if(anonymousDelegation) throw new ValidationExceptionVS(this.getClass(), messageSource.getMessage(
+                'representativeRequestWithActiveAnonymousDelegation', null, locale))
         JSONObject messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         String base64ImageHash = messageJSON.base64ImageHash
         MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);

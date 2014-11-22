@@ -94,7 +94,7 @@ class RepresentativeDelegationService {
         return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
-    @Transactional private AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
+    @Transactional public AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
         AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
                 status:AnonymousDelegation.Status.OK)
         if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {

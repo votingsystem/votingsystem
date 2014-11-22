@@ -1,8 +1,10 @@
 package org.votingsystem.android.activity;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -20,7 +22,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -30,14 +31,13 @@ import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
-import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,7 +45,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -55,7 +54,6 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 public class EventVSNewActivity extends ActivityBase {
 	
 	public static final String TAG = EventVSNewActivity.class.getSimpleName();
-
 
     private AppContextVS contextVS;
     private EditText dateElectionText;
@@ -71,14 +69,9 @@ public class EventVSNewActivity extends ActivityBase {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchPublishService();
             else {
                 setProgressDialogVisible(false);
-                String fragment = intent.getStringExtra(ContextVS.FRAGMENT_KEY);
-                if(MessageDialogFragment.class.getSimpleName().equals(fragment)) {
-                    EventVSNewActivity.this.onBackPressed();
-                    return;
-                }
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     if(optionList.contains(message)) {
@@ -93,21 +86,16 @@ public class EventVSNewActivity extends ActivityBase {
                     return;
                 }
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    MessageDialogFragment.showDialog(ResponseVS.SC_OK,
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             responseVS.getCaption(), responseVS.getNotificationMessage(),
-                            broadCastId, TypeVS.VOTING_PUBLISHING, getSupportFragmentManager());
-                    /*message = message + " " + getString(R.string.publish_document_OK_sufix_msg);
-                    AlertDialog dialog = new AlertDialog.Builder(this).setTitle(caption).
-                            setMessage(message).setPositiveButton(R.string.ok_lbl,
+                            EventVSNewActivity.this);
+                    builder.setPositiveButton(getString(R.string.continue_lbl),
                             new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            Intent intent = new Intent(this.getApplicationContext(),
-                                    EventVSMainActivity.class);
-                            startActivity(intent);
-                        }
-                    }).show();
-                    //to avoid avoid dissapear on screen orientation change
-                    dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);*/
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    EventVSNewActivity.this.onBackPressed();
+                                }
+                            });
+                    UIUtils.showMessageDialog(builder);
                 } else {
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(), getString(
                             R.string.publish_document_ERROR_msg), Html.fromHtml(
@@ -138,15 +126,12 @@ public class EventVSNewActivity extends ActivityBase {
 
     };
 
-    private void launchSignAndSendService() {
-        LOGD(TAG + ".launchSignAndSendService", "launchSignAndSendService");
-        String serviceURL = contextVS.getAccessControl().getPublishServiceURL();
-        String signedMessageSubject = null;
+    private void launchPublishService() {
+        LOGD(TAG + ".launchPublishService", "launchPublishService");
         EventVS eventVS = new EventVS();
         eventVS.setSubject(subjectEditText.getText().toString());
         eventVS.setContent(((EditorFragment) getSupportFragmentManager().
                 findFragmentByTag(EditorFragment.TAG)).getEditorData());
-        signedMessageSubject = getString(R.string.publish_election_msg_subject);
         eventVS.setDateBegin(dateElectionCalendar.getTime());
         eventVS.setDateFinish(DateUtils.addDays(dateElectionCalendar.getTime(), 1).getTime());
         if(!optionList.isEmpty()) {
@@ -162,10 +147,6 @@ public class EventVSNewActivity extends ActivityBase {
             Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
-            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED);
-            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             JSONObject documentToSign = eventVS.toJSON();
             documentToSign.put("UUID", UUID.randomUUID().toString());
             startIntent.putExtra(ContextVS.MESSAGE_KEY, documentToSign.toString());

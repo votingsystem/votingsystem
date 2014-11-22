@@ -18,7 +18,6 @@ import org.votingsystem.model.TypeVS;
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CURSOR_POSITION_KEY;
 import static org.votingsystem.model.ContextVS.EVENT_STATE_KEY;
-import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

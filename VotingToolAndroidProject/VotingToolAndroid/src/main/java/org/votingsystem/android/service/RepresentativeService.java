@@ -15,13 +15,11 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.SignedMapSender;
-import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -31,7 +29,6 @@ import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
@@ -414,12 +411,11 @@ public class RepresentativeService extends IntentService {
                 responseVS.setCaption(getString(R.string.new_representative_error_caption));
             } else {
                 responseVS.setCaption(getString(R.string.operation_ok_msg));
+                responseVS.setNotificationMessage(getString(R.string.new_representative_ok_notification_msg));
                 new Thread(
                     new Runnable() { @Override public void run() {updateRepresentationState();}
                 }).start();
-
             }
-            responseVS.setNotificationMessage(getString(R.string.new_representative_ok_notification_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
