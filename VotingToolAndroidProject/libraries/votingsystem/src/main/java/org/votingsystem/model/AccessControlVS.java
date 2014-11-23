@@ -163,6 +163,18 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/anonymousDelegation";
     }
 
+    public String getRepresentativeRevokeServiceURL() {
+        return getServerURL() + "/representative/revoke";
+    }
+
+    public String getVoteVSCheckServiceURL(String hashHex) {
+        return getServerURL() + "/voteVS/hash/" + hashHex;
+    }
+
+    public String getCancelAnonymousDelegationServiceURL() {
+        return getServerURL() + "/representative/cancelAnonymousDelegation";
+    }
+
     public static AccessControlVS parse(String actorVSStr) throws Exception {
         JSONObject actorVSJSON = new JSONObject(actorVSStr);
         JSONObject jsonObject = null;
@@ -204,14 +216,6 @@ public class AccessControlVS extends ActorVS implements Serializable {
             actorVS.setUrlTimeStampServer((String) actorVSJSON.get("urlTimeStampServer"));
         }
         return actorVS;
-    }
-
-    public String getRepresentativeRevokeServiceURL() {
-        return getServerURL() + "/representative/revoke";
-    }
-
-    public String getVoteVSCheckServiceURL(String hashHex) {
-        return getServerURL() + "/voteVS/hash/" + hashHex;
     }
 
 }

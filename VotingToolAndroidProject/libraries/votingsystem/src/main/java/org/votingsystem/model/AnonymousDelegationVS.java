@@ -63,7 +63,8 @@ public class AnonymousDelegationVS extends ReceiptContainer {
                 ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive.toString());
+                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive.toString(),
+                DateUtils.getDateStr(dateFrom), DateUtils.getDateStr(dateTo));
         setTypeVS(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
     }
 
@@ -191,9 +192,11 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         result.put("dateFrom", DateUtils.getDateStr(dateFrom));
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+        result.put("representativeNif", representative.getNif());
+        result.put("representativeName", representative.getFullName());
         result.put("hashCertVSBase64", hashCertVSBase64);
         result.put("originHashCertVSBase64", originHashCertVS);
+        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED.toString());
         result.put("UUID", UUID.randomUUID().toString());
         return new JSONObject(result);
     }

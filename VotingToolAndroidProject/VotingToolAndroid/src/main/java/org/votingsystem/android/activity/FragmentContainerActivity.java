@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -52,7 +53,7 @@ public class FragmentContainerActivity extends ActionBarActivity {
         try {
             Class clazz = Class.forName(fragmentClass);
             Fragment fragment = (Fragment)clazz.newInstance();
-            fragment.setArguments(getIntent().getExtras());
+            fragment.setArguments(Utils.intentToFragmentArguments(getIntent()));
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                             ((Object)fragment).getClass().getSimpleName()).commit();
         } catch(Exception ex) {

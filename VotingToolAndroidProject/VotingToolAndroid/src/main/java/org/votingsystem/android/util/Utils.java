@@ -58,9 +58,7 @@ public class Utils {
 
     public static Bundle intentToFragmentArguments(Intent intent) {
         Bundle arguments = new Bundle();
-        if (intent == null) {
-            return arguments;
-        }
+        if (intent == null)return arguments;
         final Uri data = intent.getData();
         if (data != null) {
             arguments.putParcelable("_uri", data);

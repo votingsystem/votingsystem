@@ -327,10 +327,7 @@ class RepresentativeController {
         if(!messageSMIME) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
         }
-        ResponseVS responseVS = representativeDelegationService.cancelAnonymousDelegation(messageSMIME, request.getLocale())
-        if (ResponseVS.SC_OK == responseVS.statusCode){
-            responseVS.setContentType(ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
-        }
+        ResponseVS responseVS = representativeDelegationService.cancelAnonymousDelegation(messageSMIME)
         return [responseVS : responseVS]
     }
 

@@ -3,6 +3,7 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -14,6 +15,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

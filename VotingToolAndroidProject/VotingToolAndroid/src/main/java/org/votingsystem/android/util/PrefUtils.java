@@ -257,14 +257,20 @@ public class PrefUtils {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        byte[] serializedObject = ObjectUtils.serializeObject(delegation);
+        Representation representation = null;
+        String serializedDelegation = null;
         try {
-            editor.putString(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY,
-                    new String(serializedObject, "UTF-8"));
+            if(delegation != null) {
+                serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
+                representation = new Representation(Calendar.getInstance().getTime(),
+                        Representation.State.WITH_ANONYMOUS_REPRESENTATION, delegation.getRepresentative(),
+                        delegation.getDateTo());
+            } else {
+                representation = new Representation(Calendar.getInstance().getTime(),
+                        Representation.State.WITHOUT_REPRESENTATION, null, null);
+            }
+            editor.putString(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, serializedDelegation);
             editor.commit();
-            Representation representation = new Representation(Calendar.getInstance().getTime(),
-                    Representation.State.WITH_ANONYMOUS_REPRESENTATION, delegation.getRepresentative(),
-                    delegation.getDateTo());
             putRepresentationState(representation, context);
             anonymousDelegation = delegation;
         } catch(Exception ex) {ex.printStackTrace();}

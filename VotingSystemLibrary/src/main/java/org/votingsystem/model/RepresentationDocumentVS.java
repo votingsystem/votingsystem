@@ -101,8 +101,9 @@ public class RepresentationDocumentVS implements Serializable {
 		return state;
 	}
 
-	public void setState(State state) {
+	public RepresentationDocumentVS setState(State state) {
 		this.state = state;
+        return this;
 	}
 
 	public UserVS getUserVS() {

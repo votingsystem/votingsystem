@@ -295,7 +295,14 @@ public class RepresentativeService extends IntentService {
             if(anonymousDelegation == null) {
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                         getString(R.string.missing_anonymous_delegation_cancellation_data));
-            } else responseVS = cancelAnonymousDelegation(anonymousDelegation);
+            } else {
+                responseVS = cancelAnonymousDelegation(anonymousDelegation);
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    PrefUtils.putAnonymousDelegation(null, this);
+                    responseVS.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
+                            setNotificationMessage(getString(R.string.cancel_anonymouys_representation_ok_msg));
+                }
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
@@ -312,10 +319,11 @@ public class RepresentativeService extends IntentService {
         JSONObject requestJSON = anonymousDelegation.getCancellationRequest();
         ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
                 requestJSON.toString(), getString(R.string.anonymous_delegation_cancellation_lbl));
+        responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(), ContentTypeVS.JSON_SIGNED,
+                contextVS.getAccessControl().getCancelAnonymousDelegationServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     responseVS.getMessageBytes()));
-            delegationReceipt.isValidSignature();
             Collection matches = delegationReceipt.checkSignerCert(
                     contextVS.getAccessControl().getCertificate());
             if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
@@ -365,7 +373,6 @@ public class RepresentativeService extends IntentService {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
                             responseVS.getMessageBytes()));
-                    delegationReceipt.isValidSignature();
                     Collection matches = delegationReceipt.checkSignerCert(
                             contextVS.getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");

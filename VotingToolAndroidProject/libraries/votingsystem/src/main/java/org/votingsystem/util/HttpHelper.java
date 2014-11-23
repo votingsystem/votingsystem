@@ -43,7 +43,7 @@ import static org.votingsystem.model.ContextVS.SIGNED_FILE_NAME;
 */
 public class HttpHelper {
     
-	public static final String TAG = "HttpHelper";
+	public static final String TAG = HttpHelper.class.getSimpleName();
     
     private static final DefaultHttpClient httpclient;
     private static final ThreadSafeClientConnManager cm;
@@ -66,13 +66,12 @@ public class HttpHelper {
     public void shutdown () {
         try { httpclient.getConnectionManager().shutdown(); } 
         catch (Exception ex) {
-            Log.e(TAG + ".shutdown" , ex.getMessage());
+            ex.printStackTrace();
         }
     }
     
     public static ResponseVS getData (String serverURL, ContentTypeVS contentType) {
-        Log.d(TAG + ".getData" ," - serverURL: " + serverURL +
-                " - contentType: " + contentType);
+        Log.d(TAG + ".getData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;
@@ -110,10 +109,9 @@ public class HttpHelper {
 
 
     public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
-              String serverURL, String... headerNames) throws IOException {
+              String serverURL, String... headerNames) {
         HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendData" , " - serverURL: " + serverURL +
-                " - contentType: " + contentType);
+        Log.d(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;
@@ -148,12 +146,12 @@ public class HttpHelper {
         return responseVS;
     }
 
-    public static ResponseVS sendFile (File file, String serverURL) throws IOException {
+    public static ResponseVS sendFile (File file, String serverURL) {
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);
-            Log.d(TAG + ".sendFile" , " - serverURL: " + httpPost.getURI()
+            Log.d(TAG + ".sendFile" , "serverURL: " + httpPost.getURI()
                     + " - file: " + file.getAbsolutePath());
             FileBody fileBody = new FileBody(file);
             MultipartEntity reqEntity = new MultipartEntity();

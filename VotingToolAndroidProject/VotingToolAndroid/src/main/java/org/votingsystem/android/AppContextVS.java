@@ -144,13 +144,13 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public X509Certificate getCert(String serverURL) {
-        LOGD(TAG + ".getCert", " - getCert - serverURL: " + serverURL);
+        LOGD(TAG + ".getCert", "serverURL: " + serverURL);
         if(serverURL == null) return null;
         return certsMap.get(serverURL);
     }
 
     public void putCert(String serverURL, X509Certificate cert) {
-        LOGD(TAG + ".putCert", " serverURL: " + serverURL);
+        LOGD(TAG + ".putCert", "serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
     }
 

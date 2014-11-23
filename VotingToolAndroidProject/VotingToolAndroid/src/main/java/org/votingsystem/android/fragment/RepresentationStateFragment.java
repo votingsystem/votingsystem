@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.RepresentativeService;
@@ -56,7 +57,13 @@ public class RepresentationStateFragment extends Fragment implements
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
         else {
             setProgressDialogVisible(false);
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                switch(responseVS.getTypeVS()) {
+                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                        break;
+                }
+            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
                     responseVS, getFragmentManager());
         }
         }
@@ -71,14 +78,10 @@ public class RepresentationStateFragment extends Fragment implements
         rootView = inflater.inflate(R.layout.representative_state, container, false);
         ((WebView)rootView.findViewById(R.id.representative_description)).setBackgroundColor(
                 getResources().getColor(R.color.bkg_screen_vs));
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
         setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
         setHasOptionsMenu(true);
         return rootView;
-    }
-
-    @Override public void onStart() {
-        super.onStart();
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
     }
 
     private void setRepresentationView(Representation representation) {
@@ -102,6 +105,7 @@ public class RepresentationStateFragment extends Fragment implements
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_public_representation_msg));
                 rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
+                printRepresentativeData(representation.getRepresentative());
                 break;
             case WITH_ANONYMOUS_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
@@ -144,6 +148,8 @@ public class RepresentationStateFragment extends Fragment implements
                 if(anonymousDelegationVS == null)
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                 break;
+            default:
+                menu.removeItem(R.id.cancel_anonymouys_representation);
         }
     }
 

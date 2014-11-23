@@ -76,7 +76,9 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
                 if(contentType == ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED) {
                     receipt = Encryptor.decryptSMIME(responseVS.getMessageBytes(),
                             certificationRequest.getKeyPair().getPrivate());
-                } else receipt = new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes()));
+                } else if(contentType == ContentTypeVS.JSON_SIGNED) {
+                    receipt = new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes()));
+                }
                 responseVS.setSMIME(receipt);
             } else return responseVS;
         } catch(Exception ex) {

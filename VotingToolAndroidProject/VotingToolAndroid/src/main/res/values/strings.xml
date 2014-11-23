@@ -51,7 +51,7 @@
     <string name="empty_search_lbl">consulta sin resultados</string>
 	<string name="keyguard_password_enter_pin_code">introduzca el código PIN de votación</string>
 	<string name="keyguard_password_enter_first_pin_code">introduzca el código PIN que deberá introducir en cada votación</string>
-	<string name="pin_dialog_caption">pin de su certificado</string>
+	<string name="pin_dialog_caption">pin de firma</string>
 	<string name="invalidPin">código pin inválido</string>
 	<string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
 	<string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
@@ -435,8 +435,8 @@
     <string name="representation_state_missing_lbl">seleccione la opción \'consultar estado de mi representación\'</string>
     <string name="representation_last_checked_msg">última actualización: \'%1$s\'</string>
     <string name="without_representative_msg">no tiene activa ninguna representación</string>
-    <string name="with_public_representation_msg">tiene activa una representación NO ANONIMA</string>
-    <string name="with_anonymous_representation_msg">tiene activa una REPRESENTACION ANONIMA que termina el \'%1$s\'</string>
+    <string name="with_public_representation_msg">tiene activa una representación \'no anónima\'</string>
+    <string name="with_anonymous_representation_msg">tiene activa una \'representación anónima\' que termina el \'%1$s\'</string>
     <string name="representative_msg">está dado de alta como representante</string>
     <string name="fetching_receipt_lbl">obteniendo recibo</string>
     <string name="anonymous_representative_selection_formatted"><![CDATA[delegación anónima de representante
@@ -450,4 +450,5 @@
     <string name="missing_anonymous_delegation_cancellation_data">no dispone de la información necesaria para cancelar la representación anónima</string>
     <string name="user_representative_lbl">su representante</string>
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
+    <string name="cancel_anonymouys_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
 </resources>

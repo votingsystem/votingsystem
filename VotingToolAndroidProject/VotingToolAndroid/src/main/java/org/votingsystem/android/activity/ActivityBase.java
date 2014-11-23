@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 
 public abstract class ActivityBase extends ActionBarActivity {
