@@ -4,14 +4,12 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.MessageTimeStamper;
-import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.util.PrefUtils;
@@ -34,7 +32,6 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
-
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
@@ -44,7 +41,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -128,12 +124,18 @@ public class VicketService extends IntentService {
 
     private ResponseVS cancelVicket(Vicket vicket) {
         VicketServer vicketServer = contextVS.getVicketServer();
-        SMIMESignedSender signedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
-                vicketServer.getNameNormalized(), vicketServer.getVicketCancelServiceURL(),
-                vicket.getCancellationRequest().toString(), ContentTypeVS.JSON_SIGNED,
-                getString(R.string.vicket_cancellation_msg_subject), vicketServer.getCertificate(),
-                (AppContextVS)getApplicationContext());
-        return signedSender.call();
+        ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
+                vicket.getCancellationRequest().toString(),
+                getString(R.string.vicket_cancellation_msg_subject));
+        try {
+            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                    ContentTypeVS.JSON_SIGNED, vicketServer.getTransactionVSServiceURL());
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
+        } finally {
+            return responseVS;
+        }
     }
 
     private ResponseVS cancelVickets(Collection<Vicket> sendedVickets) {

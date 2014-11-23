@@ -8,11 +8,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.model.ContentTypeVS;
@@ -25,10 +23,8 @@ import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -94,13 +90,11 @@ public class VoteService extends IntentService {
                     break;
                 case CANCEL_VOTE:
                     JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                    SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                            contextVS.getUserVS().getNif(), contextVS.getAccessControl().getNameNormalized(),
-                            contextVS.getAccessControl().getCancelVoteServiceURL(), cancelDataJSON.toString(),
-                            ContentTypeVS.JSON_SIGNED, getString(R.string.cancel_vote_msg_subject),
-                            contextVS.getAccessControl().getCertificate(),
-                            (AppContextVS)getApplicationContext());
-                    responseVS = smimeSignedSender.call();
+                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                            cancelDataJSON.toString(), getString(R.string.cancel_vote_msg_subject));
+                    responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                            ContentTypeVS.JSON_SIGNED,
+                            contextVS.getAccessControl().getCancelVoteServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         SMIMEMessage cancelReceipt = responseVS.getSMIME();
                         vote.setCancelVoteReceipt(cancelReceipt);

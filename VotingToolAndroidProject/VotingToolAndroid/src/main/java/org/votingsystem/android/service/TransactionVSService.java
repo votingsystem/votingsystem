@@ -3,21 +3,18 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
-
 
 /**
  * @author jgzornoza
@@ -46,11 +43,10 @@ public class TransactionVSService extends IntentService {
         try {
             JSONObject transactionVSJSON = transactionVS.transactionFromUserVSJSON(fromUserIBAN);
             VicketServer vicketServer = contextVS.getVicketServer();
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                    contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
-                    vicketServer.getTransactionVSServiceURL(), transactionVSJSON.toString(),
-                    ContentTypeVS.JSON_SIGNED, getString(R.string.FROM_USERVS_msg_subject), null, contextVS);
-            responseVS = smimeSignedSender.call();
+            responseVS = contextVS.signMessage(transactionVS.getToUserVS().getIBAN(),
+                    transactionVSJSON.toString(), getString(R.string.FROM_USERVS_msg_subject));
+            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                    ContentTypeVS.JSON_SIGNED, vicketServer.getTransactionVSServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
