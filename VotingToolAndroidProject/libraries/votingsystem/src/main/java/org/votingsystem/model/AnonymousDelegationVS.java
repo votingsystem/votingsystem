@@ -37,6 +37,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
     private Integer weeksOperationActive;
     private String serverURL;
     private CertificationRequestVS certificationRequest;
+    private UserVS representative;
     private Date dateFrom;
     private Date dateTo;
 
@@ -163,6 +164,14 @@ public class AnonymousDelegationVS extends ReceiptContainer {
 
     public void setWeeksOperationActive(Integer weeksOperationActive) {
         this.weeksOperationActive = weeksOperationActive;
+    }
+
+    public UserVS getRepresentative() {
+        return representative;
+    }
+
+    public void setRepresentative(UserVS representative) {
+        this.representative = representative;
     }
 
     public JSONObject getRequest() {

@@ -17,6 +17,7 @@ import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -35,7 +36,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.security.MessageDigest;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -63,8 +63,14 @@ public class RepresentativeService extends IntentService {
         contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
-        LOGD(TAG + ".onHandleIntent", "operation: " + operation);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+        LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - serviceCaller: " + serviceCaller);
+        ResponseVS responseVS = UIUtils.checkIfAvailable(contextVS.getAccessControlURL(), contextVS);
+        if(responseVS != null) {
+            contextVS.broadcastResponse(responseVS.setServiceCaller(
+                    serviceCaller).setTypeVS(operation));
+            return;
+        }
         switch(operation) {
             case ITEMS_REQUEST:
                 requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
@@ -90,6 +96,9 @@ public class RepresentativeService extends IntentService {
                 break;
             case STATE:
                 checkRepresentationState(serviceCaller);
+                break;
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                cancelAnonymousDelegation(intent.getExtras(), serviceCaller);
                 break;
             default: LOGD(TAG + ".onHandleIntent", "unhandled operation: " + operation.toString());
         }
@@ -283,8 +292,12 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = null;
         try {
             AnonymousDelegationVS anonymousDelegation = PrefUtils.getAnonymousDelegation(this);
-            responseVS = cancelAnonymousDelegation(anonymousDelegation);
+            if(anonymousDelegation == null) {
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                        getString(R.string.missing_anonymous_delegation_cancellation_data));
+            } else responseVS = cancelAnonymousDelegation(anonymousDelegation);
         } catch (Exception ex) {
+            ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
@@ -338,14 +351,10 @@ public class RepresentativeService extends IntentService {
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-                X509Certificate anonymousCert = anonymousDelegation.getCertificationRequest().
-                        getCertificate();
-                anonymousDelegation.setDateFrom(anonymousCert.getNotBefore());
-                anonymousDelegation.setDateTo(anonymousCert.getNotAfter());
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
                 String toUser = contextVS.getAccessControl().getNameNormalized();
-                //delegation signed with anonymous certificate (with representative data)
+                //delegation signed with anonymous certificate (with delegation data)
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, anonymousDelegation.getDelegation(representative.getNif(),
                         representative.getFullName()).toString(), messageSubject, null,
@@ -360,6 +369,7 @@ public class RepresentativeService extends IntentService {
                     Collection matches = delegationReceipt.checkSignerCert(
                             contextVS.getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+                    anonymousDelegation.setRepresentative(representative);
                     PrefUtils.putAnonymousDelegation(anonymousDelegation, this);
                     responseVS.setCaption(getString(R.string.anonymous_delegation_caption)).setNotificationMessage(
                             getString(R.string.anonymous_delegation_msg,

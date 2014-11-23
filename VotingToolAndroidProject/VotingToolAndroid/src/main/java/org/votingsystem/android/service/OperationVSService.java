@@ -3,6 +3,7 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,22 +20,24 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignAndSendService extends IntentService {
+public class OperationVSService extends IntentService {
 
-    public static final String TAG = SignAndSendService.class.getSimpleName();
+    public static final String TAG = OperationVSService.class.getSimpleName();
 
-    public SignAndSendService() { super(TAG); }
+    public OperationVSService() { super(TAG); }
 
     private AppContextVS contextVS;
 

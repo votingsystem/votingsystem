@@ -64,7 +64,10 @@ public class MessageDialogFragment extends DialogFragment {
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
         TextView captionTextView = (TextView) view.findViewById(R.id.caption_text);
         if(caption != null) captionTextView.setText(caption);
-        else captionTextView.setVisibility(View.GONE);
+        else {
+            captionTextView.setVisibility(View.GONE);
+            view.findViewById(R.id.separator).setVisibility(View.GONE);
+        }
         if(message != null) messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         AlertDialog dialog = builder.create();

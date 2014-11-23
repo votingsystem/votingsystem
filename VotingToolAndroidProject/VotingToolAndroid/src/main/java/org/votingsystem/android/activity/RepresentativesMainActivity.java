@@ -48,32 +48,41 @@ public class RepresentativesMainActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
-                launchRepresentativeService(TypeVS.REPRESENTATIVE_REVOKE);
-            else {
-                setProgressDialogVisible(null, null, false);
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
-                } else {
-                    if(responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                                getString(R.string.revoke_representative_msg_subject),
-                                getString(R.string.operation_ok_msg), getSupportFragmentManager());
-                    }
+        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
+            launchRepresentativeService((TypeVS) intent.getSerializableExtra(
+                    ContextVS.TYPEVS_KEY));
+        else {
+            setProgressDialogVisible(null, null, false);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+            } else {
+                if(responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
+                    MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                            getString(R.string.revoke_representative_msg_subject),
+                            getString(R.string.operation_ok_msg), getSupportFragmentManager());
                 }
             }
+        }
         }
     };
 
     private void launchRepresentativeService(TypeVS operationType) {
-        LOGD(TAG + ".revokeRepresentative", "revokeRepresentative");
+        LOGD(TAG + ".revokeRepresentative", "operationType: " + operationType.toString());
         Intent startIntent = new Intent(this, RepresentativeService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        setProgressDialogVisible(getString(R.string.wait_msg),
-                getString(R.string.revoke_representative_msg_subject),true);
+        String caption = null;
+        switch(operationType) {
+            case REPRESENTATIVE_REVOKE:
+                caption = getString(R.string.revoke_representative_msg_subject);
+                break;
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                caption = getString(R.string.cancel_anonymouys_representation_lbl);
+                break;
+        }
+        setProgressDialogVisible(caption, getString(R.string.wait_msg), true);
         startService(startIntent);
     }
 
@@ -91,9 +100,9 @@ public class RepresentativesMainActivity extends ActivityBase {
                 fragment, RepresentationStateFragment.TAG).commit();
     }
 
-
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
+        AlertDialog.Builder builder = null;
         switch (item.getItemId()) {
                 /*case R.id.reload:
                 fetchItems(offset);
@@ -101,23 +110,35 @@ public class RepresentativesMainActivity extends ActivityBase {
                 getLoaderManager().restartLoader(loaderId, null, this);
                 return true;*/
             case R.id.cancel_anonymouys_representation:
-                return true;
-            case R.id.new_representative:
-                Intent intent = new Intent(this, RepresentativeNewActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.cancel_representative:
-                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                        getString(R.string.remove_representative_caption),
-                        getString(R.string.remove_representative_msg), this);
+                builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.cancel_anonymouys_representation_lbl),
+                        getString(R.string.cancel_anonymouys_representation_msg), this);
                 builder.setPositiveButton(getString(R.string.continue_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getSupportFragmentManager(),
                                         broadCastId, getString(R.string.enter_signature_pin_msg),
-                                        false, null);
+                                        false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                return true;
+            case R.id.new_representative:
+                Intent intent = new Intent(this, RepresentativeNewActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.representative_revoke:
+                builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.remove_representative_caption),
+                        getString(R.string.remove_representative_msg), this);
+                builder.setPositiveButton(getString(R.string.continue_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                                broadCastId, getString(R.string.enter_signature_pin_msg),
+                                false, TypeVS.REPRESENTATIVE_REVOKE);
+                        }
+                    }).setNegativeButton(getString(R.string.cancel_lbl), null);
                 builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.edit_representative:
@@ -192,6 +213,5 @@ public class RepresentativesMainActivity extends ActivityBase {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
-
 
 }

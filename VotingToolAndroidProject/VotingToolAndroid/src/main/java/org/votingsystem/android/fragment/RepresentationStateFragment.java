@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,15 +18,16 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -43,6 +45,7 @@ public class RepresentationStateFragment extends Fragment implements
 
     private AppContextVS contextVS;
     private Representation representation;
+    private AnonymousDelegationVS anonymousDelegationVS;
     private View rootView;
     private String broadCastId = RepresentationStateFragment.class.getSimpleName();
 
@@ -51,7 +54,11 @@ public class RepresentationStateFragment extends Fragment implements
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
-        else setProgressDialogVisible(false);
+        else {
+            setProgressDialogVisible(false);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
+                    responseVS, getFragmentManager());
+        }
         }
     };
 
@@ -59,18 +66,23 @@ public class RepresentationStateFragment extends Fragment implements
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        this.representation = PrefUtils.getRepresentationState(getActivity());
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.representative_state, container, false);
         ((WebView)rootView.findViewById(R.id.representative_description)).setBackgroundColor(
                 getResources().getColor(R.color.bkg_screen_vs));
-        setRepresentationView();
+        setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
         setHasOptionsMenu(true);
         return rootView;
     }
 
-    private void setRepresentationView() {
+    @Override public void onStart() {
+        super.onStart();
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
+    }
+
+    private void setRepresentationView(Representation representation) {
+        this.representation = representation;
         if(representation == null) {
             ((TextView)rootView.findViewById(R.id.last_checked_date)).setText(getString(
                     R.string.representation_state_missing_lbl));
@@ -95,21 +107,33 @@ public class RepresentationStateFragment extends Fragment implements
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
                                 representation.getDateTo())));
+                anonymousDelegationVS = PrefUtils.getAnonymousDelegation(getActivity());
+                if(anonymousDelegationVS != null) {
+                    printRepresentativeData(anonymousDelegationVS.getRepresentative());
+                } else {
+                    ((TextView)rootView.findViewById(R.id.representative_name)).setText(
+                            getString(R.string.missing_anonymous_delegation_cancellation_data));
+                    rootView.findViewById(R.id.representative_image).setVisibility(View.GONE);
+                }
                 break;
             case REPRESENTATIVE:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.representative_msg));
-                ((TextView)rootView.findViewById(R.id.representative_name)).setText(
-                        representation.getRepresentative().getFullName());
-                String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
-                                representation.getRepresentative().getDescription() + "</body></html>";
-                ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                        representativeDescription, "text/html; charset=UTF-8", "UTF-8");
-                UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
-                        representation.getRepresentative().getImageBytes(), getActivity());
-                rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
+                printRepresentativeData(representation.getRepresentative());
                 break;
         }
+    }
+
+    private void printRepresentativeData(UserVS representative) {
+        ((TextView)rootView.findViewById(R.id.representative_name)).setText(
+                representative.getFullName());
+        String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
+                representative.getDescription() + "</body></html>";
+        ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
+                representativeDescription, "text/html; charset=UTF-8", "UTF-8");
+        UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
+                representative.getImageBytes(), getActivity());
+        rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -117,6 +141,8 @@ public class RepresentationStateFragment extends Fragment implements
         switch(representation.getState()) {
             case WITH_ANONYMOUS_REPRESENTATION:
                 menu.removeItem(R.id.new_representative);
+                if(anonymousDelegationVS == null)
+                    menu.removeItem(R.id.cancel_anonymouys_representation);
                 break;
         }
     }
@@ -168,7 +194,7 @@ public class RepresentationStateFragment extends Fragment implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(Representation.class.getSimpleName().equals(key)) {
             LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
-            setRepresentationView();
+            setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
         }
     }
 

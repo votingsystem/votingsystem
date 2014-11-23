@@ -177,7 +177,7 @@ class CsrService {
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
         Date certValidFrom = DateUtils.getMonday(Calendar.getInstance()).getTime()
         Calendar calendarValidTo = Calendar.getInstance();
-        calendarValidTo.add(Calendar.DATE, ContextVS.DAYS_ANONYMOUS_DELEGATION_DURATION);
+        calendarValidTo.add(Calendar.DATE, 1);//cert valid for one day
         X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, calendarValidTo.getTime())
         if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)

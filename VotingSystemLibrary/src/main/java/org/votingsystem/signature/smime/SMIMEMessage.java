@@ -21,6 +21,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
+import org.bouncycastle.x509.X509CertStoreSelector;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -36,7 +37,9 @@ import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.PKIXParameters;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Arrays;
@@ -289,6 +292,14 @@ public class SMIMEMessage extends MimeMessage {
         if(contentInfo == null) isValidSignature();
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         return Base64.getEncoder().encodeToString(messageDigest.digest(signedContent.getBytes()));
+    }
+
+    public Collection checkSignerCert(X509Certificate x509Cert) throws Exception {
+        if(smimeSigned == null) isValidSignature();
+        Store certs = smimeSigned.getCertificates();
+        X509CertificateHolder holder = new X509CertificateHolder(x509Cert.getEncoded());
+        SignerId signerId = new SignerId(holder.getIssuer(), x509Cert.getSerialNumber());
+        return certs.getMatches(signerId);
     }
 
     public class SMIMEContentInfo {

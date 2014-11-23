@@ -12,6 +12,10 @@
         android:textColor="@color/event_subject"
         android:layout_gravity="center_horizontal"/>
 
+    <View android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/bkg_vs"/>
+
     <TextView android:id="@+id/msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,6 +24,10 @@
         android:layout_marginRight="15dp"
         android:textColor="@color/bkg_vs"
         android:layout_gravity="center_horizontal"/>
+
+    <View android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/bkg_vs"/>
 
     <LinearLayout android:id="@+id/representative_container"
         android:layout_width="fill_parent"

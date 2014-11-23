@@ -384,7 +384,6 @@ class RepresentativeService {
             msg = messageSource.getMessage('representativeDataCreatedOKMsg',
                     [userVS.firstName, userVS.lastName].toArray(), locale)
         } else {
-            def representations = UserVS.countByRepresentative(userVS)
             msg = messageSource.getMessage('representativeDataUpdatedMsg',
                     [userVS.firstName, userVS.lastName].toArray(), locale)
         }
@@ -396,7 +395,7 @@ class RepresentativeService {
         newImage.save()
         List<MessageSMIME>  previousMessages = MessageSMIME.findAllWhere(userVS:userVS, type:TypeVS.REPRESENTATIVE_DATA)
         for(MessageSMIME message: previousMessages) {
-            message.setType(TypeVS.REPRESENTATIVE_DATA_OLD).save()
+            message.setType(TypeVS.REPRESENTATIVE_DATA_CANCELLED).save()
         }
         log.debug "saveRepresentativeData - user:${userVS.nif} - image: ${newImage.id}"
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,  type:TypeVS.REPRESENTATIVE_DATA)
@@ -527,19 +526,12 @@ class RepresentativeService {
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME();
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processRevoke - user ${userVS.nif}")
-        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-        if(TypeVS.REPRESENTATIVE_REVOKE != operationType) {
-            msg = messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(), locale)
-            log.error "processRevoke - OPERATION ERROR - ${msg}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
-        }
-        if(UserVS.Type.REPRESENTATIVE != userVS.type) {
-            msg = messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg', [userVS.nif].toArray(), locale)
-            log.error "processRevoke - USER TYPE ERROR - ${msg}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
-        }
+        if(TypeVS.REPRESENTATIVE_REVOKE != operationType) throw new ExceptionVS(
+                messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(), locale))
+        if(UserVS.Type.REPRESENTATIVE != userVS.type) throw new ExceptionVS(
+                messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg', [userVS.nif].toArray(), locale))
         //(TODO notify users)=====
         def representedUsers = UserVS.createCriteria().scroll {
             eq("representative", userVS)
@@ -589,9 +581,7 @@ class RepresentativeService {
 		String msg = null
 		SMIMEMessage smimeMessage = messageSMIMEReq.getSMIME()
 		UserVS userVS = messageSMIMEReq.getUserVS();
-		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
-		RepresentationDocumentVS representationDocument = null
-		def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
         Date selectedDate = getDateFromString(messageJSON.selectedDate)
         if(!requestValidatedNIF || !messageJSON.operation ||

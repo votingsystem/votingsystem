@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -30,7 +31,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.service.OperationVSService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -38,6 +39,7 @@ import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -144,7 +147,7 @@ public class EventVSNewActivity extends ActivityBase {
             eventVS.setFieldsEventVS(voteOptionSet);
         }
         try {
-            Intent startIntent = new Intent(this, SignAndSendService.class);
+            Intent startIntent = new Intent(this, OperationVSService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             JSONObject documentToSign = eventVS.toJSON();

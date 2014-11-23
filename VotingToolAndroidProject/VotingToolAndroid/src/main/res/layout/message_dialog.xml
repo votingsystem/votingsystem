@@ -28,7 +28,8 @@
             android:textSize="21sp" />
     </LinearLayout>
 
-    <View android:layout_width="fill_parent"
+    <View android:id="@+id/separator"
+        android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="@color/bkg_vs"/>
 

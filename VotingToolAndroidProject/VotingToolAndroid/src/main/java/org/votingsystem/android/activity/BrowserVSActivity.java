@@ -19,7 +19,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.service.OperationVSService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -81,7 +81,7 @@ public class BrowserVSActivity extends ActivityBase {
     private void launchSignAndSendService() {
         LOGD(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
         try {
-            Intent startIntent = new Intent(this, SignAndSendService.class);
+            Intent startIntent = new Intent(this, OperationVSService.class);
             startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);

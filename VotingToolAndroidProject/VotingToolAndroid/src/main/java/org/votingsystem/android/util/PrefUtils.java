@@ -262,6 +262,10 @@ public class PrefUtils {
             editor.putString(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY,
                     new String(serializedObject, "UTF-8"));
             editor.commit();
+            Representation representation = new Representation(Calendar.getInstance().getTime(),
+                    Representation.State.WITH_ANONYMOUS_REPRESENTATION, delegation.getRepresentative(),
+                    delegation.getDateTo());
+            putRepresentationState(representation, context);
             anonymousDelegation = delegation;
         } catch(Exception ex) {ex.printStackTrace();}
     }

@@ -24,6 +24,7 @@ import org.bouncycastle2.cms.CMSProcessable;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignerDigestMismatchException;
 import org.bouncycastle2.cms.CMSVerifierCertificateNotValidException;
+import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.cms.SignerInformationVerifier;
@@ -60,6 +61,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
@@ -295,12 +297,12 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return signerVS;
     }
 
-    public Collection checkSignerCert(X509Certificate x509Cert) {
+    public Collection checkSignerCert(X509Certificate x509Cert) throws Exception {
+        if(smimeSigned == null) isValidSignature();
         Store certs = smimeSigned.getCertificates();
-        X509CertSelector certSelector = new X509CertSelector();
-        certSelector.setCertificate(x509Cert);
-        X509CertStoreSelector selector = X509CertStoreSelector.getInstance(certSelector);
-        return certs.getMatches(selector);
+        X509CertificateHolder holder = new X509CertificateHolder(x509Cert.getEncoded());
+        SignerId signerId = new SignerId(holder.getIssuer(), x509Cert.getSerialNumber());
+        return certs.getMatches(signerId);
     }
 
     public TimeStampToken getTimeStampToken(X509Certificate requestCert) throws Exception {

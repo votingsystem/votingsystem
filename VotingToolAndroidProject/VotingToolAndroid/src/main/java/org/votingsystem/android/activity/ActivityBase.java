@@ -55,7 +55,7 @@ import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 public abstract class ActivityBase extends ActionBarActivity {
 
-    private static final String TAG = makeLogTag(ActivityBase.class);
+    private static final String TAG = ActivityBase.class.getSimpleName();
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -172,11 +172,6 @@ public abstract class ActivityBase extends ActionBarActivity {
         return NAVDRAWER_ITEM_INVALID;
     }
 
-    /**
-     * Sets up the navigation drawer as appropriate. Note that the nav drawer will be
-     * different depending on whether the attendee indicated that they are attending the
-     * event on-site vs. attending remotely.
-     */
     private void setupNavDrawer() {
         // What nav drawer item should be selected?
         int selfItem = getSelfNavDrawerItem();
@@ -368,7 +363,7 @@ public abstract class ActivityBase extends ActionBarActivity {
                 }
                 return true;
             case R.id.close_app:
-                ((AppContextVS)getApplicationContext()).finish();
+                contextVS.finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -588,9 +583,9 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private void toggleWebSocketServiceConnection() {
-        Intent startIntent = new Intent(((AppContextVS)getApplicationContext()), WebSocketService.class);
+        Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(((AppContextVS)getApplicationContext()).getWebSocketSession().getSessionId() != null)
+        if(contextVS.getWebSocketSession().getSessionId() != null)
             typeVS = TypeVS.WEB_SOCKET_CLOSE;
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
@@ -612,14 +607,6 @@ public abstract class ActivityBase extends ActionBarActivity {
                         .setInterpolator(new DecelerateInterpolator());
             }
         }
-    }
-
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
 }

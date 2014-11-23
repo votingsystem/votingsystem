@@ -75,8 +75,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private WebSocketSession webSocketSession;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
     private AccessControlVS accessControl;
+    private String accessControlURL;
     private ControlCenterVS controlCenter;
     private VicketServer vicketServer;
+    private String vicketServerURL;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
 
@@ -86,8 +88,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             PrefUtils.init(this);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            String vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
-            String accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
+            vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
+            accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
             LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
                     vicketServerURL);
             /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
@@ -107,6 +109,14 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             ex.printStackTrace();
         }
 	}
+
+    public  String getAccessControlURL() {
+        return  accessControlURL;
+    }
+
+    public  String getVicketServerURL() {
+        return  vicketServerURL;
+    }
 
     public void finish() {
         stopService(new Intent(getApplicationContext(), WebSocketService.class));
@@ -167,6 +177,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public void setAccessControlVS(AccessControlVS accessControl) {
         LOGD(TAG + ".setAccessControlVS", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
+        serverMap.put(accessControl.getServerURL(), accessControl);
         PrefUtils.markAccessControlLoaded(accessControl.getServerURL(), this);
         state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
     }

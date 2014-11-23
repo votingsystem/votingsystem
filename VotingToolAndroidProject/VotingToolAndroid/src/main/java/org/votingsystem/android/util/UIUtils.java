@@ -62,6 +62,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
+
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.cert.X509CertificateHolder;
@@ -69,15 +70,18 @@ import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -416,6 +420,14 @@ public class UIUtils  {
         //to avoid avoid dissapear on screen orientation change
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         return fieldsMap;
+    }
+
+    public static ResponseVS checkIfAvailable(final String serverURL,final AppContextVS contextVS) {
+        ActorVS actorVS = contextVS.getActorVS(serverURL);
+        if(actorVS == null) {
+            return new ResponseVS(ResponseVS.SC_ERROR,
+                    contextVS.getString(R.string.server_connection_error_msg, serverURL));
+        } else return null;
     }
 
     public static int setColorAlpha(int color, float alpha) {

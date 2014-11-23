@@ -86,9 +86,17 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                                 }
                             });
                 UIUtils.showMessageDialog(builder);
-            } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                    responseVS.getCaption(), responseVS.getNotificationMessage(),
-                    getSupportFragmentManager());
+            } else {
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseVS.getCaption(),
+                        responseVS.getNotificationMessage(),  RepresentativeDelegationActivity.this).
+                        setPositiveButton(getString(R.string.accept_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        RepresentativeDelegationActivity.this.onBackPressed();
+                                    }
+                                });
+                UIUtils.showMessageDialog(builder);
+            }
         }
         }
     };
