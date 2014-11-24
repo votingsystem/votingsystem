@@ -9,7 +9,7 @@
 
 </head>
 <body>
-    <vs-innerpage-signal title="<g:message code="editGroupVSLbl"/>"></vs-innerpage-signal>
+    <vs-innerpage-signal caption="<g:message code="editGroupVSLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv" style="min-height: 1000px; padding:0px 30px 0px 30px;">
         <groupvs-editor groupvs='${groupvsMap as grails.converters.JSON}'></groupvs-editor>
     </div>

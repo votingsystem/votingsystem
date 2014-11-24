@@ -4,7 +4,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="newCACertLbl"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="newCACertLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="min-height: 1000px;">
     <h3>
         <div class="pageHeader text-center">

@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css" href="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.css')}">
 </head>
 <body>
-    <vs-innerpage-signal title="<g:message code="reportsPageTitle"/>"></vs-innerpage-signal>
+    <vs-innerpage-signal caption="<g:message code="reportsPageTitle"/>"></vs-innerpage-signal>
     <div class="pageContentDiv" style="max-width:1000px; margin: 20px auto 0px auto;">
         <div class="pageHeader" style="margin:0px auto; text-align: center;">
             <g:message code="periodLbl"/>: ${dateFrom} - ${dateTo}

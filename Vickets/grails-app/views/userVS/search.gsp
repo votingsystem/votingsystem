@@ -5,7 +5,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="userSearchPageTitle"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="userSearchPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div layout vertical center>
         <div horizontal layout center center-justified id="searchPanel" class="" style="background:#ba0011;

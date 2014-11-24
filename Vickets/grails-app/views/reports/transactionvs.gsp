@@ -6,7 +6,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div layout horizontal center center-justified>
         <transactionvs-selector id="transactionSelector"></transactionvs-selector>

@@ -6,7 +6,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSClaim/eventvs-claim-list']"/>">
 </head>
 <body>
-    <vs-innerpage-signal title="<g:message code="claimSystemLbl"/>"></vs-innerpage-signal>
+    <vs-innerpage-signal caption="<g:message code="claimSystemLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv">
         <search-info id="searchInfo"></search-info>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;

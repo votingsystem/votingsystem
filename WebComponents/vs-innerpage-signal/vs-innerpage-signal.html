@@ -1,15 +1,15 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<polymer-element name="vs-innerpage-signal" attributes="title innerPage searchVisible">
+<polymer-element name="vs-innerpage-signal" attributes="caption innerPage searchVisible">
     <template></template>
     <script>
         Polymer('vs-innerpage-signal', {
-            title:null,
+            caption:null,
             innerPage:null,
             searchVisible:false,
             domReady: function() { this.fireSignal()},
             fireSignal: function() {
-                this.fire('core-signal', {name: "vs-innerpage", data: {title:this.title,
+                this.fire('core-signal', {name: "vs-innerpage", data: {caption:this.caption,
                     innerPage:this.innerPage, searchVisible:this.searchVisible}});
             }
         });

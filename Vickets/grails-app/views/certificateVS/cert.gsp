@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="trustedCertPageTitle"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="trustedCertPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv">
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superuser".equals(params.menu)}">

@@ -4,7 +4,7 @@
     <g:render template="/template/pagevs"/>
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="toolsPageTitle"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="toolsPageTitle"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto;">
     <g:if test="${request.getHeader("user-agent").toLowerCase().contains('android')}">
         <div class="userAdvert">

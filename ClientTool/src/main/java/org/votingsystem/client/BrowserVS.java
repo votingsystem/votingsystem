@@ -373,9 +373,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     @Override public void processSignalVS(Map signalData) {//{title:, url:}
-        log.debug("processSignalVS - title: " + signalData.get("title"));
-        if(signalData.containsKey("title")) tabPane.getSelectionModel().getSelectedItem().setText(
-                (String)signalData.get("title"));
+        log.debug("processSignalVS - caption: " + signalData.get("caption"));
+        if(signalData.containsKey("caption")) tabPane.getSelectionModel().getSelectedItem().setText(
+                (String)signalData.get("caption"));
     }
 
     public void processResponseVS(OperationVS operationVS) {

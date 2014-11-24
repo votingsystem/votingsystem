@@ -6,7 +6,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSManifest/eventvs-manifest-list']"/>">
 </head>
 <body>
-    <vs-innerpage-signal title="<g:message code="manifestSystemLbl"/>"></vs-innerpage-signal>
+    <vs-innerpage-signal caption="<g:message code="manifestSystemLbl"/>"></vs-innerpage-signal>
     <div class="pageContentDiv">
         <search-info id="searchInfo"></search-info>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;

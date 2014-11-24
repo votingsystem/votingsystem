@@ -10,12 +10,11 @@
         <g:include view="/include/styles.gsp"/>
         <style>
             .tabContent {
-                padding: 10px 20px 10px 20px;
                 margin:0px auto 0px auto;
                 width:auto;
             }
             paper-tabs.transparent-teal {
-                background-color: transparent;
+                background-color: #ffeeee;
                 color:#ba0011;
                 box-shadow: none;
                 cursor: pointer;
@@ -30,7 +29,7 @@
         <div class="pageContentDiv">
             <div style="margin: 0 30px 0 30px;">
                 <div class="text-center row" style="margin:20px auto 15px 15px;">
-                    <div class="representativeNameHeader">
+                    <div representativeId-data="{{representative.id}}" class="representativeNameHeader">
                         <div>{{representativeFullName}}</div>
                     </div>
                     <div  class="representativeNumRepHeader" style="">
@@ -47,7 +46,7 @@
 
                 </div>
                 <div  style="width: 1000px; margin:0px auto 0px auto;">
-                    <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
+                    <paper-tabs style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
                                  selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
                         <paper-tab name="profile" style="width: 400px"><g:message code="profileLbl"/></paper-tab>
                         <paper-tab name="votingHistory"><g:message code="votingHistoryLbl"/></paper-tab>
@@ -110,11 +109,12 @@
                 this.$.selectRepresentativeDialog.show(this.representative)
             },
             representativeChanged: function() {
-                console.log(this.tagName + "- subpage:  " + this.subpage)
+                console.log(this.tagName + ".representativeChanged - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
+                this.selectedTab = 'votingHistory'
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             ready: function() {
-                console.log(this.tagName + "- subpage:  " + this.subpage)
+                console.log(this.tagName + " - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
             },
             showImage:function() {
                 console.log(this.tagName + " - showImage")

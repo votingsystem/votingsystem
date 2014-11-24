@@ -3,7 +3,7 @@
     <g:render template="/template/pagevs"/>
 </head>
 <body>
-<vs-innerpage-signal title="<g:message code="newUserCertLbl"/>"></vs-innerpage-signal>
+<vs-innerpage-signal caption="<g:message code="newUserCertLbl"/>"></vs-innerpage-signal>
 <div class="pageContentDiv" style="min-height: 1000px;">
     <div style="margin:0px 30px 0px 30px;">
         <h3>
