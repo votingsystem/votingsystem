@@ -66,6 +66,7 @@ class RepresentativeDelegationService {
                 type:TypeVS.REPRESENTATIVE_SELECTION)
 	}
 
+    @Transactional
     private void cancelPublicDelegation(MessageSMIME messageSMIMEReq) {
         RepresentationDocumentVS representationDocument = RepresentationDocumentVS.findWhere(
                 userVS:messageSMIMEReq.getUserVS(), state:RepresentationDocumentVS.State.OK)
@@ -126,7 +127,8 @@ class RepresentativeDelegationService {
         }
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
         if(anonymousDelegation) {
-            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateTo: DateUtils.getDateStr(
+            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateFrom: DateUtils.getDateStr(
+                    anonymousDelegation.getDateFrom()), dateTo: DateUtils.getDateStr(
                     anonymousDelegation.getDateTo())]
         }
         return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
@@ -147,6 +149,7 @@ class RepresentativeDelegationService {
         messageSMIMEReq.setType(request.operation).setSMIME(smimeMessageResp)
         responseVS = csrService.signAnonymousDelegationCert(csrRequest)
         if(ResponseVS.SC_OK == responseVS.statusCode) {
+            userVS.representative = null
             new AnonymousDelegation(status:AnonymousDelegation.Status.OK, delegationSMIME:messageSMIMEReq,
                     userVS:userVS, dateFrom:request.dateFrom, dateTo:request.dateTo).save();
         }

@@ -99,14 +99,14 @@
                 <div style=" display: {{step == 'confirm'?'block':'none'}}">
                     <div layout horizontal style="margin:0px 20px 0px 0px;">
                         <div flex></div>
-                        <div style="margin:10px 0px 10px 0px;">
-                            <paper-button raised on-click="{{submit}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
+                        <div style="margin:10px 20px 10px 0px;">
+                            <paper-button raised on-click="{{cancel}}" style="margin: 0px 0px 0px 5px;">
+                                <i class="fa fa-times"></i> <g:message code="cancelLbl"/>
                             </paper-button>
                         </div>
                         <div style="margin:10px 0px 10px 0px;">
-                            <paper-button raised on-click="{{cancel}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times"></i> <g:message code="cancelLbl"/>
+                            <paper-button raised on-click="{{submit}}" style="margin: 0px 0px 0px 5px;">
+                                <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                             </paper-button>
                         </div>
                     </div>
@@ -119,15 +119,6 @@
                     <p style="text-align: center; font-size: 1.2em;">
                         <g:message code="anonymousDelegationReceiptMsg"/>
                     </p>
-                    <div>
-                        <div flex></div>
-                        <div>
-                            <paper-button raised on-click="{{saveAnonymousDelegation}}">
-                                <g:message code="saveReceiptLbl"/>
-                            </paper-button>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </paper-dialog>
@@ -163,15 +154,6 @@
                 this.$.xDialog.opened = true
                 console.log(this.tagName + " - step: " + this.step)
             },
-            saveAnonymousDelegation: function() {
-                console.log(this.tagName + " - saveAnonymousDelegation - hashCertVSBase64: " + this.hashCertVSBase64)
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_SMIME_ANONYMOUS_DELEGATION)
-                webAppMessage.message = this.hashCertVSBase64
-                webAppMessage.setCallback(function(appMessage) {
-                    console.log("saveAnonymousDelegation callback")
-                }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-            },
             submit: function() {
                 console.log("submit")
                 var representativeOperation
@@ -192,6 +174,7 @@
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
+                    webAppMessage.document = this.representative
                     webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
                     webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
                     webAppMessage.setCallback(function(appMessage) {

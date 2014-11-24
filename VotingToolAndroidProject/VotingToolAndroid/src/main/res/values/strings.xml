@@ -450,5 +450,5 @@
     <string name="missing_anonymous_delegation_cancellation_data">no dispone de la información necesaria para cancelar la representación anónima</string>
     <string name="user_representative_lbl">su representante</string>
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
-    <string name="cancel_anonymouys_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
+    <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
 </resources>

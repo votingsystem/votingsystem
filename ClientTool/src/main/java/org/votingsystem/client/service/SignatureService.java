@@ -8,6 +8,11 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.client.VotingSystemApp;
@@ -126,6 +131,12 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case WALLET_OPEN:
                             responseVS = openWallet(operationVS);
+                            break;
+                        case REPRESENTATIVE_SELECTION:
+                            responseVS = sendSMIME(operationVS);
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                                BrowserVSSessionUtils.getInstance().refreshRepresentationData();
+                            }
                             break;
                         default:
                             responseVS = sendSMIME(operationVS);
@@ -432,97 +443,92 @@ public class SignatureService extends Service<ResponseVS> {
             return responseVS;
         }
 
-
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {
             String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-            FileUtils.unpackZip(operationVS.getFile(), new File(outputFolder));
-            File cancelDataFile = new File(outputFolder + File.separator + ContextVS.CANCEL_DATA_FILE_NAME);
-            if(cancelDataFile.exists()) {
-                String jsonDataStr = FileUtils.getStringFromFile(cancelDataFile);
-                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonDataStr);
-                if(jsonObject.containsKey(ContextVS.ORIGIN_HASH_CERTVS_KEY)) {
-                    jsonObject.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
-                    jsonObject.put("UUID", UUID.randomUUID().toString());
-                    String documentToSignStr = jsonObject.toString();
-                    SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
-                            operationVS.getNormalizedReceiverName(), documentToSignStr,
-                            password.toCharArray(), operationVS.getSignedMessageSubject(), null);
-                    SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
-                            operationVS.getTargetServer().getTimeStampServiceURL(),
-                            ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
-                            operationVS.getTargetServer().getX509Certificate());
-                    ResponseVS responseVS = senderWorker.call();
-                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        if(responseVS.getContentType() != null && responseVS.getContentType().isSigned()) {
-                            SMIMEMessage smimeMessageResp = responseVS.getSMIME();
-                            if(smimeMessageResp == null) {
-                                ByteArrayInputStream bais = new ByteArrayInputStream(responseVS.getMessageBytes());
-                                smimeMessageResp = new SMIMEMessage(bais);
-                            }
-                            jsonObject = (JSONObject)JSONSerializer.toJSON(smimeMessageResp.getSignedContent());
-                            return new ResponseVS(responseVS.getStatusCode(), jsonObject.getString("message"));
-                        }
-                    }
+            AnonymousDelegationRequest delegation = BrowserVSSessionUtils.getInstance().getAnonymousDelegationRequest();
+            if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
+                    ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
+            SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
+                    operationVS.getNormalizedReceiverName(), delegation.getCancellationRequest().toString(),
+                    password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
+                    operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+            ResponseVS responseVS = senderWorker.call();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                SMIMEMessage delegationReceipt = responseVS.getSMIME();
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    Collection matches = delegationReceipt.checkSignerCert(
+                            ContextVS.getInstance().getAccessControl().getX509Certificate());
+                    if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+                    responseVS.setSMIME(delegationReceipt);
+                    responseVS.setMessage(ContextVS.getMessage("cancelAnonymousRepresentationOkMsg"));
+                    BrowserVSSessionUtils.getInstance().refreshRepresentationData();
+                    return responseVS;
                 }
             }
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("errorLbl"));
         }
 
-
         //we know this is done in a background thread
         private ResponseVS processAnonymousDelegation(OperationVS operationVS) throws Exception {
-            String representativeName = (String) operationVS.getDocumentToSignMap().get("representativeName");
             String caption = operationVS.getCaption();
+            UserVS representative = UserVS.parse(operationVS.getDocument());
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
-            Map documentToSignMap = new HashMap();
-            documentToSignMap.put("weeksOperationActive", operationVS.getDocumentToSignMap().get("weeksOperationActive"));
-            documentToSignMap.put("UUID", UUID.randomUUID().toString());
-            documentToSignMap.put("accessControlURL", ContextVS.getInstance().getAccessControl().getServerURL());
-            documentToSignMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
+            AnonymousDelegationRequest anonymousDelegation = new AnonymousDelegationRequest(
+                    Integer.valueOf((String) operationVS.getDocumentToSignMap().get("weeksOperationActive")),
+                    (String) operationVS.getDocumentToSignMap().get("representativeNif"),
+                    (String) operationVS.getDocumentToSignMap().get("representativeName"),
+                    ContextVS.getInstance().getAccessControl().getServerURL());
             try {
-                String fromUser = null;
-                String toUser =  ContextVS.getInstance().getAccessControl().getNameNormalized();
-                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(fromUser, toUser, jsonObject.toString(),
+                SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
+                        ContextVS.getInstance().getAccessControl().getNameNormalized(),
+                        anonymousDelegation.getRequest().toString(),
                         password.toCharArray(), operationVS.getSignedMessageSubject(), null);
-                String originHashCertVS = UUID.randomUUID().toString();
-                String hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
-                String weeksOperationActive = (String)operationVS.getDocumentToSignMap().get("weeksOperationActive");
-                AnonymousDelegationRequestDataSender anonymousDelegatorDataSender = new AnonymousDelegationRequestDataSender(
-                        smimeMessage, weeksOperationActive, hashCertVSBase64);
-                ResponseVS responseVS = anonymousDelegatorDataSender.call();
-                CertificationRequestVS certificationRequest = null;
+                TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
+                ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
+                        ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    byte[] bytesToken = responseVS.getMessageBytes();
+                    TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
+                    X509Certificate timeStampCert = ContextVS.getInstance().getAccessControl().getTimeStampCert();
+                    SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
+                            setProvider(ContextVS.PROVIDER).build(timeStampCert);
+                    timeStampToken.validate(timeStampSignerInfoVerifier);
+                    smimeMessage.setTimeStampToken(timeStampToken);
+                    //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
+                    //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+                    String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
+                    String representationDataFile = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
+                            ContentTypeVS.JSON_SIGNED.getName();
+                    Map<String, Object> mapToSend = new HashMap<String, Object>();
+                    mapToSend.put(csrFileName,anonymousDelegation.getCertificationRequest().getCsrPEM());
+                    mapToSend.put(representationDataFile, smimeMessage.getBytes());
+                    responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                            ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
+                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
+                        // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
+                        anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+                    } else return responseVS;
+                }
                 updateProgress(60, 100);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                else certificationRequest = (CertificationRequestVS) responseVS.getData();
-
-                jsonObject = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-                String textToSign = jsonObject.toString();
-                fromUser = hashCertVSBase64;
-                toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-                smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign,
+                smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(anonymousDelegation.getHashCertVS(),
+                        ContextVS.getInstance().getAccessControl().getNameNormalized(),
+                        anonymousDelegation.getDelegation().toString(),
                         operationVS.getSignedMessageSubject(), null);
-                String anonymousDelegationURL = ContextVS.getInstance().getAccessControl().
-                        getAnonymousDelegationServiceURL();
-                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, anonymousDelegationURL,
+                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
+                        ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL(),
                         ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                        ContentTypeVS.JSON_SIGNED, certificationRequest.getKeyPair(),
+                        ContentTypeVS.JSON_SIGNED, anonymousDelegation.getCertificationRequest().getKeyPair(),
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 responseVS = signedSender.call();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessage receipt = responseVS.getSMIME();
-                    Map receiptDataMap = (JSONObject) JSONSerializer.toJSON(receipt.getSignedContent());
-                    responseVS = operationVS.validateReceiptDataMap(receiptDataMap);
-                    Map delegationDataMap = new HashMap();
-                    delegationDataMap.put(ContextVS.HASH_CERTVS_KEY, hashCertVSBase64);
-                    delegationDataMap.put(ContextVS.ORIGIN_HASH_CERTVS_KEY, originHashCertVS);
-                    ResponseVS hashCertVSData = new ResponseVS(ResponseVS.SC_OK);
-                    hashCertVSData.setSMIME(receipt);
-                    hashCertVSData.setData(delegationDataMap);
-                    hashCertVSData.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
-                    ContextVS.getInstance().addHashCertVSData(hashCertVSBase64, hashCertVSData);
-                    responseVS.setMessage(hashCertVSBase64);
+                    anonymousDelegation.validateDelegationReceipt(responseVS.getSMIME(),
+                            ContextVS.getInstance().getAccessControl().getX509Certificate());
+                    anonymousDelegation.setRepresentative(representative);
+                    BrowserVSSessionUtils.getInstance().setAnonymousDelegationRequest(anonymousDelegation);
                 }
                 return responseVS;
             } catch (Exception ex) {

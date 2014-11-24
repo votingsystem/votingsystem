@@ -37,10 +37,9 @@
                     </div>
                     <template if="{{'user' == menuType}}">
                         <div>
-                            <button type="button" class="btn btn-default" on-click="{{selectRepresentative}}"
-                                    style="margin:15px 20px 15px 0px;">
-                                <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
-                            </button>
+                            <paper-button raised on-click="{{selectRepresentative}}" style="margin:15px 20px 15px 0px;">
+                                <i class="fa fa-hand-o-right"></i> <g:message code="saveAsRepresentativeLbl"/>
+                            </paper-button>
                         </div>
                     </template>
 
@@ -93,7 +92,6 @@
     <script>
         Polymer('representative-info', {
             menuType:menuType,
-            selectedTab:'profile',
             subpage:false,
             publish: {
                 representative: {value: {}}
@@ -110,10 +108,10 @@
             },
             representativeChanged: function() {
                 console.log(this.tagName + ".representativeChanged - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
-                this.selectedTab = 'votingHistory'
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             ready: function() {
+                this.selectedTab = 'profile'
                 console.log(this.tagName + " - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
             },
             showImage:function() {

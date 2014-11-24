@@ -44,6 +44,8 @@
                 </div>
             </template>
             <div><b><g:message code="weeksAnonymousDelegation"/>: </b>{{smimeMessageContent.weeksOperationActive}}</div>
+            <div horizontal layout style="margin:10px 0 0 0;"><b><g:message code="validFromLbl"/>:</b> {{smimeMessageContent.dateFrom}}
+                <span style="margin: 0 0 0 20px;"><b><g:message code="toLbl"/>:</b></span> {{smimeMessageContent.dateFrom}}</div>
         </div>
     </template>
     <script>

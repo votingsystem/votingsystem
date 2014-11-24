@@ -2,6 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-info']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representation-state']"/>">
 
 <polymer-element name="representative-list" attributes="url">
     <template>
@@ -14,6 +15,7 @@
             vertical-align: top;
             background-color: #fff;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+            background-color: #f2f2f2;
             margin: 10px;
             padding: 5px 10px;
         }
@@ -50,6 +52,7 @@
             </section>
         </core-animated-pages>
 
+        <representation-state id="representationState"></representation-state>
     </template>
     <script>
         Polymer('representative-list', {
@@ -58,6 +61,10 @@
                 this.loading = true
                 this.page = 0;
                 this.subpage = 0;
+
+                if(window['isClientToolConnected']) {
+                    this.$.representationState.opened = true
+                }
             },
             closeRepresentativeDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeRepresentativeDetails")

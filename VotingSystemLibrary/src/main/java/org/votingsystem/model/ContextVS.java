@@ -73,7 +73,8 @@ public class ContextVS {
     public static String SETTINGS_FILE_NAME = "settings.properties";
     public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
     public static String WALLET_FILE_NAME = "wallet.wvs";
-    public static String BROWSER_SESSION_FILE_NAME = "browser.bvs";
+    public static String BROWSER_SESSION_FILE = "browser.bvs";
+    public static String REPRESENTATIVE_STATE_FILE = "representative.bvs";
     public static String USER_CSR_REQUEST_FILE_NAME = "user.csrvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
 

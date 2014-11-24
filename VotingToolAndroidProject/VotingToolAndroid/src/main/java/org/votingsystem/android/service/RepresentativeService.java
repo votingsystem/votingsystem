@@ -18,7 +18,7 @@ import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.AnonymousDelegationVS;
+import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
@@ -291,7 +291,7 @@ public class RepresentativeService extends IntentService {
         LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
         ResponseVS responseVS = null;
         try {
-            AnonymousDelegationVS anonymousDelegation = PrefUtils.getAnonymousDelegation(this);
+            AnonymousDelegation anonymousDelegation = PrefUtils.getAnonymousDelegation(this);
             if(anonymousDelegation == null) {
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                         getString(R.string.missing_anonymous_delegation_cancellation_data));
@@ -300,7 +300,7 @@ public class RepresentativeService extends IntentService {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     PrefUtils.putAnonymousDelegation(null, this);
                     responseVS.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
-                            setNotificationMessage(getString(R.string.cancel_anonymouys_representation_ok_msg));
+                            setNotificationMessage(getString(R.string.cancel_anonymous_representation_ok_msg));
                 }
             }
         } catch (Exception ex) {
@@ -314,7 +314,7 @@ public class RepresentativeService extends IntentService {
     }
 
     private ResponseVS cancelAnonymousDelegation(
-            AnonymousDelegationVS anonymousDelegation) throws Exception {
+            AnonymousDelegation anonymousDelegation) throws Exception {
         LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
         JSONObject requestJSON = anonymousDelegation.getCancellationRequest();
         ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
@@ -341,7 +341,7 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = null;
         try {
             String messageSubject = getString(R.string.representative_delegation_lbl);
-            AnonymousDelegationVS anonymousDelegation = new AnonymousDelegationVS(weeksOperationActive,
+            AnonymousDelegation anonymousDelegation = new AnonymousDelegation(weeksOperationActive,
                     dateFrom, dateTo, contextVS.getAccessControl().getServerURL());
             String fromUser = contextVS.getUserVS().getNif();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +

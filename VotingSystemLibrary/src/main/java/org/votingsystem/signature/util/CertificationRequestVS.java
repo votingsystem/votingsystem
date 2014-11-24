@@ -69,7 +69,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getAnonymousDelegationRequest(int keySize, String keyName,
             String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
-            String weeksOperationActive) throws NoSuchAlgorithmException,
+            String weeksOperationActive, String dateFrom, String dateTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
@@ -79,6 +79,8 @@ public class CertificationRequestVS implements java.io.Serializable {
         delegationDataMap.put("accessControlURL", accessControlURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("weeksOperationActive", weeksOperationActive);
+        delegationDataMap.put("validFrom", dateFrom);
+        delegationDataMap.put("validTo", dateTo);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG,
                 new DERUTF8String(jsonObject.toString())));

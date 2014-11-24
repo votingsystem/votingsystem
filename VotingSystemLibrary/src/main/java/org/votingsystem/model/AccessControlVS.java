@@ -131,4 +131,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/csr/request";
     }
 
+    public String getRepresentationStateServiceURL (String nif) {
+        return getServerURL() + "/representative/state/" + nif;
+    }
 }

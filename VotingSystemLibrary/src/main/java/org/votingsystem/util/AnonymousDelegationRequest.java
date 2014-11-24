@@ -1,31 +1,26 @@
-package org.votingsystem.model;
+package org.votingsystem.util;
 
-import org.json.JSONObject;
-import org.votingsystem.signature.smime.CMSUtils;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.util.DateUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.mail.Header;
+import java.io.*;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AnonymousDelegationVS extends ReceiptContainer {
+public class AnonymousDelegationRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = AnonymousDelegationVS.class.getSimpleName();
+    public static final String TAG = AnonymousDelegationRequest.class.getSimpleName();
 
     private Long localId = -1L;
     private transient SMIMEMessage delegationReceipt;
@@ -52,27 +47,27 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         return delegationReceipt;
     }
 
-    public AnonymousDelegationVS(Integer weeksOperationActive, Date dateFrom, Date dateTo,
-                 String serverURL) throws Exception {
+    public AnonymousDelegationRequest(Integer weeksOperationActive, String representativeNif, String representativeName,
+              String serverURL) throws Exception {
         this.setWeeksOperationActive(weeksOperationActive);
         this.serverURL = serverURL;
-        this.dateFrom = dateFrom;
-        this.dateTo = dateTo;
+        this.dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
+        this.dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
+        this.representativeName = representativeName;
+        this.representativeNif = representativeNif;
         originHashCertVS = UUID.randomUUID().toString();
-        hashCertVSBase64 = CMSUtils.getHashBase64(getOriginHashCertVS(),
-                ContextVS.VOTING_DATA_DIGEST);
+        hashCertVSBase64 = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive.toString(),
                 DateUtils.getDateStr(dateFrom), DateUtils.getDateStr(dateTo));
-        setTypeVS(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
     }
 
-    @Override public String getSubject() {
+    public String getSubject() {
         return null;
     }
 
-    @Override public Date getDateFrom() {
+    public Date getDateFrom() {
         return dateFrom;
     }
 
@@ -80,7 +75,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         this.dateFrom = dateFrom;
     }
 
-    @Override public Date getDateTo() {
+    public Date getDateTo() {
         return dateTo;
     }
 
@@ -88,19 +83,19 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         this.dateTo = dateTo;
     }
 
-    @Override public Long getLocalId() {
+    public Long getLocalId() {
         return localId;
     }
 
-    @Override public void setLocalId(Long localId) {
+    public void setLocalId(Long localId) {
         this.localId = localId;
     }
 
-    @Override public SMIMEMessage getReceipt() {
+    public SMIMEMessage getReceipt() {
         return delegationReceipt;
     }
 
-    @Override public String getMessageId() {
+    public String getMessageId() {
         String result = null;
         try {
             SMIMEMessage receipt = getReceipt();
@@ -175,6 +170,11 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         this.representative = representative;
     }
 
+    public void validateDelegationReceipt(SMIMEMessage smimeMessage, X509Certificate serverCert) throws Exception {
+        Collection matches = smimeMessage.checkSignerCert(serverCert);
+        if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+    }
+
     public JSONObject getRequest() {
         Map result = new HashMap();
         result.put("weeksOperationActive", getWeeksOperationActive());
@@ -183,7 +183,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         result.put("accessControlURL", serverURL);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
         result.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(result);
+        return (JSONObject) JSONSerializer.toJSON(result);
     }
 
     public JSONObject getCancellationRequest() {
@@ -193,15 +193,15 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
         result.put("representativeNif", representative.getNif());
-        result.put("representativeName", representative.getFullName());
+        result.put("representativeName", representative.getName());
         result.put("hashCertVSBase64", hashCertVSBase64);
         result.put("originHashCertVSBase64", originHashCertVS);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED.toString());
         result.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(result);
+        return (JSONObject) JSONSerializer.toJSON(result);
     }
 
-    public JSONObject getDelegation(String representativeNif, String representativeName) {
+    public JSONObject getDelegation() {
         Map result = new HashMap();
         result.put("representativeNif", representativeNif);
         result.put("representativeName", representativeName);
@@ -211,18 +211,18 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         result.put("accessControlURL", serverURL);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
         result.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(result);
+        return (JSONObject) JSONSerializer.toJSON(result);
     }
 
-    public static AnonymousDelegationVS parse(JSONObject jsonObject) throws Exception {
-        Date dateFrom = DateUtils.getDateFromString(jsonObject.getString("dateFrom"));
-        Date dateTo = DateUtils.getDateFromString(jsonObject.getString("dateTo"));
-        AnonymousDelegationVS result = new AnonymousDelegationVS(jsonObject.getInt("weeksOperationActive"),
-                dateFrom, dateTo, jsonObject.getString("accessControlURL"));
+    public static AnonymousDelegationRequest parse(JSONObject jsonObject) throws Exception {
+        AnonymousDelegationRequest result = new AnonymousDelegationRequest(jsonObject.getInt("weeksOperationActive"),
+                null, null, jsonObject.getString("accessControlURL"));
         if(jsonObject.has("representativeNif"))
             result.setRepresentativeNif(jsonObject.getString("representativeNif"));
         if(jsonObject.has("representativeName"))
             result.setRepresentativeName(jsonObject.getString("representativeName"));
+        result.setDateFrom(DateUtils.getDateFromString(jsonObject.getString("dateFrom")));
+        result.setDateTo(DateUtils.getDateFromString(jsonObject.getString("dateTo")));
         return result;
     }
 

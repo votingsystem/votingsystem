@@ -24,7 +24,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.AnonymousDelegationVS;
+import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.TypeVS;
@@ -46,7 +46,7 @@ public class RepresentationStateFragment extends Fragment implements
 
     private AppContextVS contextVS;
     private Representation representation;
-    private AnonymousDelegationVS anonymousDelegationVS;
+    private AnonymousDelegation anonymousDelegation;
     private View rootView;
     private String broadCastId = RepresentationStateFragment.class.getSimpleName();
 
@@ -111,9 +111,9 @@ public class RepresentationStateFragment extends Fragment implements
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
                                 representation.getDateTo())));
-                anonymousDelegationVS = PrefUtils.getAnonymousDelegation(getActivity());
-                if(anonymousDelegationVS != null) {
-                    printRepresentativeData(anonymousDelegationVS.getRepresentative());
+                anonymousDelegation = PrefUtils.getAnonymousDelegation(getActivity());
+                if(anonymousDelegation != null) {
+                    printRepresentativeData(anonymousDelegation.getRepresentative());
                 } else {
                     ((TextView)rootView.findViewById(R.id.representative_name)).setText(
                             getString(R.string.missing_anonymous_delegation_cancellation_data));
@@ -145,7 +145,7 @@ public class RepresentationStateFragment extends Fragment implements
         switch(representation.getState()) {
             case WITH_ANONYMOUS_REPRESENTATION:
                 menu.removeItem(R.id.new_representative);
-                if(anonymousDelegationVS == null)
+                if(anonymousDelegation == null)
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                 break;
             default:

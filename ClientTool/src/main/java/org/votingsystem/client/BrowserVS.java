@@ -72,7 +72,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private static final int MAX_CHARACTERS_TAB_CAPTION = 25;
 
     private Stage browserStage;
-    private Map<String, WebView> webViewMap = new HashMap<>();
+    private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private TextField locationField = new TextField("");
     private final BrowserVSPane browserHelper;
     private TabPane tabPane;
@@ -88,7 +88,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private BrowserVS() {
         browserHelper = new BrowserVSPane();
         Platform.setImplicitExit(false);
-                browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+        browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 log.debug("signatureService - OnSucceeded");
                 PlatformImpl.runLater(new Runnable() {
@@ -339,7 +339,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             WebView operationWebView = webViewMap.remove(callerCallback);
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
-                    new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
+                    Base64.getEncoder().encodeToString(messageJSON.toString().getBytes("UTF8")) + "')";
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     operationWebView.getEngine().executeScript(jsCommand);
@@ -515,9 +515,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 OperationVS operationVS = OperationVS.parse(jsonObject);
                 webViewMap.put(operationVS.getCallerCallback(), this.webView);
                 switch (operationVS.getType()) {
-                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
-                        Utils.receiptCancellation(operationVS, BrowserVS.this);
-                        break;
                     case CONNECT:
                         getWebSocketServiceAuthenticated().setConnectionEnabled(true, operationVS.getDocument());
                         break;
@@ -590,9 +587,12 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         if (stringFormat != null) result = DateUtils.getDateStr(dateToFormat,
                                 (String) operationVS.getDocument().get("stringFormat"));
                         else result = DateUtils.getDayWeekDateStr(dateToFormat);
-                        return result;
                     case SIGNAL_VS:
                         processSignalVS(operationVS.getDocument());
+                        break;
+                    case REPRESENTATIVE_STATE:
+                        JSONObject messageJSON = BrowserVSSessionUtils.getInstance().getRepresentationState();
+                        result = Base64.getEncoder().encodeToString(messageJSON.toString().getBytes("UTF8"));
                         break;
                     default:
                         return "Unknown operation: '" + operationVS.getType() + "'";

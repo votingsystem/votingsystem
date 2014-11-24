@@ -23,7 +23,9 @@ var Operation = {
     REPRESENTATIVE_VOTING_HISTORY_REQUEST: "REPRESENTATIVE_VOTING_HISTORY_REQUEST",
     REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST",
     REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
-    REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA"
+    REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA",
+    ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:"ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED",
+    REPRESENTATIVE_STATE:"REPRESENTATIVE_STATE"
 }
 
 function httpGet(theUrl){
@@ -431,8 +433,8 @@ function fireCoreSignal(coreSignalDataBase64) {
     }
 }
 
-document.addEventListener('polymer-ready', function() {
-    console.log("utilsVS.js - polymer-ready - sending missing core signal")
+window.addEventListener('polymer-ready', function() {
+    console.log("utilsVS.js - polymer-ready - sending pending core signal")
     if(coreSignalData != null) fireCoreSignal(coreSignalData)
     coreSignalData = null
 });

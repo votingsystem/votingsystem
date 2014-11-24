@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import org.json.JSONObject;
-import org.votingsystem.model.AnonymousDelegationVS;
+import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.UserVS;
@@ -39,7 +39,7 @@ public class PrefUtils {
     }
 
     private static Representation representation;
-    private static AnonymousDelegationVS anonymousDelegation;
+    private static AnonymousDelegation anonymousDelegation;
 
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
@@ -253,7 +253,7 @@ public class PrefUtils {
         return representation;
     }
 
-    public static void putAnonymousDelegation(AnonymousDelegationVS delegation, Context context) {
+    public static void putAnonymousDelegation(AnonymousDelegation delegation, Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -276,14 +276,14 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static AnonymousDelegationVS getAnonymousDelegation(Context context) {
+    public static AnonymousDelegation getAnonymousDelegation(Context context) {
         if(anonymousDelegation != null) return anonymousDelegation;
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedObject = settings.getString(
                 ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, null);
         if(serializedObject != null) {
-            anonymousDelegation = (AnonymousDelegationVS) ObjectUtils.
+            anonymousDelegation = (AnonymousDelegation) ObjectUtils.
                     deSerializeObject(serializedObject.getBytes());
         }
         return anonymousDelegation;

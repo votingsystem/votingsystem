@@ -12,6 +12,8 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.model.Representation;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -25,12 +27,16 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.*;
 
 import javax.mail.Header;
+import javax.naming.Context;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -44,6 +50,9 @@ public class BrowserVSSessionUtils {
 
     private UserVS userVS;
     private File sessionFile;
+    private File representativeStateFile;
+    private AnonymousDelegationRequest anonymousDelegationRequest;
+    private JSONObject representativeStateJSON;
     private JSONObject browserSessionDataJSON;
     private JSONObject sessionDataJSON;
     private static CountDownLatch countDownLatch;
@@ -55,21 +64,138 @@ public class BrowserVSSessionUtils {
 
     private BrowserVSSessionUtils() {
         try {
-            sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE_NAME);
+            sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
                 sessionDataJSON = new JSONObject();
                 browserSessionDataJSON = new JSONObject();
                 browserSessionDataJSON.put("deviceId", UUID.randomUUID().toString());
+                browserSessionDataJSON.put("fileType", ContextVS.BROWSER_SESSION_FILE);
                 sessionDataJSON.put("browserSession", browserSessionDataJSON);
             } else {
                 sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
                 browserSessionDataJSON = sessionDataJSON.getJSONObject("browserSession");
             }
             browserSessionDataJSON.put("isConnected", false);
-            if(browserSessionDataJSON.get("userVS") != null) userVS = UserVS.parse((java.util.Map) browserSessionDataJSON.get("userVS"));
+            if(browserSessionDataJSON.get("userVS") != null) userVS =
+                    UserVS.parse((java.util.Map) browserSessionDataJSON.get("userVS"));
             flush();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
+        }
+    }
+
+    private void loadRepresentationData() throws IOException {
+        if(representativeStateJSON == null) {
+            representativeStateFile = new File(ContextVS.APPDIR + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
+            if(representativeStateFile.createNewFile()) {
+                if(userVS != null) {
+                    ResponseVS responseVS = HttpHelper.getInstance().getData(ContextVS.getInstance().getAccessControl().
+                            getRepresentationStateServiceURL(userVS.getNif()), ContentTypeVS.JSON);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        representativeStateJSON = (JSONObject) responseVS.getMessageJSON();
+                    }
+                }
+                if(representativeStateJSON == null) {
+                    representativeStateJSON = new JSONObject();
+                    representativeStateJSON.put("fileType", ContextVS.REPRESENTATIVE_STATE_FILE);
+                }
+                updateRepresentationState(representativeStateJSON);
+            } else {
+                representativeStateJSON = (JSONObject) JSONSerializer.toJSON(
+                        FileUtils.getStringFromFile(representativeStateFile));
+                if(getAnonymousDelegationRequest() != null) {
+                    representativeStateJSON.put("isWithAnonymousDelegation", true);
+                } else representativeStateJSON.put("isWithAnonymousDelegation", false);
+            }
+        }
+    }
+
+    public void setAnonymousDelegationRequest(AnonymousDelegationRequest delegation) {
+        try {
+            loadRepresentationData();
+            refreshRepresentationData();
+            String serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
+            representativeStateJSON.put("state", Representation.State.WITH_ANONYMOUS_REPRESENTATION.toString());
+            representativeStateJSON.put("lastCheckedDate", DateUtils.getDateStr(Calendar.getInstance().getTime()));
+            representativeStateJSON.put("representative", delegation.getRepresentative().toJSON());
+            representativeStateJSON.put("anonymousDelegationObject", serializedDelegation);
+            representativeStateJSON.put("dateFrom", DateUtils.getDateStr(delegation.getDateFrom()));
+            representativeStateJSON.put("dateTo", DateUtils.getDateStr(delegation.getDateTo()));
+            this.anonymousDelegationRequest = delegation;
+            flush();
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    public void refreshRepresentationData() {
+        ResponseVS responseVS = HttpHelper.getInstance().getData(ContextVS.getInstance().getAccessControl().
+                getRepresentationStateServiceURL(userVS.getNif()), ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            representativeStateJSON = (JSONObject) responseVS.getMessageJSON();
+            updateRepresentationState(representativeStateJSON);
+        } else log.debug("error refreshing representative data");
+    }
+
+    public void updateRepresentationState(JSONObject newRepresentativeStateJSON) {
+        try {
+            loadRepresentationData();
+            Representation.State newState = Representation.State.valueOf((String) newRepresentativeStateJSON.get("state"));
+            Representation.State previousState = Representation.State.valueOf((String) representativeStateJSON.get("state"));
+            String stateMsg = null;
+            switch (newState) {
+                case WITH_ANONYMOUS_REPRESENTATION:
+                    if(previousState == Representation.State.WITH_ANONYMOUS_REPRESENTATION){
+                        newRepresentativeStateJSON.put("anonymousDelegationObject",
+                                representativeStateJSON.get("anonymousDelegationObject"));
+                    }
+                    stateMsg = ContextVS.getMessage("withAnonymousRepresentationMsg");
+                    break;
+                case REPRESENTATIVE:
+                    stateMsg = ContextVS.getMessage("userRepresentativeMsg");
+                    break;
+                case WITH_PUBLIC_REPRESENTATION:
+                    stateMsg = ContextVS.getMessage("withPublicRepresentationMsg");
+                    break;
+                case WITHOUT_REPRESENTATION:
+                    stateMsg = ContextVS.getMessage("withoutRepresentationMsg");
+                    break;
+            }
+            representativeStateJSON = newRepresentativeStateJSON;
+            Date lastCheckedDate = Calendar.getInstance().getTime();
+            representativeStateJSON.put("stateMsg", stateMsg);
+            representativeStateJSON.put("lastCheckedDate", DateUtils.getDateStr(lastCheckedDate));
+            representativeStateJSON.put("lastCheckedDateMsg", ContextVS.getMessage("lastCheckedDateMsg",
+                    DateUtils.getDayWeekDateStr(lastCheckedDate)));
+            flush();
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    public JSONObject getRepresentationState() {
+        JSONObject result = null;
+        try {
+            loadRepresentationData();
+            result = (JSONObject) JSONSerializer.toJSON(representativeStateJSON);
+            result.remove("anonymousDelegationObject");
+        } catch(Exception ex) { log.error(ex.getMessage(), ex);
+        } finally {
+            return result;
+        }
+    }
+
+    public AnonymousDelegationRequest getAnonymousDelegationRequest() {
+        if(anonymousDelegationRequest != null) return anonymousDelegationRequest;
+        try {
+            loadRepresentationData();
+            String serializedDelegation = representativeStateJSON.getString("anonymousDelegationObject");
+            anonymousDelegationRequest = (AnonymousDelegationRequest) ObjectUtils.deSerializeObject(
+                    serializedDelegation.getBytes());
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        } finally {
+            return anonymousDelegationRequest;
         }
     }
 
@@ -94,7 +220,6 @@ public class BrowserVSSessionUtils {
         }
         return message;
     }
-
 
     public void setCSRRequestId(Long id) {
         browserSessionDataJSON.put("csrRequestId", id);
@@ -235,7 +360,6 @@ public class BrowserVSSessionUtils {
                             showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), null);
                         }
                     }
-
                     CertificationRequestVS certificationRequest =
                             (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
                     KeyStore userKeyStore = KeyStore.getInstance("JKS");
@@ -326,6 +450,8 @@ public class BrowserVSSessionUtils {
         try {
             sessionDataJSON.put("browserSession", browserSessionDataJSON);
             FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataJSON.toString().getBytes()), sessionFile);
+            if(representativeStateJSON != null) FileUtils.copyStreamToFile(new ByteArrayInputStream(
+                            representativeStateJSON.toString().getBytes()), representativeStateFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

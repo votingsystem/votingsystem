@@ -34,7 +34,7 @@ import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.model.AnonymousDelegationVS;
+import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
@@ -238,7 +238,7 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
                     JSONObject signedData = new JSONObject(selectedReceiptSMIME.getSignedContent());
-                    AnonymousDelegationVS delegation = AnonymousDelegationVS.parse(signedData);
+                    AnonymousDelegation delegation = AnonymousDelegation.parse(signedData);
                     contentFormatted = getString(R.string.anonymous_representative_selection_formatted,
                             delegation.getWeeksOperationActive(),
                             DateUtils.getDateStr(delegation.getDateFrom(), "EEE dd MMM yyyy' 'HH:mm"),

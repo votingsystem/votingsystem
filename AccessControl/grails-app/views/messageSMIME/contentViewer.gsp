@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -11,7 +12,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="signedDocumentLbl"/></title>
     <g:include view="/include/styles.gsp"/>
-
 </head>
 <body>
 <div class="pageContentDiv" id="voting_system_page"></div>
