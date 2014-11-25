@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import org.votingsystem.android.ui.debug.DebugAction;
+import org.votingsystem.android.util.WalletUtils;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
@@ -36,16 +37,18 @@ public class ForceSyncNowAction implements DebugAction {
         final Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         new AsyncTask<Context, Void, Void>() {
-            @Override
-            protected Void doInBackground(Context... contexts) {
-                LOGD(TAG, "Simulating doInBackground");
+            @Override protected Void doInBackground(Context... contexts) {
+                LOGD(TAG, "doInBackground");
+                try {
+                    LOGD(TAG, "resetting wallet");
+                    WalletUtils.saveWallet(null, "1234", context);
+                } catch(Exception ex) {ex.printStackTrace();}
                 return null;
             }
         }.execute(context);
     }
 
-    @Override
-    public String getLabel() {
+    @Override public String getLabel() {
         return "Force data sync now";
     }
 

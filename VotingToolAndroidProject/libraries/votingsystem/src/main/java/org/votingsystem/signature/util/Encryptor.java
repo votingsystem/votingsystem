@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
+import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ResponseVS;
 
@@ -76,7 +77,10 @@ import javax.mail.internet.MimeMessage;
 */
 public class Encryptor {
 	
-	public static final String TAG = "EncryptionHelper";
+	public static final String TAG = Encryptor.class.getSimpleName();
+
+    private static final int ITERATION_COUNT = 1024;
+    private static final int KEY_LENGTH = 128; // 192 and 256 bits may not be available
 
 	private  Encryptor() { }
 	
@@ -113,7 +117,7 @@ public class Encryptor {
 	
     public static byte[] encryptMessage(byte[] text, 
             X509Certificate receiverCert, Header... headers) throws Exception {
-    	Log.d(TAG + ".encryptMessage ", " #### encryptFile ");
+    	Log.d(TAG + ".encryptMessage ", "encryptMessage");
 		Properties props = System.getProperties();
 		Session session = Session.getDefaultInstance(props, null);
 		MimeMessage mimeMessage = new MimeMessage(session);
@@ -138,32 +142,6 @@ public class Encryptor {
         baos.close();
         return result;
 	}
-	
-    public static MimeBodyPart encryptBase64Message(byte[] bytesToEncrypt,
-            X509Certificate receiverCert, Header... headers) throws Exception {
-    	Log.d(TAG + ".encryptMessage ", " - encryptFile");
-        Properties props = System.getProperties();
-        Session session = Session.getDefaultInstance(props, null);
-        MimeMessage mimeMessage = new MimeMessage(session);
-        byte[] base64EncodedFileBytes = Base64.encode(bytesToEncrypt);
-        
-        mimeMessage.setContent(base64EncodedFileBytes, 
-        		"text/plain; charset=ISO-8859-1");
-        mimeMessage.setHeader("Content-Transfer-Encoding", "BASE64");
-        for(Header header:headers) {
-            mimeMessage.setHeader(header.getName(), header.getValue());
-        }
-        // set the Date: header
-        //mimeMessage.setSentDate(new Date());
-        SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
-        encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-                        receiverCert).setProvider(ContextVS.PROVIDER));
-        /* Encrypt the message */
-        MimeBodyPart encryptedPart = encryptor.generate(mimeMessage,
-                new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
-        return encryptedPart;
-    }
 
     public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert)
             throws CertificateEncodingException, OperatorCreationException, CMSException, IOException {
@@ -209,62 +187,22 @@ public class Encryptor {
    public static byte[] decryptMessage(byte[] encryptedMessageBytes,
            PrivateKey receiverPrivateKey) throws Exception {
 	   Log.d(TAG + ".decryptMessage ", "decryptMessage ");
-       RecipientId recId = null;
-       /*if(receiverCert != null)
+       /*RecipientId recId = null;
+       if(receiverCert != null)
            recId = new JceKeyTransRecipientId(receiverCert);*/
        Recipient recipient = new JceKeyTransEnvelopedRecipient(
                receiverPrivateKey).setProvider(ContextVS.PROVIDER);
-       MimeMessage msg = new MimeMessage(null,
-                       new ByteArrayInputStream(encryptedMessageBytes));
+       MimeMessage msg = new MimeMessage(null, new ByteArrayInputStream(encryptedMessageBytes));
        SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-
        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-
        RecipientInformation        recipientInfo = null;
        //if(recId != null) recipientInfo = recipients.get(recId);
        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
-           recipientInfo = (RecipientInformation)
-               recipients.getRecipients().iterator().next();
+           recipientInfo = (RecipientInformation) recipients.getRecipients().iterator().next();
        }
        byte[] messageBytes = recipientInfo.getContent(recipient);
        return messageBytes;
    }
-
-	
-	/**
-	 * helper method to decrypt SMIME signed messages
-	 */
-	public static byte[] decryptMessage(byte[] encryptedMessageBytes,
-			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
-		Log.d(TAG + ".decryptMessage ", " #### decryptMessage ");
-        RecipientId recId = null;
-        if(receiverCert != null) 
-            recId = new JceKeyTransRecipientId(receiverCert);
-		Recipient recipient = new JceKeyTransEnvelopedRecipient(receiverPrivateKey).
-                setProvider(ContextVS.PROVIDER);
-		MimeMessage msg = new MimeMessage(null, 
-				new ByteArrayInputStream(encryptedMessageBytes));
-		SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-
-        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-        RecipientInformation        recipientInfo = null;
-        if(recId != null) recipientInfo = recipients.get(recId);
-        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
-            recipientInfo = (RecipientInformation) 
-                recipients.getRecipients().iterator().next();
-        }
-		/*RecipientId recipientRID = null;
-		if(recipient.getRID() != null) {
-			recipientRID = recipient.getRID();
-			log.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
-			if(recipient.getRID().getCertificate() != null) {
-				log.debug(" -- recipient: " + recipient.getRID().getCertificate().getSubjectDN().toString());
-			} else log.debug(" -- recipient.getRID().getCertificate() NULL");
-		} else log.debug(" -- getRID NULL");
-		MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
-			 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(ContextVS.PROVIDER)));*/
-		return  recipientInfo.getContent(recipient);
-    }
 	
     public static byte[] decryptFile (byte[] encryptedFile, PublicKey publicKey,
             PrivateKey receiverPrivateKey) throws Exception {
@@ -347,8 +285,7 @@ public class Encryptor {
 			PrivateKey receiverPrivateKey) throws Exception {
 		List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
 		for(EncryptedBundleVS encryptedBundleVS : encryptedBundleVSList) {
-			result.add(decryptEncryptedBundle(encryptedBundleVS,
-                    publicKey, receiverPrivateKey));
+			result.add(decryptEncryptedBundle(encryptedBundleVS, publicKey, receiverPrivateKey));
 		}
 		return result;
 	}
@@ -383,9 +320,35 @@ public class Encryptor {
         return responseMap;
     }
 
+    public static EncryptedBundle pbeAES_Encrypt(String password, byte[] bytesToEncrypt)
+            throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+            InvalidKeyException, InvalidParameterSpecException,
+            UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        AlgorithmParameters params = cipher.getParameters();
+        byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+        return new EncryptedBundle(cipher.doFinal(bytesToEncrypt), iv, salt);
+    }
+
+    public static byte[] pbeAES_Decrypt(String password, EncryptedBundle bundle) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException,
+            IllegalBlockSizeException, UnsupportedEncodingException, InvalidKeySpecException,
+            InvalidAlgorithmParameterException, InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.getSalt(), ITERATION_COUNT, KEY_LENGTH);
+        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.getIV()));
+        return cipher.doFinal(bundle.getCipherText());
+    }
+
     public static JSONObject getEncryptedJSONDataBundle(String textToEncrypt, char[] password,
-                            byte[] salt) throws
-            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+            byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
             BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException,
             JSONException {

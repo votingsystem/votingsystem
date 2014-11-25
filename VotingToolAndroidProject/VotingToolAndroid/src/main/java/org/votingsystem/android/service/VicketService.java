@@ -335,10 +335,11 @@ public class VicketService extends IntentService {
 
     private void updateUserInfo(String serviceCaller) {
         LOGD(TAG + ".updateUserInfo", "updateUserInfo");
-        String targetService = contextVS.getVicketServer().getUserInfoServiceURL(
-                contextVS.getUserVS().getNif());
-        ResponseVS responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
+        ResponseVS responseVS = null;
         try {
+            String targetService = contextVS.getVicketServer().getUserInfoServiceURL(
+                    contextVS.getUserVS().getNif());
+            responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 UserVSAccountsInfo accountsInfo = UserVSAccountsInfo.parse(
                         responseVS.getMessageJSON());

@@ -52,6 +52,7 @@
 	<string name="keyguard_password_enter_pin_code">introduzca el código PIN de votación</string>
 	<string name="keyguard_password_enter_first_pin_code">introduzca el código PIN que deberá introducir en cada votación</string>
 	<string name="pin_dialog_caption">pin de firma</string>
+    <string name="pin_wallet_caption">pin de monedero</string>
 	<string name="invalidPin">código pin inválido</string>
 	<string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
 	<string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
@@ -277,15 +278,13 @@
     <string name="share_vicket_lbl">compartir vicket</string>
     <string name="vicket_user_info_lbl">información del usuario</string>
     <string name="request_cash_lbl">retirar efectivo</string>
-    <string name="uservs_accountvs_info_missing_caption">faltan los datos del usuario</string>
-    <string name="uservs_accountvs_info_missing"><![CDATA[no ha actualizado los datos de la semana]]></string>
     <string name="update_signers_info_lbl">actualizar datos</string>
     <string name="send_message_lbl">enviar mensaje</string>
     <string name="update_user_info_pin_msg">para obtener los datos necesita firmar una solicitud</string>
     <string name="vicket_user_info_request_msg_subject">solicitud de información de cuentas</string>
     <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s]]></string>
     <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
-    <string name="vicket_last_request_info_lbl"><![CDATA[última actualización el <u><b>\'%1$s\'</b></u>]]></string>
+    <string name="vicket_last_request_info_lbl"><![CDATA[última actualización el <u><b>%1$s</b></u>]]></string>
     <string name="time_remaining_info_lbl">tienes que gastar \'%1$s\' antes del domingo a las 24:00 horas</string>
     <string name="cash_request_dialog_caption">retirar dinero</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
@@ -452,4 +451,8 @@
     <string name="user_representative_lbl">su representante</string>
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
+    <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
+    <string name="change_wallet_pin">cambiar pin del monedero</string>
+    <string name="enter_new_pin_wallet_msg">introduzca el pin de su monedero, recuerde que si lo olvida perderá el contenido</string>
+    <string name="enter_old_pin_wallet_msg">introduzca el pin de monedero que tiene actualmente</string>
 </resources>

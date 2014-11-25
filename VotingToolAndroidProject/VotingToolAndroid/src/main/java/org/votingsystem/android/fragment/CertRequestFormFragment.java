@@ -189,7 +189,8 @@ public class CertRequestFormFragment extends Fragment {
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
-                                    broadCastId, getString(R.string.keyguard_password_enter_first_pin_code));
+                                    broadCastId, getString(
+                                    R.string.keyguard_password_enter_first_pin_code), null);
                         }
                     }).setNegativeButton(getString(R.string.cancel_lbl), null);
             UIUtils.showMessageDialog(builder);

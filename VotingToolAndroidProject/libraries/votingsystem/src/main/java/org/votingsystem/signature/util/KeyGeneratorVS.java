@@ -65,4 +65,11 @@ public enum KeyGeneratorVS {
         return serno;
     }
 
+    public byte[] getSalt() {
+        random.setSeed(System.currentTimeMillis());
+        final byte[] sernobytes = new byte[noOctets];
+        random.nextBytes(sernobytes);
+        return  sernobytes;
+    }
+    
 }

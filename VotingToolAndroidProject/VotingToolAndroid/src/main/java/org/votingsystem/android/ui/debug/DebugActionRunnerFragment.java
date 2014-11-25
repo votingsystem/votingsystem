@@ -41,7 +41,7 @@ public class DebugActionRunnerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.debug_action_runner, null);
         mLogArea = (TextView) rootView.findViewById(R.id.logArea);
@@ -68,15 +68,13 @@ public class DebugActionRunnerFragment extends Fragment {
         Button testButton = new Button(this.getActivity());
         testButton.setText(test.getLabel());
         testButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 final long start = System.currentTimeMillis();
                 mLogArea.setText("");
                 test.run(view.getContext(), new DebugAction.Callback() {
-                    @Override
-                    public void done(boolean success, String message) {
+                    @Override public void done(boolean success, String message) {
                         logTimed((System.currentTimeMillis() - start),
-                                (success ? "[OK] " : "[FAIL] ") + message);
+                        (success ? "[OK] " : "[FAIL] ") + message);
                     }
                 });
             }

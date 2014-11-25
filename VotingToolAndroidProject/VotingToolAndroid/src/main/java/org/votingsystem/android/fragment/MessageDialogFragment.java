@@ -33,6 +33,12 @@ public class MessageDialogFragment extends DialogFragment {
         newFragment.show(fragmentManager, MessageDialogFragment.TAG);
     }
 
+    public static void showDialog(String caption, String message, FragmentManager fragmentManager) {
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseVS.SC_OK,
+                caption, message);
+        newFragment.show(fragmentManager, MessageDialogFragment.TAG);
+    }
+
     public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
         showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage(), fragmentManager);

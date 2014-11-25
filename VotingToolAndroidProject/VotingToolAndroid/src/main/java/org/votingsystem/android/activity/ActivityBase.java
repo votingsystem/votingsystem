@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SyncStatusObserver;
@@ -33,6 +34,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
+import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
@@ -472,22 +474,17 @@ public abstract class ActivityBase extends ActionBarActivity {
 
     private void showConnectionStatusDialog() {
         if(contextVS.getWebSocketSession() != null) {
-            View dialogView = getLayoutInflater().inflate(R.layout.connection_status_dialog, null);
-            TextView userInfoText = (TextView) dialogView.findViewById(R.id.user_info_text);
             UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
-            if(sessionUserVS != null) {
-                userInfoText.setText(sessionUserVS.getEmail());
-            }
-            final AlertDialog dialog = new AlertDialog.Builder(this).setTitle(
-                    getString(R.string.connected_with_lbl)).setView(dialogView).create();
-            Button connectionButton = (Button) dialogView.findViewById(R.id.connection_button);
-            connectionButton.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    toggleWebSocketServiceConnection();
-                    dialog.hide();
-                }
-            });
-            dialog.show();
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);
+            builder.setPositiveButton(getString(R.string.disconnect_lbl),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        toggleWebSocketServiceConnection();
+                        dialog.dismiss();
+                    }
+                });
+            UIUtils.showMessageDialog(builder);
         }
     }
 
@@ -584,7 +581,8 @@ public abstract class ActivityBase extends ActionBarActivity {
     private void toggleWebSocketServiceConnection() {
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(contextVS.getWebSocketSession().getSessionId() != null)
+        if(contextVS.getWebSocketSession() != null &&
+                contextVS.getWebSocketSession().getSessionId() != null)
             typeVS = TypeVS.WEB_SOCKET_CLOSE;
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);

@@ -62,8 +62,8 @@ public class SMIMESignerActivity extends ActionBarActivity {
             if(request != null) {
                 if(TypeVS.MESSAGEVS_FROM_DEVICE == request.getTypeVS()) {
                     if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        UIUtils.launchMessageActivity(SMIMESignerActivity.this,
-                                request.getNotificationResponse(SMIMESignerActivity.this));
+                        UIUtils.launchMessageActivity(request.getNotificationResponse(
+                                SMIMESignerActivity.this), SMIMESignerActivity.this);
                         SMIMESignerActivity.this.finish();
                     } else showMessage(request.getStatusCode(),
                             getString(R.string.sign_document_lbl), request.getMessage());

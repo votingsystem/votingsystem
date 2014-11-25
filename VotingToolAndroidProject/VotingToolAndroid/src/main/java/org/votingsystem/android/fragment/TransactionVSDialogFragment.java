@@ -172,7 +172,7 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
 
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
-            String storedPasswordHash =  PrefUtils.getStoredPasswordHash(contextVS);
+            String storedPasswordHash =  PrefUtils.getPinHash(contextVS);
             if(storedPasswordHash != null) {
                 String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(storedPasswordHash)) {

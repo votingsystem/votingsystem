@@ -55,6 +55,7 @@ public class ContextVS {
 
 
     public static final String PIN_KEY = "PIN";
+    public static final String WALLET_PIN_KEY = "WALLET_PIN_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
     public static final String PERIOD_KEY = "PERIOD";
     public static final String URL_KEY = "URL";

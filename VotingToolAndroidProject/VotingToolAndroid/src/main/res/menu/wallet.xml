@@ -1,0 +1,4 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/change_wallet_pin"
+        android:title="@string/change_wallet_pin"/>
+</menu>

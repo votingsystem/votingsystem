@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
@@ -47,7 +51,7 @@ public class WalletFragment extends Fragment {
     private VicketListAdapter adapter = null;
     private List<Vicket> vicketList;
     private String broadCastId = WalletFragment.class.getSimpleName();
-
+    private String oldWalletPin;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -65,6 +69,22 @@ public class WalletFragment extends Fragment {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                    }
+                    break;
+                case PIN:
+                    oldWalletPin = pin;
+                    PinDialogFragment.showWalletPinScreenWithoutHashValidation(getFragmentManager(),
+                            broadCastId, getString(R.string.enter_new_pin_wallet_msg), TypeVS.PIN_CHANGE);
+                    break;
+                case PIN_CHANGE:
+                    try {
+                        WalletUtils.changeWalletPin(pin, oldWalletPin, getActivity());
+                        MessageDialogFragment.showDialog(getString(R.string.change_wallet_pin),
+                                getString(R.string.operation_ok_msg), getFragmentManager());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        MessageDialogFragment.showDialog(ResponseVS.getExceptionResponse(
+                                ex, getActivity()), getFragmentManager());
                     }
                     break;
             }
@@ -115,6 +135,21 @@ public class WalletFragment extends Fragment {
         gridView.setAdapter(adapter);
         setHasOptionsMenu(true);
         return rootView;
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.wallet, menu);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.change_wallet_pin:
+                PinDialogFragment.showWalletPinScreen(getFragmentManager(),
+                        broadCastId, getString(R.string.enter_old_pin_wallet_msg), false, TypeVS.PIN);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void isProgressDialogVisible(boolean isVisible) {

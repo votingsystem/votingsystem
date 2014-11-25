@@ -157,11 +157,28 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static String getStoredPasswordHash(Context context) throws NoSuchAlgorithmException,
-            ExceptionVS {
+    public static String getPinHash(Context context) throws NoSuchAlgorithmException, ExceptionVS {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.PIN_KEY, null);
+    }
+
+    public static void putWalletPin(String pin, Context context) {
+        try {
+            SharedPreferences settings = context.getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            String hashPin = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            editor.putString(ContextVS.WALLET_PIN_KEY, hashPin);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static String getWalletPinHash(Context context) throws NoSuchAlgorithmException,
+            ExceptionVS {
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        return settings.getString(ContextVS.WALLET_PIN_KEY, null);
     }
 
     public static String getCsrRequest(Context context) {

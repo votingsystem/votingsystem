@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -91,7 +92,7 @@ public class UserVSAccountsFragment extends Fragment {
                                 MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
                                 false, TypeVS.VICKET_REQUEST);
                     } else {
-                        UIUtils.launchMessageActivity(getActivity(), responseVS);
+                        UIUtils.launchMessageActivity(responseVS, getActivity());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             loadUserInfo(DateUtils.getCurrentWeekPeriod());
                         }
@@ -188,9 +189,7 @@ public class UserVSAccountsFragment extends Fragment {
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = PrefUtils.getUserVSAccountsLastCheckDate(getActivity());
         if(lastCheckedTime == null) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
-                    R.string.uservs_accountvs_info_missing_caption),  getString(
-                    R.string.uservs_accountvs_info_missing), getFragmentManager());
+            sendUserInfoRequest();
             return;
         }
         try {
@@ -239,6 +238,8 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendUserInfoRequest() {
+        Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
+                Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), VicketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);

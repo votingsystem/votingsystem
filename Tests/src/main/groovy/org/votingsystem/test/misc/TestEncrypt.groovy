@@ -15,7 +15,7 @@ Logger log = TestUtils.init(TestEncrypt.class, "./TestEncrypt")
 
 SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER)
 
-encryptSMIME(signatureService)
+
 
 File fileToEncrypt =  TestUtils.getFileFromResources("plainWallet")
 //JSONObject walletJSON = JSONSerializer.toJSON(fileToEncrypt.text)
