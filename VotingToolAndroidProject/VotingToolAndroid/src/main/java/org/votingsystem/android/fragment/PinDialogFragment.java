@@ -96,9 +96,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     }
 
     public static void showWalletPinScreenWithoutHashValidation(FragmentManager fragmentManager,
-              String broadCastId, String msg, TypeVS type) {
+              String broadCastId, String msg, TypeVS typeVS) {
         PinDialogFragment pinDialog = new PinDialogFragment();
-        Bundle bundle = getArguments(msg, true, false, false, broadCastId, null);
+        Bundle bundle = getArguments(msg, true, false, false, broadCastId, typeVS);
         bundle.putBoolean(ContextVS.WALLET_PIN_KEY, true);
         pinDialog.setArguments(bundle);
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);

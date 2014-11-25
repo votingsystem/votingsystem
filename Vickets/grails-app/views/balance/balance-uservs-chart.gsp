@@ -30,9 +30,9 @@
                 },
                 tooltip: {
                     formatter: function () {
-                        return '<div style="display: inline-block;"><b>' + this.x + '</b><br/>' +
+                        return '<b>' + this.x + '</b><br/>' +
                                 this.series.name + ': ' + this.y + '<br/>' +
-                                'Total: ' + this.point.stackTotal + "</div>";
+                                'Total: ' + this.point.stackTotal;
                     }
                 },
                 legend:{ align: 'center', itemDistance:100, floating: false },
@@ -41,6 +41,10 @@
                         stacking: 'normal',
                         dataLabels: {
                             enabled: true,
+                            formatter: function(){
+                                if (this.y < 1) return ''; //to remove 0 from chart
+                                else return this.y;
+                            },
                             color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
                             style: {
                                 textShadow: '0 0 3px black, 0 0 3px black'

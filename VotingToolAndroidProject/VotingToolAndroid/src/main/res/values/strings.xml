@@ -400,7 +400,7 @@
     <string name="for_lbl">para</string>
     <string name="vicket_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
     <string name="finance_lbl">finanzas</string>
-    <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear monedero</string>
+    <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
     <string name="vicket_date_info">válido desde \'%1$s\' hasta \'%2$s\'</string>
     <string name="cancelled_lbl">cancelado</string>
@@ -453,6 +453,6 @@
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
     <string name="change_wallet_pin">cambiar pin del monedero</string>
-    <string name="enter_new_pin_wallet_msg">introduzca el pin de su monedero, recuerde que si lo olvida perderá el contenido</string>
-    <string name="enter_old_pin_wallet_msg">introduzca el pin de monedero que tiene actualmente</string>
+    <string name="enter_new_pin_wallet_msg">introduzca el nuevo pin, recuerde que si lo olvida perderá el contenido de su monedero</string>
+    <string name="enter_actual_pin_wallet_msg">introduzca el pin actual de su monedero</string>
 </resources>

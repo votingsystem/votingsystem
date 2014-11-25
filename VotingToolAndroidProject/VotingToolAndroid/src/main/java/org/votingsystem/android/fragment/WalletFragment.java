@@ -51,17 +51,18 @@ public class WalletFragment extends Fragment {
     private VicketListAdapter adapter = null;
     private List<Vicket> vicketList;
     private String broadCastId = WalletFragment.class.getSimpleName();
-    private String oldWalletPin;
+    private String actualPIN;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         if(pin != null) {
             switch(responseVS.getTypeVS()) {
                 case VICKET:
                     try {
+                        actualPIN = pin;
                         vicketList = WalletUtils.getVicketList(pin, getActivity());
                         adapter.setItemList(vicketList);
                         adapter.notifyDataSetChanged();
@@ -71,14 +72,9 @@ public class WalletFragment extends Fragment {
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
                     }
                     break;
-                case PIN:
-                    oldWalletPin = pin;
-                    PinDialogFragment.showWalletPinScreenWithoutHashValidation(getFragmentManager(),
-                            broadCastId, getString(R.string.enter_new_pin_wallet_msg), TypeVS.PIN_CHANGE);
-                    break;
                 case PIN_CHANGE:
                     try {
-                        WalletUtils.changeWalletPin(pin, oldWalletPin, getActivity());
+                        WalletUtils.changeWalletPin(pin, actualPIN, getActivity());
                         MessageDialogFragment.showDialog(getString(R.string.change_wallet_pin),
                                 getString(R.string.operation_ok_msg), getFragmentManager());
                     } catch (Exception ex) {
@@ -127,7 +123,7 @@ public class WalletFragment extends Fragment {
         });
         vicketList = WalletUtils.getVicketList();
         if(vicketList == null) {
-            PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+            PinDialogFragment.showWalletPinScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
             vicketList = new ArrayList<Vicket>();
         }
@@ -144,8 +140,8 @@ public class WalletFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.change_wallet_pin:
-                PinDialogFragment.showWalletPinScreen(getFragmentManager(),
-                        broadCastId, getString(R.string.enter_old_pin_wallet_msg), false, TypeVS.PIN);
+                PinDialogFragment.showWalletPinScreenWithoutHashValidation(getFragmentManager(),
+                        broadCastId, getString(R.string.enter_new_pin_wallet_msg), TypeVS.PIN_CHANGE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

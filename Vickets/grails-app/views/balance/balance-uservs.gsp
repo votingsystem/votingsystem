@@ -17,7 +17,7 @@
         <g:include view="/include/styles.gsp"/>
         <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <transactionvs-data id="transactionViewer"></transactionvs-data>
-        </vs-dialog>
+        </paper-dialog>
         <style no-shim>
         .messageToUser {
             font-weight: bold; margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;

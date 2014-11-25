@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import org.votingsystem.android.ui.debug.DebugAction;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.WalletUtils;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -41,6 +42,7 @@ public class ForceSyncNowAction implements DebugAction {
                 LOGD(TAG, "doInBackground");
                 try {
                     LOGD(TAG, "resetting wallet");
+                    PrefUtils.putWalletPin("1234", context);
                     WalletUtils.saveWallet(null, "1234", context);
                 } catch(Exception ex) {ex.printStackTrace();}
                 return null;

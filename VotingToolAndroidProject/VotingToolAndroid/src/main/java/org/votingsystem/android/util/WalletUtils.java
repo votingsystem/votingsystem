@@ -127,14 +127,14 @@ public class WalletUtils {
         if(!passwordHash.equals(storedPasswordHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
-        FileOutputStream fos = context.openFileOutput(ContextVS.WALLET_FILE_NAME, Context.MODE_PRIVATE);
-        byte[] result = null;
         if(walletJSON != null) {
+            FileOutputStream fos = context.openFileOutput(ContextVS.WALLET_FILE_NAME, Context.MODE_PRIVATE);
             EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, walletJSON.toString().getBytes());
-            result = bundle.toJSON().toString().getBytes("UTF-8");
-        }
-        fos.write(result);
-        fos.close();
+            byte[] result = bundle.toJSON().toString().getBytes("UTF-8");
+            fos.write(result);
+            fos.close();
+        } else context.deleteFile(ContextVS.WALLET_FILE_NAME);
+
     }
 
     public static void changeWalletPin(String newPin, String oldPin, Context context)
