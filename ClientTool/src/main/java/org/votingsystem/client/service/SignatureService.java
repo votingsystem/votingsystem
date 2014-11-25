@@ -134,9 +134,6 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case REPRESENTATIVE_SELECTION:
                             responseVS = sendSMIME(operationVS);
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                                BrowserVSSessionUtils.getInstance().refreshRepresentationData();
-                            }
                             break;
                         default:
                             responseVS = sendSMIME(operationVS);
@@ -463,7 +460,6 @@ public class SignatureService extends Service<ResponseVS> {
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
                     responseVS.setSMIME(delegationReceipt);
                     responseVS.setMessage(ContextVS.getMessage("cancelAnonymousRepresentationOkMsg"));
-                    BrowserVSSessionUtils.getInstance().refreshRepresentationData();
                     return responseVS;
                 }
             }
@@ -525,7 +521,7 @@ public class SignatureService extends Service<ResponseVS> {
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 responseVS = signedSender.call();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    anonymousDelegation.validateDelegationReceipt(responseVS.getSMIME(),
+                    anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
                     anonymousDelegation.setRepresentative(representative);
                     BrowserVSSessionUtils.getInstance().setAnonymousDelegationRequest(anonymousDelegation);

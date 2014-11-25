@@ -237,12 +237,19 @@ public class ReceiptFragment extends Fragment {
                             receiptContainer.getReceipt().getSignedContent());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    JSONObject signedData = new JSONObject(selectedReceiptSMIME.getSignedContent());
-                    AnonymousDelegation delegation = AnonymousDelegation.parse(signedData);
+                    dataJSON = new JSONObject(selectedReceiptSMIME.getSignedContent());
+                    AnonymousDelegation delegation = AnonymousDelegation.parse(dataJSON);
                     contentFormatted = getString(R.string.anonymous_representative_selection_formatted,
                             delegation.getWeeksOperationActive(),
                             DateUtils.getDateStr(delegation.getDateFrom(), "EEE dd MMM yyyy' 'HH:mm"),
                             DateUtils.getDateStr(delegation.getDateTo()), "EEE dd MMM yyyy' 'HH:mm");
+                    break;
+                case ACCESS_REQUEST:
+                    dataJSON = new JSONObject(selectedReceiptSMIME.getSignedContent());
+                    contentFormatted = getString(R.string.access_request_info_formatted,
+                            CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
+                            dataJSON.getString("eventURL"));
+                    receiptSubjectStr = getString(org.votingsystem.android.lib.R.string.access_request_lbl);
                     break;
                 default:
                     contentFormatted = receiptContainer.getReceipt().getSignedContent();

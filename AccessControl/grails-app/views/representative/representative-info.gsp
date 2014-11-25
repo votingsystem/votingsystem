@@ -1,5 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/image-viewer-dialog']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-request-accreditations-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-request-votinghistory-dialog']"/>">
@@ -29,8 +30,13 @@
         <div class="pageContentDiv">
             <div style="margin: 0 30px 0 30px;">
                 <div class="text-center row" style="margin:20px auto 15px 15px;">
-                    <div representativeId-data="{{representative.id}}" class="representativeNameHeader">
-                        <div>{{representativeFullName}}</div>
+                    <div layout horizontal center center-justified style="width:100%;">
+                        <template if="{{subpage}}">
+                            <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        </template>
+                        <div flex representativeId-data="{{representative.id}}" class="representativeNameHeader">
+                            <div>{{representativeFullName}}</div>
+                        </div>
                     </div>
                     <div  class="representativeNumRepHeader" style="">
                         {{representative.numRepresentations}} <g:message code="numDelegationsPartMsg"/>
@@ -42,14 +48,12 @@
                             </paper-button>
                         </div>
                     </template>
-
                 </div>
                 <div  style="width: 1000px; margin:0px auto 0px auto;">
                     <paper-tabs style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
                                  selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
                         <paper-tab name="profile" style="width: 400px"><g:message code="profileLbl"/></paper-tab>
                         <paper-tab name="votingHistory"><g:message code="votingHistoryLbl"/></paper-tab>
-
                     </paper-tabs>
                     <div class="tabContent" style="display:{{selectedTab == 'profile'?'block':'none'}}">
                         <div layout horizontal>

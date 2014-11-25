@@ -116,8 +116,7 @@
         su identidad, para ello puede presentarse en cualquiera de <br/><br/>
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
     <string name="search_query_info_msg"><![CDATA[<b>resultado de la busqueda</b>: %1$s]]></string>
-    <string name="access_request_repeated_msg"><![CDATA[usted ya ha votado en el asunto \'%1$s\' <br/><br/>
-	puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
+    <string name="access_request_repeated_msg"><![CDATA[usted ya ha votado en el asunto \'%1$s\']]></string>
     <string name="access_request_repeated_caption">error, voto repetido</string>
     <string name="access_request_repeated_url_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
@@ -200,7 +199,7 @@
     <string name="open_receipt_lbl">ver recibo</string>
     <string name="signers_part_lbl">datos de los certificados firmantes:</string>
     <string name="num_signers_lbl"><![CDATA[<b>documento con %1$s firmantes</b>]]></string>
-    <string name="signers_info_lbl">datos de los firmantes del recibo</string>
+    <string name="signers_info_lbl">firmantes del recibo</string>
     <string name="timestamp_info_lbl">datos del sello de tiempo</string>
     <string name="date_saved_lbl">guardado</string>
     <string name="date_updated_lbl">actualizado</string>
@@ -422,6 +421,8 @@
     <string name="date_election_lbl">fecha de la consulta</string>
     <string name="votevs_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
         asunto de la votación: <b>\'%2$s\'</b><br/> opción seleccionada: <b>\'%3$s\'</b>]]></string>
+    <string name="access_request_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
+        asunto de la votación: <a href=\'%2$s\'>%2$s</a>]]></string>
     <string name="signature_content">contenido de la firma</string>
     <string name="checking_vote_state_lbl">comprobando el estado del voto</string>
     <string name="votevs_ok_msg">voto válido</string>

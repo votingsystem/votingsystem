@@ -78,7 +78,7 @@ public class CertRequestActivity extends ActionBarActivity {
                                     CertRequestActivity.super.onBackPressed();
                                 }
                             });
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                UIUtils.showMessageDialog(builder);
                 break;
         }
         if(getIntent().getStringExtra(ContextVS.OPERATIONVS_KEY) != null) {

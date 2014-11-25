@@ -1,8 +1,10 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -28,8 +30,10 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatsPagerActivity;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
@@ -67,17 +71,30 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
                 launchVoteService(responseVS.getTypeVS());
             else {
                 vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
                 if(responseVS.getTypeVS() == TypeVS.VOTEVS) {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(vote);
-                    else if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
-                        setOptionButtonsEnabled(false);
+                    else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()){
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                responseVS.getCaption(), responseVS.getNotificationMessage(),getActivity());
+                        builder.setPositiveButton(getString(R.string.open_receipt_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                                    intent.putExtra(ContextVS.URL_KEY, responseVS.getUrl());
+                                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                                    startActivity(intent);
+                                }
+                            });
+                        UIUtils.showMessageDialog(builder);
+                    } else {
+                        setOptionButtonsEnabled(true);
+                        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
                     }
-                    MessageDialogFragment.showDialog(responseVS, getFragmentManager());
                 } else if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setEventScreen(eventVS);

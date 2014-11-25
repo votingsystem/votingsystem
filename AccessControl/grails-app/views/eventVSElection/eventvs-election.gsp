@@ -6,7 +6,6 @@
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-stats']"/>">
 
 
-
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
         <g:include view="/include/styles.gsp"/>

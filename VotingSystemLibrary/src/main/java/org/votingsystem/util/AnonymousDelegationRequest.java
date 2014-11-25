@@ -134,7 +134,9 @@ public class AnonymousDelegationRequest implements Serializable {
         delegationReceiptBytes = (byte[]) s.readObject();
     }
 
-    public void setDelegationReceipt(SMIMEMessage delegationReceipt) {
+    public void setDelegationReceipt(SMIMEMessage delegationReceipt, X509Certificate serverCert) throws Exception {
+        Collection matches = delegationReceipt.checkSignerCert(serverCert);
+        if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
         this.delegationReceipt = delegationReceipt;
     }
 
@@ -168,11 +170,6 @@ public class AnonymousDelegationRequest implements Serializable {
 
     public void setRepresentative(UserVS representative) {
         this.representative = representative;
-    }
-
-    public void validateDelegationReceipt(SMIMEMessage smimeMessage, X509Certificate serverCert) throws Exception {
-        Collection matches = smimeMessage.checkSignerCert(serverCert);
-        if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
     }
 
     public JSONObject getRequest() {

@@ -235,7 +235,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                                         false, null);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                UIUtils.showMessageDialog(builder);
                 break;
         }
     }

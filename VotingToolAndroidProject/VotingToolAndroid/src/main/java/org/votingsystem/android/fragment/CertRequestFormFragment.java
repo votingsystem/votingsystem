@@ -192,7 +192,7 @@ public class CertRequestFormFragment extends Fragment {
                                     broadCastId, getString(R.string.keyguard_password_enter_first_pin_code));
                         }
                     }).setNegativeButton(getString(R.string.cancel_lbl), null);
-            builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            UIUtils.showMessageDialog(builder);
       	}
     }
 

@@ -34,7 +34,7 @@
                         <b><g:message code="validFromLbl"/>:</b>
                         {{representationState.dateFrom}}
                         <span style="margin: 0 0 0 20px;"><b><g:message code="toLbl"/>:</b></span>
-                        {{representationState.dateFrom}}
+                        {{representationState.dateTo}}
                     </div>
                 </div>
                 <div id="representativeInfo" style="margin:10px 0 10px 0;">

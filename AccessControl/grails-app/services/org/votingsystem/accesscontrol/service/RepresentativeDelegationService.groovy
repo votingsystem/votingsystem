@@ -110,28 +110,37 @@ class RepresentativeDelegationService {
         return anonymousDelegation
     }
 
-    public Map checkRepresentationState(String nifToCheck) {
+    @Transactional public Map checkRepresentationState(String nifToCheck) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         nifToCheck = NifUtils.validate(nifToCheck)
         UserVS userVS  = UserVS.findWhere(nif:nifToCheck)
         if(!userVS) throw new ExceptionVS(messageSource.getMessage('userVSNotFoundByNIF', [nifToCheck].toArray(), locale))
         if(userVS.representative) {
-            return [state:RepresentationState.WITH_PUBLIC_REPRESENTATION.toString(), representative:
-                    ((RepresentativeService)grailsApplication.mainContext.getBean(
+            RepresentationDocumentVS representationDocument = RepresentationDocumentVS.findWhere(
+                    userVS:userVS, state:RepresentationDocumentVS.State.OK)
+            return [state:RepresentationState.WITH_PUBLIC_REPRESENTATION.toString(),
+                    lastCheckedDate:DateUtils.getDateStr(Calendar.getInstance().getTime()),
+                    base64ContentDigest:representationDocument.activationSMIME.base64ContentDigest,
+                    representative:((RepresentativeService)grailsApplication.mainContext.getBean(
                     "representativeService")).getRepresentativeDetailedMap(userVS.representative)]
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-            return [state:RepresentationState.REPRESENTATIVE.toString(), representative:
-                    ((RepresentativeService)grailsApplication.mainContext.getBean(
+            return [state:RepresentationState.REPRESENTATIVE.toString(),
+                    lastCheckedDate:DateUtils.getDateStr(Calendar.getInstance().getTime()),
+                    representative: ((RepresentativeService)grailsApplication.mainContext.getBean(
                             "representativeService")).getRepresentativeDetailedMap(userVS)]
         }
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS)
         if(anonymousDelegation) {
-            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(), dateFrom: DateUtils.getDateStr(
-                    anonymousDelegation.getDateFrom()), dateTo: DateUtils.getDateStr(
-                    anonymousDelegation.getDateTo())]
+            return [state:RepresentationState.WITH_ANONYMOUS_REPRESENTATION.toString(),
+                    lastCheckedDate:DateUtils.getDateStr(Calendar.getInstance().getTime()),
+                    base64ContentDigest:anonymousDelegation.delegationSMIME.base64ContentDigest,
+                    dateFrom: DateUtils.getDateStr(anonymousDelegation.getDateFrom()),
+                    dateTo: DateUtils.getDateStr(anonymousDelegation.getDateTo())]
         }
-        return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString()]
+        return [state:org.votingsystem.model.RepresentationState.WITHOUT_REPRESENTATION.toString(),
+                lastCheckedDate:DateUtils.getDateStr(Calendar.getInstance().getTime()),
+                base64ContentDigest:""]
     }
 
     @Transactional

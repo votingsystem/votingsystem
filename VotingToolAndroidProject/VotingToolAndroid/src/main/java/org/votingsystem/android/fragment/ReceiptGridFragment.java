@@ -176,11 +176,9 @@ public class ReceiptGridFragment extends Fragment implements
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
-                TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
                 ((TextView) view.findViewById(R.id.receipt_subject)).setText(
                         receiptContainer.getCardSubject(context));
-                typeTextView.setText(receiptContainer.getTypeDescription(context));
                 ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
                         receiptContainer.getLogoId());
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));

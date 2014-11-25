@@ -43,4 +43,5 @@
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>
     <string name="representative_selection_lbl">delegación pública de representante</string>
+    <string name="access_request_lbl">solicitud de acceso</string>
 </resources>

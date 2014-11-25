@@ -121,7 +121,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                                         false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                UIUtils.showMessageDialog(builder);
                 return true;
             case R.id.new_representative:
                 Intent intent = new Intent(this, RepresentativeNewActivity.class);
@@ -139,7 +139,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                                 false, TypeVS.REPRESENTATIVE_REVOKE);
                         }
                     }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                builder.show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                UIUtils.showMessageDialog(builder);
                 return true;
             case R.id.edit_representative:
                 Intent editIntent = new Intent(this, RepresentativeNewActivity.class);

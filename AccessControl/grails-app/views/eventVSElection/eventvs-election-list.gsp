@@ -12,7 +12,7 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
             }
         </style>
-        <vs-innerpage-signal id="innerpageSignal" title="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
+        <vs-innerpage-signal id="innerpageSignal" caption="<g:message code="electionSystemLbl"/>"></vs-innerpage-signal>
         <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>

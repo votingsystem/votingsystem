@@ -82,9 +82,10 @@ public class VoteService extends IntentService {
                                 R.string.vote_ok_msg, eventSubject,
                                 vote.getOptionSelected().getContent()));
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                        responseVS.setUrl(responseVS.getMessage());
                         responseVS.setCaption(getString(R.string.access_request_repeated_caption)).
                                 setNotificationMessage(getString( R.string.access_request_repeated_msg,
-                                eventSubject, responseVS.getMessage()));
+                                eventSubject));
                     } else {
                         responseVS.setCaption(getString(R.string.vote_error_caption)).
                                 setNotificationMessage(
@@ -128,7 +129,6 @@ public class VoteService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
-            showNotification(responseVS);
             contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
         }
     }
