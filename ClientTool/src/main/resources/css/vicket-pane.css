@@ -25,9 +25,22 @@
     -fx-text-fill: #138085;
 }
 
+.menu-item .label {
+    -fx-text-fill: #6c0404;
+}
+
+.menu-item:focused {
+    -fx-background-color: #6c0404;
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: fff;
+}
+
 .context-menu {
-    -fx-background-color: #006699;
-    -fx-text-fill: white;
+    -fx-background-color: #f9f9f9;
+    -fx-text-fill: #6c0404;
+    -fx-color: #6c0404;
 }
 
 .operations {

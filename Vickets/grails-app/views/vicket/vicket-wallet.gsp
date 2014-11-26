@@ -1,6 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet-tag-group']"/>">
 
@@ -9,7 +8,6 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
             .green-slider paper-slider::shadow #sliderKnobInner,
             .green-slider paper-slider::shadow #sliderKnobInner::before,
             .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {

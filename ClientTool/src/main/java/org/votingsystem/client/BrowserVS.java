@@ -1,5 +1,6 @@
 package org.votingsystem.client;
 
+import com.google.common.eventbus.EventBus;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -67,10 +68,12 @@ import java.util.Map;
 public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
+    private static final String EVENT_BUS_IDENTIFIER = "EVENT_BUS_BrowserVS";
     private static final int BROWSER_WIDTH = 1200;
     private static final int BROWSER_HEIGHT = 1000;
     private static final int MAX_CHARACTERS_TAB_CAPTION = 25;
 
+    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);;
     private Stage browserStage;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private TextField locationField = new TextField("");
@@ -85,6 +88,10 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         return INSTANCE;
     }
 
+    public void registerToEventBus(Object eventBusListener) {
+        eventBus.register(eventBusListener);
+    }
+
     private BrowserVS() {
         browserHelper = new BrowserVSPane();
         Platform.setImplicitExit(false);
@@ -94,7 +101,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
                         ResponseVS responseVS = browserHelper.getSignatureService().getValue();
-                        if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
+                        if(responseVS.getStatus() != null) {
+                            eventBus.post(responseVS);
+                        } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                             log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                         } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             sendMessageToBrowser(responseVS.getMessageJSON(),

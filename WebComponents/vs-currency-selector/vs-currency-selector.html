@@ -1,15 +1,22 @@
 <link href="../polymer/polymer.html" rel="import">
 <link href="../paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
+<link href="../paper-dropdown/paper-dropdown.html" rel="import">
+<link href="../core-menu/core-menu.html" rel="import">
+
 
 <polymer-element name="vs-currency-selector" on-core-select="{{selectAction}}">
     <template>
         <style>
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
         </style>
-        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" selected="EUR">
-            <template repeat="{{currencyCodes}}">
-                <paper-item id="{{code}}" label="{{name}}"></paper-item>
-            </template>
+        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" on-core-select="{{selectAction}}" selected="EUR">
+            <paper-dropdown class="dropdown">
+                <core-menu>
+                    <template repeat="{{currencyCodes}}">
+                        <paper-item id="{{code}}">{{name}}</paper-item>
+                    </template>
+                </core-menu>
+            </paper-dropdown>
         </paper-dropdown-menu>
     </template>
     <script>

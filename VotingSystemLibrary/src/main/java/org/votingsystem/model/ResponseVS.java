@@ -182,8 +182,9 @@ public class ResponseVS<T> implements Serializable {
         return type;
     }
 
-    public void setType(TypeVS type) {
+    public ResponseVS setType(TypeVS type) {
         this.type = type;
+        return this;
     }
 
     public T getData() {
@@ -247,8 +248,9 @@ public class ResponseVS<T> implements Serializable {
         return (StatusVS<E>)status;
     }
 
-    public <E> void setStatus(StatusVS<E> status) {
+    public <E> ResponseVS setStatus(StatusVS<E> status) {
         this.status = status;
+        return this;
     }
 
     public File getFile() {

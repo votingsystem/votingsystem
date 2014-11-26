@@ -309,7 +309,6 @@ public class ReceiptFragment extends Fragment {
         LOGD(TAG + ".onStart", "onStart");
         super.onStart();
         if(receiptURL != null) new ReceiptFetcher().execute(receiptURL);
-        if(selectedReceipt != null) setActionBarMenu(menu);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -333,7 +332,7 @@ public class ReceiptFragment extends Fragment {
                 selectedReceipt.getTypeVS());
         this.menu = menu;
         menuInflater.inflate(R.menu.receipt_fragment, menu);
-        if(selectedReceipt != null && selectedReceipt.hashReceipt()) setActionBarMenu(menu);
+        if(selectedReceipt != null) setActionBarMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

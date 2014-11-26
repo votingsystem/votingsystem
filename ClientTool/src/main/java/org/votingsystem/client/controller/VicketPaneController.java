@@ -1,5 +1,6 @@
 package org.votingsystem.client.controller;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -24,14 +25,12 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.JSONFormDialog;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -40,6 +39,7 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.vicket.model.Vicket;
 import org.votingsystem.vicket.model.VicketTransactionBatch;
 
+import javax.swing.event.ChangeEvent;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -51,6 +51,14 @@ import java.util.Calendar;
 public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listener {
 
     private static Logger log = Logger.getLogger(VicketPaneController.class);
+
+    class EventBusDeleteVicketListener {
+        @Subscribe public void recordCustomerChange(ResponseVS responseVS) {
+            if(TypeVS.VICKET_DELETE == responseVS.getType()) {
+                log.debug("EventBusDeleteVicketListener - VICKET_DELETE");
+            }
+        }
+    }
 
     private Vicket vicket;
     private VicketServer vicketServer;
@@ -106,11 +114,21 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
+        BrowserVS.getInstance().registerToEventBus(new EventBusDeleteVicketListener());
         sendMenuItem = new MenuItem("");
         sendMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         sendMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 showForm(new Vicket.TransactionVSData("", "", "", true).getJSON());
+            }
+        });
+        MenuItem deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
+        deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                System.out.println("deleteMenuItem");
+                OperationVS operationVS = new OperationVS(TypeVS.VICKET_DELETE);
+                operationVS.setMessage(vicket.getHashCertVS());
+                BrowserVS.getInstance().processOperationVS(operationVS);
             }
         });
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
@@ -119,7 +137,7 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
                 System.out.println("saveMenuItem");
             }
         });
-        contextMenu.getItems().addAll(sendMenuItem, saveMenuItem);
+        contextMenu.getItems().addAll(sendMenuItem, deleteMenuItem, saveMenuItem);
         contextMenu.show(vicketValueLbl, Side.BOTTOM, 0, 0);
         setProgressVisible(false, true);
         PlatformImpl.runLater(statusChecker);
@@ -168,8 +186,7 @@ public class VicketPaneController  implements DocumentVS,  JSONFormDialog.Listen
 
     public void showForm(JSONObject formData) {
         PlatformImpl.runLater(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 JSONFormDialog formDialog = new JSONFormDialog();
                 formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, VicketPaneController.this);
             }

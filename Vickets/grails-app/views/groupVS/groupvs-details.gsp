@@ -5,6 +5,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown', file: 'paper-dropdown.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-menu', file: 'core-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-user']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
@@ -32,28 +34,30 @@
                 <div layout horizontal center center-justified style="margin:0 0 20px 0;">
                     <div layout horizontal center center-justified>
                         <i class="fa fa-cogs optionsIcon"></i>
-                        <paper-dropdown-menu id="configGroupDropDown" valueattr="label"
-                                     label="<g:message code="configGroupvsLbl"/>" style="width: 200px;">
-                            <core-selector target="{{$.groupOptions}}" valueattr="id" on-core-select="{{configGroup}}">
-                                <div id="groupOptions" style="padding:0 10px 0 10px;">
-                                    <core-item id="editGroup" label="<g:message code="editDataLbl"/>"></core-item>
-                                    <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>"></core-item>
-                                </div>
-                            </core-selector>
+                        <paper-dropdown-menu id="configGroupDropDown" halign="right" style="width: 200px;"
+                                     label="<g:message code="configGroupvsLbl"/>" on-core-select="{{configGroup}}">
+                            <paper-dropdown class="dropdown">
+                                <core-menu>
+                                    <paper-item><g:message code="editDataLbl"/></paper-item>
+                                    <paper-item><g:message code="cancelGroupVSLbl"/></paper-item>
+                                </core-menu>
+                            </paper-dropdown>
                         </paper-dropdown-menu>
                     </div>
 
                     <div layout horizontal center center-justified style="margin:0 0 0 60px;">
                         <i class="fa fa-money optionsIcon"></i>
-                        <paper-dropdown-menu id="selectTransactionVSDropDown" valueattr="label"
-                                         label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
-                            <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
-                                <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
-                                    <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
-                                    <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
-                                    <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
-                                </div>
-                            </core-selector>
+                        <paper-dropdown-menu id="selectTransactionVSDropDown"
+                                 label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
+                            <paper-dropdown class="dropdown">
+                                <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
+                                    <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
+                                        <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
+                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
+                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
+                                    </div>
+                                </core-selector>
+                            </paper-dropdown>
                         </paper-dropdown-menu>
                     </div>
                 </div>
@@ -242,9 +246,10 @@
             console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
                 " - menuType: " + menuType)
         },
-        configGroup:function(e) {
+        configGroup:function(e, details) {
             //e.detail.isSelected = false
-            if('cancelGroup' == e.detail.item.id) {
+            console.log("======== configGroup")
+            if('<g:message code="cancelGroupVSLbl"/>' == e.detail.item.innerHTML) {
                 showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.userVS.name),
                         "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
             } else if('editGroup' == e.detail.item.id) {

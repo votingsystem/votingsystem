@@ -80,6 +80,7 @@ public class SignatureService extends Service<ResponseVS> {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
                         break;
+                    case VICKET_DELETE:
                     case MESSAGEVS_DECRYPT:
                         responseVS = new ResponseVS(ResponseVS.SC_OK);
                         break;
@@ -131,6 +132,9 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case WALLET_OPEN:
                             responseVS = openWallet(operationVS);
+                            break;
+                        case VICKET_DELETE:
+                            responseVS = deleteVicket(operationVS);
                             break;
                         case REPRESENTATIVE_SELECTION:
                             responseVS = sendSMIME(operationVS);
@@ -343,6 +347,25 @@ public class SignatureService extends Service<ResponseVS> {
                 JSON walletJSON = WalletUtils.getWallet(password);
                 responseJSON.put("message", walletJSON);
                 return ResponseVS.getJSONResponse(ResponseVS.SC_OK, responseJSON);
+            } catch(Exception ex) {
+                log.error(ex.getMessage(), ex);
+                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            }
+        }
+
+        private ResponseVS deleteVicket(OperationVS operationVS) throws Exception {
+            log.debug("deleteVicket");
+            try {
+                JSONArray walletJSON = (JSONArray) WalletUtils.getWallet(password);
+                for(int i = 0; i < walletJSON.size(); i++) {
+                    JSONObject vicketJSON = (JSONObject) walletJSON.get(i);
+                    if(vicketJSON.getString("hashCertVS").equals(operationVS.getMessage())) {
+                        walletJSON.remove(i);
+                        log.debug("deleted vicket with hashCertVS: " + operationVS.getMessage());
+                    }
+                }
+                WalletUtils.saveWallet(walletJSON, password);
+                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.VICKET_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());

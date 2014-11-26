@@ -1,6 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown', file: 'paper-dropdown.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-menu', file: 'core-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/vs-date', file: 'vs-date.html')}">
 
 <polymer-element name="uservs-dashboard" attributes="dataMap">
@@ -12,16 +14,23 @@
             }
             .numTrans { font-size: 2em; color: #6c0404; text-align: center;}
             .transDesc {background: #6c0404; color: #f9f9f9; padding: 5px;}
+
+            .colored {
+                color: #6c0404;
+            }
         </style>
         <core-ajax id="ajax" url="{{url}}" handleAs="json" response="{{dataMap}}" method="get" contentType="json"
                    on-core-response="{{ajaxResponse}}"></core-ajax>
         <div id="selectorContainer" layout horizontal center center-justified relative>
-                <paper-dropdown-menu id="dropDownMenu" valueattr="label" halign="right" on-core-select="{{selectAction}}"
-                                     relatedTarget="{{$.trigger}}"  selected="<g:message code="lastHourEventsLbl"/>" >
-                    <paper-item label="<g:message code="lastHourEventsLbl"/>"></paper-item>
-                    <paper-item label="<g:message code="last12HourEventsLbl"/>"></paper-item>
-                    <paper-item label="<g:message code="last24HourEventsLbl"/>"></paper-item>
-                </paper-dropdown-menu>
+            <paper-dropdown-menu id="dropDownMenu" halign="right" on-core-select="{{selectAction}}">
+                <paper-dropdown class="dropdown colored">
+                    <core-menu selected="0">
+                        <paper-item><g:message code="lastHourEventsLbl"/></paper-item>
+                        <paper-item><g:message code="last12HourEventsLbl"/></paper-item>
+                        <paper-item><g:message code="last24HourEventsLbl"/></paper-item>
+                    </core-menu>
+                </paper-dropdown>
+            </paper-dropdown-menu>
         </div>
         <vs-date id="dateVS"></vs-date>
         <div layout flex horizontal wrap around-justified>
@@ -110,9 +119,9 @@
             }
             if(details.isSelected) {
                 var numHours
-                if("<g:message code="lastHourEventsLbl"/>" === details.item.label) numHours = 1
-                if("<g:message code="last12HourEventsLbl"/>" === details.item.label) numHours = 12
-                if("<g:message code="last24HourEventsLbl"/>" === details.item.label) numHours = 24
+                if("<g:message code="lastHourEventsLbl"/>" === details.item.innerHTML) numHours = 1
+                if("<g:message code="last12HourEventsLbl"/>" === details.item.innerHTML) numHours = 12
+                if("<g:message code="last24HourEventsLbl"/>" === details.item.innerHTML) numHours = 24
                 var targetURL = "${createLink( controller:'app', action:"userVS", absolute:true)}/" + numHours
                 console.log(this.tagName + " - targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
