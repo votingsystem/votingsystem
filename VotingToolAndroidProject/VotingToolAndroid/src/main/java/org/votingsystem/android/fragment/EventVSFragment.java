@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 /**
@@ -226,10 +227,9 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(getActivity(), EventVSStatsPagerActivity.class);
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(FRAGMENT_KEY, EventVSStatsFragment.class.getName());
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
-                intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
-                intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
                 startActivity(intent);
                 return true;
             default:

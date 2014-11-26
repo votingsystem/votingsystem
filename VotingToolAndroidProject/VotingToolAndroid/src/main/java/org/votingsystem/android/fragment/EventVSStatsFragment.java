@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -36,7 +35,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -107,7 +105,7 @@ public class EventVSStatsFragment extends Fragment {
     }
 
     private void loadUrl(String serverURL) {
-    	LOGD(TAG + ".serverURL", " - serverURL: " + serverURL);
+    	LOGD(TAG + ".loadUrl", " - serverURL: " + serverURL);
         WebView webview = (WebView) rootView.findViewById(R.id.webview);
         WebSettings webSettings = webview.getSettings();
         webSettings.setBuiltInZoomControls(true);

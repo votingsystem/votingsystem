@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +45,9 @@ public class EventVSSearchResultActivity extends ActionBarActivity {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.eventvs_grid);
+        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar_vs,
+                (ViewGroup) findViewById(R.id.toolbar_container)).findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         GridView gridView = (GridView) findViewById(R.id.gridview);
         TextView textView = (TextView) findViewById(R.id.search_query);

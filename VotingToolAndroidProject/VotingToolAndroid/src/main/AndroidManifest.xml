@@ -27,9 +27,6 @@
         <activity android:name=".activity.ConfirmImageActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".ui.debug.DebugActionRunnerActivity" android:noHistory="true"
-            android:label="@string/debug_tests" android:theme="@style/ThemeVS"/>
-
         <activity android:name=".activity.EventVSStatsPagerActivity"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 

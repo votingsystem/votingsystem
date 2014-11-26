@@ -220,10 +220,8 @@ public class EventVSNewActivity extends ActivityBase {
     private void addEventOption(final String optionContent) {
         final LinearLayout newOptionView = (LinearLayout) this.getLayoutInflater().
                 inflate(R.layout.new_eventvs_field, null);
-        Button remove_option_button = (Button) newOptionView.findViewById(
-                R.id.remove_option_button);
-        TextView fieldContentTextView = (TextView) newOptionView.findViewById(
-                R.id.option_content);
+        Button remove_option_button = (Button) newOptionView.findViewById(R.id.remove_option_button);
+        TextView fieldContentTextView = (TextView) newOptionView.findViewById(R.id.option_content);
         newOptionView.setVisibility(View.VISIBLE);
         fieldContentTextView.setText(optionContent);
         remove_option_button.setOnClickListener(new View.OnClickListener() {

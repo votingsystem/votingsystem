@@ -26,18 +26,15 @@
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/empty_search_lbl"/>
 
-    <FrameLayout android:id="@+id/gridContainer"
+    <GridView android:id="@+id/gridview"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-        <GridView android:id="@+id/gridview"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:columnWidth="260dp"
-            android:numColumns="auto_fit"
-            android:verticalSpacing="7dp"
-            android:horizontalSpacing="7dp"
-            android:stretchMode="columnWidth"
-            android:gravity="center"
-            android:drawSelectorOnTop="false"/>
-    </FrameLayout>
+        android:layout_height="fill_parent"
+        android:columnWidth="260dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="7dp"
+        android:horizontalSpacing="7dp"
+        android:stretchMode="columnWidth"
+        android:padding="5dp"
+        android:gravity="center"
+        android:drawSelectorOnTop="false"/>
 </RelativeLayout>

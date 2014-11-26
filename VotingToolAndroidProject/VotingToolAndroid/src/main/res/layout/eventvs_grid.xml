@@ -1,60 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <!-- this is for EventVSSearchResultActivity Toolbar-->
+    <LinearLayout android:id="@+id/toolbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"></LinearLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <LinearLayout android:id="@+id/search_query_Container"
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:layout_height="match_parent"
             android:orientation="vertical">
-            <TextView android:id="@+id/num_results"
-                android:layout_width="fill_parent"
+            <LinearLayout android:id="@+id/search_query_Container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="@color/msg_content_vs"
-                android:gravity="center_vertical|center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-            <TextView android:id="@+id/search_query"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:textColor="@color/msg_content_vs"
-                android:gravity="center_vertical|center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:visibility="gone"
+                android:orientation="vertical">
+                <TextView android:id="@+id/num_results"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:textColor="@color/msg_content_vs"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                <TextView android:id="@+id/search_query"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:textColor="@color/msg_content_vs"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <FrameLayout android:id="@+id/gridContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <GridView android:id="@+id/gridview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:columnWidth="250dp"
+                    android:numColumns="auto_fit"
+                    android:layout_margin="5dp"
+                    android:verticalSpacing="4dp"
+                    android:horizontalSpacing="4dp"
+                    android:stretchMode="columnWidth"
+                    android:gravity="center"
+                    android:drawSelectorOnTop="false"/>
+
+            </FrameLayout>
         </LinearLayout>
 
-        <FrameLayout android:id="@+id/gridContainer"
+        <TextView android:id="@android:id/empty"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:visibility="gone"
+            android:textColor="@color/empty_msg"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/empty_search_lbl"/>
 
-            <GridView android:id="@+id/gridview"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:columnWidth="250dp"
-                android:numColumns="auto_fit"
-                android:layout_margin="5dp"
-                android:verticalSpacing="4dp"
-                android:horizontalSpacing="4dp"
-                android:stretchMode="columnWidth"
-                android:gravity="center"
-                android:drawSelectorOnTop="false"/>
-
-        </FrameLayout>
-    </LinearLayout>
-
-    <TextView android:id="@android:id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="20sp"
-        android:visibility="gone"
-        android:textColor="@color/empty_msg"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="@string/empty_search_lbl"/>
-
-</RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>
