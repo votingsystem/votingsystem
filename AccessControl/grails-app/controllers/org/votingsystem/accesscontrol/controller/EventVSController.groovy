@@ -80,29 +80,6 @@ class EventVSController {
 		eventsVSMap.numEventsVSClaim = eventsVSMap.eventsVS.claims.size()
         render eventsVSMap as JSON
 	}
-	    
-	/**
-	 * Servicio que devuelve estadísticas asociadas a un eventVS.
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/eventVS/$id/stats]
-	 * @param [id] Identificador en la base de datos del eventVS que se desea consultar.
-	 * @return documento JSON con estadísticas asociadas al eventVS consultado.
-	 */
-    def stats () {
-		EventVS eventVS
-		EventVS.withTransaction {
-			eventVS = EventVS.get(params.id)
-		}
-		if (eventVS) {
-			params.eventVS = eventVS
-			if (eventVS instanceof EventVSManifest) forward(controller:"eventVSManifest",action:"stats")
-			if (eventVS instanceof EventVSClaim) forward(controller:"eventVSClaim",action:"stats")
-			if (eventVS instanceof EventVSElection) forward(controller:"eventVSElection",action:"stats")
-			return false
-		}
-        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))]
-    }
   
 	/**
 	 * Servicio que cancela eventos

@@ -43,15 +43,6 @@ class UrlMappings {
             }
         }
 
-
-        "/eventVSElection/$id?/stats"{
-            controller = "eventVSElection"
-            action = "stats"
-            constraints {
-                id(matches:/\d*/)
-            }
-        }
-
         "/eventVSElection/$id/checkDates"{
             controller = "eventVSElection"
             action = "checkDates"

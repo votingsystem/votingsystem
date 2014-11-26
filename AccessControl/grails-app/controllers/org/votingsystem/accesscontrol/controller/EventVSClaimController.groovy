@@ -180,35 +180,6 @@ class EventVSClaimController {
     }
 	
 	/**
-	 * Servicio que devuelve estadísticas asociadas a una reclamación.
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/eventVSClaim/$id/stats]
-	 * @param [id] Obligatorio. Identificador en la base de datos de la reclamación que se desea consultar.
-	 * @responseContentType [application/json]
-	 * @return documento JSON con las estadísticas asociadas a la reclamación solicitada.
-	 */
-    def stats () {
-        EventVSClaim eventVSClaim
-		if (!params.eventVS) {
-			EventVSClaim.withTransaction { eventVSClaim = EventVSClaim.get(params.long('id')) }
-		} else eventVSClaim = params.eventVS
-        if (eventVSClaim) {
-            def statsMap = eventVSClaimSignatureCollectorService.getStatsMap(eventVSClaim)
-			if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-				if (params.callback) render "${params.callback}(${statsMap as JSON})"
-				else render statsMap as JSON
-				return false
-			} else {
-				render(view:"stats", model: [statsMap:statsMap])
-				return
-			}
-        }
-        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))]
-    }
-
-	
-	/**
 	 * Servicio que devuelve información sobre la actividad de una acción de reclamación
 	 *
 	 * @httpMethod [GET]

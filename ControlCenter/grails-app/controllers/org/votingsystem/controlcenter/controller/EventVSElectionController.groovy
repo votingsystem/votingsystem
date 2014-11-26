@@ -165,58 +165,6 @@ class EventVSElectionController {
     }
 
 	/**
-	 * Servicio que ofrece datos de recuento de una votación.
-	 * 
-	 * @param [eventAccessControlURL] Obligatorio. URL del evento en el Control de Acceso.
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/eventVS/$id/stats]
-	 * @param [id] Opcional. El identificador en la base de datos del evento consultado.
-     * @param [eventAccessControlURL] Opcional. La url del evento en el Control de Asceso 
-     *         que se publicó
-	 * @responseContentType [application/json]
-	 * @return Documento JSON con estadísticas de la votación solicitada.
-	 */
-    def stats () {
-		EventVS eventVSElection
-		if (params.long('id')) {
-            EventVS.withTransaction { eventVSElection = EventVS.get(params.long('id')) }
-			if (!eventVSElection) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))]
-			}
-		} else if(params.eventAccessControlURL) {
-			log.debug("params.eventAccessControlURL: ${params.eventAccessControlURL}")
-			EventVS.withTransaction { eventVSElection = EventVS.findByUrl(params.eventAccessControlURL.trim()) }
-			if (!eventVSElection) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFoundByURL', args:[params.eventAccessControlURL]))]
-			}
-		}
-        if (eventVSElection) {
-            response.status = ResponseVS.SC_OK
-            def statsMap = new HashMap()
-			statsMap.fieldsEventVS = []
-            statsMap.id = eventVSElection.id
-			statsMap.numVotesVS = VoteVS.countByEventVS(eventVSElection)
-			statsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVSElection, VoteVS.State.OK)
-			statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVSElection, VoteVS.State.CANCELLED)
-            eventVSElection.fieldsEventVS.each { option ->
-				def numVotesVS = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
-				def optionMap = [id:option.id, accessControlId:option.accessControlFieldEventId, content:option.content,
-					numVotesVS:numVotesVS]
-				statsMap.fieldsEventVS.add(optionMap)
-			}
-			statsMap.voteVSInfoURL="${grailsApplication.config.grails.serverURL}/eventVSElection/votes?eventAccessControlURL=${eventVSElection.url}"
-			if (params.callback) render "${params.callback}(${statsMap as JSON})"
-			else render statsMap as JSON
-        } else {
-            return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
-		}
-    }
-
-	/**
 	 * Servicio que comprueba las fechas de una votación
 	 *
 	 * @httpMethod [GET]
