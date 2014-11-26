@@ -28,7 +28,7 @@
         <paper-input id="transactionvsSubject" floatinglabel label="<g:message code="subjectLbl"/>" required></paper-input>
     </div>
     <add-control-center-dialog id="addControlCenterDialog"></add-control-center-dialog>
-    <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
+    <eventvs-option-dialog id="addVotingOptionDialog"></eventvs-option-dialog>
     <eventvs-admin-dialog id="eventVSAdminDialog"></eventvs-admin-dialog>
     <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
 </div>

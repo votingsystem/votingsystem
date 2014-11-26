@@ -72,7 +72,7 @@ class EventVSService {
         TypeVS operation;
         EventVS eventVS;
         public EventVSCancelRequest(String signedContent) throws ExceptionVS {
-            net.sf.json.JSONObject messageJSON = JSON.parse(signedContent)
+            JSONObject messageJSON = JSON.parse(signedContent)
             if(!messageJSON.eventId) throw new ValidationExceptionVS(this.getClass(), "missing param 'eventId'");
             eventVS = EventVS.get(Long.valueOf(messageJSON.eventId))
             if(!eventVS) throw new ExceptionVS(messageSource.getMessage('eventVSNotFound',

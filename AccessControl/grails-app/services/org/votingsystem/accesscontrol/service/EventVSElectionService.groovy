@@ -42,24 +42,21 @@ class EventVSElectionService {
 
     @Transactional ResponseVS saveEvent(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName);
-		EventVSElection eventVS = null
 		UserVS userSigner = messageSMIMEReq.getUserVS()
-		log.debug("saveEvent --- signer: ${userSigner?.nif}")
-		String msg = null
-		ResponseVS responseVS = null
-        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
-        eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
-                controlCenterVS:systemService.getControlCenter(),
-                dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
-                dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
-        responseVS = eventVSService.setEventDatesState(eventVS)
+        JSONObject messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
+        Date dateElection = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
+        Date dateBegin = DateUtils.resetDay(dateElection).getTime()
+        Date dateFinish = DateUtils.resetDay(DateUtils.addDays(dateElection, 1).getTime()).getTime()
+        EventVSElection eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content,
+                userVS:userSigner, controlCenterVS:systemService.getControlCenter(), dateBegin: dateBegin,
+                cardinality:EventVS.Cardinality.EXCLUSIVE, dateFinish: dateFinish)
+        ResponseVS responseVS = eventVSService.setEventDatesState(eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) throw new ValidationExceptionVS(
                 responseVS.message, MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
         else if(EventVS.State.TERMINATED ==  eventVS.state) throw new ValidationExceptionVS(
                 messageSource.getMessage('eventFinishedErrorMsg', [DateUtils.getDayWeekDateStr(eventVS.dateFinish)].toArray(),
                 locale), MetaInfMsg.getErrorMsg(methodName, "eventVSFinished"))
-        eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
+        messageJSON.dateFinish = DateUtils.getDateStr(dateFinish)
         messageJSON.controlCenterURL = systemService.getControlCenter().serverURL
         messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
                  name:grailsApplication.config.vs.serverName] as JSONObject
@@ -83,17 +80,11 @@ class EventVSElectionService {
         messageJSON.dateCreated = DateUtils.getDateStr(eventVS.dateCreated)
         messageJSON.type = TypeVS.VOTING_EVENT
         responseVS = keyStoreService.generateElectionKeysStore(eventVS)
-        if(ResponseVS.SC_OK != responseVS.statusCode) {
-            log.error "$methodName - ERROR GENERATING EVENT KEYSTRORE- ${responseVS.message}"
-            throw new ExceptionVS(responseVS.message)
-        }
         messageJSON.certCAVotacion = new String(CertUtils.getPEMEncoded (responseVS.data))
-        File certChain = grailsApplication.mainContext.getResource(
-                grailsApplication.config.vs.certChainPath).getFile();
+        File certChain = grailsApplication.mainContext.getResource(grailsApplication.config.vs.certChainPath).getFile();
         messageJSON.certChain = new String(certChain.getBytes())
         X509Certificate certUsuX509 = userSigner.getCertificate()
         messageJSON.userVS = new String(CertUtils.getPEMEncoded (certUsuX509))
-
         Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
         String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.controlCenterVS.getName()
@@ -125,8 +116,7 @@ class EventVSElectionService {
         MessageSMIME messageSMIME = new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, eventVS:eventVS,  smimeMessage: smimeMessage).save()
         log.debug "$methodName - MessageSMIME receipt - id '${messageSMIME.id}'"
-        eventVS.setState(EventVS.State.ACTIVE)
-        eventVS.save()
+        eventVS.setState(EventVS.State.ACTIVE).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
                 messageSMIME: messageSMIME, contentType: ContentTypeVS.JSON_SIGNED)
     }

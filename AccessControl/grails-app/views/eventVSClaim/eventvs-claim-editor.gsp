@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-addoption-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-option-dialog.gsp']"/>">
 
 <polymer-element name="eventvs-claim-editor">
     <template>
@@ -85,7 +85,7 @@
 
     </div>
 
-        <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
+        <eventvs-option-dialog id="addVotingOptionDialog"></eventvs-option-dialog>
     </template>
     <script>
         Polymer('eventvs-claim-editor', {

@@ -428,20 +428,17 @@ hr {
     margin: 10px 5px 5px 10px;
     -moz-border-radius: 5px; border-radius: 5px;
     cursor: pointer; cursor: hand;
-    height:150px;
     overflow:hidden;
     float:left;
 }
 
 .eventBodyDiv {
     position:relative;
-    font-size: 0.7em;
-    height:75px;
+    font-size: 0.8em;
     display:table-cell;
     vertical-align:middle;
     padding: 0px 5px 0px 5px;
 }
-
 
 .eventSubjectDiv {
     font-size: 1.1em;
@@ -456,6 +453,7 @@ hr {
     position: relative;
     white-space:nowrap;
     text-overflow: ellipsis;
+    font-size: 0.9em;
 }
 
 .eventBodyDiv .cancelMessage {
@@ -486,6 +484,9 @@ hr {
 
 .eventDateBeginDiv {
     position: relative;
+    margin: 10px 0 10px 0;
+    font-size: 1.1em;
+    color: #888;
 }
 
 .eventDateBeginLblDiv {

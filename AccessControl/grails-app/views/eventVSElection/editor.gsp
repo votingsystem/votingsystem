@@ -6,7 +6,7 @@
 </head>
 <body>
     <div id="contentDiv" style="padding: 0px 20px 0px 20px; max-width: 1000px; margin:0px auto;">
-        <eventvs-vote-editor id="voteEditor"></eventvs-vote-editor>
+        <eventvs-election-editor id="voteEditor"></eventvs-election-editor>
     </div>
 </body>
 </html>

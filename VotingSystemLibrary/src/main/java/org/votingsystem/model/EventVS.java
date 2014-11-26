@@ -118,8 +118,9 @@ public class EventVS implements Serializable {
         return type;
     }
 
-    public void setType(Type type) {
+    public EventVS setType(Type type) {
         this.type = type;
+        return this;
     }
 
     public Integer getNumSignaturesCollected() {
@@ -236,8 +237,9 @@ public class EventVS implements Serializable {
         return state;
     }
 
-    public void setState(State state) {
+    public EventVS setState(State state) {
         this.state = state;
+        return this;
     }
 
     public ControlCenterVS getControlCenterVS() {

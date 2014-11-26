@@ -1,20 +1,16 @@
 <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-addoption-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-option-dialog.gsp']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 
-<polymer-element name="eventvs-vote-editor">
+<polymer-element name="eventvs-election-editor">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            .messageToUser {
-                font-weight: bold;
-                margin:10px auto 10px auto;
-                background: #f9f9f9;
-                padding:10px 20px 10px 20px;
-            }
+            .messageToUser { font-weight: bold; margin:10px auto 10px auto;  padding:10px 20px 10px 20px; }
         </style>
-        <core-signals on-core-signal-messagedialog-closed="{{messagedialog}}"></core-signals>
-        <div class="pageHeader"  layout horizontal center center-justified>
-            <h3><g:message code="publishVoteLbl"/></h3>
+        <core-signals on-core-signal-messagedialog-closed="{{messageDialogClosed}}"></core-signals>
+        <div class="pageHeader"  layout horizontal center center-justified style="margin: 10px 0 10px 0;">
+            <g:message code="publishVoteLbl"/>
         </div>
 
         <div style="display:{{messageToUser? 'block':'none'}}">
@@ -34,15 +30,9 @@
                            placeholder="<g:message code="subjectLbl"/>" error="<g:message code="requiredLbl"/>" required/>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
-                    <label>${message(code:'dateBeginLbl')}</label>
+                    <label><g:message code="dateElectionLbl"/></label>
                     <div id="dateBegin">
                         <g:datePicker name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
-                    </div>
-
-
-                    <label style="margin:0px 0px 0px 30px;">${message(code:'dateFinishLbl')}</label>
-                    <div id="dateFinish">
-                        <g:datePicker name="dateFinish" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
                     </div>
                 </div>
             </div>
@@ -50,7 +40,6 @@
             <div style="position:relative; width:100%;">
                 <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
             </div>
-
 
             <div id="fieldsDiv" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
                 <div class="fieldsBox">
@@ -72,9 +61,9 @@
 
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                 <div>
-                    <button id="addOptionButton" type="button" class="btn btn-default" style=""
-                            on-click={{showVotingOptionDialog}}"><g:message code="addOptionLbl"/> <i class="fa fa-plus"></i>
-                    </button>
+                    <paper-button raised id="addOptionButton" on-click={{showVotingOptionDialog}}">
+                        <i class="fa fa-plus"></i> <g:message code="addOptionLbl"/>
+                    </paper-button>
                 </div>
                 <div flex></div>
                 <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
@@ -85,10 +74,10 @@
 
     </div>
 
-        <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
+        <eventvs-option-dialog id="addVotingOptionDialog"></eventvs-option-dialog>
     </template>
     <script>
-        Polymer('eventvs-vote-editor', {
+        Polymer('eventvs-election-editor', {
             appMessageJSON:null,
             pollOptionList : [],
             ready: function() {
@@ -115,8 +104,6 @@
                 this.messageToUser = null
                 this.$.subject.classList.remove("formFieldError");
                 var dateBegin = getDatePickerValue('dateBegin', this.$.dateBegin)
-                var dateFinish = getDatePickerValue('dateFinish', this.$.dateFinish)
-
                 if(!this.$.subject.validity.valid) {
                     this.$.subject.classList.add("formFieldError");
                     this.messageToUser = '<g:message code="emptyFieldMsg"/>'
@@ -125,21 +112,6 @@
 
                 if(dateBegin == null) {
                     this.messageToUser = '<g:message code="emptyFieldMsg"/>'
-                    return
-                }
-
-                if(dateFinish == null) {
-                    this.messageToUser = '<g:message code="emptyFieldMsg"/>'
-                    return
-                }
-
-                if(dateFinish < new Date() ) {
-                    this.messageToUser = '<g:message code="dateInitERRORMsg"/>'
-                    return
-                }
-
-                if(dateBegin > dateFinish) {
-                    this.messageToUser = '<g:message code="dateRangeERRORMsg"/>'
                     return
                 }
 
@@ -166,7 +138,6 @@
                 eventVS.subject = this.$.subject.value;
                 eventVS.content = this.$.textEditor.getData();
                 eventVS.dateBegin = dateBegin.formatWithTime();
-                eventVS.dateFinish = dateFinish.formatWithTime();
                 eventVS.fieldsEventVS = pollOptions
                 this.appMessageJSON = null
 
@@ -191,8 +162,9 @@
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             },
-            messagedialog:function() {
-                if(this.appMessageJSON != null && this.appMessageJSON.message != null)
+            messageDialogClosed:function() {
+                if(this.appMessageJSON != null && this.appMessageJSON.message != null &&
+                        ResponseVS.SC_OK == this.appMessageJSON.statusCode)
                     window.location.href = this.appMessageJSON.message
             }
         });

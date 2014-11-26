@@ -25,12 +25,8 @@
                         <div style="font-size: 1.2em; font-weight:bold;color:#cc1606;"><g:message code="eventVSFinishedLbl"/></div>
                     </template>
                 </div>
-                <template if="{{'PENDING' == eventvs.state}}">
-                    <div><b><g:message code="dateBeginLbl"/>: </b>
-                        {{eventvs.dateBeginStr}}</div>
-                </template>
-                <div style="margin:0px 30px 0px 30px;"><b><g:message code="dateLimitLbl"/>: </b>
-                    {{eventvs.dateFinishStr}}</div>
+                <div style="margin:0px 30px 0px 30px;"><b><g:message code="electionDateLbl"/>: </b>
+                    {{eventvs.dateBeginStr}}</div>
             </div>
 
             <div>
@@ -38,7 +34,7 @@
                     <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
                 </div>
 
-                <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
+                <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;font-size: 0.85em;">
                     <b><g:message code="publishedByLbl"/>: </b>{{eventvs.userVS}}
                 </div>
 

@@ -23,10 +23,7 @@ class KeyStoreService {
     def generateElectionKeysStore(EventVSElection eventVS) throws Exception {
 		ResponseVS responseVS
 		KeyStoreVS keyStoreVS = KeyStoreVS.findWhere(valid:Boolean.TRUE, eventVS:eventVS)
-		if (keyStoreVS) {
-			log.error ("Ya se había generado el almacén de claves de CA del eventVS: '${eventVS.getId()}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
-		} 
+		if (keyStoreVS) throw new ExceptionVS("EventVS '${eventVS.getId()}' already has keyStore")
 		//String password = (1..7).inject("") { a, b -> a += ('a'..'z')[new Random().nextFloat() * 26 as int] }.toUpperCase()
 		// _ TODO _ ====== crypto token
 		String password = "${grailsApplication.config.vs.signKeysPassword}"
@@ -39,14 +36,12 @@ class KeyStoreService {
 		Certificate cert = chain[0]
 		CertificateVS certificateVS = new CertificateVS(type:CertificateVS.Type.VOTEVS_ROOT,
 			content:cert.getEncoded(), state:CertificateVS.State.OK, serialNumber:cert.getSerialNumber().longValue(),
-			validFrom:cert.getNotBefore(), validTo:cert.getNotAfter(), eventVSElection:eventVS)
-		certificateVS.save();
+			validFrom:cert.getNotBefore(), validTo:cert.getNotAfter(), eventVSElection:eventVS).save();
 		keyStoreVS = new KeyStoreVS (isRoot:Boolean.TRUE, valid:Boolean.TRUE, keyAlias:keyAlias,
 			eventVS:eventVS, validFrom:eventVS.dateBegin, validTo:eventVS.dateFinish,
-			bytes: KeyStoreUtil.getBytes(keyStore, password.toCharArray()))
-		keyStoreVS.save()
+			bytes: KeyStoreUtil.getBytes(keyStore, password.toCharArray())).save()
 		responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:cert)
-		log.debug ("Saved KeyStoreVS '${keyStoreVS.getId()}' for event '${eventVS.getId()}'")
+		log.debug ("generateElectionKeysStore - KeyStoreVS '${keyStoreVS.getId()}' - EventVS '${eventVS.getId()}'")
 		return responseVS
     }
 

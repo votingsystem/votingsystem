@@ -35,21 +35,14 @@ class EventVSElectionService {
 		ResponseVS responseVS
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
 		String msg
-        AccessControlVS accessControl = subscriptionVSService.checkAccessControl(
-                smimeMessageReq.getHeader("serverURL")[0])
-        if(!accessControl) {
-            msg = messageSource.getMessage('accessControlNotFound', [serverURL].toArray(), locale)
-            log.debug("$methodName - ${msg}")
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "accessControlNotFound"))
-        }
-        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        String serverURL = smimeMessageReq.getHeader("serverURL")[0]
+        AccessControlVS accessControl = subscriptionVSService.checkAccessControl(serverURL)
+        if(!accessControl) throw new ExceptionVS(messageSource.getMessage('accessControlNotFound',
+                [serverURL].toArray(), locale))
+        JSONObject messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if(!messageJSON.certCAVotacion || !messageJSON.userVS || !messageJSON.id ||
                 !messageJSON.fieldsEventVS || !messageJSON.URL || !messageJSON.controlCenterURL) {
-            msg = messageSource.getMessage('documentParamsErrorMsg', null, locale)
-            log.error("$methodName - ERROR - ${msg} - document: ${messageJSON as JSON}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,type:TypeVS.ERROR,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "documentParamsError"))
+            throw new ExceptionVS(messageSource.getMessage('documentParamsErrorMsg', null, locale))
         }
         String controlCenterURL = grailsApplication.config.grails.serverURL
         String requestServerURL = StringUtils.checkURL(messageJSON.controlCenterURL)
@@ -57,9 +50,7 @@ class EventVSElectionService {
             log.debug("$methodName - WARNING - serverURL: ${controlCenterURL} - messageJSON.controlCenterURL: ${messageJSON.controlCenterURL}")
         }
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
-
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(messageJSON.userVS?.bytes)
-
         UserVS user = UserVS.getUserVS(userCert);
         //Publish request comes with Access Control cert
         responseVS = subscriptionVSService.checkUser(user)
@@ -69,7 +60,7 @@ class EventVSElectionService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "checkAccesControlError"))
         }
         user = responseVS.userVS
-        def eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id, subject:messageJSON.subject,
+        EventVSElection eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id, subject:messageJSON.subject,
                 content:messageJSON.content, url:messageJSON.URL, accessControlVS:accessControl,
                 userVS:user, dateBegin:DateUtils.getDateFromString(messageJSON.dateBegin),
                 dateFinish:DateUtils.getDateFromString(messageJSON.dateFinish))

@@ -14,6 +14,22 @@
             android:layout_height="fill_parent"
             android:gravity="center_vertical|center_horizontal"
             android:orientation="vertical">
+            <TextView android:id="@+id/eventFieldsCaption" android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/event_subject"
+                android:text ="@string/vote_options_lbl"
+                android:layout_width="match_parent"
+                android:layout_margin="15dp"
+                android:singleLine="true"
+                android:textSize="24sp"
+                android:gravity="center_vertical|center_horizontal">
+            </TextView>
+            <LinearLayout android:id="@+id/optionContainer" android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical"/>
             <EditText android:id="@+id/subject"
                 android:layout_height="wrap_content"
                 android:hint="@string/subject_lbl"
@@ -36,28 +52,6 @@
                 android:tag="EditorFragment"
                 android:layout_width="match_parent"
                 android:layout_height="fill_parent" />
-            <View android:layout_width="fill_parent"
-                android:layout_marginTop="15dp"
-                android:layout_height="0.2dp"
-                android:id="@+id/separator"
-                android:visibility="visible"
-                android:background="@android:color/darker_gray"/>
-            <TextView android:id="@+id/eventFieldsCaption" android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textColor="@color/event_subject"
-                android:text ="@string/vote_options_lbl"
-                android:layout_width="match_parent"
-                android:layout_margin="15dp"
-                android:singleLine="true"
-                android:textSize="24sp"
-                android:gravity="center_vertical|center_horizontal">
-            </TextView>
-            <LinearLayout android:id="@+id/optionContainer" android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="50dp"
-                android:orientation="vertical"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

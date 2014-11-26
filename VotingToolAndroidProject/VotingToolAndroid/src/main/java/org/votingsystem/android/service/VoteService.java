@@ -51,16 +51,13 @@ public class VoteService extends IntentService {
         List<ArgVS> argVSList = new ArrayList<ArgVS>();
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
-        String eventSubject = vote.getEventVS().getSubject();
-        if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
+        String eventSubject = null;
+        if(vote != null) {
+            eventSubject = vote.getEventVS().getSubject();
+            if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
+        }
         try {
-            LOGD(TAG + ".onHandleIntent", "operation: " + operation +
-                    " - event: " + vote.getEventVS().getId());
-            if(contextVS.getControlCenter() == null) {
-                ControlCenterVS controlCenter = (ControlCenterVS) contextVS.getActorVS(vote.getEventVS().
-                        getControlCenter().getServerURL());
-                contextVS.setControlCenter(controlCenter);
-            }
+            LOGD(TAG + ".onHandleIntent", "operation: " + operation);
             switch(operation) {
                 case VOTING_PUBLISHING:
                     String textToSign = arguments.getString(ContextVS.MESSAGE_KEY);
@@ -69,10 +66,17 @@ public class VoteService extends IntentService {
                     responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                             ContentTypeVS.JSON_SIGNED, contextVS.getAccessControl().
                             getPublishServiceURL());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS.
-                            setNotificationMessage(getString(R.string.election_published_ok_msg));
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        responseVS.setCaption(getString(R.string.operation_ok_msg)).
+                                setNotificationMessage(getString(R.string.election_published_ok_msg));
+                    }
                     break;
                 case VOTEVS:
+                    if(contextVS.getControlCenter() == null) {
+                        ControlCenterVS controlCenter = (ControlCenterVS) contextVS.getActorVS(vote.getEventVS().
+                                getControlCenter().getServerURL());
+                        contextVS.setControlCenter(controlCenter);
+                    }
                     VoteSender voteSender = new VoteSender(vote, contextVS);
                     responseVS = voteSender.call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

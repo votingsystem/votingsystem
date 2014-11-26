@@ -35,18 +35,16 @@
                                 <div class='eventSubjectDiv'>
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
                                 <div class='eventBodyDiv'>
-                                    <div style='vertical-align: middle;'>
-                                        <div class='eventAuthorDiv'>
-                                            <div class='eventAuthorLblDiv'><g:message code='publishedByLbl'/>:</div>
-                                            <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
-                                        </div>
-                                        <div class='eventDateBeginDiv'>
-                                            <div class='eventDateBeginLblDiv'><g:message code='dateBeginLbl'/>:</div>
-                                            <div class='eventDateBeginValueDiv'>{{eventvs.dateFinishStr}}</div>
-                                        </div>
-                                        <div class='cancelMessage' style="display: {{(eventvs.state == 'CANCELLED')?'block':'none'}}">
-                                            <g:message code='eventCancelledLbl'/></div>
+                                    <div class='eventDateBeginDiv'>
+                                        <div class='eventDateBeginLblDiv'><g:message code='electionDateLbl'/>:</div>
+                                        <div class='eventDateBeginValueDiv'>{{eventvs.dateBeginStr}}</div>
                                     </div>
+                                    <div class='eventAuthorDiv'>
+                                        <div class='eventAuthorLblDiv'><g:message code='publishedByLbl'/>:</div>
+                                        <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
+                                    </div>
+                                    <div class='cancelMessage' style="display: {{(eventvs.state == 'CANCELLED')?'block':'none'}}">
+                                        <g:message code='eventCancelledLbl'/></div>
                                 </div>
                                 <div class='eventDivFooter'>
                                     <div class='eventRemainingDiv'>{{eventvs.dateFinish | getElapsedTime}}</div>
@@ -130,7 +128,7 @@
                 }
             },
             getElapsedTime: function(dateStr) {
-                return dateStr.getElapsedTime()
+                return dateStr.getElapsedTime() + " <g:message code='toCloseLbl'/>"
             },
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {

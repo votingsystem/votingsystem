@@ -32,6 +32,7 @@ import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.OperationVSService;
+import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -69,62 +70,62 @@ public class EventVSNewActivity extends ActivityBase {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchPublishService();
-            else {
-                setProgressDialogVisible(false);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-                if(TypeVS.ITEM_REQUEST == operationType) {
-                    if(optionList.contains(message)) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                getString(R.string.error_lbl), getString(
-                                R.string.option_repeated_msg, message),
-                                getSupportFragmentManager());
-                    } else {
-                        optionList.add(message);
-                        addEventOption(message);
-                    }
-                    return;
-                }
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                            responseVS.getCaption(), responseVS.getNotificationMessage(),
-                            EventVSNewActivity.this);
-                    builder.setPositiveButton(getString(R.string.continue_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    EventVSNewActivity.this.onBackPressed();
-                                }
-                            });
-                    UIUtils.showMessageDialog(builder);
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchPublishService();
+        else {
+            setProgressDialogVisible(false);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            if(TypeVS.ITEM_REQUEST == operationType) {
+                if(optionList.contains(message)) {
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.error_lbl), getString(
+                            R.string.option_repeated_msg, message),
+                            getSupportFragmentManager());
                 } else {
-                    MessageDialogFragment.showDialog(responseVS.getStatusCode(), getString(
-                            R.string.publish_document_ERROR_msg), Html.fromHtml(
-                            responseVS.getNotificationMessage()).toString(), getSupportFragmentManager());
+                    optionList.add(message);
+                    addEventOption(message);
                 }
+                return;
             }
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        responseVS.getCaption(), responseVS.getNotificationMessage(),
+                        EventVSNewActivity.this);
+                builder.setPositiveButton(getString(R.string.continue_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            EventVSNewActivity.this.finish();
+                        }
+                    });
+                UIUtils.showMessageDialog(builder);
+            } else {
+                MessageDialogFragment.showDialog(responseVS.getStatusCode(), getString(
+                        R.string.publish_document_ERROR_msg), Html.fromHtml(
+                        responseVS.getNotificationMessage()).toString(), getSupportFragmentManager());
+            }
+        }
         }
     };
 
     DatePickerDialog.OnDateSetListener dateElectionListener = new DatePickerDialog.OnDateSetListener() {
 
         @Override public void onDateSet(DatePicker view, int year, int monthOfYear,int dayOfMonth) {
-            //Double triggering problem
-            if (!view.isShown()) return;
-            Calendar todayCalendar = DateUtils.addDays(1);
-            Calendar electionCalendar = DateUtils.getEventVSElectionDateBeginCalendar(
-                    year, monthOfYear, dayOfMonth);
-            if(todayCalendar.after(electionCalendar)) {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
-                        R.string.error_lbl), getString(R.string.date_error_lbl),
-                        getSupportFragmentManager());
-            } else {
-                dateElectionCalendar = electionCalendar;
-                dateElectionText.setText(DateUtils.getDayWeekDateStr(
-                        dateElectionCalendar.getTime()));
-            }
+        //Double triggering problem
+        if (!view.isShown()) return;
+        Calendar todayCalendar = Calendar.getInstance();
+        Calendar electionCalendar = DateUtils.getEventVSElectionDateBeginCalendar(
+                year, monthOfYear, dayOfMonth);
+        if(todayCalendar.compareTo(electionCalendar) < 0) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
+                    R.string.error_lbl), getString(R.string.date_error_lbl),
+                    getSupportFragmentManager());
+        } else {
+            dateElectionCalendar = electionCalendar;
+            dateElectionText.setText(DateUtils.getDayWeekDateStr(
+                    dateElectionCalendar.getTime()));
+        }
         }
 
     };
@@ -147,7 +148,7 @@ public class EventVSNewActivity extends ActivityBase {
             eventVS.setFieldsEventVS(voteOptionSet);
         }
         try {
-            Intent startIntent = new Intent(this, OperationVSService.class);
+            Intent startIntent = new Intent(this, VoteService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             JSONObject documentToSign = eventVS.toJSON();
@@ -169,6 +170,7 @@ public class EventVSNewActivity extends ActivityBase {
         setContentView(R.layout.eventvs_new);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         optionContainer = (LinearLayout) findViewById(R.id.optionContainer);
         optionCaption = (TextView) findViewById(R.id.eventFieldsCaption);
         List<String> controlCenterNameList = new ArrayList<String>();
@@ -196,6 +198,7 @@ public class EventVSNewActivity extends ActivityBase {
         });
         if(savedInstanceState != null) {
             optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+            dateElectionCalendar = (Calendar) savedInstanceState.getSerializable(ContextVS.DATE_KEY);
             for(String optionContent:optionList) {
                 addEventOption(optionContent);
             }
@@ -235,6 +238,7 @@ public class EventVSNewActivity extends ActivityBase {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) optionList);
+        outState.putSerializable(ContextVS.DATE_KEY, dateElectionCalendar);
         LOGD(TAG +  ".onSaveInstanceState", "");
     }
 
