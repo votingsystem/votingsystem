@@ -20,7 +20,7 @@
         .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
     </style>
     <g:include view="/include/styles.gsp"/>
-    <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
+    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
                   on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
          transitions="cross-fade-all">
@@ -34,12 +34,12 @@
                 <div layout horizontal center center-justified style="margin:0 0 20px 0;">
                     <div layout horizontal center center-justified>
                         <i class="fa fa-cogs optionsIcon"></i>
-                        <paper-dropdown-menu id="configGroupDropDown" halign="right" style="width: 200px;"
+                        <paper-dropdown-menu halign="right" style="width: 200px;"
                                      label="<g:message code="configGroupvsLbl"/>" on-core-select="{{configGroup}}">
-                            <paper-dropdown class="dropdown">
-                                <core-menu>
-                                    <paper-item><g:message code="editDataLbl"/></paper-item>
-                                    <paper-item><g:message code="cancelGroupVSLbl"/></paper-item>
+                            <paper-dropdown class="dropdown" transition="">
+                                <core-menu id="configGroupCoreMenu">
+                                    <paper-item id="editDataItem"><g:message code="editDataLbl"/></paper-item>
+                                    <paper-item id="cancelGroupVSItem"><g:message code="cancelGroupVSLbl"/></paper-item>
                                 </core-menu>
                             </paper-dropdown>
                         </paper-dropdown-menu>
@@ -47,16 +47,14 @@
 
                     <div layout horizontal center center-justified style="margin:0 0 0 60px;">
                         <i class="fa fa-money optionsIcon"></i>
-                        <paper-dropdown-menu id="selectTransactionVSDropDown"
-                                 label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
-                            <paper-dropdown class="dropdown">
-                                <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
-                                    <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
-                                        <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
-                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
-                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
-                                    </div>
-                                </core-selector>
+                        <paper-dropdown-menu label="<g:message code="makeTransactionVSFromGroupVSLbl"/>"
+                                 on-core-select="{{showTransactionVSDialog}}" style="width: 300px;">
+                            <paper-dropdown class="dropdown"  transition="">
+                                <core-menu id="transactionvsCoreMenu">
+                                    <paper-item id="fromGroupToMember"><g:message code="makeTransactionVSFromGroupVSToMemberLbl"/></paper-item>
+                                    <paper-item id="fromGroupToMemberGroup"><g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/></paper-item>
+                                    <paper-item id="fromGroupToAllMember"><g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/></paper-item>
+                                </core-menu>
                             </paper-dropdown>
                         </paper-dropdown-menu>
                     </div>
@@ -154,7 +152,6 @@
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
-
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
@@ -162,10 +159,9 @@
                     this.groupvs.userVS.id)
             this.page = 1;
         },
-        messagedialog:function(e, detail, sender) {
-            console.log("messagedialog signal - cancelgroup: " + detail)
-            alert("detail: " + detail)
-            if('cancel_group' == detail) {
+        messagedialogAccepted:function(e, detail, sender) {
+            console.log(this.tagName + ".messagedialogAccepted")
+            if('cancel_group' == detail.callerId) {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.userVS.id
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
@@ -227,7 +223,7 @@
                 else this.isUserView = false
             }
             if('ACTIVE' == this.groupvs.userVS.state) {
-
+                this.$.messagePanel.style.display = 'none'
             } else if('PENDING' == this.groupvs.userVS.state) {
                 this.$.pageHeader.style.color = "#fba131"
                 this.$.messagePanel.classList.add("groupvsPendingBox");
@@ -242,21 +238,19 @@
             }
             this.$.userList.url = "${createLink(controller: 'groupVS', action:'')}/" + this.groupvs.userVS.id + "/users"
             this.fire('core-signal', {name: "vs-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
-
             console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
                 " - menuType: " + menuType)
         },
         configGroup:function(e, details) {
             //e.detail.isSelected = false
-            console.log("======== configGroup")
-            if('<g:message code="cancelGroupVSLbl"/>' == e.detail.item.innerHTML) {
+            if('cancelGroupVSItem' == e.detail.item.id) {
                 showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.userVS.name),
                         "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
-            } else if('editGroup' == e.detail.item.id) {
-                loadURL_VS("${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.userVS.id + "?menu=admin")
+            } else if('editDataItem' == e.detail.item.id) {
+                window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}?menu=admin&id=" +
+                        this.groupvs.userVS.id
             }
-            this.$.configGroupDropDown.selected = ""
-            this.$.configGroupDropDown.selectedItem = null
+            this.$.configGroupCoreMenu.selected = null
         },
         showTransactionVSDialog:function(e) {
             console.log("showTransactionVSDialog")
@@ -272,8 +266,7 @@
                         this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
             }
             this.page = 1;
-            this.$.selectTransactionVSDropDown.selected = ""
-            this.$.selectTransactionVSDropDown.selectedItem = null
+            this.$.transactionvsCoreMenu.selected = null
         },
         back:function() {
             this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.userVS.id});

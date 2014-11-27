@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html', absolute:'true')}">
 
 <polymer-element name="groupvs-editor">
     <template>
@@ -39,7 +39,6 @@
                     this.$.textEditor.setData(this.groupvs.description)
                 }
             },
-
             submitForm:function() {
                 console.log("submitForm")
                 if(this.$.textEditor.getData() == 0) {

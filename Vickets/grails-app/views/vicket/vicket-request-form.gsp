@@ -66,7 +66,9 @@
                 <template if="{{selectedTags.length > 0}}">
                     <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em; color: #888;
                     margin:0 0 10px 0;">
-                        <g:message code="vicketRequestSelectedTagsLbl"/>
+                        <div style="margin: 0 10px 0 0; vertical-align: bottom;">
+                            <g:message code="vicketRequestSelectedTagsLbl"/>
+                        </div>
                         <template repeat="{{tag in selectedTags}}">
                             <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="{{removeTag}}"
                                style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">

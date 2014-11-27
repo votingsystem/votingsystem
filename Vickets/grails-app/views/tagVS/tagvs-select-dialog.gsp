@@ -21,7 +21,6 @@
                 -moz-user-select: none;
                 overflow: auto;
                 background: white;
-                padding:10px 30px 30px 30px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
                 width: 400px;
@@ -29,28 +28,33 @@
         </style>
         <g:include view="/include/styles.gsp"/>
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div layout vertical id="container" style="padding:10px;">
-            <div>
-                <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
-                display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
-                    <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
-                    <div flex horizontal wrap layout style="">
-                        <template repeat="{{tag in selectedTagList}}">
-                            <a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                                {{tag.name}} <i class="fa fa-minus"></i></a>
-                        </template>
-                    </div>
+        <div layout vertical>
+            <div layout horizontal center center-justified style="margin:0 0 10px 0;">
+                <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                    <div style="text-align: center;display:{{caption? 'block':'none'}}"><g:message code="addTagLbl"/></div>
+                </div>
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                 </div>
             </div>
 
-            <div>
-                <div flex layout horizontal center center-justified>
-                    <input id="tagSearchInput" class="form-control" required autofocus
-                           title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                    <paper-button raised on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 130px; font-size: 0.9em;">
-                        <i class="fa fa-search"></i>  {{messages.tagSearchLbl}}
-                    </paper-button>
+            <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
+                display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
+                <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
+                <div flex horizontal wrap layout style="">
+                    <template repeat="{{tag in selectedTagList}}">
+                        <a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                            {{tag.name}} <i class="fa fa-minus"></i></a>
+                    </template>
                 </div>
+            </div>
+
+            <div layout horizontal center center-justified>
+                <input id="tagSearchInput" class="form-control" required autofocus
+                       title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
+                <paper-button raised on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 130px; font-size: 0.9em;">
+                    <i class="fa fa-search"></i>  {{messages.tagSearchLbl}}
+                </paper-button>
             </div>
 
             <div style="display: {{searchString!= null ? 'block':'none'}}">
@@ -94,7 +98,6 @@
                 if (event.keyCode == 13) this.searchTag()
             }.bind(this)
         },
-
         close:function() {
             this.$.xDialog.opened = false
             this.$.tagSearchInput.value = ''
@@ -109,7 +112,6 @@
             if(this.responseData != null) this.searchedTagList = this.responseData.tagRecords
             else this.searchedTagList = []
         },
-
         searchTag: function() {
             if(this.$.tagSearchInput.validity.valid) {
                 this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.value

@@ -1,6 +1,7 @@
 <link href="../polymer/polymer.html" rel="import">
 <link href="../paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
 <link href="../paper-dropdown/paper-dropdown.html" rel="import">
+<link href="../paper-item/paper-item.html" rel="import">
 <link href="../core-menu/core-menu.html" rel="import">
 
 
@@ -8,10 +9,16 @@
     <template>
         <style>
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
+            .dropdown.colored::shadow #ripple,
+            .dropdown.colored::shadow #background {
+                border: 1px solid #0f9d58;
+                background-color: #b7e1cd;
+            }
         </style>
-        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" on-core-select="{{selectAction}}" selected="EUR">
-            <paper-dropdown class="dropdown">
-                <core-menu>
+        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" style="width: 100px;"
+                             on-core-select="{{configGroup}}">
+            <paper-dropdown class="dropdown" transition="">
+                <core-menu valueattr="id" id="currencySelectorCoreMenu" selected="EUR">
                     <template repeat="{{currencyCodes}}">
                         <paper-item id="{{code}}">{{name}}</paper-item>
                     </template>
@@ -28,7 +35,7 @@
                 {name: 'Yen', code: 'JPY'}],
             ready: function() { console.log(this.tagName + " - ready")},
             getSelected:function() {
-                return this.$.dropDownMenu.selected
+                return this.$.currencySelectorCoreMenu.selected
             },
             selectAction: function(e, details) {
                 if(details.isSelected) {
