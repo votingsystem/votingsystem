@@ -323,6 +323,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         if(tabCaption != null) newTab.setText(tabCaption.length() > MAX_CHARACTERS_TAB_CAPTION ?
                 tabCaption.substring(0, MAX_CHARACTERS_TAB_CAPTION) + "...":tabCaption);
         else if(URL != null) newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
+        else newTab.setText("                ");
         newTab.setContent(webView);
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);

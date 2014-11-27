@@ -40,8 +40,11 @@ class UserVSController {
                             Iban iban = Iban.valueOf(params.IBAN);
                             BankVSInfo bankVSInfo
                             BankVSInfo.withTransaction { bankVSInfo = BankVSInfo.findWhere(bankCode:iban.bankCode) }
-                            if(bankVSInfo) msg = message(code: 'ibanFromBankVSClientMsg', args:[bankVSInfo.bankVS.name])
-                            else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+                            if(bankVSInfo) {
+                                msg = message(code: 'ibanFromBankVSClientMsg', args:[params.IBAN, bankVSInfo.bankVS.name])
+                                uservs = bankVSInfo.bankVS
+                            } else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+
                         }
                     }
                 }
@@ -52,7 +55,8 @@ class UserVSController {
                     resultMap = [groupvsMap:groupVSService.getDataMap(GroupVS.get(uservs.id), currentWeekPeriod)]
                     view = '/groupVS/groupvs'
                 } else if(uservs.instanceOf(BankVS)) {
-                    resultMap = [uservsMap:bankVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
+                    resultMap = [uservsMap:bankVSService.getDataWithBalancesMap(uservs, currentWeekPeriod),
+                                 messageToUser:msg]
                     view = 'userVS'
                 } else {
                     resultMap = [uservsMap:userVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]

@@ -14,7 +14,6 @@
             }
             .numTrans { font-size: 2em; color: #6c0404; text-align: center;}
             .transDesc {background: #6c0404; color: #f9f9f9; padding: 5px;}
-
             .colored {
                 color: #6c0404;
             }
@@ -23,7 +22,7 @@
                    on-core-response="{{ajaxResponse}}"></core-ajax>
         <div id="selectorContainer" layout horizontal center center-justified relative>
             <paper-dropdown-menu id="dropDownMenu" halign="right" on-core-select="{{selectAction}}">
-                <paper-dropdown class="dropdown colored">
+                <paper-dropdown class="dropdown colored" transition="">
                     <core-menu selected="0">
                         <paper-item><g:message code="lastHourEventsLbl"/></paper-item>
                         <paper-item><g:message code="last12HourEventsLbl"/></paper-item>

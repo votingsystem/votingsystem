@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
@@ -62,14 +63,14 @@ class MessageSMIMEController {
     def contentViewer() {
         String viewer = "message-smime"
         String smimeMessageStr
-        String timeStampDate
+        Date timeStampDate
         boolean isAsciiDoc = false
-        def signedContentJSON
+        JSONObject signedContentJSON
         if(request.messageSMIME) {
             smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
             SMIMEMessage smimeMessage = request.messageSMIME.getSMIME()
             if(smimeMessage.getTimeStampToken() != null) {
-                timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+                timeStampDate = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
             }
             if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
                 signedContentJSON = JSON.parse(AsciiDocUtil.getMetaInfVS(
@@ -79,6 +80,8 @@ class MessageSMIMEController {
             } else {
                 signedContentJSON = JSON.parse(request.messageSMIME.getSMIME()?.getSignedContent())
             }
+            if(signedContentJSON?.isTimeLimited) signedContentJSON.validTo = DateUtils.getDayWeekDateStr(
+                    DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime())
             TypeVS operation = TypeVS.valueOf(signedContentJSON.operation)
             if(TypeVS.VICKET_SEND != operation) {
                 if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS =
@@ -109,7 +112,7 @@ class MessageSMIMEController {
             } catch(Exception ex) { log.error(ex.getMessage(), ex)}
         }*/
         Map model = [operation:params.operation, smimeMessage:smimeMessageStr,
-               viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:timeStampDate]
+               viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:DateUtils.getDateStr(timeStampDate)]
         if(request.contentType?.contains("json")) {
             render model as JSON
         } else render(view:'contentViewer', model:model)

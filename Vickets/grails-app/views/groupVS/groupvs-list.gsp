@@ -16,6 +16,7 @@
             background-color: #fff;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             margin: 10px;
+            color: #667;
         }
         vs-html-echo /deep/ p {margin:0px 0px 0px 0px;}
         </style>

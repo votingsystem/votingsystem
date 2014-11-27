@@ -18,6 +18,7 @@
     <style shim-shadowdom>
         body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
         .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
+        .colored { color: #6c0404; }
     </style>
     <g:include view="/include/styles.gsp"/>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
@@ -29,14 +30,13 @@
         <div vertical layout flex>
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
             </div>
-
             <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
                 <div layout horizontal center center-justified style="margin:0 0 20px 0;">
                     <div layout horizontal center center-justified>
                         <i class="fa fa-cogs optionsIcon"></i>
                         <paper-dropdown-menu halign="right" style="width: 200px;"
                                      label="<g:message code="configGroupvsLbl"/>" on-core-select="{{configGroup}}">
-                            <paper-dropdown class="dropdown" transition="">
+                            <paper-dropdown class="dropdown colored" transition="">
                                 <core-menu id="configGroupCoreMenu">
                                     <paper-item id="editDataItem"><g:message code="editDataLbl"/></paper-item>
                                     <paper-item id="cancelGroupVSItem"><g:message code="cancelGroupVSLbl"/></paper-item>
@@ -49,7 +49,7 @@
                         <i class="fa fa-money optionsIcon"></i>
                         <paper-dropdown-menu label="<g:message code="makeTransactionVSFromGroupVSLbl"/>"
                                  on-core-select="{{showTransactionVSDialog}}" style="width: 300px;">
-                            <paper-dropdown class="dropdown"  transition="">
+                            <paper-dropdown class="dropdown colored"  transition="">
                                 <core-menu id="transactionvsCoreMenu">
                                     <paper-item id="fromGroupToMember"><g:message code="makeTransactionVSFromGroupVSToMemberLbl"/></paper-item>
                                     <paper-item id="fromGroupToMemberGroup"><g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/></paper-item>

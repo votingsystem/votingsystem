@@ -11,13 +11,13 @@
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
             .dropdown.colored::shadow #ripple,
             .dropdown.colored::shadow #background {
-                border: 1px solid #0f9d58;
-                background-color: #b7e1cd;
+                border: 1px solid #6c0404;
             }
+            .colored { color: #6c0404; }
         </style>
         <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" style="width: 100px;"
                              on-core-select="{{configGroup}}">
-            <paper-dropdown class="dropdown" transition="">
+            <paper-dropdown class="dropdown colored" transition="">
                 <core-menu valueattr="id" id="currencySelectorCoreMenu" selected="EUR">
                     <template repeat="{{currencyCodes}}">
                         <paper-item id="{{code}}">{{name}}</paper-item>

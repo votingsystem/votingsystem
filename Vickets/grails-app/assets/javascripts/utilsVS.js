@@ -335,7 +335,6 @@ function updateMenuLinks() {
 }
 
 function loadURL_VS(urlToLoad, target) {
-    console.log("============= loadURL_VS: " + urlToLoad)
     if(target) {
         window.open(updateMenuLink(urlToLoad), target);
     } else {

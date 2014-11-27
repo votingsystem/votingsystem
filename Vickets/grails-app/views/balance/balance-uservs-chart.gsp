@@ -3,7 +3,10 @@
 <polymer-element name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
     <template>
         <style></style>
-        <div id="container" style="padding: 10px;"></div>
+        <div horizontal layout center center-justified>
+            <div id="container" style="padding: 10px;"></div>
+        </div>
+
     </template>
     <script>
         Polymer('balance-uservs-chart', {
@@ -16,6 +19,8 @@
             },
             options: {
                 chart: {
+                    width: 500,
+                    height: 300,
                     spacingBottom: 30,
                     spacingTop: 30,
                     spacingLeft: 50,

@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import org.iban4j.Iban
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
@@ -20,11 +21,12 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 class BankVSService {
 
     private class SaveBankRequest {
-        String info, certChainPEM, IBAN;
+        String info, certChainPEM;
+        Iban IBAN;
         TypeVS operation;
         public SaveBankRequest(String signedContent) throws ExceptionVS {
-            def messageJSON = JSON.parse(signedContent)
-            IBAN = IbanVSUtil.validate(messageJSON.IBAN)
+            JSONObject messageJSON = JSON.parse(signedContent)
+            IBAN = Iban.valueOf(messageJSON.IBAN);
             info = messageJSON.info;
             certChainPEM = messageJSON.certChainPEM
             if(!info) throw new ValidationExceptionVS(this.getClass(), "missing param 'info'");
@@ -63,8 +65,9 @@ class BankVSService {
         def bankVSDB = UserVS.findWhere(nif:validatedNIF)
         if(bankVSDB instanceof UserVS) throw new ExceptionVS("The userVS '${bankVSDB.id}' has the same NIF '${bankVSDB.nif}'")
         if(!bankVSDB) {
-            bankVSDB = bankVS.setDescription(request.info).setIBAN(request.IBAN).save()
-            log.debug("${methodName} - NEW bankVS.id: '${bankVSDB.id}'")
+            bankVSDB = bankVS.setDescription(request.info).setIBAN(request.IBAN.toString()).save()
+            new BankVSInfo(bankVS:bankVSDB, bankCode:request.IBAN.bankCode).save();
+            log.debug("${methodName} - NEW bankVS id '${bankVSDB.id}'")
         } else {
             bankVSDB.setDescription(request.info).setCertificateCA(bankVS.getCertificateCA())
             bankVSDB.setCertificate(bankVS.getCertificate())

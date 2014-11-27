@@ -6,7 +6,7 @@
 </head>
 <body>
     <div class="pageContentDiv" style="max-width: 900px;">
-        <uservs-data userVSData="${uservsMap as grails.converters.JSON}"></uservs-data>
+        <uservs-data userVSData="${uservsMap as grails.converters.JSON}" messageToUser="${messageToUser}"></uservs-data>
     </div>
 </body>
 </html>

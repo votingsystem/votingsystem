@@ -138,6 +138,22 @@ public class DateUtils {
         return result;
     }
 
+    public static Calendar getNexMonday(Calendar calendar) {
+        Calendar result = (Calendar) calendar.clone();
+        result.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        result.set(Calendar.HOUR_OF_DAY, 24);
+        result.set(Calendar.MINUTE, 0);
+        result.set(Calendar.SECOND, 0);
+        result.set(Calendar.MILLISECOND, 0);
+        return result;
+    }
+
+    public static Calendar getCalendar(Date date) {
+        Calendar result = Calendar.getInstance();
+        result.setTime(date);
+        return result;
+    }
+
     public static Calendar resetDay(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

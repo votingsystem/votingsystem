@@ -6,7 +6,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
 
-<polymer-element name="uservs-data" attributes="">
+<polymer-element name="uservs-data" attributes="messageToUser">
 <template>
     <g:include view="/include/styles.gsp"/>
     <style no-shim>
@@ -108,6 +108,7 @@
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
+            if(this.messageToUser) showMessageVS(this.messageToUser, "<g:message code="messageLbl"/>")
         },
         templateBound:function() {
             console.log(this.tagName + " - templateBound")

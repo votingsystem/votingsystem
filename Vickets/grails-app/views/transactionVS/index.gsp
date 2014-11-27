@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-list']"/>">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
 </head>
 <body>
@@ -13,7 +13,7 @@
     </div>
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-    <transactionvs-table id="vicketTransactionTable" transactionsMap='${transactionsMap}'></transactionvs-table>
+    <transactionvs-list id="vicketTransactionTable" transactionsMap='${transactionsMap}'></transactionvs-list>
 </div>
 </body>
 

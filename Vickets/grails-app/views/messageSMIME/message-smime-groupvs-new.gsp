@@ -40,11 +40,10 @@
             <div class="eventContentDiv" style="">
                 <vs-html-echo html="{{signedDocument.groupvsInfo}}"></vs-html-echo>
             </div>
-
             <template if="{{signedDocument.tags.length > 0}}">
                 <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
                     <template repeat="{{tag in signedDocument.tags}}">
-                        <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
+                        <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag}}</a>
                     </template>
                 </div>
             </template>

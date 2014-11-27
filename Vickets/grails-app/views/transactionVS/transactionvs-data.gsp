@@ -1,7 +1,6 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 
 <polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
@@ -16,22 +15,20 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <div layout vertical style="margin: 0px auto; max-width:800px; min-width: 300px; min-height: 200px;">
-
-            <div class="pageHeader"  layout horizontal center center-justified
-                 style="margin:0 0 10px 0;font-size: 1.5em;">{{caption}}
+        <div layout vertical style="margin: 0px auto; max-width:800px; min-width: 300px; min-height: 200px; color:#555;">
+            <div horizontal layout style="margin: 0 0 20px 0;">
+                <div>
+                    <template if="{{transactionvs.tags.length > 0}}">
+                        <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
+                            <template repeat="{{tag in transactionvs.tags}}">
+                                <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                                    <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
             </div>
-            <template if="{{transactionvs.tags.length > 0}}">
-                <core-tooltip label="<g:message code="tagLbl"/>" position="top">
-                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                        <div style="margin:0 10px 0 0; color: #888;"><i class="fa fa-tag"></i></div>
-                        <template repeat="{{tag in transactionvs.tags}}">
-                            <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">
-                                {{tag}}</a>
-                        </template>
-                    </div>
-                </core-tooltip>
-            </template>
 
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
@@ -62,8 +59,10 @@
                         <g:message code="senderLbl"/></div>
                     <div id="fromUserDiv">
                         <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
-                        <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>
-                            {{transactionvs | getFromUserIBAN}}</div>
+                        <div on-click="{{showFromUserIBAN}}">
+                            <b><g:message code="IBANLbl"/>: </b>
+                            <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
+                        </div>
                     </div>
                 </div>
             </template>
