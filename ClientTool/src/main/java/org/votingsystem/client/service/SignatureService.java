@@ -322,14 +322,10 @@ public class SignatureService extends Service<ResponseVS> {
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((VicketServer)operationVS.getTargetServer()).getVicketRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
+                JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
+                        new String(responseVS.getMessageBytes(), "UTF-8"));
                 vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
-                Object wallet = WalletUtils.getWallet(password);
-                JSONArray storedWalletJSON = null;
-                if(wallet == null) storedWalletJSON = new JSONArray();
-                else storedWalletJSON = (JSONArray) wallet;
-                storedWalletJSON.addAll(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
-                WalletUtils.saveWallet(storedWalletJSON, password);
+                WalletUtils.saveToPlainWallet(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));

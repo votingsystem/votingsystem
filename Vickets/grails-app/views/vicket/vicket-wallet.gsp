@@ -54,10 +54,14 @@
                 console.log(this.tagName + " - ready")
             },
             domReady: function(){
-                this.showPasswdDialog()
+                var webAppMessage = new WebAppMessage(Operation.WALLET_STATE)
+                var walletState = VotingSystemClient.call(webAppMessage);
+                alert(walletState)
+                //this.showPasswdDialog()
             },
             showPasswdDialog: function(){
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.WALLET_OPEN)
+                var webAppMessage = new WebAppMessage( Operation.WALLET_OPEN)
+                webAppMessage
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

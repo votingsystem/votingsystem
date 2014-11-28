@@ -31,7 +31,7 @@
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                                 on-change="{{groupvsTypeSelect}}" class="form-control">
-                            <option value="ACTIVE"  style="color:#59b;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
+                            <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                             <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
                             <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
                         </select>
@@ -40,11 +40,11 @@
                         <template repeat="{{groupvs in groupvsList}}">
                             <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
-                                <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
                                 <div class='groupvsInfoDiv'><vs-html-echo html="{{groupvs.description}}"></vs-html-echo></div>
                                 <div style="position: relative;display: {{(groupvs.state == 'CANCELLED')?'block':'none'}};">
                                     <div class='groupvsMessageCancelled' style=""><g:message code="groupvsCancelledLbl"/></div>
                                 </div>
+                                <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
                                 <div class='groupvsRepresentativeDiv text-right'>{{groupvs | getRepresentativeName}}</div>
                             </div>
                         </template>

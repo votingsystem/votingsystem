@@ -21,28 +21,29 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.x509.X509CertStoreSelector;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.util.*;
+import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
-import javax.mail.*;
-import javax.mail.internet.MimeBodyPart;
+
+import javax.mail.BodyPart;
+import javax.mail.Header;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.PKIXParameters;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.Arrays;
 
 /**
  * @author jgzornoza

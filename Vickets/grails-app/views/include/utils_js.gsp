@@ -6,8 +6,8 @@
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
     window.CKEDITOR_BASEPATH = '${grailsApplication.config.grails.serverURL}/bower_components/ckeditor/';
 
-    function WebAppMessage(statusCode, operation) {
-        this.statusCode = statusCode
+    function WebAppMessage(operation, statusCode) {
+        this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
         this.operation = operation
         this.caption;
         this.message;
@@ -136,7 +136,7 @@
 
     function getDateFormatted(dateToFormat, dateFormat, stringFormat, callback) {
         var result
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.FORMAT_DATE)
+        var webAppMessage = new WebAppMessage( Operation.FORMAT_DATE)
         webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
         webAppMessage.setCallback(callback)
         try {

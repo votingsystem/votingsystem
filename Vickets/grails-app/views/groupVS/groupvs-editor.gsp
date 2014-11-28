@@ -52,7 +52,7 @@
                             '<g:message code="dataFormERRORLbl"/>')
                     return
                 }
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
+                var webAppMessage = new WebAppMessage( Operation.VICKET_GROUP_EDIT)
                 webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
                 webAppMessage.signedContent = {groupvsInfo:this.$.textEditor.getData(), groupvsName:this.groupvs.name,

@@ -99,7 +99,7 @@ v1.0, 2013-05-20: First draft
                 console.log(this.tagName + " - submitForm - asciiDoc: " + asciiDoc)
 
                 if(this.$.isSignedDocument.checked) {
-                    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, 'VICKET')
+                    var webAppMessage = new WebAppMessage( 'VICKET')
                     webAppMessage.serviceURL = serviceURL
                     webAppMessage.signedMessageSubject = "AsciiDoc TEST"
                     webAppMessage.signedContent = {asciiDoc:asciiDoc, operation:'VICKET'}

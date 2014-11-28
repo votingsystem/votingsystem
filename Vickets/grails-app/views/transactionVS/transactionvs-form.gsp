@@ -58,7 +58,7 @@
                     <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
                     <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
-                <div style="padding: 5px;display: block;">
+                <div>
                     <div horizontal layout center center-justified>
                         <input type="text" id="amount" class="form-control" style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
                                title="<g:message code="amountLbl"/>" placeholder="<g:message code="amountLbl"/>"/>
@@ -239,7 +239,7 @@
                 }
             } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
+            var webAppMessage = new WebAppMessage( this.operation)
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,

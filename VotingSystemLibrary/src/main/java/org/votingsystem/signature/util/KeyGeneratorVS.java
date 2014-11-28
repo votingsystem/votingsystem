@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import java.math.BigInteger;
 import java.security.*;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  *

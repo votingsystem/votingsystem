@@ -15,76 +15,78 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <div layout vertical style="margin: 0px auto; max-width:800px; min-width: 300px; min-height: 200px; color:#555;">
-            <div horizontal layout style="margin: 0 0 20px 0;">
-                <div>
+        <div horizontal layout>
+            <div layout vertical style="margin: 0px auto; max-width:800px; color:#667;">
+                <div horizontal layout style="margin: 0 0 20px 0;">
                     <template if="{{transactionvs.tags.length > 0}}">
                         <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
                             <template repeat="{{tag in transactionvs.tags}}">
-                                <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                                <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
                                     <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
                             </template>
                         </div>
                     </template>
+                    <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
                 </div>
-                <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
-            </div>
 
-            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
-                <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
-            </div>
-            <div style="display:{{messageToUser? 'block':'none'}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+                    <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
                 </div>
-            </div>
-
-            <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div style=""><b><g:message code="subjectLbl"/>: </b>{{transactionvs.subject}}</div>
-
-            <div style=""><b><g:message code="amountLbl"/>: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
-
-            <div horizontal layout>
-                <div style=""><b><g:message code="dateLbl"/>: </b>{{transactionvs.dateCreated}}</div>
-                <template if="{{transactionvs.validTo}}">
-                    <div style="margin: 0 0 0 15px;"><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
-                </template>
-            </div>
-            <template if="{{isSenderVisible}}">
-                <div style="margin-left: 20px;">
-                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
-                        <g:message code="senderLbl"/></div>
-                    <div id="fromUserDiv">
-                        <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
-                        <div on-click="{{showFromUserIBAN}}">
-                            <b><g:message code="IBANLbl"/>: </b>
-                            <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
+                <div style="display:{{messageToUser? 'block':'none'}}">
+                    <div  layout horizontal center center-justified  class="messageToUser">
+                        <div>
+                            <div id="messageToUser">{{messageToUser}}</div>
                         </div>
+                        <paper-shadow z="1"></paper-shadow>
                     </div>
                 </div>
-            </template>
 
-            <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible || receptorMsg ?'block':'none'}}">
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
-                <div>
-                    <template if="{{!receptorMsg}}">
-                        <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
-                        <div horizontal layout>
-                            <b><g:message code="IBANLbl"/>: </b>
-                            <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.IBAN}}</div>
-                        </div>
+                <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+                <div style=""><b><g:message code="subjectLbl"/>: </b>{{transactionvs.subject}}</div>
+
+                <div style=""><b><g:message code="amountLbl"/>: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
+
+                <div horizontal layout>
+                    <div style=""><b><g:message code="dateLbl"/>: </b>{{transactionvs.dateCreated}}</div>
+                    <template if="{{transactionvs.validTo}}">
+                        <div style="margin: 0 0 0 15px;"><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
                     </template>
+                </div>
+                <template if="{{isSenderVisible}}">
+                    <div style="margin-left: 20px;">
+                        <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
+                            <g:message code="senderLbl"/></div>
+                        <div id="fromUserDiv">
+                            <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
+                            <div on-click="{{showFromUserIBAN}}">
+                                <b><g:message code="IBANLbl"/>: </b>
+                                <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible ?'block':'none'}}">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
+                    <div>
+                        <template if="{{!receptorMsg}}">
+                            <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
+                            <div horizontal layout>
+                                <b><g:message code="IBANLbl"/>: </b>
+                                <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.IBAN}}</div>
+                            </div>
+                        </template>
+                    </div>
+                </div >
+                <div style="margin: 15px 0 15px 0;">
                     <template if="{{receptorMsg}}">{{receptorMsg}}</template>
                 </div>
-            </div >
+            </div>
         </div>
         <template if="{{isClientToolConnected}}">
-            <div layout horizontal style="margin:15px 20px 0px 0px;">
+            <div layout horizontal style="margin:1px 20px 0px 0px;">
                 <div flex></div>
-                <div style="margin:10px 0px 10px 0px;">
+                <div>
                     <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
                     </paper-button>
@@ -200,7 +202,7 @@
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
+                var webAppMessage = new WebAppMessage( Operation.OPEN_SMIME)
                 if(this.smimeMessage == null) {
                     webAppMessage.serviceURL = this.transactionvs.messageSMIMEURL
                     webAppMessage.operation = Operation.OPEN_SMIME_FROM_URL

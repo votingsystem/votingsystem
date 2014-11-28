@@ -31,7 +31,7 @@ import static org.votingsystem.android.util.LogUtils.makeLogTag;
  */
 public class WalletUtils {
 
-    private static final String TAG = makeLogTag(WalletUtils.class.getSimpleName());
+    private static final String TAG = WalletUtils.class.getSimpleName();
 
     private static List<Vicket> vicketList = null;
 

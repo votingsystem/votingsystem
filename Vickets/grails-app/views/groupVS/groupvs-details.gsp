@@ -162,7 +162,7 @@
         messagedialogAccepted:function(e, detail, sender) {
             console.log(this.tagName + ".messagedialogAccepted")
             if('cancel_group' == detail.callerId) {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
+                var webAppMessage = new WebAppMessage(Operation.VICKET_GROUP_CANCEL)
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.userVS.id
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:this.groupvs.userVS.name,
@@ -196,7 +196,7 @@
             console.log("subscribeToGroup")
             var groupvsRepresentative = {id:this.groupvs.userVS.representative.id, nif:this.groupvs.userVS.representative.nif}
             var groupVSData = {id:this.groupvs.userVS.id, name:this.groupvs.userVS.name , representative:groupvsRepresentative}
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
+            var webAppMessage = new WebAppMessage(Operation.VICKET_GROUP_SUBSCRIBE)
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.userVS.id + "/subscribe"
             webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
             webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}

@@ -60,8 +60,8 @@ public class HttpHelper {
             schemeRegistry.register(
         new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
         cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(10);
-        cm.setDefaultMaxPerRoute(10); 
+        cm.setMaxTotal(4);
+        cm.setDefaultMaxPerRoute(4);
         connEvictor = new IdleConnectionEvictor(cm);
         connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
@@ -83,7 +83,7 @@ public class HttpHelper {
             HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
             httpclient = new DefaultHttpClient(cm, httpParams);
             httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-        }catch(Exception ex) {
+        } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }
@@ -97,8 +97,8 @@ public class HttpHelper {
         log.debug("initMultiThreadedMode");
         if(cm != null) cm.shutdown();
         cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(200);
-        cm.setDefaultMaxPerRoute(200); 
+        cm.setMaxTotal(10);
+        cm.setDefaultMaxPerRoute(10);
         connEvictor = new IdleConnectionEvictor(cm);
         connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
@@ -113,8 +113,7 @@ public class HttpHelper {
                 connEvictor.shutdown();
                 connEvictor.join();
             }
-        } 
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }

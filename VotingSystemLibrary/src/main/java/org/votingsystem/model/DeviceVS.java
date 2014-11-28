@@ -10,7 +10,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import static javax.persistence.GenerationType.valueOf;
 
 /**
 * @author jgzornoza

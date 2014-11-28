@@ -109,6 +109,7 @@
         </div>
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                              serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
+        <vicket-request-result-dialog id="resultDialog"></vicket-request-result-dialog>
 
         <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
     </template>
@@ -156,7 +157,7 @@
                     }
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_REQUEST)
+                var webAppMessage = new WebAppMessage( Operation.VICKET_REQUEST)
                 webAppMessage.serviceURL = "${createLink( controller:'vicket', action:"request", absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code='vicketRequestLbl'/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_REQUEST, totalAmount:this.amountValue,
@@ -167,8 +168,11 @@
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='vicketRequestOKCaption'/>"
-                    } else caption = '<g:message code="vicketRequestERRORCaption"/>'
-                    showMessageVS(appMessageJSON.message, caption)
+                        this.$.resultDialog.showMessage(caption, appMessageJSON.message)
+                    } else {
+                        caption = '<g:message code="vicketRequestERRORCaption"/>'
+                        showMessageVS(appMessageJSON.message, caption)
+                    }
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

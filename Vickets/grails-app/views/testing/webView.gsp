@@ -19,12 +19,12 @@ WebView Test
 
     function webViewLoaded() {
         console.log("webViewLoaded")
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, 'init')
+        var webAppMessage = new WebAppMessage( 'init')
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function serverMessage(message) {
-        var webAppMessage = new WebAppMessage(ResponseVS.OK, 'message: ' + message)
+        var webAppMessage = new WebAppMessage('message: ' + message, ResponseVS.OK)
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 

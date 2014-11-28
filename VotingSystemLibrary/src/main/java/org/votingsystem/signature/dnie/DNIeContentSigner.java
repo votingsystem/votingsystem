@@ -25,6 +25,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
+
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
@@ -39,6 +40,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
 import static org.votingsystem.model.ContextVS.DNIe_SIGN_MECHANISM;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 

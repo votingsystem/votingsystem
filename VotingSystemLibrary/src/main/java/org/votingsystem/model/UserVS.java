@@ -9,9 +9,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.FileUtils;
 
-import javax.jws.soap.SOAPBinding;
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;

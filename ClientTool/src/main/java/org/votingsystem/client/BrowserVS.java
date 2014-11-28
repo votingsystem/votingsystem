@@ -566,9 +566,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         browserHelper.processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                         break;
                     case WALLET_OPEN:
-                        if(WalletUtils.exist()) browserHelper.processOperationVS(operationVS, null);
-                        else showMessage(new ResponseVS(ResponseVS.SC_ERROR,
-                                ContextVS.getMessage("walletNotFoundErrorMsg")));
+                        browserHelper.processOperationVS(operationVS, ContextVS.getMessage("walletPasswMsg"));
                         break;
                     default:
                         browserHelper.processOperationVS(operationVS, null);
@@ -601,9 +599,12 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         processSignalVS(operationVS.getDocument());
                         break;
                     case REPRESENTATIVE_STATE:
-                        JSONObject messageJSON = BrowserVSSessionUtils.getInstance().getRepresentationState();
-                        result = Base64.getEncoder().encodeToString(messageJSON.toString().getBytes("UTF8"));
+                        jsonObject = BrowserVSSessionUtils.getInstance().getRepresentationState();
+                        result = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes("UTF8"));
                         break;
+                    case WALLET_STATE:
+                        jsonObject= WalletUtils.getWalletState();
+                        result = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes("UTF8"));
                     default:
                         return "Unknown operation: '" + operationVS.getType() + "'";
                 }

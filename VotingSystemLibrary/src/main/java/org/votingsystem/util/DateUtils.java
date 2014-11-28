@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -79,6 +80,11 @@ public class DateUtils {
 
     public static String getDirPath (Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
+        return formatter.format(date);
+    }
+
+    public static String getDirSufix (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         return formatter.format(date);
     }
 

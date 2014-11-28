@@ -20,7 +20,7 @@
 </body>
 </html>
 <asset:script>
-    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
+    var webAppMessage = new WebAppMessage( this.operation)
     webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
     webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
     webAppMessage.signedContent = {operation:"TEST"}

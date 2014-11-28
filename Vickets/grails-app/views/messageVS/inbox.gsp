@@ -89,7 +89,7 @@
 
     function messagevsStateSelect(selected) {
         var optionSelected = selected.value
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS_GET)
+        var webAppMessage = new WebAppMessage(Operation.MESSAGEVS_GET)
         webAppMessage.signedMessageSubject = "<g:message code="getMessageSubject"/>"
         webAppMessage.document = {operation:Operation.MESSAGEVS_GET, state:optionSelected}
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
@@ -97,7 +97,7 @@
 
     function decryptMessageVS(messageVSId) {
         console.log("decryptMessageVS: " + messageVSId)
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS_DECRYPT)
+        var webAppMessage = new WebAppMessage(Operation.MESSAGEVS_DECRYPT)
         webAppMessage.signedMessageSubject = "<g:message code="decryptMessageSubject"/>"
         webAppMessage.setCallback(function(appMessage) {
             var messageVS = JSON.parse(appMessage)

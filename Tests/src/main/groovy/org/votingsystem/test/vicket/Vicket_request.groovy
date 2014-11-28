@@ -36,7 +36,7 @@ ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, vicket
 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
     JSONObject responseJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"))
     vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
-    WalletUtils.saveVicketsToWallet(vicketBatch.getVicketsMap().values(), ContextVS.getInstance().config.walletDir)
+    WalletUtils.saveVicketsToDir(vicketBatch.getVicketsMap().values(), ContextVS.getInstance().config.walletDir)
 } else {
     log.error(" --- ERROR --- " + responseVS.getMessage())
 }

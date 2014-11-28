@@ -52,7 +52,6 @@
     overflow: hidden;
     word-wrap:break-word;
     text-align:  justify;
-
 }
 
 
@@ -67,6 +66,7 @@
     position: relative;
     padding: 5px 10px 5px 10px;
     margin: 0 auto 0 auto;
+    text-decoration: underline;
 }
 
 .groupvsInfoDiv .cancelMessage {
@@ -87,10 +87,18 @@
     border: 1px solid #388746;
 }
 
-.groupvsActive .groupvsSubjectDiv{
-    background-color:#388746;
-}
+.groupvsActive .groupvsSubjectDiv { color:#388746; }
 
+.groupvsActive .numTotalUsersDiv { color:#388746; }
+
+.numTotalUsersDiv {
+    position:absolute;
+    bottom: 0px;
+    padding: 3px 0 0 10px;
+    margin: 0px 20px 0px 0px;
+    text-transform:uppercase;
+    font-size: 0.8em;
+}
 
 .groupvsDiv:hover .groupvsRepresentativeDiv{
     display: block;
@@ -109,29 +117,23 @@
     background: rgba(0, 0, 0, 0.45);
 }
 
-.groupvsPending {
-    border: 1px solid #fba131;
-}
+.groupvsPending {  border: 1px solid #fba131; }
 
 .groupvsPending .groupvsSubjectDiv{
-    background-color:#fba131;
+    color:#fba131;
 }
 
-.numTotalUsersDiv {
-    padding: 3px 0 0 10px;
-    color:#388746;
-    margin: 0px 20px 0px 0px;
-    text-transform:uppercase;
-}
+.groupvsPending .numTotalUsersDiv { color:#fba131; }
 
 .groupvsFinished {
-    border: 1px solid #e76;
+    border: 1px solid #cc1606;
 }
 
 .groupvsFinished .groupvsSubjectDiv{
-    background-color:#e76;
+    color:#cc1606;
 }
 
+.groupvsFinished .numTotalUsersDiv { color:#cc1606; }
 
 .groupvsPendingBox {
     border-color: #fba131;

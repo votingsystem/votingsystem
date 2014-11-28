@@ -51,7 +51,7 @@
             },
             sendMessage: function () {
                 console.log("sendMessageVS")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS)
+                var webAppMessage = new WebAppMessage(Operation.MESSAGEVS)
                 webAppMessage.serviceURL = "${createLink(controller:'messageVS', absolute:true)}/"
                 webAppMessage.signedMessageSubject = "<g:message code="sendEncryptedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.MESSAGEVS, toUserNIF:this.toUserNIF}

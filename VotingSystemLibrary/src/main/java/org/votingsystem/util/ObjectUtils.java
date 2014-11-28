@@ -24,6 +24,20 @@ public class ObjectUtils {
         return base64EncodedSerializedObject;
     }
 
+    public static String serializeObjectToString(Serializable serializable) {
+        String base64EncodedSerializedObject = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(serializable);
+            oos.close();
+            base64EncodedSerializedObject = Base64.getEncoder().encodeToString(baos.toByteArray());
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return base64EncodedSerializedObject;
+    }
+
     public static Serializable deSerializeObject(byte[] base64SerializedObject) {
         Serializable deserializedObject = null;
         try {

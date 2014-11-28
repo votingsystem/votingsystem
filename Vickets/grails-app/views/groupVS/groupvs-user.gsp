@@ -55,7 +55,7 @@
                 this.isClientToolConnected = window['isClientToolConnected']
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
-                    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEACTIVATE)
+                    var webAppMessage = new WebAppMessage(Operation.VICKET_GROUP_USER_DEACTIVATE)
                     webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'deActivateUser',absolute:true)}"
                     webAppMessage.signedMessageSubject = "<g:message code="deActivateGroupUserMessageSubject"/>" + " '" + this.subscriptionData.groupvs.name + "'"
                     webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEACTIVATE,
@@ -95,7 +95,7 @@
             },
             activateUser : function(e) {
                 console.log("activateUser")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_ACTIVATE)
+                var webAppMessage = new WebAppMessage(Operation.VICKET_GROUP_USER_ACTIVATE)
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'activateUser',absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="activateGroupUserMessageSubject"/>" + " '" +
                         this.subscriptionData.groupvs.name + "'"

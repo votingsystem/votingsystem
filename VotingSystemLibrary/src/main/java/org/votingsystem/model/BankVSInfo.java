@@ -1,8 +1,8 @@
 package org.votingsystem.model;
 
-import org.votingsystem.model.BankVS;
 import javax.persistence.*;
 import java.io.Serializable;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
