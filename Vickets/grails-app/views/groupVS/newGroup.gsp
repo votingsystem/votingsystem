@@ -124,7 +124,7 @@
             showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
         }
-        var webAppMessage = new WebAppMessage( Operation.VICKET_GROUP_NEW)
+        var webAppMessage = new WebAppMessage(Operation.VICKET_GROUP_NEW)
         webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
         webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,

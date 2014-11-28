@@ -123,13 +123,13 @@
     },
     disConnect: function(e) {
         this.async(function() {
-            var webAppMessage = new WebAppMessage( Operation.DISCONNECT)
+            var webAppMessage = new WebAppMessage(Operation.DISCONNECT)
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         }.bind(this));
         this.$.userInfoPanel.show = false
     },
     selectCertificate: function(e) {
-        var webAppMessage = new WebAppMessage( Operation.KEYSTORE_SELECT)
+        var webAppMessage = new WebAppMessage(Operation.KEYSTORE_SELECT)
         webAppMessage.setCallback(function(appMessage) {
             var appMessageJSON = JSON.parse(appMessage)
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -140,7 +140,7 @@
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     },
     connect: function(e) {
-        var webAppMessage = new WebAppMessage( Operation.CONNECT)
+        var webAppMessage = new WebAppMessage(Operation.CONNECT)
         var selectedUser = null
         if(this.userVSList != null && this.userVSList.length > 1) {
             Array.prototype.forEach.call(this.userVSList, function(userVS) {

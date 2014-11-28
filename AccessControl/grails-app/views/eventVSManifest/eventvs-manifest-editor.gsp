@@ -95,7 +95,7 @@
                 eventVS.subject = this.$.subject.value;
                 eventVS.content = this.$.textEditor.getData();
                 eventVS.dateFinish = dateFinish.formatWithTime();
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.MANIFEST_PUBLISHING)
+                var webAppMessage = new WebAppMessage(Operation.MANIFEST_PUBLISHING)
                 webAppMessage.signedContent = eventVS
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishManifestSubject"/>"

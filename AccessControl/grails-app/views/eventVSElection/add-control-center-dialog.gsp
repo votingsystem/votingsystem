@@ -139,7 +139,7 @@
             },
             associateControlCenter:function(controlCenterURL) {
                 console.log(this.tagName + " associateControlCenter - controlCenterURL: " + controlCenterURL);
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CONTROL_CENTER_ASSOCIATION)
+                var webAppMessage = new WebAppMessage(Operation.CONTROL_CENTER_ASSOCIATION)
                 var signatureContent = {
                     serverURL:controlCenterURL,
                     operation:Operation.CONTROL_CENTER_ASSOCIATION}

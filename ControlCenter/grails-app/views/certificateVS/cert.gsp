@@ -37,7 +37,7 @@
 <asset:script>
     document.addEventListener('polymer-ready', function() {
         document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_EDIT)
+            var webAppMessage = new WebAppMessage(Operation.CERT_EDIT)
             webAppMessage.serviceURL = "${createLink(controller:'certificateVS', action:'editCert',absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,

@@ -157,7 +157,7 @@
                     }
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
-                var webAppMessage = new WebAppMessage( Operation.VICKET_REQUEST)
+                var webAppMessage = new WebAppMessage(Operation.VICKET_REQUEST)
                 webAppMessage.serviceURL = "${createLink( controller:'vicket', action:"request", absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code='vicketRequestLbl'/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_REQUEST, totalAmount:this.amountValue,

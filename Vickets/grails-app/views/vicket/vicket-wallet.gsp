@@ -60,7 +60,7 @@
                 //this.showPasswdDialog()
             },
             showPasswdDialog: function(){
-                var webAppMessage = new WebAppMessage( Operation.WALLET_OPEN)
+                var webAppMessage = new WebAppMessage(Operation.WALLET_OPEN)
                 webAppMessage
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)

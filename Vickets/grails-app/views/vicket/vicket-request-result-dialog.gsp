@@ -61,7 +61,7 @@
                 this.isConfirmMessage = false
             },
             saveToSecureWallet: function() {
-                var webAppMessage = new WebAppMessage( Operation.WALLET_SAVE)
+                var webAppMessage = new WebAppMessage(Operation.WALLET_SAVE)
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

@@ -66,7 +66,7 @@
             openedChanged: function() {
                 this.$.xDialog.opened = this.opened
                 if(this.opened) {
-                    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_STATE)
+                    var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_STATE)
                     var result = VotingSystemClient.call(webAppMessage)
                     this.representationState = toJSON(decodeURIComponent(escape(window.atob(result))));
                     this.message = JSON.stringify(representationState.representative)
@@ -83,7 +83,7 @@
                 }
             },
             cancelAnonymousDelegation: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED)
+                var webAppMessage = new WebAppMessage(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED)
                 webAppMessage.serviceURL = "${createLink(controller:'representative', action:'cancelAnonymousDelegation', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="cancelAnonymousDelegationMsgSubject"/>'
                 webAppMessage.setCallback(function(appMessage) {

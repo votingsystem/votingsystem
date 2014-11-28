@@ -136,7 +136,7 @@
 
     function getDateFormatted(dateToFormat, dateFormat, stringFormat, callback) {
         var result
-        var webAppMessage = new WebAppMessage( Operation.FORMAT_DATE)
+        var webAppMessage = new WebAppMessage(Operation.FORMAT_DATE)
         webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
         webAppMessage.setCallback(callback)
         try {

@@ -86,7 +86,7 @@
         },
         messagedialogAccept: function (e, detail, sender) {
             console.log("messagedialogAccept - callerId:" + detail.callerId)
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_USER_NEW)
+            var webAppMessage = new WebAppMessage(Operation.CERT_USER_NEW)
             webAppMessage.serviceURL = "${createLink(controller:'csr', action:'request',absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code="certRequestLbl"/>"
             webAppMessage.document = {nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),

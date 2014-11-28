@@ -68,7 +68,7 @@
                 showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
                 return false
             }
-            var webAppMessage = new WebAppMessage( Operation.BANKVS_NEW)
+            var webAppMessage = new WebAppMessage(Operation.BANKVS_NEW)
             webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newBankVS", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newBankVSMsgSubject'/>"
             webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,

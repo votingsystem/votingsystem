@@ -101,7 +101,7 @@
                     showMessageVS('<g:message code="emailERRORMsg"/>', '<g:message code="errorLbl"/>')
                     return false
                 }
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
+                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representativeNif:this.representative.nif,
                     representativeName:this.representativeFullName, dateFrom:dateFrom.formatWithTime(),

@@ -117,7 +117,7 @@
                 }
             },
             showVicket: function(e) {
-                var webAppMessage = new WebAppMessage( Operation.OPEN_VICKET)
+                var webAppMessage = new WebAppMessage(Operation.OPEN_VICKET)
                 webAppMessage.document = e.target.templateInstance.model.vicket
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("showVicket - message: " + appMessage);

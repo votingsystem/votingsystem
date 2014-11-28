@@ -58,7 +58,7 @@
             },
             accept: function() {
                 console.log(this.tagName + " - removeRepresentative")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_REVOKE)
+                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_REVOKE)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
                 webAppMessage.serviceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'

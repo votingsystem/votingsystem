@@ -133,7 +133,7 @@
                 loadURL_VS("${createLink( controller:'userVS')}/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage( Operation.OPEN_SMIME)
+                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);

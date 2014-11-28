@@ -149,7 +149,7 @@
                 else eventVS.cardinality = "EXCLUSIVE"
                 eventVS.backupAvailable = this.$.allowBackupRequestCheckbox.checked
 
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
+                var webAppMessage = new WebAppMessage(Operation.CLAIM_PUBLISHING)
                 webAppMessage.signedContent = eventVS
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishClaimSubject"/>"

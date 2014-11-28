@@ -202,7 +202,7 @@
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage( Operation.OPEN_SMIME)
+                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
                 if(this.smimeMessage == null) {
                     webAppMessage.serviceURL = this.transactionvs.messageSMIMEURL
                     webAppMessage.operation = Operation.OPEN_SMIME_FROM_URL

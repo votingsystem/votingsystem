@@ -83,7 +83,7 @@
             },
             submitManifest:function() {
                 console.log("submitManifest")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MANIFEST_SIGN)
+                var webAppMessage = new WebAppMessage(Operation.MANIFEST_SIGN)
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/" + this.eventvs.id
                 webAppMessage.signedMessageSubject = this.eventvs.subject
                 webAppMessage.contentType = 'application/pkcs7-signature'

@@ -2,8 +2,8 @@
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
     window.CKEDITOR_BASEPATH = '${grailsApplication.config.grails.serverURL}/bower_components/ckeditor/';
 
-    function WebAppMessage(statusCode, operation) {
-        this.statusCode = statusCode
+    function WebAppMessage(operation, statusCode) {
+        this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
         this.operation = operation
         this.caption;
         this.message;

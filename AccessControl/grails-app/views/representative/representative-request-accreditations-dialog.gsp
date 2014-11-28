@@ -81,7 +81,7 @@
                     return false
                 }
 
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
+                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
                     representativeNif:this.representative.nif, email:this.$.emailRequest.value,
                     representativeName:this.representativeFullName, selectedDate: dateRequest.formatWithTime()}

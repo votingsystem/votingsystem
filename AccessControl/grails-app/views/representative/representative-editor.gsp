@@ -68,7 +68,7 @@
             selectImage: function() {
                 console.log(this.tagName + " - selectImage")
                 this.appMessageJSON = null
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SELECT_IMAGE)
+                var webAppMessage = new WebAppMessage(Operation.SELECT_IMAGE)
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("selectImageCallback - appMessage: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
@@ -92,7 +92,7 @@
                     showMessageVS('<g:message code="missingImageERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
                     return
                 }
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
+                var webAppMessage = new WebAppMessage(Operation.NEW_REPRESENTATIVE)
                 webAppMessage.filePath = this.selectedImagePath
                 webAppMessage.signedContent = {representativeInfo:this.$.textEditor.getData(),
                     operation:Operation.REPRESENTATIVE_DATA}

@@ -137,7 +137,7 @@
                 this.statusCode = null
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
+                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
                 if(this.messageType == 'VOTE_RESULT') webAppMessage.message = this.votevsReceipt
                 else if(this.messageType == 'VOTE_CANCELLATION_RESULT') webAppMessage.message = this.voteVSCancellationReceipt
                 webAppMessage.setCallback(function(appMessage) {
@@ -147,7 +147,7 @@
             },
             cancellationConfirmed: function() {
                 console.log("cancellationConfirmed")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CANCEL_VOTE)
+                var webAppMessage = new WebAppMessage(Operation.CANCEL_VOTE)
                 webAppMessage.message = this.hashCertVSBase64
                 webAppMessage.serviceURL = "${createLink(controller:'voteVSCanceller', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="cancelVoteLbl"/>"

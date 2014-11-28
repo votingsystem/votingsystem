@@ -65,7 +65,7 @@
                 this.messageToUser = null
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
+                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)

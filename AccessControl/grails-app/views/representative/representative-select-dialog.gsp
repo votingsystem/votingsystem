@@ -169,7 +169,7 @@
                     } else {
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
-                    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, representativeOperation)
+                    var webAppMessage = new WebAppMessage( representativeOperation)
                     webAppMessage.signedContent = {operation:representativeOperation,
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,

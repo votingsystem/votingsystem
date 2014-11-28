@@ -141,7 +141,7 @@
                 eventVS.fieldsEventVS = pollOptions
                 this.appMessageJSON = null
 
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
+                var webAppMessage = new WebAppMessage(Operation.VOTING_PUBLISHING)
                 webAppMessage.signedContent = eventVS
                 webAppMessage.serviceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"

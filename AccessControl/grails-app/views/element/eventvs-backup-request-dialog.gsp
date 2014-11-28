@@ -70,7 +70,7 @@
                     this.messageToUser = "<g:message code="formErrorMsg"/>"
                     return
                 }
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.BACKUP_REQUEST)
+                var webAppMessage = new WebAppMessage(Operation.BACKUP_REQUEST)
                 webAppMessage.serviceURL = "${createLink(controller:'backupVS', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="requestEventvsBackupMsgSubject"/>'
                 webAppMessage.eventVS = this.eventvs

@@ -124,7 +124,7 @@
             submitVote:function() {
                 console.log("submitVote")
                 var voteVS = {optionSelected:this.optionVSSelected, eventId:this.eventvs.id, eventURL:this.eventvs.URL}
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SEND_SMIME_VOTE)
+                var webAppMessage = new WebAppMessage(Operation.SEND_SMIME_VOTE)
                 this.eventvs.voteVS = voteVS
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.signedMessageSubject = '<g:message code="sendVoteMsgSubject"/>'
