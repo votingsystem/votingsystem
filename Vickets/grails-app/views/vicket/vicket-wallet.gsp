@@ -37,6 +37,11 @@
                 </div>
             </template>
         </div>
+        <div horizontal layout center center-justifed>
+            <template repeat="{{tag in plainWalletTagArray}}">
+                <vicket-wallet-tag-group tag={{tag}} vicketArray="{{plainWalletTagGroups[tag]}}"></vicket-wallet-tag-group>
+            </template>
+        </div>
         <template repeat="{{tag in tagArray}}">
             <vicket-wallet-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-wallet-tag-group>
         </template>
@@ -45,18 +50,22 @@
         Polymer('vicket-wallet', {
             selectedTags: [],
             currencyCode:null,
+            plainWallet:null,
             vicketsWalletArray:[],
             tagGroups:{},
+            plainWalletTagGroups:{},
             tagArray:[],
+            plainWalletTagArray:[],
             messageToUser:null,
             walletLoaded:false,
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
             domReady: function(){
-                var webAppMessage = new WebAppMessage(Operation.WALLET_STATE)
-                var walletState = VotingSystemClient.call(webAppMessage);
-                alert(walletState)
+                var walletStateBase64 = VotingSystemClient.call(new WebAppMessage(Operation.WALLET_STATE));
+                var walletState = toJSON((window.atob(walletStateBase64)));
+                this.loadPlainWallet(walletState.plainWallet)
+
                 //this.showPasswdDialog()
             },
             showPasswdDialog: function(){
@@ -65,7 +74,7 @@
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        this.loadWallet(appMessageJSON.message)
+                        this.loadSecureWallet(appMessageJSON.message)
                     } else {
                         var caption = '<g:message code="errorLbl"/>'
                         showMessageVS(appMessageJSON.message, caption)
@@ -73,8 +82,18 @@
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
-            loadWallet:function(vicketsWalletArray) {
-                console.log(this.tagName + " - loadWallet")
+            loadPlainWallet:function(vicketsWalletArray) {
+                console.log(this.tagName + " - loadPlainWallet")
+                this.plainWalletTagGroups = {}
+                for(vicketIdx in vicketsWalletArray) {
+                    var vicket = vicketsWalletArray[vicketIdx]
+                    if(this.plainWalletTagGroups[vicket.tag]) this.plainWalletTagGroups[vicket.tag].push(vicket)
+                    else this.plainWalletTagGroups[vicket.tag] = [vicket]
+                }
+                this.plainWalletTagArray = Object.keys(this.plainWalletTagGroups)
+            },
+            loadSecureWallet:function(vicketsWalletArray) {
+                console.log(this.tagName + " - loadSecureWallet")
                 this.tagGroups = {}
                 this.vicketsWalletArray = vicketsWalletArray
                 for(vicketIdx in this.vicketsWalletArray) {

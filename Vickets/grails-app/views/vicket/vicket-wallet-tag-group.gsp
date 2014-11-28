@@ -15,41 +15,41 @@
                 margin:10px;
                 border-radius: 5px;
                 border: 1px solid #61a753;
-                font-size: 2em;
+                font-size: 1.2em;
                 text-align: center;
             }
             .vicket i {margin:5px 10px 0 0;}
             .core-tooltip {padding: 8px;background: #f9f9f9;border: 1px solid #61a753; color:#61a753; }
         </style>
         <g:include view="/include/styles.gsp"/>
-        <div style="max-width: 700px;">
+        <div vertical layout center center-justified>
             <div class="tagHeader">{{tag | tagDescription}}</div>
             <template repeat="{{currencyMsg in currencyMsgs}}">
                 <div style="margin: 5px 0 0 20px;color: #888;">{{currencyMsg}}</div>
             </template>
-
-            <template repeat="{{vicket in vicketArray}}">
-                <core-tooltip position="right" noarrow="false">
-                    <div horizontal layout center center-justified class="vicket" on-click="{{showVicket}}">
-                        <i class="fa {{vicket.currencyCode | currencyIcon}}" style=""></i>
-                        {{vicket.vicketValue}} {{vicket.currencyCode}}
-                        <template if="{{vicket | isTimeLimited}}">
-                            <div style="font-size: 1em; margin: 0 0 0 5px;">
-                                <i class="fa fa-clock-o"></i>
-                            </div>
-                        </template>
-                    </div>
-                    <div tip>
-                        <template if="{{vicket | isTimeLimited}}">
-                            <div style="font-size: 2em; margin: 10px 10px 20px 10px;"><g:message code="expendBeforeMonday"/></div>
-                        </template>
-                        <div style="font-size: 1.4em; margin: 10px 10px 15px 10px;">{{vicket | dateInfo}}</div>
-                        <div style="font-size: 1em; margin: 10px;">{{vicket.vicketServerURL}}</div>
-                    </div>
-                </core-tooltip>
-            </template>
+            <div>
+                <template repeat="{{vicket in vicketArray}}">
+                    <core-tooltip position="right" noarrow="false">
+                        <div horizontal layout center center-justified class="vicket" on-click="{{showVicket}}">
+                            <i class="fa {{vicket.currencyCode | currencyIcon}}" style=""></i>
+                            {{vicket.vicketValue}} {{vicket.currencyCode}}
+                            <template if="{{vicket | isTimeLimited}}">
+                                <div style="font-size: 1em; margin: 0 0 0 5px;">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </template>
+                        </div>
+                        <div tip>
+                            <template if="{{vicket | isTimeLimited}}">
+                                <div style="font-size: 2em; margin: 10px 10px 20px 10px;"><g:message code="expendBeforeMonday"/></div>
+                            </template>
+                            <div style="font-size: 1.4em; margin: 10px 10px 15px 10px;">{{vicket | dateInfo}}</div>
+                            <div style="font-size: 1em; margin: 10px;">{{vicket.vicketServerURL}}</div>
+                        </div>
+                    </core-tooltip>
+                </template>
+            </div>
         </div>
-
     </template>
     <script>
         Polymer('vicket-wallet-tag-group', {
