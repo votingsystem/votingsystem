@@ -113,8 +113,8 @@ public class Utils {
                     case ACCESS_CONTROL:
                         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
                         break;
-                    case VICKETS:
-                        ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
+                    case COOINS:
+                        ContextVS.getInstance().setCooinServer((CooinServer) actorVS);
                         ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
                         break;
                     case CONTROL_CENTER:

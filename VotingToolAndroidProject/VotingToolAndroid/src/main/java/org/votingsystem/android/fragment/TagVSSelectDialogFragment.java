@@ -91,7 +91,7 @@ public class TagVSSelectDialogFragment extends DialogFragment {
     private void processSearch(String searchParam) {
         if(previousSearch != null && previousSearch.equals(searchParam)) return;
         TagVSLoader tagVSLoader = new TagVSLoader();
-        String targetURL = ((AppContextVS)getActivity().getApplicationContext()).getVicketServer().
+        String targetURL = ((AppContextVS)getActivity().getApplicationContext()).getCooinServer().
                 getTagVSSearchServiceURL(searchParam);
         tagVSLoader.execute(targetURL);
         previousSearch = searchParam;

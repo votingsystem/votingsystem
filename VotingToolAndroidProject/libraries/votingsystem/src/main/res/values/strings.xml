@@ -36,9 +36,9 @@
     <string name="receipt_lbl">recibo</string>
     <string name="account_input">ingreso en cuenta</string>
     <string name="account_output">tetirada de efectivo</string>
-    <string name="vicket_send">pago en Vickets</string>
-    <string name="vicket_request_subtitle">obtención de Vickets</string>
-    <string name="vicket_cancellation">cancelación de vickets</string>
+    <string name="cooin_send">pago en Cooins</string>
+    <string name="cooin_request_subtitle">obtención de Cooins</string>
+    <string name="cooin_cancellation">cancelación de cooins</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>

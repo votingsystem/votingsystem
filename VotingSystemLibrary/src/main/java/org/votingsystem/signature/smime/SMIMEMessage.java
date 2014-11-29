@@ -64,7 +64,7 @@ public class SMIMEMessage extends MimeMessage {
     private TimeStampToken timeStampToken;
     private SMIMEContentInfo contentInfo;
     private VoteVS voteVS;
-    private X509Certificate vicketCert;
+    private X509Certificate cooinCert;
 
     public SMIMEMessage(MimeMultipart mimeMultipart, Header... headers) throws Exception {
         super(ContextVS.MAIL_SESSION);
@@ -106,7 +106,7 @@ public class SMIMEMessage extends MimeMessage {
         return timeStampToken;
     }
 
-    public X509Certificate getVicketCert() {return vicketCert;}
+    public X509Certificate getCooinCert() {return cooinCert;}
 
     public Set<X509Certificate> getSignersCerts() {
         Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
@@ -382,8 +382,8 @@ public class SMIMEMessage extends MimeMessage {
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                     JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
                     voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
-                } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
-                    vicketCert = cert;
+                } else if (cert.getExtensionValue(ContextVS.COOIN_OID) != null) {
+                    cooinCert = cert;
                 } else {signerCerts.add(cert);}
             }
             if(voteVS != null) voteVS.setServerCerts(signerCerts);

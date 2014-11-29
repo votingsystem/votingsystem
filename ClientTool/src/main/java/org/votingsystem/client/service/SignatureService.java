@@ -23,8 +23,8 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.util.*;
-import org.votingsystem.vicket.model.VicketRequestBatch;
-import java.io.ByteArrayInputStream;
+import org.votingsystem.cooin.model.CooinRequestBatch;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -80,7 +80,7 @@ public class SignatureService extends Service<ResponseVS> {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
                         break;
-                    case VICKET_DELETE:
+                    case COOIN_DELETE:
                     case MESSAGEVS_DECRYPT:
                         responseVS = new ResponseVS(ResponseVS.SC_OK);
                         break;
@@ -127,14 +127,14 @@ public class SignatureService extends Service<ResponseVS> {
                         case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
                             break;
-                        case VICKET_REQUEST:
-                            responseVS = sendVicketRequest(operationVS);
+                        case COOIN_REQUEST:
+                            responseVS = sendCooinRequest(operationVS);
                             break;
                         case WALLET_OPEN:
                             responseVS = openWallet(operationVS);
                             break;
-                        case VICKET_DELETE:
-                            responseVS = deleteVicket(operationVS);
+                        case COOIN_DELETE:
+                            responseVS = deleteCooin(operationVS);
                             break;
                         case REPRESENTATIVE_SELECTION:
                             responseVS = sendSMIME(operationVS);
@@ -298,34 +298,34 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
-        private ResponseVS sendVicketRequest(OperationVS operationVS) throws Exception {
-            log.debug("sendVicketRequest");
+        private ResponseVS sendCooinRequest(OperationVS operationVS) throws Exception {
+            log.debug("sendCooinRequest");
             BigDecimal totalAmount = new BigDecimal((Integer)operationVS.getDocumentToSignMap().get("totalAmount"));
             String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
             TagVS tag = new TagVS((String) operationVS.getDocumentToSignMap().get("tag"));
             Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
-            VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, currencyCode, tag,
-                    isTimeLimited, (VicketServer) operationVS.getTargetServer());
+            CooinRequestBatch cooinBatch = new CooinRequestBatch(totalAmount, totalAmount, currencyCode, tag,
+                    isTimeLimited, (CooinServer) operationVS.getTargetServer());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
-                    vicketBatch.getVicketCSRRequest().toString().getBytes());
+                    cooinBatch.getCooinCSRRequest().toString().getBytes());
             SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
-                    operationVS.getNormalizedReceiverName(), vicketBatch.getRequestDataToSignJSON().toString(),
+                    operationVS.getNormalizedReceiverName(), cooinBatch.getRequestDataToSignJSON().toString(),
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     operationVS.getTargetServer().getTimeStampServiceURL());
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             smimeMessage = timeStamper.getSMIME();
-            mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
+            mapToSend.put(ContextVS.COOIN_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
                     smimeMessage.getBytes());
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    ((VicketServer)operationVS.getTargetServer()).getVicketRequestServiceURL());
+                    ((CooinServer)operationVS.getTargetServer()).getCooinRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
                         new String(responseVS.getMessageBytes(), "UTF-8"));
-                vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
-                WalletUtils.saveToPlainWallet(WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
+                cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
+                WalletUtils.saveToPlainWallet(WalletUtils.getSerializedCooinList(cooinBatch.getCooinsMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));
@@ -349,19 +349,19 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
-        private ResponseVS deleteVicket(OperationVS operationVS) throws Exception {
-            log.debug("deleteVicket");
+        private ResponseVS deleteCooin(OperationVS operationVS) throws Exception {
+            log.debug("deleteCooin");
             try {
                 JSONArray walletJSON = (JSONArray) WalletUtils.getWallet(password);
                 for(int i = 0; i < walletJSON.size(); i++) {
-                    JSONObject vicketJSON = (JSONObject) walletJSON.get(i);
-                    if(vicketJSON.getString("hashCertVS").equals(operationVS.getMessage())) {
+                    JSONObject cooinJSON = (JSONObject) walletJSON.get(i);
+                    if(cooinJSON.getString("hashCertVS").equals(operationVS.getMessage())) {
                         walletJSON.remove(i);
-                        log.debug("deleted vicket with hashCertVS: " + operationVS.getMessage());
+                        log.debug("deleted cooin with hashCertVS: " + operationVS.getMessage());
                     }
                 }
                 WalletUtils.saveWallet(walletJSON, password);
-                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.VICKET_DELETE).setStatus(new StatusVS() {});
+                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.COOIN_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());

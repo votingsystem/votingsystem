@@ -28,7 +28,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
@@ -77,8 +77,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private AccessControlVS accessControl;
     private String accessControlURL;
     private ControlCenterVS controlCenter;
-    private VicketServer vicketServer;
-    private String vicketServerURL;
+    private CooinServer cooinServer;
+    private String cooinServerURL;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
 
@@ -88,18 +88,18 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             PrefUtils.init(this);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
+            cooinServerURL = props.getProperty(ContextVS.COOIN_SERVER_URL);
             accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
-            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
-                    vicketServerURL);
+            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - cooinServerURL: " +
+                    cooinServerURL);
             /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);
             finish();}*/
-            if(accessControl == null || vicketServer == null) {
+            if(accessControl == null || cooinServer == null) {
                 Intent startIntent = new Intent(this, BootStrapService.class);
                 startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
-                startIntent.putExtra(ContextVS.VICKET_SERVER_URL, vicketServerURL);
+                startIntent.putExtra(ContextVS.COOIN_SERVER_URL, cooinServerURL);
                 startService(startIntent);
             }
             PrefUtils.registerPreferenceChangeListener(this, this);
@@ -114,8 +114,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return  accessControlURL;
     }
 
-    public  String getVicketServerURL() {
-        return  vicketServerURL;
+    public  String getCooinServerURL() {
+        return  cooinServerURL;
     }
 
     public void finish() {
@@ -156,7 +156,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public X509Certificate getTimeStampCert() {
         if(accessControl != null) return accessControl.getTimeStampCert();
-        if(vicketServer != null) return vicketServer.getTimeStampCert();
+        if(cooinServer != null) return cooinServer.getTimeStampCert();
         return null;
     }
 
@@ -170,7 +170,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public String getTimeStampServiceURL() {
         if(accessControl != null) return accessControl.getTimeStampServiceURL();
-        if(vicketServer != null) return vicketServer.getTimeStampServiceURL();
+        if(cooinServer != null) return cooinServer.getTimeStampServiceURL();
         return null;
     }
 
@@ -268,13 +268,13 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return controlCenter;
     }
 
-    public void setVicketServer(VicketServer vicketServer) {
-        serverMap.put(vicketServer.getServerURL(), vicketServer);
-        this.vicketServer = vicketServer;
+    public void setCooinServer(CooinServer cooinServer) {
+        serverMap.put(cooinServer.getServerURL(), cooinServer);
+        this.cooinServer = cooinServer;
     }
 
-    public VicketServer getVicketServer() {
-        return vicketServer;
+    public CooinServer getCooinServer() {
+        return cooinServer;
     }
 
     public void showNotification(ResponseVS responseVS){
@@ -283,7 +283,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                VICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+                COOIN_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
                 responseVS.getNotificationMessage())).setContentIntent(pendingIntent);
@@ -326,7 +326,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                                 intent = new Intent(this, BrowserVSActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
-                                intent.putExtra(ContextVS.URL_KEY, getVicketServer().getMessageVSInboxURL());
+                                intent.putExtra(ContextVS.URL_KEY, getCooinServer().getMessageVSInboxURL());
                                 startActivity(intent);
                             }
                         }

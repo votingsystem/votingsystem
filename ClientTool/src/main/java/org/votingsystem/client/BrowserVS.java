@@ -38,7 +38,7 @@ import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.controller.VicketPaneController;
+import org.votingsystem.client.controller.CooinPaneController;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
@@ -50,7 +50,7 @@ import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.util.*;
-import org.votingsystem.vicket.model.Vicket;
+import org.votingsystem.cooin.model.Cooin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -478,7 +478,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private WebSocketService getWebSocketService(){
         if(webSocketService == null) {
             webSocketService = new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
-                    ContextVS.getInstance().getVicketServer());
+                    ContextVS.getInstance().getCooinServer());
             webSocketService.addListener(this);
         }
         return webSocketService;
@@ -505,7 +505,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     public WebSocketServiceAuthenticated getWebSocketServiceAuthenticated(){
         if(webSocketServiceAuthenticated == null) {
             webSocketServiceAuthenticated = new WebSocketServiceAuthenticated(ContextVS.getInstance().getVotingSystemSSLCerts(),
-                    ContextVS.getInstance().getVicketServer());
+                    ContextVS.getInstance().getCooinServer());
             webSocketServiceAuthenticated.addListener(this);
         }
         return webSocketServiceAuthenticated;
@@ -545,8 +545,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                                 operationVS.getMessage().getBytes()), "UTF-8");
                         DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operationVS.getDocument());
                         break;
-                    case OPEN_VICKET:
-                        VicketPaneController.show((Vicket) ObjectUtils.deSerializeObject((
+                    case OPEN_COOIN:
+                        CooinPaneController.show((Cooin) ObjectUtils.deSerializeObject((
                                 (String) operationVS.getDocument().get("object")).getBytes()));
                         break;
                     case OPEN_SMIME_FROM_URL:
@@ -595,24 +595,25 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         if (stringFormat != null) result = DateUtils.getDateStr(dateToFormat,
                                 (String) operationVS.getDocument().get("stringFormat"));
                         else result = DateUtils.getDayWeekDateStr(dateToFormat);
+                        break;
                     case SIGNAL_VS:
                         processSignalVS(operationVS.getDocument());
                         break;
                     case REPRESENTATIVE_STATE:
-                        jsonObject = BrowserVSSessionUtils.getInstance().getRepresentationState();
-                        result = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes("UTF8"));
+                        result = BrowserVSSessionUtils.getInstance().getRepresentationState().toString();
                         break;
                     case WALLET_STATE:
-                        jsonObject= WalletUtils.getWalletState();
-                        result = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes("UTF8"));
+                        result = WalletUtils.getWalletState().toString();
+                        break;
                     default:
-                        return "Unknown operation: '" + operationVS.getType() + "'";
+                        result = "Unknown operation: '" + operationVS.getType() + "'";
                 }
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
                 result = ex.getMessage();
             } finally {
-                return result;
+                if(result == null) return result;
+                else return Base64.getEncoder().encodeToString(result.getBytes());
             }
         }
     }

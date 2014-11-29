@@ -128,7 +128,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     private Set<UserVS> signers = null;
     private UserVS signerVS;
     private VoteVS voteVS;
-    private X509Certificate vicketCert;
+    private X509Certificate cooinCert;
     private SMIMEContentInfo contentInfo;
     private TimeStampToken timeStampToken;
 
@@ -167,7 +167,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return smimeSigned;
     }
 
-    public X509Certificate getVicketCert() {return vicketCert;}
+    public X509Certificate getCooinCert() {return cooinCert;}
 
     public boolean isValidSignature() throws Exception {
         if(contentInfo == null) contentInfo = new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
@@ -401,8 +401,8 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                     JSONObject voteJSON = new JSONObject(signedContent);
                     voteVS = VoteVS.getInstance(JsonUtils.toMap(voteJSON), cert, timeStampToken);
-                } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
-                    vicketCert = cert;
+                } else if (cert.getExtensionValue(ContextVS.COOIN_OID) != null) {
+                    cooinCert = cert;
                 } else {signerCerts.add(cert);}
             }
             if(voteVS != null) voteVS.setServerCerts(signerCerts);

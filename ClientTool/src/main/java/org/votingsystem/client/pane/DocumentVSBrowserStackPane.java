@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
-import org.votingsystem.client.controller.VicketPaneController;
+import org.votingsystem.client.controller.CooinPaneController;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
@@ -32,7 +32,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.vicket.model.Vicket;
+import org.votingsystem.cooin.model.Cooin;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -137,7 +137,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
 
     public void init() {
         getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                "/css/vicket-pane.css").toExternalForm());
+                "/css/cooin-pane.css").toExternalForm());
     }
 
     private void goNext() {
@@ -223,8 +223,8 @@ public class DocumentVSBrowserStackPane extends StackPane {
                             DecompressBackupPane.showDialog(VotingSystemApp.getInstance(), file);
                             return;
                         }
-                        if(file.getName().endsWith(ContentTypeVS.VICKET.getExtension())) {
-                            VicketPaneController.show((Vicket)ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
+                        if(file.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
+                            CooinPaneController.show((Cooin)ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
                         } else {
                             documentVSBrowserStackPane.openFile(file, operationDocument);
                             stage.centerOnScreen();

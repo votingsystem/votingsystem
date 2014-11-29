@@ -114,7 +114,7 @@
         <welcome-file>index.gsp</welcome-file>
     </welcome-file-list>
 
-    <!-- SSL settings. only allow HTTPS access to Vickets
+    <!-- SSL settings. only allow HTTPS access to Cooins
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Entire Application</web-resource-name>

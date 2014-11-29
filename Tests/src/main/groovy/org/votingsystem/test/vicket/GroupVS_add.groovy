@@ -1,4 +1,4 @@
-package org.votingsystem.test.vicket
+package org.votingsystem.test.cooin
 
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
@@ -13,17 +13,17 @@ Logger log = TestUtils.init(GroupVS_add.class)
 
 Map requestDataMap = [groupvsInfo:"GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
         tags:[], groupvsName:"GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
-        operation:'VICKET_GROUP_NEW', UUID:UUID.randomUUID().toString()]
+        operation:'COOIN_GROUP_NEW', UUID:UUID.randomUUID().toString()]
 
-VicketServer vicketServer = TestUtils.fetchVicketServer(ContextVS.getInstance().config.vicketServerURL)
-ContextVS.getInstance().setDefaultServer(vicketServer)
+CooinServer cooinServer = TestUtils.fetchCooinServer(ContextVS.getInstance().config.cooinServerURL)
+ContextVS.getInstance().setDefaultServer(cooinServer)
 SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER)
 UserVS fromUserVS = representativeSignatureService.getUserVS()
 String messageSubject = "TEST_ADD_GROUPVS";
 SMIMEMessage smimeMessage = representativeSignatureService.getSMIMETimeStamped(fromUserVS.nif,
-        vicketServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
+        cooinServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-        vicketServer.getSaveGroupVSServiceURL())
+        cooinServer.getSaveGroupVSServiceURL())
 log.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())
 
 System.exit(0)

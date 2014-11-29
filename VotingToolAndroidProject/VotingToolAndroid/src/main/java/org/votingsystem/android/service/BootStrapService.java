@@ -14,7 +14,7 @@ import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
@@ -43,9 +43,9 @@ public class BootStrapService extends IntentService {
         final Bundle arguments = intent.getExtras();
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);
-        final String vicketServerURL = arguments.getString(ContextVS.VICKET_SERVER_URL);
+        final String cooinServerURL = arguments.getString(ContextVS.COOIN_SERVER_URL);
         LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
-                " - vicketServerURL: " + vicketServerURL);
+                " - cooinServerURL: " + cooinServerURL);
         ResponseVS responseVS = null;
         if(contextVS.getAccessControl() == null) {
             responseVS = HttpHelper.getData(AccessControlVS.getServerInfoURL(accessControlURL),
@@ -64,26 +64,26 @@ public class BootStrapService extends IntentService {
                 });
             }
         }
-        if(contextVS.getVicketServer() == null) {
-            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(vicketServerURL),
+        if(contextVS.getCooinServer() == null) {
+            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(cooinServerURL),
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    VicketServer vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                    contextVS.setVicketServer(vicketServer);
+                    CooinServer cooinServer = (CooinServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                    contextVS.setCooinServer(cooinServer);
                 } catch(Exception ex) {ex.printStackTrace();}
             } else {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
                         Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
-                                vicketServerURL), Toast.LENGTH_LONG).show();
+                                cooinServerURL), Toast.LENGTH_LONG).show();
                     }
                 });
             }
         }
         if(!PrefUtils.isDataBootstrapDone(this)) {
             PrefUtils.markDataBootstrapDone(this);
-            /*if(contextVS.getVicketServer() == null && contextVS.getAccessControl() == null) {
+            /*if(contextVS.getCooinServer() == null && contextVS.getAccessControl() == null) {
                 intent = new Intent(getBaseContext(), IntentFilterActivity.class);
                 responseVS.setCaption(getString(R.string.connection_error_msg));
                 if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())

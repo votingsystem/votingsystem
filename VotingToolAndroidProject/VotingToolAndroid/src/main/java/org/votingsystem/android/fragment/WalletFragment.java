@@ -29,7 +29,7 @@ import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.Vicket;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -48,8 +48,8 @@ public class WalletFragment extends Fragment {
 
     private View rootView;
     private GridView gridView;
-    private VicketListAdapter adapter = null;
-    private List<Vicket> vicketList;
+    private CooinListAdapter adapter = null;
+    private List<Cooin> cooinList;
     private String broadCastId = WalletFragment.class.getSimpleName();
     private String actualPIN;
 
@@ -60,11 +60,11 @@ public class WalletFragment extends Fragment {
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         if(pin != null) {
             switch(responseVS.getTypeVS()) {
-                case VICKET:
+                case COOIN:
                     try {
                         actualPIN = pin;
-                        vicketList = WalletUtils.getVicketList(pin, getActivity());
-                        adapter.setItemList(vicketList);
+                        cooinList = WalletUtils.getCooinList(pin, getActivity());
+                        adapter.setItemList(cooinList);
                         adapter.notifyDataSetChanged();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -86,7 +86,7 @@ public class WalletFragment extends Fragment {
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case VICKET_USER_INFO:
+                case COOIN_USER_INFO:
                     break;
             }
         }
@@ -116,18 +116,18 @@ public class WalletFragment extends Fragment {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(FRAGMENT_KEY, VicketFragment.class.getName());
-                intent.putExtra(ContextVS.VICKET_KEY, vicketList.get(position));
+                intent.putExtra(FRAGMENT_KEY, CooinFragment.class.getName());
+                intent.putExtra(ContextVS.COOIN_KEY, cooinList.get(position));
                 startActivity(intent);
             }
         });
-        vicketList = WalletUtils.getVicketList();
-        if(vicketList == null) {
+        cooinList = WalletUtils.getCooinList();
+        if(cooinList == null) {
             PinDialogFragment.showWalletPinScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.VICKET);
-            vicketList = new ArrayList<Vicket>();
+                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
+            cooinList = new ArrayList<Cooin>();
         }
-        adapter = new VicketListAdapter(vicketList, getActivity());
+        adapter = new CooinListAdapter(cooinList, getActivity());
         gridView.setAdapter(adapter);
         setHasOptionsMenu(true);
         return rootView;
@@ -172,13 +172,13 @@ public class WalletFragment extends Fragment {
         }
     }
 
-    public class VicketListAdapter  extends ArrayAdapter<Vicket> {
+    public class CooinListAdapter  extends ArrayAdapter<Cooin> {
 
-        private List<Vicket> itemList;
+        private List<Cooin> itemList;
         private Context context;
 
-        public VicketListAdapter(List<Vicket> itemList, Context ctx) {
-            super(ctx, R.layout.vicket_card, itemList);
+        public CooinListAdapter(List<Cooin> itemList, Context ctx) {
+            super(ctx, R.layout.cooin_card, itemList);
             this.itemList = itemList;
             this.context = ctx;
         }
@@ -188,17 +188,17 @@ public class WalletFragment extends Fragment {
             return 0;
         }
 
-        public Vicket getItem(int position) {
+        public Cooin getItem(int position) {
             if (itemList != null) return itemList.get(position);
             return null;
         }
 
         @Override public View getView(int position, View view, ViewGroup parent) {
-            Vicket vicket = itemList.get(position);
+            Cooin cooin = itemList.get(position);
             if (view == null) {
                 LayoutInflater inflater =
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.vicket_card, null);
+                view = inflater.inflate(R.layout.cooin_card, null);
             }
             //Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
             //Calendar weekLapseCalendar = Calendar.getInstance();
@@ -206,28 +206,28 @@ public class WalletFragment extends Fragment {
             LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
             linearLayout.setBackgroundColor(Color.WHITE);
             TextView date_data = (TextView)view.findViewById(R.id.date_data);
-            String dateData = getString(R.string.vicket_data_info_lbl,
-                    DateUtils.getDayWeekDateStr(vicket.getDateFrom()),
-                    DateUtils.getDayWeekDateStr(vicket.getDateTo()));
-            date_data.setText(DateUtils.getDayWeekDateStr(vicket.getDateFrom()));
+            String dateData = getString(R.string.cooin_data_info_lbl,
+                    DateUtils.getDayWeekDateStr(cooin.getDateFrom()),
+                    DateUtils.getDayWeekDateStr(cooin.getDateTo()));
+            date_data.setText(DateUtils.getDayWeekDateStr(cooin.getDateFrom()));
 
-            TextView vicket_state = (TextView) view.findViewById(R.id.vicket_state);
-            vicket_state.setText(vicket.getState().toString());
+            TextView cooin_state = (TextView) view.findViewById(R.id.cooin_state);
+            cooin_state.setText(cooin.getState().toString());
             TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
             //week_lapse.setText(weekLapseStr);
 
             TextView amount = (TextView) view.findViewById(R.id.amount);
-            amount.setText(vicket.getAmount().toPlainString());
+            amount.setText(cooin.getAmount().toPlainString());
             TextView currency = (TextView) view.findViewById(R.id.currencyCode);
-            currency.setText(vicket.getCurrencyCode().toString());
+            currency.setText(cooin.getCurrencyCode().toString());
             return view;
         }
 
-        public List<Vicket> getItemList() {
+        public List<Cooin> getItemList() {
             return itemList;
         }
 
-        public void setItemList(List<Vicket> itemList) {
+        public void setItemList(List<Cooin> itemList) {
             this.itemList = itemList;
         }
     }

@@ -19,7 +19,7 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int VICKET_TAG                              = 3;
+    public static final int COOIN_TAG                              = 3;
     public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
@@ -27,7 +27,7 @@ public class ContextVS {
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
-    public static final String VICKET_OID = VOTING_SYSTEM_BASE_OID + VICKET_TAG;
+    public static final String COOIN_OID = VOTING_SYSTEM_BASE_OID + COOIN_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
@@ -38,8 +38,8 @@ public class ContextVS {
     public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
-    public static final String VICKET_USER_INFO_DATA_FILE_NAME = "vicketUserInfo";
-    public static final String VICKET_REQUEST_DATA_FILE_NAME   = "vicketRequestData";
+    public static final String COOIN_USER_INFO_DATA_FILE_NAME = "cooinUserInfo";
+    public static final String COOIN_REQUEST_DATA_FILE_NAME   = "cooinRequestData";
     public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
@@ -72,7 +72,7 @@ public class ContextVS {
     public static final String NAME_KEY = "NAME_KEY";
     public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
-    public static final String VICKET_SERVER_URL = "VICKET_SERVER_URL";
+    public static final String COOIN_SERVER_URL = "COOIN_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String RECEIVER_KEY = "RECEIVER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
@@ -104,7 +104,7 @@ public class ContextVS {
     public static final String CURRENCY_KEY  = "CURRENCY_KEY";
     public static final String IBAN_KEY  = "IBAN_KEY";
     public static final String TRANSACTION_KEY  = "TRANSACTION_KEY";
-    public static final String VICKET_KEY  = "VICKET_KEY";
+    public static final String COOIN_KEY  = "COOIN_KEY";
     public static final String VOTE_KEY  = "VOTE_KEY";
     public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";
@@ -133,7 +133,7 @@ public class ContextVS {
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 2;
     public static final int VOTE_SERVICE_NOTIFICATION_ID           = 3;
     public static final int REPRESENTATIVE_SERVICE_NOTIFICATION_ID = 4;
-    public static final int VICKET_SERVICE_NOTIFICATION_ID         = 5;
+    public static final int COOIN_SERVICE_NOTIFICATION_ID         = 5;
 
     public static final int NUM_MIN_OPTIONS = 2;
 

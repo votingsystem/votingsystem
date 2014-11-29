@@ -118,12 +118,12 @@ public class IntentFilterActivity extends ActionBarActivity {
             try {
                 Properties props = new Properties();
                 props.load(getAssets().open("VotingSystem.properties"));
-                String vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
+                String cooinServerURL = props.getProperty(ContextVS.COOIN_SERVER_URL);
                 String accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
                 Intent startIntent = new Intent(getApplicationContext(), BootStrapService.class);
                 startIntent.putExtra(ContextVS.URI_KEY, uriData);
                 startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
-                startIntent.putExtra(ContextVS.VICKET_SERVER_URL, vicketServerURL);
+                startIntent.putExtra(ContextVS.COOIN_SERVER_URL, cooinServerURL);
                 startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                 startService(startIntent);
                 operationVS = null;

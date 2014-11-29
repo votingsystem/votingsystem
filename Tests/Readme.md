@@ -1,5 +1,5 @@
-To run Vicket request:
-$gradle testRequestVickets
+To run Cooin request:
+$gradle testRequestCooins
 
 ----------------------------------------------------------------------------------------------------
 To only run one test we must invoke the test task from the command-line with the Java system property

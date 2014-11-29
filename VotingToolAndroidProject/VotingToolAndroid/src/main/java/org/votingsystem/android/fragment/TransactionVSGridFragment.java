@@ -33,7 +33,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.service.CooinService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -71,13 +71,13 @@ public class TransactionVSGridFragment extends Fragment
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
-                case VICKET_USER_INFO:
+                case COOIN_USER_INFO:
                     launchUpdateUserInfoService();
                     break;
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case VICKET_USER_INFO:
+                case COOIN_USER_INFO:
                     break;
             }
             setProgressDialogVisible(false);
@@ -94,8 +94,8 @@ public class TransactionVSGridFragment extends Fragment
     private void launchUpdateUserInfoService() {
         LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
-            Intent startIntent = new Intent(getActivity(), VicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
+            Intent startIntent = new Intent(getActivity(), CooinService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);
             getActivity().startService(startIntent);
@@ -197,7 +197,7 @@ public class TransactionVSGridFragment extends Fragment
         switch (item.getItemId()) {
             case R.id.update_signers_info:
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
+                        getString(R.string.update_user_info_pin_msg), false, TypeVS.COOIN_USER_INFO);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

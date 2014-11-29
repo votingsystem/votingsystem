@@ -97,7 +97,7 @@ environments {
         } else {
             grails.logging.jul.usebridge = true
             grails.resources.debug = true// -> rendering problems
-            grails.serverURL = "http://vickets:8082/ControlCenter"
+            grails.serverURL = "http://cooins:8082/ControlCenter"
         }
     }
     production {

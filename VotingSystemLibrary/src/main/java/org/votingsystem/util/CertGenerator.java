@@ -35,7 +35,10 @@ public class CertGenerator {
 
     public static void main(String[] args) throws Exception{
         ContextVS.init("votingSystemLibraryLog4j.properties", "votingSystemLibraryMessages.properties", "es");
-        generate(new CertRequest(args[0]));
+
+        String testStr = "{\"rootCertFile\":\"/home/jgzornoza/github/votingsystem/templates/appsRootCert.jks\",\"rootSubjectDN\":\"CN=Voting System Certificate Authority, OU=Certs\",\"password\":\"PemPass\",\"certs\":[{\"file\":\"/home/jgzornoza/github/votingsystem/AccessControl/web-app/WEB-INF/votingsystem/AccessControl.jks\",\"distinguishedName\":\"CN=Voting System Access Control, SERIALNUMBER=50000000R\",\"alias\":\"AccessControlKeys\",\"isTimeStampingCert\":false},{\"file\":\"/home/jgzornoza/github/votingsystem/ControlCenter/web-app/WEB-INF/votingsystem/ControlCenter.jks\",\"distinguishedName\":\"CN=Voting System Control Center, SERIALNUMBER=50000001W\",\"alias\":\"ControlCenterKeys\",\"isTimeStampingCert\":false},{\"file\":\"/home/jgzornoza/github/votingsystem/TimeStampServer/web-app/WEB-INF/votingsystem/TimeStampServer.jks\",\"distinguishedName\":\"CN=Voting System TimeStamp Server, SERIALNUMBER=80000000C\",\"alias\":\"TimeStampServerKeys\",\"isTimeStampingCert\":true},{\"file\":\"/home/jgzornoza/github/votingsystem/Cooins/web-app/WEB-INF/votingsystem/CooinServer.jks\",\"distinguishedName\":\"CN=Voting System Cooin Server, SERIALNUMBER=90000000B\",\"alias\":\"CooinServerKeys\",\"isTimeStampingCert\":true}]}";
+        generate(new CertRequest(testStr));
+        //generate(new CertRequest(args[0]));
     }
 
     public CertGenerator(File rootCertFile, String rootSubjectDN, String password) throws Exception {
@@ -67,10 +70,8 @@ public class CertGenerator {
                 " - file: " + file.getAbsolutePath() + " - alias: " + alias);
         KeyStore keyStore = KeyStoreUtil.createTimeStampingKeyStore(
                 DATE_BEGIN_CERT, DURATION_CERT, password.toCharArray(), alias, rootPrivateCredential, subjectDN);
-        byte[] keyStoreBytes = KeyStoreUtil.getBytes(
-                keyStore, password.toCharArray());
-        FileUtils.copyStreamToFile(
-                new ByteArrayInputStream(keyStoreBytes),file);
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
     }
 	
     public static void generate (CertRequest request) throws Exception {
@@ -106,8 +107,8 @@ public class CertGenerator {
                             "Missing arg 'file' from cert request in certs");
                     CertRequest request = new CertRequest();
                     request.certFile = new File((String) certDataMap.get("file"));
-                    certFile.getParentFile().mkdirs();
-                    certFile.createNewFile();
+                    request.certFile.getParentFile().mkdirs();
+                    request.certFile.createNewFile();
                     if(certDataMap.get("distinguishedName") == null) throw new ExceptionVS(
                             "Missing arg 'distinguishedName' from cert request in certs");
                     request.distinguishedName = (String) certDataMap.get("distinguishedName");
@@ -121,7 +122,6 @@ public class CertGenerator {
                 }
             }
         }
-
         File getRootCertFile() {
             return new File(rootCertFile);
         }

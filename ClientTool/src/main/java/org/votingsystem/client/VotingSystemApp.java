@@ -31,7 +31,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 
@@ -62,7 +62,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     private VBox mainBox;
     private VBox votingSystemOptionsBox;
-    private VBox vicketOptionsBox;
+    private VBox cooinOptionsBox;
     private HBox headerButtonsBox;
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
@@ -151,14 +151,14 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     log.error(ex.getMessage(), ex);
                 }
                 String accessControlServerURL = null;
-                String vicketsServerURL = null;
+                String cooinsServerURL = null;
                 if(loadedFromJar) {
                     HttpHelper.getInstance().initVotingSystemSSLMode();
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
-                    vicketsServerURL = ContextVS.getMessage("prodVicketsServerURL");
+                    cooinsServerURL = ContextVS.getMessage("prodCooinsServerURL");
                 } else {
                     accessControlServerURL = ContextVS.getMessage("devAccessControlServerURL");
-                    vicketsServerURL = ContextVS.getMessage("devVicketsServerURL");
+                    cooinsServerURL = ContextVS.getMessage("devCooinsServerURL");
                 }
                 ResponseVS responseVS = null;
                 try {
@@ -170,10 +170,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     }
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {
-                    responseVS = Utils.checkServer(vicketsServerURL);
+                    responseVS = Utils.checkServer(cooinsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        setVicketServerAvailable(true, primaryStage);
-                        ContextVS.getInstance().setVicketServer((VicketServer) responseVS.getData());
+                        setCooinServerAvailable(true, primaryStage);
+                        ContextVS.getInstance().setCooinServer((CooinServer) responseVS.getData());
                     }
                 }
                 catch(Exception ex) {log.error(ex.getMessage(), ex);}
@@ -222,30 +222,30 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }});
         selectRepresentativeButton.setPrefWidth(500);
         votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
-        vicketOptionsBox = new VBox(15);
-        Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
-        vicketUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
-        vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
+        cooinOptionsBox = new VBox(15);
+        Button cooinUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
+        cooinUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
+        cooinUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openVicketURL(ContextVS.getInstance().getVicketServer().getUserDashBoardURL(),
-                        ContextVS.getMessage("vicketUsersLbl"));
+                openCooinURL(ContextVS.getInstance().getCooinServer().getUserDashBoardURL(),
+                        ContextVS.getMessage("cooinUsersLbl"));
             }});
-        vicketUsersProceduresButton.setPrefWidth(500);
+        cooinUsersProceduresButton.setPrefWidth(500);
         Button walletButton = new Button(ContextVS.getMessage("walletLbl"));
         walletButton.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         walletButton.setPrefWidth(500);
         walletButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openVicketURL(ContextVS.getInstance().getVicketServer().getWalletURL(),
+                openCooinURL(ContextVS.getInstance().getCooinServer().getWalletURL(),
                         ContextVS.getMessage("walletLbl"));
             }});
-        vicketOptionsBox.getChildren().addAll(vicketUsersProceduresButton, walletButton);
-        vicketOptionsBox.setStyle("-fx-alignment: center;");
+        cooinOptionsBox.getChildren().addAll(cooinUsersProceduresButton, walletButton);
+        cooinOptionsBox.setStyle("-fx-alignment: center;");
         ChoiceBox adminChoiceBox = new ChoiceBox();
         adminChoiceBox.setPrefWidth(180);
         final String[] adminOptions = new String[]{ContextVS.getMessage("adminLbl"),
                 ContextVS.getMessage("settingsLbl"),
-                ContextVS.getMessage("vicketAdminLbl"),
+                ContextVS.getMessage("cooinAdminLbl"),
                 ContextVS.getMessage("votingSystemProceduresLbl")};
         adminChoiceBox.getItems().addAll(adminOptions);
         adminChoiceBox.getSelectionModel().selectFirst();
@@ -256,9 +256,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     String selectedOption = adminOptions[new_value.intValue()];
                     if(ContextVS.getMessage("settingsLbl").equals(selectedOption)) {
                         openSettings();
-                    } else if(ContextVS.getMessage("vicketAdminLbl").equals(selectedOption)) {
-                        openVicketURL(ContextVS.getInstance().getVicketServer().getAdminDashBoardURL(),
-                                ContextVS.getMessage("vicketAdminLbl"));
+                    } else if(ContextVS.getMessage("cooinAdminLbl").equals(selectedOption)) {
+                        openCooinURL(ContextVS.getInstance().getCooinServer().getAdminDashBoardURL(),
+                                ContextVS.getMessage("cooinAdminLbl"));
                     } else if(ContextVS.getMessage("votingSystemProceduresLbl").equals(selectedOption)) {
                         openVotingSystemURL(ContextVS.getInstance().getAccessControl().getDashBoardURL(),
                                 ContextVS.getMessage("votingSystemProceduresLbl"));
@@ -304,14 +304,14 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         primaryStage.show();
     }
 
-    private void setVicketServerAvailable(final boolean available, Stage primaryStage) {
+    private void setCooinServerAvailable(final boolean available, Stage primaryStage) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
-                    mainBox.getChildren().add((mainBox.getChildren().size() - 1), vicketOptionsBox);
+                    mainBox.getChildren().add((mainBox.getChildren().size() - 1), cooinOptionsBox);
                 } else {
-                    if(mainBox.getChildren().contains(vicketOptionsBox)) {
-                        mainBox.getChildren().remove(vicketOptionsBox);
+                    if(mainBox.getChildren().contains(cooinOptionsBox)) {
+                        mainBox.getChildren().remove(cooinOptionsBox);
                     }
                 }
                 primaryStage.sizeToScene();
@@ -345,9 +345,9 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             @Override public void run() { BrowserVS.getInstance().newTab(URL, caption, null); }});
     }
 
-    private void openVicketURL(final String URL, final String caption) {
-        log.debug("openVicketURL: " + URL);
-        if(ContextVS.getInstance().getVicketServer() == null) {
+    private void openCooinURL(final String URL, final String caption) {
+        log.debug("openCooinURL: " + URL);
+        if(ContextVS.getInstance().getCooinServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }

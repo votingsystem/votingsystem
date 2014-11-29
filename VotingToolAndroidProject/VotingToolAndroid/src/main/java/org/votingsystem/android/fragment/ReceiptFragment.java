@@ -218,16 +218,16 @@ public class ReceiptFragment extends Fragment {
                                 "EEE dd MMM yyyy' 'HH:mm"),
                         dataJSON.getString("accessControlURL"));
                     break;
-                case VICKET_REQUEST:
+                case COOIN_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
                     currency = dataJSON.getString("currency");
                     String serverURL = dataJSON.getString("serverURL");
-                    JSONArray arrayVickets = dataJSON.getJSONArray("vickets");
-                    String vicketValueStr = arrayVickets.getJSONObject(0).getString("vicketValue");
-                    Integer numVickets = arrayVickets.getJSONObject(0).getInt("numVickets");
-                    contentFormatted = getString(R.string.vicket_request_formatted,
-                            totalAmount.toPlainString(), currency, numVickets, vicketValueStr, serverURL);
+                    JSONArray arrayCooins = dataJSON.getJSONArray("cooins");
+                    String cooinValueStr = arrayCooins.getJSONObject(0).getString("cooinValue");
+                    Integer numCooins = arrayCooins.getJSONObject(0).getInt("numCooins");
+                    contentFormatted = getString(R.string.cooin_request_formatted,
+                            totalAmount.toPlainString(), currency, numCooins, cooinValueStr, serverURL);
                     break;
                 case VOTEVS:
                     VoteVS voteVS = (VoteVS)receiptContainer;
@@ -290,7 +290,7 @@ public class ReceiptFragment extends Fragment {
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
                 break;
-            case VICKET_REQUEST:
+            case COOIN_REQUEST:
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 menu.removeItem(R.id.cancel_vote);

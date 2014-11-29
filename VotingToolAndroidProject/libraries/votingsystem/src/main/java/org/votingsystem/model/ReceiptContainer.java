@@ -52,8 +52,8 @@ public class ReceiptContainer implements Serializable {
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
-            case VICKET_REQUEST:
-                return context.getString(R.string.vicket_request_subtitle);
+            case COOIN_REQUEST:
+                return context.getString(R.string.cooin_request_subtitle);
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 return context.getString(R.string.delegation_lbl);
@@ -74,8 +74,8 @@ public class ReceiptContainer implements Serializable {
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
-            case VICKET_REQUEST:
-                return context.getString(R.string.vicket_request_subtitle);
+            case COOIN_REQUEST:
+                return context.getString(R.string.cooin_request_subtitle);
             case REPRESENTATIVE_SELECTION:
                 return context.getString(R.string.representative_selection_lbl);
             case ANONYMOUS_REPRESENTATIVE_SELECTION:

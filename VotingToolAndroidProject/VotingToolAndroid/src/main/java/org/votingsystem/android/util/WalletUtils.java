@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.Vicket;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
@@ -33,66 +33,66 @@ public class WalletUtils {
 
     private static final String TAG = WalletUtils.class.getSimpleName();
 
-    private static List<Vicket> vicketList = null;
+    private static List<Cooin> cooinList = null;
 
-    public static List<Vicket> getVicketList() {
-        if(vicketList == null) return null;
-        else return new ArrayList<Vicket>(vicketList);
+    public static List<Cooin> getCooinList() {
+        if(cooinList == null) return null;
+        else return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Vicket> getVicketList(String password, Context context) throws Exception {
+    public static List<Cooin> getCooinList(String password, Context context) throws Exception {
         JSONArray storedWalletJSON = getWallet(password, context);
-        if(storedWalletJSON == null) vicketList = new ArrayList<Vicket>();
-        else vicketList = getVicketListFromJSONArray(storedWalletJSON);
-        return new ArrayList<Vicket>(vicketList);
+        if(storedWalletJSON == null) cooinList = new ArrayList<Cooin>();
+        else cooinList = getCooinListFromJSONArray(storedWalletJSON);
+        return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Vicket> getVicketListFromJSONArray(JSONArray jsonArray) throws Exception {
-        List<Vicket> vicketList = new ArrayList<Vicket>();
+    public static List<Cooin> getCooinListFromJSONArray(JSONArray jsonArray) throws Exception {
+        List<Cooin> cooinList = new ArrayList<Cooin>();
         for(int i = 0; i < jsonArray.length(); i++) {
-            JSONObject vicketJSON = jsonArray.getJSONObject(i);
-            byte[] serializedVicket = ((JSONObject)vicketJSON).getString("object").getBytes();
-            vicketList.add((Vicket) ObjectUtils.deSerializeObject(serializedVicket));
+            JSONObject cooinJSON = jsonArray.getJSONObject(i);
+            byte[] serializedCooin = ((JSONObject)cooinJSON).getString("object").getBytes();
+            cooinList.add((Cooin) ObjectUtils.deSerializeObject(serializedCooin));
         }
-        return vicketList;
+        return cooinList;
     }
 
-    public static void saveVicketList(Collection<Vicket> newVicketList, String password,
+    public static void saveCooinList(Collection<Cooin> newCooinList, String password,
             Context context) throws Exception {
         Object wallet = getWallet(password, context);
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
         else storedWalletJSON = (JSONArray) wallet;
-        List<Map> serializedVicketList = getSerializedVicketList(newVicketList);
-        for(Map vicket : serializedVicketList) {
-            storedWalletJSON.put(new JSONObject(vicket));
+        List<Map> serializedCooinList = getSerializedCooinList(newCooinList);
+        for(Map cooin : serializedCooinList) {
+            storedWalletJSON.put(new JSONObject(cooin));
         }
         WalletUtils.saveWallet(storedWalletJSON, password, context);
-        vicketList = getVicketListFromJSONArray(storedWalletJSON);
+        cooinList = getCooinListFromJSONArray(storedWalletJSON);
     }
 
-    public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection)
+    public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<Map>();
-        for(Vicket vicket : vicketCollection) {
-            Map vicketDataMap = vicket.getCertSubject().getDataMap();
-            vicketDataMap.put("isTimeLimited", vicket.getIsTimeLimited());
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            vicketDataMap.put("object", new String(vicketSerialized, "UTF-8"));
-            result.add(vicketDataMap);
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
+            byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
+            cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
+            result.add(cooinDataMap);
         }
         return result;
     }
 
-    public static JSONArray getSerializedVicketArray(Collection<Vicket> vicketCollection)
+    public static JSONArray getSerializedCooinArray(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         JSONArray jsonArray = new JSONArray();
-        for(Vicket vicket : vicketCollection) {
-            Map vicketDataMap = vicket.getCertSubject().getDataMap();
-            vicketDataMap.put("isTimeLimited", vicket.getIsTimeLimited());
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            vicketDataMap.put("object", new String(vicketSerialized, "UTF-8"));
-            jsonArray.put(new JSONObject(vicketDataMap));
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
+            byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
+            cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
+            jsonArray.put(new JSONObject(cooinDataMap));
         }
         return jsonArray;
     }

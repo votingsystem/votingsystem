@@ -3,7 +3,7 @@ package org.votingsystem.test.util
 import org.apache.log4j.Logger
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.cooin.model.TransactionVS
 
 /**
  * @author jgzornoza

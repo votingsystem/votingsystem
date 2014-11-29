@@ -7,7 +7,8 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.vicket.model.Vicket;
+import org.votingsystem.cooin.model.Cooin;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -23,24 +24,24 @@ public class WalletUtils {
     private static Logger log = Logger.getLogger(StringUtils.class);
 
 
-    public static void saveVicketsToDir(Collection<Vicket> vicketCollection, String walletPath) throws Exception {
-        for(Vicket vicket : vicketCollection) {
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
+    public static void saveCooinsToDir(Collection<Cooin> cooinCollection, String walletPath) throws Exception {
+        for(Cooin cooin : cooinCollection) {
+            byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
             new File(walletPath).mkdirs();
-            File vicketFile = FileUtils.copyStreamToFile(new ByteArrayInputStream(vicketSerialized), new File(
+            File cooinFile = FileUtils.copyStreamToFile(new ByteArrayInputStream(cooinSerialized), new File(
                     walletPath + UUID.randomUUID().toString() + ContextVS.SERIALIZED_OBJECT_EXTENSION));
-            log.debug("stored vicket: " + vicketFile.getAbsolutePath());
+            log.debug("stored cooin: " + cooinFile.getAbsolutePath());
         }
     }
 
-    public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection)
+    public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<>();
-        for(Vicket vicket : vicketCollection) {
-            Map vicketDataMap = vicket.getCertSubject().getDataMap();
-            vicketDataMap.put("isTimeLimited", vicket.getIsTimeLimited());
-            vicketDataMap.put("object", ObjectUtils.serializeObjectToString(vicket));
-            result.add(vicketDataMap);
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
+            cooinDataMap.put("object", ObjectUtils.serializeObjectToString(cooin));
+            result.add(cooinDataMap);
         }
         return result;
     }
@@ -57,9 +58,9 @@ public class WalletUtils {
         FileUtils.copyStreamToFile(new ByteArrayInputStream(walletJSON.toString().getBytes()), walletFile);
     }
 
-    public static void saveToPlainWallet(List<Map> serializedVicketList) throws Exception {
+    public static void saveToPlainWallet(List<Map> serializedCooinList) throws Exception {
         JSONArray storedWalletJSON = (JSONArray) getPlainWallet();
-        storedWalletJSON.addAll(serializedVicketList);
+        storedWalletJSON.addAll(serializedCooinList);
         savePlainWallet(storedWalletJSON);
     }
 

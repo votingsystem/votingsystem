@@ -70,9 +70,9 @@ test {
     }
 }
 
-task testRequestVickets(type: JavaExec) {
-    description 'VicketRequest description'
-    main = 'org.votingsystem.test.vicket.Vicket_request'
+task testRequestCooins(type: JavaExec) {
+    description 'CooinRequest description'
+    main = 'org.votingsystem.test.cooin.Cooin_request'
     classpath = sourceSets.main.runtimeClasspath
 }
 

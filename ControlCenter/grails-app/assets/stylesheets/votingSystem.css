@@ -19,7 +19,7 @@ body {
 }
 
 
-.navbar-vickets {
+.vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
@@ -27,23 +27,23 @@ body {
     z-index: 20;
 }
 
-.navBar-vicket-icon {
+.vs-navbar-icon {
     color: #f9f9f9;
     cursor: pointer;
     font-size: 3em;
 }
 
-.navBar-vicket-icon:hover {
+.vs-navbar-icon:hover {
     color: #6c0404;
     cursor: pointer;
 }
 
-.navBar-vicket-button {
+.vs-navbar-button {
     color: #f9f9f9;
     background-color: #ba0011;
 }
 
-.navbar-vickets .navbar-nav > li > a:hover, .nav > li > a:focus {
+.vs-navbar .navbar-nav > li > a:hover, .nav > li > a:focus {
     text-decoration: none;
     background-color: #6c0404;
 }

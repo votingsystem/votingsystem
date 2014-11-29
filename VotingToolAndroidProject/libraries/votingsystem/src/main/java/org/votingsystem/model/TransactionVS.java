@@ -33,8 +33,8 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, FROM_BANKVS, FROM_USERVS,
-        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD;}
+    public enum Type { COOIN_REQUEST, COOIN_SEND, COOIN_CANCELLATION, FROM_BANKVS, FROM_USERVS,
+        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, COOIN_INIT_PERIOD;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -54,7 +54,7 @@ public class TransactionVS  implements Serializable {
     private UserVS sender;
     private UserVS toUserVS;
     private List<String> toUserIBAN;
-    private List<Vicket> vickets;
+    private List<Cooin> cooins;
     private TagVS tagVS = new TagVS(TagVS.WILDTAG);
     private Type type;
     private Date validTo;
@@ -75,15 +75,15 @@ public class TransactionVS  implements Serializable {
         this.isTimeLimited = isTimeLimited;
     }
 
-    public TransactionVS(Type type, List<Vicket> vickets) {
+    public TransactionVS(Type type, List<Cooin> cooins) {
         this.type = type;
-        this.vickets = vickets;
+        this.cooins = cooins;
     }
 
-    public TransactionVS(Type type, Date dateCreated,  List<Vicket> vickets, BigDecimal amount,
+    public TransactionVS(Type type, Date dateCreated,  List<Cooin> cooins, BigDecimal amount,
                  String currencyCode) {
         this.type = type;
-        this.vickets = vickets;
+        this.cooins = cooins;
         this.amount = amount;
         this.currencyCode = currencyCode;
         this.dateCreated = dateCreated;
@@ -273,11 +273,11 @@ public class TransactionVS  implements Serializable {
 
     public int getIconId(Context context) {
         switch(type) {
-            case VICKET_CANCELLATION:
+            case COOIN_CANCELLATION:
                 return R.drawable.edit_redo_24;
-            case VICKET_REQUEST:
+            case COOIN_REQUEST:
                 return R.drawable.edit_undo_24;
-            case VICKET_SEND:
+            case COOIN_SEND:
                 return R.drawable.fa_money_24;
             default:
                 return R.drawable.pending;
@@ -286,24 +286,24 @@ public class TransactionVS  implements Serializable {
 
     public TypeVS getTypeVS() {
         switch(getType()){
-            case VICKET_REQUEST:
-                return TypeVS.VICKET_REQUEST;
+            case COOIN_REQUEST:
+                return TypeVS.COOIN_REQUEST;
             default: return null;
         }
     }
 
     public String getDescription(Context context) {
         switch(type) {
-            case VICKET_CANCELLATION:
-                return context.getString(R.string.vicket_cancellation);
+            case COOIN_CANCELLATION:
+                return context.getString(R.string.cooin_cancellation);
             case FROM_GROUP_TO_ALL_MEMBERS:
             case FROM_GROUP_TO_MEMBER:
             case FROM_GROUP_TO_MEMBER_GROUP:
                 return context.getString(R.string.account_input);
-            case VICKET_REQUEST:
+            case COOIN_REQUEST:
                 return context.getString(R.string.account_output);
-            case VICKET_SEND:
-                return context.getString(R.string.vicket_send);
+            case COOIN_SEND:
+                return context.getString(R.string.cooin_send);
             default:
                 return type.toString();
         }
@@ -322,8 +322,8 @@ public class TransactionVS  implements Serializable {
 
     }
 
-    public List<Vicket> getVickets() {
-        return vickets;
+    public List<Cooin> getCooins() {
+        return cooins;
     }
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {

@@ -25,7 +25,7 @@ import android.widget.Toast;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.TransactionVSService;
-import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
@@ -73,11 +73,11 @@ public class UserVSAccountsFragment extends Fragment {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             pin = intent.getStringExtra(ContextVS.PIN_KEY);
             switch(responseVS.getTypeVS()) {
-                case VICKET_REQUEST:
-                    sendVicketRequest(pin);
+                case COOIN_REQUEST:
+                    sendCooinRequest(pin);
                     break;
-                case VICKET_SEND:
-                    sendVicket();
+                case COOIN_SEND:
+                    sendCooin();
                     break;
                 case TRANSACTIONVS:
                     sendTransactionVS();
@@ -85,12 +85,12 @@ public class UserVSAccountsFragment extends Fragment {
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case VICKET_REQUEST:
+                case COOIN_REQUEST:
                     if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
                         transactionVS = (TransactionVS) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()),
-                                false, TypeVS.VICKET_REQUEST);
+                                MsgUtils.getCooinRequestMessage(transactionVS, getActivity()),
+                                false, TypeVS.COOIN_REQUEST);
                     } else {
                         UIUtils.launchMessageActivity(responseVS, getActivity());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -98,13 +98,13 @@ public class UserVSAccountsFragment extends Fragment {
                         }
                     }
                     break;
-                case VICKET_SEND:
+                case COOIN_SEND:
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage(), getFragmentManager());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     break;
-                case VICKET_USER_INFO:
+                case COOIN_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     }
@@ -193,7 +193,7 @@ public class UserVSAccountsFragment extends Fragment {
             return;
         }
         try {
-            last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
+            last_request_date.setText(Html.fromHtml(getString(R.string.cooin_last_request_info_lbl,
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
             UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
             if(userInfo != null) {
@@ -223,7 +223,7 @@ public class UserVSAccountsFragment extends Fragment {
             case R.id.update_signers_info:
                 sendUserInfoRequest();
                 return true;
-            case R.id.open_vicket_grid:
+            case R.id.open_cooin_grid:
                 UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), getActivity());
                 return true;
             default:
@@ -240,28 +240,28 @@ public class UserVSAccountsFragment extends Fragment {
     private void sendUserInfoRequest() {
         Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
-        Intent startIntent = new Intent(getActivity(), VicketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
+        Intent startIntent = new Intent(getActivity(), CooinService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_USER_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 
-    private void sendVicketRequest(String pin) {
-        Intent startIntent = new Intent(getActivity(), VicketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
+    private void sendCooinRequest(String pin) {
+        Intent startIntent = new Intent(getActivity(), CooinService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_REQUEST);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true, getString(R.string.vicket_request_msg_subject),
-                MsgUtils.getVicketRequestMessage(transactionVS, getActivity()));
+        setProgressDialogVisible(true, getString(R.string.cooin_request_msg_subject),
+                MsgUtils.getCooinRequestMessage(transactionVS, getActivity()));
         getActivity().startService(startIntent);
     }
 
-    private void sendVicket() {
-        Intent startIntent = new Intent(getActivity(), VicketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
+    private void sendCooin() {
+        Intent startIntent = new Intent(getActivity(), CooinService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_SEND);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
         startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
@@ -327,7 +327,7 @@ public class UserVSAccountsFragment extends Fragment {
                         CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
                                 getString(R.string.cash_request_dialog_caption),
                                 getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
-                                accountBalance, currencyCode, TypeVS.VICKET_REQUEST);
+                                accountBalance, currencyCode, TypeVS.COOIN_REQUEST);
                     }
                 });
                 request_button.setVisibility(View.VISIBLE);

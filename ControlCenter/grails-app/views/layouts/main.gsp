@@ -31,7 +31,7 @@
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}"></core-signals>
         <vs-navbar id="_navbar" style="display: none;">
-            <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
+            <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="vs-navbar">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">

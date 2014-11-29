@@ -70,19 +70,19 @@ class TestUtils {
 
     public static SimulationData getSimulationData() {return simulationData;}
 
-    public static VicketServer fetchVicketServer(String vicketServerURL) throws ExceptionVS {
-        VicketServer vicketServer = null
-        if(ContextVS.getInstance().getVicketServer() == null) {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(vicketServerURL),
+    public static CooinServer fetchCooinServer(String cooinServerURL) throws ExceptionVS {
+        CooinServer cooinServer = null
+        if(ContextVS.getInstance().getCooinServer() == null) {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(cooinServerURL),
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    vicketServer = (VicketServer) ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
-                    ContextVS.getInstance().setVicketServer(vicketServer);
-                } catch(Exception ex) { throw new ExceptionVS("Error fetching Vicket server: " + ex.getMessage(), ex);}
-            } else throw new ExceptionVS("Error fetching Vicket server: " + responseVS.getMessage())
+                    cooinServer = (CooinServer) ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
+                    ContextVS.getInstance().setCooinServer(cooinServer);
+                } catch(Exception ex) { throw new ExceptionVS("Error fetching Cooin server: " + ex.getMessage(), ex);}
+            } else throw new ExceptionVS("Error fetching Cooin server: " + responseVS.getMessage())
         }
-        return vicketServer
+        return cooinServer
     }
 
     public static File getFileFromResources(String resource) {
@@ -108,7 +108,7 @@ class TestUtils {
             JSONObject groupDataJSON = JSONSerializer.toJSON(responseVS.getMessage())
             JSONObject representativeDataJSON = groupDataJSON.getJSONObject("representative")
             //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
-            JSONObject subscriptionData = new JSONObject([operation:"VICKET_GROUP_SUBSCRIBE"])
+            JSONObject subscriptionData = new JSONObject([operation:"COOIN_GROUP_SUBSCRIBE"])
             JSONObject groupDataJSON1 = new JSONObject([id:groupDataJSON.getLong("id"), name:groupDataJSON.getString("name")])
             JSONObject representativeDataJSON1 = new JSONObject([id:representativeDataJSON.getLong("id"),
                                                                  nif:representativeDataJSON.getString("nif")])

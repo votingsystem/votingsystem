@@ -1,12 +1,12 @@
 {
-    "name": "Vickets",
+    "name": "Cooins",
     "version": "0.1.0",
     "authors": [
         "JJ <jgzornoza@gmail.com>"
     ],
     "description": "Voting System Control Center",
     "keywords": [
-        "vickets",
+        "cooins",
         "voting-system"
     ],
     "license": "Apache 2",

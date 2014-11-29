@@ -53,7 +53,7 @@ public enum ContentTypeVS {
 
     VOTE("application/vote;application/pkcs7-signature;application/pkcs7-mime", "vote"),
 
-    VICKET("application/model;application/pkcs7-signature;application/pkcs7-mime", "model"),
+    COOIN("application/model;application/pkcs7-signature;application/pkcs7-mime", "model"),
 
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");
@@ -129,7 +129,7 @@ public enum ContentTypeVS {
 
         if(contentTypeStr.contains(VOTE.getName())) result = VOTE;
 
-        if(contentTypeStr.contains(VICKET.getName())) result = VICKET;
+        if(contentTypeStr.contains(COOIN.getName())) result = COOIN;
 
         return result;
     }

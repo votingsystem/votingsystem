@@ -1,4 +1,4 @@
-package org.votingsystem.test.vicket
+package org.votingsystem.test.cooin
 
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
@@ -10,7 +10,7 @@ import org.votingsystem.test.util.TransactionVSAnalizer
 import org.votingsystem.util.HttpHelper
 
 Logger log = TestUtils.init(Test.class, [:])
-String serviceURL = "http://vickets:8086/Vickets/balance/weekdb/2014/10/20"
+String serviceURL = "http://cooins:8086/Cooins/balance/weekdb/2014/10/20"
 
 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
 TransactionVSAnalizer transactionVSPlan = TransactionVSAnalizer.parse(JSONSerializer.toJSON(responseVS.getMessage()))

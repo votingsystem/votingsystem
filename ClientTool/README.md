@@ -1,4 +1,4 @@
-Herramienta cliente para PC de los Sistemas de Votación y Vickets 
+Herramienta cliente para PC de los Sistemas de Votación y Cooins
 =====================================================================
 Sólo funciona con Java 8
 

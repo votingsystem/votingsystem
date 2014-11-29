@@ -155,12 +155,12 @@ public class TransactionVSFragment extends Fragment {
     private void setActionBar() {
         if(selectedTransactionVS == null) return;
         switch(selectedTransactionVS.getType()) {
-            case VICKET_CANCELLATION:
+            case COOIN_CANCELLATION:
                 break;
-            case VICKET_REQUEST:
+            case COOIN_REQUEST:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
-            case VICKET_SEND:
+            case COOIN_SEND:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
             default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +

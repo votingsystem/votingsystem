@@ -6,14 +6,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -80,7 +75,7 @@ public class MobileSelectorDialog extends DialogVS {
             new Thread(new Runnable() {
                 @Override public void run() {
                     ResponseVS responseVS = HttpHelper.getInstance().getData(
-                            ContextVS.getInstance().getVicketServer().getDeviceListByNifServiceURL(nif), ContentTypeVS.JSON);
+                            ContextVS.getInstance().getCooinServer().getDeviceListByNifServiceURL(nif), ContentTypeVS.JSON);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         updateDeviceList((JSONArray) ((JSONObject)responseVS.getMessageJSON()).getJSONArray("deviceList"));
                     }

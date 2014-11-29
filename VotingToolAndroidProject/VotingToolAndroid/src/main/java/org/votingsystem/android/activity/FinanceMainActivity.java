@@ -37,7 +37,7 @@ public class FinanceMainActivity extends ActivityBase {
         setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
-        VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
+        CooinPagerAdapter pagerAdapter = new CooinPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
         getSupportActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
@@ -47,14 +47,14 @@ public class FinanceMainActivity extends ActivityBase {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         Intent intent = null;
         switch (item.getItemId()) {
-            case R.id.admin_vickets_menu_item:
+            case R.id.admin_cooins_menu_item:
                 intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuAdminURL());
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuAdminURL());
                 startActivity(intent);
                 return true;
-            case R.id.vickets_menu_user_item:
+            case R.id.cooins_menu_user_item:
                 intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuUserURL());
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuUserURL());
                 startActivity(intent);
                 return true;
             default:
@@ -70,17 +70,17 @@ public class FinanceMainActivity extends ActivityBase {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
     }
 
-    class VicketPagerAdapter extends FragmentStatePagerAdapter {
+    class CooinPagerAdapter extends FragmentStatePagerAdapter {
 
-        final String TAG = VicketPagerAdapter.class.getSimpleName();
+        final String TAG = CooinPagerAdapter.class.getSimpleName();
 
-        private static final int VICKET_USER_INFO = 0;
-        private static final int VICKET_LIST = 1;
+        private static final int COOIN_USER_INFO = 0;
+        private static final int COOIN_LIST = 1;
 
         private String searchQuery = null;
         private Bundle args;
 
-        public VicketPagerAdapter(FragmentManager fragmentManager, Bundle args) {
+        public CooinPagerAdapter(FragmentManager fragmentManager, Bundle args) {
             super(fragmentManager);
             this.args = (args != null)? args:new Bundle();
         }
@@ -88,10 +88,10 @@ public class FinanceMainActivity extends ActivityBase {
         @Override public Fragment getItem(int position) {
             Fragment selectedFragment = null;
             switch(position) {
-                case VICKET_USER_INFO:
+                case COOIN_USER_INFO:
                     selectedFragment = new UserVSAccountsFragment();
                     break;
-                case VICKET_LIST:
+                case COOIN_LIST:
                     selectedFragment = new TransactionVSGridFragment();
                     break;
             }
@@ -104,7 +104,7 @@ public class FinanceMainActivity extends ActivityBase {
 
         @Override public int getCount() {
             return 2;
-        } //VICKET_USER_INFO and VICKET_LIST
+        } //COOIN_USER_INFO and COOIN_LIST
 
     }
 

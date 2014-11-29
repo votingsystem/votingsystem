@@ -15,7 +15,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
-import org.votingsystem.vicket.model.TransactionVS;
+import org.votingsystem.cooin.model.TransactionVS;
 
 import javax.mail.Session;
 import javax.security.auth.x500.X500PrivateCredential;
@@ -51,7 +51,7 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int VICKET_TAG                              = 3;
+    public static final int COOIN_TAG                              = 3;
     public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
@@ -59,7 +59,7 @@ public class ContextVS {
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
-    public static final String VICKET_OID = VOTING_SYSTEM_BASE_OID + VICKET_TAG;
+    public static final String COOIN_OID = VOTING_SYSTEM_BASE_OID + COOIN_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
@@ -86,7 +86,7 @@ public class ContextVS {
     public static final String CSR_FILE_NAME                 = "csr";
     public static final String IMAGE_FILE_NAME               = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
-    public static final String VICKET_REQUEST_DATA_FILE_NAME = "vicketRequestData";
+    public static final String COOIN_REQUEST_DATA_FILE_NAME = "cooinRequestData";
 
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
 
@@ -171,7 +171,7 @@ public class ContextVS {
     private static Properties appProperties;
     private static Properties settings;
     private UserVS userVS;
-    private VicketServer vicketServer;
+    private CooinServer cooinServer;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
     private ActorVS defaultServer;
@@ -309,7 +309,6 @@ public class ContextVS {
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     public byte[] getResourceBytes(String name) throws IOException {
@@ -589,23 +588,23 @@ public class ContextVS {
     }
 
 
-    public VicketServer getVicketServer() {
-        return vicketServer;
+    public CooinServer getCooinServer() {
+        return cooinServer;
     }
 
-    public void setVicketServer(VicketServer vicketServer) {
-        this.vicketServer = vicketServer;
+    public void setCooinServer(CooinServer cooinServer) {
+        this.cooinServer = cooinServer;
     }
 
     public void setServer(ActorVS server) {
-        if(server instanceof VicketServer) setVicketServer((VicketServer) server);
+        if(server instanceof CooinServer) setCooinServer((CooinServer) server);
         else if(server instanceof AccessControlVS) setAccessControl((AccessControlVS) server);
         else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
         else log.error("setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
     }
 
     public ActorVS checkServer(String serverURL) {
-        if(vicketServer != null && vicketServer.getServerURL().equals(serverURL)) return vicketServer;
+        if(cooinServer != null && cooinServer.getServerURL().equals(serverURL)) return cooinServer;
         if(accessControl != null && accessControl.getServerURL().equals(serverURL)) return accessControl;
         if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) return controlCenter;
         log.debug("checkServer - serverURL: '" + serverURL + "' not found");
@@ -620,7 +619,7 @@ public class ContextVS {
     public ActorVS getDefaultServer() throws ExceptionVS {
         if(defaultServer != null) return defaultServer;
         if(accessControl != null) return accessControl;
-        if(vicketServer != null) return vicketServer;
+        if(cooinServer != null) return cooinServer;
         throw new ExceptionVS("Missing default server");
     }
 

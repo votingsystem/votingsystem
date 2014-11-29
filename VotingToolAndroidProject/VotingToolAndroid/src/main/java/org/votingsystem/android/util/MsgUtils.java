@@ -8,7 +8,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.Vicket;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.VoteVS;
 
 import java.security.cert.X509Certificate;
@@ -56,10 +56,10 @@ public class MsgUtils {
         else return tag;
     }
 
-    public static String getVicketDescriptionMessage(Vicket vicket, Context context) {
-        return vicket.getAmount().toPlainString() + " " + vicket.getCurrencyCode() +
+    public static String getCooinDescriptionMessage(Cooin cooin, Context context) {
+        return cooin.getAmount().toPlainString() + " " + cooin.getCurrencyCode() +
                 " " + context.getString(R.string.for_lbl ) + " '" +
-                getTagVSMessage(vicket.getSignedTagVS(), context) + "'";
+                getTagVSMessage(cooin.getSignedTagVS(), context) + "'";
     }
 
     public static String getCertInfoMessage(X509Certificate certificate, Context context) {
@@ -71,8 +71,8 @@ public class MsgUtils {
                 org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
     }
 
-    public static String getVicketStateMessage(Vicket vicket, Context context) {
-        switch(vicket.getState()) {
+    public static String getCooinStateMessage(Cooin cooin, Context context) {
+        switch(cooin.getState()) {
             case CANCELLED: return context.getString(R.string.cancelled_lbl);
             case EXPENDED: return context.getString(R.string.expended_lbl);
             case LAPSED: return context.getString(R.string.lapsed_lbl);
@@ -93,9 +93,9 @@ public class MsgUtils {
     }
 
 
-    public static String getVicketRequestMessage(TransactionVS transactionVS, Context context) {
+    public static String getCooinRequestMessage(TransactionVS transactionVS, Context context) {
         String tagMessage = getTagVSMessage(transactionVS.getTagVS().getName(), context);
-        return context.getString(R.string.vicket_request_msg, transactionVS.getAmount().toPlainString(),
+        return context.getString(R.string.cooin_request_msg, transactionVS.getAmount().toPlainString(),
                 transactionVS.getCurrencyCode(), tagMessage);
     }
 

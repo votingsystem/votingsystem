@@ -1,7 +1,7 @@
 package org.votingsystem.util;
 
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.vicket.model.TransactionVS;
+import org.votingsystem.cooin.model.TransactionVS;
 
 /**
  * @author jgzornoza

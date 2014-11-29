@@ -9,7 +9,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.cooin.model.TransactionVS
 
 /**
  * @author jgzornoza
@@ -21,7 +21,7 @@ public class TransactionVSPlan {
 
 
     private DateUtils.TimePeriod timePeriod;
-    private VicketServer vicketServer;
+    private CooinServer cooinServer;
     private List<TransactionVS> bankVSTransacionList = new ArrayList<>();
     private List<TransactionVS> groupVSTransacionList = new ArrayList<>();
     private List<TransactionVS> userVSTransacionList = new ArrayList<>();
@@ -31,14 +31,14 @@ public class TransactionVSPlan {
 
     }
 
-    public TransactionVSPlan(File transactionVSPlanFile, VicketServer vicketServer) {
-        this.vicketServer = vicketServer;
+    public TransactionVSPlan(File transactionVSPlanFile, CooinServer cooinServer) {
+        this.cooinServer = cooinServer;
         JSONObject transactionVSPlanJSON = JSONSerializer.toJSON(transactionVSPlanFile.text);
         JSONArray bankVSTransacionArray = transactionVSPlanJSON.getJSONArray("bankVSList");
         for(int i = 0; i < bankVSTransacionArray.size(); i++) {
             JSONObject transactionJSON = bankVSTransacionArray.get(i);
-            UserVS fromUserVS = TestUtils.getUserVS(transactionJSON.getLong("fromUserVSId"), vicketServer)
-            UserVS toUserVS = TestUtils.getUserVS(transactionJSON.getLong("toUserVSId"), vicketServer)
+            UserVS fromUserVS = TestUtils.getUserVS(transactionJSON.getLong("fromUserVSId"), cooinServer)
+            UserVS toUserVS = TestUtils.getUserVS(transactionJSON.getLong("toUserVSId"), cooinServer)
             TransactionVS transactionVS = TransactionVS.parse(transactionJSON)
             transactionVS.setFromUserVS(fromUserVS)
             transactionVS.setToUserVS(toUserVS)
@@ -47,13 +47,13 @@ public class TransactionVSPlan {
         JSONArray groupVSTransacionArray = transactionVSPlanJSON.getJSONArray("groupVSList");
         for(int i = 0; i < groupVSTransacionArray.size(); i++) {
             JSONObject transactionJSON = groupVSTransacionArray.get(i);
-            UserVS fromUserVS = TestUtils.getUserVS(transactionJSON.getLong("fromUserVSId"), vicketServer)
+            UserVS fromUserVS = TestUtils.getUserVS(transactionJSON.getLong("fromUserVSId"), cooinServer)
             TransactionVS transactionVS = TransactionVS.parse(transactionJSON)
             if(transactionJSON.getJSONArray("toUserVSList").size() > 0){
                 JSONArray toUserVSArray = transactionJSON.getJSONArray("toUserVSList");
                 List<String> toUserVSList = new ArrayList<>();
                 for(int j = 0; j < toUserVSArray.size(); j++){
-                    UserVS toUserVS = TestUtils.getUserVS(toUserVSArray.getLong(j), vicketServer);
+                    UserVS toUserVS = TestUtils.getUserVS(toUserVSArray.getLong(j), cooinServer);
                     toUserVSList.add(toUserVS.getIBAN())
                 }
                 transactionVS.setToUserVSList(toUserVSList);
@@ -77,10 +77,10 @@ public class TransactionVSPlan {
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     transactionVS.fromUserVS.nif, UserVS.Type.BANKVS)
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.fromUserVS.nif,
-                    vicketServer.getNameNormalized(), JSONSerializer.toJSON(
+                    cooinServer.getNameNormalized(), JSONSerializer.toJSON(
                     TransactionVSUtils.getBankVSTransactionVS(transactionVS)).toString(), smimeMessageSubject)
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    vicketServer.getTransactionVSServiceURL())
+                    cooinServer.getTransactionVSServiceURL())
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
             updateCurrencyMap(currencyResultMap, transactionVS)
         }
@@ -94,11 +94,11 @@ public class TransactionVSPlan {
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     representative.nif, UserVS.Type.GROUP)
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.nif,
-                    vicketServer.getNameNormalized(), JSONSerializer.toJSON(
+                    cooinServer.getNameNormalized(), JSONSerializer.toJSON(
                     TransactionVSUtils.getGroupVSTransactionVS(transactionVS, transactionVS.fromUserVS)).toString(),
                     smimeMessageSubject)
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    vicketServer.getTransactionVSServiceURL())
+                    cooinServer.getTransactionVSServiceURL())
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
             updateCurrencyMap(currencyResultMap, transactionVS)
         }

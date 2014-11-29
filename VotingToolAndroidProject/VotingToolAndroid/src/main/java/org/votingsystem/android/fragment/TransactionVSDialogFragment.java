@@ -187,7 +187,7 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
             if(dialogCaller != null) {
                 Intent intent = new Intent(dialogCaller);
                 intent.putExtra(ContextVS.PIN_KEY, pin);
-                TypeVS typeVS = anonymousTransactionCheckBox.isChecked()? TypeVS.VICKET_SEND:TypeVS.TRANSACTIONVS;
+                TypeVS typeVS = anonymousTransactionCheckBox.isChecked()? TypeVS.COOIN_SEND:TypeVS.TRANSACTIONVS;
                 intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
                 ResponseVS responseVS = new ResponseVS(typeVS, pin);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

@@ -12,7 +12,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
@@ -44,11 +44,11 @@ public class TransactionVSService extends IntentService {
         String message = null;
         try {
             JSONObject transactionVSJSON = transactionVS.transactionFromUserVSJSON(fromUserIBAN);
-            VicketServer vicketServer = contextVS.getVicketServer();
+            CooinServer cooinServer = contextVS.getCooinServer();
             responseVS = contextVS.signMessage(transactionVS.getToUserVS().getIBAN(),
                     transactionVSJSON.toString(), getString(R.string.FROM_USERVS_msg_subject));
             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                    ContentTypeVS.JSON_SIGNED, vicketServer.getTransactionVSServiceURL());
+                    ContentTypeVS.JSON_SIGNED, cooinServer.getTransactionVSServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);

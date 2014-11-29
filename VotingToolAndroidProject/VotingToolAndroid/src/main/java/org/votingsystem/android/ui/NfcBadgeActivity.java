@@ -37,7 +37,7 @@ public class NfcBadgeActivity extends Activity {
     private static final String TAG = makeLogTag(NfcBadgeActivity.class);
     private static final String URL_PREFIX = "sistemavotacion.org";
     // For debug purposes
-    public static final String ACTION_SIMULATE = "org.votingsystem.vickets.ACTION_SIMULATE";
+    public static final String ACTION_SIMULATE = "org.votingsystem.cooins.ACTION_SIMULATE";
 
     @Override
     public void onStart() {

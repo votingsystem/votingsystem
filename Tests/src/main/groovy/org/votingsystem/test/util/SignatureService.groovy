@@ -1,6 +1,5 @@
 package org.votingsystem.test.util
 
-import net.sf.json.JSON
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
@@ -22,8 +21,6 @@ import java.security.PublicKey
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import java.util.concurrent.ConcurrentHashMap
-
-import static org.votingsystem.model.ContextVS.getMessage
 
 class SignatureService {
 
@@ -229,7 +226,7 @@ class SignatureService {
     }
 
     private List<MockDNI> subscribeUsers(JSONObject subscriptionData, SimulationData simulationData,
-              VicketServer vicketServer) throws ExceptionVS {
+              CooinServer cooinServer) throws ExceptionVS {
         log.debug("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
         List<MockDNI> userList = new ArrayList<MockDNI>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
@@ -239,7 +236,7 @@ class SignatureService {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
             KeyStore mockDnie = generateKeyStore(userNif);
-            String toUser = vicketServer.getNameNormalized();
+            String toUser = cooinServer.getNameNormalized();
             String subject = "subscribeToGroupMsg - subscribeToGroupMsg"
             subscriptionData.put("UUID", UUID.randomUUID().toString())
             SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
@@ -248,8 +245,8 @@ class SignatureService {
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
                     subscriptionData.toString(), subject);
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                    vicketServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
-                    vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+                    cooinServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
+                    cooinServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             ResponseVS responseVS = worker.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
@@ -261,10 +258,10 @@ class SignatureService {
         return userList
     }
 
-    public List<JSONObject> validateUserVSSubscriptions(Long groupVSId, VicketServer vicketServer,
+    public List<JSONObject> validateUserVSSubscriptions(Long groupVSId, CooinServer cooinServer,
             Map<String, MockDNI> userVSMap) throws ExceptionVS {
         log.debug("validateUserVSSubscriptions");
-        ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupVSUsersServiceURL(
+        ResponseVS responseVS = HttpHelper.getInstance().getData(cooinServer.getGroupVSUsersServiceURL(
                 groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
                 ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
@@ -283,7 +280,7 @@ class SignatureService {
         List<JSONObject> requests = new ArrayList<>();
         for(JSONObject userToActivate:usersToActivate) {
             JSONObject request = new JSONObject();
-            request.put("operation", TypeVS.VICKET_GROUP_USER_ACTIVATE.toString())
+            request.put("operation", TypeVS.COOIN_GROUP_USER_ACTIVATE.toString())
             request.put("groupvs", userToActivate.getJSONObject("groupvs"));
             request.put("uservs", userToActivate.getJSONObject("uservs"));
             requests.add(request)
@@ -292,9 +289,9 @@ class SignatureService {
         UserVS userVS = UserVS.getUserVS(certSigner)
         for(JSONObject request:requests) {
             SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.nif,
-                    vicketServer.getNameNormalized(), request.toString(), messageSubject)
+                    cooinServer.getNameNormalized(), request.toString(), messageSubject)
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    vicketServer.getGroupVSUsersActivationServiceURL())
+                    cooinServer.getGroupVSUsersActivationServiceURL())
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
         }
         return requests

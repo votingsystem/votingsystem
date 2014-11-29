@@ -21,7 +21,7 @@ import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.VicketServer;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtils;
@@ -90,13 +90,13 @@ public class WebSocketService extends Service {
             OperationVS operationVS = (OperationVS)arguments.getParcelable(ContextVS.OPERATIONVS_KEY);
             String messageToSend = arguments.getString(ContextVS.MESSAGE_KEY);
             String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-            if(contextVS.getVicketServer() == null) {
+            if(contextVS.getCooinServer() == null) {
                 contextVS.sendWebSocketBroadcast(new WebSocketRequest(
                         ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), operationType));
             }
             if(session == null || !session.isOpen()) {
                 WebSocketListener socketListener = new WebSocketListener(
-                        contextVS.getVicketServer().getWebSocketURL());
+                        contextVS.getCooinServer().getWebSocketURL());
                 new Thread(null, socketListener, "websocket_service_thread").start();
             }
             try {
@@ -117,15 +117,15 @@ public class WebSocketService extends Service {
     }
 
     private WebSocketRequest initAuthenticatedSession() {
-        VicketServer vicketServer = contextVS.getVicketServer();
+        CooinServer cooinServer = contextVS.getCooinServer();
         Map mapToSend = new HashMap();
         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
         mapToSend.put("UUID", UUID.randomUUID().toString());
         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
         try {
             JSONObject requestJSON = new JSONObject(mapToSend);
-            ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
-                    requestJSON.toString(), msgSubject, contextVS.getVicketServer().getTimeStampServiceURL());
+            ResponseVS responseVS = contextVS.signMessage(cooinServer.getNameNormalized(),
+                    requestJSON.toString(), msgSubject, contextVS.getCooinServer().getTimeStampServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketRequest.load(responseVS);
             SMIMEMessage smimeMessage = responseVS.getSMIME();
             session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
@@ -267,7 +267,7 @@ public class WebSocketService extends Service {
                     case MESSAGEVS_SIGN:
                         ResponseVS responseVS = contextVS.signMessage(operationVS.getToUser(),
                                 operationVS.getTextToSign(), operationVS.getSignedMessageSubject(),
-                                contextVS.getVicketServer().getTimeStampServiceURL());
+                                contextVS.getCooinServer().getTimeStampServiceURL());
                         JSONObject responseJSON = WebSocketRequest.getSignResponse(ResponseVS.SC_OK,
                                 null, operationVS.getSessionId(), operationVS.getPublicKey(),
                                 responseVS.getSMIME(),

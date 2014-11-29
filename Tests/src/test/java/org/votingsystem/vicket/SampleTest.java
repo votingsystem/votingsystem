@@ -1,4 +1,4 @@
-package org.votingsystem.vicket;
+package org.votingsystem.cooin;
 
 import org.junit.Test;
 

@@ -1,5 +1,5 @@
-To: VotingSystemVicketServer
-Message-ID: http://vickets:8086/Vickets/messageSMIME/21
+To: VotingSystemCooinServer
+Message-ID: http://cooins:8086/Cooins/messageSMIME/21
 Subject: TransactionVS from BankVS
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; 

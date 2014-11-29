@@ -112,24 +112,24 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
-              String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
+    public static CertificationRequestVS getCooinRequest(int keySize, String keyName,
+              String signatureMechanism, String provider, String cooinServerURL, String hashCertVS,
               String amount, String currency, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
-        X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
-                ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
+        X500Principal subject = new X500Principal("CN=cooinServerURL:" + cooinServerURL +
+                ", OU=COOIN_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("vicketServerURL", vicketServerURL);
+        delegationDataMap.put("cooinServerURL", cooinServerURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
-        delegationDataMap.put("vicketValue", amount);
+        delegationDataMap.put("cooinValue", amount);
         delegationDataMap.put("currencyCode", currency);
         delegationDataMap.put("tag", tagVS);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.COOIN_TAG,
                 new DERUTF8String(jsonObject.toString())));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);

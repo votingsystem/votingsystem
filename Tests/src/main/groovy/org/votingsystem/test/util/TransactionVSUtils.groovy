@@ -4,7 +4,7 @@ import org.apache.log4j.Logger
 import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.cooin.model.TransactionVS
 
 /**
  * @author jgzornoza

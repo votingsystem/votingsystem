@@ -27,7 +27,7 @@ public class ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, COOINS, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, OK, PAUSED;}
 
@@ -340,8 +340,8 @@ public class ActorVS implements Serializable {
                     actorVS.setControlCenters(controlCenters);
                 }
                 break;
-            case VICKETS:
-                actorVS = new VicketServer();
+            case COOINS:
+                actorVS = new CooinServer();
                 break;
             default:
                 actorVS = new ActorVS();

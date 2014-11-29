@@ -1,4 +1,4 @@
-.vicket {
+.cooin {
     -fx-max-width: 600px;
     -fx-padding: 3 10 3 10;
     -fx-spacing: 10;
@@ -11,7 +11,7 @@
     -fx-background-color: #fff;
 }
 
-.vicket-error {
+.cooin-error {
     -fx-background-color: rgba(186,0,17, 0.45) ;
 }
 
