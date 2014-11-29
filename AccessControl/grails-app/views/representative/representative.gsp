@@ -1,7 +1,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-info']"/>">
+    <vs:webcomponent path="/representative/representative-info"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="representativeLbl"/>"></vs-innerpage-signal>

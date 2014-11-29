@@ -1,6 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">>
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="paper-input" file="paper-input.html"/>>
 
 <polymer-element name="uservs-selector" attributes="url isSelector">
     <template>

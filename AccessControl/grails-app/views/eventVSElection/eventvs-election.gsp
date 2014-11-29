@@ -1,10 +1,9 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-voteconfirm-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-admin-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/votevs-result-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-stats']"/>">
-
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webcomponent path="/eventVSElection/eventvs-election-voteconfirm-dialog"/>
+<vs:webcomponent path="/element/eventvs-admin-dialog"/>
+<vs:webcomponent path="/element/votevs-result-dialog"/>
+<vs:webcomponent path="/eventVSElection/eventvs-election-stats"/>
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>

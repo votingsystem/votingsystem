@@ -2,14 +2,14 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/add-control-center-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-addoption-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-admin-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/votevs-result-dialog']"/>">
+    <vs:webresource dir="paper-input" file="paper-input.html"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
+    <vs:webresource dir="paper-ripple" file="paper-ripple.html"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
+    <vs:webcomponent path="/eventVSElection/add-control-center-dialog"/>
+    <vs:webcomponent path="/element/eventvs-addoption-dialog"/>
+    <vs:webcomponent path="/element/eventvs-admin-dialog"/>
+    <vs:webcomponent path="/element/votevs-result-dialog"/>
 
 </head>
 <body>

@@ -4,7 +4,7 @@
 <head>
     <title><g:message code="groupUserPageLbl"/></title>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog']"/>">
+    <vs:webcomponent path="/element/reason-dialog"/>
 </head>
 <style>
 

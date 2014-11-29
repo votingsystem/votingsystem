@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/balance/balance-uservs']"/>">
+    <vs:webcomponent path="/balance/balance-uservs"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="balanceLbl"/>"></vs-innerpage-signal>

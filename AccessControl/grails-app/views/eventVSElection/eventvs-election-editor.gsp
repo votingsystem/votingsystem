@@ -1,6 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-option-dialog.gsp']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
+<vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
+<vs:webcomponent path="/element/eventvs-option-dialog"/>
+<vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
 
 <polymer-element name="eventvs-election-editor">
     <template>

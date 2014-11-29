@@ -1,6 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
 
 <polymer-element name="votingsystem-cert" attributes="url cert subpage">
     <template>

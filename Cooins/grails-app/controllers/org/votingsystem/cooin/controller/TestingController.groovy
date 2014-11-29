@@ -39,7 +39,6 @@ class TestingController {
     def bankVSService
 
     def index() {
-        bankVSService.refreshBankInfoData()
         render "OK"
         return false
     }

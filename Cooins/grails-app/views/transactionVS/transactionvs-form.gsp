@@ -1,13 +1,13 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-user-box', file: 'vs-user-box.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-currency-selector', file: 'vs-currency-selector.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector-dialog']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-icon" file="core-icon.html"/>
+<vs:webresource dir="vs-user-box" file="vs-user-box.html"/>
+<vs:webresource dir="vs-currency-selector" file="vs-currency-selector.html"/>
+<vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
+<vs:webresource dir="paper-radio-button" file="paper-radio-button.html"/>
+<vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
+<vs:webcomponent path="/userVS/uservs-selector-dialog"/>
 
 
 <polymer-element name="transactionvs-form" attributes="subpage">

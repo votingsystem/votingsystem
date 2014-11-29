@@ -1,7 +1,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSManifest/eventvs-manifest.gsp']"/>">
+    <vs:webcomponent path="/eventVSManifest/eventvs-manifest"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="manifestLbl"/>"></vs-innerpage-signal>

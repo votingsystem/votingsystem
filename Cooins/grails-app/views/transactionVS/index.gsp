@@ -2,8 +2,8 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-list']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
+    <vs:webcomponent path="/transactionVS/transactionvs-list"/>
+    <vs:webcomponent path="/transactionVS/transactionvs-selector"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="transactionPageTitle"/>"></vs-innerpage-signal>

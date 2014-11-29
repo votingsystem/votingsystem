@@ -1,6 +1,6 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
 
 <polymer-element name="message-smime-votevs" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>

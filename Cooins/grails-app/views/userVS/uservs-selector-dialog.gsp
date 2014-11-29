@@ -1,7 +1,8 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
+<vs:webcomponent path="/userVS/uservs-selector"/>
+
 
 <polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
     <template>

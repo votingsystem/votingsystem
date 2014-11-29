@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/cert-list.gsp']"/>">
+    <vs:webcomponent path="/certificateVS/cert-list"/>
     <style type="text/css" media="screen"></style>
 </head>
 <body>

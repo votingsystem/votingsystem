@@ -1,9 +1,9 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/vs-advanced-search-dialog', file: 'vs-advanced-search-dialog.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/search-info.gsp']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-list']"/>">
+    <vs:webresource dir="vs-advanced-search-dialog" file="vs-advanced-search-dialog.html"/>
+    <vs:webcomponent path="/element/search-info"/>
+    <vs:webcomponent path="/eventVSElection/eventvs-election-list"/>
 </head>
 <body>
     <div class="pageContentDiv">

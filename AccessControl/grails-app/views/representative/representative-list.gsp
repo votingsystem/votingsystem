@@ -1,8 +1,8 @@
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-info']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representation-state']"/>">
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="core-animated-pages" file="core-animated-pages.html"/>
+<vs:webresource dir="vs-html-echo" file="vs-html-echo.html"/>
+<vs:webcomponent path="/representative/representative-info"/>
+<vs:webcomponent path="/representative/representation-state"/>
 
 <polymer-element name="representative-list" attributes="url">
     <template>

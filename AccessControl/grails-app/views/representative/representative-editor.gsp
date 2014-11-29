@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
+<vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
 
 <polymer-element name="representative-editor" attributes="pageHeader editorData">
     <template>

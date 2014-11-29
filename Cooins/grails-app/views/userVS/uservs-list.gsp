@@ -1,8 +1,8 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-pager', file: 'vs-pager.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-card']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
+<vs:webresource dir="vs-pager" file="vs-pager.html"/>
+<vs:webcomponent path="/userVS/uservs-card"/>
 
 <polymer-element name="uservs-list" attributes="url menuType isNifVisible">
     <template>

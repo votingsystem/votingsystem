@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/bankVS-list']"/>">
+    <vs:webcomponent path="/userVS/bankVS-list"/>
 </head>
 <body>
 <div class="pageContentDiv">

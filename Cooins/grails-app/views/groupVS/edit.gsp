@@ -1,8 +1,8 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-editor']"/>">
+    <vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
+    <vs:webcomponent path="/groupVS/groupvs-editor"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="editGroupVSLbl"/>"></vs-innerpage-signal>

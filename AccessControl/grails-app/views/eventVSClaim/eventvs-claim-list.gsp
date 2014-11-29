@@ -1,7 +1,7 @@
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="core-animated-pages" file="core-animated-pages.html"/>
+<vs:webresource dir="vs-html-echo" file="vs-html-echo.html"/>
+<vs:webcomponent path="/eventVSElection/eventvs-election"/>
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype">
     <template>

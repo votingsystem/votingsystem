@@ -6,21 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="appTitle"/></title>
     <asset:stylesheet src="cooins.css"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
+    <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
+    <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-socket', file: 'vs-socket.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/layouts/vs-navbar']"/>">
+    <vs:webresource dir="polymer" file="polymer.html"/>
+    <vs:webresource dir="font-roboto" file="roboto.html"/>
+    <vs:webresource dir="core-ajax" file="core-ajax.html"/>
+    <vs:webresource dir="paper-item" file="paper-item.html"/>
+    <vs:webresource dir="core-signals" file="core-signals.html"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
+    <vs:webresource dir="vs-socket" file="vs-socket.html"/>
+    <vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
+    <vs:webresource dir="vs-innerpage-signal" file="vs-innerpage-signal.html"/>
+    <vs:webcomponent path="/element/alert-dialog"/>
+    <vs:webcomponent path="/layouts/vs-navbar"/>
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
     <g:layoutHead/>

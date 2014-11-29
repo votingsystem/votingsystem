@@ -1,9 +1,9 @@
 <%@ page import="org.votingsystem.model.CertificateVS" %>
 
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/votingsystem-cert.gsp']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webcomponent path="/certificateVS/votingsystem-cert"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
+<vs:webresource dir="core-animated-pages" file="core-animated-pages.html"/>
 
 <polymer-element name="cert-list" attributes="url menuType">
     <template>

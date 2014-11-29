@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/app/uservs-dashboard']"/>">
+    <vs:webcomponent path="/app/uservs-dashboard"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="dashBoardLbl"/>"></vs-innerpage-signal>

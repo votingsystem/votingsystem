@@ -3,12 +3,8 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/votingsystem-cert.gsp']"/>">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog.gsp']"/>">
-
-    <style type="text/css" media="screen">
-
-    </style>
+    <vs:webcomponent path="/certificateVS/votingsystem-cert"/>
+    <vs:webcomponent path="/element/reason-dialog"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="trustedCertPageTitle"/>"></vs-innerpage-signal>

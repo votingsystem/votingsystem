@@ -1,7 +1,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/cert-request-form']"/>">
+    <vs:webcomponent path="/certificateVS/cert-request-form"/>
 </head>
 <body>
     <vs-innerpage-signal caption="<g:message code="certRequestLbl"/>"></vs-innerpage-signal>

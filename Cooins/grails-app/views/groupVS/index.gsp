@@ -3,7 +3,7 @@
 <head>
     <g:render template="/template/pagevs"/>
     <asset:stylesheet src="cooins_groupvs.css"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-list']"/>">
+    <vs:webcomponent path="/groupVS/groupvs-list"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="groupvsLbl"/>"></vs-innerpage-signal>

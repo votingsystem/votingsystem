@@ -1,6 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
 <link rel="import" href="${resource(dir: '/bower_components/vs-highcharts', file: 'highcharts-import.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
 
 <polymer-element name="eventvs-election-stats" attributes="title eventVSId">
     <template>

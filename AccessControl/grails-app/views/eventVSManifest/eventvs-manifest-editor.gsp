@@ -1,5 +1,5 @@
-<link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
+<vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
 
 <polymer-element name="eventvs-manifest-editor" attributes="opened">
     <template>

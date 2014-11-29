@@ -1,8 +1,8 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
+    <vs:webresource dir="vs-texteditor" file="vs-texteditor.html"/>
+    <vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
 </head>
 <body>
 <innerpage-signal title="<g:message code="newGroupVSLbl"/>"></innerpage-signal>

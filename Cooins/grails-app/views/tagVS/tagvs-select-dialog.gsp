@@ -1,10 +1,10 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="paper-input" file="paper-input.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="core-icon-button" file="core-icon-button.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
 <link rel="import" href="${resource(dir: '/bower_components/vs-i18n', file: 'vs-i18n.html')}">
 
 

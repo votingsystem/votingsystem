@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
 
 <polymer-element name="transactionvs-table" attributes="url userNif isUserVSTable transactionsMap">
 <template>

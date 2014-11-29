@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
+    <vs:webcomponent path="/userVS/uservs-data"/>
 </head>
 <body>
     <div class="pageContentDiv" style="max-width: 900px;">

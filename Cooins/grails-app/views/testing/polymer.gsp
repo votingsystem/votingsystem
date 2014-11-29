@@ -3,10 +3,10 @@
 <head>
     <g:render template="/template/pagevs"/>
     <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+    <vs:webresource dir="core-ajax" file="core-ajax.html"/>
     <link rel="import" href="${resource(dir: '/bower_components/core-transition', file: 'core-transition-css.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+    <vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
+    <vs:webresource dir="paper-item" file="paper-item.html"/>
     <style shim-shadowdom>
     </style>
 </head>

@@ -2,15 +2,15 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
+    <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
+    <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
+    <vs:webresource dir="polymer" file="polymer.html"/>
+    <vs:webresource dir="font-roboto" file="roboto.html"/>
     <asset:stylesheet src="votingSystem.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+    <vs:webcomponent path="/element/alert-dialog"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>

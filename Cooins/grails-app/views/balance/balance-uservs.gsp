@@ -1,14 +1,13 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-progress', file: 'paper-progress.html')}">
-
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/balance/balance-uservs-chart']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-data']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-list-balance']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
+<vs:webresource dir="core-icon" file="core-icon.html"/>
+<vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
+<vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
+<vs:webresource dir="paper-progress" file="paper-progress.html"/>
+<vs:webcomponent path="/balance/balance-uservs-chart"/>
+<vs:webcomponent path="/transactionVS/transactionvs-data"/>
+<vs:webcomponent path="/transactionVS/transactionvs-list-balance"/>
 
 <asset:javascript src="balanceVSUtils.js"/>
 

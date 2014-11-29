@@ -1,8 +1,8 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-html-echo', file: 'vs-html-echo.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-icon-button" file="core-icon-button.html"/>
+<vs:webresource dir="vs-html-echo" file="vs-html-echo.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
 
 
 <polymer-element name="image-viewer-dialog" attributes="url description">

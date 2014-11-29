@@ -3,9 +3,9 @@
 <head>
     <title></title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
+    <vs:webresource dir="polymer" file="polymer.html"/>
+    <vs:webresource dir="font-roboto" file="roboto.html"/>
+    <vs:webresource dir="paper-tabs" file="paper-tabs.html"/>
     <style>
     html,body {
         height: 100%;

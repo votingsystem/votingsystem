@@ -1,14 +1,13 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-currency-selector', file: 'vs-currency-selector.html')}">
-
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/tagVS/tagvs-select-dialog']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-slider" file="paper-slider.html"/>
+<vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
+<vs:webresource dir="polymer-localstorage" file="polymer-localstorage.html"/>
+<vs:webresource dir="paper-radio-button" file="paper-radio-button.html"/>
+<vs:webresource dir="core-icon" file="core-icon.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="vs-currency-selector" file="vs-currency-selector.html"/>
+<vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
 
 <polymer-element name="cooin-request-form">
     <template>

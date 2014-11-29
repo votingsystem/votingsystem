@@ -1,9 +1,9 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/balance/balance-list']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-tabs" file="paper-tabs.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webcomponent path="/balance/balance-list"/>
+<vs:webcomponent path="/transactionVS/transactionvs-table"/>
+<vs:webcomponent path="/userVS/uservs-list"/>
 
 <polymer-element name="groupvs-details-balance-tabs" attributes="groupvs">
     <template>

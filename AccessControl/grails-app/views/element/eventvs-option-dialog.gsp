@@ -1,8 +1,8 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-input" file="paper-input.html"/>
+<vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
 
 
 <polymer-element name="eventvs-option-dialog" attributes="opened">

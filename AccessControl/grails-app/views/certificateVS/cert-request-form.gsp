@@ -1,5 +1,5 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
 
 <polymer-element name="cert-request-form" attributes="caption opened isForAdmins messageToUser">
 <template>

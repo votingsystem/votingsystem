@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-stats']"/>">
+        <vs:webcomponent path="/eventVSElection/eventvs-election-stats"/>
     </head>
     <body>
         <div horizontal layout center center-justified>

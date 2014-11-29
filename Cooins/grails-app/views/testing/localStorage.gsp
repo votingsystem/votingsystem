@@ -3,9 +3,9 @@
 <head>
     <title>WebView Test</title>
     <meta name="layout" content="simplePage" />
-    <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
+    <vs:webresource dir="polymer-localstorage" file="polymer-localstorage.html"/>
     <link rel="import" href="${resource(dir: '/bower_components/polymer-ui-toggle-button', file: 'polymer-ui-toggle-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
+    <vs:webresource dir="paper-radio-button" file="paper-radio-button.html"/>
 
 </head>
 <body id="voting_system_page">

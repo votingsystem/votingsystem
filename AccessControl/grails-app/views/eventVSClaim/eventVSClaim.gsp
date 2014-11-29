@@ -1,7 +1,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSClaim/eventvs-claim.gsp']"/>">
+    <vs:webcomponent path="/eventVSClaim/eventvs-claim"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="claimLbl"/>"></vs-innerpage-signal>

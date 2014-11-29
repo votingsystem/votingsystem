@@ -1,7 +1,7 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
 
 <polymer-element name="asciidoc-template-test" attributes="jsonDoc">
     <template>

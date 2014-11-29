@@ -1,6 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-admin-dialog.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-backup-request-dialog.gsp']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webcomponent path="/element/eventvs-admin-dialog"/>
+<vs:webcomponent path="/element/eventvs-backup-request-dialog"/>
 
 <polymer-element name="eventvs-claim">
     <template>

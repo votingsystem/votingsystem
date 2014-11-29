@@ -2,8 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/cert-list']"/>">
-    <style type="text/css" media="screen"></style>
+    <vs:webcomponent path="/certificateVS/cert-list"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="certsPageTitle"/>"></vs-innerpage-signal>

@@ -1,17 +1,16 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown', file: 'paper-dropdown.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-menu', file: 'core-menu.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-user']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
+<vs:webresource dir="core-animated-pages" file="core-animated-pages.html"/>
+<vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="core-item" file="core-item.html"/>
+<vs:webresource dir="core-selector" file="core-selector.html"/>
+<vs:webresource dir="paper-dropdown-menu" file="paper-dropdown-menu.html"/>
+<vs:webresource dir="paper-dropdown" file="paper-dropdown.html"/>
+<vs:webresource dir="core-menu" file="core-menu.html"/>
+<vs:webcomponent path="/transactionVS/transactionvs-form"/>
+<vs:webcomponent path="/userVS/uservs-list"/>
+<vs:webcomponent path="/groupVS/groupvs-user"/>
 
 <polymer-element name="groupvs-details" attributes="selectedItem subpage">
 <template>

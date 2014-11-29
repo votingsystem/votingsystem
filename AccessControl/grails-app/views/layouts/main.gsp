@@ -10,20 +10,20 @@
 
     <title><g:message code="appTitle"/></title>
     <asset:stylesheet src="votingSystem.css"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"> </script>
-    <script src="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}"> </script>
+    <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
+    <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
+    <vs:webresource dir="polymer" file="polymer.html"/>
 
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-navbar', file: 'vs-navbar.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/vs-innerpage-signal', file: 'vs-innerpage-signal.html')}">
+    <vs:webresource dir="font-roboto" file="roboto.html"/>
+    <vs:webresource dir="vs-navbar" file="vs-navbar.html"/>
+    <vs:webresource dir="core-ajax" file="core-ajax.html"/>
+    <vs:webresource dir="paper-item" file="paper-item.html"/>
+    <vs:webresource dir="core-signals" file="core-signals.html"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
+    <vs:webresource dir="vs-innerpage-signal" file="vs-innerpage-signal.html"/>
+    <vs:webcomponent path="/element/alert-dialog"/>
 
    <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>

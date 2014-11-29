@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
+    <vs:webcomponent path="/userVS/uservs-list"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="groupvsUserListLbl"/>"></vs-innerpage-signal>

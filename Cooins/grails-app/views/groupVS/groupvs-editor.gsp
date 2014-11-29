@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
 <link rel="import" href="${resource(dir: '/bower_components/vs-texteditor', file: 'vs-texteditor.html', absolute:'true')}">
 
 <polymer-element name="groupvs-editor">

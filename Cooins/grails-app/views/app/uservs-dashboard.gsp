@@ -1,9 +1,9 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown', file: 'paper-dropdown.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-menu', file: 'core-menu.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/vs-date', file: 'vs-date.html')}">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="core-ajax" file="core-ajax.html"/>
+<vs:webresource dir="paper-dropdown-menu" file="paper-dropdown-menu.html"/>
+<vs:webresource dir="paper-dropdown" file="paper-dropdown.html"/>
+<vs:webresource dir="core-menu" file="core-menu.html"/>
+<vs:webresource dir="vs-date" file="vs-date.html"/>
 
 <polymer-element name="uservs-dashboard" attributes="dataMap">
     <template>

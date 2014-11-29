@@ -2,7 +2,7 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
+    <vs:webcomponent path="/userVS/uservs-selector"/>
 </head>
 <body>
 <vs-innerpage-signal caption="<g:message code="userSearchPageTitle"/>"></vs-innerpage-signal>

@@ -1,7 +1,7 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/cooin/cooin-wallet-tag-group']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="paper-slider" file="paper-slider.html"/>
+<vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
+<vs:webcomponent path="/cooin/cooin-wallet-tag-group"/>
 
 
 <polymer-element name="cooin-wallet"  on-core-select="{{selectAction}}">

@@ -1,5 +1,6 @@
-<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-card']"/>">
+<vs:webresource dir="polymer" file="polymer.html"/>
+<vs:webresource dir="vs-user-box" file="vs-user-box.html"/>
+<vs:webcomponent path="/transactionVS/transactionvs-card"/>
 
 
 <polymer-element name="transactionvs-list" attributes="url transactionsMap">

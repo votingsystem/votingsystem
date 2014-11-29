@@ -1,9 +1,9 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-toolbar', file: 'core-toolbar.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-drawer-panel', file: 'core-drawer-panel.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-header-panel', file: 'core-header-panel.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+<vs:webresource dir="core-icon-button" file="core-icon-button.html"/>
+<vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
+<vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
 <link rel="import" href="${resource(dir: '/bower_components/paper-radio-group', file: 'paper-radio-group.html')}">
 
 <polymer-element name="vs-navbar" attributes="responsiveWidth mode sessionData userVS">

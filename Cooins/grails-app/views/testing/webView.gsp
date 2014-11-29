@@ -2,14 +2,14 @@
 <html>
 <head>
     <title>WebView Test</title>
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
+    <vs:webresource dir="polymer" file="polymer.html"/>
+    <vs:webresource dir="font-roboto" file="roboto.html"/>
+    <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
     <asset:stylesheet src="cooins.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+    <vs:webcomponent path="/element/alert-dialog"/>
+    <vs:webresource dir="paper-button" file="paper-button.html"/>
 </head>
 <body id="voting_system_page">
 WebView Test
