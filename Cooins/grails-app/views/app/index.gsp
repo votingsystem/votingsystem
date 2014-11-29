@@ -21,7 +21,24 @@
             <h3 class="pageHeader">Preguntas frecuentes</h3>
             <p><b>¿Qué es un cooin?</b> Es un certificado electrónico anónimo (sin información que pueda relacionarlo con el
             propietario) que tiene asociado un valor y que permite <b>intercambios monetarios anónimos de forma segura</b>.</p>
-
+            <p><b>¿Cómo se produce un intercambio de cooins?</b>
+                El intercambio anónimo de moneda se puede producir de dos maneras:
+            <ul>
+                <li>
+                    El usuario que desea hacer una transacción utiliza los <b>cooins</b> para firmar electrónicamente un
+                documento con los datos del beneficiario. El valor del intercambio corresponde al valor asociado al
+                    <b>cooin</b> con el que se firma el traspaso. <b>De esta forma el intercambio quedará reflejado en los
+                registros del sistema y la identidad del receptor será pública, la identidad del pagador seguirá siendo
+                anónima</b>
+                </li>
+                <li>
+                    Mediante el intercambio directo de <b>cooins</b>. Un usuario puede dar directamente a otro un <b>cooin</b>
+                    que no haya sido utilizado para que el receptor lo emplee cuando estime oportuno.<b> De esta forma el sistema
+                nunca puede saber que se ha producido el intercambio. La identidad del receptor y pagador permanecen
+                anónimas</b>
+                </li>
+            </ul>
+        </p>
             <p><b>¿Cómo se que no van a utilizar los mismos cooins en repetidas ocasiones?</b> No puedes saberlo, pero en
             caso de duda cada intercambio lleva incorporado un Sello de Tiempo. Si aparecen varios documentos firmados con
             el mismo cooin sólo tiene valor el que tiene el <b>Sello de Tiempo</b> más antiguo.</p>
