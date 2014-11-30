@@ -156,7 +156,7 @@ class EventVSService {
 			backupAvailable:eventVSItem.backupAvailable, state:eventVSItem.state.toString(),
 			voteVSInfoURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}/voteVSInfo",
 			dateBegin:eventVSItem.getDateBegin(), dateFinish:eventVSItem.getDateFinish(),
-            dateBeginStr:DateUtils.getDateStr(eventVSItem.getDateBegin(), "dd/MMM/yyyy HH:mm"),
+            dateBeginStr:DateUtils.getDateStr(eventVSItem.getDateBegin(), "dd/MMM/yyyy"),
             dateFinishStr:DateUtils.getDateStr(eventVSItem.getDateFinish(),"dd/MMM/yyyy HH:mm")]
 		if(eventVSItem.userVS) eventVSMap.userVS = "${eventVSItem.userVS?.name} ${eventVSItem.userVS?.firstName}"
 		def accessControlMap = [serverURL:grailsApplication.config.grails.serverURL,

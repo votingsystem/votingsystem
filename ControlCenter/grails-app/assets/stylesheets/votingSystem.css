@@ -132,67 +132,6 @@ hr {
     text-align: center;
 }
 
-.representativeDiv {
-    display:table;
-    width:300px;
-    background-color: #f2f2f2;
-    border: 1px solid #02227a;
-    margin: 10px 15px 10px 0px;
-    -moz-border-radius: 5px; border-radius: 5px;
-    cursor: pointer; cursor: hand;
-    height:100px;
-    overflow:hidden;
-    float:left;
-}
-
-.representativeDiv .representativeImgCol{
-    display:table-cell;
-    vertical-align: middle;
-}
-
-
-.representativeDataCol p{
-    text-overflow: ellipsis;
-    margin: 0px 10px 0px 10px;
-}
-
-.representativeDataCol {
-    margin: 0px 10px 0px 10px;
-    vertical-align: middle;
-}
-
-
-.representativeDiv .representativeDataCol{
-    display:table-cell;
-    margin-left: 30px;
-}
-
-.representativeImgCol img {
-    width:80px;
-    margin: 0px 0px 0px 15px;
-}
-
-.representativeDiv .numDelegationsData {
-    margin: 10px 10px 0px 10px;
-}
-
-.representativeDiv .representativeName {
-    font-size: 1.2em;
-    text-overflow: ellipsis;
-}
-
-.representativeNameHeader {
-    font-size: 1.5em;
-    text-overflow: ellipsis;
-    color:#6c0404;
-}
-
-.representativeNumRepHeader {
-    font-size: 1.1em;
-    text-overflow: ellipsis;
-    color:#aaaaaa;
-}
-
 .headerTitle {
     font-size: 26px;
     font-weight:bold;

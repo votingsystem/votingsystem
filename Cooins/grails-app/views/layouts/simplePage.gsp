@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <asset:stylesheet src="cooins.css"/>
     <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
-    <script src="${resource(dir: '/bower_components/webcomponentsjs', file: 'webcomponents.min.js')}"></script>
+    <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <vs:webresource dir="polymer" file="polymer.html"/>

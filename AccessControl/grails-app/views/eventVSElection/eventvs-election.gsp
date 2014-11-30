@@ -98,7 +98,7 @@
             subpage:false,
             optionVSSelected:null,
             fireSignal:function() {
-                this.fire('core-signal', {name: "vs-innerpage", data: {title:"<g:message code="pollLbl"/>"}});
+                this.fire('core-signal', {name: "vs-innerpage", data: {caption:"<g:message code="pollLbl"/>"}});
             },
             eventvsChanged:function() {
                 this.optionVSSelected = null

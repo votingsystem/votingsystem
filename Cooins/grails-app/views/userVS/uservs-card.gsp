@@ -8,7 +8,8 @@
             width: 280px;
             vertical-align: top;
             background-color: #f9f9f9;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.24);
+            -moz-border-radius: 3px; border-radius: 4px;
             border: 1px solid rgba(0, 0, 0, 0.24);
             margin: 5px;
             color: #667;

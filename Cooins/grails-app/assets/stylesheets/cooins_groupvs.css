@@ -34,11 +34,14 @@
 
 .groupvsDiv {
     position: relative;
+    display: inline-block;
+    width: 300px;
+    vertical-align: top;
     background-color: #f9f9f9;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
     -moz-border-radius: 3px; border-radius: 4px;
-    cursor: pointer;
-    padding: 0px 0px 5px 0px;
-    max-width: 300px;
+    margin: 10px;
+    color: #667;
 }
 
 .groupvsInfoDiv {
@@ -56,7 +59,6 @@
 
 
 .groupvsSubjectDiv {
-    font-size: 1.1em;
     white-space:nowrap;
     overflow:hidden;
     text-overflow: ellipsis;

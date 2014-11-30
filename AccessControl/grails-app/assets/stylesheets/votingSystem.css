@@ -175,18 +175,6 @@ hr {
     text-overflow: ellipsis;
 }
 
-.representativeNameHeader {
-    font-size: 1.5em;
-    text-overflow: ellipsis;
-    color:#6c0404;
-}
-
-.representativeNumRepHeader {
-    font-size: 1.1em;
-    text-overflow: ellipsis;
-    color:#aaaaaa;
-}
-
 .headerTitle {
     font-size: 26px;
     font-weight:bold;

@@ -10,15 +10,11 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            .tabContent {
-                margin:0px auto 0px auto;
-                width:auto;
-            }
-            paper-tabs.transparent-teal {
-                background-color: #ffeeee;
-                color:#ba0011;
-                box-shadow: none;
-                cursor: pointer;
+            .tabContent { margin:0px auto 0px auto; width:auto; }
+            .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
+            .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
+            paper-tabs.transparent-teal { padding: 0px; background-color: #ffeeee; color:#ba0011;
+                box-shadow: none; cursor: pointer; height: 35px;
             }
             paper-tabs.transparent-teal::shadow #selectionBar {
                 background-color: #ba0011;
@@ -28,63 +24,63 @@
             }
         </style>
         <div class="pageContentDiv">
-            <div style="margin: 0 30px 0 30px;">
-                <div class="text-center row" style="margin:20px auto 15px 15px;">
-                    <div layout horizontal center center-justified style="width:100%;">
+            <template if="{{'user' == menuType}}">
+                <div horizontal layout center-justified style="font-size: 0.9em;">
+                    <paper-button raised on-click="{{selectRepresentative}}">
+                        <i class="fa fa-hand-o-right"></i> <g:message code="saveAsRepresentativeLbl"/>
+                    </paper-button>
+                </div>
+            </template>
+            <div class="text-center" style="margin:20px auto 15px 15px;">
+                <div layout horizontal center center-justified style="width:100%;">
+                    <div>
                         <template if="{{subpage}}">
-                            <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                            <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                         </template>
-                        <div flex representativeId-data="{{representative.id}}" class="representativeNameHeader">
-                            <div>{{representativeFullName}}</div>
-                        </div>
                     </div>
-                    <div  class="representativeNumRepHeader" style="">
+                    <div flex representativeId-data="{{representative.id}}" class="representativeNameHeader">
+                        <div>{{representativeFullName}}</div>
+                    </div>
+                    <div class="representativeNumRepHeader" style="">
                         {{representative.numRepresentations}} <g:message code="numDelegationsPartMsg"/>
                     </div>
-                    <template if="{{'user' == menuType}}">
+                </div>
+            </div>
+            <div style="margin:0px auto 0px auto;">
+                <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
+                        valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                    <paper-tab name="profile" style="width: 400px"><g:message code="profileLbl"/></paper-tab>
+                    <paper-tab name="votingHistory"><g:message code="votingHistoryLbl"/></paper-tab>
+                </paper-tabs>
+                <div class="tabContent" style="display:{{selectedTab == 'profile'?'block':'none'}}">
+                    <div layout horizontal>
                         <div>
-                            <paper-button raised on-click="{{selectRepresentative}}" style="margin:15px 20px 15px 0px;">
-                                <i class="fa fa-hand-o-right"></i> <g:message code="saveAsRepresentativeLbl"/>
-                            </paper-button>
+                            <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
+                                 style="text-align:center; width: 100px;margin-right: 20px;"></img>
+                        </div>
+                        <div style="margin:auto auto">
+                            <vs-html-echo html="{{representative.description}}"></vs-html-echo>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabContent" style="display:{{selectedTab == 'votingHistory'?'block':'none'}}">
+                    <template if="{{'admin' == menuType}}">
+                        <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+                            <div style="display:table-cell;">
+                                <paper-button raised id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                         on-click="{{requestVotingHistory}}">
+                                    <g:message code="requestVotingHistoryLbl"/>
+                                </paper-button>
+                            </div>
+                            <div style="display:table-cell;">
+                                <paper-button raised id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                        on-click="{{requestAccreditations}}">
+                                    <g:message code="requestRepresentativeAcreditationsLbl"/>
+                                </paper-button>
+                            </div>
                         </div>
                     </template>
-                </div>
-                <div  style="width: 1000px; margin:0px auto 0px auto;">
-                    <paper-tabs style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
-                                 selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
-                        <paper-tab name="profile" style="width: 400px"><g:message code="profileLbl"/></paper-tab>
-                        <paper-tab name="votingHistory"><g:message code="votingHistoryLbl"/></paper-tab>
-                    </paper-tabs>
-                    <div class="tabContent" style="display:{{selectedTab == 'profile'?'block':'none'}}">
-                        <div layout horizontal>
-                            <div>
-                                <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
-                                     style="text-align:center; width: 100px;margin-right: 20px;"></img>
-                            </div>
-                            <div style="margin:auto auto">
-                                <vs-html-echo html="{{representative.description}}"></vs-html-echo>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tabContent" style="display:{{selectedTab == 'votingHistory'?'block':'none'}}">
-                        <template if="{{'admin' == menuType}}">
-                            <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
-                                <div style="display:table-cell;">
-                                    <paper-button raised id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                             on-click="{{requestVotingHistory}}">
-                                        <g:message code="requestVotingHistoryLbl"/>
-                                    </paper-button>
-                                </div>
-                                <div style="display:table-cell;">
-                                    <paper-button raised id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                            on-click="{{requestAccreditations}}">
-                                        <g:message code="requestRepresentativeAcreditationsLbl"/>
-                                    </paper-button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="appTitle"/></title>
@@ -139,12 +138,12 @@
                 //{"locale":"es","operation":"INIT_VALIDATED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
             },
             innerPageSignal:function(e, detail, sender) {
-                console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
+                console.log("innerPageSignal - caption:" + detail.caption + " - url: " + detail.url)
                 sendSignalVS(detail)
                 var sufix = ""
                 if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
-                if(detail.title) this.appTitle = detail.title + sufix
+                if(detail.caption) this.appTitle = detail.caption + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
                 if(detail.url) this.loadURL(detail.url)
                 document.dispatchEvent( new Event('innerPageSignal'));

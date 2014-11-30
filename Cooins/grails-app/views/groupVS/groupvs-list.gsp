@@ -8,16 +8,6 @@
 <polymer-element name="groupvs-list" attributes="url state">
     <template>
         <style no-shim>
-        .card {
-            position: relative;
-            display: inline-block;
-            width: 300px;
-            vertical-align: top;
-            background-color: #fff;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-            margin: 10px;
-            color: #667;
-        }
         vs-html-echo /deep/ p {margin:0px 0px 0px 0px;}
         </style>
         <g:include view="/include/styles.gsp"/>
@@ -38,7 +28,7 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{groupvs in groupvsList}}">
-                            <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
+                            <div on-tap="{{showGroupDetails}}" class='groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='groupvsInfoDiv'><vs-html-echo html="{{groupvs.description}}"></vs-html-echo></div>
                                 <div style="position: relative;display: {{(groupvs.state == 'CANCELLED')?'block':'none'}};">

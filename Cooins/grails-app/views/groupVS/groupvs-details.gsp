@@ -61,7 +61,7 @@
             </div>
 
             <template if="{{isUserView}}">
-                <div layout horizontal center center-justified style="margin:0px 0px 10px 10px; font-size: 0.9em;">
+                <div layout horizontal center center-justified style="margin:0 0 10px 10px; font-size: 0.9em;">
                     <paper-button raised style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                         <i class="fa fa-sign-in"></i> <g:message code="subscribeGroupVSLbl"/>
                     </paper-button raised>
@@ -74,14 +74,15 @@
                 <div horizontal layout flex style="padding:7px 0px 0px 7px;">
                     <template if="{{subpage}}">
                         <div style="margin: 10px 20px 10px 0;" title="<g:message code="backLbl"/>" >
-                            <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                            <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                         </div>
                     </template>
                     <template if="{{groupvs.userVS.tags.length > 0}}">
                         <div layout horizontal center center-justified>
                             <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
                             <template repeat="{{tag in groupvs.userVS.tags}}">
-                                <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
+                                <a class="btn btn-default" style="font-size: 0.7em;
+                                margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
                             </template>
                         </div>
                     </template>
@@ -236,7 +237,7 @@
                 this.isAdminView = false
             }
             this.$.userList.url = "${createLink(controller: 'groupVS', action:'')}/" + this.groupvs.userVS.id + "/users"
-            this.fire('core-signal', {name: "vs-innerpage", data: {title:"<g:message code="groupvsLbl"/>"}});
+            this.fire('core-signal', {name: "vs-innerpage", data: {caption:"<g:message code="groupvsLbl"/>"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
                 " - menuType: " + menuType)
         },

@@ -74,12 +74,12 @@
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
             },
             innerPageSignal:function(e, detail, sender) {
-                console.log("innerPageSignal - title:" + detail.title + " - url: " + detail.url)
+                console.log("innerPageSignal - caption:" + detail.caption + " - url: " + detail.url)
                 sendSignalVS(detail)
                 var sufix = ""
                 if('admin' === menuType) sufix = ' - <g:message code="adminLbl"/>'
                 if('superuser' === menuType) sufix = ' - <g:message code="superUserLbl"/>'
-                if(detail.title) this.appTitle = detail.title + sufix
+                if(detail.caption) this.appTitle = detail.caption + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
                 if(detail.url) this.loadURL(detail.url)
                 document.dispatchEvent( new Event('innerPageSignal'));

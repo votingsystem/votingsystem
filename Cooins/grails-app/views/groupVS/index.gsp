@@ -2,7 +2,6 @@
 <html>
 <head>
     <g:render template="/template/pagevs"/>
-    <asset:stylesheet src="cooins_groupvs.css"/>
     <vs:webcomponent path="/groupVS/groupvs-list"/>
 </head>
 <body>

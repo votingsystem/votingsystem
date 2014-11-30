@@ -45,7 +45,7 @@
                     <template if="{{uservs.state == 'ACTIVE'}}">
                         <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
                             <div class="linkVS" on-click="{{showMessageVSDialog}}">
-                                <i class="fa fa-envelope-square"></i> <g:message code="sendMessageVSLbl"/>
+                                <i class="fa fa-envelope-o"></i> <g:message code="sendMessageVSLbl"/>
                             </div>
                             <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}" class="linkVS"
                                  on-click="{{makeTransactionVS}}">
@@ -75,7 +75,8 @@
                                 - <g:message code="groupsLbl"/> -
                             </div>
                             <template repeat="{{subscriptionVS in uservs.subscriptionVSList}}">
-                                <a href="${createLink(controller: 'userVS')}/{{subscriptionVS.groupVS.id}}" style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
+                                <a href="${createLink(controller: 'userVS')}/{{subscriptionVS.groupVS.id}}"
+                                   style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
                             </template>
                         </div>
                     </template>
@@ -116,7 +117,7 @@
             if('BANKVS' == this.uservs.type) uservsType = "<g:message code="bankVSLbl"/>"
             if('USER' == this.uservs.type) uservsType = "<g:message code="userLbl"/>"
             if('SYSTEM' == this.uservs.type) uservsType = "<g:message code="systemLbl"/>"
-            this.fire('core-signal', {name: "vs-innerpage", data: {title:uservsType}});
+            this.fire('core-signal', {name: "vs-innerpage", data: {caption:uservsType}});
         },
         userVSDataChanged:function() {
             console.log(this.tagName + " - userVSDataChanged - userVSData: " + Object.prototype.toString.call(this.userVSData))

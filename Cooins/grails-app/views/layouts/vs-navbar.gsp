@@ -17,9 +17,8 @@
     #drawerPanel:not([narrow]) #menuButton { display: none; }
     icon-button.white  { fill: #f9f9f9; }
     #drawer { width: 300px; }
-    .userInfoPanel { border: 1px solid #6c0404; padding: 10px; background: #f9f9f9; width: 300px; color: #888;
-        font-size: 1em; padding:30px 20px 20px 20px; margin:20px 0 0 0;
-    }
+    .userInfoPanel { border: 1px solid #6c0404; background: #f9f9f9; width: 300px; color: #888;
+        padding:30px 20px 20px 20px; font-size: 0.9em; }
     #userInfoPanel #tooltip { padding: 0px; background: #f9f9f9; font-size: 1.2em; top:200px;}
     #userInfoPanel #control {color:#f9f9f9;}
     paper-dialog::shadow #main {padding:10px 24px 0px 24px;}
@@ -41,12 +40,16 @@
                 <core-icon-button id="connectButton" icon="{{connecButtonIcon}}" on-click="{{connectButtonClicked}}">
                     <span id="connectButtonDiv">{{connectButtonLbl}}</span>
                 </core-icon-button>
-                <core-tooltip id="userInfoPanel" style="padding: 0px; font-size: 0.9em;" position="left">
+                <core-tooltip id="userInfoPanel" style="padding: 0px;" position="left">
                     <div vertical layout class="userInfoPanel" tip>
-                        <div style="height: 30px;"><g:message code="uservsLbl"/>: {{userVS.nif}}</div>
-                        <paper-button raised label="<g:message code="disConnectLbl"/>" affirmative autofocus
-                                      on-click="{{disConnect}}">
-                        </paper-button>
+                        <div horizontal layout center-justified style="margin:0 0 20px 0;">
+                            <g:message code="connectedWithLbl"/>: {{userVS.nif}}
+                        </div>
+                        <div horizontal layout center-justified style="font-size: 0.9em;">
+                            <paper-button raised affirmative autofocus on-click="{{disConnect}}">
+                                <g:message code="disConnectLbl"/>
+                            </paper-button>
+                        </div>
                     </div>
                 </core-tooltip>
             </div>
@@ -115,16 +118,13 @@
             e.stopPropagation();
         }
         if(!window['isClientToolConnected'] ) this.$.connectButton.style.display = 'none'
-
-
     },
     requestCert:function() {
         window.open(window['accessControlURL'] + "/certificateVS/certRequest", "_blank");
     },
     disConnect: function(e) {
         this.async(function() {
-            var webAppMessage = new WebAppMessage(Operation.DISCONNECT)
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.DISCONNECT));
         }.bind(this));
         this.$.userInfoPanel.show = false
     },
