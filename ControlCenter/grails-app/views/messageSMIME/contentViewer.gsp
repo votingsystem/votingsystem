@@ -14,7 +14,8 @@
     <g:include view="/include/styles.gsp"/>
 </head>
 <body>
-<div class="pageContentDiv" id="voting_system_page"></div>
+<div id="voting_system_page" layout horizontal center center-justified>
+</div>
 <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 </body>
 </html>

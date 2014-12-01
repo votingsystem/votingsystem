@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
-                <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
+                <b><g:message code="dateLbl"/>: </b>{{timeStampDate}}
             </div>
             <div style="display:{{messageToUser? 'block':'none'}}">
                 <div  layout horizontal center center-justified  class="messageToUser">

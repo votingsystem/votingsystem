@@ -42,24 +42,7 @@
     </template>
     <script>
         Polymer('cooin-request-result-dialog', {
-            ready: function() {
-                this.isConfirmMessage = this.isConfirmMessage || false
-            },
-            onCoreOverlayOpen:function(e) { },
-            setMessage: function(message, caption, callerId, isConfirmMessage) {
-                this.reset()
-                this.message = message
-                this.caption = caption
-                this.callerId = callerId
-                this.isConfirmMessage = isConfirmMessage
-                this.$.xDialog.opened = true
-            },
-            reset: function() {
-                this.message = null
-                this.callerId = null
-                this.caption = null
-                this.isConfirmMessage = false
-            },
+            ready: function() { },
             saveToSecureWallet: function() {
                 var webAppMessage = new WebAppMessage(Operation.WALLET_SAVE)
                 webAppMessage.setCallback(function(appMessage) {
@@ -76,6 +59,7 @@
             showMessage:function(caption, message) {
                 this.caption = caption;
                 this.message = message;
+                this.$.xDialog.opened = true
             },
             close: function() {
                 this.$.xDialog.opened = false

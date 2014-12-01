@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
-                <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
+                <b><g:message code="dateLbl"/>: </b>{{timeStampDate}}
             </div>
             <div style="display:{{messageToUser? 'block':'none'}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
@@ -52,7 +52,7 @@
             </div>
 
             <div id="fromUserDivContainer" style="margin-left: 20px;">
-                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                     <g:message code="senderLbl"/></div>
                 <div id="fromUserDiv">
                     <div style=""><b><g:message code="nameLbl"/>: </b>{{signedDocument.fromUser}}</div>
@@ -60,7 +60,8 @@
                 </div>
             </div>
             <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
-                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;">{{receptorLbl}}</div>
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
+                    {{receptorLbl}}</div>
                 <div layout horizontal>
                     <div><b><g:message code="IBANLbl"/>: </b></div>
                     <div layout vertical>
@@ -134,10 +135,6 @@
                         this.caption = "<g:message code="cooinInitPeriodLbl"/>"
                         this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
                         this.$.fromUserDiv.classList.add("pageHeader");
-                        break;
-                    case 'COOIN_REQUEST':
-                        this.caption = "<g:message code="cooinRequestLbl"/>"
-                        this.signedDocument.amount = this.signedDocument.totalAmount
                         break;
                     case 'COOIN':
                     case 'COOIN_SEND':

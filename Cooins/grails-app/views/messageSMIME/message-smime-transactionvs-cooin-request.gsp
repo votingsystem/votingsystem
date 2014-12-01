@@ -5,7 +5,7 @@
 <vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
 
-<polymer-element name="message-smime-transactionvs-from-bankvs" attributes="signedDocument smimeMessage
+<polymer-element name="message-smime-transactionvs-cooin-request" attributes="signedDocument smimeMessage
         isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
@@ -22,23 +22,24 @@
         </style>
         <div layout horizontal>
             <div layout vertical style="margin: 0px auto; color: #667;">
-                <div horizontal layout style="margin: 0 0 20px 0;">
-                    <div>
-                        <template if="{{signedDocument.tags.length > 0}}">
-                            <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                                <template repeat="{{tag in signedDocument.tags}}">
-                                    <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
-                                        <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
-                                </template>
-                            </div>
-                        </template>
+                <div horizontal layout style="margin: 0 0 10px 0; min-width: 400px;">
+                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
+                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                            <i class="fa fa-tag" style="color: #888;"></i> {{signedDocument.tag}}</a>
                     </div>
-                    <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">
-                        <g:message code="transactionVSFromBankVS"/>
+                    <div layout horizontal center center-justified class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
+                        <g:message code="cooinRequestLbl"/>
+                    </div>
+                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; font-size: 0.9em;">
+                        <template if="{{isClientToolConnected}}">
+                            <paper-button raised on-click="{{checkReceipt}}">
+                                <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
+                            </paper-button>
+                        </template>
                     </div>
                 </div>
 
-                <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+                <div class="timeStampMsg" style="text-align: center;display:{{timeStampDate ? 'block':'none'}}">
                     <b><g:message code="dateLbl"/>: </b>{{timeStampDate}}
                 </div>
 
@@ -52,9 +53,9 @@
                 </div>
 
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div style=""><b><g:message code="subjectLbl"/>: </b>{{signedDocument.subject}}</div>
-                <div horizontal layout>
-                    <div flex style=""><b><g:message code="amountLbl"/>: </b>{{signedDocument.amount}} {{signedDocument.currencyCode}}</div>
+                <div horizontal layout center-justified>
+                    <div style="font-size: 1.1em;"><b><g:message code="amountLbl"/>: </b>
+                        {{signedDocument.totalAmount}} {{signedDocument.currencyCode}}</div>
                     <template if="{{signedDocument.isTimeLimited}}">
                         <core-tooltip large label="<g:message code="timeLimitedDateMsg"/> '{{signedDocument.validTo}}'" position="left">
                             <div class="pageHeader" style="margin: 0 20px 0 0;"><b>
@@ -63,46 +64,21 @@
                         </core-tooltip>
                     </template>
                 </div>
-                <div style="margin-left: 20px;">
-                    <div class="actorLbl" style=" margin:10px 0px 0px 0px;"><g:message code="senderLbl"/></div>
-                    <div>
-                        <div style=""><b><g:message code="nameLbl"/>:  </b>{{signedDocument.fromUser}}</div>
-                        <div style=""><b><g:message code="IBANLbl"/>: </b>{{signedDocument.fromUserIBAN}}</div>
-                        <div on-click="{{showFromUserVSByIBAN}}">
-                            <b><g:message code="bankVSIBANLbl"/>: </b>
-                            <span class="iban-link">{{signedDocument.fromUserIBAN}}</span>
+                <div horizontal layout center-justified>
+                    <div style="margin-left: 20px;">
+                        <div class="actorLbl" style=" margin:10px 0px 0px 0px;"><g:message code="senderLbl"/></div>
+                        <div>
+                            <div style=""><b><g:message code="nameLbl"/>:  </b>{{signedDocument.fromUserVS.name}}</div>
                         </div>
                     </div>
                 </div>
-                <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
-                    <div class="actorLbl">
-                        <g:message code="receptorLbl"/>
-                    </div>
-                    <div layout horizontal>
-                        <div><b><g:message code="IBANLbl"/>: </b></div>
-                        <div layout vertical>
-                            <template repeat="{{IBAN in signedDocument.toUserIBAN}}">
-                                <div on-click="{{showToUserVSByIBAN}}" class="iban-link">{{IBAN}}</div>
-                            </template>
-                        </div>
-                    </div>
-                </div >
-                <div  layout horizontal center center-justified>
-                    <div flex></div>
-                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                        <template if="{{isClientToolConnected}}">
-                            <paper-button raised on-click="{{checkReceipt}}">
-                                <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
-                            </paper-button>
-                        </template>
-                    </div>
-                </div>
+
             </div>
         </div>
 
     </template>
     <script>
-        Polymer('message-smime-transactionvs-from-bankvs', {
+        Polymer('message-smime-transactionvs-cooin-request', {
             publish: {
                 signedDocument: {value: {}}
             },

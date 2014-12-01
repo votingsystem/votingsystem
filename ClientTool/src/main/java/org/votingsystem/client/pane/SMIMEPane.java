@@ -48,7 +48,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             @Override public void handle(ActionEvent actionEvent) {
                 SMIMESignersPane.showDialog(signedFile);
             }});
-        openSignatureInfoButton.setPrefWidth(200);
+        openSignatureInfoButton.setPrefWidth(150);
 
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setHgrow(Priority.ALWAYS);
@@ -73,7 +73,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             contentStr = signedFile.getSMIME().getSignedContent();
         }
         signatureContentWebView.getEngine().loadContent(contentStr);
-        signatureContentWebView.setPrefHeight(600);
+        signatureContentWebView.setPrefHeight(400);
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
         timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));

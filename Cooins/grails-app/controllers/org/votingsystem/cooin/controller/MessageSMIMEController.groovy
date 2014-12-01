@@ -93,6 +93,8 @@ class MessageSMIMEController {
                     break;
                 case TypeVS.FROM_BANKVS:
                     viewer = "message-smime-transactionvs-from-bankvs"
+                case TypeVS.COOIN_REQUEST:
+                    viewer = "message-smime-transactionvs-cooin-request"
                     break;
             }
             params.operation = signedContentJSON.operation

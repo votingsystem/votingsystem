@@ -2,12 +2,13 @@
 <vs:webresource dir="paper-slider" file="paper-slider.html"/>
 <vs:webresource dir="paper-fab" file="paper-fab.html"/>
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
-<vs:webresource dir="polymer-localstorage" file="polymer-localstorage.html"/>
 <vs:webresource dir="paper-radio-button" file="paper-radio-button.html"/>
 <vs:webresource dir="core-icon" file="core-icon.html"/>
 <vs:webresource dir="paper-button" file="paper-button.html"/>
 <vs:webresource dir="vs-currency-selector" file="vs-currency-selector.html"/>
 <vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
+<vs:webcomponent path="/cooin/cooin-request-result-dialog"/>
+
 
 <polymer-element name="cooin-request-form">
     <template>
@@ -25,9 +26,7 @@
                 padding:10px 20px 10px 20px;
                 max-width:400px;
             }
-            paper-fab.green {
-                background: #259b24;
-                color: #f0f0f0;            }
+            paper-fab.green { background: #259b24; color: #f0f0f0; }
         </style>
         <div vertical layout>
             <template if="{{messageToUser}}">
@@ -107,10 +106,8 @@
             </div>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                             serviceURL="<g:createLink controller="tagVS" action="index" />"></tagvs-select-dialog>
+                 serviceURL="<g:createLink controller="tagVS" action="index"/>"></tagvs-select-dialog>
         <cooin-request-result-dialog id="resultDialog"></cooin-request-result-dialog>
-
-        <polymer-localstorage id="localstorage" name="cooin-request-localstorage" value="{{cooinsWallet}}"></polymer-localstorage>
     </template>
     <script>
         Polymer('cooin-request-form', {

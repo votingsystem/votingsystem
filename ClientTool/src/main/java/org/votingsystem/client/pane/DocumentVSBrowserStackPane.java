@@ -78,6 +78,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
         getChildren().addAll(progressBox);
 
         VBox mainVBox = new VBox();
+        mainVBox.setPrefWidth(560);
         HBox buttonsHBox = new HBox();
         HBox navigateButtonsHBox = new HBox();
 
@@ -136,8 +137,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
     }
 
     public void init() {
-        getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                "/css/cooin-pane.css").toExternalForm());
+        getScene().getStylesheets().add(((Object)this).getClass().getResource("/css/cooin-pane.css").toExternalForm());
     }
 
     private void goNext() {
@@ -282,8 +282,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
     }
 
     public String getSignatureMessage (Date date) {
-        return "<html><b>" + ContextVS.getMessage("signatureDateLbl") +
-                DateUtils.getDateStr(date) + "</html>";
+        return "<html><b>" + ContextVS.getMessage("signatureDateLbl") + DateUtils.getDateStr(date) + "</html>";
     }
 
     public void setVisible(String decompressedBackupBaseDir) {
