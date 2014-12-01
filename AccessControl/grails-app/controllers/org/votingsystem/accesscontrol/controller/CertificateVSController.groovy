@@ -238,36 +238,6 @@ class CertificateVSController {
     }
 
     /**
-     * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que crea almacenes de claves de pruebas 'JKS'
-     * @httpMethod [GET]
-     * @serviceURL [/certificateVS/createKeystore]
-     * @return Los certificados en formato PEM de las Autoridades Certificadoras en las que
-     *         confía la aplicación.
-     */
-    def createKeystore() {
-        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))]
-        }
-        log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-        String password = (params.password)? params.password:"ABCDE"
-        String givenName = (params.givenName)? params.givenName:"UserNameTestKeysStore"
-        String surname = (params.surname)? params.surname:"UserSurnameTestKeysStore"
-        String nif = (params.nif)?params.nif:"03455543T"
-        ResponseVS responseVS = keyStoreService.generateUserTestKeysStore(givenName, surname, nif, password)
-        if(ResponseVS.SC_OK == responseVS.statusCode) {
-            byte[] resultBytes = KeyStoreUtil.getBytes(responseVS.data, password.toCharArray())
-            File destFile = new File("${System.getProperty('user.home')}/${params.givenName}_${nif}.jks")
-            destFile.createNewFile()
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
-            response.outputStream <<  Base64.getEncoder().encode(resultBytes)
-            response.outputStream.flush()
-            return false
-
-        } else return [responseVS:responseVS]
-    }
-
-    /**
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {

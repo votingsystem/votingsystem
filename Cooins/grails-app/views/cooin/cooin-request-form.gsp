@@ -103,7 +103,7 @@
                 </div>
 
                 <div flex></div>
-                <paper-fab icon="done" class="green" on-click="{{submit}}"></paper-fab>
+                <paper-fab mini icon="done" class="green" on-click="{{submit}}"></paper-fab>
             </div>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"

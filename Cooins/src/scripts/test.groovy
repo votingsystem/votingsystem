@@ -1,4 +1,3 @@
-// File: src/scripts/appstatus.groovy
 import grails.util.Metadata
 import org.votingsystem.model.UserVS
 

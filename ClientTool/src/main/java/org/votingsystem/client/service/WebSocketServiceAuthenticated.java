@@ -173,7 +173,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 " - status: " + message.getStatusCode());
         switch(message.getOperation()) {
             case INIT_VALIDATED_SESSION:
-                BrowserVSSessionUtils.getInstance().initAuthenticatedSession(message, userVS);
+                if(ResponseVS.SC_OK == message.getStatusCode()) {
+                    BrowserVSSessionUtils.getInstance().initAuthenticatedSession(message, userVS);
+                } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + message.getStatusCode());
                 break;
             case MESSAGEVS_EDIT:
                 if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(

@@ -285,8 +285,7 @@ class UserBaseSimulationData extends SimulationData {
     public void createRepresentatives () throws Exception {
         log.debug("createRepresentatives - NumRepresentatives: " + getNumRepresentatives());
         if(getNumRepresentatives() > 0) {
-            byte[] imageBytes = FileUtils.getBytesFromInputStream(Thread.currentThread().getContextClassLoader().
-                    getResourceAsStream("images/icon_64/fa-user.png"))
+            byte[] imageBytes = ContextVS.getInstance().getResourceBytes("./images/icon_64/fa-user.png")
             while (hasRepresesentativeRequestsPending()){
                 if(!waitingForRepresesentativeRequests()) {
                     requestCompletionService.submit(new RepresentativeTestDataSender(NifUtils.getNif(

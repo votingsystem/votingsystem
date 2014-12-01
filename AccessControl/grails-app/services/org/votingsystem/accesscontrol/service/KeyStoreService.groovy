@@ -26,10 +26,10 @@ class KeyStoreService {
 		if (keyStoreVS) throw new ExceptionVS("EventVS '${eventVS.getId()}' already has keyStore")
 		//String password = (1..7).inject("") { a, b -> a += ('a'..'z')[new Random().nextFloat() * 26 as int] }.toUpperCase()
 		// _ TODO _ ====== crypto token
-		String password = "${grailsApplication.config.vs.signKeysPassword}"
+		String password = "${grailsApplication.config.vs.signKeyPassword}"
 		String eventVSUrl = "${grailsApplication.config.grails.serverURL}/eventVS/${eventVS.id}";
 		String strSubjectDNRoot = "CN=eventVSUrl:${eventVSUrl}, OU=Elections";
-		String keyAlias = grailsApplication.config.vs.signKeysAlias
+		String keyAlias = grailsApplication.config.vs.signKeyAlias
 		KeyStore keyStore = KeyStoreUtil.createRootKeyStore(eventVS.dateBegin, eventVS.dateFinish, password.toCharArray(),
                 keyAlias, strSubjectDNRoot);
 		Certificate[] chain = keyStore.getCertificateChain(keyAlias);
@@ -62,8 +62,8 @@ class KeyStoreService {
             Date validTo = today_plus_year.getTime()
             File keyStoreFile = grailsApplication.mainContext.getResource(
                     grailsApplication.config.vs.keyStorePath).getFile()
-            String keyAlias = grailsApplication.config.vs.signKeysAlias
-            String password = grailsApplication.config.vs.signKeysPassword
+            String keyAlias = grailsApplication.config.vs.signKeyAlias
+            String password = grailsApplication.config.vs.signKeyPassword
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
                     FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
             PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());

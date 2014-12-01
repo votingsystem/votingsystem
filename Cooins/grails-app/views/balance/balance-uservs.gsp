@@ -62,11 +62,12 @@
                                             <div>{{tag | tagDescription}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
                                             <div>
                                                 <template if="{{isTimeLimited(currency, tag)}}">
-                                                    <core-tooltip large label="{{getTimeLimitedForTagMsg(currency, tag)}}" position="right">
-                                                        <div horizontal layout center center-justified style="vertical-align: top;">
+                                                    <core-tooltip position="bottom" style="max-width: 100px;">
+                                                        <div horizontal layout center center-justified>
                                                             <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
                                                             <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
                                                         </div>
+                                                        <div tip>{{getTimeLimitedForTagMsg(currency, tag)}}</div>
                                                     </core-tooltip>
                                                 </template>
                                                 <template if="{{!isTimeLimited(currency, tag)}}">
@@ -95,8 +96,7 @@
             </div>
 
             <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display: inline-block;">
-                <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
-                                    title="<g:message code="userVSBalancesLbl"/>"
+                <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"/>"
                                       xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
                 '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
                 </balance-uservs-chart>

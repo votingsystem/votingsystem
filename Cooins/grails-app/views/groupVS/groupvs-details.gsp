@@ -30,7 +30,7 @@
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
             </div>
             <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
-                <div layout horizontal center center-justified style="margin:0 0 20px 0;">
+                <div layout horizontal center center-justified>
                     <div layout horizontal center center-justified>
                         <i class="fa fa-cogs optionsIcon"></i>
                         <paper-dropdown-menu halign="right" style="width: 200px;"

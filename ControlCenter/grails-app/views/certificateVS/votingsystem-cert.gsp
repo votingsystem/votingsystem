@@ -20,7 +20,7 @@
         <div layout vertical center center-justified >
                 <div layout horizontal class="pageWidth">
                     <template if="{{subpage != null || subcert != null}}">
-                        <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </template>
 
                     <h3 flex>

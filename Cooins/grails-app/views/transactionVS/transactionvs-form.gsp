@@ -30,7 +30,7 @@
             <div layout horizontal center center-justified style="">
                 <template if="{{subpage}}">
                     <div style="margin: 10px 0 0 0;" title="<g:message code="backLbl"/>" >
-                        <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </div>
                 </template>
                 <div flex style=" margin:0 0 0 20px; color:#6c0404;">

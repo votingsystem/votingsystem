@@ -50,9 +50,9 @@ class CsrService {
 		KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS()
 		//TODO ==== vote keystore -- this is for developement
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreVS.bytes,
-			grailsApplication.config.vs.signKeysPassword.toCharArray());
+			grailsApplication.config.vs.signKeyPassword.toCharArray());
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyStoreVS.keyAlias,
-			grailsApplication.config.vs.signKeysPassword.toCharArray());
+			grailsApplication.config.vs.signKeyPassword.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyStoreVS.keyAlias);
         DERTaggedObject representativeExtension = null
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);

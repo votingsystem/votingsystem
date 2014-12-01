@@ -64,8 +64,8 @@ class SignatureService {
     public static SignatureService getAuthoritySignatureService() {
         if(authoritySignatureService != null) return authoritySignatureService
         String keyStorePath = ContextVS.getInstance().getConfig().authorityKeyStorePath
-        String keyAlias = ContextVS.getInstance().config.authorityKeysAlias
-        String password = ContextVS.getInstance().config.authorityKeysPassword
+        String keyAlias = ContextVS.getInstance().config.userVSKeyAlias
+        String password = ContextVS.getInstance().config.userVSKeyPassword
         KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
         authoritySignatureService = new SignatureService(keyStore, keyAlias, password)
         signatureServices.put(authoritySignatureService.getUserVS().nif, authoritySignatureService)
@@ -77,18 +77,10 @@ class SignatureService {
             SignatureService sv = signatureServices.get(nif)
             return sv
         }
-        String keyStorePath = null
-        switch (userType) {
-            case UserVS.Type.BANKVS:
-                keyStorePath = "./certs/Cert_BankVS_${nif}.jks"
-                break;
-            default:
-                keyStorePath = "./certs/Cert_UserVS_${nif}.jks"
-                break;
-        }
+        String keyStorePath = "./certs/Cert_${userType.toString()}_${nif}.jks"
         log.debug("loading keystore: " + keyStorePath);
-        String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
-        String password = ContextVS.getInstance().config.userVSKeysPassword
+        String keyAlias = ContextVS.getInstance().config.userVSKeyAlias
+        String password = ContextVS.getInstance().config.userVSKeyPassword
         KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
         SignatureService signatureService = new SignatureService(keyStore, keyAlias, password)
         signatureServices.put(nif, signatureService)

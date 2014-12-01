@@ -45,8 +45,8 @@ class SignatureVSService {
         log.debug(" - init - ")
         File keyStoreFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.vs.keyStorePath).getFile()
-        String keyAlias = grailsApplication.config.vs.signKeysAlias
-        String password = grailsApplication.config.vs.signKeysPassword
+        String keyAlias = grailsApplication.config.vs.signKeyAlias
+        String password = grailsApplication.config.vs.signKeyPassword
         signedMailGenerator = new SMIMESignedGeneratorVS(FileUtils.getBytesFromFile(keyStoreFile),
                 keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
         KeyStore keyStore = KeyStore.getInstance("JKS");

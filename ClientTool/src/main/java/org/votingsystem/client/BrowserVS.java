@@ -425,6 +425,10 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
 
     @Override public void consumeWebSocketMessage(WebSocketMessage message) {
         log.debug("consumeWebSocketMessage - operation: " + message.getOperation().toString());
+        if(ResponseVS.SC_ERROR == message.getStatusCode()) {
+            showMessage(message.getStatusCode(), message.getMessage());
+            return;
+        }
         switch(message.getOperation()) {
             case INIT_VALIDATED_SESSION:
                 execCommandJS(message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
@@ -437,8 +441,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 BrowserVSSessionUtils.setWebSocketMessage(message);
                 break;
             default:
-                if(ResponseVS.SC_ERROR == message.getStatusCode())
-                    showMessage(message.getStatusCode(), message.getMessage());
                 log.debug("unprocessed message");
         }
     }

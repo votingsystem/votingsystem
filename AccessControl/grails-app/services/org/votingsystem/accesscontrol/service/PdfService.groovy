@@ -32,8 +32,8 @@ class PdfService {
 		log.debug "init - init - init"
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.vs.keyStorePath).getFile()
-		String keyAlias = grailsApplication.config.vs.signKeysAlias
-		String password = grailsApplication.config.vs.signKeysPassword
+		String keyAlias = grailsApplication.config.vs.signKeyAlias
+		String password = grailsApplication.config.vs.signKeyPassword
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		key = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());

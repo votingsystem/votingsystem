@@ -35,9 +35,8 @@
                 },
                 tooltip: {
                     formatter: function () {
-                        return '<b>' + this.x + '</b><br/>' +
-                                this.series.name + ': ' + this.y + '<br/>' +
-                                'Total: ' + this.point.stackTotal;
+                        return this.series.name + ': ' + this.y + '<br/>' +
+                               'Total: ' + this.point.stackTotal;
                     }
                 },
                 legend:{ align: 'center', itemDistance:100, floating: false },
@@ -61,7 +60,7 @@
             ready: function() {
                 this.options.chart.type = this.chart = this.chart || 'bar'
                 this.options.chart.renderTo = this.$.container
-                this.options.title.text = this.title || 'balance-uservs-chart'
+                this.options.title.text = this.title
                 this.options.xAxis.categories = this.xAxisCategories
                 this.options.yAxis.title.text = this.yAxisTitle
 

@@ -24,7 +24,7 @@
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
-                    <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                    <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </template>
                 <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>

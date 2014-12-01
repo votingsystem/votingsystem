@@ -185,11 +185,13 @@ public class BrowserVSSessionUtils {
 
     public WebSocketMessage initAuthenticatedSession(WebSocketMessage message, UserVS userVS) {
         try {
-            message.getMessageJSON().put("userVS", userVS.toJSON());
-            message.setUserVS(userVS);
-            browserSessionDataJSON.put("userVS", userVS.toJSON());
-            browserSessionDataJSON.put("isConnected", true);
-            flush();
+            if(ResponseVS.SC_OK == message.getStatusCode()) {
+                message.getMessageJSON().put("userVS", userVS.toJSON());
+                message.setUserVS(userVS);
+                browserSessionDataJSON.put("userVS", userVS.toJSON());
+                browserSessionDataJSON.put("isConnected", true);
+                flush();
+            } else log.error("ERROR - initAuthenticatedSession - statusCode: " + message.getStatusCode());
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
