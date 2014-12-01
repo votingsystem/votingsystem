@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title><g:message code="signedDocumentLbl"/></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
     <vs:webresource dir="polymer" file="polymer.html"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <vs:webcomponent path="/element/alert-dialog"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><g:message code="signedDocumentLbl"/></title>
+    <vs:webcomponent path="/messageSMIME/${viewer}"/>
     <g:include view="/include/styles.gsp"/>
 </head>
 <body>
