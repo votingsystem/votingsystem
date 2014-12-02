@@ -30,7 +30,7 @@
                 </div>
             </template>
             <template if="{{!walletLoaded}}">
-                <div horizontal layout center center-justified>
+                <div horizontal layout center center-justified style="font-size: 0.9em; ">
                     <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
                         <i class="fa fa-money"></i> <g:message code="accessToWalletMsg"/>
                     </paper-button>

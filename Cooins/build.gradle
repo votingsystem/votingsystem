@@ -7,6 +7,9 @@ sourceCompatibility = 7
 dependencies {
     compile (project(':VotingSystemLibrary'))
     compile ('org.iban4j:iban4j:2.1.1')
+    compile ('com.google.zxing:core:3.1.0')
+    compile ('com.google.zxing:javase:3.1.0')
+    compile ('com.google.guava:guava:18.0')
     compile ('javax.websocket:javax.websocket-api:1.1')
 }
 

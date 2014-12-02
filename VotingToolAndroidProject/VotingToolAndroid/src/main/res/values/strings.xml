@@ -455,4 +455,6 @@
     <string name="change_wallet_pin">cambiar pin del monedero</string>
     <string name="enter_new_pin_wallet_msg">introduzca el nuevo pin, recuerde que si lo olvida perderá el contenido de su monedero</string>
     <string name="enter_actual_pin_wallet_msg">introduzca el pin actual de su monedero</string>
+    <string name="app_needed_caption">instalar aplicación</string>
+    <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar un lector de código de barras</string>
 </resources>

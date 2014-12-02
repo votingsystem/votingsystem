@@ -59,6 +59,8 @@ android {
 dependencies {
     compile "com.android.support:appcompat-v7:21.0.+"
     compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.google.zxing:android-core:3.1.0'
+    compile 'com.google.zxing:core:3.1.0'
 
     compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.8.3"
     compile project(':libraries:bc')

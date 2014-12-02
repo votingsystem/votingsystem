@@ -16,6 +16,7 @@
 
 package org.votingsystem.android.ui.debug;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -25,11 +26,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
 import org.votingsystem.android.ui.debug.actions.PrefsAction;
+import org.votingsystem.android.ui.debug.actions.QREncoderAction;
+import org.votingsystem.android.ui.debug.actions.QRScannerAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -39,8 +44,7 @@ public class DebugActionRunnerFragment extends Fragment {
 
     private TextView mLogArea;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.debug_action_runner, null);
@@ -49,6 +53,9 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new ForceSyncNowAction()));
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
         tests.addView(createTestAction(new PrefsAction()));
+        tests.addView(createTestAction(new QRScannerAction(DebugActionRunnerFragment.this)));
+        tests.addView(createTestAction(new QREncoderAction(getActivity())));
+
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -80,6 +87,15 @@ public class DebugActionRunnerFragment extends Fragment {
             }
         });
         return testButton;
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        LOGD(TAG + ".onActivityResult", "resultCode: " + resultCode);
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (result != null) {
+            String contents = result.getContents();
+            LOGD(TAG + ".onActivityResult", "contents: " + contents);
+        }
     }
 
     protected void logTimed(long time, String message) {

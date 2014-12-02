@@ -63,6 +63,9 @@ grails.project.dependency.resolution = {
                 'org.bouncycastle:bcpg-jdk16:1.46',
                 'org.iban4j:iban4j:2.1.1',
                 'org.asciidoctor:asciidoctorj:1.5.0',
+                'com.google.zxing:core:3.1.0',
+                'com.google.zxing:javase:3.1.0',
+                'com.google.guava:guava:18.0',
                 'javax.mail:mail:1.4.7',
                 'org.bouncycastle:bctsp-jdk16:1.46') {
             excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
