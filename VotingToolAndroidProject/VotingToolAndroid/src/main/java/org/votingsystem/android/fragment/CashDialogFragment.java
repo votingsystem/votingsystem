@@ -165,20 +165,15 @@ public class CashDialogFragment extends DialogFragment {
             }
             builder.setView(view);
             dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
-            builder.setPositiveButton(getString(R.string.ok_lbl), null);
+            builder.setPositiveButton(getString(R.string.ok_lbl),
+                    new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                    sendCashValue();
+                }
+            });
             builder.setNegativeButton(getString(R.string.cancel_lbl), null);
             return builder.create();
         }
-    }
-
-    @Override public void onStart() {
-        super.onStart();
-        Button positiveButton = ((AlertDialog)getDialog()).getButton(DialogInterface.BUTTON_POSITIVE);
-        positiveButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View onClick) {
-                sendCashValue();
-            }
-        });
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

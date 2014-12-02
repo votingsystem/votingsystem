@@ -31,7 +31,6 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.service.OperationVSService;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;

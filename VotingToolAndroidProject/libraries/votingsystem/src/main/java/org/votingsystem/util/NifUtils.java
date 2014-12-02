@@ -21,7 +21,7 @@ public class NifUtils {
             }
         } catch(Exception ex) {} finally {
             if(result != null) return result;
-            else throw new ExceptionVS(contex.getString(R.string.nif_with_errors_msg));
+            else throw new ExceptionVS(contex.getString(R.string.nif_with_errors_msg, nif));
         }
     }
 

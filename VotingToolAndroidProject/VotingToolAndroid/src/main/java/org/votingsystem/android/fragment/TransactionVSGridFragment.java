@@ -71,13 +71,13 @@ public class TransactionVSGridFragment extends Fragment
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     launchUpdateUserInfoService();
                     break;
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     break;
             }
             setProgressDialogVisible(false);
@@ -95,7 +95,7 @@ public class TransactionVSGridFragment extends Fragment
         LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
             Intent startIntent = new Intent(getActivity(), CooinService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_USER_INFO);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.USERVS_MONETARY_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);
             getActivity().startService(startIntent);
@@ -197,7 +197,7 @@ public class TransactionVSGridFragment extends Fragment
         switch (item.getItemId()) {
             case R.id.update_signers_info:
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.update_user_info_pin_msg), false, TypeVS.COOIN_USER_INFO);
+                        getString(R.string.update_user_info_pin_msg), false, TypeVS.USERVS_MONETARY_INFO);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

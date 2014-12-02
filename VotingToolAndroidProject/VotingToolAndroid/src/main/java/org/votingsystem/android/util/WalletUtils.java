@@ -23,8 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

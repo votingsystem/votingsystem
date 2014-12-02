@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -112,9 +111,7 @@ public class CertRequestFormFragment extends Fragment {
         Button cancelButton = (Button) rootView.findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                //finish();
-                Intent intent = new Intent(getActivity(), EventVSMainActivity.class);
-                startActivity(intent);
+                getActivity().finish();
             }
         });
         givennameText = (EditText)rootView.findViewById(R.id.given_name_edit);
@@ -190,7 +187,7 @@ public class CertRequestFormFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
                                     broadCastId, getString(
-                                    R.string.keyguard_password_enter_first_pin_code), null);
+                                    R.string.pin_for_new_cert_msg), null);
                         }
                     }).setNegativeButton(getString(R.string.cancel_lbl), null);
             UIUtils.showMessageDialog(builder);
@@ -213,6 +210,7 @@ public class CertRequestFormFragment extends Fragment {
         } catch(Exception ex) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                     getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+            return false;
         }
     	if(TextUtils.isEmpty(givennameText.getText().toString())){
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),

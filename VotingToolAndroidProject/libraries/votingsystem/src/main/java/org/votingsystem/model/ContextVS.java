@@ -38,7 +38,6 @@ public class ContextVS {
     public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
-    public static final String COOIN_USER_INFO_DATA_FILE_NAME = "cooinUserInfo";
     public static final String COOIN_REQUEST_DATA_FILE_NAME   = "cooinRequestData";
     public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";

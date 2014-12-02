@@ -5,10 +5,10 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import org.votingsystem.android.R;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.Cooin;
 import org.votingsystem.model.VoteVS;
 
 import java.security.cert.X509Certificate;

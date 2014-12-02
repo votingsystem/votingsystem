@@ -18,13 +18,13 @@ import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Cooin;
+import org.votingsystem.model.CooinBatch;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSAccountsInfo;
-import org.votingsystem.model.Cooin;
-import org.votingsystem.model.CooinBatch;
-import org.votingsystem.model.CooinServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
@@ -73,7 +73,7 @@ public class CooinService extends IntentService {
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         try {
             switch(operation) {
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     updateUserInfo(serviceCaller);
                     break;
                 case COOIN_REQUEST:
@@ -353,7 +353,7 @@ public class CooinService extends IntentService {
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.user_info_updated));
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_USER_INFO);
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.USERVS_MONETARY_INFO);
             broadCastResponse(responseVS);
         }
     }

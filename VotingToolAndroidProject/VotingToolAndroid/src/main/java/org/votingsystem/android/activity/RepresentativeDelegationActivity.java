@@ -13,7 +13,6 @@ import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;

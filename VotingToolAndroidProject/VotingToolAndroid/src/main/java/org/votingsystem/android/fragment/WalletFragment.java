@@ -23,13 +23,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.Cooin;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -86,7 +85,7 @@ public class WalletFragment extends Fragment {
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     break;
             }
         }

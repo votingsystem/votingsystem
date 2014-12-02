@@ -27,8 +27,8 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.CooinServer;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
@@ -165,6 +165,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public AccessControlVS getAccessControl() {
+        if(accessControl == null) {
+            accessControl = (AccessControlVS) getActorVS(accessControlURL);
+        }
         return accessControl;
     }
 

@@ -45,18 +45,12 @@ public class FinanceMainActivity extends ActivityBase {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
-        Intent intent = null;
         switch (item.getItemId()) {
-            case R.id.admin_cooins_menu_item:
-                intent = new Intent(this, BrowserVSActivity.class);
+            /*case R.id.admin_cooins_menu_item:
+                Intent intent = new Intent(this, BrowserVSActivity.class);
                 intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuAdminURL());
                 startActivity(intent);
-                return true;
-            case R.id.cooins_menu_user_item:
-                intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuUserURL());
-                startActivity(intent);
-                return true;
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -74,7 +68,7 @@ public class FinanceMainActivity extends ActivityBase {
 
         final String TAG = CooinPagerAdapter.class.getSimpleName();
 
-        private static final int COOIN_USER_INFO = 0;
+        private static final int USERVS_MONETARY_INFO = 0;
         private static final int COOIN_LIST = 1;
 
         private String searchQuery = null;
@@ -88,7 +82,7 @@ public class FinanceMainActivity extends ActivityBase {
         @Override public Fragment getItem(int position) {
             Fragment selectedFragment = null;
             switch(position) {
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     selectedFragment = new UserVSAccountsFragment();
                     break;
                 case COOIN_LIST:
@@ -104,7 +98,7 @@ public class FinanceMainActivity extends ActivityBase {
 
         @Override public int getCount() {
             return 2;
-        } //COOIN_USER_INFO and COOIN_LIST
+        } //USERVS_MONETARY_INFO and COOIN_LIST
 
     }
 

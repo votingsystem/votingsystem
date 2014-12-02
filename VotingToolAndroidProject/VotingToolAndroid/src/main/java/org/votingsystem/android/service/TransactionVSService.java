@@ -10,9 +10,9 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.CooinServer;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 

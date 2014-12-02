@@ -16,13 +16,6 @@
 
 package com.google.zxing.integration.android;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -37,6 +30,13 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import org.votingsystem.android.R;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>A utility class which helps ease integration with Barcode Scanner via {@link android.content.Intent}s. This is a simple

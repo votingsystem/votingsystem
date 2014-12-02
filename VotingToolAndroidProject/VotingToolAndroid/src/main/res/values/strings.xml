@@ -49,8 +49,9 @@
     <string name="search_label"></string>
     <string name="search_invoke">búsquedas</string>
     <string name="empty_search_lbl">consulta sin resultados</string>
-	<string name="keyguard_password_enter_pin_code">introduzca el código PIN de votación</string>
-	<string name="keyguard_password_enter_first_pin_code">introduzca el código PIN que deberá introducir en cada votación</string>
+	<string name="pin_for_new_cert_msg">introduzca el código PIN que usará para firmar con el
+        certificado, no lo olvide, se le pedirá para completar la instalación en el teléfono una vez
+        haya verificado su identidad en un centro autorizado</string>
 	<string name="pin_dialog_caption">pin de firma</string>
     <string name="pin_wallet_caption">pin de monedero</string>
 	<string name="invalidPin">código pin inválido</string>
@@ -105,8 +106,7 @@
     <string name="no_receipts">no tiene guardado ningún recibo</string>
     <string name="options_lbl">opciones</string>
     <string name="uservs_cert_request_activity_text">no dispone de ningún
-        certificado con el que poder acceder a los servicios, para poder votar debe solicitar
-        un certificado de usuario, ¿desea solicitar el certificado?</string>
+        certificado con el que poder acceder a los servicios que requieren firma, ¿desea solicitar el certificado?</string>
     <string name="cert_data_confirm_msg"><![CDATA[<b>nombre: </b>%1$s<br/>
         <b>apellidos: </b>%2$s<br/>
         <b>nif: </b>%3$s<br/>
@@ -346,10 +346,9 @@
     <string name="hint_pin">pin</string>
     <string name="disconnect_from_service_lbl">desconectar de servicio</string>
     <string name="init_authenticated_session_msg_subject">inicio de sesión websocket</string>
-    <string name="init_authenticated_session_pin_msg">introduzca su contraseña para firmar la solicitud de conexión</string>
+    <string name="init_authenticated_session_pin_msg">introduzca la contraseña para solicitar una conexión</string>
     <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
     <string name="enter_pin_to_decrypt_msg">introduzca el pin para descifrar el mensaje</string>
-    <string name="cooins_menu_user_lbl">operaciones de cooins</string>
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
     <string name="anonymous_transactionvs_msg">deseo que el pago sea anónimo</string>
@@ -456,5 +455,5 @@
     <string name="enter_new_pin_wallet_msg">introduzca el nuevo pin, recuerde que si lo olvida perderá el contenido de su monedero</string>
     <string name="enter_actual_pin_wallet_msg">introduzca el pin actual de su monedero</string>
     <string name="app_needed_caption">instalar aplicación</string>
-    <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar un lector de código de barras</string>
+    <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
 </resources>

@@ -260,11 +260,9 @@ public class ReceiptFragment extends Fragment {
             contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
                     contentFormatted + "</body></html>";
             receipt_content.loadData(contentFormatted, "text/html; charset=UTF-8", null);
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    receiptContainer.getTypeDescription(getActivity()));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
                     UIUtils.getEmptyLogo(getActivity()));
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
             setActionBarMenu(menu);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -303,6 +301,8 @@ public class ReceiptFragment extends Fragment {
         }
         if(selectedReceipt.getLocalId() < 0) menu.removeItem(R.id.delete_receipt);
         else menu.removeItem(R.id.save_receipt);
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+                selectedReceipt.getTypeDescription(getActivity()));
     }
 
     @Override public void onStart() {

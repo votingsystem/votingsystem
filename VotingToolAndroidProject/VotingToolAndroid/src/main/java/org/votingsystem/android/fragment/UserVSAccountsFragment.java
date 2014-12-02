@@ -24,8 +24,8 @@ import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.CooinService;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
@@ -104,7 +104,7 @@ public class UserVSAccountsFragment extends Fragment {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     break;
-                case COOIN_USER_INFO:
+                case USERVS_MONETARY_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     }
@@ -241,7 +241,7 @@ public class UserVSAccountsFragment extends Fragment {
         Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), CooinService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_USER_INFO);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.USERVS_MONETARY_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg));
