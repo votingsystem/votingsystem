@@ -356,6 +356,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             case R.id.menu_qr:
                 intent = new Intent(this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFormFragment.class.getName());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 break;
             case R.id.menu_about:

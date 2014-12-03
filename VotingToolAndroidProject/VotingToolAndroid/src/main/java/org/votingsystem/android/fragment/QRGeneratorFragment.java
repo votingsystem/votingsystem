@@ -52,7 +52,7 @@ public class QRGeneratorFragment extends Fragment {
         } catch (ExceptionVS ex) {
             ex.printStackTrace();
         }
-        LOGD(TAG + ".onAttach", "qrMessage: " + qrMessage);
+        LOGD(TAG + ".onCreateView", "qrMessage: " + qrMessage);
         Bitmap bitmap = null;
         try {
             bitmap = QRUtils.encodeAsBitmap(qrMessage, getActivity());
@@ -61,12 +61,10 @@ public class QRGeneratorFragment extends Fragment {
         }
         ImageView view = (ImageView) rootView.findViewById(R.id.image_view);
         view.setImageBitmap(bitmap);
-        TextView contents = (TextView) rootView.findViewById(R.id.contents_text_view);
-        contents.setText(qrMessage);
         setHasOptionsMenu(true);
         ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_code_lbl));
         ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                getOperationMessage(qrMessageVS.getOperation()));
+                getOperationMessage(qrMessageVS));
         if(contextVS.getWebSocketSession() == null) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.qr_code_lbl), getString(R.string.qr_connection_required_msg),
@@ -81,13 +79,15 @@ public class QRGeneratorFragment extends Fragment {
         return rootView;
     }
 
-    private String getOperationMessage(TypeVS operation) {
-        switch(operation) {
+    private String getOperationMessage(QRMessageVS qrMessageVS) {
+        switch(qrMessageVS.getOperation()) {
             case COOIN_TICKET_REQUEST:
-                return getString(R.string.cooin_ticket_request_qr_msg);
+                return getString(R.string.cooin_ticket_request_qr_msg) + " - " +
+                        qrMessageVS.getAmount().toPlainString() + " " + qrMessageVS.getCurrencyCode() +
+                        " " + qrMessageVS.getTag();
             case TRANSACTIONVS:
                 return getString(R.string.transactionvs_qr_msg);
-            default: return operation.toString();
+            default: return qrMessageVS.getOperation().toString();
         }
     }
 

@@ -22,22 +22,22 @@ public class QRMessageVS {
     public QRMessageVS(String qrMessage) throws ExceptionVS {
         String[] messageParts = qrMessage.split(";");
         String[] partContent = messageParts[0].split("="); //0 -> operation
-        if(partContent.length > 0) {
+        if(partContent.length > 1) {
             if(!"operation".equals(partContent[0])) throw new ExceptionVS("part 0 of the qrMessage must be 'operation'");
             operation = TypeVS.valueOf(partContent[1]);
         }
         partContent = messageParts[1].split("="); //1 -> id
-        if(partContent.length > 0) {
+        if(partContent.length > 1) {
             if(!"id".equals(partContent[0])) throw new ExceptionVS("part 1 of the qrMessage must be 'id'");
             id = Long.valueOf(partContent[1]);
         }
         partContent = messageParts[2].split("="); //2 -> URL
-        if(partContent.length > 0) {
+        if(partContent.length > 1) {
             if(!"URL".equals(partContent[0])) throw new ExceptionVS("part 2 of the qrMessage must be 'URL'");
             URL = partContent[1];
         }
         partContent = messageParts[3].split("="); //3 -> amount
-        if(partContent.length > 0) {
+        if(partContent.length > 1) {
             if(!"amount".equals(partContent[0])) throw new ExceptionVS("part 3 of the qrMessage must be 'amount'");
             String[] subParts = partContent[1].split("_");
             if(subParts.length != 3)  throw new ExceptionVS("expected 'amount_currencyCode_tag' found '" + partContent[1] + "'");

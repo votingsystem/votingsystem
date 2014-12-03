@@ -4,9 +4,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -15,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
@@ -24,8 +28,11 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -39,13 +46,27 @@ public class QRGeneratorFormFragment extends Fragment {
     private AppContextVS contextVS;
     private String broadCastId = QRGeneratorFormFragment.class.getSimpleName();
     private View rootView;
+    private Button btn_plus;
+    private Button btn_minus;
     private LinearLayout currency_amount_selector;
     private QRMessageVS qrMessageVS;
     private Spinner operationSpinner;
     private Spinner currencySpinner;
     private EditText amount_text;
+    private Handler handler;
     private static final TypeVS[] OPERATION_ARRAY =
             new TypeVS[]{TypeVS.COOIN_TICKET_REQUEST, TypeVS.TRANSACTIONVS};
+    private AtomicBoolean isLongPressed = new AtomicBoolean(false);
+
+    final Runnable incrementRunnable = new Runnable(){
+        @Override public void run() { incrementAmount(); }
+    };
+
+    final Runnable decrementRunnable = new Runnable(){
+        @Override public void run() {
+            decrementAmount();
+        }
+    };
 
     @Override public View onCreateView(LayoutInflater inflater,
                ViewGroup container, Bundle savedInstanceState) {
@@ -71,7 +92,38 @@ public class QRGeneratorFormFragment extends Fragment {
         operationSpinner.setAdapter(operationAdapter);
         currencySpinner = (Spinner) rootView.findViewById(R.id.currency_spinner);
         ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.menu_qr));
-
+        btn_plus = (Button) rootView.findViewById(R.id.btn_plus);
+        btn_plus.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                incrementAmount();
+            }
+        });
+        btn_minus = (Button) rootView.findViewById(R.id.btn_minus);
+        handler = new Handler();
+        btn_minus.setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    isLongPressed.set(true);
+                    decrementAmount();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    isLongPressed.set(false);
+                    handler.removeCallbacks(decrementRunnable);
+                }
+                return true;
+            };
+        });
+        btn_plus.setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    isLongPressed.set(true);
+                    incrementAmount();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    isLongPressed.set(false);
+                    handler.removeCallbacks(incrementRunnable);
+                }
+                return true;
+            };
+        });
 
         if(contextVS.getWebSocketSession() == null) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
@@ -105,6 +157,24 @@ public class QRGeneratorFormFragment extends Fragment {
         startActivity(intent);
     }
 
+    public BigDecimal getValue() {
+        BigDecimal result = new BigDecimal(amount_text.getText().toString());
+        return result;
+    }
+
+    private void incrementAmount() {
+        BigDecimal result = getValue().add(new BigDecimal(10));
+        amount_text.setText(result.toString());
+        if(isLongPressed.get()) handler.postDelayed(incrementRunnable, 200);
+    }
+
+    private void decrementAmount() {
+        BigDecimal result = getValue().add(new BigDecimal(10).negate());
+        if (result.compareTo(new BigDecimal(0)) >= 0) {
+            amount_text.setText(result.toString());
+        }
+        if(isLongPressed.get()) handler.postDelayed(decrementRunnable, 200);
+    }
 
     public class OperationSelectedListener implements AdapterView.OnItemSelectedListener {
 
