@@ -20,10 +20,8 @@
             background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
-        .container{
-            margin: 0 auto;
-            max-width: 550px;
-        }
+        .container{ margin: 0 auto; max-width: 550px; }
+        .adviceToUser {color: #888;font-size: 1.2em; margin: 10px 0 0 0; font-weight: bold;}
         </style>
         <div class="container">
 
@@ -52,6 +50,10 @@
                     </div>
                 </div>
             </div>
+            <template if="{{'FROM_USERVS_TO_USERVS' === operation}}">
+                <div class="adviceToUser"><g:message code="fromUserVSToUserVSAdviceMsg"/></div>
+            </template>
+
 
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div layout horizontal center center-justified>

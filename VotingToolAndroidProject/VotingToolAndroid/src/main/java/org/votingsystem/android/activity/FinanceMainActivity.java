@@ -1,7 +1,6 @@
 package org.votingsystem.android.activity;
 
 import android.app.SearchManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +13,6 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.UserVSAccountsFragment;
-import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 

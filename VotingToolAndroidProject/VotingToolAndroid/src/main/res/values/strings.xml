@@ -456,4 +456,14 @@
     <string name="enter_actual_pin_wallet_msg">introduzca el pin actual de su monedero</string>
     <string name="app_needed_caption">instalar aplicación</string>
     <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
+    <string name="menu_qr">generar QR</string>
+    <string name="qr_code_lbl">código QR</string>
+    <string name="cooin_ticket_request_qr_msg">esperando cooins</string>
+    <string name="transactionvs_qr_msg">esperando ingreso</string>
+    <string name="qr_connection_required_msg">para poder operar con códigos QR necesita estar conectado</string>
+    <string name="qr_create_lbl">crear código QR</string>
+    <string name="currency_prompt">moneda</string>
+    <string name="operation_prompt">tipo de operación</string>
+    <string name="cooin_ticket_request_operation">solicitar cooins</string>
+    <string name="transactionvs_operation">solicitar ingreso en cuenta</string>
 </resources>

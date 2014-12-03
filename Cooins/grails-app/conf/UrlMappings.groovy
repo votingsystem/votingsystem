@@ -92,6 +92,10 @@ class UrlMappings {
             action = "list"
         }
 
+        "/deviceVS/$nif/connected" {
+            controller = "deviceVS"
+            action = "connected"
+        }
 
         "/groupVS/$id"{
             controller = "groupVS"

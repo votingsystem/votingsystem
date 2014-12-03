@@ -8,7 +8,7 @@
     -fx-border-insets: 0;
     -fx-border-radius: 4;
     -fx-color: #388746;
-    -fx-background-color: #fff;
+    -fx-background-color: #f9f9f9;
 }
 
 .cooin-error {
@@ -16,21 +16,20 @@
 }
 
 .statusLbl {
-    -fx-font: bold 20pt "LucidaBrightDemiBold";
     -fx-font-weight: bold;
     -fx-text-fill: #fff;
 }
 
 .infoLabel {
-    -fx-text-fill: #138085;
+    -fx-text-fill: #388746;
 }
 
 .menu-item .label {
-    -fx-text-fill: #6c0404;
+    -fx-text-fill: #388746;
 }
 
 .menu-item:focused {
-    -fx-background-color: #6c0404;
+    -fx-background-color: #388746;
 }
 
 .menu-item:focused .label {
@@ -38,12 +37,11 @@
 }
 
 .context-menu {
-    -fx-background-color: #f9f9f9;
-    -fx-text-fill: #6c0404;
-    -fx-color: #6c0404;
+    -fx-background-color: #fff;
 }
 
 .operations {
-    -fx-text-fill: #6c0404;
+    -fx-text-fill: #ba0011;
     -fx-cursor: hand;
+    -fx-font-weight: bold;
 }

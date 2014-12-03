@@ -41,6 +41,7 @@ import java.util.Map;
 public class Utils {
 
     public static final String COLOR_BUTTON_OK = "#388746";
+    public static final String COLOR_RED = "#ba0011";
     public static final String COLOR_RED_DARK = "#6c0404";
 
     private static Logger log = Logger.getLogger(Utils.class);

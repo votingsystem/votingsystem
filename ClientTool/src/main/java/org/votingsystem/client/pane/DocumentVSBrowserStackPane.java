@@ -26,13 +26,13 @@ import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.cooin.model.Cooin;
 
 import java.io.File;
 import java.io.FileOutputStream;

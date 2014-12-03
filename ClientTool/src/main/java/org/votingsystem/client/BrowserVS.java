@@ -48,9 +48,12 @@ import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.client.util.WebSocketListener;
-import org.votingsystem.model.*;
-import org.votingsystem.util.*;
 import org.votingsystem.cooin.model.Cooin;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

@@ -14,16 +14,19 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
-import org.votingsystem.callable.*;
+import org.votingsystem.callable.AccessRequestDataSender;
+import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.callable.RepresentativeDataSender;
+import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.util.*;
-import org.votingsystem.cooin.model.CooinRequestBatch;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -33,6 +36,7 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
+
 import static org.votingsystem.model.ContextVS.*;
 
 /**

@@ -13,4 +13,11 @@
         <item>Publicar reclamación</item>
     </string-array>
 
+    <string-array name="currency_codes">
+        <item>EUR</item>
+        <item>USD</item>
+        <item>CNY</item>
+        <item>JPY</item>
+    </string-array>
+
 </resources>

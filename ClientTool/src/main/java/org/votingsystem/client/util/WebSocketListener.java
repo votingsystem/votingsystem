@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSONObject;
 import org.votingsystem.util.WebSocketMessage;
 
 /**

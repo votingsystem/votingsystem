@@ -30,8 +30,8 @@ import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.CooinServer;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 

@@ -17,6 +17,7 @@ public class QRMessageVS {
     private String tag;
     private Long id;
     private BigDecimal amount;
+    private Integer numTickets;
 
     //http://cooins:8086/Cooins/QR/test?cht=qr&chs=200x200&chl=qrMessage
     //qrMessage -> operation=TRANSACTION;id=1;URL=https://cooins:8086/Cooins;amount=100_eur_WILDTAG;
@@ -37,12 +38,15 @@ public class QRMessageVS {
             if(!"URL".equals(partContent[0])) throw new ExceptionVS("part 2 of the qrMessage must be 'URL'");
             URL = partContent[1];
         }
-        partContent = messageParts[2].split("="); //3 -> amount
+        partContent = messageParts[3].split("="); //3 -> amount
         if(partContent.length > 0) {
             if(!"amount".equals(partContent[0])) throw new ExceptionVS("part 3 of the qrMessage must be 'amount'");
             String[] subParts = partContent[1].split("_");
             if(subParts.length != 3)  throw new ExceptionVS("expected 'amount_currencyCode_tag' found '" + partContent[1] + "'");
-            amount = new BigDecimal(subParts[0]);
+            if(subParts[0].contains("x")) {
+                numTickets = Integer.valueOf(subParts[0].split("x")[0]);
+                amount = new BigDecimal(subParts[0].split("x")[1]);
+            } else amount = new BigDecimal(subParts[0]);
             currencyCode = subParts[1].toUpperCase();
             tag = subParts[2];
         }
@@ -96,4 +100,11 @@ public class QRMessageVS {
         this.amount = amount;
     }
 
+    public int getNumTickets() {
+        return numTickets;
+    }
+
+    public void setNumTickets(int numTickets) {
+        this.numTickets = numTickets;
+    }
 }

@@ -1,6 +1,7 @@
 package org.votingsystem.android.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,7 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -96,13 +96,15 @@ public class RepresentativeNewActivity extends ActivityBase {
                     editorFragment.setEditable(true);
                     MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
                 } else {
-                    UIUtils.getMessageDialogBuilder(responseVS, RepresentativeNewActivity.this).
-                        setPositiveButton(getString(R.string.accept_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        RepresentativeNewActivity.this.finish();
-                                    }
-                                }).show().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            responseVS, RepresentativeNewActivity.this).
+                            setPositiveButton(getString(R.string.accept_lbl),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            RepresentativeNewActivity.this.finish();
+                                        }
+                                    });
+                    UIUtils.showMessageDialog(builder);
                 }
             } else if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

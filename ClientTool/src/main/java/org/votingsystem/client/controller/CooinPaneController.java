@@ -26,19 +26,22 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.dialog.DialogVS;
 import org.votingsystem.client.dialog.JSONFormDialog;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dialog.UserDeviceSelectorDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.cooin.model.Cooin;
+import org.votingsystem.cooin.model.CooinTransactionBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.cooin.model.CooinTransactionBatch;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -47,9 +50,13 @@ import java.util.Calendar;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listener {
+public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(CooinPaneController.class);
+
+    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
+        log.debug("setSelectedDevice - deviceDataJSON: " + deviceDataJSON.toString());
+    }
 
     class EventBusDeleteCooinListener {
         @Subscribe public void recordCustomerChange(ResponseVS responseVS) {
@@ -77,6 +84,8 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
     private MessageDialog messageDialog;
 
     private MenuItem sendMenuItem;
+    private MenuItem changeWalletMenuItem;
+    private MenuItem deleteMenuItem;
 
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
@@ -89,6 +98,7 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         sendMenuItem.setText(responseVS.getMessage());
                         sendMenuItem.setVisible(true);
+                        contextMenu.getItems().removeAll(deleteMenuItem);
                     } else {
                         mainPane.getStyleClass().add("cooin-error");
                         cooinStatusLbl.setText(ContextVS.getMessage("invalidCooin"));
@@ -103,7 +113,7 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
         }
     };
 
-    public CooinPaneController(Cooin cooin) {
+    public CooinPaneController(Cooin cooin) throws IOException {
         this.cooin = cooin;
     }
 
@@ -121,7 +131,7 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
                 showForm(new Cooin.TransactionVSData("", "", "", true).getJSON());
             }
         });
-        MenuItem deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
+        deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
         deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 System.out.println("deleteMenuItem");
@@ -136,7 +146,15 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
                 System.out.println("saveMenuItem");
             }
         });
-        contextMenu.getItems().addAll(sendMenuItem, deleteMenuItem, saveMenuItem);
+        changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
+        changeWalletMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
+                        ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinPaneController.this);
+            }
+        });
+
+        contextMenu.getItems().addAll(sendMenuItem, changeWalletMenuItem, deleteMenuItem, saveMenuItem);
         contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
         setProgressVisible(false, true);
         PlatformImpl.runLater(statusChecker);
@@ -146,23 +164,22 @@ public class CooinPaneController  implements DocumentVS,  JSONFormDialog.Listene
         currencyLbl.setText(cooin.getCurrencyCode());
         cooinTagLbl.setText(Utils.getTagDescription(cooin.getTag().getName()));
         operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
-        operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED_DARK));
+        operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED));
         String cooinDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
                 DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                 DateUtils.getDateStr(cooin.getValidTo(), "dd MMM yyyy' 'HH:mm"));
         dateInfoLbl.setText(cooinDateInfoLbl);
         operationsLbl.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                 @Override public void handle(MouseEvent event) {
-                     contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
-                 }
-             }
-        );
+                @Override public void handle(MouseEvent event) {
+                    contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
+                }
+            });
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCooinServer().getTrustAnchors(), false, Arrays.asList(
                             cooin.getCertificationRequest().getCertificate()));
             X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
-            log.debug("CooinPane. Cooin issuer: " + certCaResult.getSubjectDN().toString());
+            log.debug("cooin issuer: " + certCaResult.getSubjectDN().toString());
         } catch(Exception ex) {
             log.debug(ex.getMessage(), ex);
             X509Certificate x509Cert = cooin.getX509AnonymousCert();

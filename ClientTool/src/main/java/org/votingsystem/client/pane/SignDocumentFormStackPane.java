@@ -29,6 +29,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+
 import java.util.UUID;
 
 /**

@@ -6,13 +6,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.*;
+import javafx.stage.FileChooser;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
@@ -21,13 +19,11 @@ import org.votingsystem.client.util.BrowserVSSessionUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
@@ -78,9 +74,9 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
         mobileDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.EXCHANGE, Utils.COLOR_BUTTON_OK));
         mobileDeviceButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                MobileSelectorDialog.show(SettingsDialog.this);
+            @Override public void handle(ActionEvent actionEvent) {
+                MobileSelectorDialog.show(ContextVS.getMessage("setMobileSignatureMechanismMsg"),
+                        ContextVS.getMessage("setMobileSignatureMechanismAdv"), SettingsDialog.this);
             }
         });
         mobileDeviceInfo.getChildren().addAll(mobileDeviceLbl, mobileDeviceButton);
@@ -162,7 +158,9 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         if(evt.getSource() == signWithMobileRb && deviceDataJSON != null) {
             gridPane.add(mobileDeviceInfo, 0, 2);
         }
-        if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(SettingsDialog.this);
+        if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(ContextVS.getMessage(
+                "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
+                SettingsDialog.this);
         getStage().sizeToScene();
     }
 

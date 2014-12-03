@@ -33,6 +33,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
+import org.votingsystem.android.fragment.QRGeneratorFormFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
@@ -350,13 +351,19 @@ public abstract class ActivityBase extends ActionBarActivity {
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
+        Intent intent = null;
         switch (id) {
+            case R.id.menu_qr:
+                intent = new Intent(this, FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFormFragment.class.getName());
+                startActivity(intent);
+                break;
             case R.id.menu_about:
                 HelpUtils.showAbout(this);
                 return true;
             case R.id.menu_debug:
                 if (BuildConfig.DEBUG) {
-                    Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                    intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                     intent.putExtra(ContextVS.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
                     startActivity(intent);
                 }

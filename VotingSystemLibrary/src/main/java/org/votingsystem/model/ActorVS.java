@@ -292,6 +292,10 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/deviceVS/" + nif + "/list";
     }
 
+    public String getConnectedDeviceListByNifServiceURL(String nif) {
+        return getServerURL() + "/deviceVS/" + nif + "/connected";
+    }
+
     public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

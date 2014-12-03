@@ -7,22 +7,24 @@
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
         <paper-dialog id="xDialog" layered backdrop class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
-            <g:include view="/include/styles.gsp"/>
+        <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
             <div id="" style="width: 480px;margin:auto; padding: 15px;">
-                <div layout horizontal style="font-size: 0.8em;">
+                <div horizontal layout style="font-size: 0.8em;">
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
                     <template if="{{subscriptionData.uservs.IBAN}}">
                         <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>
                     </template>
                 </div>
-                <div id="nameDiv" style="font-size: 1.15em;font-weight: bold; margin:5px 0px 5px 0px;">{{subscriptionData.uservs.name}}</div>
+                <div id="nameDiv" style="font-size: 1.15em;font-weight: bold; margin:5px 0px 5px 0px;
+                    text-align: center; color:#6c0404;">
+                    {{subscriptionData.uservs.name}}</div>
                 <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>:
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>
-            <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
+            <div horizontal layout center center-justified style="margin:10px 0 0 0; font-size: 0.9em;">
                 <template if="{{isClientToolConnected}}">
                     <paper-button raised type="button" on-click="{{activateUser}}"
                                          style="margin:0 10px;display:{{isActive?'none':'block'}}">
@@ -45,7 +47,7 @@
                                    messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></reason-dialog>
             </div>
         </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('groupvs-user', {

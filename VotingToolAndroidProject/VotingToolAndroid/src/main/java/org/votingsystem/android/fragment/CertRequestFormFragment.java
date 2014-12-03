@@ -30,7 +30,6 @@ import android.widget.TextView.OnEditorActionListener;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertResponseActivity;
-import org.votingsystem.android.activity.EventVSMainActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;

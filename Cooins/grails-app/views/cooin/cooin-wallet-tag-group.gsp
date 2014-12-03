@@ -43,8 +43,7 @@
                             <template if="{{cooin | isTimeLimited}}">
                                 <div style="font-size: 2em; margin: 10px 10px 20px 10px;"><g:message code="expendBeforeMonday"/></div>
                             </template>
-                            <div style="font-size: 1.4em; margin: 10px 10px 15px 10px;">{{cooin | dateInfo}}</div>
-                            <div style="font-size: 1em; margin: 10px;">{{cooin.cooinServerURL}}</div>
+                            <div style="font-size: 1.2em; margin: 10px 10px 15px 10px;">{{cooin | dateInfo}}</div>
                         </div>
                     </core-tooltip>
                 </template>

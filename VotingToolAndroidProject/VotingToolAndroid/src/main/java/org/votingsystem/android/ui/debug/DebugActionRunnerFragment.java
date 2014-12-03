@@ -16,7 +16,7 @@ import com.google.zxing.integration.android.IntentResult;
 import org.votingsystem.android.R;
 import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
 import org.votingsystem.android.ui.debug.actions.PrefsAction;
-import org.votingsystem.android.ui.debug.actions.QREncoderAction;
+import org.votingsystem.android.ui.debug.actions.QRGeneratorAction;
 import org.votingsystem.android.ui.debug.actions.QRScannerAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
 
@@ -39,7 +39,7 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new QRScannerAction(DebugActionRunnerFragment.this)));
-        tests.addView(createTestAction(new QREncoderAction(getActivity())));
+        tests.addView(createTestAction(new QRGeneratorAction(getActivity())));
 
         setHasOptionsMenu(true);
         return rootView;
