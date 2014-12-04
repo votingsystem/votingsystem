@@ -19,21 +19,22 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/event_subject"
-                android:textSize="18sp"
+                android:textSize="23sp"
                 android:layout_weight="1.0"/>
             <TextView android:id="@+id/transactionvs_content"
                 android:layout_marginTop="7dp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:textSize="15sp"
+                android:textSize="23sp"
                 android:layout_weight="1.0"/>
             <TextView android:id="@+id/from_user"
                 android:layout_marginTop="7dp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textSize="12sp"
+                android:layout_marginRight="5dp"
+                android:textSize="18sp"
                 android:visibility="gone"
                 android:layout_weight="1.0"/>
             <TextView android:id="@+id/to_user"
@@ -41,17 +42,18 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textSize="12sp"
+                android:layout_marginRight="5dp"
+                android:textSize="18sp"
                 android:visibility="gone"
                 android:layout_weight="1.0"/>
 
-            <TextView android:id="@+id/receipt"
+            <Button android:id="@+id/receipt_button"
                 android:layout_marginTop="7dp"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textSize="12sp"
-                android:layout_weight="1.0"/>
+                android:textSize="18sp"
+                android:layout_gravity="center_horizontal"/>
 
         </LinearLayout>
     </ScrollView>

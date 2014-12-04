@@ -221,13 +221,10 @@ public class ReceiptFragment extends Fragment {
                 case COOIN_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
-                    currency = dataJSON.getString("currency");
+                    currency = dataJSON.getString("currencyCode");
                     String serverURL = dataJSON.getString("serverURL");
-                    JSONArray arrayCooins = dataJSON.getJSONArray("cooins");
-                    String cooinValueStr = arrayCooins.getJSONObject(0).getString("cooinValue");
-                    Integer numCooins = arrayCooins.getJSONObject(0).getInt("numCooins");
                     contentFormatted = getString(R.string.cooin_request_formatted,
-                            totalAmount.toPlainString(), currency, numCooins, cooinValueStr, serverURL);
+                            totalAmount.toPlainString(), currency, serverURL);
                     break;
                 case VOTEVS:
                     VoteVS voteVS = (VoteVS)receiptContainer;
@@ -250,6 +247,10 @@ public class ReceiptFragment extends Fragment {
                             CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
                             dataJSON.getString("eventURL"));
                     receiptSubjectStr = getString(org.votingsystem.android.lib.R.string.access_request_lbl);
+                    break;
+                case FROM_GROUP_TO_ALL_MEMBERS:
+                    contentFormatted = TransactionVS.getSMIMEContentFormatted(getActivity(),
+                            selectedReceiptSMIME.getSignedContent());
                     break;
                 default:
                     contentFormatted = receiptContainer.getReceipt().getSignedContent();
@@ -274,6 +275,14 @@ public class ReceiptFragment extends Fragment {
             LOGD(TAG + ".setActionBarMenu", "menu null");
             return;
         }
+        if(selectedReceipt == null || selectedReceipt.getTypeVS() == null) {
+            LOGD(TAG + ".selectedReceipt", "selectedReceipt undefined");
+            return;
+        }
+        if(TypeVS.VOTEVS != selectedReceipt.getTypeVS()) {
+            menu.removeItem(R.id.cancel_vote);
+            menu.removeItem(R.id.check_receipt);
+        }
         switch(selectedReceipt.getTypeVS()) {
             case VOTEVS:
                 if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
@@ -287,14 +296,6 @@ public class ReceiptFragment extends Fragment {
                 MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
-                break;
-            case COOIN_REQUEST:
-            case REPRESENTATIVE_SELECTION:
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                menu.removeItem(R.id.cancel_vote);
-                menu.removeItem(R.id.check_receipt);
-                break;
-            case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 break;
             default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +
                     selectedReceipt.getTypeVS());

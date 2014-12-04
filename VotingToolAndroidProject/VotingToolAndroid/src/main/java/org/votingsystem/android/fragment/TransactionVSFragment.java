@@ -19,8 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
@@ -31,7 +31,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -48,7 +47,7 @@ public class TransactionVSFragment extends Fragment {
     private TextView transactionvs_content;
     private TextView to_user;
     private TextView from_user;
-    private TextView receipt;
+    private Button receipt;
     private SMIMEMessage messageSMIME;
     private String broadCastId = null;
     private AppContextVS contextVS;
@@ -104,7 +103,7 @@ public class TransactionVSFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.transactionvs, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
         from_user = (TextView)rootView.findViewById(R.id.from_user);
-        receipt = (TextView)rootView.findViewById(R.id.receipt);
+        receipt = (Button) rootView.findViewById(R.id.receipt_button);
         transactionvs_content = (TextView)rootView.findViewById(R.id.transactionvs_content);
         transactionvs_content.setMovementMethod(LinkMovementMethod.getInstance());
         transactionvsSubject = (TextView)rootView.findViewById(R.id.transactionvs_subject);
@@ -116,7 +115,7 @@ public class TransactionVSFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             selectedTransaction = (TransactionVS) savedInstanceState.getSerializable(
-                    ContextVS.MESSAGE_KEY);
+                    ContextVS.TRANSACTION_KEY);
         }
         if(selectedTransaction != null) initTransactionVSScreen(selectedTransaction);
     }
@@ -141,7 +140,7 @@ public class TransactionVSFragment extends Fragment {
         messageSMIME = transactionvs.getMessageSMIME();
         transactionvsSubject.setText(selectedTransaction.getSubject());
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
-        receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
+        receipt.setText(getString(R.string.transactionvs_receipt));
         from_user.setVisibility(View.GONE);
         transactionvsSubject.setVisibility(View.GONE);
         receipt.setOnClickListener(new View.OnClickListener() {
@@ -169,9 +168,9 @@ public class TransactionVSFragment extends Fragment {
                     selectedTransaction.getType());
         }
         if(getActivity() instanceof FragmentActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.movement_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    selectedTransaction.getDescription(getActivity()));
+                    selectedTransaction.getDescription(getActivity(), selectedTransaction.getType()));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
                     selectedTransaction.getIconId(getActivity()));
         }
@@ -179,7 +178,8 @@ public class TransactionVSFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(selectedTransaction != null) outState.putSerializable(ContextVS.MESSAGE_KEY, selectedTransaction);
+        if(selectedTransaction != null) outState.putSerializable(
+                ContextVS.TRANSACTION_KEY, selectedTransaction);
     }
 
     @Override public void onResume() {
@@ -206,12 +206,12 @@ public class TransactionVSFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.show_signers_info:
                 break;
-            case R.id.delete_transactionvs:
+            /*case R.id.delete_transactionvs:
                 String selection = TransactionVSContentProvider.ID_COL + " = ?";
                 String[] selectionArgs = { selectedTransaction.getId().toString() };
                 getActivity().getContentResolver().delete(TransactionVSContentProvider.CONTENT_URI,
                         selection, selectionArgs);
-                return true;
+                return true;*/
         }
         return super.onOptionsItemSelected(item);
     }

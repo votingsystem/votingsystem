@@ -118,10 +118,8 @@ public class DateUtils {
     }
 
     public static Date getDayWeekDate (String dateStr) throws ParseException {
-        Date result = null;
         try {
-            result = getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");
-            return result;
+            return getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");
         } catch (Exception ex) {
             Calendar resultCalendar = Calendar.getInstance();
             resultCalendar.setTime(getDateFromString (dateStr, "EEE dd MMM' 'HH:mm"));

@@ -280,14 +280,14 @@ public class TransactionVSGridFragment extends Fragment
                             TransactionVSContentProvider.WEEK_LAPSE_COL));
                     Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
-                    transaction_type.setText(transactionVS.getDescription(getActivity()));
+                    transaction_type.setText(transactionVS.getDescription(getActivity(),
+                            transactionVS.getType()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
                     week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated()));
                     TextView amount = (TextView) view.findViewById(R.id.amount);
                     amount.setText(transactionVS.getAmount().toPlainString());
                     TextView currency = (TextView) view.findViewById(R.id.currencyCode);
                     currency.setText(transactionVS.getCurrencyCode());
-
                     ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
                             transactionVS.getIconId(getActivity()));
                 }

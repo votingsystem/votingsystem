@@ -24,6 +24,10 @@ public class FinanceMainActivity extends ActivityBase {
 
     public static final String TAG = FinanceMainActivity.class.getSimpleName();
 
+    //corresponds to finance section child screens order
+    private static final int USER_ACCOUNTS_POS       = 0;
+    private static final int TRANSANCTIONVS_LIST_POS = 1;
+
     private AppContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -34,11 +38,30 @@ public class FinanceMainActivity extends ActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            public void onPageScrollStateChanged(int state) { }
+
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+
+            public void onPageSelected(int position) {
+                LOGD(TAG + ".onCreate", "onPageSelected: " + position);
+                switch (position) {
+                    case USER_ACCOUNTS_POS:
+                        getSupportActionBar().setSubtitle(getString(R.string.uservs_accounts_lbl));
+                        break;
+                    case TRANSANCTIONVS_LIST_POS:
+                        getSupportActionBar().setSubtitle(getString(R.string.movements_lbl));
+                        break;
+                }
+
+            }
+        });
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         CooinPagerAdapter pagerAdapter = new CooinPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
-        getSupportActionBar().setTitle(getString(R.string.uservs_accounts_lbl));
+        getSupportActionBar().setTitle(getString(R.string.finance_lbl));
+        getSupportActionBar().setSubtitle(getString(R.string.uservs_accounts_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

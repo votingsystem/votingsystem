@@ -264,8 +264,8 @@
         <b>\'%4$s\'</b>]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">actualizando datos del representante</string>
-    <string name="cooin_request_formatted"><![CDATA[importe total de la operación: <b>%1$s %2$ss</b><br/>
-    %3$s cooins de %4$s %2$ss<br/><br/>url de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
+    <string name="cooin_request_formatted"><![CDATA[importe de la operación: <b>%1$s %2$ss</b>
+        <br/>url de servidor: <a href=\'%3$s\'>%3$s</a>]]></string>
     <string name="receipt_vote_subtitle">voto</string>
     <string name="receipt_cancel_vote_subtitle">cancelación de voto</string>
     <string name="anonimous_representative_request_lbl">delegación anónima de representante</string>
@@ -315,7 +315,7 @@
     <b>nombre:</b> %2$s]]></string>
     <string name="transactionvs_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
         <b>nombre:</b> %2$s]]></string>
-    <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>justificante</a>]]></string>
+    <string name="transactionvs_receipt">recibo</string>
     <string name="cooin_cancellation_msg_subject">cancelación de cooin</string>
     <string name="wallet_lbl">monedero</string>
     <string name="cert_info_lbl">datos del certificado</string>
@@ -408,7 +408,7 @@
     <string name="rejected_lbl">rechazado</string>
     <string name="currency_lbl">divisa</string>
     <string name="in_lbl">en</string>
-    <string name="uservs_accounts_lbl">cuentas de usuario</string>
+    <string name="uservs_accounts_lbl">cuentas</string>
     <string name="eventvs_election_active">votaciones abiertas</string>
     <string name="eventvs_election_closed">votaciones cerradas</string>
     <string name="eventvs_election_pending">votaciones pendientes</string>
@@ -468,4 +468,6 @@
     <string name="transactionvs_operation">solicitar ingreso en cuenta</string>
     <string name="operation_lbl">operación</string>
     <string name="delete_transactionvs_lbl">borrar transacción</string>
+    <string name="movements_lbl">movimientos</string>
+    <string name="movement_lbl">movimiento</string>
 </resources>

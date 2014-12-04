@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,7 +64,7 @@ public class UserVSAccountsFragment extends Fragment {
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
     private AppContextVS contextVS;
     private TextView last_request_date;
-    private ListView accounts_list_view;
+    private RecyclerView accounts_recycler_view;
     private String IBAN;
     private String pin;
 
@@ -138,7 +140,10 @@ public class UserVSAccountsFragment extends Fragment {
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.uservs_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
-        accounts_list_view = (ListView) rootView.findViewById(R.id.accounts_list_view);
+        //https://developer.android.com/training/material/lists-cards.html
+        accounts_recycler_view = (RecyclerView) rootView.findViewById(R.id.accounts_recycler_view);
+        accounts_recycler_view.setHasFixedSize(true);
+        accounts_recycler_view.setLayoutManager(new LinearLayoutManager(getActivity()));
         setHasOptionsMenu(true);
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
@@ -203,7 +208,7 @@ public class UserVSAccountsFragment extends Fragment {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
                     AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
                             tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
-                    accounts_list_view.setAdapter(accountVSInfoAdapter);
+                    accounts_recycler_view.setAdapter(accountVSInfoAdapter);
                 }
             }
         } catch(Exception ex) {
@@ -297,15 +302,23 @@ public class UserVSAccountsFragment extends Fragment {
         outState.putSerializable(ContextVS.TRANSACTION_KEY, transactionVS);
     }
 
-    public class AccountVSInfoAdapter extends ArrayAdapter<String> {
+    public class AccountVSInfoAdapter extends RecyclerView.Adapter<AccountVSInfoAdapter.ViewHolder>{
+
         private final Context context;
         private Map<String, TagVSInfo> tagVSListBalances;
         private List<String> tagVSList;
         private String currencyCode;
 
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public View accountView;
+            public ViewHolder(View accountView) {
+                super(accountView);
+                this.accountView = accountView;
+            }
+        }
+
         public AccountVSInfoAdapter(Context context, Map<String, TagVSInfo> tagVSListBalances,
-                    String currencyCode, String[] tagArray) {
-            super(context, R.layout.accountvs_info, tagArray);
+                        String currencyCode, String[] tagArray) {
             this.context = context;
             this.currencyCode = currencyCode;
             this.tagVSListBalances = tagVSListBalances;
@@ -313,10 +326,15 @@ public class UserVSAccountsFragment extends Fragment {
             tagVSList.addAll(tagVSListBalances.keySet());
         }
 
-        @Override public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
+        @Override public AccountVSInfoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                    int viewType) {
+            View accountView = ((LayoutInflater) context.getSystemService(Context.
+                    LAYOUT_INFLATER_SERVICE)).inflate(R.layout.accountvs_card, parent, false);
+            return new ViewHolder(accountView);
+        }
+
+        @Override public void onBindViewHolder(ViewHolder holder, int position) {
+            View accountView = holder.accountView;
             TagVSInfo selectedTag = tagVSListBalances.get(tagVSList.get(position));
             final BigDecimal accountBalance = selectedTag.getCash();
             Button request_button = (Button) accountView.findViewById(R.id.cash_button);
@@ -347,7 +365,10 @@ public class UserVSAccountsFragment extends Fragment {
                 time_limited_text.setText(getString(R.string.time_remaining_info_lbl, timeLimitedMsg));
                 time_limited_text.setVisibility(View.VISIBLE);
             }
-            return accountView;
+        }
+
+        @Override public int getItemCount() {
+            return tagVSListBalances.size();
         }
     }
 

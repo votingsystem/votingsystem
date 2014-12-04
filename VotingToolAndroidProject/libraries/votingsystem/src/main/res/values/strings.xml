@@ -35,13 +35,19 @@
     <string name="anonimous_representative_request_lbl">solicitud de delegación anónima</string>
     <string name="receipt_lbl">recibo</string>
     <string name="account_input">ingreso en cuenta</string>
-    <string name="account_output">tetirada de efectivo</string>
-    <string name="cooin_send">pago en Cooins</string>
-    <string name="cooin_request_subtitle">obtención de Cooins</string>
+    <string name="account_output">retirada de efectivo</string>
+    <string name="cooin_send">pago anónimo</string>
+    <string name="cooin_ticket_send">pago en efectivo</string>
+    <string name="cooin_request_subtitle">retirada de efectivo</string>
     <string name="cooin_cancellation">cancelación de cooins</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>
     <string name="representative_selection_lbl">delegación pública de representante</string>
     <string name="access_request_lbl">solicitud de acceso</string>
+    <string name="time_limited_lbl">con límite de tiempo</string>
+    <string name="from_group_to_all_member_smime_content"><![CDATA[<b>grupo: </b>%1$s<br/>
+        <b>asunto: </b>%2$s<br/><b>cantidad: </b>%3$s %4$s<br/><b>etiqueta: </b>%5$s]]>
+    </string>
+    <string name="from_group_to_all_member_lbl">ingreso de grupo</string>
 </resources>

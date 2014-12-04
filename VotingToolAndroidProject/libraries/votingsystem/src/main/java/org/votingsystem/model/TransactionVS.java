@@ -279,6 +279,8 @@ public class TransactionVS  implements Serializable {
                 return R.drawable.edit_undo_24;
             case COOIN_SEND:
                 return R.drawable.fa_money_24;
+            case FROM_GROUP_TO_ALL_MEMBERS:
+                return R.drawable.system_users_16;
             default:
                 return R.drawable.pending;
         }
@@ -292,7 +294,7 @@ public class TransactionVS  implements Serializable {
         }
     }
 
-    public String getDescription(Context context) {
+    public static String getDescription(Context context, Type type) {
         switch(type) {
             case COOIN_CANCELLATION:
                 return context.getString(R.string.cooin_cancellation);
@@ -307,6 +309,28 @@ public class TransactionVS  implements Serializable {
             default:
                 return type.toString();
         }
+    }
+
+    public static String getSMIMEContentFormatted(Context context, String contentStr) throws JSONException {
+        JSONObject contentJSON = new JSONObject(contentStr);
+        Type type = Type.valueOf(contentJSON.getString("operation"));
+        String result = null;
+        switch(type) {
+            case FROM_GROUP_TO_ALL_MEMBERS:
+                boolean isTimeLimited = contentJSON.getBoolean("isTimeLimited");
+                result = isTimeLimited?context.getString(R.string.time_limited_lbl) + "</br>":"";
+                String fromUserName = contentJSON.getString("fromUser");
+                String subject = contentJSON.getString("subject");
+                String amount = contentJSON.getString("amount");
+                String currencyCode = contentJSON.getString("currencyCode");
+                String tag = (String) contentJSON.getJSONArray("tags").get(0);
+                result = result + context.getString(R.string.from_group_to_all_member_smime_content,
+                        fromUserName, subject, amount, currencyCode, tag);
+                break;
+            default:
+                result = contentJSON.toString();
+        }
+        return result;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
@@ -464,8 +488,8 @@ public class TransactionVS  implements Serializable {
     @Override public String toString() {
         return  "[TransactionVS - subject: '" + subject + "' - amount: '" + amount + "'" +
                 " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS.getName() +
-                toUserVS != null? " - toUser: '" + toUserVS.getName() + "' - toUserIBAN: '" +
-                toUserVS.getIBAN(): "" + "]";
+                ((toUserVS != null)? " - toUser: '" + toUserVS.getName() + "' - toUserIBAN: '" +
+                toUserVS.getIBAN(): "") + "]";
     }
 
 }
