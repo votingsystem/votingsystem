@@ -7,8 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -26,7 +27,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
@@ -34,6 +34,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.CooinService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -43,7 +44,6 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.text.Collator;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -155,11 +155,16 @@ public class TransactionVSGridFragment extends Fragment
         }
     }
 
-    private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
-            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
-        } else ProgressDialogFragment.hide(getFragmentManager());
+    private void setProgressDialogVisible(final boolean isVisible) {
+        //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
+        new Handler(){
+            @Override public void handleMessage(Message msg) {
+                if (isVisible) {
+                    ProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
+                            getString(R.string.loading_data_msg), getFragmentManager());
+                } else ProgressDialogFragment.hide(getFragmentManager());
+            }
+        }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -261,7 +266,7 @@ public class TransactionVSGridFragment extends Fragment
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_transactionvs, viewGroup, false);
+            return inflater.inflate(R.layout.transactionvs_card, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {
@@ -274,15 +279,10 @@ public class TransactionVSGridFragment extends Fragment
                     String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                             TransactionVSContentProvider.WEEK_LAPSE_COL));
                     Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
-                    Calendar weekLapseCalendar = Calendar.getInstance();
-                    weekLapseCalendar.setTime(weekLapse);
-                    LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                    linearLayout.setBackgroundColor(Color.WHITE);
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
                     transaction_type.setText(transactionVS.getDescription(getActivity()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
                     week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated()));
-
                     TextView amount = (TextView) view.findViewById(R.id.amount);
                     amount.setText(transactionVS.getAmount().toPlainString());
                     TextView currency = (TextView) view.findViewById(R.id.currencyCode);

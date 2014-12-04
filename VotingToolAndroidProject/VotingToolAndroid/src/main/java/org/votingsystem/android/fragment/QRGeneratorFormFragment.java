@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -26,7 +25,6 @@ import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -127,7 +125,7 @@ public class QRGeneratorFormFragment extends Fragment {
 
         if(contextVS.getWebSocketSession() == null) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.qr_code_lbl), getString(R.string.qr_connection_required_msg),
+                    getString(R.string.qr_create_lbl), getString(R.string.qr_connection_required_msg),
                     getActivity()).setPositiveButton(getString(R.string.accept_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {

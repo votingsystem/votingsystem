@@ -223,7 +223,7 @@ public class UserVSAccountsFragment extends Fragment {
             case R.id.update_signers_info:
                 sendUserInfoRequest();
                 return true;
-            case R.id.open_cooin_grid:
+            case R.id.open_wallet:
                 UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), getActivity());
                 return true;
             default:

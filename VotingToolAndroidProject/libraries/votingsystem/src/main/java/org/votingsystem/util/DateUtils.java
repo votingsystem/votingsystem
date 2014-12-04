@@ -123,8 +123,10 @@ public class DateUtils {
             result = getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");
             return result;
         } catch (Exception ex) {
-            result = getDateFromString (dateStr, "EEE dd MMM' 'HH:mm");
-            return result;
+            Calendar resultCalendar = Calendar.getInstance();
+            resultCalendar.setTime(getDateFromString (dateStr, "EEE dd MMM' 'HH:mm"));
+            resultCalendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
+            return resultCalendar.getTime();
         }
     }
 

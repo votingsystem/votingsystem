@@ -244,7 +244,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 && contextVS.getAccessControl() != null)
             fetchItems(offset);
         else {
-            //bug, without thread triggers 'Can not perform this action inside of onLoadFinished'
             setProgressDialogVisible(false);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             else cursor.moveToFirst();

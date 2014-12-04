@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
@@ -36,14 +37,15 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
                 getSupportFragmentManager());
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
         String weekLapse = DateUtils.getPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
@@ -53,14 +55,10 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
                 cursor.moveToPosition(position);
-                updateActionBarTitle();
             }
         });
         mViewPager.setCurrentItem(cursorPosition);
-        updateActionBarTitle();
     }
-
-    private void updateActionBarTitle() { }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

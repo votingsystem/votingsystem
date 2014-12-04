@@ -38,6 +38,7 @@
             android:verticalSpacing="7dp"
             android:horizontalSpacing="7dp"
             android:stretchMode="columnWidth"
+            android:padding="4dp"
             android:gravity="center"
             android:drawSelectorOnTop="false"/>
 

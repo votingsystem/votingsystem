@@ -1,5 +1,6 @@
 package org.votingsystem.android.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,9 +30,9 @@ public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
 
-    public static void launchQRScanner(Context activity) {
+    public static void launchQRScanner(Activity activity) {
         IntentIntegrator integrator = null;
-        if(activity != null) integrator = new IntentIntegrator((android.app.Activity) activity);
+        if(activity != null) integrator = new IntentIntegrator(activity);
         integrator.addExtra("SCAN_WIDTH", 500);
         integrator.addExtra("SCAN_HEIGHT", 500);
         integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);

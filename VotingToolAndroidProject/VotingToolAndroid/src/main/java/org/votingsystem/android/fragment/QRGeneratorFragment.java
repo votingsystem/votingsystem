@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.zxing.WriterException;
 
@@ -21,7 +20,6 @@ import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.QRUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ExceptionVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;

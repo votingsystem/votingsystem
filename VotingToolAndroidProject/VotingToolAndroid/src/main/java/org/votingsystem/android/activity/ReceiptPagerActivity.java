@@ -36,12 +36,12 @@ public class ReceiptPagerActivity extends ActionBarActivity {
         setContentView(R.layout.pager_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
         cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null, null);
         cursor.moveToPosition(cursorPosition);

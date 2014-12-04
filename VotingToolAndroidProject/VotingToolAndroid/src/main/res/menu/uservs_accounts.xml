@@ -5,17 +5,17 @@
         android:showAsAction="never"
         android:title="@string/update_signers_info_lbl"/>
 
-    <group android:id="@+id/dev_items">
-        <item android:id="@+id/open_cooin_grid"
-            android:orderInCategory="1"
-            android:showAsAction="never"
-            android:icon="@android:drawable/btn_plus"
-            android:title="@string/wallet_lbl"/>
-    </group>
-
-    <!--<item android:id="@+id/admin_cooins_menu_item"
-        android:orderInCategory="3"
+    <item android:id="@+id/open_wallet"
+        android:orderInCategory="1"
         android:showAsAction="never"
-        android:title="@string/admin_cooins_menu_item"/>-->
+        android:icon="@android:drawable/btn_plus"
+        android:title="@string/wallet_lbl"/>
+
+    <!--<group android:id="@+id/dev_items">
+        <item android:id="@+id/admin_cooins_menu_item"
+            android:orderInCategory="3"
+            android:showAsAction="never"
+            android:title="@string/admin_cooins_menu_item"/>
+    </group>-->
 
 </menu>

@@ -467,4 +467,5 @@
     <string name="cooin_ticket_request_operation">solicitar cooins</string>
     <string name="transactionvs_operation">solicitar ingreso en cuenta</string>
     <string name="operation_lbl">operación</string>
+    <string name="delete_transactionvs_lbl">borrar transacción</string>
 </resources>

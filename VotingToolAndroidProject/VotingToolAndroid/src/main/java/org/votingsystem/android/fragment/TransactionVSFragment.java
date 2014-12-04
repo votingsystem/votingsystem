@@ -42,7 +42,7 @@ public class TransactionVSFragment extends Fragment {
 
     public static final String TAG = TransactionVSFragment.class.getSimpleName();
 
-    private TransactionVS selectedTransactionVS;
+    private TransactionVS selectedTransaction;
     private Menu menu;
     private TextView transactionvsSubject;
     private TextView transactionvs_content;
@@ -61,8 +61,8 @@ public class TransactionVSFragment extends Fragment {
             switch(responseVS.getTypeVS()) {
                 case RECEIPT:
                     byte[] receiptBytes = (byte[]) responseVS.getData();
-                    selectedTransactionVS.setMessageSMIMEBytes(receiptBytes);
-                    TransactionVSContentProvider.updateTransaction(contextVS, selectedTransactionVS);
+                    selectedTransaction.setMessageSMIMEBytes(receiptBytes);
+                    TransactionVSContentProvider.updateTransaction(contextVS, selectedTransaction);
                 break;
             }
         }
@@ -83,14 +83,16 @@ public class TransactionVSFragment extends Fragment {
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         //String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
-        Cursor cursor = getActivity().getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,
-                null, null, null, null);
+        Cursor cursor = getActivity().getContentResolver().query(
+                TransactionVSContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         Long transactionId = cursor.getLong(cursor.getColumnIndex(
                 TransactionVSContentProvider.ID_COL));
-        selectedTransactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
-        selectedTransactionVS.setLocalId(transactionId);
+        try {
+            selectedTransaction = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
+            selectedTransaction.setLocalId(transactionId);
+        } catch (Exception ex) {ex.printStackTrace();}
         /*String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                 TransactionVSContentProvider.WEEK_LAPSE_COL));
         String currencyStr = cursor.getString(cursor.getColumnIndex(
@@ -113,10 +115,10 @@ public class TransactionVSFragment extends Fragment {
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            selectedTransactionVS = (TransactionVS) savedInstanceState.getSerializable(
+            selectedTransaction = (TransactionVS) savedInstanceState.getSerializable(
                     ContextVS.MESSAGE_KEY);
         }
-        initTransactionVSScreen(selectedTransactionVS);
+        if(selectedTransaction != null) initTransactionVSScreen(selectedTransaction);
     }
 
     private void initTransactionVSScreen (final TransactionVS transactionvs) {
@@ -137,7 +139,7 @@ public class TransactionVSFragment extends Fragment {
                 DateUtils.getDayWeekDateStr(transactionvs.getDateCreated()),
                 transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         messageSMIME = transactionvs.getMessageSMIME();
-        transactionvsSubject.setText(selectedTransactionVS.getSubject());
+        transactionvsSubject.setText(selectedTransaction.getSubject());
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
         receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
         from_user.setVisibility(View.GONE);
@@ -153,8 +155,8 @@ public class TransactionVSFragment extends Fragment {
     }
 
     private void setActionBar() {
-        if(selectedTransactionVS == null) return;
-        switch(selectedTransactionVS.getType()) {
+        if(selectedTransaction == null) return;
+        switch(selectedTransaction.getType()) {
             case COOIN_CANCELLATION:
                 break;
             case COOIN_REQUEST:
@@ -164,20 +166,20 @@ public class TransactionVSFragment extends Fragment {
                 //menu.removeItem(R.id.cancel_vote);
                 break;
             default: LOGD(TAG + ".onCreateOptionsMenu", "unprocessed type: " +
-                    selectedTransactionVS.getType());
+                    selectedTransaction.getType());
         }
         if(getActivity() instanceof FragmentActivity) {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    selectedTransactionVS.getDescription(getActivity()));
+                    selectedTransaction.getDescription(getActivity()));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
-                    selectedTransactionVS.getIconId(getActivity()));
+                    selectedTransaction.getIconId(getActivity()));
         }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(selectedTransactionVS != null) outState.putSerializable(ContextVS.MESSAGE_KEY, selectedTransactionVS);
+        if(selectedTransaction != null) outState.putSerializable(ContextVS.MESSAGE_KEY, selectedTransaction);
     }
 
     @Override public void onResume() {
@@ -204,6 +206,12 @@ public class TransactionVSFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.show_signers_info:
                 break;
+            case R.id.delete_transactionvs:
+                String selection = TransactionVSContentProvider.ID_COL + " = ?";
+                String[] selectionArgs = { selectedTransaction.getId().toString() };
+                getActivity().getContentResolver().delete(TransactionVSContentProvider.CONTENT_URI,
+                        selection, selectionArgs);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

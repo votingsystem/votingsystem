@@ -164,12 +164,21 @@ public class TransactionVSContentProvider extends ContentProvider {
 
     @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int rowCount = database.delete(TABLE_NAME, ID_COL + " = ?",
-                new String[]{String.valueOf(ContentUris.parseId(uri))});
+        LOGD(TAG + ".delete", "selection: " + selection);
+        int rowCount;
+        if(selection != null) {
+            rowCount = database.delete(TABLE_NAME, selection, selectionArgs);
+        } else {
+            rowCount = database.delete(TABLE_NAME, ID_COL + " = ?",
+                    new String[]{String.valueOf(ContentUris.parseId(uri))});
+        }
+        LOGD(TAG + ".delete", "selection: '" + selection + "' selectionArgs: " + selectionArgs +
+                " - rowCount: " + rowCount);
         // Notify any listeners and return the deleted row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
     }
+
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 

@@ -461,11 +461,11 @@ public class TransactionVS  implements Serializable {
         return result;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return  "[TransactionVS - subject: '" + subject + "' - amount: '" + amount + "'" +
-            " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS.getName() + " - toUser: '" +
-                toUserVS.getName() + "' - toUserIBAN: '" + toUserVS.getIBAN() +"']";
+                " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS.getName() +
+                toUserVS != null? " - toUser: '" + toUserVS.getName() + "' - toUserIBAN: '" +
+                toUserVS.getIBAN(): "" + "]";
     }
 
 }
