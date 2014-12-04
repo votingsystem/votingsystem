@@ -91,7 +91,7 @@ public class QRGeneratorFormFragment extends Fragment {
         operationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         operationSpinner.setAdapter(operationAdapter);
         currencySpinner = (Spinner) rootView.findViewById(R.id.currency_spinner);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.menu_qr));
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_create_lbl));
         btn_plus = (Button) rootView.findViewById(R.id.btn_plus);
         btn_plus.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

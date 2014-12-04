@@ -18,10 +18,12 @@ public class QRMessageVS {
     private Long id;
     private BigDecimal amount;
     private Integer numTickets;
+    private String qrMessage;
 
     //http://cooins:8086/Cooins/QR/test?cht=qr&chs=200x200&chl=qrMessage
     //qrMessage -> operation=TRANSACTION;id=1;URL=https://cooins:8086/Cooins;amount=100_eur_WILDTAG;
     public QRMessageVS(String qrMessage) throws ExceptionVS {
+        this.qrMessage = qrMessage;
         String[] messageParts = qrMessage.split(";");
         String[] partContent = messageParts[0].split("="); //0 -> operation
         if(partContent.length > 1) {
@@ -106,5 +108,13 @@ public class QRMessageVS {
 
     public void setNumTickets(int numTickets) {
         this.numTickets = numTickets;
+    }
+
+    public String getQrMessage() {
+        return qrMessage;
+    }
+
+    public void setQrMessage(String qrMessage) {
+        this.qrMessage = qrMessage;
     }
 }

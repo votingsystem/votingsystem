@@ -27,6 +27,10 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -39,7 +43,9 @@ import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.WebSocketRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -353,12 +359,15 @@ public abstract class ActivityBase extends ActionBarActivity {
         }
         Intent intent = null;
         switch (id) {
-            case R.id.menu_qr:
+            case R.id.qr_read_menu:
+                Utils.launchQRScanner(this);
+                return true;
+            case R.id.qr_create_menu:
                 intent = new Intent(this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFormFragment.class.getName());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
-                break;
+                return true;
             case R.id.menu_about:
                 HelpUtils.showAbout(this);
                 return true;
@@ -374,6 +383,26 @@ public abstract class ActivityBase extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (result != null) {
+            QRMessageVS qrMessageVS = null;
+            try {
+                qrMessageVS = new QRMessageVS(result.getContents());
+                Toast.makeText(getApplication(),
+                        getString(R.string.operation_lbl) + " - " +
+                        qrMessageVS.getOperation().toString(), Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Toast.makeText(getApplication(),
+                        getString(R.string.error_lbl) + " - " + result.getContents(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 
     private void goToNavDrawerItem(int item) {

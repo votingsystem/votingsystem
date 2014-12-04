@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+
 import org.votingsystem.android.R;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
@@ -26,6 +28,16 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
+
+    public static void launchQRScanner(Context activity) {
+        IntentIntegrator integrator = null;
+        if(activity != null) integrator = new IntentIntegrator((android.app.Activity) activity);
+        integrator.addExtra("SCAN_WIDTH", 500);
+        integrator.addExtra("SCAN_HEIGHT", 500);
+        integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);
+        integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
+        integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES, activity);
+    }
 
     public static ResponseVS getBroadcastResponse(TypeVS operation, String serviceCaller,
               ResponseVS responseVS, Context context) {

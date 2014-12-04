@@ -15,9 +15,14 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_qr"
-        android:title="@string/menu_qr"
-        android:orderInCategory="18"
+    <item android:id="@+id/qr_read_menu"
+        android:title="@string/qr_read_lbl"
+        android:orderInCategory="16"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/qr_create_menu"
+        android:title="@string/qr_create_lbl"
+        android:orderInCategory="17"
         android:showAsAction="never" />
 
     <item android:id="@+id/menu_debug"
