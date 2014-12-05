@@ -39,7 +39,6 @@ public class ContextVS {
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
     public static final String COOIN_REQUEST_DATA_FILE_NAME   = "cooinRequestData";
-    public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
     public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";
@@ -54,7 +53,6 @@ public class ContextVS {
 
 
     public static final String PIN_KEY = "PIN";
-    public static final String WALLET_PIN_KEY = "WALLET_PIN_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
     public static final String PERIOD_KEY = "PERIOD";
     public static final String URL_KEY = "URL";
@@ -73,9 +71,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String COOIN_SERVER_URL = "COOIN_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
-    public static final String RECEIVER_KEY = "RECEIVER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
-    public static final String MESSAGE_BYTES_KEY = "MESSAGE_BYTES_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
     public static final String HASH_VALIDATION_KEY = "HASH_VALIDATION_KEY";
@@ -83,20 +79,16 @@ public class ContextVS {
     public static final String VALUE_KEY = "VALUE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
-    public static final String REPRESENTATIVE_KEY = "REPRESENTATIVE_KEY";
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
     public static final String ERROR_PANEL_KEY = "ERROR_PANEL";
     public static final String ICON_KEY = "ICON_KEY";
     public static final String IMAGE_KEY = "IMAGE_KEY";
     public static final String EDITOR_VISIBLE_KEY = "EDITOR_VISIBLE_KEY";
-    public static final String LOADING_KEY = "LOADING_KEY";
-    public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String OPERATIONVS_KEY = "OPERATIONVS_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String USERVS_ACCOUNT_LAST_CHECKED_KEY = "USERVS_ACCOUNT_LAST_CHECKED_KEY";
-    public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENTVS_KEY  = "EVENTVS";
@@ -109,20 +101,15 @@ public class ContextVS {
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String CSR_KEY                     = "csrKey";
-    public static final String HASH_CERT_KEY               = "HASH_CERT_KEY";
     public static final String TIME_KEY                    = "TIME_KEY";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String QUERY_KEY                   = "QUERY_KEY";
-
-    public static final String RSS_LAST_CHECKED_KEY = "RSS_LAST_CHECKED_KEY";
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
             "PENDING_OPERATIONS_LAST_CHECKED_KEY";
 
     //Pages size
     //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
-    public static final Integer EVENTVS_PAGE_SIZE = 20;
-
     //Num. max of weeks for anonymous delegations. 52 -> one year
     public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;
 

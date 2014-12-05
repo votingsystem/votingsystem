@@ -10,4 +10,10 @@
         android:key="requestCertButton"
         android:summary="@string/request_certificate_menu"/>
 
+    <Preference android:title="@string/change_pin"
+        android:key="changePinButton"/>
+
+    <Preference android:title="@string/about_msg"
+        android:key="aboutAppButton"/>
+
 </PreferenceScreen>

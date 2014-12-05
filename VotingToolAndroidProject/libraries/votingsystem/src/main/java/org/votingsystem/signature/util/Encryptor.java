@@ -1,7 +1,7 @@
 package org.votingsystem.signature.util;
 
+import android.util.Base64;
 import android.util.Log;
-
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
 import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
@@ -22,7 +22,6 @@ import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
-import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
@@ -153,8 +152,7 @@ public class Encryptor {
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        byte[] result = bOut.toByteArray();
-        return Base64.encode(result);
+        return bOut.toByteArray();
     }
 
     public static byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
@@ -167,7 +165,7 @@ public class Encryptor {
                         setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        return Base64.encode(bOut.toByteArray());
+        return bOut.toByteArray();
     }
 
     /**
@@ -229,7 +227,7 @@ public class Encryptor {
 
     public static byte[] decryptCMS(PrivateKey privateKey, byte[] base64EncryptedData)
             throws Exception {
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData, Base64.DEFAULT);
         CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection c = recipients.getRecipients();
@@ -355,11 +353,10 @@ public class Encryptor {
         //byte[] salt = KeyGeneratorVS.INSTANCE.getEncryptionSalt();
         Map encryptedDataMap = encrypt(textToEncrypt, password, salt);
         byte[] iv = (byte[]) encryptedDataMap.get("iv");
-        String ivBase64 = android.util.Base64.encodeToString(iv, android.util.Base64.DEFAULT);
+        String ivBase64 = Base64.encodeToString(iv, Base64.DEFAULT);
         byte[] encryptedText = (byte[]) encryptedDataMap.get("encryptedText");
-        String encryptedTextBase64 = android.util.Base64.encodeToString(
-                encryptedText, android.util.Base64.DEFAULT);
-        String saltBase64 = android.util.Base64.encodeToString(salt, android.util.Base64.DEFAULT);
+        String encryptedTextBase64 = Base64.encodeToString(encryptedText, Base64.DEFAULT);
+        String saltBase64 = Base64.encodeToString(salt, Base64.DEFAULT);
         JSONObject resultJSON = new JSONObject();
         resultJSON.put("iv", ivBase64);
         resultJSON.put("encryptedText", encryptedTextBase64);
@@ -372,12 +369,9 @@ public class Encryptor {
             InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException,
             UnsupportedEncodingException, InvalidAlgorithmParameterException, JSONException {
-        byte[] encryptedText = android.util.Base64.decode(jsonData.getString("encryptedText"),
-                android.util.Base64.DEFAULT);
-        byte[] salt = android.util.Base64.decode(jsonData.getString("salt"),
-                android.util.Base64.DEFAULT);
-        byte[] iv = android.util.Base64.decode(jsonData.getString("iv"),
-                android.util.Base64.DEFAULT);
+        byte[] encryptedText = Base64.decode(jsonData.getString("encryptedText"), Base64.DEFAULT);
+        byte[] salt = Base64.decode(jsonData.getString("salt"), Base64.DEFAULT);
+        byte[] iv = Base64.decode(jsonData.getString("iv"), Base64.DEFAULT);
         return decrypt(encryptedText, password, salt, iv);
     }
 

@@ -31,12 +31,13 @@ public class CertRequestActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        appContextVS = getApplicationContext();
+        appContextVS = (AppContextVS) getApplicationContext();
         LOGD(TAG + ".onCreate", "appContextVS.getState(): " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_advice);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -95,11 +96,6 @@ public class CertRequestActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-
-    @Override public AppContextVS getApplicationContext() {
-        return (AppContextVS) super.getApplicationContext();
     }
 
 }

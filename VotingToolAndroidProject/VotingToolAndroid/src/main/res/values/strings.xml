@@ -53,7 +53,6 @@
         certificado, no lo olvide, se le pedirá para completar la instalación en el teléfono una vez
         haya verificado su identidad en un centro autorizado</string>
 	<string name="pin_dialog_caption">pin de firma</string>
-    <string name="pin_wallet_caption">pin de monedero</string>
 	<string name="invalidPin">código pin inválido</string>
 	<string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
 	<string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
@@ -451,9 +450,10 @@
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
-    <string name="change_wallet_pin">cambiar pin del monedero</string>
-    <string name="enter_new_pin_wallet_msg">introduzca el nuevo pin, recuerde que si lo olvida perderá el contenido de su monedero</string>
-    <string name="enter_actual_pin_wallet_msg">introduzca el pin actual de su monedero</string>
+    <string name="change_pin">cambiar pin de firma</string>
+    <string name="enter_new_pin_msg">introduzca el nuevo pin, recuerde que si lo olvida no podrá firmar y perderá el contenido de su monedero</string>
+    <string name="confirm_new_pin_msg">confirme el nuevo pin</string>
+    <string name="enter_actual_pin_msg">introduzca el pin actual</string>
     <string name="app_needed_caption">instalar aplicación</string>
     <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
     <string name="qr_code_lbl">código QR</string>
@@ -470,4 +470,8 @@
     <string name="delete_transactionvs_lbl">borrar transacción</string>
     <string name="movements_lbl">movimientos</string>
     <string name="movement_lbl">movimiento</string>
+    <string name="about_msg">información sobre la aplicación</string>
+    <string name="pin_change_lbl">cambiar pin</string>
+    <string name="new_pin_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nuevo pin</string>
+    <string name="new_pin_error_msg">los valores no coinciden comience de nuevo, introduzca el nuevo pin</string>
 </resources>

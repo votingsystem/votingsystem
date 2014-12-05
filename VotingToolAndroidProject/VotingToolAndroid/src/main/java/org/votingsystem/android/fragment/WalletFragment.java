@@ -22,6 +22,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.util.WalletUtils;
@@ -62,24 +63,14 @@ public class WalletFragment extends Fragment {
                 case COOIN:
                     try {
                         actualPIN = pin;
-                        cooinList = WalletUtils.getCooinList(pin, getActivity());
+                        cooinList = WalletUtils.getCooinList(pin,
+                                (AppContextVS) getActivity().getApplicationContext());
                         adapter.setItemList(cooinList);
                         adapter.notifyDataSetChanged();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-                    }
-                    break;
-                case PIN_CHANGE:
-                    try {
-                        WalletUtils.changeWalletPin(pin, actualPIN, getActivity());
-                        MessageDialogFragment.showDialog(getString(R.string.change_wallet_pin),
-                                getString(R.string.operation_ok_msg), getFragmentManager());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        MessageDialogFragment.showDialog(ResponseVS.getExceptionResponse(
-                                ex, getActivity()), getFragmentManager());
                     }
                     break;
             }
@@ -122,7 +113,7 @@ public class WalletFragment extends Fragment {
         });
         cooinList = WalletUtils.getCooinList();
         if(cooinList == null) {
-            PinDialogFragment.showWalletPinScreen(getFragmentManager(), broadCastId,
+            PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
             cooinList = new ArrayList<Cooin>();
         }
@@ -138,10 +129,6 @@ public class WalletFragment extends Fragment {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.change_wallet_pin:
-                PinDialogFragment.showWalletPinScreenWithoutHashValidation(getFragmentManager(),
-                        broadCastId, getString(R.string.enter_new_pin_wallet_msg), TypeVS.PIN_CHANGE);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

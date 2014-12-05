@@ -2,8 +2,10 @@ package org.votingsystem.android.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
 
 import org.json.JSONObject;
+import org.votingsystem.android.R;
 import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
@@ -163,22 +165,22 @@ public class PrefUtils {
         return settings.getString(ContextVS.PIN_KEY, null);
     }
 
-    public static void putWalletPin(String pin, Context context) {
+    public static void putWallet(byte[] encryptedWalletBytes, Context context) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            String hashPin = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-            editor.putString(ContextVS.WALLET_PIN_KEY, hashPin);
+            if(encryptedWalletBytes == null) editor.putString(ContextVS.WALLET_FILE_NAME, null);
+            else editor.putString(ContextVS.WALLET_FILE_NAME,
+                    Base64.encodeToString(encryptedWalletBytes, Base64.DEFAULT));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static String getWalletPinHash(Context context) throws NoSuchAlgorithmException,
-            ExceptionVS {
+    public static String getWallet(Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        return settings.getString(ContextVS.WALLET_PIN_KEY, null);
+        return settings.getString(ContextVS.WALLET_FILE_NAME, null);
     }
 
     public static String getCsrRequest(Context context) {
@@ -304,5 +306,15 @@ public class PrefUtils {
                     deSerializeObject(serializedObject.getBytes());
         }
         return anonymousDelegation;
+    }
+
+    public static void changePin(String newPin, String oldPin, Context context)
+            throws ExceptionVS, NoSuchAlgorithmException {
+        String storedPinHash = PrefUtils.getPinHash(context);
+        String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
+        if(!storedPinHash.equals(pinHash)) {
+            throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+        }
+        PrefUtils.putPin(Integer.valueOf(newPin), context);
     }
 }

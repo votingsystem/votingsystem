@@ -3,8 +3,8 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
 
-import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -20,13 +20,11 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -99,7 +97,8 @@ public class OperationVSService extends IntentService {
                 JSONObject documentToEncrypt = operationVS.getDocumentToEncrypt();
                 byte[] encryptedBytes = Encryptor.encryptToCMS(
                         documentToEncrypt.toString().getBytes(), receiverCert);
-                String encryptedMessageStr = new String(encryptedBytes, "UTF-8");
+                String encryptedMessageStr = Base64.encodeToString(
+                        encryptedBytes, android.util.Base64.DEFAULT);
                 String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr,
                         ContextVS.VOTING_DATA_DIGEST);
                 Map signedMap = new HashMap();
@@ -121,8 +120,8 @@ public class OperationVSService extends IntentService {
                     targetServer.getTimeStampServiceURL(), contextVS);
             responseVS = timeStamper.call();
             smimeMessage = timeStamper.getSMIME();
-            String smimeMessageBase64 = new String(Base64.encode(smimeMessage.getBytes()));
-            operationVS.getDocumentToSignJSON().put("smimeMessage", smimeMessageBase64);
+            operationVS.getDocumentToSignJSON().put("smimeMessage", Base64.encodeToString(
+                    smimeMessage.getBytes(), android.util.Base64.DEFAULT));
             operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));
             responseVS = HttpHelper.sendData(operationVS.getDocumentToSignJSON().toString().getBytes(),
                     ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());

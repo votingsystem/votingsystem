@@ -368,9 +368,6 @@ public abstract class ActivityBase extends ActionBarActivity {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 return true;
-            case R.id.menu_about:
-                HelpUtils.showAbout(this);
-                return true;
             case R.id.menu_debug:
                 if (BuildConfig.DEBUG) {
                     intent = new Intent(getBaseContext(), FragmentContainerActivity.class);

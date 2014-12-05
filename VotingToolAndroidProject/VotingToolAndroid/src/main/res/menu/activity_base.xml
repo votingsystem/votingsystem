@@ -27,11 +27,6 @@
 
     <item android:id="@+id/menu_debug"
         android:title="@string/description_debug"
-        android:orderInCategory="18"
-        android:showAsAction="never" />
-
-    <item android:id="@+id/menu_about"
-        android:title="@string/title_about"
         android:orderInCategory="19"
         android:showAsAction="never" />
 

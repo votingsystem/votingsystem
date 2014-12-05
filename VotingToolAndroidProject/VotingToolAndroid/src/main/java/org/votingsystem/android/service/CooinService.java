@@ -320,7 +320,7 @@ public class CooinService extends IntentService {
                 responseVS.setCaption(getString(R.string.cooin_request_ok_caption)).setNotificationMessage(
                         getString(R.string.cooin_request_ok_msg, cooinBatch.getTotalAmount(),
                         cooinBatch.getCurrencyCode()));
-                WalletUtils.saveCooinList(cooinBatch.getCooinsMap().values(), password, this);
+                WalletUtils.saveCooinList(cooinBatch.getCooinsMap().values(), password, contextVS);
             } else responseVS.setCaption(getString(
                     R.string.cooin_request_error_caption));
         } catch(Exception ex) {

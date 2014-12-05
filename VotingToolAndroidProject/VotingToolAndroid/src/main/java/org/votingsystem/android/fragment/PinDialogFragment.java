@@ -38,6 +38,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.CertResponseActivity;
+import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
@@ -53,6 +54,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     public static final String TAG = PinDialogFragment.class.getSimpleName();
 
+    private static final String NEW_PIN_KEY = "NEW_PIN_KEY";
+    private enum PinChangeStep {PIN_REQUEST, NEW_PIN_REQUEST, NEW_PIN_CONFIRM}
+
     private TypeVS typeVS;
     private TextView msgTextView;
     private EditText userPinEditText;
@@ -60,7 +64,8 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private Boolean withHashValidation = null;
     private String dialogCaller = null;
     private String firstPin = null;
-    private boolean walletPin = false;
+    private String newPin = null;
+    private PinChangeStep pinChangeStep = PinChangeStep.PIN_REQUEST;
 
 
     public static void showPinScreen(FragmentManager fragmentManager, String broadCastId,
@@ -68,6 +73,21 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         boolean isWithCertValidation = true;
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
                 message, isWithPasswordConfirm, isWithCertValidation, broadCastId, type);
+        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
+    }
+
+    public static void showWalletScreen(FragmentManager fragmentManager, String broadCastId,
+                 String message, boolean isWithPasswordConfirm, TypeVS type) {
+        boolean isWithCertValidation = false;
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
+                message, isWithPasswordConfirm, isWithCertValidation, broadCastId, type);
+        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
+    }
+
+    public static void showChangePinScreen(FragmentManager fragmentManager) {
+        boolean isWithCertValidation = true;
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
+                null, true, isWithCertValidation, null, TypeVS.PIN_CHANGE);
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);
     }
 
@@ -83,24 +103,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
               String broadCastId, String msg, TypeVS typeVS) {
         PinDialogFragment pinDialog = new PinDialogFragment();
         pinDialog.setArguments(getArguments(msg, true, false, false, broadCastId, typeVS));
-        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
-    }
-
-    public static void showWalletPinScreen(FragmentManager fragmentManager, String broadCastId,
-             String message, boolean isWithPasswordConfirm, TypeVS typeVS) {
-        PinDialogFragment pinDialog = new PinDialogFragment();
-        Bundle bundle = getArguments(message, false, true, true, broadCastId, typeVS);
-        bundle.putBoolean(ContextVS.WALLET_PIN_KEY, true);
-        pinDialog.setArguments(bundle);
-        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
-    }
-
-    public static void showWalletPinScreenWithoutHashValidation(FragmentManager fragmentManager,
-              String broadCastId, String msg, TypeVS typeVS) {
-        PinDialogFragment pinDialog = new PinDialogFragment();
-        Bundle bundle = getArguments(msg, true, false, false, broadCastId, typeVS);
-        bundle.putBoolean(ContextVS.WALLET_PIN_KEY, true);
-        pinDialog.setArguments(bundle);
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);
     }
 
@@ -136,7 +138,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        walletPin = getArguments().getBoolean(ContextVS.WALLET_PIN_KEY, false);
         final ContextVS.State appState = contextVS.getState();
         if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
@@ -159,18 +160,36 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             return builder.create();
         } else {
             View view = inflater.inflate(R.layout.pin_dialog, null);
-            if(walletPin) ((TextView) view.findViewById(R.id.caption_text)).setText(
-                    R.string.pin_wallet_caption);
             msgTextView = (TextView) view.findViewById(R.id.msg);
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
-                msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
+            if(savedInstanceState != null) {
+                pinChangeStep = (PinChangeStep) savedInstanceState.getSerializable(
+                        TypeVS.PIN_CHANGE.toString());
+                newPin = savedInstanceState.getString(NEW_PIN_KEY);
+            } else {
+                if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
+                    msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
+                }
+                withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
+                withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
+                dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
+                builder.setView(view).setOnKeyListener(this);
             }
-            withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
-            withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
-            dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
-            builder.setView(view).setOnKeyListener(this);
+            if(TypeVS.PIN_CHANGE == typeVS) {
+                ((TextView) view.findViewById(R.id.caption_text)).setText(R.string.pin_change_lbl);
+                switch (pinChangeStep) {
+                    case PIN_REQUEST:
+                        msgTextView.setText(getString(R.string.enter_actual_pin_msg));
+                        break;
+                    case NEW_PIN_REQUEST:
+                        msgTextView.setText(getString(R.string.enter_new_pin_msg));
+                        break;
+                    case NEW_PIN_CONFIRM:
+                        msgTextView.setText(getString(R.string.confirm_new_pin_msg));
+                        break;
+                }
+            }
             return builder.create();
         }
     }
@@ -178,31 +197,58 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.PIN_KEY, firstPin);
+        outState.putSerializable(TypeVS.PIN_CHANGE.toString(), pinChangeStep);
+        outState.putString(NEW_PIN_KEY, newPin);
+
     }
 
     private void setPin(final String pin) {
-        if(withPasswordConfirm) {
-            if(firstPin == null) {
-                firstPin = pin;
-                msgTextView.setText(getString(R.string.repeat_password));
-                userPinEditText.setText("");
-                return;
-            } else {
-                if (!firstPin.equals(pin)) {
-                    firstPin = null;
+        if(typeVS == TypeVS.PIN_CHANGE) {
+            switch(pinChangeStep) {
+                case PIN_REQUEST:
+                    if(isHashOK(pin)) {
+                        pinChangeStep =  PinChangeStep.NEW_PIN_REQUEST;
+                        msgTextView.setText(getString(R.string.enter_new_pin_msg));
+                        userPinEditText.setText("");
+                        return;
+                    } else return;
+                case NEW_PIN_REQUEST:
+                    newPin = pin;
+                    pinChangeStep =  PinChangeStep.NEW_PIN_CONFIRM;
+                    msgTextView.setText(getString(R.string.confirm_new_pin_msg));
                     userPinEditText.setText("");
-                    msgTextView.setText(getString(R.string.password_mismatch));
                     return;
+                case NEW_PIN_CONFIRM:
+                    if(pin.equals(newPin)) {
+                        PrefUtils.putPin(Integer.valueOf(pin), getActivity());
+                        userPinEditText.setVisibility(View.GONE);
+                        msgTextView.setText(getString(R.string.new_pin_ok_msg));
+                        return;
+                    } else {
+                        pinChangeStep =  PinChangeStep.NEW_PIN_REQUEST;
+                        msgTextView.setText(getString(R.string.new_pin_error_msg));
+                        userPinEditText.setText("");
+                        return;
+                    }
+            }
+        } else {
+            if(withPasswordConfirm) {
+                if(firstPin == null) {
+                    firstPin = pin;
+                    msgTextView.setText(getString(R.string.repeat_password));
+                    userPinEditText.setText("");
+                    return;
+                } else {
+                    if (!firstPin.equals(pin)) {
+                        firstPin = null;
+                        userPinEditText.setText("");
+                        msgTextView.setText(getString(R.string.password_mismatch));
+                        return;
+                    }
                 }
             }
         }
-        AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
-            if(!walletPin && withHashValidation == true) {
-                if(!isHashOK(PrefUtils.getPinHash(contextVS), pin)) return;
-            } else if(walletPin && withHashValidation) {
-                if(!isHashOK(PrefUtils.getWalletPinHash(contextVS), pin)) return;
-            }
             InputMethodManager imm = (InputMethodManager)getActivity().
                     getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
@@ -221,14 +267,19 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         }
     }
 
-    private boolean isHashOK(String expectedHash, String pin) throws NoSuchAlgorithmException {
-        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-        if(!expectedHash.equals(pinHash)) {
-            msgTextView.setVisibility(View.VISIBLE);
-            msgTextView.setText(getString(R.string.pin_error_msg));
-            userPinEditText.setText("");
+    private boolean isHashOK(String pin) {
+        try {
+            String expectedHash = PrefUtils.getPinHash(getActivity());
+            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            if(!expectedHash.equals(pinHash)) {
+                msgTextView.setText(getString(R.string.pin_error_msg));
+                userPinEditText.setText("");
+                return false;
+            } else return true;
+        } catch(Exception ex) {
+            ex.printStackTrace();
             return false;
-        } else return true;
+        }
     }
 
     @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -249,4 +300,10 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         return false;//True if the listener has consumed the event, false otherwise.
     }
 
+    @Override public void onDismiss(final DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (getActivity() != null && getActivity() instanceof MessageActivity) {
+            getActivity().finish();
+        }
+    }
 }

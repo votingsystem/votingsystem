@@ -71,7 +71,7 @@ public class RssService extends Service  implements Runnable {
         notificationManager.notify(ContextVS.RSS_SERVICE_NOTIFICATION_ID, note);
         handler = new Handler();
         // Load last updated value.
-        // We store last updated value in preferences.
+        // We store last updated value in settings_activity.
         SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         lastCheckedTime = new GregorianCalendar();

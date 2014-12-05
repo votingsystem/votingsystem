@@ -12,7 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
@@ -41,6 +43,15 @@ public class MessageActivity extends ActionBarActivity {
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
                 AppContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         View view = getLayoutInflater().inflate(R.layout.message_activity, null);
+        TypeVS typeVS = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
+        String broadCastId = getIntent().getStringExtra(ContextVS.CALLER_KEY);
+        if(typeVS != null) {
+            switch(typeVS) {
+                case PIN_CHANGE:
+                    PinDialogFragment.showChangePinScreen(getSupportFragmentManager());
+                    return;
+            }
+        }
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         ((TextView) view.findViewById(R.id.caption_text)).setText(responseVS.getCaption());
         ((TextView) view.findViewById(R.id.message_text)).setText(Html.fromHtml(

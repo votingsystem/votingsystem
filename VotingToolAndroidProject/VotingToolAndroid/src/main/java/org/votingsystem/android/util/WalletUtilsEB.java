@@ -4,7 +4,6 @@ import android.content.Context;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
@@ -28,9 +27,9 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletUtils {
+public class WalletUtilsEB {
 
-    private static final String TAG = WalletUtils.class.getSimpleName();
+    private static final String TAG = WalletUtilsEB.class.getSimpleName();
 
     private static List<Cooin> cooinList = null;
 
@@ -39,7 +38,7 @@ public class WalletUtils {
         else return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Cooin> getCooinList(String password, AppContextVS context) throws Exception {
+    public static List<Cooin> getCooinList(String password, Context context) throws Exception {
         JSONArray storedWalletJSON = getWallet(password, context);
         if(storedWalletJSON == null) cooinList = new ArrayList<Cooin>();
         else cooinList = getCooinListFromJSONArray(storedWalletJSON);
@@ -57,7 +56,7 @@ public class WalletUtils {
     }
 
     public static void saveCooinList(Collection<Cooin> newCooinList, String password,
-             AppContextVS context) throws Exception {
+            Context context) throws Exception {
         Object wallet = getWallet(password, context);
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
@@ -66,7 +65,7 @@ public class WalletUtils {
         for(Map cooin : serializedCooinList) {
             storedWalletJSON.put(new JSONObject(cooin));
         }
-        WalletUtils.saveWallet(storedWalletJSON, password, context);
+        WalletUtilsEB.saveWallet(storedWalletJSON, password, context);
         cooinList = getCooinListFromJSONArray(storedWalletJSON);
     }
 
@@ -96,40 +95,56 @@ public class WalletUtils {
         return jsonArray;
     }
 
-    public static JSONArray getWallet(String password, AppContextVS context) throws Exception {
+    public static JSONArray getWallet(String password, Context context) throws Exception {
         byte[] walletBytes = getWalletBytes(password, context);
         if(walletBytes == null) return null;
         else return new JSONArray(new String(walletBytes, "UTF-8"));
     }
 
-    private static byte[] getWalletBytes(String password, AppContextVS context) throws Exception {
-        String storedPasswordHash = PrefUtils.getPinHash(context);
+    private static byte[] getWalletBytes(String password, Context context) throws Exception {
+        //String storedPasswordHash = PrefUtils.getWalletPinHash(context);
+        String storedPasswordHash = null;
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
         try {
-            String walletBase64 = PrefUtils.getWallet(context);
-            if(walletBase64 == null) return null;
-            else return context.decryptMessage(walletBase64.getBytes());
+            FileInputStream fis = context.openFileInput(ContextVS.WALLET_FILE_NAME);
+            byte[] encryptedWalletBytes = FileUtils.getBytesFromInputStream(fis);
+            JSONObject bundleJSON = new JSONObject(new String(encryptedWalletBytes, "UTF-8"));
+            EncryptedBundle bundle = EncryptedBundle.parse(bundleJSON);
+            return Encryptor.pbeAES_Decrypt(password, bundle);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }
     }
 
-    public static void saveWallet(Object walletJSON, String password, AppContextVS context)
+    public static void saveWallet(Object walletJSON, String password, Context context)
             throws Exception {
-        String storedPasswordHash = PrefUtils.getPinHash(context);
+        //String storedPasswordHash = PrefUtils.getWalletPinHash(context);
+        String storedPasswordHash = null;
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
         if(walletJSON != null) {
-            byte[] encryptedWalletBytes = Encryptor.encryptToCMS(
-                    walletJSON.toString().getBytes(), context.getX509UserCert());
-            PrefUtils.putWallet(encryptedWalletBytes, context);
-        } else PrefUtils.putWallet(null, context);
+            FileOutputStream fos = context.openFileOutput(ContextVS.WALLET_FILE_NAME, Context.MODE_PRIVATE);
+            EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, walletJSON.toString().getBytes());
+            byte[] result = bundle.toJSON().toString().getBytes("UTF-8");
+            fos.write(result);
+            fos.close();
+        } else context.deleteFile(ContextVS.WALLET_FILE_NAME);
 
+    }
+
+    public static void changeWalletPin(String newPin, String oldPin, Context context)
+            throws ExceptionVS, NoSuchAlgorithmException {
+        /*String storedPinHash = PrefUtils.getWalletPinHash(context);
+        String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
+        if(!storedPinHash.equals(pinHash)) {
+            throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+        }
+        PrefUtils.putWalletPin(newPin, context);*/
     }
 
 }

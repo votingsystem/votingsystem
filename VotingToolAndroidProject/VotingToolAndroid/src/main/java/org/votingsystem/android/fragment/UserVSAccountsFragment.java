@@ -94,7 +94,9 @@ public class UserVSAccountsFragment extends Fragment {
                                 MsgUtils.getCooinRequestMessage(transactionVS, getActivity()),
                                 false, TypeVS.COOIN_REQUEST);
                     } else {
-                        UIUtils.launchMessageActivity(responseVS, getActivity());
+                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                                responseVS.getCaption(), responseVS.getNotificationMessage(),
+                                getFragmentManager());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             loadUserInfo(DateUtils.getCurrentWeekPeriod());
                         }
