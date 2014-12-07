@@ -9,6 +9,7 @@ import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.util.LoggerVS
@@ -38,10 +39,7 @@ class TestingController {
     def transactionVS_UserVSService
     def bankVSService
 
-    def index() {
-        render "OK"
-        return false
-    }
+    def index() { }
 
     def balance() {
         Map balanceTo = [EUR:[HIDROGENO:[total:new BigDecimal(880.5), timeLimited:new BigDecimal(700.5)],

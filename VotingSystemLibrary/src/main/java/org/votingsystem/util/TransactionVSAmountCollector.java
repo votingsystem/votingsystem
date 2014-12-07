@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.cooin.model.TransactionVS;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Set;
@@ -13,14 +15,14 @@ import java.util.stream.Collector;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BigDecimalCollector implements Collector<BigDecimal, BigDecimal[], BigDecimal> {
+public class TransactionVSAmountCollector implements Collector<TransactionVS, BigDecimal[], BigDecimal> {
 
     @Override public Supplier<BigDecimal[]> supplier() {
         return () -> new BigDecimal[1];
     }
 
-    @Override public BiConsumer<BigDecimal[], BigDecimal> accumulator() {
-        return (a, t) -> { a[0].add(t); };
+    @Override public BiConsumer<BigDecimal[], TransactionVS> accumulator() {
+        return (a, t) -> { a[0].add(t.getAmount()); };
     }
 
     //to join two accumulators together into one. It is used when collector is executed in parallel
@@ -31,6 +33,7 @@ public class BigDecimalCollector implements Collector<BigDecimal, BigDecimal[], 
     @Override public Function<BigDecimal[], BigDecimal> finisher() {
         return a -> a[0];
     }
+
 
     @Override public Set<Characteristics> characteristics() {
         return Collections.emptySet();
