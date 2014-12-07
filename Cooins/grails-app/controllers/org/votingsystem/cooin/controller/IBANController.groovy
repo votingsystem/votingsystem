@@ -5,9 +5,8 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.model.ResponseVS
 
 /**
  * @infoController Aplicación

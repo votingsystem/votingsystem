@@ -3,10 +3,9 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
+import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.cooin.model.UserVSAccount
 
 import java.text.Normalizer
 

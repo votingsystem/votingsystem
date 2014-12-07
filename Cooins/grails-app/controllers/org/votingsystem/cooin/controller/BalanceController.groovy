@@ -5,11 +5,8 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.cooin.service.FilesService
 
 class BalanceController {
 

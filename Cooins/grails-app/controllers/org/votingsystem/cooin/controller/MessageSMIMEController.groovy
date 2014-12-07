@@ -3,14 +3,14 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.AsciiDocUtil
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.util.AsciiDocUtil
 
 /**
  * @infoController Mensajes firmados

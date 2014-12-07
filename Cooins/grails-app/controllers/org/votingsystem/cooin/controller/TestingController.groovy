@@ -5,26 +5,13 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.CountryCode
 import org.iban4j.Iban
-import org.votingsystem.cooin.util.TransactionVSFromAmountCollector1
-import org.votingsystem.cooin.util.TransactionVSFromAmountCollector2
-import org.votingsystem.groovy.util.TransactionVSUtils
-import org.votingsystem.model.GroupVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubscriptionVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.util.DateUtils
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.util.LoggerVS
 import org.votingsystem.cooin.util.WebViewWrapper
 import org.votingsystem.cooin.websocket.SessionVSHelper
-import org.votingsystem.util.TransactionVSFromAmountCollector
-
-import java.time.Duration
-import java.util.function.Function
-
-import static java.util.stream.Collectors.groupingBy
-import static java.util.stream.Collectors.groupingBy
-import static java.util.stream.Collectors.groupingBy
+import org.votingsystem.groovy.util.TransactionVSUtils
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.DateUtils
 
 /**
  * @infoController TestingController
@@ -48,16 +35,8 @@ class TestingController {
     def bankVSService
 
     def index() {
-        UserVS userVS
-        UserVS.withTransaction {userVS = UserVS.get(2L)}
-        List<TransactionVS> transactionList = transactionVSService.getTransactionToList(userVS, DateUtils.getCurrentWeekPeriod());
-        /*def result = transactionList.stream().collect(groupingBy(new Function<TransactionVS, String>() {
-            @Override String apply(TransactionVS t) { return t.getCurrencyCode() }
-        }, groupingBy(new Function<TransactionVS, String>() {
-            @Override String apply(TransactionVS t) { return t.getTagName() }
-        }, new TransactionVSFromAmountCollector2())));*/
-        def result = TransactionVS.getBalances(transactionList, TransactionVS.Source.TO)
-        render result as JSON;
+        render "OK";
+        return false
     }
 
     def balance() {

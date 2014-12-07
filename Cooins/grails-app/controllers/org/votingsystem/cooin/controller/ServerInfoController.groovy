@@ -5,7 +5,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.util.CertUtils
 
 /**

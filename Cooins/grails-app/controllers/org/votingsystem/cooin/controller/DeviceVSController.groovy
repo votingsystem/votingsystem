@@ -3,7 +3,6 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.cooin.websocket.SessionVSHelper
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.DeviceVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtils

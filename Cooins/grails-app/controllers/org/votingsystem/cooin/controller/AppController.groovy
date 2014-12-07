@@ -3,7 +3,6 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
 
 /**

@@ -6,9 +6,13 @@ import org.apache.log4j.RollingFileAppender
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.votingsystem.model.*
 import org.votingsystem.cooin.model.Cooin
 import org.votingsystem.cooin.model.CooinRequestBatch
+import org.votingsystem.model.ContextVS
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TagVS
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 class CooinController {

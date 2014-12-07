@@ -8,7 +8,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
 
 import java.text.DateFormat

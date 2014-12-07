@@ -5,11 +5,11 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
+import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.cooin.model.UserVSAccount
 
 class UserVSController {
 

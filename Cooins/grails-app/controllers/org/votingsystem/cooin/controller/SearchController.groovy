@@ -2,7 +2,6 @@ package org.votingsystem.cooin.controller
 
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 
 /**
  * @infoController Búsquedas
