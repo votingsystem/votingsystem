@@ -14,12 +14,8 @@ class BootStrap {
 
     def init = { servletContext ->
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        JSON.registerObjectMarshaller(Date) {
-            return DateUtils.getDayWeekDateStr(it)
-        }
-        JSON.registerObjectMarshaller(BigDecimal) {
-            return DateUtils.getDayWeekDateStr(it)
-        }
+        JSON.registerObjectMarshaller(Date) { return DateUtils.getDayWeekDateStr(it) }
+        JSON.registerObjectMarshaller(BigDecimal) { return it.toPlainString() }
         ContextVS.init(ApplicationContextHolder.getInstance())
         signatureVSService.init();
         systemService.init()
