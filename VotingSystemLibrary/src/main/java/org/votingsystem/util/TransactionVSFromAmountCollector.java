@@ -15,7 +15,7 @@ import java.util.stream.Collector;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionVSAmountCollector implements Collector<TransactionVS, BigDecimal[], BigDecimal> {
+public class TransactionVSFromAmountCollector implements Collector<TransactionVS, BigDecimal[], BigDecimal> {
 
     @Override public Supplier<BigDecimal[]> supplier() {
         return () -> new BigDecimal[1];

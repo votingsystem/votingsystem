@@ -8,7 +8,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.TransactionVSAmountCollector;
 import org.votingsystem.util.DateUtils;
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,7 +16,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collector;
+import org.votingsystem.util.TransactionVSFromAmountCollector;
+import org.votingsystem.util.TransactionVSToAmountCollector;
 import static java.util.stream.Collectors.groupingBy;
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -337,9 +338,18 @@ public class TransactionVS  implements Serializable {
         accountFromMovements.put(userVSAccount, amount);
     }
 
-    public static Map getBalancesFrom(List<TransactionVS> transactionList) {
+    public static Map getBalances(List<TransactionVS> transactionList, Source source) {
+        Collector<TransactionVS, ?, ?> amountCollector = null;
+        switch(source) {
+            case FROM:
+                amountCollector = new TransactionVSFromAmountCollector();
+                break;
+            case TO:
+                amountCollector = new TransactionVSToAmountCollector();
+                break;
+        }
         return transactionList.stream().collect(groupingBy(TransactionVS::getCurrencyCode,
-                groupingBy(TransactionVS::getTagName, new TransactionVSAmountCollector())));
+                groupingBy(TransactionVS::getTagName, amountCollector)));
     }
 
     public void afterInsert() {
