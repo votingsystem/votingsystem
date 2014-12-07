@@ -12,6 +12,7 @@ import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
+import static java.util.stream.Collectors.groupingBy
 import static org.votingsystem.cooin.model.TransactionVS.*
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.CoreSignal
@@ -148,7 +149,7 @@ class TransactionVSService {
     }
 
     @Transactional
-    public List getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
+    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             if(fromUserVS instanceof GroupVS) {
                 or {
@@ -206,10 +207,10 @@ class TransactionVSService {
 
     @Transactional
     public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
-        def transactionList = getTransactionFromList(fromUserVS, timePeriod)
-        def transactionFromList = []
+        List<TransactionVS> transactionList = getTransactionFromList(fromUserVS, timePeriod)
+        List<Map> transactionFromList = []
         Map<String, Map> balancesMap = [:]
-        transactionList.each { transaction ->
+        for(TransactionVS transaction : transactionList) {
             if(balancesMap[transaction.currencyCode]) {
                 Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
                 if(currencyMap[transaction.tag.name]) {

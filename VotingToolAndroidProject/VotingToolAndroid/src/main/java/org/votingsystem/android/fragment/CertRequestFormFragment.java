@@ -81,6 +81,7 @@ public class CertRequestFormFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) launchUserCertRequestService(pin);
             else {
+                showProgress(false, true);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     Intent resultIntent = new Intent(getActivity(), CertResponseActivity.class);
                     startActivity(resultIntent);

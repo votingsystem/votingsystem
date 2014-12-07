@@ -8,8 +8,8 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.BigDecimalCollector;
 import org.votingsystem.util.DateUtils;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,9 +17,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static javax.persistence.GenerationType.IDENTITY;
-
+import static java.util.stream.Collectors.*;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -251,6 +250,12 @@ public class TransactionVS  implements Serializable {
         this.tag = tag;
     }
 
+
+    public String getTagName() {
+        if(tag == null) return null;
+        else return tag.getName();
+    }
+
     public static TransactionVS parse(JSONObject jsonData) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         if(jsonData.has("id")) transactionVS.setId(jsonData.getLong("id"));
@@ -329,6 +334,11 @@ public class TransactionVS  implements Serializable {
         if(accountFromMovements == null)  accountFromMovements = new HashMap<UserVSAccount, BigDecimal>();
         accountFromMovements.put(userVSAccount, amount);
     }
+
+    /*public static Map getBalancesFrom(List<TransactionVS> transactionList) {
+        return transactionList.stream().collect(groupingBy(TransactionVS::getCurrencyCode,
+                groupingBy(TransactionVS::getTagName, new BigDecimalCollector())));
+    }*/
 
     public void afterInsert() {
         ContextVS.getInstance().updateBalances(this);
