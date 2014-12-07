@@ -139,7 +139,7 @@ class CooinService {
         }
         Map resultMap = [statusCode:ResponseVS.SC_OK, message: messageSource.getMessage('cooinSendResultMsg',
                 [toUserVS.name, TransactionVSUtils.getBalancesMapMsg(messageSource.getMessage('forLbl', null, locale),
-                        TransactionVSUtils.getBalancesMap(transactionVSList))].toArray(),
+                        TransactionVS.getBalances(transactionVSList, TransactionVS.Source.FROM))].toArray(),
                 locale), receiptList:responseList]
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)
     }

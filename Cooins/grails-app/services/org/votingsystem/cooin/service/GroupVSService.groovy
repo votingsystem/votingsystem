@@ -2,6 +2,7 @@ package org.votingsystem.cooin.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -157,13 +158,15 @@ class GroupVSService {
         Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = getGroupVSDataMap(groupVS)
 
-        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(((UserVS)groupVS), timePeriod)
-        resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList
-        resultMap.balancesFrom = transactionsFromWithBalancesMap.balancesFrom
+        Map transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionVSService.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM)
+        resultMap.transactionFromList = transactionListWithBalances.transactionList
+        resultMap.balancesFrom = transactionListWithBalances.balances
 
-        Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(groupVS, timePeriod)
-        resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
-        resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
+        transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionVSService.getTransactionToList(groupVS, timePeriod), TransactionVS.Source.TO)
+        resultMap.transactionToList = transactionListWithBalances.transactionList
+        resultMap.balancesTo = transactionListWithBalances.balances
 
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
         userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)

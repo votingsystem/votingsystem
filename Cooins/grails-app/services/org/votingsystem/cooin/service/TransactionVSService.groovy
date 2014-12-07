@@ -149,6 +149,16 @@ class TransactionVSService {
     }
 
     @Transactional
+    public List getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('toUserVS', toUserVS)
+            eq('state', TransactionVS.State.OK)
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        return transactionList
+    }
+
+    @Transactional
     public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             if(fromUserVS instanceof GroupVS) {
@@ -206,45 +216,12 @@ class TransactionVSService {
     }
 
     @Transactional
-    public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
-        List<TransactionVS> transactionList = getTransactionFromList(fromUserVS, timePeriod)
+    public Map getTransactionListWithBalances(List<TransactionVS> transactionList, Source source) {
         List<Map> transactionFromList = []
-        Map<String, Map> balancesMap = [:]
         for(TransactionVS transaction : transactionList) {
-            if(balancesMap[transaction.currencyCode]) {
-                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
-                if(currencyMap[transaction.tag.name]) {
-                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
-                } else currencyMap[(transaction.tag.name)] = transaction.amount
-            } else {
-                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
-                balancesMap[(transaction.currencyCode)] = currencyMap
-            }
             transactionFromList.add(getTransactionMap(transaction))
         }
-        return [transactionFromList:transactionFromList, balancesFrom:balancesMap]
-    }
-
-    @Transactional
-    public List getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
-        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('toUserVS', toUserVS)
-            eq('state', TransactionVS.State.OK)
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
-        return transactionList
-    }
-
-    @Transactional
-    public Map getTransactionToListWithBalances(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
-        List<TransactionVS> transactionList = getTransactionToList(toUserVS, timePeriod)
-        def transactionToList = []
-        Map<String, Map> balancesMap = [:]
-        for(TransactionVS transaction : transactionList) {
-            TransactionVSUtils.addTransactionVSToBalance(balancesMap, transaction)
-            transactionToList.add(getTransactionMap(transaction))
-        }
-        return [transactionToList:transactionToList, balancesTo:balancesMap]
+        return [transactionList:transactionFromList, balances:TransactionVS.getBalances(transactionList, source)]
     }
 
     @Transactional

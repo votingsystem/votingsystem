@@ -17,6 +17,9 @@ class BootStrap {
         JSON.registerObjectMarshaller(Date) {
             return DateUtils.getDayWeekDateStr(it)
         }
+        JSON.registerObjectMarshaller(BigDecimal) {
+            return DateUtils.getDayWeekDateStr(it)
+        }
         ContextVS.init(ApplicationContextHolder.getInstance())
         signatureVSService.init();
         systemService.init()

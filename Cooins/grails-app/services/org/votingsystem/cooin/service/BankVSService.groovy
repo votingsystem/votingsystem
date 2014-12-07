@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.iban4j.Iban
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -89,9 +90,10 @@ class BankVSService {
     public Map getDataWithBalancesMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
         Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = userVSService.getUserVSDataMap(bankVS, false)
-        Map transactionsWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(bankVS, timePeriod)
-        resultMap.transactionFromList = transactionsWithBalancesMap.transactionFromList
-        resultMap.balancesFrom = transactionsWithBalancesMap.balancesFrom
+        Map transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionVSService.getTransactionFromList(bankVS, timePeriod), TransactionVS.Source.FROM)
+        resultMap.transactionFromList = transactionListWithBalances.transactionList
+        resultMap.balancesFrom = transactionListWithBalances.balances
         return resultMap
     }
 

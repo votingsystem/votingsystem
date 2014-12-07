@@ -3,6 +3,7 @@ package org.votingsystem.cooin.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
@@ -120,20 +121,20 @@ class UserVSService {
         Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = getUserVSDataMap(userVS, false)
 
-        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(userVS, timePeriod)
-        resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList
-        resultMap.balancesFrom = transactionsFromWithBalancesMap.balancesFrom
+        Map transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionVSService.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM)
+        resultMap.transactionFromList = transactionListWithBalances.transactionList
+        resultMap.balancesFrom = transactionListWithBalances.balances
 
-        Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
-        resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
-        resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
+        transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionVSService.getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO)
+        resultMap.transactionToList = transactionListWithBalances.transactionList
+        resultMap.balancesTo = transactionListWithBalances.balances
+
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
         if(UserVS.Type.SYSTEM != userVS.type && timePeriod.isCurrentWeekPeriod())
             userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
-        resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesFrom)
-        resultMap.balancesTo = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesTo)
-        resultMap.balancesCash = TransactionVSUtils.setBigDecimalToPlainString(resultMap.balancesCash)
         return resultMap
     }
 }

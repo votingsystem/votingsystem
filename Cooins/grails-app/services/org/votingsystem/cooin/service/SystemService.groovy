@@ -106,45 +106,21 @@ class SystemService {
                 }
             }
         }
-        def transactionFromList = []
-        Map<String, Map> balancesMap = [:]
-        transactionList.each { transaction ->
-            if(balancesMap[transaction.currencyCode]) {
-                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
-                if(currencyMap[transaction.tag.name]) {
-                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
-                } else currencyMap[(transaction.tag.name)] = transaction.amount
-            } else {
-                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
-                balancesMap[(transaction.currencyCode)] = currencyMap
-            }
-            transactionFromList.add(((TransactionVSService)grailsApplication.mainContext.getBean(
-                    "transactionVSService")).getTransactionMap(transaction))
-        }
-        resultMap.transactionFromList = transactionFromList
-        resultMap.balancesFrom = TransactionVSUtils.setBigDecimalToPlainString(balancesMap)
+        TransactionVSService transactionVSService = (TransactionVSService)grailsApplication.mainContext.getBean(
+                "transactionVSService")
+        Map transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionList, TransactionVS.Source.FROM)
+        resultMap.transactionFromList = transactionListWithBalances.transactionList
+        resultMap.balancesFrom = transactionListWithBalances.balances
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
             not{ inList("type", [TransactionVS.Type.COOIN_SEND])}
         }
-        def transactionToList = []
-        balancesMap = [:]
-        transactionList.each { transaction ->
-            if(balancesMap[transaction.currencyCode]) {
-                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
-                if(currencyMap[transaction.tag.name]) {
-                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
-                } else currencyMap[(transaction.tag.name)] = transaction.amount
-            } else {
-                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
-                balancesMap[(transaction.currencyCode)] = currencyMap
-            }
-            transactionToList.add(((TransactionVSService)grailsApplication.mainContext.getBean(
-                    "transactionVSService")).getTransactionMap(transaction))
-        }
-        resultMap.transactionToList = transactionToList
-        resultMap.balancesTo = TransactionVSUtils.setBigDecimalToPlainString(balancesMap)
+        transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
+                transactionList, TransactionVS.Source.FROM)
+        resultMap.transactionToList = transactionListWithBalances.transactionList
+        resultMap.balancesTo = transactionListWithBalances.balances
         return resultMap
     }
 
