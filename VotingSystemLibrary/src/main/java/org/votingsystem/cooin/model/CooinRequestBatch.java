@@ -235,7 +235,7 @@ public class CooinRequestBatch extends BatchRequest implements Serializable  {
         return (JSONArray) JSONSerializer.toJSON(getCooinCSRList());
     }
 
-    public TransactionVS getTransactionVS(String subject, Map<UserVSAccount, BigDecimal> accountFromMovements) {
+    public TransactionVS getTransactionVS(String subject, Map<CooinAccount, BigDecimal> accountFromMovements) {
         TransactionVS transaction = new TransactionVS();
         transaction.setAmount(requestAmount);
         transaction.setState(TransactionVS.State.OK);

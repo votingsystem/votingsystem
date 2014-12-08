@@ -4,7 +4,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
@@ -20,7 +20,7 @@ class TransactionVS_UserVSService {
   //@Transactional
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+        Map<CooinAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
                 request.fromUserVS.IBAN, request.tag, request.amount, request.currencyCode)
         //Transactions from users doesn't need parent transaction
         TransactionVS transactionVS = new TransactionVS(amount:request.amount, messageSMIME:request.messageSMIME,

@@ -18,10 +18,10 @@ import static javax.persistence.GenerationType.IDENTITY;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="UserVSAccount")
-public class UserVSAccount implements Serializable {
+@Table(name="CooinAccount")
+public class CooinAccount implements Serializable {
 
-    private static Logger log = Logger.getLogger(UserVSAccount.class);
+    private static Logger log = Logger.getLogger(CooinAccount.class);
 
     public enum State {ACTIVE, SUSPENDED, CANCELLED}
 
@@ -60,7 +60,7 @@ public class UserVSAccount implements Serializable {
         return balance;
     }
 
-    public UserVSAccount setBalance(BigDecimal balance) {
+    public CooinAccount setBalance(BigDecimal balance) {
         this.balance = balance;
         return this;
     }
@@ -113,7 +113,7 @@ public class UserVSAccount implements Serializable {
         this.tag = tag;
     }
 
-    public UserVSAccount.State getState() {
+    public CooinAccount.State getState() {
         return state;
     }
 

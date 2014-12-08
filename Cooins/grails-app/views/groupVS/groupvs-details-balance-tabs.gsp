@@ -64,7 +64,7 @@
                     }
                     this.$.transactionFromTable.transactionList = this.groupvs.transactionFromList
                     this.$.transactionToTable.transactionList = this.groupvs.transactionToList
-                    this.$.balanceList.url = "${createLink(controller:'userVSAccount', action:'balance')}?id=" + this.groupvs.userVS.id
+                    this.$.balanceList.url = "${createLink(controller:'cooinAccount', action:'balance')}?id=" + this.groupvs.userVS.id
                     this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id + "/user"
                     this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.userVS.id
                 }

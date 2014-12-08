@@ -29,7 +29,7 @@ class UserVSService {
     def subscriptionVSService
     def transactionVSService
     def systemService
-    def userVSAccountService
+    def cooinAccountService
 
     /*
      * Add users from PEM certs
@@ -133,7 +133,7 @@ class UserVSService {
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
         if(UserVS.Type.SYSTEM != userVS.type && timePeriod.isCurrentWeekPeriod())
-            userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
+            cooinAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         return resultMap
     }
 }

@@ -30,4 +30,13 @@ class ReportFiles {
         return new File("${baseDir.getAbsolutePath()}/tag_${tagName}.p7s")
     }
 
+    public static File getReportErrorsFile(DateUtils.TimePeriod timePeriod, String baseDirPath) {
+        String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom())
+        String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo())
+        baseDirPath ="$baseDirPath/${dateFromPathPart}_${dateToPathPart}"
+        File baseDir = new File(baseDirPath)
+        baseDir.mkdirs()
+        return new File("$baseDirPath/Errors.log");
+    }
+
 }

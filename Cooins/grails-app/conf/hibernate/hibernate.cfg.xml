@@ -38,7 +38,7 @@
 
         <mapping class="org.votingsystem.cooin.model.MessageVS" />
         <mapping class="org.votingsystem.cooin.model.TransactionVS" />
-        <mapping class="org.votingsystem.cooin.model.UserVSAccount" />
+        <mapping class="org.votingsystem.cooin.model.CooinAccount" />
         <mapping class="org.votingsystem.cooin.model.Cooin"/>
         <mapping class="org.votingsystem.cooin.model.CooinRequestBatch"/>
 

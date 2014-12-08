@@ -74,7 +74,7 @@ public class TransactionVS  implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    @Transient private Map<UserVSAccount, BigDecimal> accountFromMovements;
+    @Transient private Map<CooinAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;
     @Transient private List<String> toUserVSList;
 
@@ -334,17 +334,17 @@ public class TransactionVS  implements Serializable {
         return result;
     }
 
-    public Map<UserVSAccount, BigDecimal> getAccountFromMovements() {
+    public Map<CooinAccount, BigDecimal> getAccountFromMovements() {
         return accountFromMovements;
     }
 
-    public void setAccountFromMovements(Map<UserVSAccount, BigDecimal> accountFromMovements) {
+    public void setAccountFromMovements(Map<CooinAccount, BigDecimal> accountFromMovements) {
         this.accountFromMovements = accountFromMovements;
     }
 
-    public void addAccountFromMovement(UserVSAccount userVSAccount, BigDecimal amount) {
-        if(accountFromMovements == null)  accountFromMovements = new HashMap<UserVSAccount, BigDecimal>();
-        accountFromMovements.put(userVSAccount, amount);
+    public void addAccountFromMovement(CooinAccount cooinAccount, BigDecimal amount) {
+        if(accountFromMovements == null)  accountFromMovements = new HashMap<CooinAccount, BigDecimal>();
+        accountFromMovements.put(cooinAccount, amount);
     }
 
     public static Map getBalances(Collection<TransactionVS> transactionList, Source source) {

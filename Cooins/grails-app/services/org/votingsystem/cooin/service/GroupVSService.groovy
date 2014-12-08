@@ -2,6 +2,7 @@ package org.votingsystem.cooin.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
@@ -10,7 +11,7 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
@@ -29,7 +30,7 @@ class GroupVSService {
     def subscriptionVSService
     def transactionVSService
     def systemService
-    def userVSAccountService
+    def cooinAccountService
     def grailsLinkGenerator
 
     public ResponseVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq) {
@@ -83,7 +84,7 @@ class GroupVSService {
         groupVS = new GroupVS(name:request.groupvsName.trim(), state:UserVS.State.ACTIVE, representative:userSigner,
                 description:request.groupvsInfo,tagVSSet:request.tagSet).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
-        new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
+        new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
                 balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN(), tag:systemService.getWildTag()).save()
         String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
         String fromUser = grailsApplication.config.vs.serverName
@@ -169,9 +170,7 @@ class GroupVSService {
         resultMap.balancesTo = transactionListWithBalances.balances
 
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
-
-        log.debug("================== checkBalancesMap!!!!!!")
-        //userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
+        cooinAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
     }
 
@@ -182,7 +181,7 @@ class GroupVSService {
         Set<TagVS> tagSet = new HashSet<TagVS>();
         public GroupVSRequest() {}
         public GroupVSRequest(String signedContent) throws ExceptionVS {
-            def messageJSON = JSON.parse(signedContent)
+            JSONObject messageJSON = JSON.parse(signedContent)
             groupvsName = messageJSON.groupvsName;
             groupvsInfo = messageJSON.groupvsInfo
             if(!groupvsName) throw new ValidationExceptionVS(this.getClass(), "missing param 'groupvsName'");

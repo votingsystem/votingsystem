@@ -11,7 +11,7 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
@@ -75,7 +75,7 @@ class BankVSService {
             bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
         }
         subscriptionVSService.setUserCertificate(bankVSDB, null)
-        new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
+        new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
                 IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)

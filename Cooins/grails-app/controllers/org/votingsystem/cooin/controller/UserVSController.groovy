@@ -5,7 +5,7 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -33,8 +33,8 @@ class UserVSController {
                         uservs = UserVS.findWhere(type:UserVS.Type.valueOf(params.userType), IBAN:params.IBAN)
                     }
                 } else {
-                    UserVSAccount.withTransaction {
-                        UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:params.IBAN)
+                    CooinAccount.withTransaction {
+                        CooinAccount userAccount = CooinAccount.findWhere(IBAN:params.IBAN)
                         if(userAccount) uservs = userAccount.userVS
                         else {
                             Iban iban = Iban.valueOf(params.IBAN);

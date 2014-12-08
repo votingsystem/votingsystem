@@ -276,7 +276,7 @@ class UrlMappings {
 
 
         "/userVS/$id/balance"{
-            controller = "userVSAccount"
+            controller = "cooinAccount"
             action = "balance"
             constraints {
                 id(matches:/\d*/)

@@ -13,7 +13,7 @@ import org.votingsystem.throwable.ValidationExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
 
 import static org.votingsystem.cooin.model.TransactionVS.*
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.CoreSignal
 import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.cooin.util.LoggerVS
@@ -87,12 +87,12 @@ class TransactionVSService {
         responseVS.save()
     }
 
-    private UserVSAccount updateUserVSAccountTo(TransactionVS transactionVS) {
+    private CooinAccount updateUserVSAccountTo(TransactionVS transactionVS) {
         if(!transactionVS.toUserIBAN) throw new ExceptionVS("transactionVS without toUserIBAN")
-        UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+        CooinAccount accountTo = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
                 currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
         if(!accountTo) {//new user account for tag
-            accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
+            accountTo = new CooinAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
                     currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
             log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
                     "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")

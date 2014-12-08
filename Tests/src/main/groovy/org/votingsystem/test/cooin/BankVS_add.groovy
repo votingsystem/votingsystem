@@ -12,7 +12,7 @@ import org.votingsystem.util.HttpHelper
 Logger log = TestUtils.init(Cooin_request.class)
 
 Map requestDataMap = [info:"Voting System Test Bank - " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()),
-        certChainPEM:new String(ContextVS.getInstance().getResourceBytes("./certs/Cert_BankVS_03455543T.pem"),"UTF-8"),
+        certChainPEM:new String(ContextVS.getInstance().getResourceBytes("./certs/Cert_BANKVS_03455543T.pem"),"UTF-8"),
         IBAN:"ES1877777777450000000050", operation:"BANKVS_NEW", UUID:UUID.randomUUID().toString()]
 
 CooinServer cooinServer = TestUtils.fetchCooinServer(ContextVS.getInstance().config.cooinServerURL)

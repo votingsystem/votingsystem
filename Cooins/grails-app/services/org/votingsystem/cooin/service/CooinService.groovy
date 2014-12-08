@@ -177,7 +177,7 @@ class CooinService {
         UserVS fromUserVS = cooinBatch.messageSMIME.userVS
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         //Check cash available for user
-        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+        Map<CooinAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
                 fromUserVS.IBAN, cooinBatch.getTagVS(), cooinBatch.getRequestAmount(), cooinBatch.getCurrencyCode())
         cooinBatch = csrService.signCooinBatchRequest(cooinBatch)
         TransactionVS userTransaction = cooinBatch.getTransactionVS(messageSource.getMessage(

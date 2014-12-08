@@ -3,7 +3,7 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
 
@@ -34,7 +34,7 @@ class TagVSController {
                     tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
                             "\\p{InCombiningDiacriticalMarks}+", "");
                     tag = new TagVS(name:tagName).save()
-                    new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
+                    new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
                             userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:tag).save()
                 }
                 def result = [id:tag.id, name:tag.name]
@@ -77,7 +77,7 @@ class TagVSController {
             listDB = TagVS.createCriteria().list(offset: 0) { }
         }
         listDB.each { it ->
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
+            new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
                     userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:it).save()
         }
         render "OK"
@@ -91,7 +91,7 @@ class TagVSController {
      * @httpMethod [GET]
      * @responseContentType [application/json]
      */
-    def userVSAccountByBalanceTagVS () {
+    def cooinAccountByBalanceTagVS () {
         if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: "serviceDevelopmentModeMsg"))]
@@ -101,8 +101,8 @@ class TagVSController {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'searchMissingParamTag'))]
         } else {
             def listDB
-            UserVSAccount.withTransaction {
-                listDB = UserVSAccount.createCriteria().listDistinct() {
+            CooinAccount.withTransaction {
+                listDB = CooinAccount.createCriteria().listDistinct() {
                     tagVSSet {
                         eq('name', params.tag)
                     }

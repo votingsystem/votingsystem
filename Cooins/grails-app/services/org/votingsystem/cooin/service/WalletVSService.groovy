@@ -3,7 +3,7 @@ package org.votingsystem.cooin.service
 import grails.transaction.Transactional
 import org.votingsystem.model.TagVS
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.WalletVS
 
 /**
@@ -22,10 +22,10 @@ class WalletVSService {
     @Transactional
     public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, TagVS tag, String currencyCode) {
         List accountList = []
-        def wildTagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:systemService.getWildTag())
+        def wildTagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:systemService.getWildTag())
         if(wildTagAccount) accountList.add(wildTagAccount)
         if(tag) {
-            def tagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)
+            def tagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)
             if(tagAccount) accountList.add(tagAccount)
         }
         if(accountList.isEmpty()) throw new ExceptionVS(
@@ -34,7 +34,7 @@ class WalletVSService {
     }
 
     @Transactional
-    public Map<UserVSAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
+    public Map<CooinAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
             TagVS tag, BigDecimal amount, String currencyCode) {
         WalletVS transactionWallet = getWalletVSForTransactionVS(fromUserIBAN, tag, currencyCode)
         return transactionWallet.getAccountMovementsForTransaction(tag, amount, currencyCode)

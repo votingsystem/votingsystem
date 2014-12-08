@@ -1,10 +1,10 @@
 package org.votingsystem.cooin.util;
 
 import org.apache.log4j.Logger;
+import org.votingsystem.cooin.model.CooinAccount;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.cooin.model.UserVSAccount;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -17,27 +17,27 @@ public class WalletVS {
 
     private static Logger log = Logger.getLogger(WalletVS.class);
 
-    private Set<UserVSAccount> accounts = null;
+    private Set<CooinAccount> accounts = null;
     private String currencyCode;
-    private Map<String, UserVSAccount> tagDataMap = new HashMap<String, UserVSAccount>();
+    private Map<String, CooinAccount> tagDataMap = new HashMap<String, CooinAccount>();
 
     public WalletVS(List accountList, String currencyCode) {
         this.currencyCode = currencyCode;
         accounts = new HashSet(accountList);
-        for(UserVSAccount account : accounts) {
+        for(CooinAccount account : accounts) {
             tagDataMap.put(account.getTag().getName(), account);
         }
     }
 
-    public Map<UserVSAccount, BigDecimal> getAccountMovementsForTransaction(
+    public Map<CooinAccount, BigDecimal> getAccountMovementsForTransaction(
             TagVS tag, BigDecimal amount, String currencyCode) throws Exception {
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
                 ApplicationContextHolder.getMessage("negativeAmountRequestedErrorMsg", amount.toString()));
-        Map<UserVSAccount, BigDecimal> result = new HashMap<UserVSAccount, BigDecimal>();
-        UserVSAccount wildTagAccount = tagDataMap.get(TagVS.WILDTAG);
+        Map<CooinAccount, BigDecimal> result = new HashMap<CooinAccount, BigDecimal>();
+        CooinAccount wildTagAccount = tagDataMap.get(TagVS.WILDTAG);
         if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
         if(!TagVS.WILDTAG.equals(tag.getName())) {
-            UserVSAccount tagAccount = tagDataMap.get(tag.getName());
+            CooinAccount tagAccount = tagDataMap.get(tag.getName());
             if(tagAccount != null && tagAccount.getBalance().compareTo(amount) > 0) result.put(tagAccount, amount);
             else {
                 BigDecimal tagAccountDeficit = amount;
@@ -64,7 +64,7 @@ public class WalletVS {
     }
 
     public BigDecimal getTagBalance(String tagName) {
-        UserVSAccount account = tagDataMap.get(tagName);
+        CooinAccount account = tagDataMap.get(tagName);
         if(account != null) return account.getBalance();
         else return null;
     }

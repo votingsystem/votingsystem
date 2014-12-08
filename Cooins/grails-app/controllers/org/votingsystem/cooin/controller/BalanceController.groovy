@@ -12,7 +12,7 @@ class BalanceController {
 
     def balanceService
     def filesService
-    def userVSAccountService
+    def cooinAccountService
     def groupVSService
 
     def index() { }
@@ -23,7 +23,7 @@ class BalanceController {
         if(!userVS) {
             response.status = ResponseVS.SC_NOT_FOUND
             render(text: message(code:'userVSNotFoundById', args:[params.userId]), encoding: "UTF-8")
-        } else render userVSAccountService.getAccountsBalanceMap(userVS) as JSON
+        } else render cooinAccountService.getAccountsBalanceMap(userVS) as JSON
     }
 
     def userVS() {

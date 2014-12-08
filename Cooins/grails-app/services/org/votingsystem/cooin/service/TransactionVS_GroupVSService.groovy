@@ -6,7 +6,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 
 import java.math.RoundingMode
 
@@ -24,7 +24,7 @@ class TransactionVS_GroupVSService {
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         String msg
-        Map<UserVSAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
+        Map<CooinAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
                 request.groupVS.IBAN, request.tag, request.amount, request.currencyCode)
         if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             return processTransactionVSForAllMembers(request, accountFromMovements)
@@ -58,7 +58,7 @@ class TransactionVS_GroupVSService {
 
     @Transactional
     private ResponseVS processTransactionVSForAllMembers(TransactionVSService.TransactionVSRequest request,
-             Map<UserVSAccount, BigDecimal> accountFromMovements) {
+             Map<CooinAccount, BigDecimal> accountFromMovements) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         BigDecimal userPart = request.amount.divide(request.numReceptors, 2, RoundingMode.FLOOR)
         TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS

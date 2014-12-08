@@ -3,7 +3,7 @@ package org.votingsystem.cooin.service
 import grails.transaction.Transactional
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.WalletVS
 
 
@@ -12,7 +12,7 @@ import org.votingsystem.cooin.util.WalletVS
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Transactional
-class UserVSAccountService {
+class CooinAccountService {
 
 	def grailsApplication
 	def messageSource
@@ -20,9 +20,9 @@ class UserVSAccountService {
 
     WalletVS getUserVSWallet(UserVS user) {
         def userAccountsDB
-        UserVSAccount.withTransaction { userAccountsDB = UserVSAccount.createCriteria().list(sort:'dateCreated', order:'asc') {
+        CooinAccount.withTransaction { userAccountsDB = CooinAccount.createCriteria().list(sort:'dateCreated', order:'asc') {
             eq("userVS", userVS)
-            eq("state", UserVSAccount.State.ACTIVE)
+            eq("state", CooinAccount.State.ACTIVE)
         }}
         WalletVS walletVS = new WalletVS()
         List userAccounts = []
@@ -31,18 +31,18 @@ class UserVSAccountService {
         }
     }
 
-    Map getUserVSAccountMap(UserVSAccount userVSAccount) {
-        Map result = [id:userVSAccount.id, currency:userVSAccount.currencyCode, IBAN:userVSAccount.IBAN,
-                      amount:userVSAccount.balance, lastUpdated:userVSAccount.lastUpdated]
-        if(userVSAccount.tag) result.tag = [id:userVSAccount.tag.id, name:userVSAccount.tag.name]
+    Map getUserVSAccountMap(CooinAccount cooinAccount) {
+        Map result = [id:cooinAccount.id, currency:cooinAccount.currencyCode, IBAN:cooinAccount.IBAN,
+                      amount:cooinAccount.balance, lastUpdated:cooinAccount.lastUpdated]
+        if(cooinAccount.tag) result.tag = [id:cooinAccount.tag.id, name:cooinAccount.tag.name]
         return result
     }
 
     Map getAccountsBalanceMap(UserVS userVS) {
-        List<UserVSAccount> userVSAccounts
-        userVSAccounts = UserVSAccount.findAllWhere(userVS:userVS, state:UserVSAccount.State.ACTIVE)
+        List<CooinAccount> cooinAccounts
+        cooinAccounts = CooinAccount.findAllWhere(userVS:userVS, state:CooinAccount.State.ACTIVE)
         Map result = [:]
-        for(UserVSAccount account: userVSAccounts) {
+        for(CooinAccount account: cooinAccounts) {
             if(result[(account.IBAN)]) {
                 if(result[(account.IBAN)][(account.currencyCode)]) {
                     result[(account.IBAN)][(account.currencyCode)][(account.tag.name)] = account.balance.toString()

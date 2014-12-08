@@ -11,7 +11,7 @@ import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
@@ -43,10 +43,10 @@ class SystemService {
                     grailsApplication.config.vs.defaulTagsFilePath).getFile()?.text.split(",")
             for(String tag: defaultTags) {
                 TagVS newTagVS = new TagVS(name:tag).save()
-                new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
+                new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
                         balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:newTagVS).save()
             }
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
+            new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
                     balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:wildTag).save()
         }
         updateAdmins()
@@ -135,8 +135,8 @@ class SystemService {
     }
 
     public void updateTagBalance(BigDecimal amount, String currencyCode, TagVS tag) {
-        UserVSAccount tagAccount = UserVSAccount.findWhere(userVS:getSystemUser(), tag:tag, currencyCode:currencyCode,
-                state: UserVSAccount.State.ACTIVE)
+        CooinAccount tagAccount = CooinAccount.findWhere(userVS:getSystemUser(), tag:tag, currencyCode:currencyCode,
+                state: CooinAccount.State.ACTIVE)
         if(!tagAccount) throw new Exception("THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG '${tag.name}' and currency '${currencyCode}'")
         tagAccount.balance = tagAccount.balance.add(amount)
         tagAccount.save()

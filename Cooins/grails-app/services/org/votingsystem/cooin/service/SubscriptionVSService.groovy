@@ -8,7 +8,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
@@ -119,11 +119,11 @@ class SubscriptionVSService {
                 metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"))
     }
 
-    public UserVSAccount checkUserVSAccount(UserVS userVS){
-        UserVSAccount userAccount = UserVSAccount.findWhere(userVS:userVS)
+    public CooinAccount checkUserVSAccount(UserVS userVS){
+        CooinAccount userAccount = CooinAccount.findWhere(userVS:userVS)
         if(!userAccount) {
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
+            new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
                     balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
         }
         return userAccount

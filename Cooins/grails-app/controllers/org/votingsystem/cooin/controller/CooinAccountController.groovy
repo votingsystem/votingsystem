@@ -3,7 +3,7 @@ package org.votingsystem.cooin.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
-import org.votingsystem.cooin.model.UserVSAccount
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 
@@ -14,9 +14,9 @@ import org.votingsystem.model.UserVS
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
-class UserVSAccountController {
+class CooinAccountController {
 
-    def userVSAccountService
+    def cooinAccountService
 
     def balance() {
         if(params.long('id')) {
@@ -28,13 +28,13 @@ class UserVSAccountController {
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
             }
             def userAccountsDB
-            UserVSAccount.withTransaction { userAccountsDB = UserVSAccount.createCriteria().list(sort:'dateCreated', order:'asc') {
+            CooinAccount.withTransaction { userAccountsDB = CooinAccount.createCriteria().list(sort:'dateCreated', order:'asc') {
                 eq("userVS", userVS)
-                eq("state", UserVSAccount.State.ACTIVE)
+                eq("state", CooinAccount.State.ACTIVE)
             }}
             List userAccounts = []
             userAccountsDB.each { it ->
-                userAccounts.add(userVSAccountService.getUserVSAccountMap(it))
+                userAccounts.add(cooinAccountService.getUserVSAccountMap(it))
             }
             resultMap = [name: userVS.name, id:userVS.id, accounts:userAccounts]
             render resultMap as JSON
