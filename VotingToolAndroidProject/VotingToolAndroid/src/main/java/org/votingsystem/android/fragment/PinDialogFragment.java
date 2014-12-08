@@ -100,9 +100,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     }
 
     public static void showPinScreenWithoutHashValidation(FragmentManager fragmentManager,
-              String broadCastId, String msg, TypeVS typeVS) {
+              boolean isWithPasswordConfirm, String broadCastId, String msg, TypeVS typeVS) {
         PinDialogFragment pinDialog = new PinDialogFragment();
-        pinDialog.setArguments(getArguments(msg, true, false, false, broadCastId, typeVS));
+        pinDialog.setArguments(getArguments(msg, isWithPasswordConfirm, false, false, broadCastId, typeVS));
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);
     }
 

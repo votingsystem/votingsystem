@@ -70,7 +70,6 @@ public class KeyStoreUtil {
                 dateBegin, dateFinish, endEntitySubjectDN);
         X500PrivateCredential endCredential = new X500PrivateCredential(
                 endCert, endPair.getPrivate(), endEntityAlias);
-        store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
                 new Certificate[] {endCredential.getCertificate(), rootCredential.getCertificate()});
         return store;

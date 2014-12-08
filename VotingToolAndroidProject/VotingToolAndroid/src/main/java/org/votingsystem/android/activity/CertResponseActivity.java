@@ -100,7 +100,7 @@ public class CertResponseActivity extends ActionBarActivity {
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             PinDialogFragment.showPinScreenWithoutHashValidation(
-                    getSupportFragmentManager(), broadCastId,
+                    getSupportFragmentManager(), false, broadCastId,
                     getString(R.string.enter_pin_import_cert_msg), null);
             }
         });

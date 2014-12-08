@@ -474,4 +474,5 @@
     <string name="pin_change_lbl">cambiar pin</string>
     <string name="new_pin_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nuevo pin</string>
     <string name="new_pin_error_msg">los valores no coinciden comience de nuevo, introduzca el nuevo pin</string>
+    <string name="open_wallet_lbl">abrir monedero</string>
 </resources>

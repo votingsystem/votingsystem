@@ -1,2 +1,8 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/open_wallet"
+        android:showAsAction="always"
+        votingSystem:showAsAction="always"
+        android:title="@string/open_wallet_lbl"/>
 </menu>

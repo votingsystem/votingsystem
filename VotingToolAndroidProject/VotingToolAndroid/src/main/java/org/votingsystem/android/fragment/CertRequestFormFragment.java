@@ -185,7 +185,7 @@ public class CertRequestFormFragment extends Fragment {
             builder.setPositiveButton(getString(R.string.continue_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
+                            PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(), true,
                                     broadCastId, getString(
                                     R.string.pin_for_new_cert_msg), null);
                         }

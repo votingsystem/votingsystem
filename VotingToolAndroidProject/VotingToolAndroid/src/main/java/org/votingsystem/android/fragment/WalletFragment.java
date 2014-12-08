@@ -51,7 +51,7 @@ public class WalletFragment extends Fragment {
     private CooinListAdapter adapter = null;
     private List<Cooin> cooinList;
     private String broadCastId = WalletFragment.class.getSimpleName();
-    private String actualPIN;
+    private Menu menu;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -62,11 +62,11 @@ public class WalletFragment extends Fragment {
             switch(responseVS.getTypeVS()) {
                 case COOIN:
                     try {
-                        actualPIN = pin;
                         cooinList = WalletUtils.getCooinList(pin,
                                 (AppContextVS) getActivity().getApplicationContext());
                         adapter.setItemList(cooinList);
                         adapter.notifyDataSetChanged();
+                        menu.removeItem(R.id.open_wallet);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
@@ -125,10 +125,15 @@ public class WalletFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.wallet, menu);
+        this.menu = menu;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.open_wallet:
+                PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
