@@ -59,5 +59,5 @@ La dirección del servidor de sello de tiempo de las aplicaciones **AccessContro
 
 =======================================================================================================
 
-* Para construir las aplicaciones se debe emplear un entorno con **Java 8**, **Grails 2.4.4** y **Gradle 2.2**
+* Para construir las aplicaciones se debe emplear un entorno con **Java 8**, **Grails 2.4.4** y **Gradle 2.2.1**
 

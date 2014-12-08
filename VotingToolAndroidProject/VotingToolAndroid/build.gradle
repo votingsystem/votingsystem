@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.14.1'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
@@ -51,9 +51,13 @@ android {
     }
 
     applicationVariants.all { variant ->
-        variant.outputFile = file("${signedAndroidAppName}.apk")
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                output.outputFile = new File(outputFile.parent, "${signedAndroidAppName}.apk")
+            }
+        }
     }
-
 }
 
 dependencies {
