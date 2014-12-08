@@ -18,9 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +34,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVSAccountsInfo;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -54,14 +52,14 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserVSAccountsFragment extends Fragment {
+public class CooinAccountsFragment extends Fragment {
 
-	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
+	public static final String TAG = CooinAccountsFragment.class.getSimpleName();
 
     private String currencyCode;
     private TransactionVS transactionVS;
     private View rootView;
-    private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
+    private String broadCastId = CooinAccountsFragment.class.getSimpleName();
     private AppContextVS contextVS;
     private TextView last_request_date;
     private RecyclerView accounts_recycler_view;
@@ -108,7 +106,7 @@ public class UserVSAccountsFragment extends Fragment {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     break;
-                case USERVS_MONETARY_INFO:
+                case COOIN_ACCOUNTS_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
                     }
@@ -123,7 +121,7 @@ public class UserVSAccountsFragment extends Fragment {
     };
 
     public static Fragment newInstance(Long representativeId) {
-        UserVSAccountsFragment fragment = new UserVSAccountsFragment();
+        CooinAccountsFragment fragment = new CooinAccountsFragment();
         Bundle args = new Bundle();
         args.putLong(ContextVS.USER_KEY, representativeId);
         fragment.setArguments(args);
@@ -131,7 +129,7 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     public static Fragment newInstance(Bundle args) {
-        UserVSAccountsFragment fragment = new UserVSAccountsFragment();
+        CooinAccountsFragment fragment = new CooinAccountsFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -170,7 +168,7 @@ public class UserVSAccountsFragment extends Fragment {
         if(operationVS != null){
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
-                UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
+                CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(contextVS);
                 IBAN = userInfo.getUserVS().getIBAN();
                 cashAvailable = userInfo.getAvailableForTagVS(transactionVS.getCurrencyCode(),
                         transactionVS.getTagVS().getName());
@@ -194,7 +192,7 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
-        Date lastCheckedTime = PrefUtils.getUserVSAccountsLastCheckDate(getActivity());
+        Date lastCheckedTime = PrefUtils.getCooinAccountsLastCheckDate(getActivity());
         if(lastCheckedTime == null) {
             sendUserInfoRequest();
             return;
@@ -202,7 +200,7 @@ public class UserVSAccountsFragment extends Fragment {
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.cooin_last_request_info_lbl,
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
-            UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
+            CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(contextVS);
             if(userInfo != null) {
                 Map<String, TagVSInfo> tagVSBalancesMap = userInfo.getTagVSBalancesMap(
                         Currency.getInstance("EUR").getCurrencyCode());
@@ -248,7 +246,7 @@ public class UserVSAccountsFragment extends Fragment {
         Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), CooinService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.USERVS_MONETARY_INFO);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg));
@@ -343,7 +341,7 @@ public class UserVSAccountsFragment extends Fragment {
             if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                 request_button.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        UserVSAccountsFragment.this.currencyCode = currencyCode;
+                        CooinAccountsFragment.this.currencyCode = currencyCode;
                         CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
                                 getString(R.string.cash_request_dialog_caption),
                                 getString(R.string.cash_dialog_msg, accountBalance, currencyCode),

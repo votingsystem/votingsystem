@@ -16,7 +16,7 @@ import android.text.TextUtils;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.UserVSAccountsInfo;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
@@ -259,7 +259,7 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void updateUserVSTransactionVSList(Context context, UserVSAccountsInfo userInfo) {
+    public static void updateUserVSTransactionVSList(Context context, CooinAccountsInfo userInfo) {
         for(TransactionVS transactionVS : userInfo.getTransactionList()) {
             addTransaction(context, transactionVS,
                     DateUtils.getPath(userInfo.getTimePeriod().getDateFrom()));

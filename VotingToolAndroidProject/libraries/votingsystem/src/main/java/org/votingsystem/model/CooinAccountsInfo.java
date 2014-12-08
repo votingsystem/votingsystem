@@ -19,9 +19,9 @@ import java.util.Set;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserVSAccountsInfo {
+public class CooinAccountsInfo {
 
-    public static final String TAG = UserVSAccountsInfo.class.getSimpleName();
+    public static final String TAG = CooinAccountsInfo.class.getSimpleName();
 
     private UserVS userVS;
     private DateUtils.TimePeriod timePeriod;
@@ -122,8 +122,8 @@ public class UserVSAccountsInfo {
         }
     }
 
-    public static UserVSAccountsInfo parse(JSONObject jsonData) throws Exception {
-        UserVSAccountsInfo result =  new UserVSAccountsInfo();
+    public static CooinAccountsInfo parse(JSONObject jsonData) throws Exception {
+        CooinAccountsInfo result =  new CooinAccountsInfo();
         DateUtils.TimePeriod timePeriod = DateUtils.TimePeriod.parse(jsonData.getJSONObject("timePeriod"));
         result.setTimePeriod(timePeriod);
         result.setUserVS(UserVS.parse(jsonData.getJSONObject("userVS")));

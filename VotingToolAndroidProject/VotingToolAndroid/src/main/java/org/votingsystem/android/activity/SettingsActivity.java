@@ -67,7 +67,7 @@ public class SettingsActivity extends PreferenceActivity
                 }
             } else {
                 switch(responseVS.getTypeVS()) {
-                    case USERVS_MONETARY_INFO:
+                    case COOIN_ACCOUNTS_INFO:
                         break;
                 }
             }*/

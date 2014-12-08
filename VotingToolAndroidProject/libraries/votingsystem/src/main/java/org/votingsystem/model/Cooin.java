@@ -278,10 +278,10 @@ public class Cooin extends ReceiptContainer {
         this.transaction = transaction;
     }
 
-    public static JSONObject getUserVSAccountInfoRequest(String nif) {
+    public static JSONObject getCooinAccountInfoRequest(String nif) {
         Map mapToSend = new HashMap();
         mapToSend.put("NIF", nif);
-        mapToSend.put("operation", TypeVS.USERVS_MONETARY_INFO.toString());
+        mapToSend.put("operation", TypeVS.COOIN_ACCOUNTS_INFO.toString());
         mapToSend.put("UUID", UUID.randomUUID().toString());
         return new JSONObject(mapToSend);
     }

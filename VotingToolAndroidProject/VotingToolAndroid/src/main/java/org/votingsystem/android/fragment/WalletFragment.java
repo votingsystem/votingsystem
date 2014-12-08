@@ -52,6 +52,7 @@ public class WalletFragment extends Fragment {
     private List<Cooin> cooinList;
     private String broadCastId = WalletFragment.class.getSimpleName();
     private Menu menu;
+    private boolean walletLoaded = false;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -66,7 +67,7 @@ public class WalletFragment extends Fragment {
                                 (AppContextVS) getActivity().getApplicationContext());
                         adapter.setItemList(cooinList);
                         adapter.notifyDataSetChanged();
-                        menu.removeItem(R.id.open_wallet);
+                        if(menu != null) menu.removeItem(R.id.open_wallet);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
@@ -76,7 +77,7 @@ public class WalletFragment extends Fragment {
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case USERVS_MONETARY_INFO:
+                case COOIN_ACCOUNTS_INFO:
                     break;
             }
         }
@@ -116,7 +117,7 @@ public class WalletFragment extends Fragment {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
             cooinList = new ArrayList<Cooin>();
-        }
+        } else walletLoaded = true;
         adapter = new CooinListAdapter(cooinList, getActivity());
         gridView.setAdapter(adapter);
         setHasOptionsMenu(true);
@@ -124,7 +125,7 @@ public class WalletFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.wallet, menu);
+        if(!walletLoaded) menuInflater.inflate(R.menu.wallet, menu);
         this.menu = menu;
     }
 

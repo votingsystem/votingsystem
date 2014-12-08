@@ -24,7 +24,7 @@ import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVSAccountsInfo;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
@@ -73,7 +73,7 @@ public class CooinService extends IntentService {
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         try {
             switch(operation) {
-                case USERVS_MONETARY_INFO:
+                case COOIN_ACCOUNTS_INFO:
                     updateUserInfo(serviceCaller);
                     break;
                 case COOIN_REQUEST:
@@ -185,7 +185,7 @@ public class CooinService extends IntentService {
         byte[] decryptedMessageBytes = null;
         Map <Long,Cooin> sendedCooinsMap = new HashMap<Long, Cooin>();
         try {
-            UserVSAccountsInfo userInfo = PrefUtils.getUserVSAccountsInfo(contextVS);
+            CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(contextVS);
             BigDecimal available = userInfo.getAvailableForTagVS(currencyCode, tagVS);
             if(available.compareTo(requestAmount) < 0) {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
@@ -297,10 +297,11 @@ public class CooinService extends IntentService {
         }
     }
 
-    private ResponseVS cooinRequest(String serviceCaller, CooinBatch cooinBatch,String password){
+    private ResponseVS cooinRequest(String serviceCaller, CooinBatch cooinBatch, String password){
         CooinServer cooinServer = cooinBatch.getCooinServer();
         ResponseVS responseVS = null;
         try {
+            LOGD(TAG + ".cooinRequest", "Amount: " + cooinBatch.getTotalAmount().toPlainString());
             String messageSubject = getString(R.string.cooin_request_msg_subject);
             String fromUser = contextVS.getUserVS().getNif();
             String requestDataFileName = ContextVS.COOIN_REQUEST_DATA_FILE_NAME + ":" +
@@ -321,6 +322,7 @@ public class CooinService extends IntentService {
                         getString(R.string.cooin_request_ok_msg, cooinBatch.getTotalAmount(),
                         cooinBatch.getCurrencyCode()));
                 WalletUtils.saveCooinList(cooinBatch.getCooinsMap().values(), password, contextVS);
+                updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
                     R.string.cooin_request_error_caption));
         } catch(Exception ex) {
@@ -341,9 +343,9 @@ public class CooinService extends IntentService {
                     contextVS.getUserVS().getNif());
             responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                UserVSAccountsInfo accountsInfo = UserVSAccountsInfo.parse(
+                CooinAccountsInfo accountsInfo = CooinAccountsInfo.parse(
                         responseVS.getMessageJSON());
-                PrefUtils.putUserVSAccountsInfo(accountsInfo, DateUtils.getCurrentWeekPeriod(),
+                PrefUtils.putCooinAccountsInfo(accountsInfo, DateUtils.getCurrentWeekPeriod(),
                         contextVS);
                 TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, accountsInfo);
             } else responseVS.setCaption(getString(R.string.error_lbl));
@@ -353,7 +355,7 @@ public class CooinService extends IntentService {
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.user_info_updated));
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.USERVS_MONETARY_INFO);
+            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_ACCOUNTS_INFO);
             broadCastResponse(responseVS);
         }
     }

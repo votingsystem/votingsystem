@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
-import org.votingsystem.android.fragment.UserVSAccountsFragment;
+import org.votingsystem.android.fragment.CooinAccountsFragment;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -104,7 +104,7 @@ public class FinanceMainActivity extends ActivityBase {
             Fragment selectedFragment = null;
             switch(position) {
                 case USERVS_MONETARY_INFO:
-                    selectedFragment = new UserVSAccountsFragment();
+                    selectedFragment = new CooinAccountsFragment();
                     break;
                 case COOIN_LIST:
                     selectedFragment = new TransactionVSGridFragment();
@@ -119,7 +119,7 @@ public class FinanceMainActivity extends ActivityBase {
 
         @Override public int getCount() {
             return 2;
-        } //USERVS_MONETARY_INFO and COOIN_LIST
+        } //COOIN_ACCOUNTS_INFO and COOIN_LIST
 
     }
 

@@ -10,7 +10,7 @@ import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Representation;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSAccountsInfo;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
@@ -115,7 +115,7 @@ public class PrefUtils {
         sp.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    public static Date getUserVSAccountsLastCheckDate(Context context) {
+    public static Date getCooinAccountsLastCheckDate(Context context) {
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         GregorianCalendar lastCheckedTime = new GregorianCalendar();
@@ -126,18 +126,18 @@ public class PrefUtils {
         } else return null;
     }
 
-    public static UserVSAccountsInfo getUserVSAccountsInfo(Context context) throws Exception {
+    public static CooinAccountsInfo getCooinAccountsInfo(Context context) throws Exception {
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         String userInfoStr = pref.getString(editorKey, null);
-        if(userInfoStr != null) return UserVSAccountsInfo.parse(new JSONObject(userInfoStr));
+        if(userInfoStr != null) return CooinAccountsInfo.parse(new JSONObject(userInfoStr));
         else return null;
     }
 
-    public static void putUserVSAccountsInfo(UserVSAccountsInfo userInfo,
-             DateUtils.TimePeriod timePeriod, Context context) throws Exception {
+    public static void putCooinAccountsInfo(CooinAccountsInfo userInfo,
+                DateUtils.TimePeriod timePeriod, Context context) throws Exception {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
