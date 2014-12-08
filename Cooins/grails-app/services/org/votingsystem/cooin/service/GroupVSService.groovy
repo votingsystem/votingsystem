@@ -7,9 +7,9 @@ import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
@@ -169,7 +169,9 @@ class GroupVSService {
         resultMap.balancesTo = transactionListWithBalances.balances
 
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
-        userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
+
+        log.debug("================== checkBalancesMap!!!!!!")
+        //userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
     }
 

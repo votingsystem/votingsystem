@@ -5,7 +5,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 
 import javax.persistence.*;
 import java.io.File;

@@ -3,7 +3,6 @@ package org.votingsystem.cooin.service
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.model.UserVSAccount
 

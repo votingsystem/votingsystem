@@ -22,7 +22,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGenerator;
 import org.votingsystem.signature.smime.SimpleSignerInfoGeneratorBuilder;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
 

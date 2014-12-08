@@ -2,7 +2,7 @@ package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
 import org.votingsystem.model.UserVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.WalletVS
 
@@ -68,11 +68,11 @@ class UserVSAccountService {
                     BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
                     if(balancesMap[currency][tag]) {
                         BigDecimal balanceTagAmount = balancesMap[currency][tag];
-                        if(tagAmount.compareTo(balanceTagAmount) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
-                                " - accounts: '$accountsMap' - balance '$balancesMap'")
+                        if(tagAmount.compareTo(balanceTagAmount) != 0) throw new ExceptionVS("Balance Error with user " +
+                                "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                     } else {
-                        if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
-                                " - accounts: '$accountsMap' - balance '$balancesMap'")
+                        if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with user " +
+                                "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                     }
                 }
             } else {

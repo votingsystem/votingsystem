@@ -4,8 +4,8 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*

@@ -2,7 +2,7 @@ package org.votingsystem.test.util
 
 import org.apache.log4j.Logger
 import org.votingsystem.model.UserVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
 
 /**

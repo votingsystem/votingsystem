@@ -1,4 +1,6 @@
-package org.votingsystem.util;
+package org.votingsystem.throwable;
+
+import org.votingsystem.throwable.ExceptionVS;
 
 /**
  * @author jgzornoza

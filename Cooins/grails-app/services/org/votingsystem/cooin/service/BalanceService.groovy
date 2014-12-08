@@ -1,13 +1,12 @@
 package org.votingsystem.cooin.service
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
 import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.model.UserVSAccount
@@ -90,11 +89,10 @@ class BalanceService {
                     BigDecimal amountResult = new BigDecimal(tagVSEntry.getValue()).subtract(timeLimitedNotExpended)
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
                             [tagVSEntry.getKey()].toArray(), locale)
-                    Map transactionData = [operation:TypeVS.COOIN_INIT_PERIOD , amount:amountResult, tag:tagVSEntry.getKey(),
-                               timeLimitedNotExpended:timeLimitedNotExpended, toUserVS: userVS.name, toUserNIF:userVS.nif,
-                               toUserId:userVS.id, toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
                     ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name,
-                            userVS.getNif(), new JSONObject(transactionData).toString(), "${transactionMsgSubject} - ${signedMessageSubject}")
+                            userVS.getNif(), TransactionVS.getInitPeriodTransactionVSData(amountResult,
+                            timeLimitedNotExpended, tagVSEntry.getKey(), userVS).toString(),
+                            "${transactionMsgSubject} - ${signedMessageSubject}")
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(
                             "${methodName} - error signing system transaction - ${responseVS.getMessage()}")
                     MessageSMIME messageSMIME = new MessageSMIME(userVS:systemService.getSystemUser(),
@@ -105,8 +103,8 @@ class BalanceService {
                            type:TransactionVS.Type.COOIN_INIT_PERIOD, tag:currentTagVS).save()
                     if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                         UserVSAccount account = UserVSAccount.findWhere(userVS:userVS, tag:currentTagVS)
-                        TransactionVS transactionVS = new TransactionVS(amount: timeLimitedNotExpended,
-                                fromUserVS:userVS, fromUserIBAN: userVS.IBAN, currencyCode: currency, tag:currentTagVS,
+                        new TransactionVS(amount: timeLimitedNotExpended, fromUserVS:userVS, fromUserIBAN:
+                                userVS.IBAN, currencyCode: currency, tag:currentTagVS,
                                 toUserIBAN: systemService.getSystemUser().IBAN, messageSMIME:messageSMIME,
                                 toUserVS: systemService.getSystemUser(), state:TransactionVS.State.OK,
                                 subject: signedMessageSubject, type:TransactionVS.Type.COOIN_INIT_PERIOD_TIME_LIMITED,

@@ -14,6 +14,7 @@ import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.cooin.model.TransactionVS;
 

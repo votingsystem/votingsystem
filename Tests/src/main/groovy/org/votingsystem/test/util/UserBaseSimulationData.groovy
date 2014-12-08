@@ -7,8 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.test.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.test.callable.RepresentativeTestDataSender
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.FileUtils
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 

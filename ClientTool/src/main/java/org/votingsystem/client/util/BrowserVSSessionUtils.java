@@ -24,6 +24,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import javax.mail.Header;

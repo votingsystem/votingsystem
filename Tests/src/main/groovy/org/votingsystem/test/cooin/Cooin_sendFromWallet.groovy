@@ -8,7 +8,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.CooinServer
 import org.votingsystem.test.util.TestUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.cooin.model.CooinTransactionBatch
 

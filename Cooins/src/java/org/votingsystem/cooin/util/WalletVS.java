@@ -2,8 +2,8 @@ package org.votingsystem.cooin.util;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.ValidationExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.cooin.model.UserVSAccount;
 
 import java.math.BigDecimal;

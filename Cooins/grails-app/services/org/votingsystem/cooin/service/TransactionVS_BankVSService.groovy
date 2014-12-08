@@ -4,7 +4,7 @@ import grails.transaction.Transactional
 import org.votingsystem.model.BankVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.cooin.model.TransactionVS
 

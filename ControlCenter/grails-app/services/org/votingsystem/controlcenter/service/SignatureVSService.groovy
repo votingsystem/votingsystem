@@ -6,7 +6,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
 import javax.mail.Header

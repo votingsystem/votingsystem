@@ -35,7 +35,8 @@ class TestingController {
     def bankVSService
 
     def index() {
-        render "OK";
+        balanceService.initWeekPeriod(Calendar.getInstance())
+        render "initWeekPeriod - OK";
         return false
     }
 

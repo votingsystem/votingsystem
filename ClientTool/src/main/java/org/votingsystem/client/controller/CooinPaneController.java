@@ -26,7 +26,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.DialogVS;
 import org.votingsystem.client.dialog.JSONFormDialog;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.UserDeviceSelectorDialog;
@@ -37,7 +36,7 @@ import org.votingsystem.cooin.model.CooinTransactionBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 

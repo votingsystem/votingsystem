@@ -7,17 +7,15 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.NifUtils
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.FileUtils
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore

@@ -24,7 +24,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.signature.util.TimeStampResponseGenerator
 import org.votingsystem.signature.util.KeyGeneratorVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
 import javax.security.auth.x500.X500PrivateCredential

@@ -1,9 +1,8 @@
 package org.votingsystem.groovy.util
 
 import org.votingsystem.model.TagVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
-import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
  * @author jgzornoza

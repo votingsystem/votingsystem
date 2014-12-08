@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.throwable;
 
 /**
  * @author jgzornoza

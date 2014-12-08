@@ -2,13 +2,12 @@ package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
-import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 import org.votingsystem.cooin.model.TransactionVS

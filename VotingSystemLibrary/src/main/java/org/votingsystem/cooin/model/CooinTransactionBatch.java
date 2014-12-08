@@ -9,7 +9,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;

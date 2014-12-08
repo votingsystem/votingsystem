@@ -13,7 +13,7 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 

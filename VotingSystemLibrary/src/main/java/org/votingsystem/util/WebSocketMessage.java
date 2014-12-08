@@ -8,6 +8,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;

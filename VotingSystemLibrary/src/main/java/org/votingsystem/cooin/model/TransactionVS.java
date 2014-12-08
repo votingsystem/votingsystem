@@ -4,10 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import javax.persistence.*;
 import java.io.Serializable;
@@ -319,6 +316,21 @@ public class TransactionVS  implements Serializable {
         result.transactionParent = transactionParent;
         result.toUserVS = toUser;
         result.toUserIBAN = toUserIBAN;
+        return result;
+    }
+
+    public static JSONObject getInitPeriodTransactionVSData(BigDecimal amountResult, BigDecimal timeLimitedNotExpended,
+            String tag, UserVS userVS) {
+        JSONObject result = new JSONObject();
+        result.put("operation", TypeVS.COOIN_INIT_PERIOD.toString());
+        result.put("amount", amountResult.toPlainString());
+        result.put("timeLimitedNotExpended", timeLimitedNotExpended.toPlainString());
+        result.put("tag", tag);
+        result.put("toUserType", userVS.getType().toString());
+        result.put("toUserId", userVS.getId());
+        if(userVS.getNif() != null) result.put("toUserNIF", userVS.getNif());
+        result.put("toUserVS", userVS.getName());
+        result.put("UUID", UUID.randomUUID().toString());
         return result;
     }
 

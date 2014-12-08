@@ -4,7 +4,7 @@ import net.sf.json.JSONSerializer
 import org.votingsystem.model.*
 import org.votingsystem.test.callable.EncryptionTestSender
 import org.votingsystem.test.util.TestUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 

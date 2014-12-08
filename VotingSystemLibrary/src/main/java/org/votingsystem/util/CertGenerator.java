@@ -5,6 +5,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.throwable.ExceptionVS;
 
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;

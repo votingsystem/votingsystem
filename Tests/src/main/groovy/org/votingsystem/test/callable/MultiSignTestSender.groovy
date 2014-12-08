@@ -3,13 +3,11 @@ package org.votingsystem.test.callable
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureService
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 

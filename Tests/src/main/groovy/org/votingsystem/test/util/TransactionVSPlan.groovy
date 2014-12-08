@@ -7,7 +7,7 @@ import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.cooin.model.TransactionVS
 

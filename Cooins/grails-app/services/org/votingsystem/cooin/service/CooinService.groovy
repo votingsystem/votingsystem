@@ -8,9 +8,8 @@ import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.cooin.model.*
 
 import java.security.cert.X509Certificate

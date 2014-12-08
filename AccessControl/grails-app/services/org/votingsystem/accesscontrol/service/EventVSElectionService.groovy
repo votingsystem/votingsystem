@@ -4,13 +4,13 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import grails.transaction.Transactional
 import org.votingsystem.util.MetaInfMsg

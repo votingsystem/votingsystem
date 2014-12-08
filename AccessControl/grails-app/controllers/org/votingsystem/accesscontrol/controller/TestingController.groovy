@@ -1,7 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 
 /**
  * @infoController TestingController

@@ -1,9 +1,8 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.WalletVS
 

@@ -1,12 +1,10 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.model.UserVSAccount
 

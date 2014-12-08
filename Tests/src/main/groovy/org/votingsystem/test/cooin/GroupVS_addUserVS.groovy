@@ -9,7 +9,7 @@ import org.votingsystem.test.util.MockDNI
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.SimulationData
 import org.votingsystem.test.util.TestUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 
 Map userBaseData = [userIndex:100]
 Map simulationDataMap = [groupId:5, serverURL:"http://cooins:8086/Cooins", numRequestsProjected: 5, userBaseData:userBaseData]

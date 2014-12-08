@@ -28,7 +28,7 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 
 import javax.mail.BodyPart;

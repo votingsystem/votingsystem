@@ -9,7 +9,6 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import java.security.KeyStore
 import java.security.PrivateKey

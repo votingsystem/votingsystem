@@ -2,12 +2,10 @@ package org.votingsystem.controlcenter.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
-import org.votingsystem.model.ActorVS
-import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 

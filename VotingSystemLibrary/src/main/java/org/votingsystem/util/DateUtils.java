@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.votingsystem.throwable.ExceptionVS;
 
 import java.text.DateFormat;
 import java.text.ParseException;

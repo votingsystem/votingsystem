@@ -26,6 +26,7 @@ import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;

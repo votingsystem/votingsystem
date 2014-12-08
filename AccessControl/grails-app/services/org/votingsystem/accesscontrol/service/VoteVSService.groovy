@@ -6,10 +6,10 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import static org.springframework.context.i18n.LocaleContextHolder.*
 

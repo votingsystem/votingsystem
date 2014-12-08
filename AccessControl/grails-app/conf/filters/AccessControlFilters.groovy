@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import javax.servlet.http.HttpServletRequest
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.*
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 
 /**
  * @author jgzornoza

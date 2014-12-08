@@ -4,15 +4,14 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 import org.votingsystem.cooin.model.TransactionVS
-import static java.util.stream.Collectors.groupingBy
+
 import static org.votingsystem.cooin.model.TransactionVS.*
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.CoreSignal

@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.throwable.ExceptionVS;
 
 public class NifUtils {
 	    

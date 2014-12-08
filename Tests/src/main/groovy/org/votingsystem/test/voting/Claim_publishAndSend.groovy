@@ -31,11 +31,11 @@ log = TestUtils.init(Claim_publishAndSend.class, simulationDataMap)
 
 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
         TestUtils.simulationData.getAccessControlURL()),ContentTypeVS.JSON);
-if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
 ActorVS actorVS = ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
-if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " + actorVS.getType().toString());
+if(!(actorVS instanceof AccessControlVS)) throw new org.votingsystem.throwable.ExceptionVS("Expected access control but found " + actorVS.getType().toString());
 if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
-    throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
+    throw new org.votingsystem.throwable.ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
 }
 ContextVS.getInstance().setAccessControl(actorVS);
 eventVS = publishEvent(TestUtils.simulationData.getEventVS(), publisherNIF, "publishClaimMsgSubject");
@@ -110,7 +110,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
             ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,
             "eventURL");
     ResponseVS responseVS = signedSender.call();
-    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
     String eventURL = ((List<String>)responseVS.getData()).iterator().next()
     byte[] responseBytes = responseVS.getMessageBytes();
     ContextVS.getInstance().copyFile(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
@@ -147,7 +147,7 @@ private void changeEventState(String publisherNIF) throws Exception {
             ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
             ContentTypeVS.JSON_SIGNED, null, null);
     ResponseVS responseVS = worker.call();
-    if(ResponseVS.SC_OK == responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
+    if(ResponseVS.SC_OK == responseVS.statusCode) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
 }
 
 private void requestBackup(EventVS eventVS, String nif) throws Exception {
@@ -173,5 +173,5 @@ private void requestBackup(EventVS eventVS, String nif) throws Exception {
             responseVS = future.get();
             log.debug("BackupRequestWorker - status: " + responseVS.getStatusCode());*/
         }
-    } else throw new ExceptionVS(responseVS.getMessage())
+    } else throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
 }

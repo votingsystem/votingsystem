@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 
 import javax.websocket.Session;
 import java.util.*;

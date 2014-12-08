@@ -8,6 +8,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.*;
 import java.security.cert.X509Certificate;

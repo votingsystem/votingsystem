@@ -5,8 +5,8 @@ import net.sf.json.JSONArray
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 import static org.springframework.context.i18n.LocaleContextHolder.*
 
 class EventVSClaimSignatureCollectorService {

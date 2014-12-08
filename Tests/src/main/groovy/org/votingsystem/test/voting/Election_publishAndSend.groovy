@@ -10,7 +10,7 @@ import org.votingsystem.test.callable.SignTask
 import org.votingsystem.test.callable.VoteSender
 import org.votingsystem.test.util.*
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.PdfFormHelper
 

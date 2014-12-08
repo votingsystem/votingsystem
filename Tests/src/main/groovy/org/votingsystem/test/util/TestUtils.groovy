@@ -6,7 +6,7 @@ import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.test.ui.TestsApp
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 

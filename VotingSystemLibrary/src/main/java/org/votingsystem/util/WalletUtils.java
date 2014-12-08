@@ -8,6 +8,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.cooin.model.Cooin;
+import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

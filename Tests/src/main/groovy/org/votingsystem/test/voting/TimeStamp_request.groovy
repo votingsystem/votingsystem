@@ -6,7 +6,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.test.callable.TimeStamperTestSender
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 

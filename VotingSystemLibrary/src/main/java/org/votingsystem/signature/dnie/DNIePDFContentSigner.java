@@ -14,7 +14,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.ContentSignerVS;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
 

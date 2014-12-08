@@ -6,11 +6,11 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-import java.security.cert.X509Certificate
+
 import static org.springframework.context.i18n.LocaleContextHolder.*
 
 /**

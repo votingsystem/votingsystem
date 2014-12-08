@@ -3,7 +3,7 @@ package org.votingsystem.test.util
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import org.votingsystem.model.UserVS
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.TransactionVS;
 
 /**

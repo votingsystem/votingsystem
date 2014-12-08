@@ -2,8 +2,8 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.*

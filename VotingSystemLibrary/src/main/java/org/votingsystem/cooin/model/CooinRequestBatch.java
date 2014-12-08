@@ -8,7 +8,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.throwable.ExceptionVS;
 
 import javax.persistence.*;
 import java.io.IOException;

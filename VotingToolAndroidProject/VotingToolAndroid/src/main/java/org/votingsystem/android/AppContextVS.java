@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
@@ -212,22 +213,34 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         return Encryptor.decryptCMS(privateKey, encryptedBytes);
     }
 
-    //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public ActorVS getActorVS(String serverURL) {
+    public ActorVS getActorVS(final String serverURL) {
         ActorVS targetServer = getServer(serverURL);
         if(targetServer == null) {
-            try {
-                ResponseVS responseVS = HttpHelper.getData(
-                        ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    targetServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                    setServer(targetServer);
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
+            if(Looper.getMainLooper().getThread() != Thread.currentThread()) { //not in main thread,
+                //if invoked from main thread -> android.os.NetworkOnMainThreadException
+                targetServer = getActorVSFromURL(serverURL);
+            } else {
+                LOGD(TAG + ".getActorVS", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
+                new Thread(new Runnable() {
+                    @Override public void run() {  getActorVSFromURL(serverURL);  }
+                }).start();
             }
         }
         return targetServer;
+    }
+
+    private ActorVS getActorVSFromURL(String serverURL) {
+        ActorVS targetServer = null;
+        try {
+            ResponseVS responseVS = HttpHelper.getData(
+                    ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                targetServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                setServer(targetServer);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        } finally { return targetServer; }
     }
 
     //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
@@ -277,6 +290,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public CooinServer getCooinServer() {
+        if(cooinServer == null) {
+            cooinServer = (CooinServer) getActorVS(cooinServerURL);
+        }
         return cooinServer;
     }
 

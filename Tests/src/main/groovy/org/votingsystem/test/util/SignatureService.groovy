@@ -139,7 +139,7 @@ class SignatureService {
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${ContextVS.getInstance().config.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage());
         return timeStamper.getSMIME();
     }
 		
@@ -218,7 +218,7 @@ class SignatureService {
     }
 
     private List<MockDNI> subscribeUsers(JSONObject subscriptionData, SimulationData simulationData,
-              CooinServer cooinServer) throws ExceptionVS {
+              CooinServer cooinServer) throws org.votingsystem.throwable.ExceptionVS {
         log.debug("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
         List<MockDNI> userList = new ArrayList<MockDNI>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
@@ -241,7 +241,7 @@ class SignatureService {
                     cooinServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             ResponseVS responseVS = worker.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                throw new ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
+                throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
             } else simulationData.getAndIncrementNumRequestsOK();
             if((i % 50) == 0) log.debug("Subscribed " + i + " of " +
                     simulationData.getUserBaseSimulationData().getNumRequestsProjected() + " users to groupVS");
@@ -251,12 +251,12 @@ class SignatureService {
     }
 
     public List<JSONObject> validateUserVSSubscriptions(Long groupVSId, CooinServer cooinServer,
-            Map<String, MockDNI> userVSMap) throws ExceptionVS {
+            Map<String, MockDNI> userVSMap) throws org.votingsystem.throwable.ExceptionVS {
         log.debug("validateUserVSSubscriptions");
         ResponseVS responseVS = HttpHelper.getInstance().getData(cooinServer.getGroupVSUsersServiceURL(
                 groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
                 ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
         JSONObject dataJSON = JSONSerializer.toJSON(responseVS.getMessage())
         JSONArray jsonArray = dataJSON.getJSONArray("userVSList");
         List<JSONObject> usersToActivate = new ArrayList<>();
@@ -267,7 +267,7 @@ class SignatureService {
                 if(userVSMap.get(userVSData.getString("NIF")) != null) usersToActivate.add(userSubscriptionData);
             }
         }
-        if(usersToActivate.size() != userVSMap.size()) throw new ExceptionVS("Expected '" + userVSMap.size() +
+        if(usersToActivate.size() != userVSMap.size()) throw new org.votingsystem.throwable.ExceptionVS("Expected '" + userVSMap.size() +
                 "' pending users and found '" + usersToActivate.size() + "'");
         List<JSONObject> requests = new ArrayList<>();
         for(JSONObject userToActivate:usersToActivate) {
@@ -284,7 +284,7 @@ class SignatureService {
                     cooinServer.getNameNormalized(), request.toString(), messageSubject)
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     cooinServer.getGroupVSUsersActivationServiceURL())
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())
         }
         return requests
     }

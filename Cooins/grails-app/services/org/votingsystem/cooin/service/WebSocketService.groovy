@@ -11,7 +11,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.MessageVS
 import org.votingsystem.cooin.websocket.SessionVS
 import org.votingsystem.cooin.websocket.SessionVSHelper

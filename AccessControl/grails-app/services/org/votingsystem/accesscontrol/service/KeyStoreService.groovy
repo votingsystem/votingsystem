@@ -2,8 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.util.ApplicationContextHolder
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 
 import javax.security.auth.x500.X500PrivateCredential

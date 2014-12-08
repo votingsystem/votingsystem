@@ -5,9 +5,9 @@ import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.util.ValidationExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
 import org.votingsystem.cooin.model.UserVSAccount
 import org.votingsystem.cooin.util.IbanVSUtil
 
