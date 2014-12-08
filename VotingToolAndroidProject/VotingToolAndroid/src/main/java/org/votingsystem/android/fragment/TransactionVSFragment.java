@@ -81,9 +81,10 @@ public class TransactionVSFragment extends Fragment {
         super.onCreate(savedInstanceState);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        //String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
+        String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
         Cursor cursor = getActivity().getContentResolver().query(
-                TransactionVSContentProvider.CONTENT_URI, null, null, null, null);
+                TransactionVSContentProvider.CONTENT_URI, null, selection,
+                new String[]{contextVS.getCurrentWeekLapseId()}, null);
         cursor.moveToPosition(cursorPosition);
         Long transactionId = cursor.getLong(cursor.getColumnIndex(
                 TransactionVSContentProvider.ID_COL));
@@ -99,7 +100,7 @@ public class TransactionVSFragment extends Fragment {
         LOGD(TAG + ".onCreateView", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
         broadCastId = TransactionVSFragment.class.getSimpleName() + "_" + cursorPosition;
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
-                " - arguments: " + getArguments());
+                " - arguments: " + getArguments() + " - transactionId: " + transactionId);
         View rootView = inflater.inflate(R.layout.transactionvs, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
         from_user = (TextView)rootView.findViewById(R.id.from_user);
@@ -171,8 +172,6 @@ public class TransactionVSFragment extends Fragment {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.movement_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                     selectedTransaction.getDescription(getActivity(), selectedTransaction.getType()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
-                    selectedTransaction.getIconId(getActivity()));
         }
     }
 

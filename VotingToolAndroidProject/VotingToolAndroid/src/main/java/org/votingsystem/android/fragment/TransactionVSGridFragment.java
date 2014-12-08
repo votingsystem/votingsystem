@@ -179,7 +179,6 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.uservs_accounts, menu);
-
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
         List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (
@@ -210,8 +209,8 @@ public class TransactionVSGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position +" -id: " + id);
-        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        LOGD(TAG +  ".onListItemClick", "position: " + position + " - id: " + id);
+        //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(), TransactionVSPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
@@ -220,7 +219,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         LOGD(TAG + ".onCreateLoader", "");
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
-        CursorLoader loader = new CursorLoader(this.getActivity(),
+        CursorLoader loader = new CursorLoader(getActivity(),
                 TransactionVSContentProvider.CONTENT_URI, null, selection,
                 new String[]{contextVS.getCurrentWeekLapseId()}, null);
         return loader;
@@ -291,6 +290,7 @@ public class TransactionVSGridFragment extends Fragment
                     ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
                             transactionVS.getIconId(getActivity()));
                 }
+                //cursor.close();
             }
         }
     }
