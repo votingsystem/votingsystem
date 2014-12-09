@@ -66,6 +66,7 @@ public class ContextVS {
     public static final String SURNAME_KEY = "SURNAME_KEY";
     public static final String PHONE_KEY = "PHONE_KEY";
     public static final String DEVICE_ID_KEY = "DEVICE_ID_KEY";
+    public static final String DEVICE_KEY = "DEVICE_KEY";
     public static final String NAME_KEY = "NAME_KEY";
     public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";

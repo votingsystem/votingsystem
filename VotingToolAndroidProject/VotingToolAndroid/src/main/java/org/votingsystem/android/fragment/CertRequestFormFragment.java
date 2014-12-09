@@ -76,18 +76,18 @@ public class CertRequestFormFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            String pin = intent.getStringExtra(PIN_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) launchUserCertRequestService(pin);
-            else {
-                showProgress(false, true);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    Intent resultIntent = new Intent(getActivity(), CertResponseActivity.class);
-                    startActivity(resultIntent);
-                } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getMessage());
-            }
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        String pin = intent.getStringExtra(PIN_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(pin != null) launchUserCertRequestService(pin);
+        else {
+            showProgress(false, true);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                Intent resultIntent = new Intent(getActivity(), CertResponseActivity.class);
+                startActivity(resultIntent);
+            } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getMessage());
+        }
         }
     };
 

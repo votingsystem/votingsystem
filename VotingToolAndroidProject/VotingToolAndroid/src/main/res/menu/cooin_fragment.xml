@@ -10,12 +10,10 @@
         android:showAsAction="never"
         android:title="@string/timestamp_info_lbl"/>
 
-
-    <item android:id="@+id/cancel_cooin"
-        android:orderInCategory="3"
+    <item android:id="@+id/send_to_wallet"
+        android:orderInCategory="1"
         android:showAsAction="never"
-        android:title="@string/cancel_cooin_lbl"/>
-
+        android:title="@string/send_to_wallet"/>
 
     <item android:id="@+id/share_cooin"
         android:orderInCategory="4"

@@ -48,4 +48,7 @@ public class CooinServer extends ActorVS implements Serializable {
         return getServerURL() + "/userVS" + DateUtils.getPath(date);
     }
 
+    public String getDeviceVSConnectedServiceURL(String nif) {
+        return getServerURL() + "/deviceVS/" + nif + "/connected";
+    }
 }

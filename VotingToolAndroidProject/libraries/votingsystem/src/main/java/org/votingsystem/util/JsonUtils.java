@@ -71,4 +71,15 @@ public class JsonUtils {
             return json;
         }
     }
+
+    public static JSONObject getDeviceFromConnectedResponse(String deviceName, String responseStr) {
+        try {
+            JSONArray deviceArray = new JSONObject(responseStr).getJSONArray("deviceList");
+            for(int i = 0; i < deviceArray.length(); i++) {
+                JSONObject deviceJSON = (JSONObject) deviceArray.get(i);
+                if(deviceName.equals(deviceJSON.get("deviceName"))) return deviceJSON;
+            }
+        } catch (Exception ex) {ex.printStackTrace();}
+        return null;
+    }
 }

@@ -55,7 +55,7 @@ public class ProgressDialogFragment extends DialogFragment {
                 ProgressDialogFragment.TAG) != null) {
             ((ProgressDialogFragment) fragmentManager.
                     findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
-        } else LOGD(TAG +  ".hide", "ModalProgressDialogFragment not found");
+        } else LOGD(TAG +  ".hide", TAG + " not found");
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

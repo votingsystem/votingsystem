@@ -477,5 +477,10 @@
     <string name="open_wallet_lbl">abrir monedero</string>
     <string name="lapse_lbl">caduca: %1$s</string>
     <string name="tag_info"><![CDATA[<b>%1$s %2$s</b> para <b>%3$s</b>]]></string>
-    <string name="tag_info_time_limited"><![CDATA[tienes que gastar <b>\'%1$s %2$s\'</b> antes de que acabe la semana]]></string>
+    <string name="tag_info_time_limited"><![CDATA[tienes que gastar <b>%1$s %2$s</b> antes de que acabe la semana]]></string>
+    <string name="send_to_wallet">cambiar de monedero</string>
+    <string name="connect_device_advice_msg">¿está conectado el dispositivo al que desea enviar el cooin?</string>
+    <string name="searching_devices_lbl">buscando dispositivos</string>
+    <string name="send_to_wallet_connection_required_msg">para poder acceder al monedero destino necesita estar conectado</string>
+    <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el cooin</string>
 </resources>

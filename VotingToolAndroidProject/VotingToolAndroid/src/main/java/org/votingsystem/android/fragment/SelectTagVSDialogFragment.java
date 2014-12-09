@@ -39,9 +39,9 @@ import java.util.List;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TagVSSelectDialogFragment extends DialogFragment {
+public class SelectTagVSDialogFragment extends DialogFragment {
 
-    public static final String TAG = TagVSSelectDialogFragment.class.getSimpleName();
+    public static final String TAG = SelectTagVSDialogFragment.class.getSimpleName();
 
     private SimpleAdapter simpleAdapter;
     private String previousSearch;
@@ -49,7 +49,7 @@ public class TagVSSelectDialogFragment extends DialogFragment {
     private List<String> tagList = new ArrayList<String>();
 
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
-        TagVSSelectDialogFragment dialogFragment = new TagVSSelectDialogFragment();
+        SelectTagVSDialogFragment dialogFragment = new SelectTagVSDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.CALLER_KEY, dialogCaller);
         dialogFragment.setArguments(args);
@@ -59,7 +59,7 @@ public class TagVSSelectDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.tagvs_select_dialog, null);
+        View view = inflater.inflate(R.layout.select_tagvs_dialog, null);
         final EditText search_text = (EditText) view.findViewById(R.id.search_text);
         Button search_tag_btn = (Button) view.findViewById(R.id.search_tag_btn);
         search_tag_btn.setOnClickListener(new View.OnClickListener() {
@@ -71,9 +71,8 @@ public class TagVSSelectDialogFragment extends DialogFragment {
             }
         });
         ListView tag_list_view = (ListView) view.findViewById(R.id.tag_list_view);
-        AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setTitle(
-                getString(R.string.search_tag_lbl));
-        final AlertDialog dialog = builder.create();
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(
+                getString(R.string.search_tag_lbl)).create();
         dialog.setView(view);
         simpleAdapter = new SimpleAdapter(new ArrayList<String>(), getActivity());
         tag_list_view.setAdapter(simpleAdapter);

@@ -205,8 +205,8 @@ public class CashDialogFragment extends DialogFragment {
     }
 
     public void addTagClicked() {
-        if(tagVS == null) TagVSSelectDialogFragment.showDialog(broadCastId,
-                getActivity().getSupportFragmentManager(), TagVSSelectDialogFragment.TAG);
+        if(tagVS == null) SelectTagVSDialogFragment.showDialog(broadCastId,
+                getActivity().getSupportFragmentManager(), SelectTagVSDialogFragment.TAG);
         else setTagVS(null);
     }
 

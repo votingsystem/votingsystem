@@ -87,4 +87,8 @@ public class CooinServer extends ActorVS implements Serializable {
         return getServerURL() + "/groupVS/activateUser";
     }
 
+    public String getDeviceVSConnectedServiceURL(String nif) {
+        return getServerURL() + "/deviceVS/" + nif + "/connected";
+    }
+
 }

@@ -129,7 +129,7 @@ class BalanceService {
                 }
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
-                errorsFile.append(StackTraceUtils.extractRootCause(ex) + System.getProperty("line.separator"))
+                errorsFile.append("${StackTraceUtils.extractRootCause(ex)} ${System.getProperty("line.separator")}")
             }
         }
         signPeriodResult(timePeriod)

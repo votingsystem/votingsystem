@@ -53,9 +53,15 @@ public class CooinFragment extends Fragment {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
             else {
                 setProgressDialogVisible(false);
-                MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                        responseVS.getCaption(), responseVS.getNotificationMessage(),
-                        getFragmentManager());
+                switch(responseVS.getTypeVS()) {
+                    case DEVICE_SELECT:
+                        break;
+                    default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                           responseVS.getCaption(), responseVS.getNotificationMessage(),
+                           getFragmentManager());
+                }
+
+
             }
         }
     };
@@ -152,9 +158,15 @@ public class CooinFragment extends Fragment {
                             getTimeStampToken(), contextVS.getTimeStampCert(),
                             getFragmentManager(), getActivity());
                     break;
-                case R.id.cancel_cooin:
-                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                            getString(R.string.cancel_cooin_dialog_msg), false, null);
+                case R.id.send_to_wallet:
+                    if(contextVS.getWebSocketSession() == null) {
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                getString(R.string.send_to_wallet),
+                                getString(R.string.send_to_wallet_connection_required_msg),
+                                getActivity()).setPositiveButton(getString(R.string.accept_lbl), null);
+                        UIUtils.showMessageDialog(builder);
+                    } else SelectDeviceDialogFragment.showDialog(broadCastId, getActivity().
+                            getSupportFragmentManager(), SelectDeviceDialogFragment.TAG);
                     break;
                 case R.id.share_cooin:
                     try {
