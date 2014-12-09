@@ -15,9 +15,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.fragment.TransactionVSFragment;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.DateUtils;
-
-import java.util.Calendar;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 

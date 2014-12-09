@@ -27,13 +27,12 @@ import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -216,7 +215,7 @@ public class CooinAccountsFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.uservs_accounts, menu);
+        menuInflater.inflate(R.menu.cooin_accounts, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
     }

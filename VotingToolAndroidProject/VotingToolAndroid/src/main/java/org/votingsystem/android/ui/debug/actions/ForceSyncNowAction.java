@@ -7,9 +7,6 @@ import android.os.Bundle;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.ui.debug.DebugAction;
-import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.WalletUtils;
-import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;

@@ -28,7 +28,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -179,7 +178,7 @@ public class TransactionVSGridFragment extends Fragment
                int visibleItemCount, int totalItemCount) { }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.uservs_accounts, menu);
+        menuInflater.inflate(R.menu.cooin_accounts, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
         List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (

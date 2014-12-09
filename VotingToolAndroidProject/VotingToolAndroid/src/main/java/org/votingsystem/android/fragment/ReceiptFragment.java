@@ -25,7 +25,6 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;

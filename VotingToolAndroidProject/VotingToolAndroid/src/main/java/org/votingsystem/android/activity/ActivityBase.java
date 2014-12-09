@@ -41,7 +41,6 @@ import org.votingsystem.android.fragment.QRGeneratorFormFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
-import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
@@ -82,8 +81,9 @@ public abstract class ActivityBase extends ActionBarActivity {
     protected static final int NAVDRAWER_ITEM_POLLS = 0;
     protected static final int NAVDRAWER_ITEM_REPRESENTATIVES = 1;
     protected static final int NAVDRAWER_ITEM_RECEIPTS = 2;
-    protected static final int NAVDRAWER_ITEM_FINANCE = 3;
-    protected static final int NAVDRAWER_ITEM_SETTINGS = 4;
+    protected static final int NAVDRAWER_ITEM_COOIN_ACCOUNTS = 3;
+    protected static final int NAVDRAWER_ITEM_WALLET = 4;
+    protected static final int NAVDRAWER_ITEM_SETTINGS = 5;
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
@@ -93,7 +93,8 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.string.polls_lbl,
             R.string.representatives_lbl,
             R.string.receipts_lbl,
-            R.string.finance_lbl,
+            R.string.cooin_accounts_lbl,
+            R.string.wallet_lbl,
             R.string.navdrawer_item_settings,
     };
 
@@ -102,6 +103,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.drawable.poll_32,
             R.drawable.system_users_32,
             R.drawable.fa_cert_32,
+            R.drawable.fa_bank_32,
             R.drawable.fa_money_32,
             R.drawable.ic_drawer_settings,
     };
@@ -260,10 +262,11 @@ public abstract class ActivityBase extends ActionBarActivity {
         mNavDrawerItems.add(NAVDRAWER_ITEM_POLLS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_REPRESENTATIVES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_COOIN_ACCOUNTS);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_WALLET);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
         mNavDrawerItems.add(NAVDRAWER_ITEM_RECEIPTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
-        mNavDrawerItems.add(NAVDRAWER_ITEM_FINANCE);
-        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
         createNavDrawerItems();
     }
@@ -415,13 +418,18 @@ public abstract class ActivityBase extends ActionBarActivity {
                 startActivity(intent);
                 finish();
                 break;
-            case NAVDRAWER_ITEM_RECEIPTS:
-                intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
+            case NAVDRAWER_ITEM_COOIN_ACCOUNTS:
+                intent = new Intent(this, CooinAccountsMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;
-            case NAVDRAWER_ITEM_FINANCE:
-                intent = new Intent(this, FinanceMainActivity.class);
+            case NAVDRAWER_ITEM_WALLET:
+                intent = new Intent(this, WalletActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case NAVDRAWER_ITEM_RECEIPTS:
+                intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;

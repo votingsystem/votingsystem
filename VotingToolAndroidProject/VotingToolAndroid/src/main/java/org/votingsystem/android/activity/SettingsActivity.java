@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.view.View;
 
 import org.votingsystem.android.R;

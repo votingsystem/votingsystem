@@ -49,7 +49,10 @@
             android:theme="@style/ThemeVS">
         </activity>
 
-        <activity android:name=".activity.FinanceMainActivity"
+        <activity android:name=".activity.CooinAccountsMainActivity"
+            android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.WalletActivity"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.FragmentContainerActivity"

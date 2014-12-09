@@ -9,8 +9,6 @@ import android.os.Bundle;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.service.CooinService;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 

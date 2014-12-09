@@ -13,11 +13,9 @@ import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.CooinAccountsFragment;
-import org.votingsystem.android.fragment.WalletFragment;
+import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.service.CooinService;
-import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 
@@ -27,9 +25,9 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class FinanceMainActivity extends ActivityBase {
+public class CooinAccountsMainActivity extends ActivityBase {
 
-    public static final String TAG = FinanceMainActivity.class.getSimpleName();
+    public static final String TAG = CooinAccountsMainActivity.class.getSimpleName();
 
     //corresponds to finance section child screens order
     private static final int USER_ACCOUNTS_POS       = 0;
@@ -41,7 +39,7 @@ public class FinanceMainActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        setContentView(R.layout.finance_main);
+        setContentView(R.layout.cooin_accounts_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -54,7 +52,7 @@ public class FinanceMainActivity extends ActivityBase {
                 LOGD(TAG + ".onCreate", "onPageSelected: " + position);
                 switch (position) {
                     case USER_ACCOUNTS_POS:
-                        getSupportActionBar().setSubtitle(getString(R.string.uservs_accounts_lbl));
+                        getSupportActionBar().setSubtitle(null);
                         break;
                     case TRANSANCTIONVS_LIST_POS:
                         getSupportActionBar().setSubtitle(getString(R.string.movements_lbl));
@@ -67,8 +65,7 @@ public class FinanceMainActivity extends ActivityBase {
         CooinPagerAdapter pagerAdapter = new CooinPagerAdapter(getSupportFragmentManager(),
                 getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
-        getSupportActionBar().setTitle(getString(R.string.finance_lbl));
-        getSupportActionBar().setSubtitle(getString(R.string.uservs_accounts_lbl));
+        getSupportActionBar().setTitle(getString(R.string.cooin_accounts_lbl));
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -86,16 +83,13 @@ public class FinanceMainActivity extends ActivityBase {
                 startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
                 startService(startIntent);
                 return true;
-            case R.id.open_wallet:
-                UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), this);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     @Override protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_FINANCE;// we only have a nav drawer if we are in top-level
+        return NAVDRAWER_ITEM_COOIN_ACCOUNTS;// we only have a nav drawer if we are in top-level
     }
 
     @Override public void requestDataRefresh() {

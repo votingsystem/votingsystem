@@ -1,7 +1,5 @@
 package org.votingsystem.android.util;
 
-import android.content.Context;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -9,18 +7,13 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

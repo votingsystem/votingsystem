@@ -397,7 +397,7 @@
     <string name="wildtag_lbl">gastos libres</string>
     <string name="for_lbl">para</string>
     <string name="cooin_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
-    <string name="finance_lbl">finanzas</string>
+    <string name="cooin_accounts_lbl">cuentas</string>
     <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
     <string name="cooin_date_info">válido desde \'%1$s\' hasta \'%2$s\'</string>
@@ -407,7 +407,6 @@
     <string name="rejected_lbl">rechazado</string>
     <string name="currency_lbl">divisa</string>
     <string name="in_lbl">en</string>
-    <string name="uservs_accounts_lbl">cuentas</string>
     <string name="eventvs_election_active">votaciones abiertas</string>
     <string name="eventvs_election_closed">votaciones cerradas</string>
     <string name="eventvs_election_pending">votaciones pendientes</string>

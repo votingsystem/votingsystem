@@ -46,8 +46,6 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ResponseVS;
 
-import java.security.NoSuchAlgorithmException;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class PinDialogFragment extends DialogFragment implements OnKeyListener {

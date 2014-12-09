@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,32 +62,32 @@ public class WalletFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-        if(pin != null) {
-            switch(responseVS.getTypeVS()) {
-                case COOIN:
-                    try {
-                        cooinList = WalletUtils.getCooinList(pin,
-                                (AppContextVS) getActivity().getApplicationContext());
-                        adapter.setItemList(cooinList);
-                        adapter.notifyDataSetChanged();
-                        if(menu != null) menu.removeItem(R.id.open_wallet);
-                        printSummary();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-                    }
-                    break;
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) {
+                switch(responseVS.getTypeVS()) {
+                    case COOIN:
+                        try {
+                            cooinList = WalletUtils.getCooinList(pin,
+                                    (AppContextVS) getActivity().getApplicationContext());
+                            adapter.setItemList(cooinList);
+                            adapter.notifyDataSetChanged();
+                            if(menu != null) menu.removeItem(R.id.open_wallet);
+                            printSummary();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                    getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                        }
+                        break;
+                }
+            } else {
+                switch(responseVS.getTypeVS()) {
+                    case COOIN_ACCOUNTS_INFO:
+                        break;
+                }
             }
-        } else {
-            switch(responseVS.getTypeVS()) {
-                case COOIN_ACCOUNTS_INFO:
-                    break;
-            }
-        }
         }
     };
 
@@ -101,8 +102,8 @@ public class WalletFragment extends Fragment {
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-           Bundle savedInstanceState) {
-        ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.wallet_lbl), null, null);
+                                       Bundle savedInstanceState) {
+        ((ActionBarActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));
         rootView = inflater.inflate(R.layout.wallet_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
