@@ -1,6 +1,7 @@
 package org.votingsystem.android.activity;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,11 +9,17 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.CooinAccountsFragment;
+import org.votingsystem.android.fragment.WalletFragment;
+import org.votingsystem.android.service.CooinService;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -72,6 +79,16 @@ public class FinanceMainActivity extends ActivityBase {
                 intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuAdminURL());
                 startActivity(intent);
                 return true;*/
+            case R.id.update_signers_info:
+                Toast.makeText(this, getString(R.string.fetching_uservs_accounts_info_msg),
+                        Toast.LENGTH_SHORT).show();
+                Intent startIntent = new Intent(this, CooinService.class);
+                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
+                startService(startIntent);
+                return true;
+            case R.id.open_wallet:
+                UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), this);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

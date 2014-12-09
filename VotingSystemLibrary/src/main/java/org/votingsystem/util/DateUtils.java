@@ -343,17 +343,21 @@ public class DateUtils {
                     dateTo.compareTo(currentWeekPeriod.getDateTo()) <= 0);
         }
 
+        public boolean inRange(Date dateToCheck) {
+            return dateToCheck.compareTo(dateFrom) >= 0 && dateToCheck.compareTo(dateTo) <= 0;
+        }
+
         @Override public String toString() {
             return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
         }
     }
 
     public static String getDayWeekDateStr (Date date) {
-        Date lastYear = addDays(Calendar.getInstance().getTime(), -364).getTime();
-        Date nextYear = addDays(Calendar.getInstance().getTime(), 364).getTime();
-        if(date.before(lastYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
-        if(date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
-        return getDateStr(date, "EEE dd MMM' 'HH:mm");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
+            return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
 
     public static Date getDayWeekDate (String dateStr) throws ParseException {

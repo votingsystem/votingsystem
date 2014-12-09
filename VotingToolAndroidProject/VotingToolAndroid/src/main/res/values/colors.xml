@@ -14,6 +14,7 @@
     <color name="representative_name">#005b92</color>
     <color name="theme_primary_dark">#303f9f</color>
 
+    <color name="wallet_summary">#005b92</color>
     <color name="active_vs">#388746</color>
     <color name="terminated_vs">#cc1606</color>
     <color name="pending_vs">#fba131</color>

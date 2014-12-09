@@ -50,4 +50,9 @@
         <b>asunto: </b>%2$s<br/><b>cantidad: </b>%3$s %4$s<br/><b>etiqueta: </b>%5$s]]>
     </string>
     <string name="from_group_to_all_member_lbl">ingreso de grupo</string>
+    <string name="active_lbl">activo</string>
+    <string name="cancelled_lbl">cancelado</string>
+    <string name="expended_lbl">consumido</string>
+    <string name="lapsed_lbl">caducado</string>
+    <string name="rejected_lbl">rechazado</string>
 </resources>

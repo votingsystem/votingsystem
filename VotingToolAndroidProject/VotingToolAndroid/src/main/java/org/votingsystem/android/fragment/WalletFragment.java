@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
+import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.WalletUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
@@ -33,10 +35,13 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
+import java.math.BigDecimal;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
@@ -68,6 +73,7 @@ public class WalletFragment extends Fragment {
                         adapter.setItemList(cooinList);
                         adapter.notifyDataSetChanged();
                         if(menu != null) menu.removeItem(R.id.open_wallet);
+                        printSummary();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
@@ -97,7 +103,7 @@ public class WalletFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.wallet_lbl), null, null);
-        rootView = inflater.inflate(R.layout.grid_container, container, false);
+        rootView = inflater.inflate(R.layout.wallet_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
@@ -117,11 +123,43 @@ public class WalletFragment extends Fragment {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
             cooinList = new ArrayList<Cooin>();
-        } else walletLoaded = true;
+        } else {
+            printSummary();
+            walletLoaded = true;
+        }
         adapter = new CooinListAdapter(cooinList, getActivity());
         gridView.setAdapter(adapter);
         setHasOptionsMenu(true);
         return rootView;
+    }
+
+    private void printSummary() {
+        LinearLayout summary = (LinearLayout) rootView.findViewById(R.id.summary);
+        Map<String, Map<String, Map>> currencyMap = WalletUtils.getCurrencyMap();
+        for(String currency : currencyMap.keySet()) {
+            LinearLayout currencyData = (LinearLayout) getActivity().getLayoutInflater().inflate(
+                    R.layout.wallet_currency_summary, null);
+            ((LinearLayout)rootView.findViewById(R.id.summary)).addView(currencyData);
+            Map<String, Map> tagInfoMap = currencyMap.get(currency);
+            for(String tag : tagInfoMap.keySet()) {
+                LinearLayout tagData = (LinearLayout) getActivity().getLayoutInflater().inflate(
+                        R.layout.wallet_tag_summary, null);
+                String contentFormatted = getString(R.string.tag_info,
+                        ((BigDecimal)tagInfoMap.get(tag).get("total")).toPlainString(), currency,
+                        MsgUtils.getTagVSMessage(tag, getActivity()));
+                if(((BigDecimal)tagInfoMap.get(tag).get("timeLimited")).compareTo(BigDecimal.ZERO) > 0) {
+                    contentFormatted = contentFormatted + " " + getString(R.string.tag_info_time_limited,
+                            ((BigDecimal)tagInfoMap.get(tag).get("timeLimited")).toPlainString(),
+                            currency);
+                }
+                contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
+                        "<p style='text-align:center; margin:0px;font-size:0.9em;'>" +
+                        contentFormatted + "</p></body></html>";
+                ((WebView)tagData.findViewById(R.id.tag_info)).loadData(
+                        contentFormatted, "text/html; charset=UTF-8", null);
+                ((LinearLayout)currencyData.findViewById(R.id.tag_info)).addView(tagData);
+            }
+        }
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -198,20 +236,27 @@ public class WalletFragment extends Fragment {
             LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
             linearLayout.setBackgroundColor(Color.WHITE);
             TextView date_data = (TextView)view.findViewById(R.id.date_data);
-            String dateData = getString(R.string.cooin_data_info_lbl,
-                    DateUtils.getDayWeekDateStr(cooin.getDateFrom()),
-                    DateUtils.getDayWeekDateStr(cooin.getDateTo()));
             date_data.setText(DateUtils.getDayWeekDateStr(cooin.getDateFrom()));
 
             TextView cooin_state = (TextView) view.findViewById(R.id.cooin_state);
-            cooin_state.setText(cooin.getState().toString());
-            TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-            //week_lapse.setText(weekLapseStr);
+            cooin_state.setText(cooin.getStateMsg(getActivity()));
+            cooin_state.setTextColor(cooin.getStateColor(getActivity()));
 
             TextView amount = (TextView) view.findViewById(R.id.amount);
             amount.setText(cooin.getAmount().toPlainString());
+            amount.setTextColor(cooin.getStateColor(getActivity()));
             TextView currency = (TextView) view.findViewById(R.id.currencyCode);
             currency.setText(cooin.getCurrencyCode().toString());
+            currency.setTextColor(cooin.getStateColor(getActivity()));
+
+
+            if(DateUtils.getCurrentWeekPeriod().inRange(cooin.getDateTo())) {
+                TextView time_limited_msg = (TextView) view.findViewById(R.id.time_limited_msg);
+                time_limited_msg.setText(getString(R.string.lapse_lbl,
+                        DateUtils.getDayWeekDateStr(cooin.getDateTo())));
+            }
+            ((TextView) view.findViewById(R.id.tag_data)).setText(MsgUtils.getTagVSMessage(
+                    cooin.getSignedTagVS(), getActivity()));
             return view;
         }
 

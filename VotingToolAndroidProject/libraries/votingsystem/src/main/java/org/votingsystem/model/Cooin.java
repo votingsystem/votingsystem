@@ -1,7 +1,10 @@
 package org.votingsystem.model;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
@@ -16,6 +19,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,9 +94,34 @@ public class Cooin extends ReceiptContainer {
 
     private void load(CertificationRequestVS certificationRequest) throws IOException, JSONException, ExceptionVS {
         x509AnonymousCert = certificationRequest.getCertificate();
+        if(x509AnonymousCert != null) {
+            validFrom = x509AnonymousCert.getNotBefore();
+            validTo = x509AnonymousCert.getNotAfter();
+            if(Calendar.getInstance().getTime().after(validTo) && state == State.OK) {
+                state = State.LAPSED;
+            }
+        }
         JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.COOIN_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
         certSubject.addDateInfo(x509AnonymousCert);
+    }
+
+    public String getStateMsg(Context context) {
+        switch (state) {
+            case OK: return context.getString(R.string.active_lbl);
+            case CANCELLED: return context.getString(R.string.cancelled_lbl);
+            case EXPENDED: return context.getString(R.string.expended_lbl);
+            case LAPSED: return context.getString(R.string.lapsed_lbl);
+            case REJECTED: return context.getString(R.string.rejected_lbl);
+            default: return state.toString();
+        }
+    }
+
+    public int getStateColor(Context context) {
+        switch (state) {
+            case OK: return context.getResources().getColor(R.color.active_vs);
+            default: return context.getResources().getColor(R.color.terminated_vs);
+        }
     }
 
     public void validateSignedData() throws Exception {
@@ -393,10 +422,6 @@ public class Cooin extends ReceiptContainer {
         byte[] smimeMessageBytes = (byte[]) s.readObject();
         if(smimeMessageBytes != null) {
             smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
-        }
-        if(x509AnonymousCert != null) {
-            validFrom = x509AnonymousCert.getNotBefore();
-            validTo = x509AnonymousCert.getNotAfter();
         }
         if(certificationRequest != null) load(certificationRequest);
     }

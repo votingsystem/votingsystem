@@ -11,11 +11,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="4dip">
-
-        <LinearLayout android:layout_width="wrap_content"
-            android:minWidth="80dp"
+        <LinearLayout
+            android:minWidth="60dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="7dp"
             android:gravity="center"
             android:orientation="vertical">
             <LinearLayout android:layout_width="wrap_content"
@@ -24,45 +23,63 @@
                 <TextView android:id="@+id/amount"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:gravity="center" />
-
                 <TextView android:id="@+id/currencyCode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
                     android:gravity="center"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:singleLine="true"
                     android:ellipsize="marquee"/>
             </LinearLayout>
-
         </LinearLayout>
 
-        <LinearLayout android:layout_width="200dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="7dp"
-            android:orientation="vertical"
-            android:background="@android:drawable/list_selector_background">
-
-            <TextView android:id="@+id/cooin_state"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:gravity="center_vertical"
-                android:ellipsize="marquee" />
-            <TextView android:id="@+id/date_data"
-                android:layout_width="200dp"
-                android:layout_height="match_parent"
-                android:textSize="12sp"
-                android:singleLine="true"
-                android:ellipsize="marquee" />
-            <TextView android:id="@+id/week_lapse"
-                android:layout_width="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:gravity="center_vertical" />
+                android:orientation="horizontal">
+                <TextView android:id="@+id/cooin_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:ellipsize="marquee" />
+                <TextView android:id="@+id/time_limited_msg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/terminated_vs"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:layout_marginRight="3dp"
+                    android:gravity="right"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/tag_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:singleLine="true"/>
+                <TextView android:id="@+id/date_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:layout_marginRight="3dp"
+                    android:gravity="right"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>

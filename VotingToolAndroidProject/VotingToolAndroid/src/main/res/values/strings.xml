@@ -475,4 +475,7 @@
     <string name="new_pin_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nuevo pin</string>
     <string name="new_pin_error_msg">los valores no coinciden comience de nuevo, introduzca el nuevo pin</string>
     <string name="open_wallet_lbl">abrir monedero</string>
+    <string name="lapse_lbl">caduca: %1$s</string>
+    <string name="tag_info"><![CDATA[<b>%1$s %2$s</b> para <b>%3$s</b>]]></string>
+    <string name="tag_info_time_limited"><![CDATA[tienes que gastar <b>\'%1$s %2$s\'</b> antes de que acabe la semana]]></string>
 </resources>

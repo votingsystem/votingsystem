@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -199,10 +200,6 @@ public class TransactionVSGridFragment extends Fragment
         LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
-            case R.id.update_signers_info:
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.update_user_info_pin_msg), false, TypeVS.COOIN_ACCOUNTS_INFO);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -290,7 +287,6 @@ public class TransactionVSGridFragment extends Fragment
                     ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
                             transactionVS.getIconId(getActivity()));
                 }
-                //cursor.close();
             }
         }
     }

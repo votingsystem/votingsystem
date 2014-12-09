@@ -11,6 +11,7 @@ import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -18,9 +19,11 @@ import org.votingsystem.util.ObjectUtils;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +71,38 @@ public class WalletUtils {
         }
         WalletUtils.saveWallet(storedWalletJSON, password, context);
         cooinList = getCooinListFromJSONArray(storedWalletJSON);
+    }
+
+    public static Map<String, Map<String, Map>> getCurrencyMap() {
+        Map<String, Map<String, Map>> result = new HashMap<String, Map<String, Map>>();
+        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        for(Cooin cooin:cooinList) {
+            if(result.containsKey(cooin.getCurrencyCode())) {
+                Map<String, Map> tagMap = result.get(cooin.getCurrencyCode());
+                if(tagMap.containsKey(cooin.getSignedTagVS())) {
+                    Map<String, BigDecimal> tagInfoMap = tagMap.get(cooin.getSignedTagVS());
+                    tagInfoMap.put("total", tagInfoMap.get("total").add(cooin.getAmount()));
+                    if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited",
+                            tagInfoMap.get("timeLimited").add(cooin.getAmount()));
+                    tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                } else {
+                    Map<String, BigDecimal> tagInfoMap = new HashMap<String, BigDecimal>();
+                    tagInfoMap.put("total", cooin.getAmount());
+                    if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited", cooin.getAmount());
+                    else tagInfoMap.put("timeLimited", BigDecimal.ZERO);
+                    tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                }
+            } else {
+                Map<String, Map> tagMap = new HashMap<String, Map>();
+                Map<String, BigDecimal> tagInfoMap = new HashMap<String, BigDecimal>();
+                tagInfoMap.put("total", cooin.getAmount());
+                if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited", cooin.getAmount());
+                else tagInfoMap.put("timeLimited", BigDecimal.ZERO);
+                tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                result.put(cooin.getCurrencyCode(), tagMap);
+            }
+        }
+        return result;
     }
 
     public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)

@@ -20,7 +20,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -194,7 +193,7 @@ public class CooinAccountsFragment extends Fragment {
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = PrefUtils.getCooinAccountsLastCheckDate(getActivity());
         if(lastCheckedTime == null) {
-            sendUserInfoRequest();
+            updateCooinAccountsInfo();
             return;
         }
         try {
@@ -226,10 +225,7 @@ public class CooinAccountsFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
-                sendUserInfoRequest();
-                return true;
-            case R.id.open_wallet:
-                UIUtils.launchEmbeddedFragment(WalletFragment.class.getName(), getActivity());
+                updateCooinAccountsInfo();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -242,14 +238,12 @@ public class CooinAccountsFragment extends Fragment {
         } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
-    private void sendUserInfoRequest() {
-        Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
-                Toast.LENGTH_SHORT).show();
+    private void updateCooinAccountsInfo() {
         Intent startIntent = new Intent(getActivity(), CooinService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                getString(R.string.loading_info_msg));
+                getString(R.string.fetching_uservs_accounts_info_msg));
         getActivity().startService(startIntent);
     }
 
