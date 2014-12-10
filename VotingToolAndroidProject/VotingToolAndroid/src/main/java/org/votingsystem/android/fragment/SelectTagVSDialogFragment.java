@@ -152,7 +152,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         private Context context;
 
         public SimpleAdapter(List<String> itemList, Context ctx) {
-            super(ctx, R.layout.search_tag_list_item, itemList);
+            super(ctx, R.layout.adapter_list_item, itemList);
             this.itemList = itemList;
             this.context = ctx;
         }
@@ -177,7 +177,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
             if (itemView == null) {
                 LayoutInflater inflater =
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                itemView = inflater.inflate(R.layout.search_tag_list_item, null);
+                itemView = inflater.inflate(R.layout.adapter_list_item, null);
             }
             TextView text = (TextView) itemView.findViewById(R.id.list_item);
             text.setText(tag);

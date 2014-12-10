@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.controller.CooinPaneController;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.WebSocketService;
@@ -81,10 +82,14 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private TextField locationField = new TextField("");
     private final BrowserVSPane browserHelper;
+    private HBox toolBar;
     private TabPane tabPane;
     private Button prevButton;
+    private Button messageToDeviceButton;
     private WebSocketServiceAuthenticated webSocketServiceAuthenticated;
     private WebSocketService webSocketService;
+    private WebSocketMessage webSocketMessage;
+    private PasswordDialog webSocketMessagePasswordDialog;
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
@@ -154,6 +159,13 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         final Button forwardButton = new Button();
         final Button reloadButton = new Button();
         forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
+        messageToDeviceButton = new Button();
+        messageToDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
+        messageToDeviceButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
+            @Override public void handle(javafx.event.ActionEvent ev) {
+                consumeMessageTodDevice();
+            }
+        });
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
@@ -199,7 +211,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 }
             }
         });
-        HBox toolBar = new HBox();
+        toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
@@ -342,6 +354,26 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         return webView;
     }
 
+    private void consumeMessageTodDevice() {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                if(!toolBar.getChildren().contains(messageToDeviceButton))
+                    toolBar.getChildren().add(messageToDeviceButton);
+                if(webSocketMessagePasswordDialog == null) {
+                    webSocketMessagePasswordDialog = new PasswordDialog();
+                    webSocketMessagePasswordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("messageToDevicePasswordMsg"));
+                    String password = webSocketMessagePasswordDialog.getPassword();
+                    if(password != null) {
+                        webSocketMessage = null;
+                        toolBar.getChildren().remove(messageToDeviceButton);
+                    }
+                    webSocketMessagePasswordDialog = null;
+                } else webSocketMessagePasswordDialog.toFront();
+
+            }
+        });
+    }
+
     @Override public void sendMessageToBrowser(int statusCode, String message, String callerCallback) {
         String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
         log.debug("sendMessageToBrowser - statusCode: " + statusCode + " - message: " + logMsg);
@@ -428,7 +460,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
 
     @Override public void consumeWebSocketMessage(WebSocketMessage message) {
         log.debug("consumeWebSocketMessage - operation: " + message.getOperation().toString());
-        if(ResponseVS.SC_ERROR == message.getStatusCode()) {
+        if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {
             showMessage(message.getStatusCode(), message.getMessage());
             return;
         }
@@ -440,6 +472,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 log.debug("========= TODO MESSAGEVS_SIGN");
                 break;
             case MESSAGEVS_TO_DEVICE:
+                webSocketMessage = message;
+                consumeMessageTodDevice();
+                break;
             case MESSAGEVS_FROM_DEVICE:
                 BrowserVSSessionUtils.setWebSocketMessage(message);
                 break;

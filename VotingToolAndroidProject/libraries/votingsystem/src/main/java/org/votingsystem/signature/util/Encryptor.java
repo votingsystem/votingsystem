@@ -14,7 +14,6 @@ import org.bouncycastle2.cms.RecipientInformation;
 import org.bouncycastle2.cms.RecipientInformationStore;
 import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle2.crypto.DataLengthException;
 import org.bouncycastle2.crypto.InvalidCipherTextException;

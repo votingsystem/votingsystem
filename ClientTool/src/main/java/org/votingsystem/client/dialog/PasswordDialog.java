@@ -43,11 +43,13 @@ public class PasswordDialog {
     private Label capsLockPressedMessageLabel;
     private HBox messagePanel;
     private PasswordField password1Field;
+    private Text password2Text;
     private PasswordField password2Field;
     private Button cancelButton;
     private String password;
     private String mainMessage = null;
     boolean isCapsLockPressed = false;
+    boolean isWithPasswordConfirm = true;
 
     public PasswordDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
@@ -116,7 +118,7 @@ public class PasswordDialog {
 
 
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
-        Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));
+        password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         password2Text.setStyle("-fx-spacing: 50;");
 
         dialogVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
@@ -160,7 +162,9 @@ public class PasswordDialog {
     private void checkPasswords() {
         log.debug("checkPasswords");
         String password1 = new String(password1Field.getText());
-        String password2 = new String(password2Field.getText());
+        String password2 = null;
+        if(!isWithPasswordConfirm) password2 = password1;
+        else password2 = new String(password2Field.getText());
         if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
         else {
             if (password1.equals(password2)) {
@@ -176,12 +180,31 @@ public class PasswordDialog {
 
 
     public void show(String mainMessage) {
-        PasswordDialog.this.mainMessage = mainMessage;
+        this.mainMessage = mainMessage;
+        isWithPasswordConfirm = true;
         setMessage(mainMessage);
         stage.sizeToScene();
         stage.centerOnScreen();
         stage.toFront();
         stage.showAndWait();
+    }
+
+    public void showWithoutPasswordConfirm(String mainMessage) {
+        this.mainMessage = mainMessage;
+        isWithPasswordConfirm = false;
+        setMessage(mainMessage);
+        if(dialogVBox.getChildren().contains(password2Text) && dialogVBox.getChildren().contains(password2Field)) {
+            dialogVBox.getChildren().removeAll(password2Text, password2Field);
+        }
+        stage.sizeToScene();
+        stage.centerOnScreen();
+        stage.toFront();
+        stage.showAndWait();
+    }
+
+    public void toFront() {
+        stage.centerOnScreen();
+        stage.toFront();
     }
 
     private void setMessage (String message) {

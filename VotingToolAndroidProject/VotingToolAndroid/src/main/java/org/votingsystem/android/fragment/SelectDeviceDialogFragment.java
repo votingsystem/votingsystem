@@ -65,8 +65,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         ListView tag_list_view = (ListView) view.findViewById(R.id.tag_list_view);
         msg_text = (TextView) view.findViewById(R.id.msg_text);
         simpleAdapter = new SimpleAdapter(new ArrayList<String>(), getActivity());
-        final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(
-                getString(R.string.send_to_wallet)).create();
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
         dialog.setView(view);
         tag_list_view.setAdapter(simpleAdapter);
         tag_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -96,6 +95,9 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             dialogCaller = savedInstanceState.getString(ContextVS.CALLER_KEY);
             deviceConnectedResponseStr = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
             tagList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+            if(tagList.size() > 0) {
+                msg_text.setText(getString(R.string.select_connected_device_msg));
+            }
             simpleAdapter.setItemList(tagList);
             simpleAdapter.notifyDataSetChanged();
         } else {
@@ -151,7 +153,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         private Context context;
 
         public SimpleAdapter(List<String> itemList, Context ctx) {
-            super(ctx, R.layout.search_tag_list_item, itemList);
+            super(ctx, R.layout.adapter_list_item, itemList);
             this.itemList = itemList;
             this.context = ctx;
         }
@@ -176,7 +178,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             if (itemView == null) {
                 LayoutInflater inflater =
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                itemView = inflater.inflate(R.layout.search_tag_list_item, null);
+                itemView = inflater.inflate(R.layout.adapter_list_item, null);
             }
             TextView text = (TextView) itemView.findViewById(R.id.list_item);
             text.setText(tag);

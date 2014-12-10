@@ -8,7 +8,10 @@ import android.os.Bundle;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.service.WebSocketService;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
@@ -83,4 +86,14 @@ public class Utils {
         return arguments;
     }
 
+    public static void toggleWebSocketServiceConnection(AppContextVS contextVS) {
+        Intent startIntent = new Intent(contextVS, WebSocketService.class);
+        TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
+        if(contextVS.getWebSocketSession() != null &&
+                contextVS.getWebSocketSession().getSessionId() != null)
+            typeVS = TypeVS.WEB_SOCKET_CLOSE;
+        LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+        contextVS.startService(startIntent);
+    }
 }

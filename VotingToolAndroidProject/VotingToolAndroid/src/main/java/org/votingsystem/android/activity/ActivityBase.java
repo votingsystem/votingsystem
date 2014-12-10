@@ -28,17 +28,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.QRGeneratorFormFragment;
-import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.PrefUtils;
@@ -51,10 +48,8 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 
@@ -131,36 +126,25 @@ public abstract class ActivityBase extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+            WebSocketRequest socketRequest = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
-                        ProgressDialogFragment.showDialog(
-                                getString(R.string.connecting_caption),
+                        ProgressDialogFragment.showDialog(getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
-                        new Thread(new Runnable() {
-                            @Override public void run() { toggleWebSocketServiceConnection(); }
-                        }).start();
+                        new Thread(new Runnable() {@Override public void run() {
+                                Utils.toggleWebSocketServiceConnection(contextVS); }}).start();
                         break;
                 }
-            } else if(request != null) {
-                LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + request.getTypeVS());
+            } else if(socketRequest != null) {
+                LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + socketRequest.getTypeVS());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
-                switch(request.getTypeVS()) {
-                    case INIT_VALIDATED_SESSION:
-                        if(ResponseVS.SC_OK == request.getStatusCode()) {
-                            connectionStatusText.setText(getString(R.string.connected_lbl));
-                            connectionStatusView.setVisibility(View.VISIBLE);
-                        } else if(ResponseVS.SC_ERROR == request.getStatusCode())
-                            MessageDialogFragment.showDialog(request.getStatusCode(),
-                                request.getCaption(), request.getMessage(), getSupportFragmentManager());
-                        break;
-                    case WEB_SOCKET_CLOSE:
-                        connectionStatusText.setText(getString(R.string.disconnected_lbl));
-                        connectionStatusView.setVisibility(View.GONE);
-                        break;
-                }
+                setConnectionStatusUI();
+                if(ResponseVS.SC_ERROR == socketRequest.getStatusCode())
+                        MessageDialogFragment.showDialog(socketRequest.getStatusCode(),
+                                socketRequest.getCaption(), socketRequest.getMessage(),
+                                getSupportFragmentManager());
             }
         }
     };
@@ -457,6 +441,17 @@ public abstract class ActivityBase extends ActionBarActivity {
         mDrawerLayout.closeDrawer(Gravity.START);
     }
 
+    private void setConnectionStatusUI() {
+        if(contextVS.getWebSocketSession() != null) {
+            connectionStatusText.setText(getString(R.string.connected_lbl));
+            connectionStatusView.setVisibility(View.VISIBLE);
+        } else {
+            connectionStatusText.setText(getString(R.string.disconnected_lbl));
+            connectionStatusView.setVisibility(View.GONE);
+        }
+    }
+
+
     @Override protected void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -464,6 +459,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
         mSyncStatusObserver.onStatusChanged(0);
+        setConnectionStatusUI();
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
@@ -520,7 +516,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        toggleWebSocketServiceConnection();
+                        Utils.toggleWebSocketServiceConnection(contextVS);
                         dialog.dismiss();
                     }
                 });
@@ -589,11 +585,9 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
-        @Override
-        public void onStatusChanged(final int which) {
+        @Override public void onStatusChanged(final int which) {
             runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+                @Override public void run() {
                     LOGD(TAG, "SyncStatusObserver  - onStatusChanged - which: " + which);
                 }
             });
@@ -616,17 +610,6 @@ public abstract class ActivityBase extends ActionBarActivity {
         if (mStatusBarColorAnimator != null) {
             mStatusBarColorAnimator.cancel();
         }
-    }
-
-    private void toggleWebSocketServiceConnection() {
-        Intent startIntent = new Intent(contextVS, WebSocketService.class);
-        TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(contextVS.getWebSocketSession() != null &&
-                contextVS.getWebSocketSession().getSessionId() != null)
-            typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        startService(startIntent);
     }
 
     protected void onActionBarAutoShowOrHide(boolean shown) {

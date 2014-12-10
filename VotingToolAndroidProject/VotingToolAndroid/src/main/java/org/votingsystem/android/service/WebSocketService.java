@@ -80,7 +80,10 @@ public class WebSocketService extends Service {
             if(responseVS != null) {
                 new Thread(null, new Runnable() {
                     @Override public void run() {
-                        try {session.getBasicRemote().sendText(responseVS.getMessageJSON().toString()); }
+                        try {
+                            String response = responseVS.getMessageJSON().toString();
+                            LOGD(TAG + ".onStartCommand", "message: " + response);
+                            session.getBasicRemote().sendText(response); }
                         catch(Exception ex) {ex.printStackTrace();}
                     }
                 }, "websocket_message_proccessor_thread").start();

@@ -172,9 +172,6 @@ public class EventVSNewActivity extends ActivityBase {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         optionContainer = (LinearLayout) findViewById(R.id.optionContainer);
         optionCaption = (TextView) findViewById(R.id.eventFieldsCaption);
-        List<String> controlCenterNameList = new ArrayList<String>();
-        controlCenterNameList.add(getString(R.string.select_control_center_lbl));
-        controlCenterNameList.add(contextVS.getAccessControl().getControlCenter().getName());
         dateElectionText = (EditText) findViewById(R.id.date_election);
         dateElectionText.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {

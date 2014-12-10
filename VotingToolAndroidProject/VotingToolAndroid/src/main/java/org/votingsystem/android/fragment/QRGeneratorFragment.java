@@ -79,7 +79,7 @@ public class QRGeneratorFragment extends Fragment {
 
     private String getOperationMessage(QRMessageVS qrMessageVS) {
         switch(qrMessageVS.getOperation()) {
-            case COOIN_TICKET_REQUEST:
+            case COOIN_USERVS_CHANGE:
                 return getString(R.string.cooin_ticket_request_qr_msg) + " - " +
                         qrMessageVS.getAmount().toPlainString() + " " + qrMessageVS.getCurrencyCode() +
                         " " + qrMessageVS.getTag();

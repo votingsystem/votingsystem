@@ -53,7 +53,7 @@ public class QRGeneratorFormFragment extends Fragment {
     private EditText amount_text;
     private Handler handler;
     private static final TypeVS[] OPERATION_ARRAY =
-            new TypeVS[]{TypeVS.COOIN_TICKET_REQUEST, TypeVS.TRANSACTIONVS};
+            new TypeVS[]{TypeVS.COOIN_USERVS_CHANGE, TypeVS.TRANSACTIONVS};
     private AtomicBoolean isLongPressed = new AtomicBoolean(false);
 
     final Runnable incrementRunnable = new Runnable(){
@@ -179,7 +179,7 @@ public class QRGeneratorFormFragment extends Fragment {
         public void onItemSelected(AdapterView<?> parent, View view, int pos,long id) {
             TypeVS selectedOperation = OPERATION_ARRAY[pos];
             switch (selectedOperation) {
-                case COOIN_TICKET_REQUEST:
+                case COOIN_USERVS_CHANGE:
 
                     break;
                 case TRANSACTIONVS:

@@ -131,7 +131,8 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                     String password = null;
                     if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
                         PasswordDialog passwordDialog = new PasswordDialog();
-                        passwordDialog.show(ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+                        passwordDialog.showWithoutPasswordConfirm(
+                                ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
                         password = passwordDialog.getPassword();
                         if(password == null) {
                             broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);

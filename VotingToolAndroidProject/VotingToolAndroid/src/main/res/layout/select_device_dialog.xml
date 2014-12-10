@@ -2,17 +2,37 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="10dp"
     android:orientation="vertical">
-    <TextView android:id="@+id/msg_text"
+
+    <TextView android:id="@+id/caption"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/bkg_vs"
+        android:textStyle="bold"
         android:layout_gravity="center"
-        android:text="@string/connect_device_advice_msg"
-        android:textSize="17sp" />
+        android:text="@string/send_to_wallet"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:padding="5dp"
+        android:textSize="21sp" />
 
-    <ListView android:id="@+id/tag_list_view"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"/>
+    <View android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/bkg_vs"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:orientation="vertical">
+        <TextView android:id="@+id/msg_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/connect_device_advice_msg"
+            android:textSize="17sp" />
 
+        <ListView android:id="@+id/tag_list_view"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+    </LinearLayout>
 </LinearLayout>

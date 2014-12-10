@@ -115,6 +115,13 @@ public class WebSocketMessage {
         } else throw new ExceptionVS(message);
     }
 
+    public void decryptMessage() throws ExceptionVS {
+        if(messageJSON.has("encryptedMessage")) {
+            //COOIN_WALLET_CHANGE
+
+        } else throw new ExceptionVS("missing encryptedMessage");
+    }
+
     public static String getWebSocketCoreSignalJSCommand(JSONObject messageJSON, ConnectionStatus status) {
         JSONObject coreSignal = new JSONObject();
         if(messageJSON == null) messageJSON = new JSONObject();

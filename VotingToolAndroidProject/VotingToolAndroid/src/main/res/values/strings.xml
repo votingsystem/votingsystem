@@ -482,4 +482,6 @@
     <string name="searching_devices_lbl">buscando dispositivos</string>
     <string name="send_to_wallet_connection_required_msg">para poder acceder al monedero destino necesita estar conectado</string>
     <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el cooin</string>
+    <string name="connect_lbl">conectar</string>
+    <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
 </resources>

@@ -3,22 +3,29 @@ package org.votingsystem.android.util;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
 
-import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ResponseVS;
-
+import java.security.KeyPair;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -292,10 +299,58 @@ public class WebSocketRequest implements Parcelable {
         encryptedDataMap.put("statusCode", statusCode);
         encryptedDataMap.put("message", message);
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
-        encryptedDataMap.put("smimeMessage", new String(Base64.encode(smimeMessage.getBytes())));
+        encryptedDataMap.put("smimeMessage", Base64.encodeToString(smimeMessage.getBytes(), Base64.DEFAULT));
         byte[] encryptedData = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), publicKey);
         result.put("encryptedMessage", new String(encryptedData, "UTF_8"));
         return new JSONObject(result);
+    }
+
+    public static RequestBundle getCooinWalletChangeRequest(Long deviceToId, String deviceToName,
+            List<Cooin> cooinList,  String locale, X509Certificate deviceToCert) throws Exception {
+        Map messageToDevice = new HashMap<>();
+        messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("deviceToId", deviceToId);
+        messageToDevice.put("deviceToName", deviceToName);
+        messageToDevice.put("locale", locale);
+        Map encryptedDataMap =  new HashMap<>();
+        encryptedDataMap.put("operation", TypeVS.COOIN_WALLET_CHANGE.toString());
+        encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
+        List<Map> serializedCooinList = WalletUtils.getSerializedCooinList(cooinList);
+        encryptedDataMap.put("cooinList", serializedCooinList);
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        encryptedDataMap.put("publicKey", Base64.encodeToString(keyPair.getPublic().getEncoded(),
+                Base64.DEFAULT));
+        byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
+                new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
+        messageToDevice.put("encryptedMessage", Base64.encodeToString(encryptedRequestBytes,
+                Base64.DEFAULT));
+        JSONObject messageToServiceJSON = new JSONObject(messageToDevice);
+        return new RequestBundle(keyPair, messageToServiceJSON);
+    }
+
+    public static RequestBundle getCooinWalletChangeRequest(JSONObject deviceToJSON,
+        AppContextVS contextVS, Cooin... cooins) throws Exception {
+        X509Certificate deviceToCert = CertUtils.fromPEMToX509CertCollection(
+                deviceToJSON.getString("certPEM").getBytes()).iterator().next();
+        return WebSocketRequest.getCooinWalletChangeRequest(deviceToJSON.getLong("id"),
+                deviceToJSON.getString("deviceName"), Arrays.asList(cooins),
+                contextVS.getResources().getConfiguration().locale.getLanguage(),
+                deviceToCert);
+    }
+
+    public static class RequestBundle {
+        KeyPair keyPair;
+        JSONObject messageToDevice;
+        public RequestBundle(KeyPair keyPair, JSONObject messageToDevice) {
+            this.keyPair = keyPair;
+            this.messageToDevice = messageToDevice;
+        }
+        public KeyPair getKeyPair() {
+            return keyPair;
+        }
+        public JSONObject getRequest() {
+            return messageToDevice;
+        }
     }
 }
