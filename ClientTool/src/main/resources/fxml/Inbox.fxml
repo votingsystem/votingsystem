@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="modal-dialog" stylesheets="@../css/inbox.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" prefHeight="24.0" prefWidth="600.0" text="caption" VBox.vgrow="ALWAYS">
+         <font>
+            <Font size="20.0" />
+         </font>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </Label>
+      <VBox fx:id="messageListPanel" prefHeight="200.0" prefWidth="100.0" />
+      <HBox prefWidth="200.0">
+         <children>
+            <Label fx:id="closeAdviceMsg" prefHeight="32.0" prefWidth="445.0" text="Label">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
+            <Button fx:id="closeButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" text="Button" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

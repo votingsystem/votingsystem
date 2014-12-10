@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
-import org.votingsystem.client.controller.CooinPaneController;
+import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
@@ -224,7 +224,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
                             return;
                         }
                         if(file.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
-                            CooinPaneController.show((Cooin)ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
+                            CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
                         } else {
                             documentVSBrowserStackPane.openFile(file, operationDocument);
                             stage.centerOnScreen();

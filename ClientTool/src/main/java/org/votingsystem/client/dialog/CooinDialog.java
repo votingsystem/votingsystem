@@ -1,4 +1,4 @@
-package org.votingsystem.client.controller;
+package org.votingsystem.client.dialog;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
@@ -26,9 +26,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.JSONFormDialog;
-import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.dialog.UserDeviceSelectorDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
@@ -49,9 +46,9 @@ import java.util.Calendar;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
+public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
 
-    private static Logger log = Logger.getLogger(CooinPaneController.class);
+    private static Logger log = Logger.getLogger(CooinDialog.class);
 
     @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
         log.debug("setSelectedDevice - deviceDataJSON: " + deviceDataJSON.toString());
@@ -112,7 +109,7 @@ public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener
         }
     };
 
-    public CooinPaneController(Cooin cooin) throws IOException {
+    public CooinDialog(Cooin cooin) throws IOException {
         this.cooin = cooin;
     }
 
@@ -149,7 +146,7 @@ public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener
         changeWalletMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
-                        ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinPaneController.this);
+                        ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this);
             }
         });
 
@@ -183,7 +180,7 @@ public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener
             log.debug(ex.getMessage(), ex);
             X509Certificate x509Cert = cooin.getX509AnonymousCert();
             String msg = null;
-            if(x509Cert == null) msg = ContextVS.getMessage("cooinWithouCertErrorMsg");
+            if(x509Cert == null) msg = ContextVS.getMessage("cooinWithoutCertErrorMsg");
             else {
                 String errorMsg =  null;
                 if(Calendar.getInstance().getTime().after(x509Cert.getNotAfter())) {
@@ -203,7 +200,7 @@ public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 JSONFormDialog formDialog = new JSONFormDialog();
-                formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, CooinPaneController.this);
+                formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, CooinDialog.this);
             }
         });
     }
@@ -212,11 +209,11 @@ public class CooinPaneController implements DocumentVS,  JSONFormDialog.Listener
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
-                    CooinPaneController cooinPaneController = new CooinPaneController(cooin);
+                    CooinDialog cooinDialog = new CooinDialog(cooin);
                     Stage stage = new Stage();
                     stage.centerOnScreen();
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Cooin.fxml"));
-                    fxmlLoader.setController(cooinPaneController);
+                    fxmlLoader.setController(cooinDialog);
                         stage.setScene(new Scene(fxmlLoader.load()));
                     stage.setTitle("Cooin - " + cooin.getAmount().toPlainString() + " " + cooin.getCurrencyCode() +
                             " " + Utils.getTagForDescription(cooin.getTag().getName()));

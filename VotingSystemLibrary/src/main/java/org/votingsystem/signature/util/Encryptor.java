@@ -268,7 +268,8 @@ public class Encryptor {
     }
 
     public static byte[] decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) throws CMSException, IOException {
-        byte[] cmsEncryptedData = Base64.getDecoder().decode(base64EncryptedData);
+        //byte[] cmsEncryptedData = Base64.getDecoder().decode(base64EncryptedData);
+        byte[] cmsEncryptedData = org.bouncycastle.util.encoders.Base64.decode(base64EncryptedData);
         CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection                 c = recipients.getRecipients();

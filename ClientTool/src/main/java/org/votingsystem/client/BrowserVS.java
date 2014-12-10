@@ -38,32 +38,30 @@ import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.controller.CooinPaneController;
+import org.votingsystem.client.dialog.CooinDialog;
+import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
-import org.votingsystem.client.util.BrowserVSSessionUtils;
-import org.votingsystem.client.util.Utils;
-import org.votingsystem.client.util.WebKitHost;
-import org.votingsystem.client.util.WebSocketListener;
+import org.votingsystem.client.util.*;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.util.*;
 
 /**
  * @author jgzornoza
@@ -88,7 +86,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private Button messageToDeviceButton;
     private WebSocketServiceAuthenticated webSocketServiceAuthenticated;
     private WebSocketService webSocketService;
-    private WebSocketMessage webSocketMessage;
     private PasswordDialog webSocketMessagePasswordDialog;
     private static final BrowserVS INSTANCE = new BrowserVS();
 
@@ -214,7 +211,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , Utils.createSpacer());
+        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer());
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -357,19 +354,29 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private void consumeMessageTodDevice() {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
-                if(!toolBar.getChildren().contains(messageToDeviceButton))
-                    toolBar.getChildren().add(messageToDeviceButton);
-                if(webSocketMessagePasswordDialog == null) {
-                    webSocketMessagePasswordDialog = new PasswordDialog();
-                    webSocketMessagePasswordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("messageToDevicePasswordMsg"));
-                    String password = webSocketMessagePasswordDialog.getPassword();
-                    if(password != null) {
-                        webSocketMessage = null;
-                        toolBar.getChildren().remove(messageToDeviceButton);
-                    }
-                    webSocketMessagePasswordDialog = null;
-                } else webSocketMessagePasswordDialog.toFront();
-
+                if(BrowserVSSessionUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
+                    if(!toolBar.getChildren().contains(messageToDeviceButton))
+                        toolBar.getChildren().add(messageToDeviceButton);
+                    if(webSocketMessagePasswordDialog == null) {
+                        webSocketMessagePasswordDialog = new PasswordDialog();
+                        webSocketMessagePasswordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("messageToDevicePasswordMsg"));
+                        String password = webSocketMessagePasswordDialog.getPassword();
+                        if(password != null) {
+                            try {
+                                KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
+                                PrivateKey privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
+                                        password.toCharArray());
+                                InboxDialog.show(privateKey);
+                                toolBar.getChildren().remove(messageToDeviceButton);
+                            } catch(Exception ex) {
+                                log.error(ex.getMessage(), ex);
+                                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                            }
+                        }
+                        webSocketMessagePasswordDialog = null;
+                    } else webSocketMessagePasswordDialog.toFront();
+                } else showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
+                        " - " + ContextVS.getMessage("jksRequiredMsg")));
             }
         });
     }
@@ -472,7 +479,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 log.debug("========= TODO MESSAGEVS_SIGN");
                 break;
             case MESSAGEVS_TO_DEVICE:
-                webSocketMessage = message;
+                MessageToDeviceInbox.getInstance().addMessage(message);
                 consumeMessageTodDevice();
                 break;
             case MESSAGEVS_FROM_DEVICE:
@@ -586,7 +593,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                         DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operationVS.getDocument());
                         break;
                     case OPEN_COOIN:
-                        CooinPaneController.show((Cooin) ObjectUtils.deSerializeObject((
+                        CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((
                                 (String) operationVS.getDocument().get("object")).getBytes()));
                         break;
                     case OPEN_SMIME_FROM_URL:
