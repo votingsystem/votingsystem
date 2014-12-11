@@ -4,9 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
 import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -14,13 +12,9 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
-
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.util.*;
@@ -33,9 +27,26 @@ public class WebSocketMessage {
 
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
+    public List<Cooin> getCooinList() {
+        return cooinList;
+    }
+
+    public void setCooinList(List<Cooin> cooinList) {
+        this.cooinList = cooinList;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private String sessionId;
+    private String UUID;
     private String deviceFromName;
     private String message;
     private String URL;
@@ -53,6 +64,7 @@ public class WebSocketMessage {
         if(requestJSON.has("operation")) this.operation = TypeVS.valueOf(requestJSON.getString("operation"));
         if(requestJSON.has("statusCode")) this.statusCode = requestJSON.getInt("statusCode");
         if(requestJSON.has("URL")) this.URL = requestJSON.getString("URL");
+        if(requestJSON.has("UUID")) this.setUUID(requestJSON.getString("UUID"));
         if(requestJSON.has("date")) this.date = DateUtils.getDayWeekDate(requestJSON.getString("date"));
         if(requestJSON.has("message")) {
             Object messageObject = requestJSON.get("message");
@@ -148,12 +160,12 @@ public class WebSocketMessage {
             if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
             if(decryptedJSON.has("cooinList")) {
                 JSONArray cooinArray = decryptedJSON.getJSONArray("cooinList");
-                cooinList = new ArrayList<Cooin>();
+                setCooinList(new ArrayList<Cooin>());
                 for(int i = 0; i < cooinArray.size(); i ++) {
                     JSONObject cooinJSON = (JSONObject) cooinArray.get(i);
                     CertificationRequestVS certificationRequest = (CertificationRequestVS)ObjectUtils.deSerializeObject(
                             ((String) cooinJSON.get("certificationRequest")).getBytes());
-                    cooinList.add(Cooin.load(certificationRequest));
+                    getCooinList().add(Cooin.load(certificationRequest));
                 }
             }
             if(decryptedJSON.has("publicKey")) {

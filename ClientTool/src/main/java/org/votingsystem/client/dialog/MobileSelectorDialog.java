@@ -19,6 +19,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
+
 import java.io.IOException;
 
 /**

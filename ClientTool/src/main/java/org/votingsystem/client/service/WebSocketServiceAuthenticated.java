@@ -26,7 +26,6 @@ import javax.websocket.*;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.*;
 
 /**

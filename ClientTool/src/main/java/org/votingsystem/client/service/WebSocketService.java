@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

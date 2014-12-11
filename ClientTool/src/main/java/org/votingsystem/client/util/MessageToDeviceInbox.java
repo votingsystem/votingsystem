@@ -6,11 +6,14 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.WebSocketMessage;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * @author jgzornoza
@@ -50,6 +53,11 @@ public class MessageToDeviceInbox {
         webSocketMessage.setDate(Calendar.getInstance().getTime());
         webSocketMessageList.add(webSocketMessage);
         flush();
+    }
+
+    public void removeMessage(WebSocketMessage webSocketMessage) {
+        webSocketMessageList = webSocketMessageList.stream().filter(m -> !m.getUUID().equals(
+                webSocketMessage.getUUID())).collect(Collectors.toList());
     }
 
     public List<WebSocketMessage> getMessageList() {

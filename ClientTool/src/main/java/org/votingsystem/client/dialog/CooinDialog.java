@@ -32,8 +32,8 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 

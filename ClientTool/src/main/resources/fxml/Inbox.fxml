@@ -21,12 +21,6 @@
                </Label>
             <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
                <VBox fx:id="messageListPanel" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
-               <HBox prefWidth="200.0">
-                   <children>
-                       <Separator prefHeight="0.0" prefWidth="0.0" HBox.hgrow="ALWAYS" />
-                       <Button fx:id="closeButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" text="Button" />
-                   </children>
-               </HBox>
            </children>
        </VBox>
    </content>

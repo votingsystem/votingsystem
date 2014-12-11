@@ -2,33 +2,23 @@ package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.util.MessageToDeviceInbox;
-import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.WebSocketMessage;
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +36,6 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     @FXML private Label message;
     @FXML private ProgressBar progressBar;
     @FXML private Label closeAdviceMsg;
-    @FXML private Button closeButton;
     @FXML private VBox messageListPanel;
 
     private static final Map<WebSocketMessage, HBox> messageMap = new HashMap<WebSocketMessage, HBox>();
@@ -67,20 +56,10 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         }
         message.setText(ContextVS.getMessage("inboxNumMessagesMsg", messageMap.size()));
         scrollPane.getScene().getWindow().sizeToScene();
-        closeButton.setVisible(true);
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        closeButton.setText(ContextVS.getMessage("closeLbl"));
-        closeButton.setVisible(false);
-        closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                hide();
-            }
-        });
     }
 
     public void showMessage(Integer statusCode, String message) {
@@ -105,13 +84,11 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         });
     }
 
-    @Override public void onMessageButtonClick(WebSocketMessage webSocketMessage) {
-        log.debug("onMessageButtonClick");
+    @Override public void removeMessage(WebSocketMessage webSocketMessage) {
+        log.debug("onMessageButtonClick - operation: " + webSocketMessage.getOperation());
         messageMap.remove(webSocketMessage);
-        refreshView();
-        switch (webSocketMessage.getOperation()) {
-
-        }
+        MessageToDeviceInbox.getInstance().removeMessage(webSocketMessage);
+        PlatformImpl.runLater(() ->  refreshView());
     }
 
     public class DecryptMessageTask extends Task<ObservableList<WebSocketMessage>> {
@@ -130,9 +107,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
                     webSocketMessage.decryptMessage(privateKey);
                     messageMap.put(webSocketMessage, new InboxMessageRow(webSocketMessage, InboxDialog.this).getMainPane());
                 }
-                PlatformImpl.runLater(new Runnable(){ @Override public void run() { refreshView();}
-                });
-
+                PlatformImpl.runLater(new Runnable(){ @Override public void run() { refreshView();} });
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -140,4 +115,5 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
             return null;
         }
     }
+
 }
