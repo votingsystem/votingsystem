@@ -21,19 +21,17 @@ public class DialogVS {
     private Stage stage;
     private Node rootNode;
 
-    public DialogVS(FXMLLoader fxmlLoader) throws IOException {
-        loadFXML(fxmlLoader);
-    }
     public DialogVS(String fxmlFilePath) throws IOException {
-        loadFXML(new FXMLLoader(getClass().getResource(fxmlFilePath)));
+        this(fxmlFilePath, StageStyle.TRANSPARENT);
     }
 
-    private void loadFXML(FXMLLoader fxmlLoader) throws IOException {
-        stage = new Stage(StageStyle.TRANSPARENT);
+    public DialogVS(String fxmlFilePath, StageStyle stageStyle) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
+        stage = new Stage(stageStyle);
         stage.initModality(Modality.APPLICATION_MODAL);
         fxmlLoader.setController(this);
-        stage.setScene(new Scene(fxmlLoader.load()));
         stage.centerOnScreen();
+        stage.setScene(new Scene(fxmlLoader.load()));
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

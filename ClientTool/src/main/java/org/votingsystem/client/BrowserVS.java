@@ -160,7 +160,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         messageToDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
         messageToDeviceButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
-                consumeMessageTodDevice();
+                consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"));
             }
         });
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
@@ -211,7 +211,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer());
+        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer(),
+                messageToDeviceButton);
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -351,15 +352,16 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         return webView;
     }
 
-    private void consumeMessageTodDevice() {
+    private void consumeMessageTodDevice(final String pinDialogMessage) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 if(BrowserVSSessionUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
-                    if(!toolBar.getChildren().contains(messageToDeviceButton))
-                        toolBar.getChildren().add(messageToDeviceButton);
                     if(webSocketMessagePasswordDialog == null) {
                         webSocketMessagePasswordDialog = new PasswordDialog();
-                        webSocketMessagePasswordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("messageToDevicePasswordMsg"));
+                        String dialogMessage = null;
+                        if(pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
+                        else dialogMessage = pinDialogMessage;
+                        webSocketMessagePasswordDialog.showWithoutPasswordConfirm(dialogMessage);
                         String password = webSocketMessagePasswordDialog.getPassword();
                         if(password != null) {
                             try {
@@ -367,7 +369,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                                 PrivateKey privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                                         password.toCharArray());
                                 InboxDialog.show(privateKey);
-                                toolBar.getChildren().remove(messageToDeviceButton);
                             } catch(Exception ex) {
                                 log.error(ex.getMessage(), ex);
                                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
@@ -480,7 +481,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 break;
             case MESSAGEVS_TO_DEVICE:
                 MessageToDeviceInbox.getInstance().addMessage(message);
-                consumeMessageTodDevice();
+                consumeMessageTodDevice(null);
                 break;
             case MESSAGEVS_FROM_DEVICE:
                 BrowserVSSessionUtils.setWebSocketMessage(message);

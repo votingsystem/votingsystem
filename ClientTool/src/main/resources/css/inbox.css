@@ -17,11 +17,17 @@
     -fx-color: #f9f9f9;
 }
 
+.undecorated-dialog {
+    -fx-alignment: center;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-color: #f9f9f9;
+}
+
 .message-row {
-    -fx-spacing: 10;
-    -fx-padding: 100;
+    -fx-padding: 10;
     -fx-border-color: #6c0404;
-    -fx-border-width: 3;
+    -fx-border-width: 1;
     -fx-border-radius: 2;
     -fx-background-radius: 6;
     -fx-color: #f9f9f9;

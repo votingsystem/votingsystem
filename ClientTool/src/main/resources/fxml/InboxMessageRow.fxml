@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<HBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="message-row" stylesheets="@../css/inbox.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="mainPane" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/inbox.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label fx:id="descriptionLbl" prefHeight="27.0" prefWidth="531.0" text="Label" />
-      <Button fx:id="messageButton" mnemonicParsing="false" stylesheets="@../css/inbox.css" text="Button" />
+      <Button fx:id="messageButton" mnemonicParsing="false" stylesheets="@../css/inbox.css" text="Button">
+         <HBox.margin>
+            <Insets left="10.0" right="10.0" />
+         </HBox.margin></Button>
+      <Label fx:id="descriptionLbl" prefHeight="27.0" text="Label" HBox.hgrow="ALWAYS">
+         <HBox.margin>
+            <Insets right="10.0" />
+         </HBox.margin></Label>
    </children>
+   <padding>
+      <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+   </padding>
 </HBox>
