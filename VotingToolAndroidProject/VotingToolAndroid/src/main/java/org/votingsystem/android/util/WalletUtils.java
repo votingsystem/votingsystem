@@ -1,5 +1,7 @@
 package org.votingsystem.android.util;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -7,6 +9,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -106,6 +109,20 @@ public class WalletUtils {
             cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
             byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
             cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
+            result.add(cooinDataMap);
+        }
+        return result;
+    }
+
+    public static List<Map> getSerializedCertificationRequestList(Collection<Cooin> cooinCollection)
+            throws UnsupportedEncodingException {
+        List<Map> result = new ArrayList<Map>();
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(
+                    cooin.getCertificationRequest());
+            cooinDataMap.put("certificationRequest",
+                    new String(serializedCertificationRequest, "UTF-8"));
             result.add(cooinDataMap);
         }
         return result;

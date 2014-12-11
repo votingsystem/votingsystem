@@ -9,6 +9,7 @@ import org.votingsystem.util.WebSocketMessage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -46,6 +47,7 @@ public class MessageToDeviceInbox {
     }
 
     public void addMessage(WebSocketMessage webSocketMessage) {
+        webSocketMessage.setDate(Calendar.getInstance().getTime());
         webSocketMessageList.add(webSocketMessage);
         flush();
     }

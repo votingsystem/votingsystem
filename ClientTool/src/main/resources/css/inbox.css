@@ -17,6 +17,17 @@
     -fx-color: #f9f9f9;
 }
 
+.message-row {
+    -fx-spacing: 10;
+    -fx-padding: 100;
+    -fx-border-color: #6c0404;
+    -fx-border-width: 3;
+    -fx-border-radius: 2;
+    -fx-background-radius: 6;
+    -fx-color: #f9f9f9;
+    -fx-font-size: 14;
+}
+
 .separator {
     visibility: hidden;
 }

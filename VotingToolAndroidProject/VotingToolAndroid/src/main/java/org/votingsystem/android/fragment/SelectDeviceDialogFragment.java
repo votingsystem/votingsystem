@@ -124,7 +124,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
         @Override protected void onPreExecute() {
             super.onPreExecute();
-            dialog.setMessage(getString(R.string.search_tag_lbl));
+            dialog.setMessage(getString(R.string.searching_devices_lbl));
             dialog.show();
         }
 

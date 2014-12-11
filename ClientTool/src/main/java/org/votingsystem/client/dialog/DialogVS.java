@@ -21,10 +21,16 @@ public class DialogVS {
     private Stage stage;
     private Node rootNode;
 
+    public DialogVS(FXMLLoader fxmlLoader) throws IOException {
+        loadFXML(fxmlLoader);
+    }
     public DialogVS(String fxmlFilePath) throws IOException {
+        loadFXML(new FXMLLoader(getClass().getResource(fxmlFilePath)));
+    }
+
+    private void loadFXML(FXMLLoader fxmlLoader) throws IOException {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
         fxmlLoader.setController(this);
         stage.setScene(new Scene(fxmlLoader.load()));
         stage.centerOnScreen();

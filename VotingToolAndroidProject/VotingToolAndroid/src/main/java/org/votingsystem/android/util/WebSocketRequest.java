@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -34,6 +36,8 @@ import java.util.Map;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class WebSocketRequest implements Parcelable {
+
+    private static final String TAG = WebSocketRequest.class.getSimpleName();
 
     enum MessageVSState {PENDING}
 
@@ -294,6 +298,7 @@ public class WebSocketRequest implements Parcelable {
         Map result = new HashMap();
         result.put("sessionId", sessionId);
         result.put("operation", TypeVS.MESSAGEVS_FROM_DEVICE.toString());
+        result.put("UUID", UUID.randomUUID().toString());
         result.put("locale", locale);
         Map encryptedDataMap = new HashMap();
         encryptedDataMap.put("statusCode", statusCode);
@@ -306,30 +311,31 @@ public class WebSocketRequest implements Parcelable {
         return new JSONObject(result);
     }
 
-    public static RequestBundle getCooinWalletChangeRequest(Long deviceToId, String deviceToName,
+    //Base64.DEFAULT -> problems with Java 8 with
+    public static JSONObject getCooinWalletChangeRequest(Long deviceToId, String deviceToName,
             List<Cooin> cooinList,  String locale, X509Certificate deviceToCert) throws Exception {
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("UUID", UUID.randomUUID().toString());
         messageToDevice.put("deviceToId", deviceToId);
         messageToDevice.put("deviceToName", deviceToName);
         messageToDevice.put("locale", locale);
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.COOIN_WALLET_CHANGE.toString());
         encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
-        List<Map> serializedCooinList = WalletUtils.getSerializedCooinList(cooinList);
+        List<Map> serializedCooinList = WalletUtils.getSerializedCertificationRequestList(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        encryptedDataMap.put("publicKey", Base64.encodeToString(keyPair.getPublic().getEncoded(),
-                Base64.DEFAULT));
+        encryptedDataMap.put("publicKey", new String(org.bouncycastle2.util.encoders.Base64.encode(
+                keyPair.getPublic().getEncoded()), "UTF-8"));
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
         messageToDevice.put("encryptedMessage", Base64.encodeToString(encryptedRequestBytes,
                 Base64.DEFAULT));
-        JSONObject messageToServiceJSON = new JSONObject(messageToDevice);
-        return new RequestBundle(keyPair, messageToServiceJSON);
+        return new JSONObject(messageToDevice);
     }
 
-    public static RequestBundle getCooinWalletChangeRequest(JSONObject deviceToJSON,
+    public static JSONObject getCooinWalletChangeRequest(JSONObject deviceToJSON,
         AppContextVS contextVS, Cooin... cooins) throws Exception {
         X509Certificate deviceToCert = CertUtils.fromPEMToX509CertCollection(
                 deviceToJSON.getString("certPEM").getBytes()).iterator().next();

@@ -26,6 +26,7 @@ import javax.websocket.*;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -168,35 +169,39 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     }
 
     private void consumeMessage(final String messageStr) {
-        WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
-        log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + message.getOperation() +
-                " - status: " + message.getStatusCode());
-        switch(message.getOperation()) {
-            case INIT_VALIDATED_SESSION:
-                if(ResponseVS.SC_OK == message.getStatusCode()) {
-                    BrowserVSSessionUtils.getInstance().initAuthenticatedSession(message, userVS);
-                } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + message.getStatusCode());
-                break;
-            case MESSAGEVS_EDIT:
-                if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                        message.getStatusCode(), message.getMessage());
-            case MESSAGEVS_GET:
-                if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                        message.getStatusCode(), message.getMessage());
-                else {
-                    Platform.runLater(new Runnable() {
-                        @Override public void run() {
-                            log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
-                            BrowserVS.getInstance().execCommandJSCurrentView("alert('" + message.getMessage() + "')");
-                            //browserVS.executeScript("updateMessageVSList(" + message + ")");
-                        }
-                    });
-                }
-                break;
-        }
-        for(WebSocketListener listener : listeners) {
-            if(listener != null) listener.consumeWebSocketMessage(message);
-            else listeners.remove(listener);
+        try {
+            WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
+            log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + message.getOperation() +
+                    " - status: " + message.getStatusCode());
+            switch(message.getOperation()) {
+                case INIT_VALIDATED_SESSION:
+                    if(ResponseVS.SC_OK == message.getStatusCode()) {
+                        BrowserVSSessionUtils.getInstance().initAuthenticatedSession(message, userVS);
+                    } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + message.getStatusCode());
+                    break;
+                case MESSAGEVS_EDIT:
+                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
+                            message.getStatusCode(), message.getMessage());
+                case MESSAGEVS_GET:
+                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
+                            message.getStatusCode(), message.getMessage());
+                    else {
+                        Platform.runLater(new Runnable() {
+                            @Override public void run() {
+                                log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
+                                BrowserVS.getInstance().execCommandJSCurrentView("alert('" + message.getMessage() + "')");
+                                //browserVS.executeScript("updateMessageVSList(" + message + ")");
+                            }
+                        });
+                    }
+                    break;
+            }
+            for(WebSocketListener listener : listeners) {
+                if(listener != null) listener.consumeWebSocketMessage(message);
+                else listeners.remove(listener);
+            }
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 

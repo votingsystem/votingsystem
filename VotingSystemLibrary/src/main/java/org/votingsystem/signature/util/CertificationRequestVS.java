@@ -21,6 +21,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,9 +42,10 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     private transient PKCS10CertificationRequest csr;
     private transient SMIMESignedGeneratorVS SMIMESignedGeneratorVS;
-    private KeyPair keyPair;
+    private transient KeyPair keyPair;
     private String signatureMechanism;
     private X509Certificate certificate;
+    private byte[] signedCsr;
 
     private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr, String signatureMechanism) {
         this.keyPair = keyPair;
@@ -144,6 +148,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
         SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+        this.setSignedCsr(signedCsr);
     }
     
     public SMIMEMessage getSMIME(String fromUser, String toUser,
@@ -187,7 +192,8 @@ public class CertificationRequestVS implements java.io.Serializable {
         }
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException,
+            InvalidKeySpecException {
         s.defaultReadObject();
         byte[] certificateBytes = (byte[]) s.readObject();
         if(certificateBytes != null) {
@@ -197,5 +203,20 @@ public class CertificationRequestVS implements java.io.Serializable {
                 ex.printStackTrace();
             }
         }
+        try {
+            byte[] publicKeyBytes = (byte[]) s.readObject();
+            PublicKey publicKey =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+            byte[] privateKeyBytes = (byte[]) s.readObject();
+            PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+            if(privateKey != null && publicKey != null) keyPair = new KeyPair(publicKey, privateKey);
+        } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+    }
+
+    public byte[] getSignedCsr() {
+        return signedCsr;
+    }
+
+    public void setSignedCsr(byte[] signedCsr) {
+        this.signedCsr = signedCsr;
     }
 }

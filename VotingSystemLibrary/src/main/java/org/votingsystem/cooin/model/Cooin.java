@@ -191,6 +191,13 @@ public class Cooin implements Serializable  {
         certSubject.addDateInfo(x509AnonymousCert);
     }
 
+    public static Cooin load(CertificationRequestVS certificationRequest) throws Exception {
+        Cooin cooin = new Cooin();
+        cooin.setCertificationRequest(certificationRequest);
+        cooin.initSigner(certificationRequest.getSignedCsr());
+        return cooin;
+    }
+
     public Boolean getIsTimeLimited() {
         return isTimeLimited;
     }

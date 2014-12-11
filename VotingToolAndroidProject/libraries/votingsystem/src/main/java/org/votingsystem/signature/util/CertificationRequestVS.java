@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import android.util.Base64;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -26,6 +28,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,13 +46,15 @@ import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 */
 public class CertificationRequestVS implements java.io.Serializable {
 
+    public static final String TAG = CertificationRequestVS.class.getSimpleName();
+
     private static final long serialVersionUID = 1L;
     
-	public static final String TAG = "CertificationRequestVS";
+
     private transient PKCS10CertificationRequest csr;
     private transient SignedMailGenerator signedMailGenerator;
-    private String hashPin;
     private KeyPair keyPair;
+    private String hashPin;
     private String signatureMechanism;
     private X509Certificate certificate;
     private byte[] signedCsr;
@@ -218,6 +225,13 @@ public class CertificationRequestVS implements java.io.Serializable {
         try {
             if(certificate != null) s.writeObject(certificate.getEncoded());
             else s.writeObject(null);
+            if(keyPair != null) {//this is to deserialize private keys outside android environments
+                s.writeObject(keyPair.getPublic().getEncoded());
+                s.writeObject(keyPair.getPrivate().getEncoded());
+            } else {
+                s.writeObject(null);
+                s.writeObject(null);
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -233,6 +247,18 @@ public class CertificationRequestVS implements java.io.Serializable {
                 ex.printStackTrace();
             }
         }
+        try {
+            byte[] publicKeyBytes = (byte[]) s.readObject();
+            PublicKey publicKey =  KeyFactory.getInstance("RSA").generatePublic(
+                    new X509EncodedKeySpec(publicKeyBytes));
+            byte[] privateKeyBytes = (byte[]) s.readObject();
+            PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(
+                    new PKCS8EncodedKeySpec(privateKeyBytes));
+            if(privateKey != null && publicKey != null) keyPair = new KeyPair(publicKey, privateKey);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     private PKCS10CertificationRequest getCsr() {

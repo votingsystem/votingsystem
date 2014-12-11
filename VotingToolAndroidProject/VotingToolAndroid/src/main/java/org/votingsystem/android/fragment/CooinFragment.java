@@ -87,10 +87,9 @@ public class CooinFragment extends Fragment {
                 case DEVICE_SELECT:
                     try {
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            WebSocketRequest.RequestBundle requestBundle = WebSocketRequest.
-                                    getCooinWalletChangeRequest(responseVS.getMessageJSON(),
-                                    contextVS, cooin);
-                            responseVS.setMessageJSON(requestBundle.getRequest());
+                            JSONObject requestJSON = WebSocketRequest.getCooinWalletChangeRequest(
+                                    responseVS.getMessageJSON(), contextVS, cooin);
+                            responseVS = new ResponseVS(ResponseVS.SC_OK, requestJSON.toString());
                             Intent startIntent = new Intent(getActivity(), WebSocketService.class);
                             startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
