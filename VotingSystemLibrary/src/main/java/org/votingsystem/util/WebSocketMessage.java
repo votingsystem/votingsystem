@@ -27,22 +27,6 @@ public class WebSocketMessage {
 
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
-    public List<Cooin> getCooinList() {
-        return cooinList;
-    }
-
-    public void setCooinList(List<Cooin> cooinList) {
-        this.cooinList = cooinList;
-    }
-
-    public String getUUID() {
-        return UUID;
-    }
-
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
-    }
-
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private String sessionId;
@@ -55,7 +39,7 @@ public class WebSocketMessage {
     private TypeVS operation;
     private JSONObject messageJSON;
     private List<Cooin> cooinList;
-    private PublicKey receiverPublic;
+    private PublicKey publicKey;
     private Date date;
 
     public WebSocketMessage(JSONObject requestJSON) throws ParseException {
@@ -130,6 +114,38 @@ public class WebSocketMessage {
         this.userVS = userVS;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public List<Cooin> getCooinList() {
+        return cooinList;
+    }
+
+    public void setCooinList(List<Cooin> cooinList) {
+        this.cooinList = cooinList;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
     public SMIMEMessage getSignResponse(WebSocketUtils.RequestBundle request) throws Exception {
         if(messageJSON.has("encryptedMessage")) {
             byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("encryptedMessage").getBytes(),
@@ -141,14 +157,6 @@ public class WebSocketMessage {
                 return smimeMessage;
             } else throw new ExceptionVS(responseJSON.getString("message"));
         } else throw new ExceptionVS(message);
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
@@ -170,7 +178,7 @@ public class WebSocketMessage {
             }
             if(decryptedJSON.has("publicKey")) {
                 byte[] decodedPK = Base64.getDecoder().decode(decryptedJSON.getString("publicKey"));
-                receiverPublic = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
+                publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
             }
         } else throw new ExceptionVS("missing encryptedMessage");
     }
@@ -209,4 +217,5 @@ public class WebSocketMessage {
     public void setMessageJSON(JSONObject messageJSON) {
         this.messageJSON = messageJSON;
     }
+
 }

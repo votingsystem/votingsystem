@@ -1,7 +1,6 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
-import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -13,10 +12,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
-import org.votingsystem.client.util.MessageToDeviceInbox;
+import org.votingsystem.client.util.InboxManager;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.WebSocketMessage;
+
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.HashMap;
@@ -72,22 +72,18 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     }
 
     public static void show(PrivateKey privateKey) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    InboxDialog dialog = new InboxDialog(privateKey);
-                    dialog.show();
-                } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
-                }
-            }
+        PlatformImpl.runLater(() -> {
+            try {
+                InboxDialog dialog = new InboxDialog(privateKey);
+                dialog.show();
+            } catch (Exception ex) { log.error(ex.getMessage(), ex); }
         });
     }
 
     @Override public void removeMessage(WebSocketMessage webSocketMessage) {
         log.debug("onMessageButtonClick - operation: " + webSocketMessage.getOperation());
         messageMap.remove(webSocketMessage);
-        MessageToDeviceInbox.getInstance().removeMessage(webSocketMessage);
+        InboxManager.getInstance().removeMessage(webSocketMessage);
         PlatformImpl.runLater(() ->  refreshView());
     }
 
@@ -99,7 +95,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         }
 
         @Override protected ObservableList<WebSocketMessage> call() throws Exception {
-            List<WebSocketMessage> messageList = MessageToDeviceInbox.getInstance().getMessageList();
+            List<WebSocketMessage> messageList = InboxManager.getInstance().getMessageList();
             try {
                 int i = 0;
                 for(WebSocketMessage webSocketMessage : messageList) {

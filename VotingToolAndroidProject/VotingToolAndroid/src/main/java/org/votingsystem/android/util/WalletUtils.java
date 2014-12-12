@@ -1,7 +1,5 @@
 package org.votingsystem.android.util;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -9,7 +7,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;

@@ -79,6 +79,7 @@ public class ContextVS {
     public static String PLAIN_WALLET_FILE_NAME = "plain_wallet.wvs";
     public static String BROWSER_SESSION_FILE = "browser.bvs";
     public static String INBOX_FILE = "inbox.mvs";
+    public static String NOTIFICATIONS_FILE = "notifications.nvs";
     public static String REPRESENTATIVE_STATE_FILE = "representative.bvs";
     public static String USER_CSR_REQUEST_FILE_NAME = "user.csrvs";
     public static String RECEIPT_FILE_NAME = "receipt";

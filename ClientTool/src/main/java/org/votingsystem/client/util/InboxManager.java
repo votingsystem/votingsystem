@@ -12,35 +12,34 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MessageToDeviceInbox {
+public class InboxManager {
 
-    private static Logger log = Logger.getLogger(MessageToDeviceInbox.class);
+    private static Logger log = Logger.getLogger(InboxManager.class);
 
     private List<WebSocketMessage> webSocketMessageList = new ArrayList<>();
-    private File sessionFile;
-    private static final MessageToDeviceInbox INSTANCE = new MessageToDeviceInbox();
+    private File messagesFile;
+    private static final InboxManager INSTANCE = new InboxManager();
 
 
-    public static MessageToDeviceInbox getInstance() {
+    public static InboxManager getInstance() {
         return INSTANCE;
     }
 
-    private MessageToDeviceInbox() {
+    private InboxManager() {
         JSONArray messageArray = null;
         try {
-            sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.INBOX_FILE);
-            if(sessionFile.createNewFile()) {
+            messagesFile = new File(ContextVS.APPDIR + File.separator + ContextVS.INBOX_FILE);
+            if(messagesFile.createNewFile()) {
                 messageArray = new JSONArray();
                 flush();
             }
-            else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
+            else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
             for(int i = 0; i < messageArray.size(); i++) {
                 webSocketMessageList.add(new WebSocketMessage((net.sf.json.JSONObject) messageArray.get(i)));
             }
@@ -58,6 +57,7 @@ public class MessageToDeviceInbox {
     public void removeMessage(WebSocketMessage webSocketMessage) {
         webSocketMessageList = webSocketMessageList.stream().filter(m -> !m.getUUID().equals(
                 webSocketMessage.getUUID())).collect(Collectors.toList());
+        flush();
     }
 
     public List<WebSocketMessage> getMessageList() {
@@ -75,7 +75,7 @@ public class MessageToDeviceInbox {
             for(WebSocketMessage webSocketMessage: webSocketMessageList) {
                 messageArray.add(webSocketMessage.getMessageJSON());
             }
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), sessionFile);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), messagesFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

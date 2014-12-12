@@ -55,7 +55,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
     }
 
     class EventBusDeleteCooinListener {
-        @Subscribe public void recordCustomerChange(ResponseVS responseVS) {
+        @Subscribe public void responseVSChange(ResponseVS responseVS) {
             if(TypeVS.COOIN_DELETE == responseVS.getType()) {
                 log.debug("EventBusDeleteCooinListener - COOIN_DELETE");
             }

@@ -1,15 +1,12 @@
 package org.votingsystem.client.pane;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.util.MessageToDeviceInbox;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
@@ -18,6 +15,7 @@ import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.WebSocketMessage;
+
 import java.io.IOException;
 
 /**

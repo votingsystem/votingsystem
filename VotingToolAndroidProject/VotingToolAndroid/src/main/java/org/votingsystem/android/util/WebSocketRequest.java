@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +20,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -345,18 +345,4 @@ public class WebSocketRequest implements Parcelable {
                 deviceToCert);
     }
 
-    public static class RequestBundle {
-        KeyPair keyPair;
-        JSONObject messageToDevice;
-        public RequestBundle(KeyPair keyPair, JSONObject messageToDevice) {
-            this.keyPair = keyPair;
-            this.messageToDevice = messageToDevice;
-        }
-        public KeyPair getKeyPair() {
-            return keyPair;
-        }
-        public JSONObject getRequest() {
-            return messageToDevice;
-        }
-    }
 }

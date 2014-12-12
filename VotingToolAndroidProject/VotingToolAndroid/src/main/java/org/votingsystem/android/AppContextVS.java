@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
+import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,10 +41,12 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -51,6 +54,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
@@ -91,8 +100,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             props.load(getAssets().open("VotingSystem.properties"));
             cooinServerURL = props.getProperty(ContextVS.COOIN_SERVER_URL);
             accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
-            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL + " - cooinServerURL: " +
-                    cooinServerURL);
+            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL +
+                    " - cooinServerURL: " + cooinServerURL);
             /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);

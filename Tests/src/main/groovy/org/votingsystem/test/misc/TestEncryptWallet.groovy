@@ -1,17 +1,14 @@
 package org.votingsystem.test.misc
 
-import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.ContextVS
-import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.FileUtils
 
 
-Logger log = TestUtils.init(TestEncrypt.class, "./TestEncrypt")
+Logger log = TestUtils.init(TestEncryptWallet.class, "./TestEncryptWallet")
 
 SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER)
 

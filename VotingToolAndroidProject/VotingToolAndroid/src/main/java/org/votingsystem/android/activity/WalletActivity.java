@@ -6,7 +6,6 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.ReceiptGridFragment;
 import org.votingsystem.android.fragment.WalletFragment;
 
 import java.lang.ref.WeakReference;

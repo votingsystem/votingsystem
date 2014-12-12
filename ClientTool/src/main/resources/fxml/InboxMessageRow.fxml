@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox fx:id="mainPane" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/inbox.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="mainPane" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="message-row" stylesheets="@../css/inbox.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Button fx:id="messageButton" mnemonicParsing="false" onAction="#onClickMessageButton" stylesheets="@../css/inbox.css" text="Button">
          <HBox.margin>

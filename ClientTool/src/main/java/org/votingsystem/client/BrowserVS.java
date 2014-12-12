@@ -16,10 +16,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
@@ -78,7 +75,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private static final int BROWSER_HEIGHT = 1000;
     private static final int MAX_CHARACTERS_TAB_CAPTION = 25;
 
-    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);;
+    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
     private Stage browserStage;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private TextField locationField = new TextField("");
@@ -146,13 +143,11 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         browserStage.initModality(Modality.WINDOW_MODAL);
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         browserStage.setResizable(true);
-        browserStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent event) {
-                event.consume();
-                browserStage.hide();
-                browserHelper.getSignatureService().cancel();
-                log.debug("browserStage.setOnCloseRequest");
-            }
+        browserStage.setOnCloseRequest(event -> {
+            event.consume();
+            browserStage.hide();
+            browserHelper.getSignatureService().cancel();
+            log.debug("browserStage.setOnCloseRequest");
         });
         VBox mainVBox = new VBox();
         prevButton = new Button();
@@ -161,37 +156,33 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
         messageToDeviceButton = new Button();
         messageToDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
-        messageToDeviceButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override public void handle(javafx.event.ActionEvent ev) {
-                consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"));
-            }
+        messageToDeviceButton.setOnAction((event) -> {
+            consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"));
         });
-        forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override public void handle(javafx.event.ActionEvent ev) {
-                try {
-                    ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
-                    prevButton.setDisable(false);
-                } catch(Exception ex) {
-                    forwardButton.setDisable(true);
-                }
-            }
+        forwardButton.setOnAction((event) -> {
+            try {
+                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
+                prevButton.setDisable(false);
+            } catch(Exception ex) { forwardButton.setDisable(true); }
         });
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override public void handle(javafx.event.ActionEvent ev) {
+            @Override
+            public void handle(javafx.event.ActionEvent ev) {
                 try {
-                    ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
+                    ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
                     forwardButton.setDisable(false);
-                } catch(Exception ex) {
+                } catch (Exception ex) {
                     prevButton.setDisable(true);
                 }
             }
         });
         reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
         reloadButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override public void handle(javafx.event.ActionEvent ev) {
+            @Override
+            public void handle(javafx.event.ActionEvent ev) {
                 //webView.getEngine().load(locationField.getText());
-                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(locationField.getText());
+                ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(locationField.getText());
             }
         });
         prevButton.setDisable(true);
@@ -199,14 +190,15 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         locationField.setPrefWidth(400);
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override public void handle(KeyEvent ke) {
+            @Override
+            public void handle(KeyEvent ke) {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    if(!"".equals(locationField.getText())) {
+                    if (!"".equals(locationField.getText())) {
                         String targetURL = null;
-                        if(locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
+                        if (locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
                             targetURL = locationField.getText().trim();
                         } else targetURL = "http://" + locationField.getText().trim();
-                        ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
+                        ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
                     }
                 }
             }
@@ -214,8 +206,9 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
+        NotificationManager.getInstance().setAlertButton(new Button());
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer(),
-                messageToDeviceButton);
+                NotificationManager.getInstance().getAlertButton(), messageToDeviceButton);
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -396,14 +389,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     Base64.getEncoder().encodeToString(messageJSON.toString().getBytes("UTF8")) + "')";
-            PlatformImpl.runLater(new Runnable() {
-                @Override public void run() {
-                    operationWebView.getEngine().executeScript(jsCommand);
-                }
-            });
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+            PlatformImpl.runLater(() -> { operationWebView.getEngine().executeScript(jsCommand); });
+        } catch(Exception ex) { log.error(ex.getMessage(), ex); }
     }
 
     @Override public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
@@ -414,14 +401,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     Base64.getEncoder().encodeToString(message.getBytes("UTF8")) + "')";
-            PlatformImpl.runLater(new Runnable() {
-                @Override public void run() {
-                    operationWebView.getEngine().executeScript(jsCommand);
-                }
-            });
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+            PlatformImpl.runLater(() -> {  operationWebView.getEngine().executeScript(jsCommand); });
+        } catch(Exception ex) { log.error(ex.getMessage(), ex); }
     }
 
     @Override public void processOperationVS(OperationVS operationVS) {
@@ -442,21 +423,13 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         String message = responseVS.getMessage() == null? "":responseVS.getMessage();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
         else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
-        final String msg = message;
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(null, msg);
-            }
-        });
+        showMessage(null, message);
     }
 
     public void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }
+        PlatformImpl.runLater(() -> {
+            MessageDialog messageDialog = new MessageDialog();
+            messageDialog.showMessage(statusCode, message);
         });
     }
 
@@ -483,7 +456,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 log.debug("========= TODO MESSAGEVS_SIGN");
                 break;
             case MESSAGEVS_TO_DEVICE:
-                MessageToDeviceInbox.getInstance().addMessage(message);
+                InboxManager.getInstance().addMessage(message);
                 consumeMessageTodDevice(null);
                 break;
             case MESSAGEVS_FROM_DEVICE:
@@ -509,20 +482,16 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     public void execCommandJS(String jsCommand) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                for(WebView webView : webViewMap.values()) {
-                    webView.getEngine().executeScript(jsCommand);
-                }
+        PlatformImpl.runLater(() -> {
+            for(WebView webView : webViewMap.values()) {
+                webView.getEngine().executeScript(jsCommand);
             }
         });
     }
 
     public void execCommandJSCurrentView(String jsCommand) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
-            }
+        PlatformImpl.runLater(() -> {
+            ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
         });
     }
 
@@ -536,20 +505,16 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     }
 
     public void sendWebSocketMessage(String message) throws IOException {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                try { getWebSocketService().sendMessage(message);}
-                catch(Exception ex) {log.error(ex.getMessage(), ex);}
-            }
+        PlatformImpl.runLater(() -> {
+            try { getWebSocketService().sendMessage(message);}
+            catch(Exception ex) {log.error(ex.getMessage(), ex);}
         });
     }
 
     public void sendWebSocketAuthenticatedMessage(String message) throws IOException {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                try { getWebSocketServiceAuthenticated().sendMessage(message);}
-                catch(Exception ex) {log.error(ex.getMessage(), ex);}
-            }
+        PlatformImpl.runLater(() -> {
+            try { getWebSocketServiceAuthenticated().sendMessage(message);}
+            catch(Exception ex) {log.error(ex.getMessage(), ex);}
         });
     }
 
