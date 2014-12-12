@@ -524,6 +524,16 @@ public class Cooin implements Serializable  {
         return result;
     }
 
+    public static Map<String, BigDecimal> getCurrencyMap(List<Cooin> cooinList) {
+        Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
+        for(Cooin cooin : cooinList){
+            if(currencyMap.containsKey(cooin.getCurrencyCode())) currencyMap.put(cooin.getCurrencyCode(),
+                    currencyMap.get(cooin.getCurrencyCode()).add(cooin.getAmount()));
+            else currencyMap.put(cooin.getCurrencyCode(), cooin.getAmount());
+        }
+        return currencyMap;
+    }
+
     public static class TransactionVSData {
 
         private String subject, toUserName, toUserIBAN;

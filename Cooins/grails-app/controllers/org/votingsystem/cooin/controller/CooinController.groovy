@@ -93,7 +93,10 @@ class CooinController {
         }
         int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
         String msg = null
-        if(!cooin) msg = message(code:'cooinNotFoundErrorMsg')
+        if(!cooin) {
+            statusCode = ResponseVS.SC_NOT_FOUND
+            msg = message(code:'cooinNotFoundErrorMsg')
+        }
         else {
             switch(cooin.state) {
                 case Cooin.State.EXPENDED:

@@ -86,54 +86,32 @@ public class BrowserVSPane extends StackPane {
         password2Field = new PasswordField();
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                setPasswordDialogVisible(false, null);
-            }});
+        cancelButton.setOnAction(event -> setPasswordDialogVisible(false, null));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                checkPasswords();
-            }});
+        acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
-        password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
-            new EventHandler<KeyEvent>() {
-                public void handle(KeyEvent event) {
-                    if ((event.getCode() == KeyCode.ENTER)) {
-                        acceptButton.fire();
-                    }
-                    setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
-                            java.awt.event.KeyEvent.VK_CAPS_LOCK));
-                }
-            }
-        );
-
-        password2Field.addEventHandler(KeyEvent.KEY_PRESSED,
-            new EventHandler<KeyEvent>() {
-                public void handle(KeyEvent event) {
-                    if ((event.getCode() == KeyCode.ENTER)) {
-                        acceptButton.fire();
-                    }
-                    setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
-                            java.awt.event.KeyEvent.VK_CAPS_LOCK));
-                }
-            }
-        );
+        password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if ((event.getCode() == KeyCode.ENTER)) acceptButton.fire();
+            setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
+                    java.awt.event.KeyEvent.VK_CAPS_LOCK));
+        });
+        password2Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if ((event.getCode() == KeyCode.ENTER)) acceptButton.fire();
+            setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
+                    java.awt.event.KeyEvent.VK_CAPS_LOCK));
+        });
 
         HBox footerButtonsBox = new HBox();
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
-
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         password2Text.setStyle("-fx-spacing: 50;");
-
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
         passwordVBox.getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
@@ -152,11 +130,7 @@ public class BrowserVSPane extends StackPane {
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
         if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
-            PlatformImpl.runAndWait(new Runnable() {
-                @Override public void run() {
-                    setPasswordDialogVisible(true, passwordDialogMessage);
-                }
-            });
+            PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
         } else signatureService.processOperationVS("", operationVS);
     }
 
@@ -185,22 +159,18 @@ public class BrowserVSPane extends StackPane {
 
     private void checkPasswords() {
         log.debug("checkPasswords");
-        PlatformImpl.runLater(new Runnable(){
-            @Override public void run() {
-                String password1 = new String(password1Field.getText());
-                String password2 = new String(password2Field.getText());
-                if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
-                else {
-                    if (password1.equals(password2)) {
-                        password = password1;
-                        setPasswordDialogVisible(false, null);
-                        signatureService.processOperationVS(password, operationVS);
-                    } else {
-                        setMessage(ContextVS.getMessage("passwordError"));
-                    }
-                    password1Field.setText("");
-                    password2Field.setText("");
-                }
+        PlatformImpl.runLater(() -> {
+            String password1 = new String(password1Field.getText());
+            String password2 = new String(password2Field.getText());
+            if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
+            else {
+                if (password1.equals(password2)) {
+                    password = password1;
+                    setPasswordDialogVisible(false, null);
+                    signatureService.processOperationVS(password, operationVS);
+                } else setMessage(ContextVS.getMessage("passwordError"));
+                password1Field.setText("");
+                password2Field.setText("");
             }
         });
     }

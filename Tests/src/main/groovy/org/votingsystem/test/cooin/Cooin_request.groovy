@@ -8,7 +8,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.util.SignatureService
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.WalletUtils
+import org.votingsystem.util.Wallet
 import org.votingsystem.cooin.model.CooinRequestBatch
 
 Logger log = TestUtils.init(Cooin_request.class)
@@ -36,7 +36,7 @@ ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, cooinS
 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
     JSONObject responseJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"))
     cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
-    WalletUtils.saveCooinsToDir(cooinBatch.getCooinsMap().values(), ContextVS.getInstance().config.walletDir)
+    Wallet.saveCooinsToDir(cooinBatch.getCooinsMap().values(), ContextVS.getInstance().config.walletDir)
 } else {
     log.error(" --- ERROR --- " + responseVS.getMessage())
 }

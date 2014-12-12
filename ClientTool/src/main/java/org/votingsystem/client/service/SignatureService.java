@@ -330,7 +330,7 @@ public class SignatureService extends Service<ResponseVS> {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
                         new String(responseVS.getMessageBytes(), "UTF-8"));
                 cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
-                WalletUtils.saveToPlainWallet(WalletUtils.getSerializedCooinList(cooinBatch.getCooinsMap().values()));
+                Wallet.saveToPlainWallet(Wallet.getSerializedCooinList(cooinBatch.getCooinsMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));
@@ -345,7 +345,7 @@ public class SignatureService extends Service<ResponseVS> {
             try {
                 JSONObject responseJSON = new JSONObject();
                 responseJSON.put("statusCode", ResponseVS.SC_OK);
-                JSON walletJSON = WalletUtils.getWallet(password);
+                JSON walletJSON = Wallet.getWallet(password);
                 responseJSON.put("message", walletJSON);
                 return ResponseVS.getJSONResponse(ResponseVS.SC_OK, responseJSON);
             } catch(Exception ex) {
@@ -357,7 +357,7 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS deleteCooin(OperationVS operationVS) throws Exception {
             log.debug("deleteCooin");
             try {
-                JSONArray walletJSON = (JSONArray) WalletUtils.getWallet(password);
+                JSONArray walletJSON = (JSONArray) Wallet.getWallet(password);
                 for(int i = 0; i < walletJSON.size(); i++) {
                     JSONObject cooinJSON = (JSONObject) walletJSON.get(i);
                     if(cooinJSON.getString("hashCertVS").equals(operationVS.getMessage())) {
@@ -365,7 +365,7 @@ public class SignatureService extends Service<ResponseVS> {
                         log.debug("deleted cooin with hashCertVS: " + operationVS.getMessage());
                     }
                 }
-                WalletUtils.saveWallet(walletJSON, password);
+                Wallet.saveWallet(walletJSON, password);
                 return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.COOIN_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);

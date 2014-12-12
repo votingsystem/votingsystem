@@ -137,7 +137,7 @@ public class WalletUtilsEB {
 
     }
 
-    public static void changeWalletPin(String newPin, String oldPin, Context context)
+    public static void changePin(String newPin, String oldPin, Context context)
             throws ExceptionVS, NoSuchAlgorithmException {
         /*String storedPinHash = PrefUtils.getWalletPinHash(context);
         String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);

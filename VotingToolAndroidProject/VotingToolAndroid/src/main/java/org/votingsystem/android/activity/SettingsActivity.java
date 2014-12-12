@@ -53,7 +53,7 @@ public class SettingsActivity extends PreferenceActivity
 
                     case PIN_CHANGE:
                         try {
-                            WalletUtils.changeWalletPin(pin, actualPIN,
+                            WalletUtils.changePin(pin, actualPIN,
                                     (AppContextVS) getActivity().getApplicationContext());
                             MessageDialogFragment.showDialog(getString(R.string.change_wallet_pin),
                                     getString(R.string.operation_ok_msg), getFragmentManager());

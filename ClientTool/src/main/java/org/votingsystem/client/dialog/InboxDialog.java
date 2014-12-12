@@ -63,11 +63,9 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     }
 
     public void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }
+        PlatformImpl.runLater(() -> {
+            MessageDialog messageDialog = new MessageDialog();
+            messageDialog.showMessage(statusCode, message);
         });
     }
 

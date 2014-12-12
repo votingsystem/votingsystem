@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.DocumentVS;
+import org.votingsystem.client.util.NotificationManager;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
@@ -119,7 +120,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        BrowserVS.getInstance().registerToEventBus(new EventBusDeleteCooinListener());
+        NotificationManager.getInstance().registerToEventBus(new EventBusDeleteCooinListener());
         sendMenuItem = new MenuItem("");
         sendMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         sendMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -133,7 +134,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                 System.out.println("deleteMenuItem");
                 OperationVS operationVS = new OperationVS(TypeVS.COOIN_DELETE);
                 operationVS.setMessage(cooin.getHashCertVS());
-                BrowserVS.getInstance().processOperationVS(operationVS);
+                BrowserVS.getInstance().processOperationVS(operationVS, null);
             }
         });
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));

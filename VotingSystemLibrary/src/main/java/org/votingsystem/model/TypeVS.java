@@ -129,5 +129,5 @@ public enum TypeVS {
 
     WALLET_OPEN,
     WALLET_SAVE,
-    WALLET_STATE;
+    WALLET_STATE, COOIN_IMPORT;
 }

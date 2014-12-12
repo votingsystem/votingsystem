@@ -18,17 +18,21 @@ public class MsgUtils {
     private static Logger log = Logger.getLogger(MsgUtils.class);
 
     public static String getCooinChangeWalletMsg(WebSocketMessage webSocketMessage) {
-        Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
-        for(Cooin cooin : webSocketMessage.getCooinList()){
-            if(currencyMap.containsKey(cooin.getCurrencyCode())) currencyMap.put(cooin.getCurrencyCode(),
-                    currencyMap.get(cooin.getCurrencyCode()).add(cooin.getAmount()));
-            else currencyMap.put(cooin.getCurrencyCode(), cooin.getAmount());
-        }
+        Map<String, BigDecimal> currencyMap = Cooin.getCurrencyMap(webSocketMessage.getCooinList());
         StringBuilder amountInfo = new StringBuilder();
         for(String currencyCode: currencyMap.keySet()) {
             amountInfo.append(" - " + currencyMap.get(currencyCode) + " " + currencyCode);
         }
         return ContextVS.getMessage("cooin_wallet_change_msg", webSocketMessage.getDeviceFromName(), amountInfo.toString());
+    }
+
+    public static String getPlainWalletNotEmptyMsg(Map<String, BigDecimal> currencyMap) {
+        StringBuilder amountInfo = new StringBuilder();
+        for(String currencyCode: currencyMap.keySet()) {
+            if(amountInfo.length() > 0) amountInfo.append(" - ");
+            amountInfo.append(currencyMap.get(currencyCode) + " " + currencyCode);
+        }
+        return ContextVS.getMessage("plain_wallet_not_empty_msg", amountInfo.toString());
     }
 
 }

@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public interface WebKitHost {
 
-    public void sendMessageToBrowser(int statusCode, String message, String callerCallback);
     public void sendMessageToBrowser(JSON messageJSON, String callerCallback);
-    public void processOperationVS(OperationVS operationVS);
+    public void processOperationVS(OperationVS operationVS, String passwordDialogMessage);
+    public void processOperationVS(String password, OperationVS operationVS);
     public void processSignalVS(Map signalData);
 }

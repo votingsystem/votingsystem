@@ -13,7 +13,7 @@
            <children>
                <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" prefHeight="24.0" textFill="#6c0404" VBox.vgrow="ALWAYS">
                    <font>
-                       <Font name="System Bold" size="21.0" />
+                       <Font name="System Bold" size="20.0" />
                    </font>
                    <VBox.margin>
                        <Insets />

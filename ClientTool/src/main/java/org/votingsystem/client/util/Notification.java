@@ -1,12 +1,17 @@
 package org.votingsystem.client.util;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -20,6 +25,8 @@ public class Notification {
     private String message;
     private Date date;
     private String UUID;
+
+    public Notification() {}
 
     public Notification(JSONObject jsonObject) throws ParseException {
         typeVS = TypeVS.valueOf(jsonObject.getString("typeVS"));
@@ -41,16 +48,18 @@ public class Notification {
         return message;
     }
 
-    public void setMessage(String message) {
+    public Notification setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public TypeVS getTypeVS() {
         return typeVS;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
+    public Notification setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
+        return this;
     }
 
     public String getUUID() {
@@ -60,6 +69,12 @@ public class Notification {
     public Notification setUUID(String UUID) {
         this.UUID = UUID;
         return this;
+    }
+
+    public static Notification getPlainWalletNotEmptyNotification(List<Cooin> cooinList) {
+        Notification notification = new Notification();
+        return notification.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
+                cooinList))).setTypeVS(TypeVS.COOIN_IMPORT);
     }
 
     public JSONObject toJSON() {
