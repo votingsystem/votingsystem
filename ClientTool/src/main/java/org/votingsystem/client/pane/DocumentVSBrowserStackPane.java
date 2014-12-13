@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -41,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -181,20 +182,10 @@ public class DocumentVSBrowserStackPane extends StackPane {
             tabPane.getTabs().add(newTab);
             tabPane.getSelectionModel().select(newTab);
         } catch (Exception ex) {
-            showMessage(ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()), null);
+            showMessage(null, ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
             getScene().getWindow().hide();
             log.error(ex.getMessage(), ex);
         }
-    }
-
-    public void showMessage(final String message, Boolean isHtml) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if (messageDialog == null) messageDialog = new MessageDialog();
-                if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
-                else messageDialog.showMessage(null, message);
-            }
-        });
     }
 
     public static void showDialog(final String signedDocumentStr, Map operationDocument) {
@@ -292,7 +283,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
         if(!metaInfFile.exists()) {
             String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
             log.error(message);
-            showMessage("Error - " + message, null);
+            showMessage(null, "Error - " + message);
             return;
         }
         try {

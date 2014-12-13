@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="140.0" prefWidth="359.0" styleClass="cooin" stylesheets="@../css/cooin-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="140.0" prefWidth="370.0" styleClass="cooin" stylesheets="@../css/cooin-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -30,12 +30,12 @@
          <children>
             <Label fx:id="cooinServerLbl" prefHeight="16.0" prefWidth="105.0" styleClass="infoLabel" text="cooinServer">
                <font>
-                  <Font size="7.0" />
+                  <Font size="8.0" />
                </font>
             </Label>
             <Label fx:id="cooinHashLbl" alignment="CENTER_RIGHT" prefHeight="22.0" prefWidth="239.0" styleClass="infoLabel" text="cooinHash">
                <font>
-                  <Font size="7.0" />
+                  <Font size="8.0" />
                </font>
             </Label>
          </children>

@@ -1,17 +1,14 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author jgzornoza

@@ -35,11 +35,13 @@ public class BrowserVSPane extends StackPane {
     private String password;
     private PasswordField password1Field;
     private PasswordField password2Field;
+    private Text password2Text;
     private VBox passwordVBox;
     private Region passwordRegion;
     private String mainMessage = null;
     private final SignatureService signatureService;
     private OperationVS operationVS;
+    private boolean isWithPasswordConfirm = true;
 
     public BrowserVSPane() {
         this.signatureService = new SignatureService();
@@ -66,31 +68,25 @@ public class BrowserVSPane extends StackPane {
         progressRegion.visibleProperty().bind(signatureService.runningProperty());
         progressBox.visibleProperty().bind(signatureService.runningProperty());
         progressBox.getChildren().addAll(progressMessageText, progressBar);
-
         passwordVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
         messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #888;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
-
         capsLockPressedMessageText = new Text(ContextVS.getMessage("capsLockKeyPressed"));
         capsLockPressedMessageText.setWrappingWidth(320);
         capsLockPressedMessageText.setStyle("-fx-font-weight: bold; -fx-fill: #6c0404;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         capsLockPressedMessageText.setTextAlignment(TextAlignment.CENTER);
-
         password1Field = new PasswordField();
         password2Field = new PasswordField();
-
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(event -> setPasswordDialogVisible(false, null));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if ((event.getCode() == KeyCode.ENTER)) acceptButton.fire();
             setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
@@ -101,14 +97,13 @@ public class BrowserVSPane extends StackPane {
             setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
                     java.awt.event.KeyEvent.VK_CAPS_LOCK));
         });
-
         HBox footerButtonsBox = new HBox();
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
-        Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));
+        password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         password2Text.setStyle("-fx-spacing: 50;");
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
@@ -133,11 +128,26 @@ public class BrowserVSPane extends StackPane {
     }
 
     public void setPasswordDialogVisible(boolean isVisible, String message) {
+        isWithPasswordConfirm = false;
+        setPasswordDialogVisible(isVisible, message, isWithPasswordConfirm);
+    }
+
+    public void setPasswordDialogVisible(boolean isVisible, String message, boolean isWithPasswordConfirm) {
+        this.isWithPasswordConfirm = isWithPasswordConfirm;
         if(message == null) mainMessage = ContextVS.getMessage("passwordMissing");
         else mainMessage = message;
         setMessage(mainMessage);
         password1Field.setText("");
         password2Field.setText("");
+        if(!isWithPasswordConfirm) {
+            if(passwordVBox.getChildren().contains(password2Text)) passwordVBox.getChildren().remove(password2Text);
+            if(passwordVBox.getChildren().contains(password2Field)) passwordVBox.getChildren().remove(password2Field);
+        } else {
+            if(!passwordVBox.getChildren().contains(password2Text)) {
+                passwordVBox.getChildren().add(3, password2Text);
+                passwordVBox.getChildren().add(4, password2Field);
+            }
+        }
         passwordVBox.setVisible(isVisible);
         passwordRegion.setVisible(isVisible);
     }
@@ -159,7 +169,9 @@ public class BrowserVSPane extends StackPane {
         log.debug("checkPasswords");
         PlatformImpl.runLater(() -> {
             String password1 = new String(password1Field.getText());
-            String password2 = new String(password2Field.getText());
+            String password2 = null;
+            if(isWithPasswordConfirm)  password2 = new String(password2Field.getText());
+            else password2 = password1;
             if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
             else {
                 if (password1.equals(password2)) {

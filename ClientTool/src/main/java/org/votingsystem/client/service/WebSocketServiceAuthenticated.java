@@ -20,12 +20,14 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.WebSocketMessage;
+
 import javax.websocket.*;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

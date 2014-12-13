@@ -1,5 +1,6 @@
 package org.votingsystem.client.service;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
@@ -8,12 +9,15 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.util.Notification;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketMessage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -23,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.votingsystem.client.VotingSystemApp.*;
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -101,14 +105,42 @@ public class InboxService {
     public void addMessage(WebSocketMessage webSocketMessage) {
         webSocketMessage.setDate(Calendar.getInstance().getTime());
         webSocketMessageList.add(webSocketMessage);
+        PlatformImpl.runLater(() -> inboxButton.setVisible(true));
         flush();
         consumeMessageTodDevice(null);
     }
 
+
     public void removeMessage(WebSocketMessage webSocketMessage) {
         webSocketMessageList = webSocketMessageList.stream().filter(m -> !m.getUUID().equals(
                 webSocketMessage.getUUID())).collect(Collectors.toList());
+        if(webSocketMessageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
         flush();
+    }
+
+    public void processMessage(WebSocketMessage webSocketMessage) {
+        switch(webSocketMessage.getOperation()) {
+            case COOIN_WALLET_CHANGE:
+                PasswordDialog passwordDialog = new PasswordDialog();
+                passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
+                String password = passwordDialog.getPassword();
+                if(password != null) {
+                    try {
+                        Wallet.saveToWallet(webSocketMessage.getCooinList(), password);
+                        NotificationService.getInstance().postToEventBus(
+                                webSocketMessage.setState(WebSocketMessage.State.PROCESSED));
+                        removeMessage(webSocketMessage);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.error(ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+                break;
+            default:
+
+        }
     }
 
     public List<WebSocketMessage> getMessageList() {

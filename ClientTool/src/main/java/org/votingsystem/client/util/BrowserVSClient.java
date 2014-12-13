@@ -17,9 +17,11 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.Wallet;
+
 import java.util.Base64;
 import java.util.Date;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 /**
  * JavaScript interface object
  * @author jgzornoza

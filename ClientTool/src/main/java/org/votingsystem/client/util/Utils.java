@@ -25,6 +25,7 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.Wallet;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +33,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza

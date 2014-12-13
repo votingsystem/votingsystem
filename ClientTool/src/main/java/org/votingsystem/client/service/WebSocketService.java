@@ -16,6 +16,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.WebSocketMessage;
+
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
@@ -24,7 +25,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza

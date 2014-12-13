@@ -6,7 +6,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.WebSocketMessage;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

@@ -27,9 +27,11 @@ public class WebSocketMessage {
 
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
+    public enum State {PENDING, PROCESSED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private String sessionId;
+    private State state = State.PENDING;
     private String UUID;
     private String deviceFromName;
     private String message;
@@ -136,6 +138,15 @@ public class WebSocketMessage {
 
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public WebSocketMessage setState(State state) {
+        this.state = state;
+        return this;
     }
 
     public String getUUID() {

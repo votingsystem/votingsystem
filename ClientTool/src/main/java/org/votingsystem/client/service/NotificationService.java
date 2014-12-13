@@ -3,7 +3,6 @@ package org.votingsystem.client.service;
 import com.google.common.eventbus.EventBus;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
-import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -12,24 +11,24 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.NotificationsDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.Notification;
-import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
-import static java.util.stream.Collectors.*;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static java.util.stream.Collectors.toList;
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -101,13 +100,14 @@ public class NotificationService {
         }
         notificationList.add(notification);
         eventBus.post(notification);
-        if(notificationsButton != null) notificationsButton.setVisible(true);
+        if(notificationsButton != null) PlatformImpl.runLater(() -> notificationsButton.setVisible(true));
         flush();
     }
 
     public void removeNotification(Notification notification) {
         notificationList = notificationList.stream().filter(n -> !n.getUUID().equals(
                 notification.getUUID())).collect(toList());
+        if(notificationList.size() == 0) PlatformImpl.runLater(() -> notificationsButton.setVisible(false));
         flush();
     }
 
@@ -133,7 +133,6 @@ public class NotificationService {
                             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                         }
                     }
-
                     break;
             }
         });

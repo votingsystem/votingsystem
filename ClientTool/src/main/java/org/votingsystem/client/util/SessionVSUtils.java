@@ -1,8 +1,6 @@
 package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -25,6 +23,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,7 +36,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza

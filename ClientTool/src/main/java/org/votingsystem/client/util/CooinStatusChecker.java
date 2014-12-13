@@ -5,6 +5,7 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
+
 import java.util.List;
 
 /**

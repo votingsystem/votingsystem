@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -26,8 +25,8 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
-import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
@@ -366,7 +365,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, optionButton));
     }
 
-    public void showMessage(final String message) {
+    public static void showMessage(final String message) {
         PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message));
     }
 

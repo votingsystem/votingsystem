@@ -11,10 +11,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.NotificationRow;
-import org.votingsystem.client.util.Notification;
 import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.util.Notification;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -50,23 +49,18 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
     }
 
     private void refreshView() {
-        messageListPanel.getChildren().clear();
-        if(notificationMap.size() > 0) {
-            messageListPanel.getChildren().addAll(notificationMap.values());
-            message.setText(ContextVS.getMessage("numNotificationsMsg", notificationMap.size()));
-            scrollPane.getScene().getWindow().sizeToScene();
-        } else hide();
+        PlatformImpl.runLater(() ->  {
+            messageListPanel.getChildren().clear();
+            if(notificationMap.size() > 0) {
+                messageListPanel.getChildren().addAll(notificationMap.values());
+                message.setText(ContextVS.getMessage("numNotificationsMsg", notificationMap.size()));
+                scrollPane.getScene().getWindow().sizeToScene();
+            } else hide();
+        });
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-    }
-
-    public void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(() -> {
-            MessageDialog messageDialog = new MessageDialog();
-            messageDialog.showMessage(statusCode, message);
-        });
     }
 
     public static void showDialog() {
@@ -85,7 +79,7 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
             switch (notification.getState()) {
                 case PROCESSED:
                     notificationMap.remove(notification);
-                    PlatformImpl.runLater(() ->  refreshView());
+                    refreshView();
                     break;
             }
         }

@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -26,6 +25,8 @@ import org.votingsystem.util.FileUtils;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -208,11 +209,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
-    }
-
-    public void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(new Runnable() { @Override public void run() {
-            new MessageDialog().showMessage(statusCode, message);}});
     }
 
     private void validateForm() {

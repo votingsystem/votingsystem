@@ -6,15 +6,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import org.apache.log4j.Logger;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.CooinStatusChecker;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.WebSocketMessage;
 
 import java.io.IOException;
@@ -33,7 +35,9 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
 
     @FXML private HBox mainPane;
     @FXML private Label descriptionLbl;
+    @FXML private Label dateLbl;
     @FXML private Button messageButton;
+    @FXML private Button removeButton;
     private WebSocketMessage webSocketMessage;
     private Listener listener;
 
@@ -47,8 +51,12 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
 
     @FXML void initialize() { // This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
+        removeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        removeButton.setOnAction((event) -> listener.removeMessage(webSocketMessage));
         switch(webSocketMessage.getOperation()) {
             case COOIN_WALLET_CHANGE:
+                dateLbl.setText(DateUtils.getDayWeekDateStr(webSocketMessage.getDate()));
+                messageButton.setWrapText(true);
                 messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
                 descriptionLbl.setText(MsgUtils.getCooinChangeWalletMsg(webSocketMessage));
                 new Thread(new CooinStatusChecker(webSocketMessage.getCooinList(), this)).start();
@@ -68,14 +76,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
     }
 
     public void onClickMessageButton(ActionEvent actionEvent) {
-        switch(webSocketMessage.getOperation()) {
-            case COOIN_WALLET_CHANGE:
-                descriptionLbl.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                break;
-            default:
-
-        }
+        InboxService.getInstance().processMessage(webSocketMessage);
     }
 
     public HBox getMainPane() {

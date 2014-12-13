@@ -21,7 +21,6 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -30,6 +29,8 @@ import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -121,7 +122,7 @@ public class TimeStampPane extends GridPane {
                     log.error(ex.getMessage(), ex);
                 }
                 if(!validationOk) {
-                    showMessage(ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
+                    showMessage(null, ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
                 }
                 add(certsVBox, 0, 5, 2, 1);
             }
@@ -157,11 +158,6 @@ public class TimeStampPane extends GridPane {
         buttonsHBox.getChildren().addAll(certValidationButton, spacer, cancelButton);
         setMargin(buttonsHBox, new Insets(20, 20, 0, 20));
         add(buttonsHBox, 0, 6, 2, 1);
-    }
-
-    private void showMessage(String message) {
-        MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(null, message);
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {

@@ -79,6 +79,17 @@ public class Wallet {
         savePlainWallet(storedWalletJSON);
     }
 
+    public static void saveToWallet(Collection<Cooin> cooinCollection, String pin) throws Exception {
+        List<Map> serializedCooinList = getSerializedCooinList(cooinCollection);
+        saveToWallet(serializedCooinList, pin);
+    }
+
+    public static void saveToWallet(List<Map> serializedCooinList, String pin) throws Exception {
+        JSONArray storedWalletJSON = getWallet(pin);
+        storedWalletJSON.addAll(serializedCooinList);
+        saveWallet(storedWalletJSON, pin);
+    }
+
     public static void saveWallet(Object walletJSON, String pin) throws Exception {
         String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
@@ -126,8 +137,7 @@ public class Wallet {
         String newPinHash = CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST);
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHash + ContextVS.WALLET_FILE_EXTENSION;
         File newWalletFile = new File(ContextVS.APPDIR + File.separator + newWalletFileName);
-        if(!newWalletFile.createNewFile())
-            throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
+        if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(newPin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), newWalletFile);
         String oldWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + oldPinHash + ContextVS.WALLET_FILE_EXTENSION;
@@ -145,7 +155,7 @@ public class Wallet {
         if(resultFiles != null && resultFiles.length > 0) {
             EncryptedWalletList encryptedWalletList = new EncryptedWalletList();
             for(String filePath : resultFiles) {
-                encryptedWalletList.addWallet(getWalletWrapper(filePath));
+                encryptedWalletList.addWallet(getWalletWrapper(directory.getAbsolutePath() + File.separator + filePath));
             }
             return encryptedWalletList;
         } else return new EncryptedWalletList();

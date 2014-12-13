@@ -22,7 +22,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -31,6 +30,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -154,16 +155,6 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         documentSignerHelper.getChildren().add(0, this);
         stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));
         stage.setTitle(ContextVS.getMessage("signDocumentButtonLbl"));
-    }
-
-    private void showMessage(final int statusCode, final String message) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }
-        });
-
     }
 
     private void sendDocumentToService() {

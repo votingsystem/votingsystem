@@ -26,8 +26,8 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -100,7 +102,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                         mainPane.getStyleClass().add("cooin-error");
                         cooinStatusLbl.setText(ContextVS.getMessage("invalidCooin"));
                         sendMenuItem.setVisible(false);
-                        showMessage(responseVS.getMessage(), Boolean.FALSE);
+                        showMessage(null, responseVS.getMessage());
                     }
 
                 }
@@ -159,7 +161,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
         cooinHashLbl.setText(cooin.getHashCertVS());
         cooinValueLbl.setText(cooin.getAmount().toPlainString());
         currencyLbl.setText(cooin.getCurrencyCode());
-        cooinTagLbl.setText(Utils.getTagDescription(cooin.getTag().getName()));
+        cooinTagLbl.setText(Utils.getTagDescription(cooin.getSignedTagVS()));
         operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
         operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED));
         String cooinDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
@@ -193,7 +195,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                         DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(cooin.getValidTo()), "dd MMM yyyy' 'HH:mm");
             }
-            showMessage(msg, Boolean.TRUE);
+            showMessage(msg);
         }
     }
 
@@ -217,7 +219,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                     fxmlLoader.setController(cooinDialog);
                         stage.setScene(new Scene(fxmlLoader.load()));
                     stage.setTitle("Cooin - " + cooin.getAmount().toPlainString() + " " + cooin.getCurrencyCode() +
-                            " " + Utils.getTagForDescription(cooin.getTag().getName()));
+                            " " + Utils.getTagForDescription(cooin.getSignedTagVS()));
                     stage.initModality(Modality.WINDOW_MODAL);
                     //stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
                     stage.show();
@@ -242,16 +244,6 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
 
     @Override public ContentTypeVS getContentTypeVS() {
         return ContentTypeVS.COOIN;
-    }
-
-    public void showMessage(final String message, Boolean isHtml) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                messageDialog = new MessageDialog();
-                if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
-                else messageDialog.showMessage(null, message);
-            }
-        });
     }
 
     @Override public void processJSONForm(JSONObject jsonForm) {
@@ -279,7 +271,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                             cooinServer.getTrustAnchors());
                     Thread.sleep(3000);
                     setProgressVisible(false, false);
-                    showMessage(responseJSON.getString("message"), Boolean.FALSE);
+                    showMessage(null, responseJSON.getString("message"));
                     return true;
                 }
             };
@@ -293,7 +285,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
             new Thread(transactionTask).start();
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            showMessage(ex.getMessage(), Boolean.FALSE);
+            showMessage(null, ex.getMessage());
             setProgressVisible(false, true);
         }
     }

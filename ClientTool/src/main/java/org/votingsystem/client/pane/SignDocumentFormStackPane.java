@@ -19,7 +19,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ActorVS;
@@ -197,14 +196,6 @@ public class SignDocumentFormStackPane extends StackPane {
         progressRegion.visibleProperty().bind(operationHandlerTask.runningProperty());
         progressBox.visibleProperty().bind(operationHandlerTask.runningProperty());
         new Thread(operationHandlerTask).start();
-    }
-
-    private void showMessage(final int statusCode, final String message) {
-        PlatformImpl.runLater(new Runnable(){
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }});
     }
 
     public void setPasswordDialogVisible(boolean isVisible) {

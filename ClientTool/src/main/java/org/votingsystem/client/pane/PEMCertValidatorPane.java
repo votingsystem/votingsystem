@@ -17,13 +17,14 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -73,11 +74,6 @@ public class PEMCertValidatorPane extends GridPane {
         add(buttonsBox, 0, 2);
     }
 
-    private void showMessage(String message) {
-        MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(null, message);
-    }
-
     private void validatePublicKey() {
         log.debug("validatePublicKey");
         Collection<X509Certificate> certs = null;
@@ -86,10 +82,10 @@ public class PEMCertValidatorPane extends GridPane {
             certs = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            showMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
+            showMessage(null, ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
-            showMessage("ERROR - " + ContextVS.getMessage("certNotFoundErrorMsg"));
+            showMessage(null, "ERROR - " + ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
                 log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
@@ -97,7 +93,7 @@ public class PEMCertValidatorPane extends GridPane {
 
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
-                    showMessage("ERROR - " + ex.getMessage());
+                    showMessage(null, "ERROR - " + ex.getMessage());
                 }
             }
             acceptButton.setVisible(false);

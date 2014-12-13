@@ -106,16 +106,9 @@ public class UserDeviceSelectorDialog extends DialogVS {
         hide();
     }
 
+
     public void cancelButton(ActionEvent actionEvent) {
         hide();
-    }
-
-    public void showMessage(String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                new MessageDialog().showMessage(null, message);
-            }
-        });
     }
 
     public static void show(String caption, String message, Listener listener) {

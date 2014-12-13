@@ -187,6 +187,13 @@ public class CertificationRequestVS implements java.io.Serializable {
         try {
             if(certificate != null) s.writeObject(certificate.getEncoded());
             else s.writeObject(null);
+            if(keyPair != null) {//this is to deserialize private keys outside android environments
+                s.writeObject(keyPair.getPublic().getEncoded());
+                s.writeObject(keyPair.getPrivate().getEncoded());
+            } else {
+                s.writeObject(null);
+                s.writeObject(null);
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
         }

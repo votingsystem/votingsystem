@@ -10,7 +10,10 @@ import javafx.concurrent.Worker;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebHistory;
@@ -31,15 +34,17 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.WebSocketMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import static org.votingsystem.client.VotingSystemApp.*;
+
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -188,7 +193,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
                 if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
-                //log.debug("==== currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
+                //log.debug("currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
                 String params = "";
                 if(locationField.getText().contains("?")) {
                     params = locationField.getText().substring(locationField.getText().indexOf("?"),
@@ -308,9 +313,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             case INIT_VALIDATED_SESSION:
                 execCommandJS(message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                 break;
-            case MESSAGEVS_SIGN:
-                log.debug("========= TODO MESSAGEVS_SIGN");
-                break;
+            //case MESSAGEVS_SIGN: break;
             case MESSAGEVS_TO_DEVICE:
                 InboxService.getInstance().addMessage(message);
                 break;

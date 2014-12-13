@@ -22,6 +22,8 @@ import org.votingsystem.util.NifUtils;
 
 import java.io.IOException;
 
+import static org.votingsystem.client.VotingSystemApp.showMessage;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -82,7 +84,7 @@ public class MobileSelectorDialog extends DialogVS {
                 }
             }).start();
         } catch(Exception ex) {
-            showMessage(ex.getMessage());
+            showMessage(null, ex.getMessage());
         }
 
     }
@@ -126,15 +128,6 @@ public class MobileSelectorDialog extends DialogVS {
 
     public void onEnterNifTextField(ActionEvent actionEvent) {
         searchButton(actionEvent);
-    }
-
-
-    public void showMessage(String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                new MessageDialog().showMessage(null, message);
-            }
-        });
     }
 
     public static void show(String caption, String message, Listener listener) {

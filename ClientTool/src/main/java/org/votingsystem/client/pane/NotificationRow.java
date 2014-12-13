@@ -7,13 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.util.CooinStatusChecker;
-import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Notification;
-import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.WebSocketMessage;
 
 import java.io.IOException;
 

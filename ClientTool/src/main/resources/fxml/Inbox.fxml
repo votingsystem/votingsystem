@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<ScrollPane fx:id="scrollPane" hbarPolicy="NEVER" maxHeight="-Infinity" minHeight="-Infinity" minWidth="600.0" prefHeight="400.0" stylesheets="@../css/inbox.css" vbarPolicy="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fx:id="scrollPane" hbarPolicy="NEVER" maxHeight="-Infinity" minHeight="-Infinity" minWidth="600.0" prefHeight="400.0" prefWidth="800.0" stylesheets="@../css/inbox.css" vbarPolicy="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <content>
-       <VBox fx:id="mainPane" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="560.0" styleClass="undecorated-dialog" stylesheets="@../css/inbox.css">
+       <VBox fx:id="mainPane" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="560.0" prefWidth="800.0" styleClass="undecorated-dialog" stylesheets="@../css/inbox.css">
            <children>
                <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" prefHeight="24.0" textFill="#6c0404" VBox.vgrow="ALWAYS">
                    <font>
@@ -20,7 +20,11 @@
                    </VBox.margin>
                </Label>
             <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
-               <VBox fx:id="messageListPanel" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+            <HBox VBox.vgrow="ALWAYS">
+               <children>
+                     <VBox fx:id="messageListPanel" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
            </children>
        </VBox>
    </content>

@@ -141,6 +141,7 @@ public class MessageDialog {
             if(ResponseVS.SC_OK == statusCode) {
                 messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
             } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+            messageLabel.setGraphicTextGap(15);
         }
         stage.centerOnScreen();
         stage.show();
