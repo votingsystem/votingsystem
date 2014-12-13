@@ -9,6 +9,7 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.WalletException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -79,32 +80,44 @@ public class Wallet {
     }
 
     public static void saveWallet(Object walletJSON, String pin) throws Exception {
-        if(walletJSON != null) {
-            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-            EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
-            WalletFile walletWrapper = encryptedWalletList.getWallet(pinHash);
-            if(walletWrapper == null && encryptedWalletList.size() > 0)
-                throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
-            File walletFile = null;
-            if(walletWrapper == null && encryptedWalletList.size() == 0) {
-                String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHash + ContextVS.WALLET_FILE_EXTENSION;
-                walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
-                walletFile.createNewFile();
-            }
-            Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile);
-        }
+        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+        EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
+        WalletFile walletFile = encryptedWalletList.getWallet(pinHash);
+        if(walletFile == null || encryptedWalletList.size() == 0)
+            throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
+        Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile.file);
+    }
+
+    public static void createWallet(Object walletJSON, String pin) throws Exception {
+        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+        String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHash + ContextVS.WALLET_FILE_EXTENSION;
+        File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
+        walletFile.createNewFile();
+        Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile);
     }
 
     public static JSONArray getWallet(String pin) throws Exception {
         String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHash + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
-        if(!walletFile.exists()) throw new ExceptionVS(ContextVS.getMessage("walletNotFoundErrorMsg"));
+        if(!walletFile.exists()) {
+            EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
+            if(encryptedWalletList.size() > 0) throw new ExceptionVS(ContextVS.getMessage("walletNotFoundErrorMsg"));
+            else throw new WalletException(ContextVS.getMessage("walletNotFoundErrorMsg"));
+        }
         JSONObject bundleJSON = (JSONObject) JSONSerializer.toJSON( FileUtils.getStringFromFile(walletFile));
         Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(bundleJSON);
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
         return (JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8"));
+    }
+
+    public static void importPlainWallet(String password) throws Exception {
+        JSONArray walletJSON = getWallet(password);
+        walletJSON.addAll(getPlainWallet());
+        saveWallet(walletJSON, password);
+        savePlainWallet(new JSONArray());
     }
 
     public static void changePin(String newPin, String oldPin) throws Exception {
@@ -135,7 +148,7 @@ public class Wallet {
                 encryptedWalletList.addWallet(getWalletWrapper(filePath));
             }
             return encryptedWalletList;
-        } else return null;
+        } else return new EncryptedWalletList();
     }
 
     public static JSONObject getWalletState() throws Exception {
@@ -150,7 +163,7 @@ public class Wallet {
         String[] nameParts = filePath.split("_");
         WalletFile result = null;
         try {
-            result = new WalletFile(nameParts[1],  new File(filePath));
+            result = new WalletFile(nameParts[1].split(ContextVS.WALLET_FILE_EXTENSION)[0],  new File(filePath));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -159,10 +172,10 @@ public class Wallet {
 
     private static class WalletFile {
         String hash;
-        File walletFile;
-        WalletFile(String hash, File walletFile) {
+        File file;
+        WalletFile(String hash, File file) {
             this.hash = hash;
-            this.walletFile = walletFile;
+            this.file = file;
         }
     }
 
@@ -192,7 +205,7 @@ public class Wallet {
         }
 
         File getEncryptedWallet(String hash) {
-            return walletList.get(hash).walletFile;
+            return walletList.get(hash).file;
         }
     }
 

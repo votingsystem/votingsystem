@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
-import org.votingsystem.client.util.InboxManager;
+import org.votingsystem.client.service.InboxService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.WebSocketMessage;
@@ -81,7 +81,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     @Override public void removeMessage(WebSocketMessage webSocketMessage) {
         log.debug("onMessageButtonClick - operation: " + webSocketMessage.getOperation());
         messageMap.remove(webSocketMessage);
-        InboxManager.getInstance().removeMessage(webSocketMessage);
+        InboxService.getInstance().removeMessage(webSocketMessage);
         PlatformImpl.runLater(() ->  refreshView());
     }
 
@@ -93,7 +93,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         }
 
         @Override protected ObservableList<WebSocketMessage> call() throws Exception {
-            List<WebSocketMessage> messageList = InboxManager.getInstance().getMessageList();
+            List<WebSocketMessage> messageList = InboxService.getInstance().getMessageList();
             try {
                 int i = 0;
                 for(WebSocketMessage webSocketMessage : messageList) {

@@ -17,14 +17,18 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class Notification {
+public class Notification<T> {
 
     private static Logger log = Logger.getLogger(Notification.class);
+
+    public enum State {PENDING, PROCESSED}
 
     private TypeVS typeVS;
     private String message;
     private Date date;
+    private State state = State.PENDING;
     private String UUID;
+    private T data;
 
     public Notification() {}
 
@@ -62,6 +66,15 @@ public class Notification {
         return this;
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public Notification setState(State state) {
+        this.state = state;
+        return this;
+    }
+
     public String getUUID() {
         return UUID;
     }
@@ -75,6 +88,14 @@ public class Notification {
         Notification notification = new Notification();
         return notification.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
                 cooinList))).setTypeVS(TypeVS.COOIN_IMPORT);
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 
     public JSONObject toJSON() {

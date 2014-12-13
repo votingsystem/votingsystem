@@ -26,7 +26,7 @@ public class NotificationRow {
     private static Logger log = Logger.getLogger(NotificationRow.class);
 
     public interface Listener {
-        public void removeMessage(Notification notification);
+        public void onNotificationClicked(Notification notification);
     }
 
     @FXML private HBox mainPane;
@@ -57,16 +57,8 @@ public class NotificationRow {
 
     }
 
-
     public void onClickMessageButton(ActionEvent actionEvent) {
-        switch(notification.getTypeVS()) {
-            case COOIN_IMPORT:
-                descriptionLbl.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                break;
-            default:
-
-        }
+        listener.onNotificationClicked(notification);
     }
 
     public HBox getMainPane() {

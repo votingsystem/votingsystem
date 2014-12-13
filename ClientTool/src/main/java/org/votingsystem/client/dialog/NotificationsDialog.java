@@ -1,8 +1,7 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -11,19 +10,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.pane.NotificationRow;
-import org.votingsystem.client.util.InboxManager;
 import org.votingsystem.client.util.Notification;
-import org.votingsystem.client.util.NotificationManager;
+import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.WebSocketMessage;
 
 import java.io.IOException;
-import java.security.PrivateKey;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,10 +41,11 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
         super("/fxml/Inbox.fxml", StageStyle.DECORATED);
         getStage().setTitle(ContextVS.getMessage("notificationsCaption"));
         progressBar.setVisible(false);
-        for(Notification notification : NotificationManager.getInstance().getNotificationList()) {
+        for(Notification notification : NotificationService.getInstance().getNotificationList()) {
             notificationMap.put(notification, new NotificationRow(notification, this).getMainPane());
         }
         mainPane.getChildren().remove(progressBar);
+        NotificationService.getInstance().registerToEventBus(new EventBusNotificationListener());
         refreshView();
     }
 
@@ -58,9 +53,9 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
         messageListPanel.getChildren().clear();
         if(notificationMap.size() > 0) {
             messageListPanel.getChildren().addAll(notificationMap.values());
-        }
-        message.setText(ContextVS.getMessage("numNotificationsMsg", notificationMap.size()));
-        scrollPane.getScene().getWindow().sizeToScene();
+            message.setText(ContextVS.getMessage("numNotificationsMsg", notificationMap.size()));
+            scrollPane.getScene().getWindow().sizeToScene();
+        } else hide();
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
@@ -83,11 +78,22 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
         });
     }
 
-    @Override public void removeMessage(Notification notification) {
-        log.debug("onMessageButtonClick - operation: " + notification.getTypeVS());
-        notificationMap.remove(notification);
-        NotificationManager.getInstance().removeNotification(notification);
-        PlatformImpl.runLater(() ->  refreshView());
+    class EventBusNotificationListener {
+        @Subscribe public void notificationChanged(Notification notification) {
+            log.debug("EventBusNotificationListener - notification: " + notification.getTypeVS() +
+                    " - state: " + notification.getState());
+            switch (notification.getState()) {
+                case PROCESSED:
+                    notificationMap.remove(notification);
+                    PlatformImpl.runLater(() ->  refreshView());
+                    break;
+            }
+        }
+    }
+
+    @Override public void onNotificationClicked(Notification notification) {
+        log.debug("onNotificationClicked - operation: " + notification.getTypeVS());
+        NotificationService.getInstance().consumeNotification(notification);
     }
 
 }

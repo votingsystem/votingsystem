@@ -1,6 +1,5 @@
 package org.votingsystem.client.service;
 
-import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -11,14 +10,12 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.util.BrowserVSSessionUtils;
+import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.WebSocketMessage;
-
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +24,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import static org.votingsystem.client.VotingSystemApp.*;
 
 /**
  * @author jgzornoza
@@ -71,15 +69,6 @@ public class WebSocketService extends Service<ResponseVS> {
         instance = this;
     }
 
-    public void showMessage(final int statusCode, final String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }
-        });
-    }
-
     public static WebSocketService getInstance() {
         return instance;
     }
@@ -109,7 +98,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        BrowserVSSessionUtils.getInstance().setIsConnected(false);
+                        SessionVSUtils.getInstance().setIsConnected(false);
                     }
 
                     @Override public void onError(Session session, Throwable thr) {

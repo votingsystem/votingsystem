@@ -12,22 +12,20 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.util.BrowserVSSessionUtils;
+import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.WebSocketMessage;
-
 import javax.websocket.*;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
-
+import static org.votingsystem.client.VotingSystemApp.*;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -72,15 +70,6 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         instance = this;
     }
 
-    public void showMessage(final Integer statusCode, final String message) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(statusCode, message);
-            }
-        });
-    }
-
     public static WebSocketServiceAuthenticated getInstance() {
         return instance;
     }
@@ -110,7 +99,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        BrowserVSSessionUtils.getInstance().setIsConnected(false);
+                        SessionVSUtils.getInstance().setIsConnected(false);
                     }
 
                     @Override public void onError(Session session, Throwable thr) {
@@ -129,7 +118,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             Platform.runLater(new Runnable() {
                 @Override public void run() {
                     String password = null;
-                    if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
+                    if(CryptoTokenVS.MOBILE != SessionVSUtils.getCryptoTokenType()) {
                         PasswordDialog passwordDialog = new PasswordDialog();
                         passwordDialog.showWithoutPasswordConfirm(
                                 ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
@@ -175,7 +164,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             switch(message.getOperation()) {
                 case INIT_VALIDATED_SESSION:
                     if(ResponseVS.SC_OK == message.getStatusCode()) {
-                        BrowserVSSessionUtils.getInstance().initAuthenticatedSession(message, userVS);
+                        SessionVSUtils.getInstance().initAuthenticatedSession(message, userVS);
                     } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + message.getStatusCode());
                     break;
                 case MESSAGEVS_EDIT:
@@ -249,7 +238,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = BrowserVSSessionUtils.getSMIME(null,
+                SMIMEMessage smimeMessage = SessionVSUtils.getSMIME(null,
                         targetServer.getNameNormalized(), documentToSignJSON.toString(),
                         password.toCharArray(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());

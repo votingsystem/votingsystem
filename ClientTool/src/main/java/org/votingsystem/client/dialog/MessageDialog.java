@@ -41,7 +41,7 @@ public class MessageDialog {
 
     public MessageDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
-        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initModality(Modality.APPLICATION_MODAL);
         //stage.initOwner(window);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }

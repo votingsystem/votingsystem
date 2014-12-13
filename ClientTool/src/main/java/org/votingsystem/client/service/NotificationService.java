@@ -1,18 +1,25 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.service;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
+import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.NotificationsDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.util.Notification;
+import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
 import java.io.ByteArrayInputStream;
@@ -22,21 +29,22 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import static java.util.stream.Collectors.*;
+import static org.votingsystem.client.VotingSystemApp.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class NotificationManager {
+public class NotificationService {
 
-    private static Logger log = Logger.getLogger(NotificationManager.class);
+    private static Logger log = Logger.getLogger(NotificationService.class);
 
     private static final String EVENT_BUS_IDENTIFIER = "NotificationManager_EVENT_BUS";
     private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
     private File notificationsFile;
     private List<Notification> notificationList = new ArrayList<>();
-    private static final NotificationManager INSTANCE = new NotificationManager();
-    private Button alertButton;
+    private static final NotificationService INSTANCE = new NotificationService();
+    private Button notificationsButton;
 
     public void registerToEventBus(Object eventBusListener) {
         eventBus.register(eventBusListener);
@@ -46,9 +54,9 @@ public class NotificationManager {
         eventBus.post(eventData);
     }
 
-    public static NotificationManager getInstance() {return INSTANCE;}
+    public static NotificationService getInstance() {return INSTANCE;}
 
-    private NotificationManager() {
+    private NotificationService() {
         JSONArray notificationsArray = null;
         try {
             notificationsFile = new File(ContextVS.APPDIR + File.separator + ContextVS.NOTIFICATIONS_FILE);
@@ -68,18 +76,22 @@ public class NotificationManager {
         }
     }
 
-    public void setAlertButton(Button alertButton) {
-        alertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.INFO_CIRCLE, Utils.COLOR_YELLOW_ALERT));
-        this.alertButton = alertButton;
-        alertButton.setOnAction((event) -> {
+    public void setNotificationsButton(Button notificationsButton) {
+        notificationsButton.setGraphic(Utils.getImage(FontAwesome.Glyph.INFO_CIRCLE, Utils.COLOR_YELLOW_ALERT));
+        this.notificationsButton = notificationsButton;
+        notificationsButton.setOnAction((event) -> {
             NotificationsDialog.showDialog();
         });
-        if(notificationList.size() > 0) alertButton.setVisible(true);
-        else alertButton.setVisible(false);
+        if(notificationList.size() > 0) notificationsButton.setVisible(true);
+        else notificationsButton.setVisible(false);
     }
 
-    public Button getAlertButton() {
-        return alertButton;
+    public void showIfPendingNotifications() {
+        if(notificationList.size() > 0) NotificationsDialog.showDialog();
+    }
+
+    public Button getNotificationsButton() {
+        return notificationsButton;
     }
 
     public void addNotification(Notification notification) {
@@ -89,7 +101,7 @@ public class NotificationManager {
         }
         notificationList.add(notification);
         eventBus.post(notification);
-        if(alertButton != null) alertButton.setVisible(true);
+        if(notificationsButton != null) notificationsButton.setVisible(true);
         flush();
     }
 
@@ -101,6 +113,30 @@ public class NotificationManager {
 
     public List<Notification> getNotificationList() {
         return notificationList;
+    }
+
+    public void consumeNotification(final Notification notification) {
+        PlatformImpl.runLater(() -> {
+            switch (notification.getTypeVS()) {
+                case COOIN_IMPORT:
+                    PasswordDialog passwordDialog = new PasswordDialog();
+                    passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
+                    String password = passwordDialog.getPassword();
+                    if(password != null) {
+                        try {
+                            Wallet.importPlainWallet(password);
+                            eventBus.post(notification.setState(Notification.State.PROCESSED));
+                        } catch (WalletException wex) {
+                            Utils.showWalletNotFoundMessage();
+                        } catch (Exception ex) {
+                            log.error(ex.getMessage(), ex);
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    }
+
+                    break;
+            }
+        });
     }
 
     private void flush() {

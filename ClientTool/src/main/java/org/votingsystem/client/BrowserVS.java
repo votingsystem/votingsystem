@@ -7,8 +7,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
@@ -23,10 +21,9 @@ import net.sf.json.JSON;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.dialog.InboxDialog;
-import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
+import org.votingsystem.client.service.InboxService;
+import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.client.util.*;
@@ -34,18 +31,15 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import static org.votingsystem.client.VotingSystemApp.*;
 
 /**
  * @author jgzornoza
@@ -65,10 +59,8 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
     private HBox toolBar;
     private TabPane tabPane;
     private Button prevButton;
-    private Button messageToDeviceButton;
     private WebSocketServiceAuthenticated webSocketServiceAuthenticated;
     private WebSocketService webSocketService;
-    private PasswordDialog webSocketMessagePasswordDialog;
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
@@ -83,7 +75,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             PlatformImpl.runLater(() -> {
                 ResponseVS responseVS = browserHelper.getSignatureService().getValue();
                 if(responseVS.getStatus() != null) {
-                    NotificationManager.getInstance().postToEventBus(responseVS);
+                    NotificationService.getInstance().postToEventBus(responseVS);
                 } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                     log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                 } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
@@ -117,11 +109,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         final Button forwardButton = new Button();
         final Button reloadButton = new Button();
         forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
-        messageToDeviceButton = new Button();
-        messageToDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
-        messageToDeviceButton.setOnAction((event) -> {
-            consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"));
-        });
         forwardButton.setOnAction((event) -> {
             try {
                 ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
@@ -129,15 +116,12 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
             } catch(Exception ex) { forwardButton.setDisable(true); }
         });
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
-        prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override
-            public void handle(javafx.event.ActionEvent ev) {
-                try {
-                    ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
-                    forwardButton.setDisable(false);
-                } catch (Exception ex) {
-                    prevButton.setDisable(true);
-                }
+        prevButton.setOnAction(event -> {
+            try {
+                ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
+                forwardButton.setDisable(false);
+            } catch (Exception ex) {
+                prevButton.setDisable(true);
             }
         });
         reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
@@ -156,13 +140,15 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     } else targetURL = "http://" + locationField.getText().trim();
                     ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
                 }
-            }});
+            }
+        });
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        NotificationManager.getInstance().setAlertButton(new Button());
+        NotificationService.getInstance().setNotificationsButton(new Button());
+        InboxService.getInstance().setInboxButton(new Button());
         toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer(),
-                NotificationManager.getInstance().getAlertButton(), messageToDeviceButton);
+                NotificationService.getInstance().getNotificationsButton(), InboxService.getInstance().getInboxButton());
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -238,7 +224,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new BrowserVSClient(webView));
                             webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                    BrowserVSSessionUtils.getInstance().getBrowserSessionData()));
+                                    SessionVSUtils.getInstance().getBrowserSessionData()));
                         }
                     } else if (newState.equals(Worker.State.FAILED)) {
                         showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
@@ -249,8 +235,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         );
         VBox.setVgrow(webView, Priority.ALWAYS);
         Tab newTab = new Tab();
-        newTab.setOnSelectionChanged(new EventHandler < Event > (){
-            @Override public void handle(Event event) {
+        newTab.setOnSelectionChanged(event -> {
                 int selectedIdx = tabPane.getSelectionModel().getSelectedIndex();
                 ObservableList<WebHistory.Entry> entries = ((WebView)tabPane.getSelectionModel().getSelectedItem().
                         getContent()).getEngine().getHistory().getEntries();
@@ -260,8 +245,7 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                     log.debug("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
                     locationField.setText(selectedEntry.getUrl());
                 }
-            }
-        });
+            });
         if(tabCaption != null) newTab.setText(tabCaption.length() > MAX_CHARACTERS_TAB_CAPTION ?
                 tabCaption.substring(0, MAX_CHARACTERS_TAB_CAPTION) + "...":tabCaption);
         else if(URL != null) newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
@@ -277,34 +261,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         }
         browserStage.toFront();
         return webView;
-    }
-
-    private void consumeMessageTodDevice(final String pinDialogMessage) {
-        PlatformImpl.runLater(() -> {
-            if(BrowserVSSessionUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
-                if(webSocketMessagePasswordDialog == null) {
-                    webSocketMessagePasswordDialog = new PasswordDialog();
-                    String dialogMessage = null;
-                    if(pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
-                    else dialogMessage = pinDialogMessage;
-                    webSocketMessagePasswordDialog.showWithoutPasswordConfirm(dialogMessage);
-                    String password = webSocketMessagePasswordDialog.getPassword();
-                    if(password != null) {
-                        try {
-                            KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
-                            PrivateKey privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                                    password.toCharArray());
-                            InboxDialog.show(privateKey);
-                        } catch(Exception ex) {
-                            log.error(ex.getMessage(), ex);
-                            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
-                        }
-                    }
-                    webSocketMessagePasswordDialog = null;
-                } else webSocketMessagePasswordDialog.toFront();
-            } else showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
-                    " - " + ContextVS.getMessage("jksRequiredMsg")));
-        });
     }
 
     @Override public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
@@ -333,20 +289,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 (String)signalData.get("caption"));
     }
 
-    public void showMessage(ResponseVS responseVS) {
-        String message = responseVS.getMessage() == null? "":responseVS.getMessage();
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
-        else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
-        showMessage(null, message);
-    }
-
-    public void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(() -> {
-            MessageDialog messageDialog = new MessageDialog();
-            messageDialog.showMessage(statusCode, message);
-        });
-    }
-
     public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,
             final boolean isToolbarVisible) {
         final StringBuilder jsCommand = new StringBuilder();
@@ -370,11 +312,10 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
                 log.debug("========= TODO MESSAGEVS_SIGN");
                 break;
             case MESSAGEVS_TO_DEVICE:
-                InboxManager.getInstance().addMessage(message);
-                consumeMessageTodDevice(null);
+                InboxService.getInstance().addMessage(message);
                 break;
             case MESSAGEVS_FROM_DEVICE:
-                BrowserVSSessionUtils.setWebSocketMessage(message);
+                SessionVSUtils.setWebSocketMessage(message);
                 break;
             default:
                 log.debug("unprocessed message");

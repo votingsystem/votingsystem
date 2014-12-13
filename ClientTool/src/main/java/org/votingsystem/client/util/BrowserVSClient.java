@@ -19,7 +19,7 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.Wallet;
 import java.util.Base64;
 import java.util.Date;
-
+import static org.votingsystem.client.VotingSystemApp.*;
 /**
  * JavaScript interface object
  * @author jgzornoza
@@ -85,14 +85,14 @@ public class BrowserVSClient {
                     BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                     break;
                 case WALLET_OPEN:
-                    BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("walletPasswMsg"));
+                    BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("walletPinMsg"));
                     break;
                 default:
                     BrowserVS.getInstance().processOperationVS(operationVS, null);
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            BrowserVS.getInstance().showMessage(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage()));
+            showMessage(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage()));
         }
     }
 
@@ -119,7 +119,7 @@ public class BrowserVSClient {
                     BrowserVS.getInstance().processSignalVS(operationVS.getDocument());
                     break;
                 case REPRESENTATIVE_STATE:
-                    result = BrowserVSSessionUtils.getInstance().getRepresentationState().toString();
+                    result = SessionVSUtils.getInstance().getRepresentationState().toString();
                     break;
                 case WALLET_STATE:
                     result = Wallet.getWalletState().toString();

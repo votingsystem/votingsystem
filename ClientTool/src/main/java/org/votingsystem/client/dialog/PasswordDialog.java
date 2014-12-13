@@ -41,11 +41,9 @@ public class PasswordDialog {
     private VBox dialogVBox;
     private Text messageText;
     private Label capsLockPressedMessageLabel;
-    private HBox messagePanel;
     private PasswordField password1Field;
     private Text password2Text;
     private PasswordField password2Field;
-    private Button cancelButton;
     private String password;
     private String mainMessage = null;
     boolean isCapsLockPressed = false;
@@ -53,8 +51,7 @@ public class PasswordDialog {
 
     public PasswordDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
-        stage.initModality(Modality.WINDOW_MODAL);
-
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
             @Override public void handle(WindowEvent window) {      }
         });
@@ -74,17 +71,11 @@ public class PasswordDialog {
         password2Field = new PasswordField();
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                stage.close();
-            }});
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setOnAction(event -> stage.close());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                checkPasswords();
-            }});
+        acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,

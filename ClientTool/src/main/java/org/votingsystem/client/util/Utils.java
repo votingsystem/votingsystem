@@ -3,6 +3,7 @@ package org.votingsystem.client.util;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -10,6 +11,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -22,7 +24,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
-
+import org.votingsystem.util.Wallet;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import static org.votingsystem.client.VotingSystemApp.*;
 
 /**
  * @author jgzornoza
@@ -281,7 +284,7 @@ public class Utils {
                         ContextVS.saveUserKeyStore(userKeyStore, password);
                         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                 CryptoTokenVS.JKS_KEYSTORE.toString());
-                        BrowserVSSessionUtils.getInstance().setUserVS(userVS, false);
+                        SessionVSUtils.getInstance().setUserVS(userVS, false);
                         JSONObject userDataJSON = userVS.toJSON();
                         userDataJSON.put("statusCode", ResponseVS.SC_OK);
                         webKitHost.sendMessageToBrowser(userDataJSON, operationVS.getCallerCallback());
@@ -319,6 +322,26 @@ public class Utils {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         return (JSONObject)JSONSerializer.toJSON(resultMap);
+    }
+
+    public static void createNewWallet() {
+        PlatformImpl.runLater(() -> {
+            PasswordDialog passwordDialog = new PasswordDialog();
+            passwordDialog.show(ContextVS.getMessage("newWalletPinMsg"));
+            String password = passwordDialog.getPassword();
+            if(password != null) {
+                try {
+                    Wallet.createWallet(new JSONArray(), password);
+                } catch (Exception ex) { log.error(ex.getMessage(), ex); }
+            }
+        });
+
+    }
+
+    public static void showWalletNotFoundMessage() {
+        Button optionButton = new Button(ContextVS.getMessage("newWalletButton"));
+        optionButton.setOnAction(event -> createNewWallet());
+        showMessage(ContextVS.getMessage("walletNotFoundMessage"), optionButton);
     }
 
 }

@@ -1,8 +1,6 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,7 +14,7 @@ import javafx.scene.text.TextAlignment;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SignatureService;
-import org.votingsystem.client.util.BrowserVSSessionUtils;
+import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -129,7 +127,7 @@ public class BrowserVSPane extends StackPane {
 
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
-        if(CryptoTokenVS.MOBILE != BrowserVSSessionUtils.getCryptoTokenType()) {
+        if(CryptoTokenVS.MOBILE != SessionVSUtils.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
         } else signatureService.processOperationVS("", operationVS);
     }

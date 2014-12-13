@@ -26,7 +26,8 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
-import org.votingsystem.client.util.BrowserVSSessionUtils;
+import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
@@ -166,7 +167,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true, primaryStage);
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
-                        BrowserVSSessionUtils.getInstance().checkCSRRequest();
+                        SessionVSUtils.getInstance().checkCSRRequest();
                     }
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {
@@ -206,39 +207,35 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         votingSystemOptionsBox = new VBox(15);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE));
-        voteButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
-                        ContextVS.getMessage("voteButtonLbl"));
-            }});
+        voteButton.setOnAction(event -> {
+            openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
+                    ContextVS.getMessage("voteButtonLbl"));
+        });
         voteButton.setPrefWidth(500);
 
         Button selectRepresentativeButton = new Button(ContextVS.getMessage("selectRepresentativeButtonLbl"));
         selectRepresentativeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.HAND_ALT_RIGHT));
-        selectRepresentativeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
-                        ContextVS.getMessage("selectRepresentativeButtonLbl"));
-            }});
+        selectRepresentativeButton.setOnAction(event -> {
+            openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
+                    ContextVS.getMessage("selectRepresentativeButtonLbl"));
+        });
         selectRepresentativeButton.setPrefWidth(500);
         votingSystemOptionsBox.getChildren().addAll(voteButton, selectRepresentativeButton);
         cooinOptionsBox = new VBox(15);
         Button cooinUsersProceduresButton = new Button(ContextVS.getMessage("financesLbl"));
         cooinUsersProceduresButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BAR_CHART_ALT));
-        cooinUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
+        cooinUsersProceduresButton.setOnAction(event -> {
                 openCooinURL(ContextVS.getInstance().getCooinServer().getUserDashBoardURL(),
                         ContextVS.getMessage("cooinUsersLbl"));
-            }});
+            });
         cooinUsersProceduresButton.setPrefWidth(500);
         Button walletButton = new Button(ContextVS.getMessage("walletLbl"));
         walletButton.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         walletButton.setPrefWidth(500);
-        walletButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
+        walletButton.setOnAction(event -> {
                 openCooinURL(ContextVS.getInstance().getCooinServer().getWalletURL(),
                         ContextVS.getMessage("walletLbl"));
-            }});
+            });
         cooinOptionsBox.getChildren().addAll(cooinUsersProceduresButton, walletButton);
         cooinOptionsBox.setStyle("-fx-alignment: center;");
         ChoiceBox adminChoiceBox = new ChoiceBox();
@@ -288,50 +285,40 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         // allow the UNDECORATED Stage to be dragged around.
         final Node root = primaryStage.getScene().getRoot();
         final Delta dragDelta = new Delta();
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                // record a delta distance for the drag and drop operation.
+        root.setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
                 dragDelta.x = primaryStage.getX() - mouseEvent.getScreenX();
                 dragDelta.y = primaryStage.getY() - mouseEvent.getScreenY();
-            }
-        });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
+            });
+        root.setOnMouseDragged(mouseEvent -> {
                 primaryStage.setX(mouseEvent.getScreenX() + dragDelta.x);
                 primaryStage.setY(mouseEvent.getScreenY() + dragDelta.y);
-            }
-        });
+            });
         primaryStage.show();
+        NotificationService.getInstance().showIfPendingNotifications();
     }
 
     private void setCooinServerAvailable(final boolean available, Stage primaryStage) {
-        PlatformImpl.runLater(new Runnable(){
-            @Override public void run() {
-                if(available) {
-                    mainBox.getChildren().add((mainBox.getChildren().size() - 1), cooinOptionsBox);
-                } else {
-                    if(mainBox.getChildren().contains(cooinOptionsBox)) {
-                        mainBox.getChildren().remove(cooinOptionsBox);
-                    }
+        PlatformImpl.runLater(() -> {
+            if(available) mainBox.getChildren().add((mainBox.getChildren().size() - 1), cooinOptionsBox);
+            else {
+                if(mainBox.getChildren().contains(cooinOptionsBox)) {
+                    mainBox.getChildren().remove(cooinOptionsBox);
                 }
-                primaryStage.sizeToScene();
             }
+            primaryStage.sizeToScene();
         });
     }
 
 
     private void setVotingSystemAvailable(final boolean available, Stage primaryStage) {
-        PlatformImpl.runLater(new Runnable(){
-            @Override public void run() {
-                if(available) {
-                    mainBox.getChildren().add(1, votingSystemOptionsBox);
-                } else {
-                    if(mainBox.getChildren().contains(votingSystemOptionsBox)) {
-                        mainBox.getChildren().remove(votingSystemOptionsBox);
-                    }
+        PlatformImpl.runLater(() -> {
+            if(available) mainBox.getChildren().add(1, votingSystemOptionsBox);
+            else {
+                if(mainBox.getChildren().contains(votingSystemOptionsBox)) {
+                    mainBox.getChildren().remove(votingSystemOptionsBox);
                 }
-                primaryStage.sizeToScene();
             }
+            primaryStage.sizeToScene();
         });
     }
 
@@ -341,8 +328,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() {
-            @Override public void run() { BrowserVS.getInstance().newTab(URL, caption, null); }});
+        Platform.runLater(() -> BrowserVS.getInstance().newTab(URL, caption, null));
     }
 
     private void openCooinURL(final String URL, final String caption) {
@@ -351,23 +337,37 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
-        Platform.runLater(new Runnable() {
-            @Override public void run() { BrowserVS.getInstance().newTab(URL, caption, null); }});
+        Platform.runLater(() -> BrowserVS.getInstance().newTab(URL, caption, null));
     }
 
     private void openSettings() {
         log.debug("openSettings");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                SettingsDialog settingsDialog = new SettingsDialog();
-                settingsDialog.show();
-            }
+        Platform.runLater(() -> {
+            SettingsDialog settingsDialog = new SettingsDialog();
+            settingsDialog.show();
         });
     }
 
+    public static void showMessage(ResponseVS responseVS) {
+        String message = responseVS.getMessage() == null? "":responseVS.getMessage();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
+        else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
+        showMessage(null, message);
+    }
+
+    public static void showMessage(Integer statusCode, String message) {
+        PlatformImpl.runLater(() -> {
+            MessageDialog messageDialog = new MessageDialog();
+            messageDialog.showMessage(statusCode, message);
+        });
+    }
+
+    public static void showMessage(final String message, final Button optionButton) {
+        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, optionButton));
+    }
+
     public void showMessage(final String message) {
-        PlatformImpl.runLater(new Runnable() { @Override public void run() {
-            new MessageDialog().showHtmlMessage(message);}});
+        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message));
     }
 
     class Delta { double x, y; }
@@ -382,9 +382,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     public static void main(String[] args) {
         ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
-        if(args.length > 0) {
-            ContextVS.getInstance().initDirs(args[0]);
-        }
+        if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
     }
 

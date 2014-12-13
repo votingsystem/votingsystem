@@ -10,7 +10,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.model.ContentTypeVS;
@@ -26,7 +25,6 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -39,14 +37,15 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import static org.votingsystem.client.VotingSystemApp.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSSessionUtils {
+public class SessionVSUtils {
 
-    private static Logger log = Logger.getLogger(BrowserVSSessionUtils.class);
+    private static Logger log = Logger.getLogger(SessionVSUtils.class);
 
     private UserVS userVS;
     private File sessionFile;
@@ -59,9 +58,9 @@ public class BrowserVSSessionUtils {
     private static WebSocketUtils.RequestBundle requestBundle;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
-    private static final BrowserVSSessionUtils INSTANCE = new BrowserVSSessionUtils();
+    private static final SessionVSUtils INSTANCE = new SessionVSUtils();
 
-    private BrowserVSSessionUtils() {
+    private SessionVSUtils() {
         try {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
@@ -176,7 +175,7 @@ public class BrowserVSSessionUtils {
         }
     }
 
-    public static BrowserVSSessionUtils getInstance() {
+    public static SessionVSUtils getInstance() {
         return INSTANCE;
     }
 
@@ -324,10 +323,7 @@ public class BrowserVSSessionUtils {
                         if(passwd == null) {
                             Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
                             optionButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-                            optionButton.setOnAction(new EventHandler<ActionEvent>() {
-                                @Override public void handle(ActionEvent actionEvent) {
-                                    deleteCSR();
-                                }});
+                            optionButton.setOnAction(event -> deleteCSR());
                             showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;
                         }
@@ -414,14 +410,6 @@ public class BrowserVSSessionUtils {
 
     public static ResponseVS getMessageToDeviceResponse() {
         return messageToDeviceResponse;
-    }
-
-    public void showMessage(final String message, final Button optionButton) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                new MessageDialog().showHtmlMessage(message, optionButton);
-            }
-        });
     }
 
     private void flush() {
