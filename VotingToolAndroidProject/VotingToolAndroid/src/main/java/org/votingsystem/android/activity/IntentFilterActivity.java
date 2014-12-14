@@ -104,15 +104,12 @@ public class IntentFilterActivity extends ActionBarActivity {
         }
         showProgressDialog(getString(R.string.connecting_caption),
                 getString(R.string.loading_data_msg));
-        AppContextVS contextVS = (AppContextVS) getApplicationContext();
-
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(responseVS != null) {
             if(progressDialog != null) progressDialog.dismiss();
             showMessage(responseVS.getStatusCode(), responseVS.getCaption(), responseVS.getMessage());
             return;
         }
-
         Uri uriData = getIntent().getData();
         if(uriData != null) {
             try {
@@ -134,13 +131,13 @@ public class IntentFilterActivity extends ActionBarActivity {
                     } else {
                         String encodedMsg = uriData.getQueryParameter("operationvs");
                         if(encodedMsg != null) {
-                            byte[] decodedMsgBytes = Base64.decode(encodedMsg.getBytes());
-                            operationVS = OperationVS.parse(new String(decodedMsgBytes, "UTF-8"));
+                            JSONObject jsonObject = new JSONObject(new String(
+                                    Base64.decode(encodedMsg.getBytes()), "UTF-8"));
+                            operationVS = OperationVS.parse(jsonObject);
                             //operationVS = OperationVS.parse(StringUtils.decodeString(encodedMsg));
                         }
                     }
                 }
-
             } catch(Exception ex) {ex.printStackTrace();}
         } else {
             Intent intent = new Intent(this, EventVSMainActivity.class);

@@ -32,6 +32,7 @@ import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 
@@ -67,6 +68,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
+    private static final Map<String, AESParams> sessionKeys = new HashMap<String, AESParams>();
 
     static {
         //Without this WebView always send requests with 'en-us,en;q=0.5'
@@ -121,6 +123,14 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             smimeMessageMap = new HashMap<String, String>();
         }
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
+    }
+
+    public void putSessionKey(String UUID, AESParams aesParams) {
+        sessionKeys.put(UUID, aesParams);
+    }
+
+    public AESParams getSessionKeys(String UUID) {
+        return sessionKeys.get(UUID);
     }
 
     @Override public void stop() {

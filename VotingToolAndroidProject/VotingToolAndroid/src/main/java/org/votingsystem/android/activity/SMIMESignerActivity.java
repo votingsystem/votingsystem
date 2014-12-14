@@ -23,7 +23,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
@@ -44,7 +44,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
     private AppContextVS contextVS = null;
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
-    private WebSocketRequest request;
+    private WebSocketMessage request;
     private OperationVS operationVS;
     private ProgressDialog progressDialog = null;
 
@@ -53,7 +53,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService(null, operationVS);

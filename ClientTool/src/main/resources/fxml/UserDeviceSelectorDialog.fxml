@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.paint.*?>
-<?import javafx.scene.text.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
+<?import javafx.scene.text.Font?>
 <VBox fx:id="mainPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="550.0" styleClass="modal-dialog" stylesheets="@../css/mobile-selector-dialog.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
       <Label fx:id="captionLbl" text="Label" textFill="#6c0404" wrapText="true">

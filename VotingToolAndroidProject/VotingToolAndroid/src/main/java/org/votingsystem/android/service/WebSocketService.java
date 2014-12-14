@@ -17,7 +17,7 @@ import org.glassfish.tyrus.client.ClientManager;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.OperationVS;
@@ -94,7 +94,7 @@ public class WebSocketService extends Service {
             String messageToSend = arguments.getString(ContextVS.MESSAGE_KEY);
             String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
             if(contextVS.getCooinServer() == null) {
-                contextVS.sendWebSocketBroadcast(new WebSocketRequest(
+                contextVS.sendWebSocketBroadcast(new WebSocketMessage(
                         ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), operationType));
             }
             if(session == null || !session.isOpen()) {
@@ -119,7 +119,7 @@ public class WebSocketService extends Service {
         return START_STICKY;
     }
 
-    private WebSocketRequest initAuthenticatedSession() {
+    private WebSocketMessage initAuthenticatedSession() {
         CooinServer cooinServer = contextVS.getCooinServer();
         Map mapToSend = new HashMap();
         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
@@ -129,15 +129,15 @@ public class WebSocketService extends Service {
             JSONObject requestJSON = new JSONObject(mapToSend);
             ResponseVS responseVS = contextVS.signMessage(cooinServer.getNameNormalized(),
                     requestJSON.toString(), msgSubject, contextVS.getCooinServer().getTimeStampServiceURL());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketRequest.load(responseVS);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketMessage.load(responseVS);
             SMIMEMessage smimeMessage = responseVS.getSMIME();
             session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
                     smimeMessage).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new WebSocketRequest(ResponseVS.SC_ERROR, ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
+            return new WebSocketMessage(ResponseVS.SC_ERROR, ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
         }
-        return new WebSocketRequest(ResponseVS.SC_PROCESSING, null, TypeVS.INIT_VALIDATED_SESSION);
+        return new WebSocketMessage(ResponseVS.SC_PROCESSING, null, TypeVS.INIT_VALIDATED_SESSION);
     }
 
     public JSONObject getMessageJSON(TypeVS operation, String message, Map data,
@@ -219,15 +219,14 @@ public class WebSocketService extends Service {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
-                                contextVS.sendWebSocketBroadcast(WebSocketRequest.parse(message, contextVS));
+                                contextVS.sendWebSocketBroadcast(new WebSocketMessage(message));
                             }
                         });
                         setWebSocketSession(session);
                     }
-
                     @Override public void onClose(Session session, CloseReason closeReason) {
-                        contextVS.sendWebSocketBroadcast(
-                                new WebSocketRequest(ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
+                        contextVS.sendWebSocketBroadcast(new WebSocketMessage(
+                                ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                     }
                 }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
 
@@ -271,10 +270,8 @@ public class WebSocketService extends Service {
                         ResponseVS responseVS = contextVS.signMessage(operationVS.getToUser(),
                                 operationVS.getTextToSign(), operationVS.getSignedMessageSubject(),
                                 contextVS.getCooinServer().getTimeStampServiceURL());
-                        JSONObject responseJSON = WebSocketRequest.getSignResponse(ResponseVS.SC_OK,
-                                null, operationVS.getSessionId(), operationVS.getPublicKey(),
-                                responseVS.getSMIME(),
-                                contextVS.getResources().getConfiguration().locale.getLanguage());
+                        JSONObject responseJSON = WebSocketMessage.getSignResponse(ResponseVS.SC_OK,
+                                null, operationVS, responseVS.getSMIME(), contextVS);
                         session.getBasicRemote().sendText(responseJSON.toString());
                         break;
                     default:

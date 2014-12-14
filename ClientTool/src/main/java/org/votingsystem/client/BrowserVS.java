@@ -29,17 +29,18 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
-import org.votingsystem.client.util.*;
+import org.votingsystem.client.util.BrowserVSClient;
+import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.WebSocketMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
+public class BrowserVS extends Region implements WebKitHost {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
     private static final int BROWSER_WIDTH = 1200;
@@ -303,42 +304,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
         newTab(urlToLoad, caption, "".equals(jsCommand.toString()) ? null : jsCommand.toString());
     }
 
-    @Override public void consumeWebSocketMessage(WebSocketMessage message) {
-        log.debug("consumeWebSocketMessage - operation: " + message.getOperation().toString());
-        if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {
-            showMessage(message.getStatusCode(), message.getMessage());
-            return;
-        }
-        switch(message.getOperation()) {
-            case INIT_VALIDATED_SESSION:
-                execCommandJS(message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
-                break;
-            //case MESSAGEVS_SIGN: break;
-            case MESSAGEVS_TO_DEVICE:
-                InboxService.getInstance().addMessage(message);
-                break;
-            case MESSAGEVS_FROM_DEVICE:
-                SessionVSUtils.setWebSocketMessage(message);
-                break;
-            default:
-                log.debug("unprocessed message");
-        }
-    }
-
-    @Override public void setConnectionStatus(WebSocketMessage.ConnectionStatus status) {
-        log.debug("setConnectionStatus - status: " + status.toString());
-        switch (status) {
-            case CLOSED:
-                execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.CLOSED));
-                break;
-            case OPEN:
-                execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.OPEN));
-                break;
-        }
-    }
-
     public void execCommandJS(String jsCommand) {
         PlatformImpl.runLater(() -> {
             for(WebView webView : webViewMap.values()) {
@@ -355,38 +320,6 @@ public class BrowserVS extends Region implements WebKitHost, WebSocketListener {
 
     public void registerCallerCallbackView(String callerCallback, WebView webView) {
         webViewMap.put(callerCallback, webView);
-    }
-
-    public WebSocketService getWebSocketService(){
-        if(webSocketService == null) {
-            webSocketService = new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
-                    ContextVS.getInstance().getCooinServer());
-            webSocketService.addListener(this);
-        }
-        return webSocketService;
-    }
-
-    public void sendWebSocketMessage(String message) throws IOException {
-        PlatformImpl.runLater(() -> {
-            try { getWebSocketService().sendMessage(message);}
-            catch(Exception ex) {log.error(ex.getMessage(), ex);}
-        });
-    }
-
-    public void sendWebSocketAuthenticatedMessage(String message) throws IOException {
-        PlatformImpl.runLater(() -> {
-            try { getWebSocketServiceAuthenticated().sendMessage(message);}
-            catch(Exception ex) {log.error(ex.getMessage(), ex);}
-        });
-    }
-
-    public WebSocketServiceAuthenticated getWebSocketServiceAuthenticated(){
-        if(webSocketServiceAuthenticated == null) {
-            webSocketServiceAuthenticated = new WebSocketServiceAuthenticated(ContextVS.getInstance().getVotingSystemSSLCerts(),
-                    ContextVS.getInstance().getCooinServer());
-            webSocketServiceAuthenticated.addListener(this);
-        }
-        return webSocketServiceAuthenticated;
     }
 
 }

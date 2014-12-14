@@ -11,11 +11,11 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.SessionVSUtils;
-import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketMessage;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -23,8 +23,6 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
@@ -43,10 +41,9 @@ public class WebSocketService extends Service<ResponseVS> {
     private final String keyStorePassw = "";
     private ActorVS targetServer;
     private Session session;
-    private Set<WebSocketListener> listeners = new HashSet<WebSocketListener>();
     private String connectionMessage = null;
 
-    public WebSocketService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
+    private WebSocketService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
         if(targetServer.getWebSocketURL().startsWith("wss")) {
             log.debug("settings for SECURE connetion");
@@ -72,8 +69,11 @@ public class WebSocketService extends Service<ResponseVS> {
     }
 
     public static WebSocketService getInstance() {
+        if(instance == null) instance =  new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
+                ContextVS.getInstance().getCooinServer());
         return instance;
     }
+
 
     @Override protected Task<ResponseVS> createTask() {
         return new WebSocketTask();
@@ -122,14 +122,6 @@ public class WebSocketService extends Service<ResponseVS> {
         } else broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
     }
 
-    public void addListener(WebSocketListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(WebSocketListener listener) {
-        listeners.remove(listener);
-    }
-
     public void sendMessage(String message) throws IOException {
         if(session != null && session.isOpen()) session.getBasicRemote().sendText(message);
         else {
@@ -141,7 +133,7 @@ public class WebSocketService extends Service<ResponseVS> {
     private void consumeMessage(final String messageStr){
         try {
             WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
-            log.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + message.getOperation() +
+            log.debug("consumeMessage - type: " + message.getOperation() +
                     " - status: " + message.getStatusCode());
             switch(message.getOperation()) {
                 case MESSAGEVS_SIGN:
@@ -162,9 +154,24 @@ public class WebSocketService extends Service<ResponseVS> {
                     }
                     break;
             }
-            for(WebSocketListener listener : listeners) {
-                if(listener != null) listener.consumeWebSocketMessage(message);
-                else listeners.remove(listener);
+            if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {
+                showMessage(message.getStatusCode(), message.getMessage());
+                return;
+            }
+            switch(message.getOperation()) {
+                case INIT_VALIDATED_SESSION:
+                    BrowserVS.getInstance().execCommandJS(
+                            message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                    break;
+                //case MESSAGEVS_SIGN: break;
+                case MESSAGEVS_TO_DEVICE:
+                    InboxService.getInstance().addMessage(message);
+                    break;
+                case MESSAGEVS_FROM_DEVICE:
+                    SessionVSUtils.setWebSocketMessage(message);
+                    break;
+                default:
+                    log.debug("unprocessed message");
             }
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }
@@ -172,9 +179,15 @@ public class WebSocketService extends Service<ResponseVS> {
     private void broadcastConnectionStatus(WebSocketMessage.ConnectionStatus status) {
         if(session == null) log.debug("broadcastConnectionStatus - status: " + status.toString());
         else log.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
-        for(WebSocketListener listener : listeners) {
-            if(listener != null) listener.setConnectionStatus(status);
-            else listeners.remove(listener);
+        switch (status) {
+            case CLOSED:
+                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                        null, WebSocketMessage.ConnectionStatus.CLOSED));
+                break;
+            case OPEN:
+                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                        null, WebSocketMessage.ConnectionStatus.OPEN));
+                break;
         }
     }
 

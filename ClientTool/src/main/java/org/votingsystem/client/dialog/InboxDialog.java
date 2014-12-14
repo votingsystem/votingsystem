@@ -17,10 +17,11 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketMessage;
 
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,17 +42,21 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     @FXML private ProgressBar progressBar;
     @FXML private Label closeAdviceMsg;
     @FXML private VBox messageListPanel;
+    private static InboxDialog dialog;
 
     private static final Map<WebSocketMessage, HBox> messageMap = new HashMap<WebSocketMessage, HBox>();
 
-    public InboxDialog(PrivateKey privateKey) throws IOException {
+    private InboxDialog() throws IOException {
         super("/fxml/Inbox.fxml", StageStyle.DECORATED);
         getStage().setTitle(ContextVS.getMessage("messageVSInboxCaption"));
-        Task<ObservableList<WebSocketMessage>> task = new DecryptMessageTask(privateKey);
+        NotificationService.getInstance().registerToEventBus(new EventBusMessageListener());
+    }
+
+    private void load(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
+        Task<ObservableList<WebSocketMessage>> task = new DecryptMessageTask(privateKey, timeLimitedWebSocketMessage);
         progressBar.progressProperty().bind(task.progressProperty());
         progressBar.visibleProperty().bind(task.runningProperty());
         task.setOnSucceeded(event -> mainPane.getChildren().remove(progressBar));
-        NotificationService.getInstance().registerToEventBus(new EventBusMessageListener());
         new Thread(task).start();
     }
 
@@ -72,17 +77,19 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         log.debug("initialize");
     }
 
-    public static void show(PrivateKey privateKey) {
+    public static void show(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
         PlatformImpl.runLater(() -> {
             try {
-                InboxDialog dialog = new InboxDialog(privateKey);
+                if(dialog == null) dialog = new InboxDialog();
+                dialog.load(privateKey, timeLimitedWebSocketMessage);
                 dialog.show();
             } catch (Exception ex) { log.error(ex.getMessage(), ex); }
         });
     }
 
+
     @Override public void removeMessage(WebSocketMessage webSocketMessage) {
-        log.debug("onMessageButtonClick - operation: " + webSocketMessage.getOperation());
+        log.debug("removeMessage - operation: " + webSocketMessage.getOperation());
         messageMap.remove(webSocketMessage);
         InboxService.getInstance().removeMessage(webSocketMessage);
         refreshView();
@@ -104,12 +111,16 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
     public class DecryptMessageTask extends Task<ObservableList<WebSocketMessage>> {
 
         PrivateKey privateKey;
-        public DecryptMessageTask(PrivateKey privateKey) {
+        private WebSocketMessage timeLimitedWebSocketMessage;
+        public DecryptMessageTask(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
             this.privateKey = privateKey;
+            this.timeLimitedWebSocketMessage = timeLimitedWebSocketMessage;
         }
 
         @Override protected ObservableList<WebSocketMessage> call() throws Exception {
             List<WebSocketMessage> messageList = InboxService.getInstance().getMessageList();
+            if(timeLimitedWebSocketMessage == null) messageList = InboxService.getInstance().getMessageList();
+            else messageList = Arrays.asList(timeLimitedWebSocketMessage);
             try {
                 int i = 0;
                 for(WebSocketMessage webSocketMessage : messageList) {

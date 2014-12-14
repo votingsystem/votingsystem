@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,7 +38,7 @@ public class AESParams {
         return iv;
     }
 
-    public JSONObject getJSON() throws UnsupportedEncodingException, JSONException {
+    public JSONObject toJSON() throws UnsupportedEncodingException, JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("key", new String(Base64.encode(key.getEncoded()), "UTF-8"));
         jsonObject.put("iv", new String(Base64.encode(iv.getIV()), "UTF-8"));

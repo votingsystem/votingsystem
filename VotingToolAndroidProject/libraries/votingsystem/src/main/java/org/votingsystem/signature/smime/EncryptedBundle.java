@@ -1,6 +1,7 @@
 package org.votingsystem.signature.smime;
 
 import android.util.Base64;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -12,6 +12,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -113,7 +114,7 @@ public class EditorFragment extends Fragment {
 
     @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
         try {
-            OperationVS operationVS = OperationVS.parse(appMessage);
+            OperationVS operationVS = OperationVS.parse(new JSONObject(appMessage));
             processOperation(operationVS);
         } catch (Exception e) {
             e.printStackTrace();

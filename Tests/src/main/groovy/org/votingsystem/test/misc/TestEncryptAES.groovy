@@ -25,6 +25,7 @@ IvParameterSpec iv = new IvParameterSpec(random.generateSeed(16));
 
 KeyGenerator kg = KeyGenerator.getInstance("AES");
 kg.init(random);
+kg.init(256); // 192 and 256 bits may not be available
 Key key = kg.generateKey();
 log.debug("key: " + key.algorithm)
 String keyBase64 = Base64.getEncoder().encodeToString(key.getEncoded())
@@ -33,7 +34,7 @@ log.debug("keyBase64: " + keyBase64)
 byte[] decodeKeyBytes = Base64.getDecoder().decode(keyBase64)
 SecretKey key2 = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
 
-Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
 cipher.init(Cipher.ENCRYPT_MODE, key2, iv);
 byte[] stringBytes = messageToEncrypt.getBytes();
 byte[] encryptedMessage = cipher.doFinal(stringBytes);

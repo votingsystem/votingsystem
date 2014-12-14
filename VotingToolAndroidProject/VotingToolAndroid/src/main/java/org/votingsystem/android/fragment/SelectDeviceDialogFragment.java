@@ -34,6 +34,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -48,6 +50,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     private String deviceConnectedResponseStr;
     private TextView msg_text;
     private List<String> tagList = new ArrayList<String>();
+    private DeviceLoader deviceLoader;
 
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
         SelectDeviceDialogFragment dialogFragment = new SelectDeviceDialogFragment();
@@ -82,6 +85,11 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         return dialog;
     }
 
+    @Override public void onStop() {
+        super.onStop();
+        if(deviceLoader != null) deviceLoader.cancel(true);
+    }
+
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.CALLER_KEY, dialogCaller);
@@ -101,7 +109,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             simpleAdapter.setItemList(tagList);
             simpleAdapter.notifyDataSetChanged();
         } else {
-            DeviceLoader deviceLoader = new DeviceLoader();
+            deviceLoader = new DeviceLoader();
             String targetURL = ((AppContextVS)getActivity().getApplicationContext()).getCooinServer().
                     getDeviceVSConnectedServiceURL(contextVS.getUserVS().getNif());
             deviceLoader.execute(targetURL);
@@ -114,6 +122,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
         @Override protected void onPostExecute(List<String> result) {
             super.onPostExecute(result);
+            LOGD(TAG + ".DeviceLoader", "onPostExecute");
             if(tagList.size() > 0) {
                 msg_text.setText(getString(R.string.select_connected_device_msg));
             }

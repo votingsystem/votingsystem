@@ -1,11 +1,11 @@
 package org.votingsystem.model;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessage;
+
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;

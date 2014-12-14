@@ -1,6 +1,5 @@
 package org.votingsystem.client.service;
 
-import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
@@ -9,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.util.Notification;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -18,7 +16,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
-import org.votingsystem.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketMessage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
@@ -38,6 +36,7 @@ public class InboxService {
     private static Logger log = Logger.getLogger(InboxService.class);
 
     private List<WebSocketMessage> webSocketMessageList = new ArrayList<>();
+    private WebSocketMessage timeLimitedWebSocketMessage;
     private File messagesFile;
     private static final InboxService INSTANCE = new InboxService();
     private Button inboxButton;
@@ -70,33 +69,37 @@ public class InboxService {
         inboxButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
         this.inboxButton = inboxButton;
         inboxButton.setOnAction((event) -> {
-            consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"));
+            consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"), false);
         });
         if(webSocketMessageList.size() > 0) inboxButton.setVisible(true);
         else inboxButton.setVisible(false);
     }
 
-
-    private void consumeMessageTodDevice(final String pinDialogMessage) {
+    private void consumeMessageTodDevice(final String pinDialogMessage, final boolean isTimeLimited) {
         PlatformImpl.runLater(() -> {
             if (SessionVSUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
-                PasswordDialog passwordDialog = new PasswordDialog();
+                final PasswordDialog passwordDialog = new PasswordDialog();
                 String dialogMessage = null;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
                 else dialogMessage = pinDialogMessage;
-                passwordDialog.showWithoutPasswordConfirm(dialogMessage);
+                Integer visibilityInSeconds = null;
+                if(isTimeLimited) {
+                    visibilityInSeconds = WebSocketMessage.TIME_LIMITED_MESSAGE_LIVE;
+                }
+                passwordDialog.showWithoutPasswordConfirm(dialogMessage, visibilityInSeconds);
                 String password = passwordDialog.getPassword();
                 if (password != null) {
                     try {
                         KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
                         PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                                 password.toCharArray());
-                        InboxDialog.show(privateKey);
+                        InboxDialog.show(privateKey, timeLimitedWebSocketMessage);
                     } catch (Exception ex) {
                         log.error(ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
                     }
                 }
+                timeLimitedWebSocketMessage = null;
             } else showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
                     " - " + ContextVS.getMessage("jksRequiredMsg")));
         });
@@ -104,12 +107,13 @@ public class InboxService {
 
     public void addMessage(WebSocketMessage webSocketMessage) {
         webSocketMessage.setDate(Calendar.getInstance().getTime());
-        webSocketMessageList.add(webSocketMessage);
-        PlatformImpl.runLater(() -> inboxButton.setVisible(true));
-        flush();
-        consumeMessageTodDevice(null);
+        if(!webSocketMessage.isTimeLimited()) {
+            webSocketMessageList.add(webSocketMessage);
+            PlatformImpl.runLater(() -> inboxButton.setVisible(true));
+            flush();
+        } else timeLimitedWebSocketMessage = webSocketMessage;
+        consumeMessageTodDevice(null, webSocketMessage.isTimeLimited());
     }
-
 
     public void removeMessage(WebSocketMessage webSocketMessage) {
         webSocketMessageList = webSocketMessageList.stream().filter(m -> !m.getUUID().equals(
@@ -119,6 +123,10 @@ public class InboxService {
     }
 
     public void processMessage(WebSocketMessage webSocketMessage) {
+        if(webSocketMessage.getState() == WebSocketMessage.State.LAPSED) {
+            log.debug("discarding LAPSED message");
+            return;
+        }
         switch(webSocketMessage.getOperation()) {
             case COOIN_WALLET_CHANGE:
                 PasswordDialog passwordDialog = new PasswordDialog();
@@ -130,6 +138,8 @@ public class InboxService {
                         NotificationService.getInstance().postToEventBus(
                                 webSocketMessage.setState(WebSocketMessage.State.PROCESSED));
                         removeMessage(webSocketMessage);
+                        WebSocketServiceAuthenticated.getInstance().sendMessage(webSocketMessage.getResponse(
+                                ResponseVS.SC_OK, null).toString());
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {
@@ -139,7 +149,6 @@ public class InboxService {
                 }
                 break;
             default:
-
         }
     }
 

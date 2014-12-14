@@ -7,6 +7,12 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.paddings.PKCS7Padding;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
@@ -238,7 +244,7 @@ public class Encryptor {
         return Base64.getEncoder().encode(bOut.toByteArray());
     }
 
-    public byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+    public static byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
         dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator("".getBytes(), receptorPublicKey).
                 setProvider(ContextVS.PROVIDER));
@@ -473,17 +479,33 @@ public class Encryptor {
         }
     }
 
-    public String encryptAES(String messageToEncrypt, AESParams params) throws
+    public static String encryptAESRestricted(String messageToEncrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException,
+            NoSuchProviderException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, params.getKey(), params.getIV());
         byte[] encryptedMessage = cipher.doFinal(messageToEncrypt.getBytes("UTF-8"));
         return new String(org.bouncycastle.util.encoders.Base64.encode(encryptedMessage));
     }
 
+    //BC provider to avoid key length restrictions on normal jvm
+    public static String encryptAES(String messageToEncrypt, AESParams params) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException, InvalidCipherTextException {
+        BlockCipher AESCipher = new AESEngine();
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
+        KeyParameter key = new KeyParameter(params.getKey().getEncoded());
+        pbbc.init(true, key); //to decrypt put param to false
+        byte[] input = messageToEncrypt.getBytes("UTF-8");
+        byte[] output = new byte[pbbc.getOutputSize(input.length)];
+        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
+        pbbc.doFinal(output, bytesWrittenOut);
+        return new String(org.bouncycastle.util.encoders.Base64.encode(output));
+    }
+
     //decrypts base64 encoded AES message
-    public String decryptAES(String messageToDecrypt, AESParams params) throws
+    public static String decryptAES(String messageToDecrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

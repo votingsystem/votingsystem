@@ -3,7 +3,6 @@ package org.votingsystem.client.util;
 import org.apache.log4j.Logger;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.WebSocketMessage;
 
 import java.math.BigDecimal;
 import java.util.Map;

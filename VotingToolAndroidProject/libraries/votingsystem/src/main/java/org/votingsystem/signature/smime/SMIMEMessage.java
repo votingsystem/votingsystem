@@ -2,8 +2,6 @@ package org.votingsystem.signature.smime;
 
 import android.util.Log;
 
-import com.sun.mail.util.BASE64DecoderStream;
-
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -20,7 +18,6 @@ import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSProcessable;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignerDigestMismatchException;
 import org.bouncycastle2.cms.CMSVerifierCertificateNotValidException;
@@ -29,41 +26,28 @@ import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
-import org.bouncycastle2.util.encoders.Base64;
-import org.bouncycastle2.x509.X509CertStoreSelector;
 import org.json.JSONObject;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JsonUtils;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.math.BigInteger;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,22 +59,16 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import javax.activation.CommandMap;
-import javax.activation.FileDataSource;
 import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.util.SharedByteArrayInputStream;
-
-import static org.votingsystem.model.ContextVS.PROVIDER;
 
 
 /**

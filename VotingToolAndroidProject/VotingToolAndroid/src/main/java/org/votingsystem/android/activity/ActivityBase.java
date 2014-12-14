@@ -44,7 +44,7 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -130,7 +130,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            WebSocketRequest socketRequest = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+            WebSocketMessage socketRequest = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:

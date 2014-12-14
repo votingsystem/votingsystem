@@ -100,6 +100,10 @@ public class SessionVSHelper {
         return authenticatedSessionMap.get(session.getId());
     }
 
+    public Session getAuthenticatedSession(String sessionId) {
+        return authenticatedSessionMap.get(sessionId).getSession();
+    }
+
     public Session getSession(String sessionId) {
         return sessionMap.get(sessionId);
     }

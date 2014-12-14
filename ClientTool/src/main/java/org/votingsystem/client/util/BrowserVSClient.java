@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
+import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
@@ -46,14 +47,14 @@ public class BrowserVSClient {
             BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
-                    BrowserVS.getInstance().getWebSocketServiceAuthenticated().setConnectionEnabled(
+                    WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(
                             true, operationVS.getDocument());
                     break;
                 case DISCONNECT:
-                    BrowserVS.getInstance().getWebSocketServiceAuthenticated().setConnectionEnabled(false, null);
+                    WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(false, null);
                     break;
                 case MESSAGEVS_TO_DEVICE:
-                    BrowserVS.getInstance().getWebSocketService().sendMessage(jsonStr);
+                    WebSocketService.getInstance().sendMessage(jsonStr);
                     break;
                 case  KEYSTORE_SELECT:
                     Utils.selectKeystoreFile(operationVS, BrowserVS.getInstance());

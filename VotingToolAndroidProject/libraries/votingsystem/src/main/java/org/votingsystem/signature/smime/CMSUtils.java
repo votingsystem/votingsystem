@@ -7,7 +7,6 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.BEROctetStringGenerator;

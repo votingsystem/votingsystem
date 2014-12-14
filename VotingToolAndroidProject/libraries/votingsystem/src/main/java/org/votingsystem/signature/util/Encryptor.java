@@ -2,6 +2,7 @@ package org.votingsystem.signature.util;
 
 import android.util.Base64;
 import android.util.Log;
+
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
 import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
@@ -15,8 +16,13 @@ import org.bouncycastle2.cms.RecipientInformationStore;
 import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle2.crypto.BlockCipher;
 import org.bouncycastle2.crypto.DataLengthException;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
+import org.bouncycastle2.crypto.engines.AESEngine;
+import org.bouncycastle2.crypto.paddings.PKCS7Padding;
+import org.bouncycastle2.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
@@ -391,7 +397,7 @@ public class Encryptor {
         return plaintext;
     }
 
-    public String encryptAES(String messageToEncrypt, AESParams params) throws
+    public static String encryptAES(String messageToEncrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -400,16 +406,31 @@ public class Encryptor {
         return new String(org.bouncycastle2.util.encoders.Base64.encode(encryptedMessage));
     }
 
-    //decrypts base64 encoded AES message
-    public String decryptAES(String messageToDecrypt, AESParams params) throws
+    public static String decryptAES(String messageToDecrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, params.getKey(), params.getIV());
         byte[] encryptedMessageBytes = org.bouncycastle2.util.encoders.Base64.decode(
-                messageToDecrypt.getBytes());
+                messageToDecrypt.getBytes("UTF-8"));
         byte[] decryptedBytes = cipher.doFinal(encryptedMessageBytes);
         return new String(decryptedBytes, "UTF8");
     }
 
+    //decrypts base64 encoded AES message
+    public static String decryptAESPKCS7(String messageToDecrypt, AESParams params) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
+            UnsupportedEncodingException, InvalidCipherTextException {
+        BlockCipher AESCipher = new AESEngine();
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
+        KeyParameter key = new KeyParameter(params.getKey().getEncoded());
+        pbbc.init(false, key); //to encrypt put param to true
+        byte[] input = org.bouncycastle2.util.encoders.Base64.decode(
+                messageToDecrypt.getBytes("UTF-8"));
+        byte[] output = new byte[pbbc.getOutputSize(input.length)];
+        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
+        pbbc.doFinal(output, bytesWrittenOut);
+        return new String(output, "UTF-8");
+    }
 }

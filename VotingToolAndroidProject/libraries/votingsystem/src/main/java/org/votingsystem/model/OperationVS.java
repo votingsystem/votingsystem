@@ -59,6 +59,7 @@ public class OperationVS implements Parcelable {
     private String toUser;
     private String textToSign;
     private String subject;
+    private String UUID;
     private List<Header> headerList;
 
     public OperationVS() {}
@@ -180,6 +181,15 @@ public class OperationVS implements Parcelable {
         this.typeVS = typeVS;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public OperationVS setUUID(String UUID) {
+        this.UUID = UUID;
+        return this;
+    }
+
     public String[] getArgs() {
         return this.args;
     }
@@ -196,8 +206,9 @@ public class OperationVS implements Parcelable {
         return sessionId;
     }
     
-    public void setSessionId(String sessionId) {
+    public OperationVS setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     public void setUrlTimeStampServer(String urlTimeStampServer) {
@@ -249,10 +260,9 @@ public class OperationVS implements Parcelable {
         this.receiverName = receiverName;
     }
 
-    public static OperationVS parse (String operationStr) throws JSONException, ParseException {
-        if(operationStr == null) return null;
+
+    public static OperationVS parse (JSONObject operationJSON) throws JSONException, ParseException {
         OperationVS operation = new OperationVS();
-        JSONObject operationJSON = new JSONObject(operationStr);
         if (operationJSON.has("operation")) {
             operation.setTypeVS(TypeVS.valueOf(operationJSON.getString("operation")));
         }

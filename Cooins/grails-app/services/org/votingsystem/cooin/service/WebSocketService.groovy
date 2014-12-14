@@ -92,7 +92,8 @@ class WebSocketService {
             case TypeVS.MESSAGEVS_FROM_DEVICE:
                 if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
-                Session originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
+                Session originSession = SessionVSHelper.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
+                if(!originSession) originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
                 if(!originSession) {
                     processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
                                     "messagevsSignRequestorNotFound", null, locale)))
@@ -182,7 +183,8 @@ class WebSocketService {
                 if(!messageJSON.deviceId) throw new ExceptionVS("missing message 'deviceId'")
             }
             sessionVS = SessionVSHelper.getInstance().getAuthenticatedSession(session)
-            log.debug("sessiI id: ${session.getId()} - operatin : ${messageJSON?.operation}- remoteIp: ${remoteAddress.address} - last: ${last}")
+            log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - " +
+                    "remoteIp: ${remoteAddress.address} - last: ${last}")
         }
         JSONObject getResponse(Integer statusCode, String message){
             return getResponse(session.getId(), statusCode, operation, message);

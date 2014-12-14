@@ -33,10 +33,11 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
     @FXML private ProgressBar progressBar;
     @FXML private Label closeAdviceMsg;
     @FXML private VBox messageListPanel;
+    private static NotificationsDialog dialog;
 
     private static final Map<Notification, HBox> notificationMap = new HashMap<Notification, HBox>();
 
-    public NotificationsDialog() throws IOException {
+    private NotificationsDialog() throws IOException {
         super("/fxml/Inbox.fxml", StageStyle.DECORATED);
         getStage().setTitle(ContextVS.getMessage("notificationsCaption"));
         progressBar.setVisible(false);
@@ -66,7 +67,7 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
     public static void showDialog() {
         PlatformImpl.runLater(() -> {
             try {
-                NotificationsDialog dialog = new NotificationsDialog();
+                if(dialog == null) dialog = new NotificationsDialog();
                 dialog.show();
             } catch (Exception ex) { log.error(ex.getMessage(), ex); }
         });

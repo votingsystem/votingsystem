@@ -7,9 +7,9 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
+import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -55,7 +55,6 @@ public class SessionVSUtils {
     private JSONObject browserSessionDataJSON;
     private JSONObject sessionDataJSON;
     private static CountDownLatch countDownLatch;
-    private static WebSocketUtils.RequestBundle requestBundle;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
     private static final SessionVSUtils INSTANCE = new SessionVSUtils();
@@ -375,10 +374,10 @@ public class SessionVSUtils {
                 String deviceFromName = InetAddress.getLocalHost().getHostName();
                 String certPEM = mobileTokenJSON.getString("certPEM");
                 X509Certificate deviceToCert =  CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
-                requestBundle = WebSocketUtils.getSignRequest(deviceToId, deviceToName,
+                JSONObject jsonObject = WebSocketMessage.getSignRequest(deviceToId, deviceToName,
                     deviceFromName, toUser, textToSign, subject, ContextVS.getInstance().getLocale().getLanguage(),
                     deviceToCert, headers);
-                BrowserVS.getInstance().sendWebSocketMessage(requestBundle.getRequest().toString());
+                WebSocketService.getInstance().sendMessage(jsonObject.toString());
                 countDownLatch.await();
                 ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -397,7 +396,7 @@ public class SessionVSUtils {
                 break;
             case MESSAGEVS_FROM_DEVICE:
                 try {
-                    smimeMessage = message.getSignResponse(requestBundle);
+                    smimeMessage = message.getSMIME();
                     messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
                 } catch(Exception ex) {
                     log.error(ex.getMessage(), ex);

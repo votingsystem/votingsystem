@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import android.content.Context;
+
 import org.votingsystem.android.lib.R;
 
 public class NifUtils {

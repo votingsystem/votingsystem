@@ -26,7 +26,7 @@ import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
-import org.votingsystem.android.util.WebSocketRequest;
+import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
@@ -57,7 +57,7 @@ public class CooinFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketRequest request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case WEB_SOCKET_INIT:
@@ -73,9 +73,12 @@ public class CooinFragment extends Fragment {
                     break;
                 case MESSAGEVS_TO_DEVICE:
                     break;
-                default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                        responseVS.getCaption(), responseVS.getNotificationMessage(),
-                        getFragmentManager());
+                default:
+                    if(responseVS != null) {
+                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                                responseVS.getCaption(), responseVS.getNotificationMessage(),
+                                getFragmentManager());
+                    }
             }
         } else {
             setProgressDialogVisible(false, null, null);
@@ -85,7 +88,7 @@ public class CooinFragment extends Fragment {
                 case DEVICE_SELECT:
                     try {
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            JSONObject requestJSON = WebSocketRequest.getCooinWalletChangeRequest(
+                            JSONObject requestJSON = WebSocketMessage.getCooinWalletChangeRequest(
                                     responseVS.getMessageJSON(), contextVS, cooin);
                             responseVS = new ResponseVS(ResponseVS.SC_OK, requestJSON.toString());
                             Intent startIntent = new Intent(getActivity(), WebSocketService.class);

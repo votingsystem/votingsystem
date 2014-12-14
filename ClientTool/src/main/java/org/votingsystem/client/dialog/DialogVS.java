@@ -90,7 +90,12 @@ public class DialogVS {
     }
 
     public void hide() {
-        stage.getScene().getWindow().hide();
+        try {
+            stage.close();
+            this.finalize();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 
     class Delta { double x, y; }

@@ -71,7 +71,7 @@ public class BrowserVSPane extends StackPane {
         passwordVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #888;");
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
         capsLockPressedMessageText = new Text(ContextVS.getMessage("capsLockKeyPressed"));
@@ -100,7 +100,7 @@ public class BrowserVSPane extends StackPane {
         HBox footerButtonsBox = new HBox();
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(cancelButton, spacer, acceptButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));

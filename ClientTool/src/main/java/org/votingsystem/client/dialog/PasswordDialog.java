@@ -1,7 +1,8 @@
 package org.votingsystem.client.dialog;
 
+import com.sun.javafx.application.PlatformImpl;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -27,6 +28,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author jgzornoza
@@ -39,6 +41,7 @@ public class PasswordDialog {
     private Stage stage;
     private VBox dialogVBox;
     private Text messageText;
+    private Text timeLimitedMessageText;
     private Label capsLockPressedMessageLabel;
     private PasswordField password1Field;
     private Text password2Text;
@@ -58,8 +61,9 @@ public class PasswordDialog {
         dialogVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
-        VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;-fx-end-margin: 15;");
+        timeLimitedMessageText = new Text();
+        timeLimitedMessageText.setStyle("-fx-font-size: 14;-fx-font-weight: bold;-fx-fill: #888;-fx-end-margin: 5; -fx-start-margin: 5;");
         messageText.setTextAlignment(TextAlignment.CENTER);
 
         capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
@@ -103,7 +107,7 @@ public class PasswordDialog {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(cancelButton, spacer, acceptButton);
         VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
 
 
@@ -168,6 +172,10 @@ public class PasswordDialog {
         }
     }
 
+    public void close() {
+        stage.close();
+    }
+
 
     public void show(String mainMessage) {
         this.mainMessage = mainMessage;
@@ -180,11 +188,31 @@ public class PasswordDialog {
     }
 
     public void showWithoutPasswordConfirm(String mainMessage) {
+        showWithoutPasswordConfirm(mainMessage, null);
+    }
+
+    public void showWithoutPasswordConfirm(String mainMessage, final Integer visibilityInSeconds) {
         this.mainMessage = mainMessage;
         isWithPasswordConfirm = false;
         setMessage(mainMessage);
         if(dialogVBox.getChildren().contains(password2Text) && dialogVBox.getChildren().contains(password2Field)) {
             dialogVBox.getChildren().removeAll(password2Text, password2Field);
+        }
+        if(visibilityInSeconds != null) {
+            dialogVBox.getChildren().add(1, timeLimitedMessageText);
+            Task task = new Task() {
+                @Override protected Object call() throws Exception {
+                    AtomicInteger secondsOpened = new AtomicInteger(0);
+                    while(secondsOpened.get() < visibilityInSeconds) {
+                        PlatformImpl.runLater(() -> timeLimitedMessageText.setText(ContextVS.getMessage(
+                                "timeLimitedWebSocketMessage", visibilityInSeconds - secondsOpened.getAndIncrement())));
+                        Thread.sleep(1000);
+                    }
+                    PlatformImpl.runLater(() -> stage.close());
+                    return null;
+                }
+            };
+            new Thread(task).start();
         }
         stage.sizeToScene();
         stage.centerOnScreen();

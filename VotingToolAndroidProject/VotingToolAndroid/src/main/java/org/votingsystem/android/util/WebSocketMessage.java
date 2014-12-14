@@ -15,29 +15,29 @@ import org.votingsystem.model.Cooin;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DeviceUtils;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ResponseVS;
 
-import java.security.KeyPair;
-import java.security.PublicKey;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketRequest implements Parcelable {
+public class WebSocketMessage implements Parcelable {
 
-    private static final String TAG = WebSocketRequest.class.getSimpleName();
+    private static final String TAG = WebSocketMessage.class.getSimpleName();
 
     enum MessageVSState {PENDING}
 
@@ -45,36 +45,39 @@ public class WebSocketRequest implements Parcelable {
     private MessageVSBundle messageVSBundle;
     private Integer statusCode;
     private Long userId;
+    private String UUID;
     private String sessionId;
     private String caption;
     private String message;
     private String url;
+    private AESParams aesParams;
     private String serviceCaller = ContextVS.WEB_SOCKET_BROADCAST_ID;
     private OperationVS operationVS;
+    private JSONObject messageJSON;
 
-    public WebSocketRequest() {}
+    public WebSocketMessage() {}
 
-    public WebSocketRequest(Integer statusCode, String message, TypeVS typeVS) {
+    public WebSocketMessage(Integer statusCode, String message, TypeVS typeVS) {
         this.statusCode = statusCode;
         this.message = message;
         this.typeVS = typeVS;
     }
 
-    public static final Parcelable.Creator<WebSocketRequest> CREATOR =
-            new Parcelable.Creator<WebSocketRequest>() {
-                @Override public WebSocketRequest createFromParcel(Parcel source) {
-                    return new WebSocketRequest(source);
-                }
-                @Override public WebSocketRequest[] newArray(int size) {
-                    return new WebSocketRequest[size];
-                }
-            };
+    public static final Parcelable.Creator<WebSocketMessage> CREATOR =
+        new Parcelable.Creator<WebSocketMessage>() {
+            @Override public WebSocketMessage createFromParcel(Parcel source) {
+                return new WebSocketMessage(source);
+            }
+            @Override public WebSocketMessage[] newArray(int size) {
+                return new WebSocketMessage[size];
+            }
+        };
 
     @Override public int describeContents() {
         return 0;
     }
 
-    public WebSocketRequest(Parcel source) {
+    public WebSocketMessage(Parcel source) {
         // Must read values in the same order as they were placed in. The
         // generic 'readValues' instead of the typed vesions are for the null values
         typeVS = (TypeVS) source.readSerializable();
@@ -107,49 +110,85 @@ public class WebSocketRequest implements Parcelable {
         parcel.writeValue(serviceCaller);
     }
 
-    public static WebSocketRequest load(ResponseVS responseVS) {
-        WebSocketRequest result = new WebSocketRequest(responseVS.getStatusCode(),
+    public static WebSocketMessage load(ResponseVS responseVS) {
+        WebSocketMessage result = new WebSocketMessage(responseVS.getStatusCode(),
                 responseVS.getMessage(), responseVS.getTypeVS());
         result.setServiceCaller(responseVS.getServiceCaller());
         result.setCaption(responseVS.getCaption());
         return result;
     }
 
-    public static WebSocketRequest load(Integer statusCode, String serviceCaller, String caption,
+    public static WebSocketMessage load(Integer statusCode, String serviceCaller, String caption,
             String message, TypeVS typeVS) {
-        WebSocketRequest result = new WebSocketRequest(statusCode, message, typeVS);
+        WebSocketMessage result = new WebSocketMessage(statusCode, message, typeVS);
         result.setServiceCaller(serviceCaller);
         result.setCaption(caption);
         return result;
     }
 
-    public static WebSocketRequest parse(String message, AppContextVS appContextVS) {
+    public void setAESParams(AESParams aesParams) {
+        this.aesParams = aesParams;
+    }
+
+    public AESParams getAESParams() {
+        return aesParams;
+    }
+
+    public JSONObject getMessageJSON() {
+        return messageJSON;
+    }
+
+    public void setMessageJSON(JSONObject messageJSON) {
+        this.messageJSON = messageJSON;
+    }
+
+    public boolean isEncrypted() {
+        return messageJSON.has("encryptedMessage");
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public  WebSocketMessage (String message) {
         try {
-            JSONObject messageJSON = new JSONObject(message);
-            WebSocketRequest result = new WebSocketRequest();
+            messageJSON = new JSONObject(message);
+            if(messageJSON.has("UUID")) UUID = messageJSON.getString("UUID");
             if(messageJSON.has("operation"))
-                result.setTypeVS(TypeVS.valueOf(messageJSON.getString("operation")));
+                setTypeVS(TypeVS.valueOf(messageJSON.getString("operation")));
             if(messageJSON.has("statusCode"))
-                result.setStatusCode(messageJSON.getInt("statusCode"));
-            if(messageJSON.has("userId")) result.setUserId(messageJSON.getLong("userId"));
-            if(messageJSON.has("sessionId")) result.setSessionId(messageJSON.getString("sessionId"));
+                setStatusCode(messageJSON.getInt("statusCode"));
+            if(messageJSON.has("userId")) setUserId(messageJSON.getLong("userId"));
+            if(messageJSON.has("sessionId")) setSessionId(messageJSON.getString("sessionId"));
             if(messageJSON.has("messageVSDataMap"))
-                result.setMessageVSBundle(new MessageVSBundle(messageJSON.getJSONObject("messageVSDataMap")));
-            if(messageJSON.has("message")) result.setMessage(messageJSON.getString("message"));
-            if(messageJSON.has("URL")) result.setUrl(messageJSON.getString("URL"));
-            if(messageJSON.has("messageVSDataMap")) result.setMessageVSBundle(
+                setMessageVSBundle(new MessageVSBundle(messageJSON.getJSONObject("messageVSDataMap")));
+            if(messageJSON.has("message")) setMessage(messageJSON.getString("message"));
+            if(messageJSON.has("URL")) setUrl(messageJSON.getString("URL"));
+            if(messageJSON.has("messageVSDataMap")) setMessageVSBundle(
                     new MessageVSBundle(messageJSON.getJSONObject("messageVSDataMap")));
-            if(messageJSON.has("encryptedMessage")) {
-                byte[] decryptedBytes = appContextVS.decryptMessage(
-                        messageJSON.getString("encryptedMessage").getBytes());
-                OperationVS operationVS =  OperationVS.parse(new String(decryptedBytes, "UTF-8"));
-                operationVS.setSessionId(result.getSessionId());
-                result.setOperationVS(operationVS);
-            }
-            return result;
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new WebSocketRequest(ResponseVS.SC_ERROR, ex.getMessage(), null);
+        }
+    }
+
+    public void decryptMessage(AESParams aesParams) throws Exception {
+        if(messageJSON.has("encryptedMessage")) {
+            loadDecryptedJSON(new JSONObject(Encryptor.decryptAESPKCS7(
+                    messageJSON.getString("encryptedMessage"), aesParams)));
+        } else throw new ExceptionVS("encryptedMessage");
+    }
+
+    public byte[] getEncryptedMessage() throws JSONException {
+        return org.bouncycastle2.util.encoders.Base64.decode(
+                messageJSON.getString("encryptedMessage").getBytes());
+    }
+
+    public void loadDecryptedJSON(JSONObject decryptedJSON) throws JSONException, ParseException,
+            NoSuchAlgorithmException {
+        this.operationVS =  OperationVS.parse(decryptedJSON).setSessionId(
+                getSessionId()).setUUID(UUID);
+        if(decryptedJSON.has("aesParams")) {
+            this.aesParams = AESParams.load(decryptedJSON.getJSONObject("aesParams"));
         }
     }
 
@@ -293,30 +332,33 @@ public class WebSocketRequest implements Parcelable {
         return new JSONObject(result);
     }
 
-    public static JSONObject getSignResponse(Integer statusCode, String message, String sessionId,
-             PublicKey publicKey, SMIMEMessage smimeMessage, String locale) throws Exception {
+    public static JSONObject getSignResponse(Integer statusCode, String message,
+            OperationVS  operationVS, SMIMEMessage smimeMessage, AppContextVS contextVS) throws Exception {
         Map result = new HashMap();
-        result.put("sessionId", sessionId);
+        result.put("sessionId", operationVS.getSessionId());
         result.put("operation", TypeVS.MESSAGEVS_FROM_DEVICE.toString());
-        result.put("UUID", UUID.randomUUID().toString());
-        result.put("locale", locale);
+        result.put("UUID", operationVS.getUUID());
+        result.put("locale", contextVS.getResources().getConfiguration().locale.getLanguage());
         Map encryptedDataMap = new HashMap();
         encryptedDataMap.put("statusCode", statusCode);
         encryptedDataMap.put("message", message);
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
         encryptedDataMap.put("smimeMessage", Base64.encodeToString(smimeMessage.getBytes(), Base64.DEFAULT));
-        byte[] encryptedData = Encryptor.encryptToCMS(
-                new JSONObject(encryptedDataMap).toString().getBytes(), publicKey);
-        result.put("encryptedMessage", new String(encryptedData, "UTF_8"));
+        AESParams aesParams = contextVS.getSessionKey(operationVS.getUUID());
+        result.put("encryptedMessage", Encryptor.encryptAES(
+                new JSONObject(encryptedDataMap).toString(), aesParams));
         return new JSONObject(result);
     }
 
     //Base64.DEFAULT -> problems with Java 8 with
     public static JSONObject getCooinWalletChangeRequest(Long deviceToId, String deviceToName,
-            List<Cooin> cooinList,  String locale, X509Certificate deviceToCert) throws Exception {
+            List<Cooin> cooinList,  String locale, X509Certificate deviceToCert,
+            AppContextVS contextVS) throws Exception {
         Map messageToDevice = new HashMap<>();
+        String randomUUID = java.util.UUID.randomUUID().toString();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
-        messageToDevice.put("UUID", UUID.randomUUID().toString());
+        messageToDevice.put("timeLimited", true);
+        messageToDevice.put("UUID", randomUUID);
         messageToDevice.put("deviceToId", deviceToId);
         messageToDevice.put("deviceToName", deviceToName);
         messageToDevice.put("locale", locale);
@@ -325,9 +367,9 @@ public class WebSocketRequest implements Parcelable {
         encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
         List<Map> serializedCooinList = WalletUtils.getSerializedCertificationRequestList(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
-        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        encryptedDataMap.put("publicKey", new String(org.bouncycastle2.util.encoders.Base64.encode(
-                keyPair.getPublic().getEncoded()), "UTF-8"));
+        AESParams aesParams = new AESParams();
+        contextVS.putSessionKey(randomUUID, aesParams);
+        encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
         messageToDevice.put("encryptedMessage", Base64.encodeToString(encryptedRequestBytes,
@@ -339,10 +381,10 @@ public class WebSocketRequest implements Parcelable {
         AppContextVS contextVS, Cooin... cooins) throws Exception {
         X509Certificate deviceToCert = CertUtils.fromPEMToX509CertCollection(
                 deviceToJSON.getString("certPEM").getBytes()).iterator().next();
-        return WebSocketRequest.getCooinWalletChangeRequest(deviceToJSON.getLong("id"),
+        return WebSocketMessage.getCooinWalletChangeRequest(deviceToJSON.getLong("id"),
                 deviceToJSON.getString("deviceName"), Arrays.asList(cooins),
                 contextVS.getResources().getConfiguration().locale.getLanguage(),
-                deviceToCert);
+                deviceToCert, contextVS);
     }
 
 }

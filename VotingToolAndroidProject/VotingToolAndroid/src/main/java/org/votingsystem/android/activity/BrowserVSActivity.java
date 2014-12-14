@@ -136,7 +136,7 @@ public class BrowserVSActivity extends ActivityBase {
     @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
         LOGD(TAG + ".setJSONMessageToSignatureClient", "appMessage: " + appMessage);
         try {
-            operationVS = OperationVS.parse(appMessage);
+            operationVS = OperationVS.parse(new JSONObject(appMessage));
             switch(operationVS.getTypeVS()) {
                 case MESSAGEVS_GET:
                     sendMessageToWebSocketService(operationVS.getTypeVS(), operationVS.getDocument().toString());

@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author jgzornoza
@@ -87,7 +88,20 @@ public class Wallet {
     public static void saveToWallet(List<Map> serializedCooinList, String pin) throws Exception {
         JSONArray storedWalletJSON = getWallet(pin);
         storedWalletJSON.addAll(serializedCooinList);
-        saveWallet(storedWalletJSON, pin);
+        List<String> cooinHashList = new ArrayList<>();
+        JSONArray cooinsToSaveArray = new JSONArray();
+        long numCooins = (long) storedWalletJSON.stream().filter(cooin -> {
+            if (!cooinHashList.contains(((JSONObject) cooin).getString("hashCertVS"))) {
+                cooinsToSaveArray.add(cooin);
+                cooinHashList.add(((JSONObject) cooin).getString("hashCertVS"));
+                return true;
+            } else {
+                log.debug("repeated cooin: " + ((JSONObject) cooin).getString("hashCertVS"));
+                return false;
+            }
+        }).collect(Collectors.counting());
+        log.debug("saving " + numCooins + " cooins");
+        saveWallet(cooinsToSaveArray, pin);
     }
 
     public static void saveWallet(Object walletJSON, String pin) throws Exception {
