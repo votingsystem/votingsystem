@@ -303,6 +303,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 primaryStage.setY(mouseEvent.getScreenY() + dragDelta.y);
             });
         primaryStage.show();
+        BrowserVS.getInstance();
         NotificationService.getInstance().showIfPendingNotifications();
     }
 

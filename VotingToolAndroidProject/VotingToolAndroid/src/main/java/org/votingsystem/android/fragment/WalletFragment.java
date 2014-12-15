@@ -28,7 +28,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.util.MsgUtils;
-import org.votingsystem.android.util.WalletUtils;
+import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
@@ -68,7 +68,7 @@ public class WalletFragment extends Fragment {
                 switch(responseVS.getTypeVS()) {
                     case COOIN:
                         try {
-                            cooinList = WalletUtils.getCooinList(pin,
+                            cooinList = Wallet.getCooinList(pin,
                                     (AppContextVS) getActivity().getApplicationContext());
                             adapter.setItemList(cooinList);
                             adapter.notifyDataSetChanged();
@@ -118,7 +118,7 @@ public class WalletFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        cooinList = WalletUtils.getCooinList();
+        cooinList = Wallet.getCooinList();
         if(cooinList == null) {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
@@ -135,7 +135,7 @@ public class WalletFragment extends Fragment {
 
     private void printSummary() {
         LinearLayout summary = (LinearLayout) rootView.findViewById(R.id.summary);
-        Map<String, Map<String, Map>> currencyMap = WalletUtils.getCurrencyMap();
+        Map<String, Map<String, Map>> currencyMap = Wallet.getCurrencyMap();
         for(String currency : currencyMap.keySet()) {
             LinearLayout currencyData = (LinearLayout) getActivity().getLayoutInflater().inflate(
                     R.layout.wallet_currency_summary, null);

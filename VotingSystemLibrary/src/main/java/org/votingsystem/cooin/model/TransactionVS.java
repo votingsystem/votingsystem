@@ -323,8 +323,8 @@ public class TransactionVS  implements Serializable {
             String tag, UserVS userVS) {
         JSONObject result = new JSONObject();
         result.put("operation", TypeVS.COOIN_INIT_PERIOD.toString());
-        result.put("amount", amountResult.toPlainString());
-        result.put("timeLimitedNotExpended", timeLimitedNotExpended.toPlainString());
+        result.put("amount", amountResult.setScale(2, BigDecimal.ROUND_DOWN).toPlainString());
+        result.put("timeLimitedNotExpended", timeLimitedNotExpended.setScale(2, BigDecimal.ROUND_DOWN).toPlainString());
         result.put("tag", tag);
         result.put("toUserType", userVS.getType().toString());
         result.put("toUserId", userVS.getId());

@@ -15,7 +15,7 @@ import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Utils;
-import org.votingsystem.android.util.WalletUtils;
+import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
@@ -321,7 +321,7 @@ public class CooinService extends IntentService {
                 responseVS.setCaption(getString(R.string.cooin_request_ok_caption)).setNotificationMessage(
                         getString(R.string.cooin_request_ok_msg, cooinBatch.getTotalAmount(),
                         cooinBatch.getCurrencyCode()));
-                WalletUtils.saveCooinList(cooinBatch.getCooinsMap().values(), password, contextVS);
+                Wallet.saveCooinList(cooinBatch.getCooinsMap().values(), password, contextVS);
                 updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
                     R.string.cooin_request_error_caption));

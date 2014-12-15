@@ -51,7 +51,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     private transient PKCS10CertificationRequest csr;
     private transient SignedMailGenerator signedMailGenerator;
-    private KeyPair keyPair;
+    private transient KeyPair keyPair;
     private String hashPin;
     private String signatureMechanism;
     private X509Certificate certificate;
@@ -184,9 +184,7 @@ public class CertificationRequestVS implements java.io.Serializable {
                 Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
                 if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
                 certificate = certificates.iterator().next();
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
+            } catch(Exception ex) { ex.printStackTrace();  }
         }
         return certificate;
     }
@@ -230,9 +228,7 @@ public class CertificationRequestVS implements java.io.Serializable {
                 s.writeObject(null);
                 s.writeObject(null);
             }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch(Exception ex) { ex.printStackTrace(); }
     }
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
@@ -241,22 +237,18 @@ public class CertificationRequestVS implements java.io.Serializable {
         if(certificateBytes != null) {
             try {
                 certificate = CertUtils.loadCertificate(certificateBytes);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
+            } catch(Exception ex) { ex.printStackTrace(); }
         }
         try {
-            byte[] publicKeyBytes = (byte[]) s.readObject();
-            PublicKey publicKey =  KeyFactory.getInstance("RSA").generatePublic(
-                    new X509EncodedKeySpec(publicKeyBytes));
-            byte[] privateKeyBytes = (byte[]) s.readObject();
-            PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(
-                    new PKCS8EncodedKeySpec(privateKeyBytes));
+            Object temp = null;
+            PublicKey publicKey = null;
+            PrivateKey privateKey = null;
+            if((temp = s.readObject()) != null) publicKey =  KeyFactory.getInstance("RSA").
+                    generatePublic(new X509EncodedKeySpec((byte[]) temp));
+            if((temp = s.readObject()) != null) privateKey =  KeyFactory.getInstance("RSA").
+                    generatePrivate(new PKCS8EncodedKeySpec((byte[]) temp));
             if(privateKey != null && publicKey != null) keyPair = new KeyPair(publicKey, privateKey);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-
+        } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
     private PKCS10CertificationRequest getCsr() {

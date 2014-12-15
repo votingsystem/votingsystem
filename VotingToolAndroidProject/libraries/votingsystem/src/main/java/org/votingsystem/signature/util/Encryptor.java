@@ -20,6 +20,7 @@ import org.bouncycastle2.crypto.BlockCipher;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.crypto.engines.AESEngine;
+import org.bouncycastle2.crypto.modes.CBCBlockCipher;
 import org.bouncycastle2.crypto.paddings.PKCS7Padding;
 import org.bouncycastle2.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle2.crypto.params.KeyParameter;
@@ -29,8 +30,10 @@ import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,9 +52,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -102,6 +108,42 @@ public class Encryptor {
         baos.close();
 		return baos.toByteArray();
 	}
+
+    public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
+               PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {
+        byte[] messageBytes = null;
+        switch(encryptedBundleVS.getType()) {
+            case FILE:
+                messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
+                        publicKey, receiverPrivateKey);
+                encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
+                encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
+                break;
+            case SMIME_MESSAGE:
+                SMIMEMessage smimeMessage = decryptSMIME(encryptedBundleVS.getEncryptedMessageBytes(),
+                        receiverPrivateKey);
+                encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
+                encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessage);
+                break;
+            case TEXT:
+                messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
+                        publicKey, receiverPrivateKey);
+                encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
+                encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
+                break;
+        }
+        return encryptedBundleVS;
+    }
+
+    public static List<EncryptedBundleVS> decryptEncryptedBundleList(
+            List<EncryptedBundleVS> encryptedBundleVSList, PublicKey publicKey,
+            PrivateKey receiverPrivateKey) throws Exception {
+        List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
+        for(EncryptedBundleVS encryptedBundleVS : encryptedBundleVSList) {
+            result.add(decryptEncryptedBundle(encryptedBundleVS, publicKey, receiverPrivateKey));
+        }
+        return result;
+    }
 	
     public static byte[] encryptMessage(byte[] text, 
             X509Certificate receiverCert, Header... headers) throws Exception {
@@ -138,19 +180,6 @@ public class Encryptor {
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
         OutputStream out = dataStreamGen.open(bOut, new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
-        out.write(dataToEncrypt);
-        out.close();
-        return bOut.toByteArray();
-    }
-
-    public static byte[] encryptToCMS1(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
-        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-                "".getBytes(), receptorPublicKey).setProvider(ContextVS.PROVIDER));
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = dataStreamGen.open(bOut,
-                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
-                        setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
         return bOut.toByteArray();
@@ -292,11 +321,11 @@ public class Encryptor {
     //BC provider to avoid key length restrictions on normal jvm
     public static String encryptAES(String messageToEncrypt, AESParams aesParams) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException, InvalidCipherTextException {
-        BlockCipher AESCipher = new AESEngine();
-        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
+            UnsupportedEncodingException, InvalidCipherTextException {
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
         KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
-        CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
+        ParametersWithIV params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
         pbbc.init(true, params); //to decrypt put param to false
         byte[] input = messageToEncrypt.getBytes("UTF-8");
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
@@ -305,21 +334,21 @@ public class Encryptor {
         return new String(org.bouncycastle2.util.encoders.Base64.encode(output));
     }
 
-    //decrypts base64 encoded AES message
+    //BC provider to avoid key length restrictions on normal jvm
     public static String decryptAES(String messageToDecrypt, AESParams aesParams) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
             UnsupportedEncodingException, InvalidCipherTextException {
-        BlockCipher AESCipher = new AESEngine();
-        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
         KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
         CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
         pbbc.init(false, params); //to encrypt put param to true
-        byte[] input = org.bouncycastle2.util.encoders.Base64.decode(
-                messageToDecrypt.getBytes("UTF-8"));
+        byte[] input = org.bouncycastle2.util.encoders.Base64.decode(messageToDecrypt.getBytes("UTF-8"));
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
         int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
         pbbc.doFinal(output, bytesWrittenOut);
-        return new String(output, "UTF-8");
+        int i = output.length - 1; //remove padding
+        while (i >= 0 && output[i] == 0) { --i; }
+        return new String(Arrays.copyOf(output, i + 1), "UTF-8");
     }
 }

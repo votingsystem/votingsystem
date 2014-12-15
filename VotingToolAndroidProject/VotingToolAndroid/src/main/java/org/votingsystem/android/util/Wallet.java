@@ -1,25 +1,22 @@
 package org.votingsystem.android.util;
 
-import android.content.Context;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +24,9 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletUtilsEB {
+public class Wallet {
 
-    private static final String TAG = WalletUtilsEB.class.getSimpleName();
+    private static final String TAG = Wallet.class.getSimpleName();
 
     private static List<Cooin> cooinList = null;
 
@@ -38,7 +35,7 @@ public class WalletUtilsEB {
         else return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Cooin> getCooinList(String password, Context context) throws Exception {
+    public static List<Cooin> getCooinList(String password, AppContextVS context) throws Exception {
         JSONArray storedWalletJSON = getWallet(password, context);
         if(storedWalletJSON == null) cooinList = new ArrayList<Cooin>();
         else cooinList = getCooinListFromJSONArray(storedWalletJSON);
@@ -56,7 +53,7 @@ public class WalletUtilsEB {
     }
 
     public static void saveCooinList(Collection<Cooin> newCooinList, String password,
-            Context context) throws Exception {
+             AppContextVS context) throws Exception {
         Object wallet = getWallet(password, context);
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
@@ -65,8 +62,40 @@ public class WalletUtilsEB {
         for(Map cooin : serializedCooinList) {
             storedWalletJSON.put(new JSONObject(cooin));
         }
-        WalletUtilsEB.saveWallet(storedWalletJSON, password, context);
+        Wallet.saveWallet(storedWalletJSON, password, context);
         cooinList = getCooinListFromJSONArray(storedWalletJSON);
+    }
+
+    public static Map<String, Map<String, Map>> getCurrencyMap() {
+        Map<String, Map<String, Map>> result = new HashMap<String, Map<String, Map>>();
+        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        for(Cooin cooin:cooinList) {
+            if(result.containsKey(cooin.getCurrencyCode())) {
+                Map<String, Map> tagMap = result.get(cooin.getCurrencyCode());
+                if(tagMap.containsKey(cooin.getSignedTagVS())) {
+                    Map<String, BigDecimal> tagInfoMap = tagMap.get(cooin.getSignedTagVS());
+                    tagInfoMap.put("total", tagInfoMap.get("total").add(cooin.getAmount()));
+                    if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited",
+                            tagInfoMap.get("timeLimited").add(cooin.getAmount()));
+                    tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                } else {
+                    Map<String, BigDecimal> tagInfoMap = new HashMap<String, BigDecimal>();
+                    tagInfoMap.put("total", cooin.getAmount());
+                    if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited", cooin.getAmount());
+                    else tagInfoMap.put("timeLimited", BigDecimal.ZERO);
+                    tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                }
+            } else {
+                Map<String, Map> tagMap = new HashMap<String, Map>();
+                Map<String, BigDecimal> tagInfoMap = new HashMap<String, BigDecimal>();
+                tagInfoMap.put("total", cooin.getAmount());
+                if(timePeriod.inRange(cooin.getDateTo())) tagInfoMap.put("timeLimited", cooin.getAmount());
+                else tagInfoMap.put("timeLimited", BigDecimal.ZERO);
+                tagMap.put(cooin.getSignedTagVS(), tagInfoMap);
+                result.put(cooin.getCurrencyCode(), tagMap);
+            }
+        }
+        return result;
     }
 
     public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)
@@ -77,6 +106,20 @@ public class WalletUtilsEB {
             cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
             byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
             cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
+            result.add(cooinDataMap);
+        }
+        return result;
+    }
+
+    public static List<Map> getSerializedCertificationRequestList(Collection<Cooin> cooinCollection)
+            throws UnsupportedEncodingException {
+        List<Map> result = new ArrayList<Map>();
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(
+                    cooin.getCertificationRequest());
+            cooinDataMap.put("certificationRequest",
+                    new String(serializedCertificationRequest, "UTF-8"));
             result.add(cooinDataMap);
         }
         return result;
@@ -95,56 +138,40 @@ public class WalletUtilsEB {
         return jsonArray;
     }
 
-    public static JSONArray getWallet(String password, Context context) throws Exception {
+    public static JSONArray getWallet(String password, AppContextVS context) throws Exception {
         byte[] walletBytes = getWalletBytes(password, context);
         if(walletBytes == null) return null;
         else return new JSONArray(new String(walletBytes, "UTF-8"));
     }
 
-    private static byte[] getWalletBytes(String password, Context context) throws Exception {
-        //String storedPasswordHash = PrefUtils.getWalletPinHash(context);
-        String storedPasswordHash = null;
+    private static byte[] getWalletBytes(String password, AppContextVS context) throws Exception {
+        String storedPasswordHash = PrefUtils.getPinHash(context);
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
         try {
-            FileInputStream fis = context.openFileInput(ContextVS.WALLET_FILE_NAME);
-            byte[] encryptedWalletBytes = FileUtils.getBytesFromInputStream(fis);
-            JSONObject bundleJSON = new JSONObject(new String(encryptedWalletBytes, "UTF-8"));
-            EncryptedBundle bundle = EncryptedBundle.parse(bundleJSON);
-            return Encryptor.pbeAES_Decrypt(password, bundle);
+            String walletBase64 = PrefUtils.getWallet(context);
+            if(walletBase64 == null) return null;
+            else return context.decryptMessage(walletBase64.getBytes());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }
     }
 
-    public static void saveWallet(Object walletJSON, String password, Context context)
+    public static void saveWallet(Object walletJSON, String password, AppContextVS context)
             throws Exception {
-        //String storedPasswordHash = PrefUtils.getWalletPinHash(context);
-        String storedPasswordHash = null;
+        String storedPasswordHash = PrefUtils.getPinHash(context);
         String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
         if(!passwordHash.equals(storedPasswordHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
         if(walletJSON != null) {
-            FileOutputStream fos = context.openFileOutput(ContextVS.WALLET_FILE_NAME, Context.MODE_PRIVATE);
-            EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, walletJSON.toString().getBytes());
-            byte[] result = bundle.toJSON().toString().getBytes("UTF-8");
-            fos.write(result);
-            fos.close();
-        } else context.deleteFile(ContextVS.WALLET_FILE_NAME);
+            byte[] encryptedWalletBytes = Encryptor.encryptToCMS(
+                    walletJSON.toString().getBytes(), context.getX509UserCert());
+            PrefUtils.putWallet(encryptedWalletBytes, context);
+        } else PrefUtils.putWallet(null, context);
 
-    }
-
-    public static void changePin(String newPin, String oldPin, Context context)
-            throws ExceptionVS, NoSuchAlgorithmException {
-        /*String storedPinHash = PrefUtils.getWalletPinHash(context);
-        String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
-        if(!storedPinHash.equals(pinHash)) {
-            throw new ExceptionVS(context.getString(R.string.pin_error_msg));
-        }
-        PrefUtils.putWalletPin(newPin, context);*/
     }
 
 }

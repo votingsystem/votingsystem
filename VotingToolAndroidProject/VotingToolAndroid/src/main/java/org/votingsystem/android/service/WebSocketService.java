@@ -97,12 +97,12 @@ public class WebSocketService extends Service {
                 contextVS.sendWebSocketBroadcast(new WebSocketMessage(
                         ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), operationType));
             }
-            if(session == null || !session.isOpen()) {
-                WebSocketListener socketListener = new WebSocketListener(
-                        contextVS.getCooinServer().getWebSocketURL());
-                new Thread(null, socketListener, "websocket_service_thread").start();
-            }
             try {
+                if(session == null || !session.isOpen()) {
+                    WebSocketListener socketListener = new WebSocketListener(
+                            contextVS.getCooinServer().getWebSocketURL());
+                    new Thread(null, socketListener, "websocket_service_thread").start();
+                }
                 if(latch.getCount() > 0) {
                     LOGD(TAG + ".onStartCommand", "starting websocket session");
                     latch.await();

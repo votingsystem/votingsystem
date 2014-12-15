@@ -374,7 +374,7 @@ public class WebSocketMessage implements Parcelable {
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.COOIN_WALLET_CHANGE.toString());
         encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
-        List<Map> serializedCooinList = WalletUtils.getSerializedCertificationRequestList(cooinList);
+        List<Map> serializedCooinList = Wallet.getSerializedCertificationRequestList(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         AESParams aesParams = new AESParams();
         contextVS.putSessionKey(randomUUID, aesParams);

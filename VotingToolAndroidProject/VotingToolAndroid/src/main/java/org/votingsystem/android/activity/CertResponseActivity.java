@@ -26,7 +26,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.WalletUtils;
+import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -168,7 +168,7 @@ public class CertResponseActivity extends ActionBarActivity {
                         State.WITH_CERTIFICATE, user.getNif(), contextVS);
                 PrefUtils.putPin(Integer.valueOf(pin), contextVS);
                 if(wallet != null) {
-                    WalletUtils.saveWallet(wallet, pin, contextVS);
+                    Wallet.saveWallet(wallet, pin, contextVS);
                 }
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(user, this);
