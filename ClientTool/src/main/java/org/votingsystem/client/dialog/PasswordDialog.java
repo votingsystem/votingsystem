@@ -208,7 +208,7 @@ public class PasswordDialog {
                                 "timeLimitedWebSocketMessage", visibilityInSeconds - secondsOpened.getAndIncrement())));
                         Thread.sleep(1000);
                     }
-                    PlatformImpl.runLater(() -> stage.close());
+                    PlatformImpl.runLater(() -> {if(stage.isShowing()) stage.close();});
                     return null;
                 }
             };

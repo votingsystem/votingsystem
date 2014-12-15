@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -64,6 +66,20 @@ public class Wallet {
         }
         Wallet.saveWallet(storedWalletJSON, password, context);
         cooinList = getCooinListFromJSONArray(storedWalletJSON);
+    }
+
+    public static void removeCooinList(
+            Collection<Cooin> cooinListToRemove, AppContextVS context) throws Exception {
+        Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
+        for(Cooin cooin:cooinList) {
+            cooinMap.put(cooin.getHashCertVS(), cooin);
+        }
+        for(Cooin cooin : cooinListToRemove) {
+            if(cooinMap.remove(cooin.getHashCertVS()) != null)  LOGD(TAG +  ".removeCooinList",
+                    "removed cooin: " + cooin.getHashCertVS());
+        }
+        cooinList = new ArrayList<>(cooinMap.values());
+        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
     }
 
     public static Map<String, Map<String, Map>> getCurrencyMap() {
@@ -145,10 +161,12 @@ public class Wallet {
     }
 
     private static byte[] getWalletBytes(String password, AppContextVS context) throws Exception {
-        String storedPasswordHash = PrefUtils.getPinHash(context);
-        String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
-        if(!passwordHash.equals(storedPasswordHash)) {
-            throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+        if(password != null) {
+            String storedPasswordHash = PrefUtils.getPinHash(context);
+            String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
+            if(!passwordHash.equals(storedPasswordHash)) {
+                throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+            }
         }
         try {
             String walletBase64 = PrefUtils.getWallet(context);
@@ -161,10 +179,12 @@ public class Wallet {
 
     public static void saveWallet(Object walletJSON, String password, AppContextVS context)
             throws Exception {
-        String storedPasswordHash = PrefUtils.getPinHash(context);
-        String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
-        if(!passwordHash.equals(storedPasswordHash)) {
-            throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+        if(password != null) {
+            String storedPasswordHash = PrefUtils.getPinHash(context);
+            String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
+            if(!passwordHash.equals(storedPasswordHash)) {
+                throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+            }
         }
         if(walletJSON != null) {
             byte[] encryptedWalletBytes = Encryptor.encryptToCMS(

@@ -22,6 +22,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.WalletActivity;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.UIUtils;
@@ -57,7 +58,7 @@ public class CooinFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        WebSocketMessage socketMsg = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case WEB_SOCKET_INIT:
@@ -66,19 +67,31 @@ public class CooinFragment extends Fragment {
                     Utils.toggleWebSocketServiceConnection(contextVS);
                     break;
             }
-        } else if(request != null){
+        } else if(socketMsg != null){
             setProgressDialogVisible(false, null, null);
-            switch(request.getTypeVS()) {
+            switch(socketMsg.getTypeVS()) {
                 case INIT_VALIDATED_SESSION:
                     break;
                 case MESSAGEVS_TO_DEVICE:
                     break;
-                default:
-                    if(responseVS != null) {
-                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                                responseVS.getCaption(), responseVS.getNotificationMessage(),
+                case COOIN_WALLET_CHANGE:
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            getString(R.string.send_to_wallet),
+                            getString(R.string.item_sended_ok_msg),
+                            getActivity()).setPositiveButton(getString(R.string.accept_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    startActivity(new Intent(contextVS, WalletActivity.class));
+                                }
+                            });
+                        UIUtils.showMessageDialog(builder);
+                    } else MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
+                                getString(R.string.error_lbl), socketMsg.getMessage(),
                                 getFragmentManager());
-                    }
+                    break;
+                default:
+                    LOGD(TAG + ".broadcastReceiver", "socketMsg: " + socketMsg.getTypeVS());
             }
         } else {
             setProgressDialogVisible(false, null, null);

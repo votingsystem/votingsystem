@@ -18,6 +18,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.signature.util.SessionVS;
 import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ResponseVS;
@@ -43,7 +44,7 @@ public class WebSocketMessage implements Parcelable {
 
     private TypeVS typeVS;
     private MessageVSBundle messageVSBundle;
-    private Integer statusCode;
+    private Integer statusCode = ResponseVS.SC_PROCESSING;
     private Long userId;
     private String UUID;
     private String sessionId;
@@ -197,9 +198,10 @@ public class WebSocketMessage implements Parcelable {
             NoSuchAlgorithmException {
         this.operationVS =  OperationVS.parse(decryptedJSON).setSessionId(
                 getSessionId()).setUUID(UUID);
-        if(decryptedJSON.has("aesParams")) {
-            this.aesParams = AESParams.load(decryptedJSON.getJSONObject("aesParams"));
-        }
+        if(decryptedJSON.has("aesParams")) this.aesParams = AESParams.load(
+                decryptedJSON.getJSONObject("aesParams"));
+        if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
+        if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
     }
 
     public OperationVS getOperationVS() {
@@ -208,11 +210,6 @@ public class WebSocketMessage implements Parcelable {
 
     public void setOperationVS(OperationVS operationVS) {
         this.operationVS = operationVS;
-    }
-
-    public static JSONObject getResponseFromDevice() {
-        //request.messageJSON.sessionId
-        return null;
     }
 
     public TypeVS getTypeVS() {
@@ -300,6 +297,10 @@ public class WebSocketMessage implements Parcelable {
         }
     }
 
+    @Override public String toString() {
+        return this.getClass().getSimpleName() + " - " + getTypeVS() + " - " + UUID;
+    }
+
     public ResponseVS getNotificationResponse(Context context) {
         ResponseVS responseVS = new ResponseVS(statusCode, message);
         if(ResponseVS.SC_OK == statusCode) {
@@ -377,7 +378,7 @@ public class WebSocketMessage implements Parcelable {
         List<Map> serializedCooinList = Wallet.getSerializedCertificationRequestList(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         AESParams aesParams = new AESParams();
-        contextVS.putSessionKey(randomUUID, aesParams);
+        contextVS.putSessionVS(randomUUID, new SessionVS(aesParams, cooinList));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);

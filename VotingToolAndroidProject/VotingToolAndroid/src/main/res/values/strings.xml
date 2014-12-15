@@ -484,4 +484,5 @@
     <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el cooin</string>
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
+    <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
 </resources>

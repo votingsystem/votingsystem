@@ -130,7 +130,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            WebSocketMessage socketRequest = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+            WebSocketMessage socketMsg = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
@@ -141,13 +141,13 @@ public abstract class ActivityBase extends ActionBarActivity {
                                 Utils.toggleWebSocketServiceConnection(contextVS); }}).start();
                         break;
                 }
-            } else if(socketRequest != null) {
-                LOGD(TAG + ".broadcastReceiver", "WebSocketRequest typeVS: " + socketRequest.getTypeVS());
+            } else if(socketMsg != null) {
+                LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getTypeVS());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
                 setConnectionStatusUI();
-                if(ResponseVS.SC_ERROR == socketRequest.getStatusCode())
-                        MessageDialogFragment.showDialog(socketRequest.getStatusCode(),
-                                socketRequest.getCaption(), socketRequest.getMessage(),
+                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode())
+                        MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
+                                socketMsg.getCaption(), socketMsg.getMessage(),
                                 getSupportFragmentManager());
             }
         }

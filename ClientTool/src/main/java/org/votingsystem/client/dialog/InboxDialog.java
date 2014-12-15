@@ -92,7 +92,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         log.debug("removeMessage - operation: " + webSocketMessage.getOperation());
         messageMap.remove(webSocketMessage);
         InboxService.getInstance().removeMessage(webSocketMessage);
-        refreshView();
+        if(getStage().isShowing()) refreshView();
     }
 
     class EventBusMessageListener {

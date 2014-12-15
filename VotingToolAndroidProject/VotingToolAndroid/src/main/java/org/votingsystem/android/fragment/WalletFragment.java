@@ -189,19 +189,6 @@ public class WalletFragment extends Fragment {
         return true;
     }
 
-    @Override public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        Intent intent = activity.getIntent();
-        if(intent != null) {
-            String query = null;
-            if (Intent.ACTION_SEARCH.equals(intent)) {
-                query = intent.getStringExtra(SearchManager.QUERY);
-            }
-            LOGD(TAG + ".onAttach", "activity: " + activity.getClass().getName() +
-                    " - query: " + query + " - activity: ");
-        }
-    }
-
     public class CooinListAdapter  extends ArrayAdapter<Cooin> {
 
         private List<Cooin> itemList;
@@ -271,7 +258,7 @@ public class WalletFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 

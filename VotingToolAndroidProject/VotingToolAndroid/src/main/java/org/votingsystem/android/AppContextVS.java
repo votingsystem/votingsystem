@@ -21,6 +21,7 @@ import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
@@ -28,6 +29,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -35,6 +37,7 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.signature.util.SessionVS;
 import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -49,6 +52,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -76,7 +80,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private State state = State.WITHOUT_CSR;
     private WebSocketSession webSocketSession;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
-    private static final Map<String, AESParams> sessionKeys = new HashMap<String, AESParams>();
+    private static final Map<String, SessionVS> sessionsMap = new HashMap<String, SessionVS>();
     private AccessControlVS accessControl;
     private String accessControlURL;
     private ControlCenterVS controlCenter;
@@ -245,12 +249,12 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         } finally { return targetServer; }
     }
 
-    public void putSessionKey(String UUID, AESParams aesParams) {
-        sessionKeys.put(UUID, aesParams);
+    public void putSessionVS(String UUID, SessionVS session) {
+        sessionsMap.put(UUID, session);
     }
 
     public AESParams getSessionKey(String UUID) {
-        return sessionKeys.get(UUID);
+        return sessionsMap.get(UUID).getAESParams();
     }
 
     //http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
@@ -335,20 +339,20 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    public void sendWebSocketBroadcast(WebSocketMessage request) {
-        LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + request.getStatusCode() +
-            " - type: " + request.getTypeVS() + " - serviceCaller: " + request.getServiceCaller());
-        Intent intent =  new Intent(request.getServiceCaller());
-        intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
+    public void sendWebSocketBroadcast(WebSocketMessage socketMsg) {
+        LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
+            " - type: " + socketMsg.getTypeVS() + " - serviceCaller: " + socketMsg.getServiceCaller());
+        Intent intent =  new Intent(socketMsg.getServiceCaller());
+        intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, socketMsg);
         try {
-            switch(request.getTypeVS()) {
+            switch(socketMsg.getTypeVS()) {
                 case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == request.getStatusCode()) {
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                         try {
                             setWebSocketSession(new WebSocketSession(
-                                    request.getSessionId(), request.getUserId()));
+                                    socketMsg.getSessionId(), socketMsg.getUserId()));
                             WebSocketMessage.MessageVSBundle messageBundle =
-                                    request.getMessageVSBundle();
+                                    socketMsg.getMessageVSBundle();
                             if(messageBundle != null && messageBundle.getPendingMessages().length() > 0) {
                                 JSONArray messageVSList = messageBundle.getPendingMessages();
                                 if(messageVSList.length() > 0) {
@@ -365,26 +369,33 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case WEB_SOCKET_CLOSE:
-                    if(ResponseVS.SC_OK == request.getStatusCode()) setWebSocketSession(null);
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) setWebSocketSession(null);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_FROM_DEVICE:
-                    request.decryptMessage(sessionKeys.get(request.getUUID()));
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    socketMsg.decryptMessage(sessionsMap.get(socketMsg.getUUID()).getAESParams());
+                    sendWebSocketBroadcast(socketMsg);
                     break;
                 case MESSAGEVS_TO_DEVICE:
-                    if(request.isEncrypted()) {
-                        request.loadDecryptedJSON(new JSONObject(new String(decryptMessage(
-                                request.getEncryptedMessage()), "UTF-8")));
-                        sessionKeys.put(request.getUUID(), request.getAESParams());
-                        sendWebSocketBroadcast(request);
+                    if(socketMsg.isEncrypted()) {
+                        socketMsg.loadDecryptedJSON(new JSONObject(new String(decryptMessage(
+                                socketMsg.getEncryptedMessage()), "UTF-8")));
+                        sessionsMap.put(socketMsg.getUUID(), new SessionVS(socketMsg.getAESParams()));
+                        sendWebSocketBroadcast(socketMsg);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, request);
+                    intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, socketMsg);
                     startActivity(intent);
+                    break;
+                case COOIN_WALLET_CHANGE:
+                    SessionVS sessionVS = sessionsMap.get(socketMsg.getUUID());
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode() && sessionVS != null) {
+                        Wallet.removeCooinList((Collection<Cooin>) sessionVS.getData(), this);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    }
                     break;
             }
         } catch(Exception ex) {ex.printStackTrace();}

@@ -186,6 +186,10 @@ public class WebSocketMessage {
         this.aesParams = aesParams;
     }
 
+    public AESParams getAESParams() {
+        return  aesParams;
+    }
+
     public JSONObject getResponse(Integer statusCode, String message) throws Exception {
         Map result = new HashMap();
         result.put("sessionId", sessionId);
