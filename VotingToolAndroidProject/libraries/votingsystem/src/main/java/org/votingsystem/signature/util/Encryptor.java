@@ -17,23 +17,20 @@ import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle2.crypto.BlockCipher;
-import org.bouncycastle2.crypto.DataLengthException;
+import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.crypto.engines.AESEngine;
 import org.bouncycastle2.crypto.paddings.PKCS7Padding;
 import org.bouncycastle2.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle2.crypto.params.KeyParameter;
+import org.bouncycastle2.crypto.params.ParametersWithIV;
 import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,13 +49,9 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -83,19 +76,14 @@ public class Encryptor {
 	
 	public static final String TAG = Encryptor.class.getSimpleName();
 
-    private static final int ITERATION_COUNT = 1024;
-    private static final int KEY_LENGTH = 128; // 192 and 256 bits may not be available
-
 	private  Encryptor() { }
 	
-	public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
+	public static byte[] encryptSMIME(MimeMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
-		Log.d(TAG + ".encryptSMIMEFile ", " #### encryptSMIMEFile ");
-    	/* Create the encryptor */
+		Log.d(TAG + ".encryptSMIMEFile ", "receiver: " + receiverCert.getSubjectDN());
     	SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
     	encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
     			receiverCert).setProvider(ContextVS.PROVIDER));
-        /* Encrypt the message */
         MimeBodyPart encryptedPart = encryptor.generate(msgToEncrypt,
                 new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
@@ -103,20 +91,16 @@ public class Encryptor {
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
             String headerLine = (String)headers.nextElement();
-            Log.d(TAG + ".encryptSMIMEFile", " - headerLine: " + headerLine);
-            /* 
-             * Make sure not to override any content-* headers from the
-             * original message
-             */
+            Log.d(TAG + ".encryptSMIMEFile", "headerLine: " + headerLine);
+            //Make sure not to override any content-* headers from the original message
             if (!Strings.toLowerCase(headerLine).startsWith("content-")) {
             	encryptedPart.addHeaderLine(headerLine);
             }
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         encryptedPart.writeTo(baos);
-        byte[] result = baos.toByteArray();
         baos.close();
-		return result;
+		return baos.toByteArray();
 	}
 	
     public static byte[] encryptMessage(byte[] text, 
@@ -127,12 +111,11 @@ public class Encryptor {
 		MimeMessage mimeMessage = new MimeMessage(session);
 		mimeMessage.setText(new String(text));
         if (headers != null) {
-            for(Header header : headers) {
-                if(header != null) mimeMessage.setHeader(header.getName(), header.getValue());
+            for (Header header : headers) {
+                if (header != null) mimeMessage.setHeader(header.getName(), header.getValue());
             }
         }
-		// set the Date: header
-		//mimeMessage.setSentDate(new Date());
+		//mimeMessage.setSentDate(new Date());// set the Date: header
 		SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
 		encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
 		        receiverCert).setProvider(ContextVS.PROVIDER));
@@ -160,7 +143,7 @@ public class Encryptor {
         return bOut.toByteArray();
     }
 
-    public static byte[] encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+    public static byte[] encryptToCMS1(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
         dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
                 "".getBytes(), receptorPublicKey).setProvider(ContextVS.PROVIDER));
@@ -257,79 +240,14 @@ public class Encryptor {
         return result;
     }
 
-	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
-            PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {
-		byte[] messageBytes = null;
-		switch(encryptedBundleVS.getType()) {
-			case FILE:
-				messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
-                        publicKey, receiverPrivateKey);
-				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
-				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
-				break;
-			case SMIME_MESSAGE:
-				SMIMEMessage smimeMessage = decryptSMIME(encryptedBundleVS.getEncryptedMessageBytes(),
-                        receiverPrivateKey);
-				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
-				encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessage);
-				break;
-			case TEXT:
-				messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
-                        publicKey, receiverPrivateKey);
-				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
-				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
-				break;
-		}
-		return encryptedBundleVS;
-	}
-	
-	public static List<EncryptedBundleVS> decryptEncryptedBundleList(
-			List<EncryptedBundleVS> encryptedBundleVSList, PublicKey publicKey,
-			PrivateKey receiverPrivateKey) throws Exception {
-		List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
-		for(EncryptedBundleVS encryptedBundleVS : encryptedBundleVSList) {
-			result.add(decryptEncryptedBundle(encryptedBundleVS, publicKey, receiverPrivateKey));
-		}
-		return result;
-	}
-
-    /**
-     * http://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption?rq=1
-     * Share the password (a char[]) and salt (a byte[]—8 bytes selected by a SecureRandom makes a
-     * good salt—which doesn't need to be kept secret) with the recipient
-     */
-    public static Map encrypt(String textToEncrypt, char[] password, byte[] salt) throws
-            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-            BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException {
-        //Security.addProvider(new BouncyCastleProvider());
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        //byte[] salt = KeyGeneratorVS.INSTANCE.getEncryptionSalt();
-        KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
-                ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
-        /* Encrypt the message. */
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
-        AlgorithmParameters params = cipher.getParameters();
-        //send the encryptedText and the iv to the recipient.
-        Map responseMap = new HashMap();
-        byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
-        byte[] encryptedText = cipher.doFinal(textToEncrypt.getBytes(ContextVS.UTF_8));
-        responseMap.put("iv", iv);
-        responseMap.put("encryptedText", encryptedText);
-        responseMap.put("salt", salt);
-        return responseMap;
-    }
-
     public static EncryptedBundle pbeAES_Encrypt(String password, byte[] bytesToEncrypt)
             throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, InvalidParameterSpecException,
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ContextVS.
+                SYMETRIC_ENCRYPTION_ITERATION_COUNT, ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secret);
@@ -344,69 +262,23 @@ public class Encryptor {
             InvalidAlgorithmParameterException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.getSalt(), ITERATION_COUNT, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.getSalt(), ContextVS.
+                SYMETRIC_ENCRYPTION_ITERATION_COUNT, ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.getIV()));
         return cipher.doFinal(bundle.getCipherText());
     }
 
-    public static JSONObject getEncryptedJSONDataBundle(String textToEncrypt, char[] password,
-            byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-            BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException,
-            JSONException {
-        //byte[] salt = KeyGeneratorVS.INSTANCE.getEncryptionSalt();
-        Map encryptedDataMap = encrypt(textToEncrypt, password, salt);
-        byte[] iv = (byte[]) encryptedDataMap.get("iv");
-        String ivBase64 = Base64.encodeToString(iv, Base64.DEFAULT);
-        byte[] encryptedText = (byte[]) encryptedDataMap.get("encryptedText");
-        String encryptedTextBase64 = Base64.encodeToString(encryptedText, Base64.DEFAULT);
-        String saltBase64 = Base64.encodeToString(salt, Base64.DEFAULT);
-        JSONObject resultJSON = new JSONObject();
-        resultJSON.put("iv", ivBase64);
-        resultJSON.put("encryptedText", encryptedTextBase64);
-        resultJSON.put("salt", saltBase64);
-        return resultJSON;
-    }
-
-    public static String decryptDataBundle(JSONObject jsonData, char[] password) throws
-            DataLengthException, IllegalStateException, InvalidCipherTextException,
-            InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException,
-            UnsupportedEncodingException, InvalidAlgorithmParameterException, JSONException {
-        byte[] encryptedText = Base64.decode(jsonData.getString("encryptedText"), Base64.DEFAULT);
-        byte[] salt = Base64.decode(jsonData.getString("salt"), Base64.DEFAULT);
-        byte[] iv = Base64.decode(jsonData.getString("iv"), Base64.DEFAULT);
-        return decrypt(encryptedText, password, salt, iv);
-    }
-
-    public static String decrypt(byte[] encryptedTextBytes, char[] password, byte[] salt,
-            byte[] iv) throws DataLengthException, IllegalStateException, InvalidCipherTextException,
-            InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException,
-            UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
-                ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
-        /* Decrypt the message, given derived key and initialization vector. */
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
-        String plaintext = new String(cipher.doFinal(encryptedTextBytes), ContextVS.UTF_8);
-        return plaintext;
-    }
-
-    public static String encryptAES(String messageToEncrypt, AESParams params) throws
+    /*public static String encryptAES(String messageToEncrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, params.getKey(), params.getIV());
         byte[] encryptedMessage = cipher.doFinal(messageToEncrypt.getBytes("UTF-8"));
         return new String(org.bouncycastle2.util.encoders.Base64.encode(encryptedMessage));
-    }
+    }*/
 
-    public static String decryptAES(String messageToDecrypt, AESParams params) throws
+    /*public static String decryptAES(String messageToDecrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -415,17 +287,34 @@ public class Encryptor {
                 messageToDecrypt.getBytes("UTF-8"));
         byte[] decryptedBytes = cipher.doFinal(encryptedMessageBytes);
         return new String(decryptedBytes, "UTF8");
+    }*/
+
+    //BC provider to avoid key length restrictions on normal jvm
+    public static String encryptAES(String messageToEncrypt, AESParams aesParams) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException, InvalidCipherTextException {
+        BlockCipher AESCipher = new AESEngine();
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
+        KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
+        CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
+        pbbc.init(true, params); //to decrypt put param to false
+        byte[] input = messageToEncrypt.getBytes("UTF-8");
+        byte[] output = new byte[pbbc.getOutputSize(input.length)];
+        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
+        pbbc.doFinal(output, bytesWrittenOut);
+        return new String(org.bouncycastle2.util.encoders.Base64.encode(output));
     }
 
     //decrypts base64 encoded AES message
-    public static String decryptAESPKCS7(String messageToDecrypt, AESParams params) throws
+    public static String decryptAES(String messageToDecrypt, AESParams aesParams) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
             UnsupportedEncodingException, InvalidCipherTextException {
         BlockCipher AESCipher = new AESEngine();
         PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(AESCipher, new PKCS7Padding());
-        KeyParameter key = new KeyParameter(params.getKey().getEncoded());
-        pbbc.init(false, key); //to encrypt put param to true
+        KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
+        CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
+        pbbc.init(false, params); //to encrypt put param to true
         byte[] input = org.bouncycastle2.util.encoders.Base64.decode(
                 messageToDecrypt.getBytes("UTF-8"));
         byte[] output = new byte[pbbc.getOutputSize(input.length)];

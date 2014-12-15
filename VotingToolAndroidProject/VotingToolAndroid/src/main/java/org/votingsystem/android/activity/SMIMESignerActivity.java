@@ -126,8 +126,8 @@ public class SMIMESignerActivity extends ActionBarActivity {
             case R.id.reject_sign_request:
                 try {
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
-                    responseVS.setMessageJSON(request.getResponse(operationVS.getTypeVS(),
-                            ResponseVS.SC_ERROR, getString(R.string.reject_websocket_request_msg,
+                    responseVS.setMessageJSON(request.getResponse(ResponseVS.SC_ERROR,
+                            getString(R.string.reject_websocket_request_msg,
                             DeviceUtils.getDeviceName()), this));
                     launchService(responseVS, null);
                     this.finish();

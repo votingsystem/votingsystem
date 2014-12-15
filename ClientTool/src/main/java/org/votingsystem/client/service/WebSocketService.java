@@ -11,11 +11,11 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.client.util.WebSocketMessage;
 
 import javax.websocket.*;
 import java.io.IOException;

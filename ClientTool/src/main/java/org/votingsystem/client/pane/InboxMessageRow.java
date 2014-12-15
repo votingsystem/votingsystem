@@ -14,11 +14,11 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.CooinStatusChecker;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.client.util.WebSocketMessage;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -15,9 +15,9 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.client.util.WebSocketMessage;
 
 import java.io.IOException;
 import java.security.PrivateKey;

@@ -15,11 +15,11 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.client.util.WebSocketMessage;
 
 import javax.websocket.*;
 import java.net.URI;

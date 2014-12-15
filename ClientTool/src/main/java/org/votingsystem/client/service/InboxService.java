@@ -10,13 +10,14 @@ import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
-import org.votingsystem.client.util.WebSocketMessage;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**

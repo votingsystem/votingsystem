@@ -94,6 +94,12 @@ public class WebSocketMessage implements Parcelable {
         message = (String) source.readValue(String.class.getClassLoader());
         url = (String) source.readValue(String.class.getClassLoader());
         serviceCaller = (String) source.readValue(String.class.getClassLoader());
+        String aesParamsStr =  (String) source.readValue(String.class.getClassLoader());
+        if(aesParamsStr != null) {
+            try {
+                AESParams.load(new JSONObject(aesParamsStr));
+            } catch (Exception ex) {ex.printStackTrace();}
+        }
     }
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
@@ -108,6 +114,10 @@ public class WebSocketMessage implements Parcelable {
         parcel.writeValue(message);
         parcel.writeValue(url);
         parcel.writeValue(serviceCaller);
+        try {
+            if(aesParams != null) parcel.writeValue(aesParams.toJSON().toString());
+            else parcel.writeValue(null);
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 
     public static WebSocketMessage load(ResponseVS responseVS) {
@@ -173,7 +183,7 @@ public class WebSocketMessage implements Parcelable {
 
     public void decryptMessage(AESParams aesParams) throws Exception {
         if(messageJSON.has("encryptedMessage")) {
-            loadDecryptedJSON(new JSONObject(Encryptor.decryptAESPKCS7(
+            loadDecryptedJSON(new JSONObject(Encryptor.decryptAES(
                     messageJSON.getString("encryptedMessage"), aesParams)));
         } else throw new ExceptionVS("encryptedMessage");
     }
@@ -302,22 +312,21 @@ public class WebSocketMessage implements Parcelable {
         return responseVS;
     }
 
-    public JSONObject getResponse(TypeVS operationType, Integer statusCode, String message,
-            Context context) throws Exception {
+    public JSONObject getResponse(Integer statusCode, String message,Context context)
+            throws Exception {
         Map result = new HashMap();
         result.put("sessionId", operationVS.getSessionId());
         result.put("locale", context.getResources().getConfiguration().locale.getLanguage());
         if(operationVS.getPublicKey() != null) {
             result.put("operation", TypeVS.MESSAGEVS_FROM_DEVICE.toString());
-            Map dataToEncrypt = new HashMap();
-            dataToEncrypt.put("statusCode", statusCode);
-            dataToEncrypt.put("message", message);
-            dataToEncrypt.put("operation", operationType.toString());
-            byte[] encryptedData = Encryptor.encryptToCMS(
-                    new JSONObject(dataToEncrypt).toString().getBytes(), operationVS.getPublicKey());
-            result.put("encryptedMessage", new String(encryptedData, "UTF_8"));
+            Map encryptedDataMap = new HashMap();
+            encryptedDataMap.put("statusCode", statusCode);
+            encryptedDataMap.put("message", message);
+            encryptedDataMap.put("operation", operationVS.getTypeVS().toString());
+            result.put("encryptedMessage", Encryptor.encryptAES(
+                    new JSONObject(encryptedDataMap).toString(), aesParams));
         } else {
-            result.put("operation", operationType.toString());
+            result.put("operation", operationVS.getTypeVS().toString());
             result.put("statusCode", statusCode);
             result.put("message", message);
         }

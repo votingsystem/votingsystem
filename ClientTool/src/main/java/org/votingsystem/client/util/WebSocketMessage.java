@@ -13,15 +13,14 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.*;
@@ -208,19 +207,6 @@ public class WebSocketMessage {
         return (JSONObject) JSONSerializer.toJSON(result);
     }
 
-    public static JSONObject getSignRequest(Long deviceIdTo, String deviceIdFrom, String deviceName,
-                        byte[] encryptedBytes, String locale) {
-        Map messageToServiceMap = new HashMap<>();
-        messageToServiceMap.put("locale", locale);
-        messageToServiceMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
-        messageToServiceMap.put("deviceIdFrom", deviceIdFrom);
-        messageToServiceMap.put("deviceIdTo", deviceIdTo);
-        messageToServiceMap.put("deviceName", deviceName);
-        messageToServiceMap.put("encryptedMessage", Base64.getEncoder().encodeToString(encryptedBytes));
-        JSONObject messageToServiceJSON = (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
-        return messageToServiceJSON;
-    }
-
     public static JSONObject getSignRequest(Long deviceToId, String deviceToName, String deviceFromName,
                String toUser, String textToSign, String subject, String locale, X509Certificate deviceToCert,
                Header... headers) throws Exception {
@@ -259,18 +245,13 @@ public class WebSocketMessage {
     }
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
-        if(messageJSON.has("encryptedMessage")) {
-            byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("encryptedMessage").getBytes(),
-                    privateKey);
-            loadDecryptedContent((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes, "UTF-8")));
-        } else throw new ExceptionVS("missing encryptedMessage");
+        byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("encryptedMessage").getBytes(), privateKey);
+        loadDecryptedContent((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes, "UTF-8")));
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
-        if(messageJSON.has("encryptedMessage")) {
-            loadDecryptedContent((JSONObject) JSONSerializer.toJSON(Encryptor.decryptAES(
-                    messageJSON.getString("encryptedMessage"), aesParams)));
-        } else throw new ExceptionVS("missing encryptedMessage");
+        loadDecryptedContent((JSONObject) JSONSerializer.toJSON(Encryptor.decryptAES(
+                messageJSON.getString("encryptedMessage"), aesParams)));
     }
 
     private void loadDecryptedContent(JSONObject decryptedJSON) throws Exception {
