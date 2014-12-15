@@ -13,6 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
 import java.io.File;
@@ -49,7 +50,7 @@ public class HTMLMessageDialog {
         verticalBox.getChildren().addAll(webView, acceptButton);
         verticalBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

@@ -4,11 +4,14 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.sf.json.JSONArray;
@@ -18,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;
@@ -42,7 +46,9 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
  */
 public class Utils {
 
-    public static final String COLOR_BUTTON_OK = "#388746";
+    public static final String APPLICATION_ICON = "mail-mark-unread.png";
+
+    public static final String COLOR_BUTTON_OK = "#888";
     public static final String COLOR_RED = "#ba0011";
     public static final String COLOR_RED_DARK = "#6c0404";
     public static final String COLOR_YELLOW_ALERT = "#fa1";
@@ -96,6 +102,13 @@ public class Utils {
         return image;
     }
 
+    public static String getResource(String path) {
+        return VotingSystemApp.class.getResource(path).toExternalForm();
+    }
+
+    public static Image getImageFromResources(String imageFilename) {
+        return new Image(getResource("/images/" + imageFilename));
+    }
 
     public static Node createSpacer() {
         Region spacer = new Region();

@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -287,8 +288,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         mainBox.getStyleClass().add("modal-dialog");
         mainBox.setPrefWidth(550);
         primaryStage.setScene(new Scene(mainBox));
-        primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                "/css/modal-dialog.css").toExternalForm());
+        primaryStage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         // allow the UNDECORATED Stage to be dragged around.
@@ -302,6 +302,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 primaryStage.setX(mouseEvent.getScreenX() + dragDelta.x);
                 primaryStage.setY(mouseEvent.getScreenY() + dragDelta.y);
             });
+        primaryStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
         primaryStage.show();
         BrowserVS.getInstance();
         NotificationService.getInstance().showIfPendingNotifications();

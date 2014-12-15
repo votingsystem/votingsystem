@@ -73,7 +73,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
-        mobileDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.EXCHANGE, Utils.COLOR_BUTTON_OK));
+        mobileDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.EXCHANGE));
         mobileDeviceButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 MobileSelectorDialog.show(ContextVS.getMessage("setMobileSignatureMechanismMsg"),
@@ -102,7 +102,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         keyStoreVBox.getStyleClass().add("settings-vbox");
 
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
-        requestCertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE, Utils.COLOR_BUTTON_OK));
+        requestCertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         requestCertButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 if (ContextVS.getInstance().getAccessControl() != null) {
@@ -145,7 +145,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         gridPane.add(footerButtonsBox,0,7);
         gridPane.getStyleClass().add("modal-dialog");
         getStage().setScene(new Scene(gridPane, Color.TRANSPARENT));
-        getStage().getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
+        getStage().getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         gridPane.setMinWidth(600);
     }
 

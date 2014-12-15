@@ -90,17 +90,13 @@ public class Wallet {
         storedWalletJSON.addAll(serializedCooinList);
         List<String> cooinHashList = new ArrayList<>();
         JSONArray cooinsToSaveArray = new JSONArray();
-        long numCooins = (long) storedWalletJSON.stream().filter(cooin -> {
+        storedWalletJSON.stream().forEach(cooin -> {
             if (!cooinHashList.contains(((JSONObject) cooin).getString("hashCertVS"))) {
                 cooinsToSaveArray.add(cooin);
                 cooinHashList.add(((JSONObject) cooin).getString("hashCertVS"));
-                return true;
-            } else {
-                log.debug("repeated cooin: " + ((JSONObject) cooin).getString("hashCertVS"));
-                return false;
-            }
-        }).collect(Collectors.counting());
-        log.debug("saving " + numCooins + " cooins");
+            } else log.debug("repeated cooin: " + ((JSONObject) cooin).getString("hashCertVS"));
+        });
+        log.debug("saving " + cooinsToSaveArray.size() + " cooins");
         saveWallet(cooinsToSaveArray, pin);
     }
 

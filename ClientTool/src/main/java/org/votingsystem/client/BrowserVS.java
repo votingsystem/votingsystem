@@ -10,10 +10,7 @@ import javafx.concurrent.Worker;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebHistory;
@@ -174,11 +171,14 @@ public class BrowserVS extends Region implements WebKitHost {
         tabPainContainer.getChildren().addAll(tabPane, addButton);
         VBox.setVgrow(tabPainContainer, Priority.ALWAYS);
         mainVBox.getChildren().addAll(toolBar, tabPainContainer);
-        mainVBox.getStylesheets().add(((Object)this).getClass().getResource("/css/browservs.css").toExternalForm());
+        mainVBox.getStylesheets().add(Utils.getResource("/css/browservs.css"));
         browserHelper.getChildren().add(0, mainVBox);
         browserStage.setScene(new Scene(browserHelper));
         browserStage.setWidth(BROWSER_WIDTH);
         browserStage.setHeight(BROWSER_HEIGHT);
+        browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        locationField.setOnMouseClicked(event -> createHistoryMenu(((WebView)tabPane.getSelectionModel().getSelectedItem().
+                getContent())).show(locationField, Side.BOTTOM, 0, 0));
     }
 
     public WebView newTab(String URL, String tabCaption, String jsCommand) {
@@ -293,6 +293,25 @@ public class BrowserVS extends Region implements WebKitHost {
         log.debug("processSignalVS - caption: " + signalData.get("caption"));
         if(signalData.containsKey("caption")) tabPane.getSelectionModel().getSelectedItem().setText(
                 (String)signalData.get("caption"));
+    }
+
+
+    private ContextMenu createHistoryMenu(WebView webView) { // a menu of history items.
+        final ContextMenu historyMenu = new ContextMenu();
+        WebHistory history = webView.getEngine().getHistory();
+        // determine an appropriate subset range of the history list to display.
+        int minIdx = Math.max(0, history.getCurrentIndex() - 8); // min range (inclusive) of history items to show.
+        int maxIdx = Math.min(history.getEntries().size(), history.getCurrentIndex() + 6); // min range (exclusive) of history items to show.
+        // add menu items to the history list.
+        for (int i = maxIdx - 1; i >= minIdx; i--) {
+            final MenuItem nextMenuItem = new MenuItem(history.getEntries().get(i).getUrl());
+            nextMenuItem.setOnAction(actionEvent -> webView.getEngine().load(nextMenuItem.getText()));
+            historyMenu.getItems().add(nextMenuItem);
+            if (i == history.getCurrentIndex()) {
+                nextMenuItem.getStyleClass().add("current-menu");
+            }
+        }
+        return historyMenu;
     }
 
     public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,

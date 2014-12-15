@@ -149,7 +149,7 @@ public class CashDialogFragment extends DialogFragment {
             time_limited_checkbox = (CheckBox) view.findViewById(R.id.time_limited_checkbox);
             errorMsgTextView = (TextView) view.findViewById(R.id.errorMsg);
             horizontal_number_picker.setMaxValue(maxValue, currencyCode);
-            add_tag_btn = (Button) view.findViewById(R.id.add_tag_btn);
+       d     add_tag_btn = (Button) view.findViewById(R.id.add_tag_btn);
             add_tag_btn.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) { addTagClicked(); }
             });

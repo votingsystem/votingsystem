@@ -89,7 +89,7 @@ public class JSONFormDialog {
         mainBox.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(mainBox));
-        stage.getScene().getStylesheets().add(getClass().getResource("/css/modal-dialog.css").toExternalForm());
+        stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
         final Delta dragDelta = new Delta();

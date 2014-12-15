@@ -152,12 +152,9 @@ public class SignDocumentFormStackPane extends StackPane {
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         password2Text.setStyle("-fx-spacing: 50;");
-
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
-        passwordVBox.getStylesheets().add(getClass().getResource(
-                "/css/documentSignerPasswordDialog.css").toExternalForm());
-
+        passwordVBox.getStylesheets().add(Utils.getResource("/css/documentSignerPasswordDialog.css"));
         passwordVBox.getStyleClass().add("message-lbl-bold");
         passwordVBox.getStyleClass().add("modal-dialog");
         passwordVBox.setStyle("-fx-background-color: #f9f9f9; -fx-max-height:280px;-fx-max-width:350px;");

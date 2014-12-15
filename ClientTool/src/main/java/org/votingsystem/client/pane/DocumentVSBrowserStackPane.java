@@ -138,7 +138,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
     }
 
     public void init() {
-        getScene().getStylesheets().add(((Object)this).getClass().getResource("/css/cooin-pane.css").toExternalForm());
+        getScene().getStylesheets().add(Utils.getResource("/css/cooin-pane.css"));
     }
 
     private void goNext() {
