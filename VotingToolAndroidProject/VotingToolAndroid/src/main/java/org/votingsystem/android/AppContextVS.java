@@ -343,7 +343,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
             " - type: " + socketMsg.getTypeVS() + " - serviceCaller: " + socketMsg.getServiceCaller());
         Intent intent =  new Intent(socketMsg.getServiceCaller());
-        intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, socketMsg);
+        intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
         try {
             switch(socketMsg.getTypeVS()) {
                 case INIT_VALIDATED_SESSION:
@@ -387,7 +387,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_REQUEST_KEY, socketMsg);
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
                     startActivity(intent);
                     break;
                 case COOIN_WALLET_CHANGE:

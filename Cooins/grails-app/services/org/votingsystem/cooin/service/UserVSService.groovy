@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
@@ -109,10 +110,10 @@ class UserVSService {
                                      pemCert:new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8")])
             }
         }
-
         return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
                 IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), reason:userVS.reason,
-                description:userVS.description, certificateList:certificateList]
+                description:userVS.description, certificateList:certificateList,
+                connectedDevices:SessionVSManager.getInstance().connectedDeviceMap(userVS.id)]
     }
 
     @Transactional

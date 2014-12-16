@@ -4,7 +4,7 @@ import grails.converters.JSON
 import net.sf.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.cooin.model.MessageVS
-import org.votingsystem.cooin.websocket.SessionVSHelper
+import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.model.DeviceVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -33,7 +33,7 @@ class MessageVSController {
     }
 
     def connected() {
-        render SessionVSHelper.getInstance().getConnectedUsersDataMap() as JSON
+        render SessionVSManager.getInstance().getConnectedUsersDataMap() as JSON
         return false
     }
 
@@ -55,7 +55,7 @@ class MessageVSController {
             Map result = [status:ResponseVS.SC_NOT_FOUND, message:"No device connected with specified paramas" , params:params]
             render result as JSON
         } else {
-            SessionVSHelper.getInstance().sendMessage(userDeviceList, new JSONObject(
+            SessionVSManager.getInstance().sendMessage(userDeviceList, new JSONObject(
                     [status:ResponseVS.SC_OK, message:params.message, operation:TypeVS.MESSAGEVS_SIGN.toString()]).toString())
         }
         return false

@@ -58,7 +58,7 @@ public class CooinFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketMessage socketMsg = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        WebSocketMessage socketMsg = intent.getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case WEB_SOCKET_INIT:

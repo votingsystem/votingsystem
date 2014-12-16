@@ -13,7 +13,7 @@
     "**/.*"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.4.0",
+    "polymer": "Polymer/polymer#~0.5.2",
     "ckeditor":"ckeditor#~4.4.4"
   }
 }

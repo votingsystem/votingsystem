@@ -62,17 +62,15 @@ public class CooinAccountsFragment extends Fragment {
     private TextView last_request_date;
     private RecyclerView accounts_recycler_view;
     private String IBAN;
-    private String pin;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            pin = intent.getStringExtra(ContextVS.PIN_KEY);
             switch(responseVS.getTypeVS()) {
                 case COOIN_REQUEST:
-                    sendCooinRequest(pin);
+                    sendCooinRequest((String) responseVS.getData());
                     break;
                 case COOIN_SEND:
                     sendCooin();
@@ -136,7 +134,7 @@ public class CooinAccountsFragment extends Fragment {
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        rootView = inflater.inflate(R.layout.uservs_accounts, container, false);
+        rootView = inflater.inflate(R.layout.cooin_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         //https://developer.android.com/training/material/lists-cards.html
         accounts_recycler_view = (RecyclerView) rootView.findViewById(R.id.accounts_recycler_view);
@@ -322,7 +320,7 @@ public class CooinAccountsFragment extends Fragment {
         @Override public AccountVSInfoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                     int viewType) {
             View accountView = ((LayoutInflater) context.getSystemService(Context.
-                    LAYOUT_INFLATER_SERVICE)).inflate(R.layout.accountvs_card, parent, false);
+                    LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cooin_account_card, parent, false);
             return new ViewHolder(accountView);
         }
 

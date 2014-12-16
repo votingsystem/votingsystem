@@ -49,6 +49,8 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_gravity="center"
+            android:paddingRight="4dp"
+            android:paddingLeft="4dp"
             android:textSize="10sp"/>
     </LinearLayout>
 

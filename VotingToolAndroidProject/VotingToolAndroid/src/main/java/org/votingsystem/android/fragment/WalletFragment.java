@@ -1,7 +1,5 @@
 package org.votingsystem.android.fragment;
 
-import android.app.Activity;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,12 +61,11 @@ public class WalletFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) {
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case COOIN:
                         try {
-                            cooinList = Wallet.getCooinList(pin,
+                            cooinList = Wallet.getCooinList((String) responseVS.getData(),
                                     (AppContextVS) getActivity().getApplicationContext());
                             adapter.setItemList(cooinList);
                             adapter.notifyDataSetChanged();

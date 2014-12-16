@@ -8,7 +8,7 @@ import org.iban4j.Iban
 import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.cooin.util.LoggerVS
 import org.votingsystem.cooin.util.WebViewWrapper
-import org.votingsystem.cooin.websocket.SessionVSHelper
+import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils
@@ -74,7 +74,7 @@ class TestingController {
     }
 
     def broadcast() {
-        SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
+        SessionVSManager.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
         render "OK"
         return false
     }

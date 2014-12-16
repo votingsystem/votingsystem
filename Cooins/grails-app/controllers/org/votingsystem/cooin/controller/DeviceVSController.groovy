@@ -2,7 +2,7 @@ package org.votingsystem.cooin.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.votingsystem.cooin.websocket.SessionVSHelper
+import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.model.DeviceVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtils
@@ -42,7 +42,7 @@ class DeviceVSController {
         }
         List result = []
         for(DeviceVS deviceVS : deviceVSList) {
-            if(SessionVSHelper.getInstance().get(deviceVS.id)) {
+            if(SessionVSManager.getInstance().get(deviceVS.id)) {
                 String deviceName = deviceVS.deviceName ? deviceVS.deviceName : "${deviceVS.type.toString()} - $deviceVS.email"
                 X509Certificate certX509 = CertUtils.loadCertificate (deviceVS.certificateVS.content)
                 result.add([id:deviceVS.id, deviceName:deviceName, certPEM:new String(CertUtils.getPEMEncoded(certX509), "UTF-8")])

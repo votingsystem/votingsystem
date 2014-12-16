@@ -53,7 +53,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         LOGD(TAG + ".broadcastReceiver",
                 "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService(null, operationVS);
@@ -90,7 +90,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         contextVS = (AppContextVS) getApplicationContext();
-        request =  getIntent().getParcelableExtra(ContextVS.WEBSOCKET_REQUEST_KEY);
+        request =  getIntent().getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         operationVS = request.getOperationVS();
         webView = (WebView) findViewById(R.id.smime_signed_content);
         try {

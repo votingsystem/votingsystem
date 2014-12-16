@@ -14,7 +14,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.MessageVS
 import org.votingsystem.cooin.websocket.SessionVS
-import org.votingsystem.cooin.websocket.SessionVSHelper
+import org.votingsystem.cooin.websocket.SessionVSManager
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
@@ -48,12 +48,12 @@ class WebSocketService {
     }
 
     public void onOpen(Session session) {
-        SessionVSHelper.getInstance().put(session)
+        SessionVSManager.getInstance().put(session)
     }
 
     public void onClose(Session session, CloseReason closeReason) {
         log.debug("onClose - session id: ${session.getId()} - closeReason: ${closeReason}")
-        SessionVSHelper.getInstance().remove(session)
+        SessionVSManager.getInstance().remove(session)
     }
 
     public void processRequest(WebSocketRequest request) {
@@ -82,7 +82,7 @@ class WebSocketService {
                 processResponse(request.messageJSON)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
-                if(SessionVSHelper.getInstance().sendMessageToDevice(Long.valueOf(
+                if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
                     processResponse(request.getResponse(ResponseVS.SC_OK, null))
                 } else processResponse(request.getResponse(ResponseVS.SC_ERROR,
@@ -92,8 +92,8 @@ class WebSocketService {
             case TypeVS.MESSAGEVS_FROM_DEVICE:
                 if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
-                Session originSession = SessionVSHelper.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
-                if(!originSession) originSession = SessionVSHelper.getInstance().getSession(request.messageJSON.sessionId)
+                Session originSession = SessionVSManager.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
+                if(!originSession) originSession = SessionVSManager.getInstance().getSession(request.messageJSON.sessionId)
                 if(!originSession) {
                     processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
                                     "messagevsSignRequestorNotFound", null, locale)))
@@ -110,7 +110,7 @@ class WebSocketService {
                 ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
-                    SessionVSHelper.getInstance().putAuthenticatedDevice(request.session, userVS)
+                    SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
                     request.messageJSON.userId = userVS.id
                     request.messageJSON.messageVSDataMap = [(MessageVS.State.PENDING.toString()):
                                 messageVSService.getMessageList(userVS, MessageVS.State.PENDING)]
@@ -131,24 +131,24 @@ class WebSocketService {
     }
 
     public void broadcast(JSONObject messageJSON) {
-        SessionVSHelper.getInstance().broadcast(messageJSON)
+        SessionVSManager.getInstance().broadcast(messageJSON)
     }
 
     public void broadcastToAuthenticatedUsers(JSONObject messageJSON) {
-        SessionVSHelper.getInstance().broadcastToAuthenticatedUsers(messageJSON)
+        SessionVSManager.getInstance().broadcastToAuthenticatedUsers(messageJSON)
     }
 
     public ResponseVS broadcastList(Map dataMap, Set<String> listeners) {
-        return SessionVSHelper.getInstance().broadcastList(dataMap, listeners)
+        return SessionVSManager.getInstance().broadcastList(dataMap, listeners)
     }
 
     public ResponseVS broadcastAuthenticatedList(Map dataMap, Set<String> listeners) {
-        return SessionVSHelper.getInstance().broadcastAuthenticatedList(dataMap, listeners)
+        return SessionVSManager.getInstance().broadcastAuthenticatedList(dataMap, listeners)
     }
 
     public void processResponse(JSONObject messageJSON) {
         log.debug("processResponse - messageJSON: ${messageJSON.message}")
-        SessionVSHelper.getInstance().sendMessage(((String)messageJSON.sessionId), messageJSON.toString());
+        SessionVSManager.getInstance().sendMessage(((String)messageJSON.sessionId), messageJSON.toString());
     }
 
     public JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
@@ -182,7 +182,7 @@ class WebSocketService {
             if(TypeVS.MESSAGEVS_SIGN == operation) {
                 if(!messageJSON.deviceId) throw new ExceptionVS("missing message 'deviceId'")
             }
-            sessionVS = SessionVSHelper.getInstance().getAuthenticatedSession(session)
+            sessionVS = SessionVSManager.getInstance().getAuthenticatedSession(session)
             log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - " +
                     "remoteIp: ${remoteAddress.address} - last: ${last}")
         }

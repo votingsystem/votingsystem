@@ -6,26 +6,27 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
-
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.stream.Collectors;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SessionVSHelper {
+public class SessionVSManager {
 
-    private static Logger log = Logger.getLogger(SessionVSHelper.class);
+    private static Logger log = Logger.getLogger(SessionVSManager.class);
 
     private static final ConcurrentHashMap<String, Session> sessionMap = new ConcurrentHashMap<String, Session>();
     private static final ConcurrentHashMap<String, SessionVS> authenticatedSessionMap = new ConcurrentHashMap<String, SessionVS>();
     private static final ConcurrentHashMap<Long, String> deviceSessionMap = new ConcurrentHashMap<Long, String>();
-    private static final SessionVSHelper instance = new SessionVSHelper();
+    private static final SessionVSManager instance = new SessionVSManager();
+    private static final ConcurrentHashMap<Long, Set<DeviceVS>> connectedUserVSDeviceMap = new ConcurrentHashMap<Long, Set<DeviceVS>>();
 
-    private SessionVSHelper() { }
+    private SessionVSManager() { }
 
     public void put(Session session) {
         if(!sessionMap.containsKey(session.getId())) {
@@ -40,6 +41,9 @@ public class SessionVSHelper {
         if(sessionVS == null) {
             authenticatedSessionMap.put(session.getId(), new SessionVS(session, userVS));
             deviceSessionMap.put(userVS.getDeviceVS().getId(), session.getId());
+            if(connectedUserVSDeviceMap.containsKey(userVS.getId())) {
+                connectedUserVSDeviceMap.get(userVS.getId()).add(userVS.getDeviceVS());
+            } else connectedUserVSDeviceMap.put(userVS.getId(), new HashSet<DeviceVS>(Arrays.asList(userVS.getDeviceVS())));
         } else log.debug("put - session already in authenticatedSessionMap");
     }
 
@@ -48,11 +52,17 @@ public class SessionVSHelper {
     }
 
     public Collection<Long> getAuthenticatedUsers() {
-        Set<Long> result = new HashSet();
-        for(Long deviceId : deviceSessionMap.keySet()) {
-            result.add(authenticatedSessionMap.get(deviceSessionMap.get(deviceId)).getUserVS().getId());
-        }
-        return result;
+        return Collections.list(connectedUserVSDeviceMap.keys());
+    }
+
+    public Set<Map> connectedDeviceMap(Long userId) {
+        if(!connectedUserVSDeviceMap.containsKey(userId)) return new HashSet<>();
+        else return connectedUserVSDeviceMap.get(userId).stream().map(d -> {
+                Map<String, Object> result = new HashMap<String, Object>();
+                result.put("id", d.getId());
+                result.put("name", d.getDeviceName());
+                return result;
+            }).collect(Collectors.toSet());
     }
 
     public Map<Long, Set> getConnectedUsersDataMap() {
@@ -84,15 +94,21 @@ public class SessionVSHelper {
         log.debug("remove - session id: " + session.getId());
         if(sessionMap.containsKey(session.getId())) sessionMap.remove(session.getId());
         if(authenticatedSessionMap.containsKey(session.getId())) {
-            authenticatedSessionMap.remove(session.getId());
+            SessionVS removedSessionVS = authenticatedSessionMap.remove(session.getId());
             if(deviceSessionMap.containsValue(session.getId())) {
                 while (deviceSessionMap.values().remove(session.getId()));
+            }
+            if(connectedUserVSDeviceMap.containsKey(removedSessionVS.getUserVS().getId())) {
+                connectedUserVSDeviceMap.replace(removedSessionVS.getUserVS().getId(), connectedUserVSDeviceMap.get(
+                        removedSessionVS.getUserVS().getId()).stream().filter(d -> {
+                        if(removedSessionVS.getUserVS().getDeviceVS().getId() == d.getId()) return false;
+                        else return true; }).collect(toSet()));
             }
         }
         try {session.close();} catch (Exception ex) {}
     }
 
-    public static SessionVSHelper getInstance() {
+    public static SessionVSManager getInstance() {
         return instance;
     }
 

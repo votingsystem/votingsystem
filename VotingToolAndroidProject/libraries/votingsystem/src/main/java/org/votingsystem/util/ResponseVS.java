@@ -431,4 +431,8 @@ public class ResponseVS<T> implements Parcelable {
         this.url = url;
     }
 
+    @Override public String toString() {
+        return this.getClass().getSimpleName() + " - statusCode: " + statusCode +
+                " - typeVS:" + typeVS;
+    }
 }

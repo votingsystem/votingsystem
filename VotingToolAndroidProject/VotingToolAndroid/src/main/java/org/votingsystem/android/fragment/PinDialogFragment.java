@@ -252,7 +252,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
             if(dialogCaller != null) {
                 Intent intent = new Intent(dialogCaller);
-                intent.putExtra(ContextVS.PIN_KEY, pin);
+                intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
                 intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
                 ResponseVS responseVS = new ResponseVS(typeVS, pin);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
