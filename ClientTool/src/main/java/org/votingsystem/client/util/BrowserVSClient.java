@@ -80,10 +80,6 @@ public class BrowserVSClient {
                 case SAVE_SMIME_ANONYMOUS_DELEGATION:
                     Utils.saveReceiptAnonymousDelegation(operationVS, BrowserVS.getInstance());
                     break;
-                case MESSAGEVS_GET:
-                    JSONObject documentJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocument());
-                    WebSocketServiceAuthenticated.getInstance().sendMessage(documentJSON.toString());
-                    break;
                 case CERT_USER_NEW:
                     BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                     break;

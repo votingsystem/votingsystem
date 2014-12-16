@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -19,6 +20,7 @@ import org.votingsystem.util.ObjectUtils;
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -211,22 +213,21 @@ public class WebSocketMessage {
         return (JSONObject) JSONSerializer.toJSON(result);
     }
 
-    public static JSONObject getSignRequest(Long deviceToId, String deviceToName, String deviceFromName,
-               String toUser, String textToSign, String subject, String locale, X509Certificate deviceToCert,
-               Header... headers) throws Exception {
+    public static JSONObject getSignRequest(Long deviceToId, String deviceToName, String toUser, String textToSign,
+            String subject, X509Certificate deviceToCert, Header... headers) throws Exception {
         Map messageToDevice = new HashMap<>();
-        String randomUUID = java.util.UUID.randomUUID().toString();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
         messageToDevice.put("deviceToId", deviceToId);
         messageToDevice.put("deviceToName", deviceToName);
-        messageToDevice.put("locale", locale);
+        messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        String randomUUID = java.util.UUID.randomUUID().toString();
+        messageToDevice.put("UUID", randomUUID);
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
-        encryptedDataMap.put("deviceFromName", deviceFromName);
+        encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("textToSign", textToSign);
         encryptedDataMap.put("subject", subject);
-        messageToDevice.put("UUID", randomUUID);
         if(headers != null) {
             JSONArray headersArray = new JSONArray();
             for(Header header : headers) {
@@ -240,10 +241,32 @@ public class WebSocketMessage {
             encryptedDataMap.put("headers", headersArray);
         }
         AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putSessionKey(randomUUID, aesParams);
+        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(aesParams, null, null));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceToCert);
+        messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
+        return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+    }
+
+    public static JSONObject getMessageVSToDevice(DeviceVS deviceVS, String toUser, String textToEncrypt) throws Exception {
+        Map messageToDevice = new HashMap<>();
+        messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("deviceToId", deviceVS.getId());
+        messageToDevice.put("deviceToName", deviceVS.getDeviceName());
+        messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        String randomUUID = java.util.UUID.randomUUID().toString();
+        messageToDevice.put("UUID", randomUUID);
+        Map encryptedDataMap =  new HashMap<>();
+        encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
+        encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
+        encryptedDataMap.put("toUser", toUser);
+        encryptedDataMap.put("textToSign", textToEncrypt);
+        AESParams aesParams = new AESParams();
+        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(aesParams, deviceVS, null));
+        encryptedDataMap.put("aesParams", aesParams.toJSON());
+        byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
+                JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
         return (JSONObject) JSONSerializer.toJSON(messageToDevice);
     }

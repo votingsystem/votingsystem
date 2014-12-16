@@ -137,21 +137,10 @@ public class WebSocketService extends Service<ResponseVS> {
                     " - status: " + message.getStatusCode());
             switch(message.getOperation()) {
                 case MESSAGEVS_SIGN:
-                case MESSAGEVS_EDIT:
                     if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
                             message.getStatusCode(), message.getMessage());
-                case MESSAGEVS_GET:
-                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                            message.getStatusCode(), message.getMessage());
-                    else {
-                        Platform.runLater(new Runnable() {
-                            @Override public void run() {
-                                log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
-                                BrowserVS.getInstance().execCommandJSCurrentView("alert('" + message.getMessage() + "')");
-                                //browserVS.executeScript("updateMessageVSList(" + message + ")");
-                            }
-                        });
-                    }
+                    else Platform.runLater(() -> BrowserVS.getInstance().execCommandJSCurrentView(
+                                "alert('" + message.getMessage() + "')"));
                     break;
             }
             if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {

@@ -29,6 +29,7 @@ import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
@@ -69,7 +70,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
-    private static final Map<String, AESParams> sessionKeys = new HashMap<String, AESParams>();
+    private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
 
     static {
         //Without this WebView always send requests with 'en-us,en;q=0.5'
@@ -126,12 +127,12 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
     }
 
-    public void putSessionKey(String UUID, AESParams aesParams) {
-        sessionKeys.put(UUID, aesParams);
+    public void putSession(String UUID, WebSocketSession session) {
+        sessionMap.put(UUID, session);
     }
 
     public AESParams getSessionKeys(String UUID) {
-        return sessionKeys.get(UUID);
+        return sessionMap.get(UUID).getAESParams();
     }
 
     @Override public void stop() {

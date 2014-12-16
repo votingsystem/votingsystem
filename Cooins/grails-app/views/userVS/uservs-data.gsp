@@ -3,7 +3,7 @@
 <vs:webresource dir="core-ajax" file="core-ajax.html"/>
 <vs:webresource dir="core-animated-pages" file="core-animated-pages.html"/>
 <vs:webcomponent path="/transactionVS/transactionvs-form"/>
-<vs:webcomponent path="/messageVS/messagevs-send-dialog"/>
+<vs:webcomponent path="/element/messagevs-send-dialog"/>
 <vs:webcomponent path="/transactionVS/transactionvs-table"/>
 
 <polymer-element name="uservs-data" attributes="messageToUser">
@@ -41,10 +41,9 @@
                     <template if="{{uservs.state != 'ACTIVE'}}">
                         <div class="uservsCancelled">{{uservs.state}}</div>
                     </template>
-
                     <template if="{{uservs.state == 'ACTIVE'}}">
                         <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                            <div style="display: {{isClientToolConnected && uservs.connectedDevices.length > 0?'block':'none'}}"
+                            <div style="display: {{true && uservs.connectedDevices.length > 0?'block':'none'}}"
                                  class="linkVS" on-click="{{showMessageVSDialog}}">
                                 <i class="fa fa-envelope-o"></i> <g:message code="sendMessageVSLbl"/>
                             </div>
@@ -97,7 +96,6 @@
         menuType:null,
         uservsType:'',
         isClientToolConnected:false,
-        sendMessageTemplateMsg:"<g:message code="uservsMessageVSLbl"/>",
         publish: {
             userVSData: {}
         },
@@ -147,8 +145,7 @@
             }
         },
         showMessageVSDialog: function () {
-            this.$.sendMessageDialog.show(this.uservs.nif, this.sendMessageTemplateMsg.format(this.uservs.name),
-                    this.uservs.certificateList)
+            this.$.sendMessageDialog.show(this.uservs.nif, this.uservs.certificateList)
         },
         sendMessageDialogResponse:function(e) {
             var appMessageJSON = JSON.parse(e.detail)

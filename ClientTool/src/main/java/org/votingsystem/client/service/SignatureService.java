@@ -22,6 +22,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -86,7 +87,6 @@ public class SignatureService extends Service<ResponseVS> {
                         }
                         break;
                     case COOIN_DELETE:
-                    case MESSAGEVS_DECRYPT:
                         responseVS = new ResponseVS(ResponseVS.SC_OK);
                         break;
                     default:
@@ -125,9 +125,6 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case MESSAGEVS:
                             responseVS = sendMessageVS(operationVS);
-                            break;
-                        case MESSAGEVS_DECRYPT:
-                            responseVS = decryptMessageVS(operationVS);
                             break;
                         case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
@@ -376,91 +373,23 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
             log.debug("sendMessageVS");
-            //operationVS.getContentType(); -> MessageVS
-            List signedDataList = new ArrayList<>();
-            List encryptedDataList = new ArrayList<>();
-            List<Map> targetCertList = operationVS.getTargetCertList();
-            for(Map receiverCertDataMap : targetCertList) {
-                X509Certificate receiverCert = CertUtils.fromPEMToX509Cert(((String) receiverCertDataMap.get("pemCert")).getBytes());
-                JSONObject documentToEncrypt = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToEncrypt());
-                ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, Encryptor.encryptToCMS(
-                        documentToEncrypt.toString().getBytes(), receiverCert));
-                String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");
-                String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr, ContextVS.VOTING_DATA_DIGEST);
-                Map signedMap = new HashMap<>();
-                signedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
-                signedMap.put("encryptedMessageHashBase64", encryptedMessageHash);
-                signedDataList.add(signedMap);
-                Map encryptedMap = new HashMap<>();
-                encryptedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
-                encryptedMap.put("encryptedData", encryptedMessageStr);
-                encryptedDataList.add(encryptedMap);
-            }
-            operationVS.getDocumentToSignMap().put("encryptedDataInfo", signedDataList);
-            JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-            SMIMEMessage smimeMessage = SessionVSUtils.getSMIME(null, operationVS.getTargetServer().getNameNormalized(),
-                    documentToSignJSON.toString(), password.toCharArray(), operationVS.getSignedMessageSubject(), null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                    operationVS.getTargetServer().getTimeStampServiceURL());
-            ResponseVS responseVS = timeStamper.call();
-            smimeMessage = timeStamper.getSMIME();
-            try {
-                String base64ResultDigest = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
-                operationVS.getDocumentToSignMap().put("smimeMessage", base64ResultDigest);
-                operationVS.getDocumentToSignMap().put("encryptedDataList", encryptedDataList);
-                JSONObject documentToSendJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-                responseVS = HttpHelper.getInstance().sendData(documentToSendJSON.toString().getBytes(),
-                        ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
-            } catch (Exception ex) {
-                log.debug(ex.getMessage(), ex);
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            } finally {
-                return responseVS;
-            }
-        }
-
-        private ResponseVS decryptMessageVS(OperationVS operationVS) throws Exception {
-            log.debug("decryptMessageVS");
-            Map documentToDecrypt = operationVS.getDocumentToDecrypt();
-            List<Map> encryptedDataList = (List) documentToDecrypt.get("encryptedDataList");
-            X509Certificate cryptoTokenCert = null;
-            PrivateKey privateKey = null;
-            try{
-                KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
-                privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
-                java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-                cryptoTokenCert = (X509Certificate) chain[0];
-            } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
-                return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
-            }
-            String encryptedData = null;
-            for(Map encryptedDataMap : encryptedDataList) {
-                Long serialNumber = Long.valueOf((String) encryptedDataMap.get("serialNumber"));
-                if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
-                    log.debug("Cert matched - serialNumber: " + serialNumber);
-                    encryptedData = (String) encryptedDataMap.get("encryptedData");
-                }
-            }
             ResponseVS responseVS = null;
-            if(encryptedData != null) {
-                responseVS = new ResponseVS(ResponseVS.SC_OK, Encryptor.decryptCMS(encryptedData.getBytes(), privateKey)) ;
-                responseVS.setContentType(ContentTypeVS.JSON);
-                Map editDataMap = new HashMap();
-                editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
-                editDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-                editDataMap.put("state", "CONSUMED");
-                editDataMap.put("messageId", documentToDecrypt.get("id"));
-                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(editDataMap);
-                WebSocketServiceAuthenticated.getInstance().sendMessage(jsonObject.toString());
-            }
-            else {
-                log.error("Unable to decrypt from this device");
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR);
-            }
-            //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.name]
-            //messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
-            //encryptedDataList:messageVSJSON.encryptedDataList]
+            if(WebSocketServiceAuthenticated.getInstance().isConnected()) {
+                responseVS = HttpHelper.getInstance().getData(((CooinServer) operationVS.getTargetServer()).
+                        getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    JSONArray deviceArray = (JSONArray) responseVS.getMessageJSON();
+                    List<JSONObject> connectedDevices = new ArrayList<>();
+                    for (int i = 0; i < deviceArray.size(); i++) {
+                        DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
+                        JSONObject socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
+                                JSONSerializer.toJSON(operationVS.getDocumentToEncrypt()).toString());
+                        WebSocketServiceAuthenticated.getInstance().sendMessage(socketMsg.toString());
+                    }
+                    responseVS = new ResponseVS(ResponseVS.SC_OK);
+                }
+            } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                    ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
             return responseVS;
         }
 

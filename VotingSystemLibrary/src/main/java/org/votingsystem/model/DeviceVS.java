@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -20,6 +21,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class DeviceVS implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+    public X509Certificate getX509Certificate() {
+        return x509Certificate;
+    }
+
+    public void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
+    }
 
     public enum Type {MOBILE, PC}
 
@@ -38,6 +47,7 @@ public class DeviceVS implements Serializable {
     @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Transient private transient X509Certificate x509Certificate;
 
 	public UserVS getUserVS() {
 		return userVS;
@@ -141,4 +151,15 @@ public class DeviceVS implements Serializable {
         setType(Type.valueOf(jsonData.getString("deviceType")));
         return this;
     }
+
+    public static DeviceVS parse(JSONObject jsonObject) throws Exception {
+        DeviceVS deviceVS = new DeviceVS();
+        deviceVS.setId(jsonObject.getLong("id"));
+        deviceVS.setDeviceName(jsonObject.getString("deviceName"));
+        Collection<X509Certificate>  certChain = CertUtils.fromPEMToX509CertCollection(
+                jsonObject.getString("certPEM").getBytes());
+        deviceVS.setX509Certificate(certChain.iterator().next());
+        return deviceVS;
+    }
+
 }

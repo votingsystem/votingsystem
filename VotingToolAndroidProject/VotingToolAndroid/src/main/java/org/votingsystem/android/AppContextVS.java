@@ -204,7 +204,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(
                 USER_CERT_ALIAS, null);
         return keyEntry;
-    }
+    }       
 
     public X509Certificate getX509UserCert() throws CertificateException, UnrecoverableEntryException,
             NoSuchAlgorithmException, KeyStoreException, IOException {
@@ -351,19 +351,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                         try {
                             setWebSocketSession(new WebSocketSession(
                                     socketMsg.getSessionId(), socketMsg.getUserId()));
-                            WebSocketMessage.MessageVSBundle messageBundle =
-                                    socketMsg.getMessageVSBundle();
-                            if(messageBundle != null && messageBundle.getPendingMessages().length() > 0) {
-                                JSONArray messageVSList = messageBundle.getPendingMessages();
-                                if(messageVSList.length() > 0) {
-                                    String jsCommand = "javascript:updateMessageVSList('" + messageVSList.toString() + "')";
-                                    intent = new Intent(this, BrowserVSActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
-                                    intent.putExtra(ContextVS.URL_KEY, getCooinServer().getMessageVSInboxURL());
-                                    startActivity(intent);
-                                }
-                            }
                         } catch(Exception ex) { ex.printStackTrace(); }
                     }
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

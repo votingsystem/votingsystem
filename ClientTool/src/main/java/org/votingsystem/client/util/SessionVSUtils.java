@@ -371,12 +371,10 @@ public class SessionVSUtils {
                 JSONObject mobileTokenJSON = getInstance().getCryptoToken();//{"id":,"deviceName":"","certPEM":""}
                 Long deviceToId = mobileTokenJSON.getLong("id");
                 String deviceToName = mobileTokenJSON.getString("deviceName");
-                String deviceFromName = InetAddress.getLocalHost().getHostName();
                 String certPEM = mobileTokenJSON.getString("certPEM");
                 X509Certificate deviceToCert =  CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
                 JSONObject jsonObject = WebSocketMessage.getSignRequest(deviceToId, deviceToName,
-                    deviceFromName, toUser, textToSign, subject, ContextVS.getInstance().getLocale().getLanguage(),
-                    deviceToCert, headers);
+                    toUser, textToSign, subject, deviceToCert, headers);
                 WebSocketService.getInstance().sendMessage(jsonObject.toString());
                 countDownLatch.await();
                 ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();

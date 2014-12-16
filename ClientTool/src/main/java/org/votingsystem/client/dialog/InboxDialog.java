@@ -123,10 +123,10 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
             else messageList = Arrays.asList(timeLimitedWebSocketMessage);
             try {
                 int i = 0;
-                for(WebSocketMessage webSocketMessage : messageList) {
+                for(WebSocketMessage socketMsg : messageList) {
                     updateProgress(i++, messageList.size());
-                    webSocketMessage.decryptMessage(privateKey);
-                    messageMap.put(webSocketMessage, new InboxMessageRow(webSocketMessage, InboxDialog.this).getMainPane());
+                    socketMsg.decryptMessage(privateKey);
+                    messageMap.put(socketMsg, new InboxMessageRow(socketMsg, InboxDialog.this).getMainPane());
                 }
                 refreshView();
             } catch(Exception ex) {

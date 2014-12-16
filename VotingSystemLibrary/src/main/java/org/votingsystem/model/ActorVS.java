@@ -263,10 +263,6 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/userVS";
     }
 
-    public String getMessageVSInboxURL() {
-        return getServerURL() + "/messageVS/inbox";
-    }
-
     public String getUserBaseInitServiceURL() {
         return getServerURL() + "/userVS/prepareUserBaseData";
     }

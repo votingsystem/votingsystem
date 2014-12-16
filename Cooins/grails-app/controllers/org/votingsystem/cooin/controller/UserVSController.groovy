@@ -6,6 +6,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.Iban
 import org.springframework.dao.DataAccessException
 import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -292,6 +293,11 @@ class UserVSController {
             if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
             return [responseVS:bankVSService.saveBankVS(messageSMIME)]
         }
+    }
+
+    def connected() {
+        render SessionVSManager.getInstance().getConnectedUsersDataMap() as JSON
+        return false
     }
 
     /**

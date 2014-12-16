@@ -53,18 +53,9 @@ public class BrowserVSActivity extends ActivityBase {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(TypeVS.MESSAGEVS_DECRYPT == typeVS) {
-                //decryptMessageVS(operationVS);
-            } else launchSignAndSendService();
-        }
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
-            if(responseVS != null && TypeVS.MESSAGEVS_GET == responseVS.getTypeVS()) {
-                String jsCommand = "javascript:updateMessageVSList('" +
-                        responseVS.getMessageJSON().toString() + "')";
-                runOnUiThread(new Runnable() { @Override public void run() { setProgressDialogVisible(false); } });
-                webView.loadUrl(jsCommand);
-            } else if(responseVS.getOperation() != null) {
+            if(responseVS.getOperation() != null) {
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
                     sendMessageToBrowserApp(responseVS.getMessageJSON(),
                             responseVS.getOperation().getCallerCallback());
@@ -138,13 +129,6 @@ public class BrowserVSActivity extends ActivityBase {
         try {
             operationVS = OperationVS.parse(new JSONObject(appMessage));
             switch(operationVS.getTypeVS()) {
-                case MESSAGEVS_GET:
-                    sendMessageToWebSocketService(operationVS.getTypeVS(), operationVS.getDocument().toString());
-                    break;
-                case MESSAGEVS_DECRYPT:
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                            getString(R.string.enter_pin_to_decrypt_msg), false, TypeVS.MESSAGEVS_DECRYPT);
-                    break;
                 default:
                     processSignatureOperation(operationVS);
             }
@@ -152,21 +136,6 @@ public class BrowserVSActivity extends ActivityBase {
             e.printStackTrace();
         }
     }
-
-    /*private void decryptMessageVS(OperationVS operationVS)  {
-        LOGD(TAG + ".decryptMessageVS", "decryptMessageVS");
-        ResponseVS responseVS = null;
-        try {
-            responseVS = contextVS.decryptMessageVS(operationVS.getDocumentToDecrypt());
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                sendMessageToWebSocketService(TypeVS.WEB_SOCKET_MESSAGE,
-                        ((JSONObject)responseVS.getData()).toString());
-                sendMessageToBrowserApp(responseVS.getMessageJSON(), operationVS.getCallerCallback());
-            } else Log.e(TAG + ".decryptMessageVS", "ERROR decrypting message");
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }*/
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
         LOGD(TAG + ".sendMessageToWebSocketService", "messageTypeVS: " + messageTypeVS.toString());

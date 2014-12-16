@@ -24,7 +24,7 @@ class WebSocketService {
 
     def grailsApplication
     def messageSource
-    def messageVSService
+
 
     public void onTextMessage(Session session, String msg , boolean last) {
         WebSocketRequest request = null
@@ -56,30 +56,12 @@ class WebSocketService {
         SessionVSManager.getInstance().remove(session)
     }
 
+    //TODO QUEUE
     public void processRequest(WebSocketRequest request) {
         switch(request.operation) {
             case TypeVS.LISTEN_TRANSACTIONS:
                 TransactionVSService transactionVSService = grailsApplication.mainContext.getBean("transactionVSService")
                 transactionVSService.addTransactionListener(request.messageJSON.userId)
-                break;
-            case TypeVS.MESSAGEVS:
-                MessageVSService messageVSService = grailsApplication.mainContext.getBean("messageVSService")
-                messageVSService.sendWebSocketMessage(request.messageJSON)
-                break;
-            case TypeVS.MESSAGEVS_EDIT:
-                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
-                grailsApplication.mainContext.getBean("messageVSService").editMessage(
-                        request. messageJSON, request.sessionVS.userVS, request.locale)
-                break;
-            case TypeVS.MESSAGEVS_GET:
-                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
-                request.messageJSON.userId = request.sessionVS.userVS.id
-                request.messageJSON.messageVSList = messageVSService.getMessageList(request.sessionVS.userVS,
-                        MessageVS.State.valueOf(request.messageJSON.state))
-                request.messageJSON.status = ResponseVS.SC_OK
-                processResponse(request.messageJSON)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
                 if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
@@ -111,15 +93,9 @@ class WebSocketService {
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
                     SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
-                    request.messageJSON.userId = userVS.id
-                    request.messageJSON.messageVSDataMap = [(MessageVS.State.PENDING.toString()):
-                                messageVSService.getMessageList(userVS, MessageVS.State.PENDING)]
-                    request.messageJSON.statusCode = ResponseVS.SC_OK
-                    processResponse(request.messageJSON)
+                    processResponse(request.getResponse(ResponseVS.SC_OK, null, userVS.id))
                 } else {
-                    request.messageJSON.statusCode = ResponseVS.SC_ERROR
-                    request.messageJSON.message = responseVS.getMessage()
-                    processResponse(request.messageJSON)
+                    processResponse(request.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(), null))
                 }
                 break;
             case TypeVS.WEB_SOCKET_BAN_SESSION:
@@ -189,6 +165,14 @@ class WebSocketService {
         JSONObject getResponse(Integer statusCode, String message){
             return getResponse(session.getId(), statusCode, operation, message);
         }
+
+        JSONObject getResponse(Integer statusCode, String message, Long userId){
+            messageJSON.statusCode = statusCode;
+            messageJSON.userId = userId;
+            messageJSON.message = message;
+            return messageJSON;
+        }
+
     }
 
 }

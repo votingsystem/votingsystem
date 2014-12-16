@@ -2,7 +2,6 @@ package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.util.StringUtils;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +18,9 @@ public class OperationVS {
 
     private TypeVS typeVS;
     private Integer statusCode;
-    private List targetCertList;
     private String callerCallback;
     private String message;
+    private String nif;
     private String documentURL;
     private String urlTimeStampServer;
     private String serverURL;
@@ -220,8 +219,8 @@ public class OperationVS {
         }
         if (dataMap.containsKey("statusCode")) operationVS.setStatusCode((Integer)dataMap.get("statusCode"));
         if (dataMap.containsKey("message")) operationVS.setMessage((String)dataMap.get("message"));
-        if (dataMap.containsKey("serviceURL"))
-            operationVS.setServiceURL((String)dataMap.get("serviceURL"));
+        if (dataMap.containsKey("nif")) operationVS.setNif((String)dataMap.get("nif"));
+        if (dataMap.containsKey("serviceURL")) operationVS.setServiceURL((String)dataMap.get("serviceURL"));
         if (dataMap.containsKey("documentURL")) operationVS.setDocumentURL((String)dataMap.get("documentURL"));
         if (dataMap.containsKey("urlTimeStampServer")) operationVS.setUrlTimeStampServer((String)dataMap.get("urlTimeStampServer"));
         if (dataMap.containsKey("serverURL")) {
@@ -233,16 +232,13 @@ public class OperationVS {
             EventVS eventVS = EventVS.parse((Map) dataMap.get("eventVS"));
             operationVS.setEventVS(eventVS);
         }
-
         if (dataMap.containsKey("signedContent")) {
             Map documentToSignMap = (Map) dataMap.get("signedContent");
             //to avoid process repeated messages on servers
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             operationVS.setDocumentToSignMap(documentToSignMap);
         }
-        if (dataMap.containsKey("asciiDoc")) {
-            operationVS.setAsciiDoc((String) dataMap.get("asciiDoc"));
-        }
+        if (dataMap.containsKey("asciiDoc")) operationVS.setAsciiDoc((String) dataMap.get("asciiDoc"));
         if (dataMap.containsKey("documentToEncrypt")) {
             Map documentToEncrypt = (Map) dataMap.get("documentToEncrypt");
             operationVS.setDocumentToEncrypt(documentToEncrypt);
@@ -256,22 +252,12 @@ public class OperationVS {
             documentMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
             operationVS.setDocument(documentMap);
         }
-        if (dataMap.containsKey("targetCertList")) {
-            operationVS.setTargetCertList((List) dataMap.get("targetCertList"));
-        }
-
         if(dataMap.containsKey("contentType")) operationVS.setContentType((String)dataMap.get("contentType"));
-
-        if (dataMap.containsKey("receiverName"))
-            operationVS.setReceiverName((String)dataMap.get("receiverName"));
-
+        if (dataMap.containsKey("receiverName")) operationVS.setReceiverName((String)dataMap.get("receiverName"));
         if (dataMap.containsKey("signedMessageSubject"))
             operationVS.setSignedMessageSubject((String)dataMap.get("signedMessageSubject"));
-        if (dataMap.containsKey("filePath")) {
-            operationVS.setFile(new File((String)dataMap.get("filePath")));
-        }
-        if (dataMap.containsKey("email"))
-            operationVS.setEmail((String)dataMap.get("email"));
+        if (dataMap.containsKey("filePath")) operationVS.setFile(new File((String)dataMap.get("filePath")));
+        if (dataMap.containsKey("email")) operationVS.setEmail((String)dataMap.get("email"));
         return operationVS;
     }
 
@@ -323,14 +309,6 @@ public class OperationVS {
         this.documentToDecrypt = documentToDecrypt;
     }
 
-    public List getTargetCertList() {
-        return targetCertList;
-    }
-
-    public void setTargetCertList(List targetCertList) {
-        this.targetCertList = targetCertList;
-    }
-
     public Map getDocument() {
         return document;
     }
@@ -345,6 +323,14 @@ public class OperationVS {
 
     public void setAsciiDoc(String asciiDoc) {
         this.asciiDoc = asciiDoc;
+    }
+
+    public String getNif() {
+        return nif;
+    }
+
+    public void setNif(String nif) {
+        this.nif = nif;
     }
 }
 

@@ -142,6 +142,11 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         }
     }
 
+    public boolean isConnected() {
+        if(session != null && session.isOpen()) return true;
+        else return false;
+    }
+
     public void sendMessage(String message) {
         try {
             session.getBasicRemote().sendText(message);
@@ -150,55 +155,42 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         }
     }
 
-    private void consumeMessage(final String messageStr) {
+    private void consumeMessage(final String socketMsgStr) {
         try {
-            WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
-            log.debug("consumeMessage - type: " + message.getOperation() + " - status: " + message.getStatusCode());
-            switch(message.getOperation()) {
+            WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(socketMsgStr));
+            log.debug("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
+            switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == message.getStatusCode()) {
-                        SessionVSUtils.getInstance().initAuthenticatedSession(message, userVS);
-                    } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + message.getStatusCode());
-                    break;
-                case MESSAGEVS_EDIT:
-                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                            message.getStatusCode(), message.getMessage());
-                case MESSAGEVS_GET:
-                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                            message.getStatusCode(), message.getMessage());
-                    else {
-                        Platform.runLater(new Runnable() {
-                            @Override public void run() {
-                                log.debug(" ==== TODO - SEND MESSAGE TO BROWSER ==== ");
-                                BrowserVS.getInstance().execCommandJSCurrentView("alert('" + message.getMessage() + "')");
-                                //browserVS.executeScript("updateMessageVSList(" + message + ")");
-                            }
-                        });
-                    }
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
+                        SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
+                    } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + socketMsg.getStatusCode());
                     break;
             }
-            if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {
-                showMessage(message.getStatusCode(), message.getMessage());
+            if(socketMsg.getStatusCode() != null && ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
-            switch(message.getOperation()) {
+            switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
                     BrowserVS.getInstance().execCommandJS(
-                            message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                     break;
                 //case MESSAGEVS_SIGN: break;
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().addMessage(message);
+                    InboxService.getInstance().addMessage(socketMsg);
+                    break;
+                case MESSAGEVS_CONSUMED:
+
                     break;
                 case MESSAGEVS_FROM_DEVICE:
-                    if(message.isEncrypted()) {
-                        message.decryptMessage(VotingSystemApp.getInstance().getSessionKeys(message.getUUID()));
-                        SessionVSUtils.setWebSocketMessage(message);
+                    if(socketMsg.isEncrypted()) {
+                        socketMsg.decryptMessage(VotingSystemApp.getInstance().getSessionKeys(socketMsg.getUUID()));
+                        SessionVSUtils.setWebSocketMessage(socketMsg);
                     }
 
                     break;
                 default:
-                    log.debug("unprocessed message");
+                    log.debug("unprocessed socketMsg");
             }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);

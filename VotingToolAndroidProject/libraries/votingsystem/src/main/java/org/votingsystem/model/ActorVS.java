@@ -37,10 +37,6 @@ public class ActorVS implements java.io.Serializable {
         this.webSocketURL = webSocketURL;
     }
 
-    public String getMessageVSInboxURL() {
-        return getServerURL() + "/messageVS/inbox";
-    }
-
     public String getMenuUserURL() {
         return getServerURL() + "/app/userVS?menu=user";
     }

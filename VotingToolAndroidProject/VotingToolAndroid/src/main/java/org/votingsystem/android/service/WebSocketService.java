@@ -256,7 +256,6 @@ public class WebSocketService extends Service {
                 if(operationType == null && operationVS != null)
                     operationType = operationVS.getTypeVS();
                 switch(operationType) {
-                    case MESSAGEVS_GET:
                     case WEB_SOCKET_MESSAGE:
                         session.getBasicRemote().sendText(messageToSend);
                         break;

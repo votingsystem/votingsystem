@@ -40,10 +40,7 @@ public class WebSocketMessage implements Parcelable {
 
     private static final String TAG = WebSocketMessage.class.getSimpleName();
 
-    enum MessageVSState {PENDING}
-
     private TypeVS typeVS;
-    private MessageVSBundle messageVSBundle;
     private Integer statusCode = ResponseVS.SC_PROCESSING;
     private Long userId;
     private String UUID;
@@ -83,11 +80,6 @@ public class WebSocketMessage implements Parcelable {
         // generic 'readValues' instead of the typed vesions are for the null values
         typeVS = (TypeVS) source.readSerializable();
         operationVS = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
-        String messageVSBundleStr =  (String) source.readValue(String.class.getClassLoader());
-        try {
-            if(messageVSBundleStr != null) setMessageVSBundle(
-                    new MessageVSBundle(new JSONObject(messageVSBundleStr)));
-        } catch(Exception ex) {ex.printStackTrace();}
         statusCode = (Integer) source.readValue(Integer.class.getClassLoader());
         userId = (Long) source.readValue(Long.class.getClassLoader());
         sessionId = (String) source.readValue(String.class.getClassLoader());
@@ -106,8 +98,6 @@ public class WebSocketMessage implements Parcelable {
     @Override public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeSerializable(typeVS);
         parcel.writeParcelable(operationVS, flags);
-        if(getMessageVSBundle() != null) parcel.writeValue(getMessageVSBundle().messageVSDataMap.toString());
-        else parcel.writeValue(null);
         parcel.writeValue(statusCode);
         parcel.writeValue(userId);
         parcel.writeValue(sessionId);
@@ -171,12 +161,8 @@ public class WebSocketMessage implements Parcelable {
                 setStatusCode(messageJSON.getInt("statusCode"));
             if(messageJSON.has("userId")) setUserId(messageJSON.getLong("userId"));
             if(messageJSON.has("sessionId")) setSessionId(messageJSON.getString("sessionId"));
-            if(messageJSON.has("messageVSDataMap"))
-                setMessageVSBundle(new MessageVSBundle(messageJSON.getJSONObject("messageVSDataMap")));
             if(messageJSON.has("message")) setMessage(messageJSON.getString("message"));
             if(messageJSON.has("URL")) setUrl(messageJSON.getString("URL"));
-            if(messageJSON.has("messageVSDataMap")) setMessageVSBundle(
-                    new MessageVSBundle(messageJSON.getJSONObject("messageVSDataMap")));
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -275,26 +261,6 @@ public class WebSocketMessage implements Parcelable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
-    }
-
-    public MessageVSBundle getMessageVSBundle() {
-        return messageVSBundle;
-    }
-
-    public void setMessageVSBundle(MessageVSBundle messageVSBundle) {
-        this.messageVSBundle = messageVSBundle;
-    }
-
-    public static class MessageVSBundle {
-        JSONObject messageVSDataMap;
-        public MessageVSBundle(JSONObject messageVSDataMap) {
-            this.messageVSDataMap = messageVSDataMap;
-        }
-        public JSONArray getPendingMessages() throws JSONException {
-            if(messageVSDataMap.has(MessageVSState.PENDING.toString()))
-                return messageVSDataMap.getJSONArray(MessageVSState.PENDING.toString());
-            else return new JSONArray();
-        }
     }
 
     @Override public String toString() {
