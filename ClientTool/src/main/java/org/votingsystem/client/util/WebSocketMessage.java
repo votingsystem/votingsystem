@@ -6,10 +6,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -117,6 +114,7 @@ public class WebSocketMessage {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+        if(messageJSON != null) messageJSON.put("operation", operation);
     }
 
     public String getWebSocketCoreSignalJSCommand(ConnectionStatus status) {
@@ -213,6 +211,17 @@ public class WebSocketMessage {
         return (JSONObject) JSONSerializer.toJSON(result);
     }
 
+    public static JSONObject getAuthenticationRequest(SMIMEMessage smimeMessage, String UUID) throws Exception {
+        Map messageToServiceMap = new HashMap<>();
+        messageToServiceMap.put("operation", TypeVS.INIT_VALIDATED_SESSION);
+        messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        messageToServiceMap.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+        messageToServiceMap.put("UUID", UUID);
+        VotingSystemApp.getInstance().putSession(UUID, new WebSocketSession<>(
+                null, null, null, TypeVS.INIT_VALIDATED_SESSION));
+        return (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
+    }
+
     public static JSONObject getSignRequest(Long deviceToId, String deviceToName, String toUser, String textToSign,
             String subject, X509Certificate deviceToCert, Header... headers) throws Exception {
         Map messageToDevice = new HashMap<>();
@@ -241,7 +250,8 @@ public class WebSocketMessage {
             encryptedDataMap.put("headers", headersArray);
         }
         AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(aesParams, null, null));
+        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(
+                aesParams, null, null, TypeVS.MESSAGEVS_SIGN));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceToCert);
@@ -252,6 +262,7 @@ public class WebSocketMessage {
     public static JSONObject getMessageVSToDevice(DeviceVS deviceVS, String toUser, String textToEncrypt) throws Exception {
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
         messageToDevice.put("deviceToId", deviceVS.getId());
         messageToDevice.put("deviceToName", deviceVS.getDeviceName());
         messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
@@ -263,7 +274,8 @@ public class WebSocketMessage {
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("textToSign", textToEncrypt);
         AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(aesParams, deviceVS, null));
+        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(
+                aesParams, deviceVS, null, TypeVS.MESSAGEVS));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceVS.getX509Certificate());

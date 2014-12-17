@@ -222,6 +222,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                             " " + Utils.getTagForDescription(cooin.getSignedTagVS()));
                     stage.initModality(Modality.WINDOW_MODAL);
                     //stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
+                    stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
                     stage.show();
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);

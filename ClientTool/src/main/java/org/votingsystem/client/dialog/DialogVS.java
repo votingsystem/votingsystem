@@ -9,6 +9,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.votingsystem.client.util.Utils;
 
 import java.io.IOException;
 
@@ -48,6 +49,7 @@ public class DialogVS {
                 getStage().setY(mouseEvent.getScreenY() + dragDelta.y);
             }
         });
+        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
 
     public DialogVS(Node rootNode) {

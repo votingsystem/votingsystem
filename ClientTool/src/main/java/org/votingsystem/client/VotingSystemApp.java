@@ -135,6 +135,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         return sessionMap.get(UUID).getAESParams();
     }
 
+    public WebSocketSession getSession(String UUID) {
+        return sessionMap.get(UUID);
+    }
+
     @Override public void stop() {
         log.debug("stop");
         //Platform.exit();

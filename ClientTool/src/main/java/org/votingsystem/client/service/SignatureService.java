@@ -378,7 +378,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS = HttpHelper.getInstance().getData(((CooinServer) operationVS.getTargetServer()).
                         getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    JSONArray deviceArray = (JSONArray) responseVS.getMessageJSON();
+                    JSONArray deviceArray = ((JSONObject) responseVS.getMessageJSON()).getJSONArray("deviceList");
                     List<JSONObject> connectedDevices = new ArrayList<>();
                     for (int i = 0; i < deviceArray.size(); i++) {
                         DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));

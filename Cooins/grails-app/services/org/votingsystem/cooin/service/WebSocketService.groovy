@@ -25,7 +25,6 @@ class WebSocketService {
     def grailsApplication
     def messageSource
 
-
     public void onTextMessage(Session session, String msg , boolean last) {
         WebSocketRequest request = null
         try {
@@ -35,10 +34,7 @@ class WebSocketService {
             log.error(ex.getMessage(), ex);
             String message = ex.getMessage()
             if(message == null) message = messageSource.getMessage('socketRequestErrorMsg', null, locale)
-            JSONObject responseJSON
-            if(request) responseJSON = request.getResponse(ResponseVS.SC_ERROR, message)
-            else responseJSON = getResponse(session.getId(),ResponseVS.SC_ERROR , null, ex.getMessage())
-            processResponse(responseJSON);
+            processResponse(request.getResponse(ResponseVS.SC_ERROR, message));
         }
     }
 
@@ -64,7 +60,7 @@ class WebSocketService {
                 transactionVSService.addTransactionListener(request.messageJSON.userId)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
-                if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
+                    if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
                     processResponse(request.getResponse(ResponseVS.SC_OK, null))
                 } else processResponse(request.getResponse(ResponseVS.SC_ERROR,
@@ -88,15 +84,12 @@ class WebSocketService {
                 SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
                 SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
                         request.messageJSON.smimeMessage.decodeBase64()))
-                request.messageJSON.remove("smimeMessage")
                 ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
                     SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
                     processResponse(request.getResponse(ResponseVS.SC_OK, null, userVS.id))
-                } else {
-                    processResponse(request.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(), null))
-                }
+                } else processResponse(request.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(), null))
                 break;
             case TypeVS.WEB_SOCKET_BAN_SESSION:
                 //talks
@@ -127,16 +120,6 @@ class WebSocketService {
         SessionVSManager.getInstance().sendMessage(((String)messageJSON.sessionId), messageJSON.toString());
     }
 
-    public JSONObject getResponse(String sessionId, Integer statusCode, TypeVS typeVS, String message){
-        JSONObject result = new JSONObject();
-        if(typeVS != null) result.put("operation", typeVS.toString());
-        else result.put("operation", TypeVS.WEB_SOCKET_MESSAGE.toString());
-        result.put("sessionId", sessionId);
-        result.put("statusCode", statusCode);
-        result.put("message", message);
-        return result;
-    }
-
     public class WebSocketRequest {
         Session session;
         JSONObject messageJSON;
@@ -163,14 +146,13 @@ class WebSocketService {
                     "remoteIp: ${remoteAddress.address} - last: ${last}")
         }
         JSONObject getResponse(Integer statusCode, String message){
-            return getResponse(session.getId(), statusCode, operation, message);
+            return JSONSerializer.toJSON([statusCode:statusCode, message:message,
+                  sessionId:session.getId(), operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
         }
 
         JSONObject getResponse(Integer statusCode, String message, Long userId){
-            messageJSON.statusCode = statusCode;
-            messageJSON.userId = userId;
-            messageJSON.message = message;
-            return messageJSON;
+            return JSONSerializer.toJSON([statusCode:statusCode, message:message, userId:userId,
+                    sessionId:messageJSON.sessionId, operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
         }
 
     }

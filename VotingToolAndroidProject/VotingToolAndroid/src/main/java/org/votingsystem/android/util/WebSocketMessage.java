@@ -333,6 +333,7 @@ public class WebSocketMessage implements Parcelable {
         Map messageToDevice = new HashMap<>();
         String randomUUID = java.util.UUID.randomUUID().toString();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
         messageToDevice.put("timeLimited", true);
         messageToDevice.put("UUID", randomUUID);
         messageToDevice.put("deviceToId", deviceToId);

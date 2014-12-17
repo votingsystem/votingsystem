@@ -4,7 +4,7 @@
 <vs:webresource dir="paper-button" file="paper-button.html"/>
 <vs:webresource dir="core-localstorage" file="core-localstorage.html"/>
 
-<polymer-element name="uservs-selector" attributes="url isSelector contactSelector">
+<polymer-element name="uservs-selector" attributes="url contactSelector">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -75,7 +75,6 @@
     </template>
     <script>
         Polymer('uservs-selector', {
-            isSelector:false,
             contactsArray:[],
             modeSearch:false,
             ready: function() {
@@ -83,7 +82,7 @@
                 this.userVSList = []
                 this.contactSelector = (this.contactSelector != null)?true:false
                 this.modeSearch = !this.contactSelector
-                console.log(this.tagName + " - contactSelector: " + this.contactSelector + this.contacts)
+                console.log(this.tagName + " - contactSelector: " + this.contactSelector)
             },
             modeSearchChanged:function(e) {
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
@@ -93,7 +92,7 @@
                 } else this.userVSList = toJSON(this.contacts)
             },
             contactsChanged:function(e) {
-                console.log("contacts: " + this.contacts)
+                console.log(this.tagName + " - contactsChanged")
                 this.contactsArray = toJSON(this.contacts)
                 if(this.contactSelector && !this.modeSearch) this.userVSList = this.contactsArray
             },
@@ -130,7 +129,7 @@
             isContact:function (uservs){
                 var isInArray = false
                 for(uservsIdx in this.contactsArray) {
-                    if(this.contactsArray[uservsIdx].id === uservs.id) isInArray = true
+                    if(this.contactsArray[uservsIdx].id === uservs.id) return true
                 }
                 return isInArray
             },

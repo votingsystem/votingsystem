@@ -25,6 +25,7 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.votingsystem.client.VotingSystemApp.showMessage;
@@ -42,6 +43,8 @@ public class InboxService {
     private File messagesFile;
     private static final InboxService INSTANCE = new InboxService();
     private Button inboxButton;
+    private PasswordDialog passwordDialog;
+    private AtomicBoolean isPasswordVisible = new AtomicBoolean(false);
     public static InboxService getInstance() {
         return INSTANCE;
     }
@@ -71,16 +74,17 @@ public class InboxService {
         inboxButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
         this.inboxButton = inboxButton;
         inboxButton.setOnAction((event) -> {
-            consumeMessageTodDevice(ContextVS.getMessage("inboxPinDialogMsg"), false);
+            consumeMessageToDevice(ContextVS.getMessage("inboxPinDialogMsg"), false);
         });
         if(webSocketMessageList.size() > 0) inboxButton.setVisible(true);
         else inboxButton.setVisible(false);
     }
 
-    private void consumeMessageTodDevice(final String pinDialogMessage, final boolean isTimeLimited) {
+    private void consumeMessageToDevice(final String pinDialogMessage, final boolean isTimeLimited) {
+        if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
             if (SessionVSUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
-                final PasswordDialog passwordDialog = new PasswordDialog();
+                passwordDialog = new PasswordDialog();
                 String dialogMessage = null;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
                 else dialogMessage = pinDialogMessage;
@@ -90,6 +94,7 @@ public class InboxService {
                 }
                 passwordDialog.showWithoutPasswordConfirm(dialogMessage, visibilityInSeconds);
                 String password = passwordDialog.getPassword();
+                isPasswordVisible.set(false);
                 if (password != null) {
                     try {
                         KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
@@ -114,7 +119,7 @@ public class InboxService {
             PlatformImpl.runLater(() -> inboxButton.setVisible(true));
             flush();
         } else timeLimitedWebSocketMessage = webSocketMessage;
-        consumeMessageTodDevice(null, webSocketMessage.isTimeLimited());
+        consumeMessageToDevice(null, webSocketMessage.isTimeLimited());
     }
 
     public void removeMessage(WebSocketMessage webSocketMessage) {

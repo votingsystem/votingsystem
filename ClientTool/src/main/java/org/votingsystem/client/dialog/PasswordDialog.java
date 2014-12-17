@@ -142,6 +142,7 @@ public class PasswordDialog {
             }
         });
         dialogVBox.setPrefWidth(350);
+        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
 
     private void setCapsLockState (boolean pressed) {
@@ -151,6 +152,10 @@ public class PasswordDialog {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isShowing() {
+        return stage.isShowing();
     }
 
     private void checkPasswords() {

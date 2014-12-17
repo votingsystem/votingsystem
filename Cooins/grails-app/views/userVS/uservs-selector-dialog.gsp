@@ -17,7 +17,7 @@
                     <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
                 </div>
                 <div>
-                    <uservs-selector id="userVSSelector" isSelector="true"></uservs-selector>
+                    <uservs-selector id="userVSSelector"></uservs-selector>
                 </div>
             </div>
         </paper-dialog>

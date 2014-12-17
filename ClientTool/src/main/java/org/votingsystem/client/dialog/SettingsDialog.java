@@ -59,7 +59,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
             @Override public void handle(ActionEvent actionEvent) {
                 changeSignatureMode(actionEvent);
             }});
-
         signWithMobileRb = new RadioButton(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
         signWithMobileRb.setToggleGroup(tg);
         signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
@@ -67,7 +66,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 changeSignatureMode(actionEvent);
             }
         });
-
         mobileDeviceInfo = new HBox(15);
         mobileDeviceInfo.setAlignment(Pos.CENTER);
         mobileDeviceLbl = new Label();
@@ -81,7 +79,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
             }
         });
         mobileDeviceInfo.getChildren().addAll(mobileDeviceLbl, mobileDeviceButton);
-
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
         signWithKeystoreRb.setToggleGroup(tg);
         signWithKeystoreRb.setOnAction(new EventHandler<ActionEvent>() {
@@ -100,7 +97,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
-
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         requestCertButton.setOnAction(new EventHandler<ActionEvent>() {

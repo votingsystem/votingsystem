@@ -58,7 +58,6 @@ public class MobileSelectorDialog extends DialogVS {
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         mainPane.getChildren().removeAll(progressBar);
-
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));

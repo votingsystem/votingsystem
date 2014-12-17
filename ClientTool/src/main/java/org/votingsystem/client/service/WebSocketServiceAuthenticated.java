@@ -16,6 +16,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
@@ -158,36 +159,39 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     private void consumeMessage(final String socketMsgStr) {
         try {
             WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(socketMsgStr));
+            WebSocketSession webSocketSession = null;
             log.debug("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
-            switch(socketMsg.getOperation()) {
-                case INIT_VALIDATED_SESSION:
-                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
-                        SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
-                    } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + socketMsg.getStatusCode());
-                    break;
-            }
-            if(socketMsg.getStatusCode() != null && ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+            if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
             switch(socketMsg.getOperation()) {
-                case INIT_VALIDATED_SESSION:
-                    BrowserVS.getInstance().execCommandJS(
-                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
-                    break;
-                //case MESSAGEVS_SIGN: break;
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().addMessage(socketMsg);
                     break;
+                case MESSAGEVS_FROM_VS:
+                    if((webSocketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID())) != null) {
+                        socketMsg.setOperation(webSocketSession.getTypeVS());
+                        switch(webSocketSession.getTypeVS()) {
+                            case INIT_VALIDATED_SESSION:
+                                if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
+                                    SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
+                                    BrowserVS.getInstance().execCommandJS(
+                                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                                } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + socketMsg.getStatusCode());
+                                break;
+                            default:
+                                log.error("MESSAGEVS_FROM_VS - TypeVS: " + webSocketSession.getTypeVS());
+                        }
+                    }
+                    break;
                 case MESSAGEVS_CONSUMED:
-
                     break;
                 case MESSAGEVS_FROM_DEVICE:
                     if(socketMsg.isEncrypted()) {
                         socketMsg.decryptMessage(VotingSystemApp.getInstance().getSessionKeys(socketMsg.getUUID()));
                         SessionVSUtils.setWebSocketMessage(socketMsg);
                     }
-
                     break;
                 default:
                     log.debug("unprocessed socketMsg");
@@ -212,24 +216,6 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         }
     }
 
-    public static JSONObject getMessageJSON(TypeVS operation, String message, Map data, SMIMEMessage smimeMessage) {
-        Map messageToServiceMap = new HashMap<>();
-        messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-        messageToServiceMap.put("operation", operation.toString());
-        if(message != null) messageToServiceMap.put("message", message);
-        if(data != null) messageToServiceMap.put("data", data);
-        if(smimeMessage != null) {
-            try {
-                String smimeMessageStr = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
-                messageToServiceMap.put("smimeMessage", smimeMessageStr);
-            } catch (Exception ex) {
-                log.debug(ex.getMessage(), ex);
-            }
-        }
-        JSONObject messageToServiceJSON = (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
-        return messageToServiceJSON;
-    }
-
     public class InitValidatedSessionTask extends Task<ResponseVS> {
 
         private String password, nif;
@@ -243,8 +229,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             Map documentToSignMap = new HashMap<>();
+            String randomUUID = UUID.randomUUID().toString();
             documentToSignMap.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
-            documentToSignMap.put("UUID", UUID.randomUUID().toString());
+            documentToSignMap.put("UUID", randomUUID);
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
@@ -255,7 +242,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 userVS = smimeMessage.getSigner();
                 responseVS = timeStamper.call();
                 smimeMessage = timeStamper.getSMIME();
-                connectionMessage = getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString();
+                connectionMessage = WebSocketMessage.getAuthenticationRequest(smimeMessage, randomUUID).toString();
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() { WebSocketServiceAuthenticated.this.restart();}
                 });

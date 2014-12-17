@@ -12,10 +12,9 @@
     </div>
 </div>
 </body>
-
 </html>
 <asset:script>
-    document.querySelector("#userVSSelector").addEventListener('user-clicked', function(e) {
+    document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
         if(document.querySelector("#navBar") != null) {
             document.querySelector("#navBar").url = "${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType
         } else window.location.href = "${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType

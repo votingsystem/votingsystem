@@ -88,6 +88,7 @@ public class MessageDialog {
                 stage.setY(mouseEvent.getScreenY() + dragDelta.y);
             }
         });
+        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
 
     private void isHTMLView(boolean isHTMLView) {

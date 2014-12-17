@@ -52,7 +52,6 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
     }
 
     @FXML void initialize() { // This method is called by the FXMLLoader when initialization is complete
-        log.debug("initialize");
         removeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) -> listener.removeMessage(webSocketMessage));
         if(webSocketMessage.isTimeLimited()) {

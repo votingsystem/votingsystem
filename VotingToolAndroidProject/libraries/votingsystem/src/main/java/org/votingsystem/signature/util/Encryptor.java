@@ -1,8 +1,6 @@
 package org.votingsystem.signature.util;
 
-import android.util.Base64;
 import android.util.Log;
-
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
 import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
@@ -27,6 +25,7 @@ import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.signature.smime.EncryptedBundle;
@@ -242,7 +241,7 @@ public class Encryptor {
 
     public static byte[] decryptCMS(PrivateKey privateKey, byte[] base64EncryptedData)
             throws Exception {
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData, Base64.DEFAULT);
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
         CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection c = recipients.getRecipients();
@@ -329,7 +328,7 @@ public class Encryptor {
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
         int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
         pbbc.doFinal(output, bytesWrittenOut);
-        return new String(org.bouncycastle2.util.encoders.Base64.encode(output));
+        return new String(Base64.encode(output));
     }
 
     //BC provider to avoid key length restrictions on normal jvm
@@ -341,7 +340,7 @@ public class Encryptor {
         KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
         CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
         pbbc.init(false, params); //to encrypt put param to true
-        byte[] input = org.bouncycastle2.util.encoders.Base64.decode(messageToDecrypt.getBytes("UTF-8"));
+        byte[] input = Base64.decode(messageToDecrypt.getBytes("UTF-8"));
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
         int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
         pbbc.doFinal(output, bytesWrittenOut);

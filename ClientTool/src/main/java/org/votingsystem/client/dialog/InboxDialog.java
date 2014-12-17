@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -125,7 +126,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
                 int i = 0;
                 for(WebSocketMessage socketMsg : messageList) {
                     updateProgress(i++, messageList.size());
-                    socketMsg.decryptMessage(privateKey);
+                    if(socketMsg.isEncrypted()) socketMsg.decryptMessage(privateKey);
                     messageMap.put(socketMsg, new InboxMessageRow(socketMsg, InboxDialog.this).getMainPane());
                 }
                 refreshView();
