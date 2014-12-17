@@ -145,7 +145,7 @@
             }
         },
         showMessageVSDialog: function () {
-            this.$.sendMessageDialog.show(this.uservs.nif, this.uservs.certificateList)
+            this.$.sendMessageDialog.show(this.uservs)
         },
         sendMessageDialogResponse:function(e) {
             var appMessageJSON = JSON.parse(e.detail)

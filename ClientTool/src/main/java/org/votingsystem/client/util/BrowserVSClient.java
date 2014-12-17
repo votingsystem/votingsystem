@@ -41,7 +41,7 @@ public class BrowserVSClient {
         try {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
-            log.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
+            log.debug("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
             OperationVS operationVS = OperationVS.parse(jsonObject);
             BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
@@ -85,6 +85,11 @@ public class BrowserVSClient {
                     break;
                 case WALLET_OPEN:
                     BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("walletPinMsg"));
+                    break;
+                case MESSAGEVS:
+                    if(operationVS.getDocumentToSignMap() != null) BrowserVS.getInstance().processOperationVS(
+                            operationVS, null);
+                    else  BrowserVS.getInstance().processOperationVS(null, operationVS);
                     break;
                 default:
                     BrowserVS.getInstance().processOperationVS(operationVS, null);

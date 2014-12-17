@@ -11,6 +11,7 @@
     <vs:webresource dir="font-roboto" file="roboto.html"/>
     <vs:webresource dir="core-signals" file="core-signals.html"/>
     <vs:webresource dir="vs-innerpage-signal" file="vs-innerpage-signal.html"/>
+    <vs:webresource dir="core-localstorage" file="core-localstorage.html"/>
     <vs:webcomponent path="/element/alert-dialog"/>
     <vs:webresource dir="paper-button" file="paper-button.html"/>
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->

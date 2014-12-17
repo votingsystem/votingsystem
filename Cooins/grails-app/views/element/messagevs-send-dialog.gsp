@@ -14,7 +14,7 @@
                     <div vertical flex layout style="padding: 10px 10px 10px 10px; min-height:280px; ">
                       {{messageToUser}}
                       <div flex style="font-size: 1.3em; color:#6c0404; text-align: center;">
-                          <textarea id="messageVSContent" rows="12" cols="45" maxlength="500"></textarea>
+                          <textarea rows="12" cols="45" maxlength="{{messageVSMaxLength}}" value="{{messageVS}}"></textarea>
                       </div>
                       <div layout horizontal style="padding:20px 20px 20px 20px;">
                           <div flex></div>
@@ -28,10 +28,14 @@
     </template>
     <script>
         Polymer('messagevs-send-dialog', {
-            toUserNIF:'',
             uservs:{},
+            messageVSMaxLength:500,
             sendMessageTemplateMsg:"<g:message code="uservsMessageVSLbl"/>",
             ready: function() { },
+            messageVSChanged: function() {
+                if(this.messageVS.length > this.messageVSMaxLength) this.messageVS = this.messageVS.substring(0,
+                        this.messageVSMaxLength);
+            },
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
             },
@@ -40,8 +44,7 @@
             },
             show: function (uservs) {
                 this.uservs = uservs;
-                this.toUserNIF = this.uservs.nif
-                this.$.messageVSContent.value = ""
+                this.messageVS = ""
                 this.messageToUser = this.sendMessageTemplateMsg.format(this.uservs.name),
                 this.opened = true
             },
@@ -50,18 +53,20 @@
             },
             sendMessage: function () {
                 console.log("sendMessageVS")
+
+
+
+                if(this.messageVS.trim() == "") return
+
                 var webAppMessage = new WebAppMessage(Operation.MESSAGEVS)
-                webAppMessage.serviceURL = "${createLink(controller:'messageVS', absolute:true)}/"
-                webAppMessage.signedMessageSubject = "<g:message code="sendEncryptedMessageSubject"/>"
-                webAppMessage.signedContent = {operation:Operation.MESSAGEVS, toUserNIF:this.toUserNIF}
-                webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS,
-                    messageContent:this.$.messageVSContent.value}
+                webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS, messageContent:this.messageVS}
                 webAppMessage.nif = this.uservs.nif
                 webAppMessage.contentType = 'application/messagevs'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + " - " + this.id + " - sendMessageVS callback: " + appMessage);
                     this.fire('message-response', appMessage)
                 }.bind(this))
+                //alert(JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.opened = false
             }

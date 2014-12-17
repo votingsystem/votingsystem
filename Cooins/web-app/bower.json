@@ -56,7 +56,6 @@
       "moment":"moment#~2.8.3",
       "polymer-layout":"Polymer/polymer-layout",
       "polymer-flex-layout":"Polymer/polymer-flex-layout",
-      "polymer-localstorage":"Polymer/polymer-localstorage",
       "polymer-ui-toggle-button":"Polymer/polymer-ui-toggle-button"
 
   }

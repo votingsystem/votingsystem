@@ -204,7 +204,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(
                 USER_CERT_ALIAS, null);
         return keyEntry;
-    }       
+    }
 
     public X509Certificate getX509UserCert() throws CertificateException, UnrecoverableEntryException,
             NoSuchAlgorithmException, KeyStoreException, IOException {
