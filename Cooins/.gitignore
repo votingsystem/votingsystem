@@ -1,17 +1,10 @@
 /web-app/android
-/web-app/ckeditor
 /web-app/tools
-/web-app/polymer
-
-/web-app/designer
-/web-app/topeka
-/web-app/polymer-tutorial
-
+/web-app/bower_components
 
 /build
 /logs
 /target
-/target-eclipse
 /VotingSystem
 .CooinReports
 wrapper
