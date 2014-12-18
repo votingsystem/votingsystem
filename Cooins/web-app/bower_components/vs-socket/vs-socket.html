@@ -1,0 +1,103 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element to make websocket connections
+
+https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+
+##### Example
+
+    <vs-socket></vs-socket>
+
+@element vs-socket
+@blurb A very specific component for votingsystem project.
+@status alpha
+@homepage http://votingsystem.github.io/vs-socket
+-->
+<polymer-element name="vs-socket" attributes="socketservice">
+    <template>
+        <content></content>
+    </template>
+
+    <script>
+
+        Polymer('vs-socket', {
+            /**
+             * The URL of the socket service
+             *
+             * @attribute socketservice
+             * @type string
+             */
+            socketservice: null,
+
+            websocket:null,
+            message:null,
+
+            socketserviceChanged:function() {
+                if(this.socketservice == null || "" == this.socketservice) return
+                this.log("connecting to: " + this.socketservice)
+                try {
+                    if ('WebSocket' in window) {
+                        this.websocket = new WebSocket(this.socketservice);
+                    } else if ('MozWebSocket' in window) {
+                        this.websocket = new MozWebSocket(this.socketservice);
+                    } else {
+                        this.log("Browser without socket support")
+                        return;
+                    }
+                } catch(ex) {this.log(ex)}
+
+                this.websocket.onopen = function () {
+                    this.log('Info: WebSocket connection opened.');
+                    if(this.message != null) {
+                        this.log('Sending pending message');
+                        this.sendMessage(this.message)
+                        this.message = null
+                    }
+                }.bind(this);
+                this.websocket.onmessage = function (event) {
+                    this.log('Received: ' + event.data);
+                    this.onMessage(JSON.parse(event.data))
+                }.bind(this);
+                this.websocket.onclose = function (event) {
+                    this.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
+                }.bind(this);
+            },
+
+            log:function(message) {
+                console.log(this.tagName + " - " + this.id +" - " + message)
+            },
+
+            ready: function() { },
+
+            /**
+             * The `sendMessage` method will send a message to the websocket service
+             *
+             * @method sendMessage
+             * @param {String} message The message to send
+             */
+            sendMessage: function(message) {
+                try {
+                    this.websocket.send(message);
+                } catch(ex) {
+                    this.log(ex)
+                    this.message = message
+                }
+            },
+
+            /**
+             * Fire response signal
+             *
+             * @method onMessage
+             */
+            onMessage: function(data) {
+                if(data.coreSignal != null) this.fire('core-signal', {name: data.coreSignal, data: data});
+                this.fire('on-message', data);
+            }
+
+        });
+
+
+    </script>
+
+</polymer-element>

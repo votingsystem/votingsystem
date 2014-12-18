@@ -1,0 +1,28 @@
+{
+  "name": "vs-texteditor",
+  "version": "0.3.1",
+  "authors": [
+    "JJ <jgzornoza@gmail.com>"
+  ],
+  "description": "Voting system text editor",
+  "keywords": "voting-system, web-components",
+  "main": "vs-texteditor.html",
+  "license": "Licensed under the Apache License, Version 2.0",
+  "homepage": "https://github.com/votingsystem/vs-texteditor",
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.4.0",
+    "ckeditor": "ckeditor#~4.4.4"
+  },
+  "_release": "0.3.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.3.1",
+    "commit": "a5f5a0c79242ec1cd21718e48efe9f0779363fa5"
+  },
+  "_source": "git://github.com/votingsystem/vs-texteditor.git",
+  "_target": "~0.3.1",
+  "_originalSource": "vs-texteditor"
+}
