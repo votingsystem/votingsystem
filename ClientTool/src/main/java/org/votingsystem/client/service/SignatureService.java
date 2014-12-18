@@ -379,11 +379,10 @@ public class SignatureService extends Service<ResponseVS> {
                         getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     JSONArray deviceArray = ((JSONObject) responseVS.getMessageJSON()).getJSONArray("deviceList");
-                    List<JSONObject> connectedDevices = new ArrayList<>();
                     for (int i = 0; i < deviceArray.size(); i++) {
                         DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
                         JSONObject socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
-                                JSONSerializer.toJSON(operationVS.getDocumentToEncrypt()).toString());
+                                operationVS.getMessage());
                         WebSocketServiceAuthenticated.getInstance().sendMessage(socketMsg.toString());
                     }
                     responseVS = new ResponseVS(ResponseVS.SC_OK);

@@ -59,7 +59,7 @@
                 if(this.messageVS.trim() == "") return
 
                 var webAppMessage = new WebAppMessage(Operation.MESSAGEVS)
-                webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS, messageContent:this.messageVS}
+                webAppMessage.message = this.messageVS
                 webAppMessage.nif = this.uservs.nif
                 webAppMessage.contentType = 'application/messagevs'
                 webAppMessage.setCallback(function(appMessage) {

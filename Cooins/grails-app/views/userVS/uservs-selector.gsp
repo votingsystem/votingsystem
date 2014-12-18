@@ -40,7 +40,7 @@
                     <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;"><g:message code="contactsLbl"/></div>
                     <div>
                         <paper-button raised on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
-                            <i class="fa fa-search"></i> <g:message code="searchLbl"/>
+                            <i class="fa fa-search"></i> <g:message code="userSearchLbl"/>
                         </paper-button>
                     </div>
                 </div>

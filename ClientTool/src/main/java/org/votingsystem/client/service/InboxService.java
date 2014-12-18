@@ -7,6 +7,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.InboxDialog;
+import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
@@ -38,7 +39,7 @@ public class InboxService {
 
     private static Logger log = Logger.getLogger(InboxService.class);
 
-    private List<WebSocketMessage> webSocketMessageList = new ArrayList<>();
+    private List<WebSocketMessage> socketMsgList = new ArrayList<>();
     private WebSocketMessage timeLimitedWebSocketMessage;
     private File messagesFile;
     private static final InboxService INSTANCE = new InboxService();
@@ -59,7 +60,7 @@ public class InboxService {
             }
             else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
             for(int i = 0; i < messageArray.size(); i++) {
-                webSocketMessageList.add(new WebSocketMessage((net.sf.json.JSONObject) messageArray.get(i)));
+                socketMsgList.add(new WebSocketMessage((net.sf.json.JSONObject) messageArray.get(i)));
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -76,7 +77,7 @@ public class InboxService {
         inboxButton.setOnAction((event) -> {
             consumeMessageToDevice(ContextVS.getMessage("inboxPinDialogMsg"), false);
         });
-        if(webSocketMessageList.size() > 0) inboxButton.setVisible(true);
+        if(socketMsgList.size() > 0) inboxButton.setVisible(true);
         else inboxButton.setVisible(false);
     }
 
@@ -112,40 +113,44 @@ public class InboxService {
         });
     }
 
-    public void addMessage(WebSocketMessage webSocketMessage) {
-        webSocketMessage.setDate(Calendar.getInstance().getTime());
-        if(!webSocketMessage.isTimeLimited()) {
-            webSocketMessageList.add(webSocketMessage);
+    public void addMessage(WebSocketMessage socketMsg) {
+        socketMsg.setDate(Calendar.getInstance().getTime());
+        if(!socketMsg.isTimeLimited()) {
+            socketMsgList.add(socketMsg);
             PlatformImpl.runLater(() -> inboxButton.setVisible(true));
             flush();
-        } else timeLimitedWebSocketMessage = webSocketMessage;
-        consumeMessageToDevice(null, webSocketMessage.isTimeLimited());
+        } else timeLimitedWebSocketMessage = socketMsg;
+        consumeMessageToDevice(null, socketMsg.isTimeLimited());
     }
 
-    public void removeMessage(WebSocketMessage webSocketMessage) {
-        webSocketMessageList = webSocketMessageList.stream().filter(m -> !m.getUUID().equals(
-                webSocketMessage.getUUID())).collect(Collectors.toList());
-        if(webSocketMessageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
+    public void removeMessage(WebSocketMessage socketMsg) {
+        socketMsgList = socketMsgList.stream().filter(m -> !m.getUUID().equals(
+                socketMsg.getUUID())).collect(Collectors.toList());
+        if(socketMsgList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
         flush();
     }
 
-    public void processMessage(WebSocketMessage webSocketMessage) {
-        if(webSocketMessage.getState() == WebSocketMessage.State.LAPSED) {
-            log.debug("discarding LAPSED message");
-            return;
+    public void processMessage(WebSocketMessage socketMsg) {
+        switch(socketMsg.getState()) {
+            case LAPSED:
+                log.debug("discarding LAPSED message");
+                return;
+            case REMOVED:
+                removeMessage(socketMsg);
+                return;
         }
-        switch(webSocketMessage.getOperation()) {
+        switch(socketMsg.getOperation()) {
             case COOIN_WALLET_CHANGE:
                 PasswordDialog passwordDialog = new PasswordDialog();
                 passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
                 String password = passwordDialog.getPassword();
                 if(password != null) {
                     try {
-                        Wallet.saveToWallet(webSocketMessage.getCooinList(), password);
+                        Wallet.saveToWallet(socketMsg.getCooinList(), password);
                         NotificationService.getInstance().postToEventBus(
-                                webSocketMessage.setState(WebSocketMessage.State.PROCESSED));
-                        removeMessage(webSocketMessage);
-                        WebSocketServiceAuthenticated.getInstance().sendMessage(webSocketMessage.getResponse(
+                                socketMsg.setState(WebSocketMessage.State.PROCESSED));
+                        removeMessage(socketMsg);
+                        WebSocketServiceAuthenticated.getInstance().sendMessage(socketMsg.getResponse(
                                 ResponseVS.SC_OK, null).toString());
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
@@ -155,24 +160,27 @@ public class InboxService {
                     }
                 }
                 break;
-            default:
+            case MESSAGEVS:
+                showMessage(socketMsg.getMessage());
+                break;
+            default:log.debug(socketMsg.getOperation() + " not processed");
         }
     }
 
     public List<WebSocketMessage> getMessageList() {
-        return new ArrayList<>(webSocketMessageList);
+        return new ArrayList<>(socketMsgList);
     }
 
     public void resetMessageList() {
-        webSocketMessageList = new ArrayList<>();
+        socketMsgList = new ArrayList<>();
     }
 
     private void flush() {
         log.debug("flush");
         try {
             JSONArray messageArray = new JSONArray();
-            for(WebSocketMessage webSocketMessage: webSocketMessageList) {
-                messageArray.add(webSocketMessage.getMessageJSON());
+            for(WebSocketMessage socketMsg: socketMsgList) {
+                messageArray.add(socketMsg.getMessageJSON());
             }
             FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), messagesFile);
         } catch(Exception ex) {

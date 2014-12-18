@@ -10,7 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.service.InboxService;
+import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.util.CooinStatusChecker;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
@@ -19,7 +19,6 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,30 +30,26 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
 
     private static Logger log = Logger.getLogger(InboxMessageRow.class);
 
-    public interface Listener {
-        public void removeMessage(WebSocketMessage webSocketMessage);
-    }
-
     @FXML private HBox mainPane;
     @FXML private Label descriptionLbl;
     @FXML private Label dateLbl;
     @FXML private Button messageButton;
     @FXML private Button removeButton;
-    private WebSocketMessage webSocketMessage;
-    private Listener listener;
+    private WebSocketMessage socketMsg;
 
-    public  InboxMessageRow(WebSocketMessage webSocketMessage, Listener listener) throws IOException {
-        this.webSocketMessage = webSocketMessage;
-        this.listener = listener;
+    public  InboxMessageRow(WebSocketMessage socketMsg) throws IOException {
+        this.socketMsg = socketMsg;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/InboxMessageRow.fxml"));
         fxmlLoader.setController(this);
         fxmlLoader.load();
     }
 
     @FXML void initialize() { // This method is called by the FXMLLoader when initialization is complete
+        messageButton.setWrapText(true);
         removeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        removeButton.setOnAction((event) -> listener.removeMessage(webSocketMessage));
-        if(webSocketMessage.isTimeLimited()) {
+        removeButton.setOnAction((event) ->
+                InboxDialog.getInstance().processMessage(socketMsg.setState(WebSocketMessage.State.REMOVED)));
+        if(socketMsg.isTimeLimited()) {
             Task task = new Task() {
                 @Override protected Object call() throws Exception {
                     AtomicInteger secondsOpened = new AtomicInteger(0);
@@ -64,22 +59,25 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
                                         WebSocketMessage.TIME_LIMITED_MESSAGE_LIVE - secondsOpened.getAndIncrement())));
                         Thread.sleep(1000);
                     }
-                    listener.removeMessage(webSocketMessage);
+                    InboxDialog.getInstance().processMessage(socketMsg.setState(WebSocketMessage.State.REMOVED));
                     return null;
                 }
             };
             new Thread(task).start();
-        } else dateLbl.setText(DateUtils.getDayWeekDateStr(webSocketMessage.getDate()));
-        switch(webSocketMessage.getOperation()) {
+        } else dateLbl.setText(DateUtils.getDayWeekDateStr(socketMsg.getDate()));
+        switch(socketMsg.getOperation()) {
             case COOIN_WALLET_CHANGE:
-                messageButton.setWrapText(true);
                 messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                descriptionLbl.setText(MsgUtils.getCooinChangeWalletMsg(webSocketMessage));
-                new Thread(new CooinStatusChecker(webSocketMessage.getCooinList(), this)).start();
+                descriptionLbl.setText(MsgUtils.getCooinChangeWalletMsg(socketMsg));
+                new Thread(new CooinStatusChecker(socketMsg.getCooinList(), this)).start();
+                break;
+            case MESSAGEVS:
+                messageButton.setText(ContextVS.getMessage("messagevs_lbl"));
+                descriptionLbl.setText(socketMsg.getMessageTruncated());
                 break;
             default:
-                descriptionLbl.setText(webSocketMessage.getOperation().toString());
-                messageButton.setText(webSocketMessage.getOperation().toString());
+                descriptionLbl.setText(socketMsg.getOperation().toString());
+                messageButton.setText(socketMsg.getOperation().toString());
         }
 
     }
@@ -87,12 +85,12 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
     @Override public void processCooinStatus(Cooin cooin, Integer statusCode) {
         if(ResponseVS.SC_OK != statusCode) {
             log.debug("Cooin '" + cooin.getHashCertVS() + "' - statusCode: " + statusCode);
-            listener.removeMessage(webSocketMessage);
+            InboxDialog.getInstance().processMessage(socketMsg.setState(WebSocketMessage.State.REMOVED));
         }
     }
 
     public void onClickMessageButton(ActionEvent actionEvent) {
-        InboxService.getInstance().processMessage(webSocketMessage);
+        InboxDialog.getInstance().processMessage(socketMsg);
     }
 
     public HBox getMainPane() {

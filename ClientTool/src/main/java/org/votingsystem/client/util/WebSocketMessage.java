@@ -33,8 +33,9 @@ public class WebSocketMessage {
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
+    public static final int TRUNCATED_MSG_SIZE = 80; //seconds
 
-    public enum State {PENDING, PROCESSED, LAPSED}
+    public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private String sessionId;
@@ -272,7 +273,7 @@ public class WebSocketMessage {
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("toUser", toUser);
-        encryptedDataMap.put("textToSign", textToEncrypt);
+        encryptedDataMap.put("message", textToEncrypt);
         AESParams aesParams = new AESParams();
         VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(
                 aesParams, deviceVS, null, TypeVS.MESSAGEVS));
@@ -296,6 +297,7 @@ public class WebSocketMessage {
     private void loadDecryptedContent(JSONObject decryptedJSON) throws Exception {
         if(decryptedJSON.has("operation")) operation = TypeVS.valueOf(decryptedJSON.getString("operation"));
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
+        if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
         if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
         if(decryptedJSON.has("smimeMessage")) {
             byte[] smimeMessageBytes = Base64.getDecoder().decode(decryptedJSON.getString("smimeMessage").getBytes());
@@ -314,6 +316,12 @@ public class WebSocketMessage {
         if(decryptedJSON.has("aesParams")) {
             this.aesParams = AESParams.load(decryptedJSON.getJSONObject("aesParams"));
         }
+    }
+
+    public String getMessageTruncated() {
+        if(message != null && message.length() > TRUNCATED_MSG_SIZE)
+            return message.substring(0, TRUNCATED_MSG_SIZE) + "...";
+        else return message;
     }
 
     public static String getWebSocketCoreSignalJSCommand(JSONObject messageJSON, ConnectionStatus status) {

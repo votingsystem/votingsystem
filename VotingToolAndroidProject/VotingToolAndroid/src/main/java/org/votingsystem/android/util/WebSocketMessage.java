@@ -3,9 +3,8 @@ package org.votingsystem.android.util;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
 
-import org.json.JSONArray;
+import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -23,6 +22,7 @@ import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ResponseVS;
 
+import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -47,6 +47,7 @@ public class WebSocketMessage implements Parcelable {
     private String sessionId;
     private String caption;
     private String message;
+    private String deviceFromName;
     private String url;
     private AESParams aesParams;
     private String serviceCaller = ContextVS.WEB_SOCKET_BROADCAST_ID;
@@ -180,14 +181,18 @@ public class WebSocketMessage implements Parcelable {
                 messageJSON.getString("encryptedMessage").getBytes());
     }
 
-    public void loadDecryptedJSON(JSONObject decryptedJSON) throws JSONException, ParseException,
-            NoSuchAlgorithmException {
+    public void loadDecryptedJSON(JSONObject decryptedJSON) throws Exception {
         this.operationVS =  OperationVS.parse(decryptedJSON).setSessionId(
                 getSessionId()).setUUID(UUID);
         if(decryptedJSON.has("aesParams")) this.aesParams = AESParams.load(
                 decryptedJSON.getJSONObject("aesParams"));
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
         if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
+        if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
+        if(decryptedJSON.has("smimeMessage")) {
+            byte[] smimeMessageBytes = Base64.decode(decryptedJSON.getString("smimeMessage").getBytes());
+            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+        }
     }
 
     public OperationVS getOperationVS() {
@@ -319,7 +324,7 @@ public class WebSocketMessage implements Parcelable {
         encryptedDataMap.put("statusCode", statusCode);
         encryptedDataMap.put("message", message);
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
-        encryptedDataMap.put("smimeMessage", Base64.encodeToString(smimeMessage.getBytes(), Base64.DEFAULT));
+        encryptedDataMap.put("smimeMessage", new String(Base64.encode(smimeMessage.getBytes())));
         AESParams aesParams = contextVS.getSessionKey(operationVS.getUUID());
         result.put("encryptedMessage", Encryptor.encryptAES(
                 new JSONObject(encryptedDataMap).toString(), aesParams));
@@ -349,8 +354,7 @@ public class WebSocketMessage implements Parcelable {
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
-        messageToDevice.put("encryptedMessage", Base64.encodeToString(encryptedRequestBytes,
-                Base64.DEFAULT));
+        messageToDevice.put("encryptedMessage", new String(Base64.encode(encryptedRequestBytes)));
         return new JSONObject(messageToDevice);
     }
 

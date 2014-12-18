@@ -33,7 +33,7 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
+public class InboxDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(InboxDialog.class);
 
@@ -88,12 +88,17 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
         });
     }
 
+    public static InboxDialog getInstance() { return dialog;}
 
-    @Override public void removeMessage(WebSocketMessage webSocketMessage) {
-        log.debug("removeMessage - operation: " + webSocketMessage.getOperation());
-        messageMap.remove(webSocketMessage);
-        InboxService.getInstance().removeMessage(webSocketMessage);
-        if(getStage().isShowing()) refreshView();
+   public void processMessage(WebSocketMessage socketMsg) {
+        log.debug("processMessage - operation: " + socketMsg.getOperation());
+       switch(socketMsg.getState()) {
+           case REMOVED:
+               messageMap.remove(socketMsg);
+               if(getStage().isShowing()) refreshView();
+               break;
+       }
+        InboxService.getInstance().processMessage(socketMsg);
     }
 
     class EventBusMessageListener {
@@ -127,7 +132,7 @@ public class InboxDialog extends DialogVS implements InboxMessageRow.Listener {
                 for(WebSocketMessage socketMsg : messageList) {
                     updateProgress(i++, messageList.size());
                     if(socketMsg.isEncrypted()) socketMsg.decryptMessage(privateKey);
-                    messageMap.put(socketMsg, new InboxMessageRow(socketMsg, InboxDialog.this).getMainPane());
+                    messageMap.put(socketMsg, new InboxMessageRow(socketMsg).getMainPane());
                 }
                 refreshView();
             } catch(Exception ex) {
