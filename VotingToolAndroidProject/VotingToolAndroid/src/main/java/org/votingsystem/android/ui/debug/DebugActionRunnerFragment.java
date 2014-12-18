@@ -15,6 +15,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.ui.debug.actions.BrowserVSAction;
 import org.votingsystem.android.ui.debug.actions.DeleteDBAction;
 import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
 import org.votingsystem.android.ui.debug.actions.PrefsAction;
@@ -40,6 +41,8 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new DeleteDBAction()));
+        tests.addView(createTestAction(new BrowserVSAction(
+                (AppContextVS) getActivity().getApplicationContext())));
         setHasOptionsMenu(true);
         return rootView;
     }

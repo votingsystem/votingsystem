@@ -77,14 +77,15 @@ public abstract class ActivityBase extends ActionBarActivity {
     // symbols for navdrawer items (indices must correspond to array below). This is
     // not a list of items that are necessarily *present* in the Nav Drawer; rather,
     // it's a list of all possible items.
-    protected static final int NAVDRAWER_ITEM_POLLS = 0;
-    protected static final int NAVDRAWER_ITEM_REPRESENTATIVES = 1;
-    protected static final int NAVDRAWER_ITEM_RECEIPTS = 2;
-    protected static final int NAVDRAWER_ITEM_COOIN_ACCOUNTS = 3;
-    protected static final int NAVDRAWER_ITEM_WALLET = 4;
-    protected static final int NAVDRAWER_ITEM_SETTINGS = 5;
-    protected static final int NAVDRAWER_ITEM_INVALID = -1;
-    protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
+    protected static final int NAVDRAWER_ITEM_POLLS             = 0;
+    protected static final int NAVDRAWER_ITEM_REPRESENTATIVES   = 1;
+    protected static final int NAVDRAWER_ITEM_RECEIPTS          = 2;
+    protected static final int NAVDRAWER_ITEM_COOIN_ACCOUNTS    = 3;
+    protected static final int NAVDRAWER_ITEM_WALLET            = 4;
+    protected static final int NAVDRAWER_ITEM_SETTINGS          = 5;
+    protected static final int NAVDRAWER_ITEM_CONTACTS          = 6;
+    protected static final int NAVDRAWER_ITEM_INVALID           = -1;
+    protected static final int NAVDRAWER_ITEM_SEPARATOR         = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
 
     // titles for navdrawer items (indices must correspond to the above)
@@ -95,6 +96,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.string.cooin_accounts_lbl,
             R.string.wallet_lbl,
             R.string.navdrawer_item_settings,
+            R.string.contacts_lbl
     };
 
     // icons for navdrawer items (indices must correspond to above array)
@@ -105,6 +107,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.drawable.fa_bank_32,
             R.drawable.fa_money_32,
             R.drawable.ic_drawer_settings,
+            R.drawable.fa_user_32
     };
 
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
@@ -252,6 +255,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
         mNavDrawerItems.add(NAVDRAWER_ITEM_COOIN_ACCOUNTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_WALLET);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_CONTACTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
         mNavDrawerItems.add(NAVDRAWER_ITEM_RECEIPTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
@@ -413,6 +417,11 @@ public abstract class ActivityBase extends ActionBarActivity {
                 break;
             case NAVDRAWER_ITEM_WALLET:
                 intent = new Intent(this, WalletActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case NAVDRAWER_ITEM_CONTACTS:
+                intent = new Intent(this, ContactsMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;

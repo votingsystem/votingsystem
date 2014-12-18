@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -36,7 +38,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSActivity extends ActivityBase {
+public class BrowserVSActivity extends ActionBarActivity {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
@@ -88,6 +90,8 @@ public class BrowserVSActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
+        setSupportActionBar(toolbar);
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
         }
@@ -108,6 +112,7 @@ public class BrowserVSActivity extends ActivityBase {
         webSettings.setJavaScriptEnabled(true);
         webView.addJavascriptInterface(this, "clientTool");
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 if(jsCommand != null) webView.loadUrl(jsCommand);

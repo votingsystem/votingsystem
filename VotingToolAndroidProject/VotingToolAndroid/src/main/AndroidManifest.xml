@@ -38,6 +38,18 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
         </activity>
 
+        <activity android:name=".activity.ContactsMainActivity"
+            android:label="@string/contacts_lbl" android:theme="@style/ThemeVS">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
+        </activity>
+
+        <activity android:name=".activity.ContactPagerActivity"
+            android:theme="@style/ThemeVS"/>
+
         <activity android:name=".activity.EventVSNewActivity"
             android:label="@string/publish_poll_lbl" android:theme="@style/ThemeVS"/>
 
@@ -125,7 +137,7 @@
         <!-- The attribute "android:exported" must be set to "false" to restrict this content
             provider to its own app. Otherwise, all apps could access it. -->
         <provider android:name=".contentprovider.UserContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.representative"/>
+            android:exported="false" android:authorities="votingsystem.org.uservs"/>
 
         <provider android:name=".contentprovider.EventVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.eventvs"/>

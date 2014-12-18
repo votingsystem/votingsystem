@@ -486,4 +486,9 @@
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
     <string name="messagevs_caption">mensaje cifrado</string>
+    <string name="contacts_lbl">contactos</string>
+    <string name="contact_lbl">contacto</string>
+    <string name="send_money_lbl">hacer ingreso</string>
+    <string name="remove_contact_lbl">borrar contacto</string>
+    <string name="add_contact_lbl">añadir contacto</string>
 </resources>

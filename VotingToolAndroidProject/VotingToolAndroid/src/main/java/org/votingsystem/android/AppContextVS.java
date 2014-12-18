@@ -1,15 +1,15 @@
 package org.votingsystem.android;
 
 import android.app.Application;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Html;
 
 import org.json.JSONObject;
 import org.votingsystem.android.activity.MessageActivity;
@@ -22,6 +22,7 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketConnection;
 import org.votingsystem.android.util.WebSocketMessage;
+import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -36,7 +37,6 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
@@ -87,6 +88,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private String cooinServerURL;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
+    private AtomicInteger notificationId = new AtomicInteger(1);
 
     @Override public void onCreate() {
         try {
@@ -303,27 +305,24 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public CooinServer getCooinServer() {
-        if(cooinServer == null) {
-            cooinServer = (CooinServer) getActorVS(cooinServerURL);
-        }
+        if(cooinServer == null) cooinServer = (CooinServer) getActorVS(cooinServerURL);
         return cooinServer;
     }
 
     public void showNotification(ResponseVS responseVS){
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
+        final NotificationManager mgr = (NotificationManager)this.getSystemService(NOTIFICATION_SERVICE);
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 COOIN_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
-                responseVS.getNotificationMessage())).setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
+                .setAutoCancel(true).setContentTitle(responseVS.getCaption())
+                .setContentText(responseVS.getNotificationMessage()).setSound(soundUri);
         if(responseVS.getIconId() != null) builder.setSmallIcon(responseVS.getIconId());
-        Notification note = builder.build();
-        note.flags |= Notification.FLAG_AUTO_CANCEL; // hide the notification after its selected
-        //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.VOTING_SYSTEM_NOTIFICATION_ID, note);
+        else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
+        mgr.notify(notificationId.getAndIncrement(), builder.build());
     }
 
     public void broadcastResponse(ResponseVS responseVS, ArgVS... args ) {
@@ -388,7 +387,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
                         responseVS.setCaption(getString(R.string.messagevs_caption)).
-                                setNotificationMessage(getString(R.string.messagevs_caption));
+                                setNotificationMessage(socketMsg.getMessage());
                         showNotification(responseVS);
                     }
                     break;

@@ -238,7 +238,7 @@ public class RepresentativeService extends IntentService {
                 JSONObject requestJSON = new JSONObject(responseVS.getMessage());
                 UserVS representative = UserVS.parse(requestJSON);
                 representative.setImageBytes(representativeImageBytes);
-                Uri representativeURI = UserContentProvider.getRepresentativeURI(
+                Uri representativeURI = UserContentProvider.getUserVSURI(
                         representative.getId());
                 getContentResolver().insert(UserContentProvider.CONTENT_URI,
                         UserContentProvider.getContentValues(representative));

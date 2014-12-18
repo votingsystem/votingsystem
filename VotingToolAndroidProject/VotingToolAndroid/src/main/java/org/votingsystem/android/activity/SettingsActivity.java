@@ -22,11 +22,13 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 public class SettingsActivity extends PreferenceActivity

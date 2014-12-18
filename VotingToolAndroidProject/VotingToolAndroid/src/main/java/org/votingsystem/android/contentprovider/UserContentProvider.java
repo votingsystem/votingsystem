@@ -30,9 +30,9 @@ public class UserContentProvider extends ContentProvider {
     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DB_NAME = "voting_system_representatives.db";
-    private static final String TABLE_NAME = "representatives";
-    public static final String AUTHORITY = "votingsystem.org.representative";
+    private static final String DB_NAME = "voting_system_uservs.db";
+    private static final String TABLE_NAME = "uservs";
+    public static final String AUTHORITY = "votingsystem.org.uservs";
 
     public static final String ID_COL                  = "_id";
     public static final String URL_COL                 = "url";
@@ -50,7 +50,7 @@ public class UserContentProvider extends ContentProvider {
     private static final int ALL_ITEMS     = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "representative";
+    private static final String BASE_PATH = "uservs";
 
     private static Long numTotalRepresentatives = null;
 
@@ -65,8 +65,8 @@ public class UserContentProvider extends ContentProvider {
     // Here's the public URI used to query for representative items.
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getRepresentativeURI(Long representativeId) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + representativeId);
+    public static Uri getUserVSURI(Long userVSId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + userVSId);
     }
 
     @Override public boolean onCreate() {
@@ -89,9 +89,9 @@ public class UserContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/representative"; // List of items.
+                return "vnd.android.cursor.dir/uservs"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/representative"; // Specific item.
+                return "vnd.android.cursor.item/uservs"; // Specific item.
             default:
                 return null;
         }

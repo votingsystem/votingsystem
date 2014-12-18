@@ -60,6 +60,7 @@ public class ContextVS {
     public static final String DATE_KEY = "DATE_KEY";
     public static final String JS_COMMAND_KEY = "JS_COMMAND_KEY";
     public static final String FORM_DATA_KEY = "FORM_DATA";
+    public static final String JSON_DATA_KEY = "JSON_DATA";
     public static final String NIF_KEY = "NIF";
     public static final String USER_KEY = "USER_KEY";
     public static final String EMAIL_KEY = "EMAIL_KEY";
@@ -115,12 +116,12 @@ public class ContextVS {
     public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;
 
     //Notifications IDs
-    public static final int VOTING_SYSTEM_NOTIFICATION_ID            = 1;
-    public static final int RSS_SERVICE_NOTIFICATION_ID            = 1;
-    public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 2;
-    public static final int VOTE_SERVICE_NOTIFICATION_ID           = 3;
-    public static final int REPRESENTATIVE_SERVICE_NOTIFICATION_ID = 4;
-    public static final int COOIN_SERVICE_NOTIFICATION_ID         = 5;
+    public static final int VOTING_SYSTEM_NOTIFICATION_ID          = 1;
+    public static final int RSS_SERVICE_NOTIFICATION_ID            = 2;
+    public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 3;
+    public static final int VOTE_SERVICE_NOTIFICATION_ID           = 4;
+    public static final int REPRESENTATIVE_SERVICE_NOTIFICATION_ID = 5;
+    public static final int COOIN_SERVICE_NOTIFICATION_ID          = 6;
 
     public static final int NUM_MIN_OPTIONS = 2;
 

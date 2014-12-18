@@ -9,8 +9,10 @@ import org.votingsystem.signature.util.CertUtils;
 import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +24,7 @@ public class UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
+    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS, CONTACT}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
 
@@ -340,6 +342,15 @@ public class UserVS implements Serializable {
         if (userJSON.has("lastName"))  userVS.setLastName(userJSON.getString("lastName"));
         if (userJSON.has("description")) userVS.setDescription(userJSON.getString("description"));
         return userVS;
+    }
+
+    public static List<UserVS> parseList(JSONObject usersJSON) throws Exception {
+        List<UserVS> result = new ArrayList<>();
+        JSONArray usersArray = usersJSON.getJSONArray("userVSList");
+        for(int i = 0; i < usersArray.length(); i++) {
+            result.add(UserVS.parse(usersArray.getJSONObject(i)));
+        }
+        return result;
     }
 
     public JSONObject toJSON() throws Exception {

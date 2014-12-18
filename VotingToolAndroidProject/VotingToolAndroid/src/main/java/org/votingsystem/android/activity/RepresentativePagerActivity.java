@@ -14,6 +14,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.UserVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -41,8 +42,9 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         RepresentativePagerAdapter pagerAdapter = new RepresentativePagerAdapter(
                 getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(UserContentProvider.CONTENT_URI,
-                null, null, null, null);
+        String selection = UserContentProvider.TYPE_COL + " =? ";
+        cursor = getContentResolver().query(UserContentProvider.CONTENT_URI, null, selection,
+                new String[]{UserVS.Type.REPRESENTATIVE.toString()}, null);
         cursor.moveToFirst();
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {

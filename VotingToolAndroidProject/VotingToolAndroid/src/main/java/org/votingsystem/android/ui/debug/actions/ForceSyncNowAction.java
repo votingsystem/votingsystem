@@ -9,10 +9,10 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.ui.debug.DebugAction;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
 
 public class ForceSyncNowAction implements DebugAction {
-    private static final String TAG = makeLogTag(ForceSyncNowAction.class);
+
+    private static final String TAG = ForceSyncNowAction.class.getSimpleName();
 
     private AppContextVS appContext;
 

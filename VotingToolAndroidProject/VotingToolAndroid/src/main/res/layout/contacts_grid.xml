@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/search_query"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="@color/progress_text"
+        android:visibility="gone"
+        android:gravity="center_vertical|center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:textColor="@color/empty_msg"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/empty_search_lbl"/>
+
+
+    <FrameLayout android:id="@+id/gridContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <GridView android:id="@+id/gridview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:columnWidth="250dp"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="7dp"
+            android:horizontalSpacing="7dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center"
+            android:drawSelectorOnTop="false"/>
+    </FrameLayout>
+</RelativeLayout>

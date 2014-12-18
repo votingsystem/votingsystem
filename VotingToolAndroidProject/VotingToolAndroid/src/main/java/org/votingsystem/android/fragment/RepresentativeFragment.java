@@ -82,7 +82,7 @@ public class RepresentativeFragment extends Fragment {
                 " - arguments: " + getArguments());
         representativeId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
         Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
-                getRepresentativeURI(representativeId), null, null, null, null);
+                getUserVSURI(representativeId), null, null, null, null);
         cursor.moveToFirst();
         final UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
