@@ -156,6 +156,9 @@ public class DeviceVS implements Serializable {
         DeviceVS deviceVS = new DeviceVS();
         deviceVS.setId(jsonObject.getLong("id"));
         deviceVS.setDeviceName(jsonObject.getString("deviceName"));
+        deviceVS.setEmail(jsonObject.getString("email"));
+        deviceVS.setPhone(jsonObject.getString("phone"));
+        deviceVS.setDeviceId(jsonObject.getString("deviceId"));
         Collection<X509Certificate>  certChain = CertUtils.fromPEMToX509CertCollection(
                 jsonObject.getString("certPEM").getBytes());
         deviceVS.setX509Certificate(certChain.iterator().next());

@@ -142,7 +142,7 @@ public abstract class ActivityBase extends ActionBarActivity {
                         break;
                 }
             } else if(socketMsg != null) {
-                LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getTypeVS());
+                LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getOperation());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
                 setConnectionStatusUI();
                 if(ResponseVS.SC_ERROR == socketMsg.getStatusCode())
@@ -270,7 +270,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
-                if(contextVS.getWebSocketSession() == null) {
+                if(contextVS.getWebSocketConnection() == null) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
                 } else {showConnectionStatusDialog();}
@@ -446,7 +446,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private void setConnectionStatusUI() {
-        if(contextVS.getWebSocketSession() != null) {
+        if(contextVS.getWebSocketConnection() != null) {
             connectionStatusText.setText(getString(R.string.connected_lbl));
             connectionStatusView.setVisibility(View.VISIBLE);
         } else {
@@ -513,7 +513,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private void showConnectionStatusDialog() {
-        if(contextVS.getWebSocketSession() != null) {
+        if(contextVS.getWebSocketConnection() != null) {
             UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);

@@ -89,8 +89,8 @@ public class Utils {
     public static void toggleWebSocketServiceConnection(AppContextVS contextVS) {
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(contextVS.getWebSocketSession() != null &&
-                contextVS.getWebSocketSession().getSessionId() != null)
+        if(contextVS.getWebSocketConnection() != null &&
+                contextVS.getWebSocketConnection().getSessionId() != null)
             typeVS = TypeVS.WEB_SOCKET_CLOSE;
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);

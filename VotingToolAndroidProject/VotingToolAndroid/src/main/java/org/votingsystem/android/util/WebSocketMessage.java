@@ -17,19 +17,19 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.SessionVS;
 import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.mail.MessagingException;
 
 
 /**
@@ -40,7 +40,10 @@ public class WebSocketMessage implements Parcelable {
 
     private static final String TAG = WebSocketMessage.class.getSimpleName();
 
-    private TypeVS typeVS;
+    public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
+    public static final int TRUNCATED_MSG_SIZE = 80; //chars
+
+    private TypeVS operation;
     private Integer statusCode = ResponseVS.SC_PROCESSING;
     private Long userId;
     private String UUID;
@@ -48,6 +51,7 @@ public class WebSocketMessage implements Parcelable {
     private String caption;
     private String message;
     private String deviceFromName;
+    private SMIMEMessage smimeMessage;
     private String url;
     private AESParams aesParams;
     private String serviceCaller = ContextVS.WEB_SOCKET_BROADCAST_ID;
@@ -56,10 +60,10 @@ public class WebSocketMessage implements Parcelable {
 
     public WebSocketMessage() {}
 
-    public WebSocketMessage(Integer statusCode, String message, TypeVS typeVS) {
+    public WebSocketMessage(Integer statusCode, String message, TypeVS operation) {
         this.statusCode = statusCode;
         this.message = message;
-        this.typeVS = typeVS;
+        this.operation = operation;
     }
 
     public static final Parcelable.Creator<WebSocketMessage> CREATOR =
@@ -79,7 +83,7 @@ public class WebSocketMessage implements Parcelable {
     public WebSocketMessage(Parcel source) {
         // Must read values in the same order as they were placed in. The
         // generic 'readValues' instead of the typed vesions are for the null values
-        typeVS = (TypeVS) source.readSerializable();
+        operation = (TypeVS) source.readSerializable();
         operationVS = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
         statusCode = (Integer) source.readValue(Integer.class.getClassLoader());
         userId = (Long) source.readValue(Long.class.getClassLoader());
@@ -97,7 +101,7 @@ public class WebSocketMessage implements Parcelable {
     }
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeSerializable(typeVS);
+        parcel.writeSerializable(operation);
         parcel.writeParcelable(operationVS, flags);
         parcel.writeValue(statusCode);
         parcel.writeValue(userId);
@@ -157,7 +161,7 @@ public class WebSocketMessage implements Parcelable {
             messageJSON = new JSONObject(message);
             if(messageJSON.has("UUID")) UUID = messageJSON.getString("UUID");
             if(messageJSON.has("operation"))
-                setTypeVS(TypeVS.valueOf(messageJSON.getString("operation")));
+                setOperation(TypeVS.valueOf(messageJSON.getString("operation")));
             if(messageJSON.has("statusCode"))
                 setStatusCode(messageJSON.getInt("statusCode"));
             if(messageJSON.has("userId")) setUserId(messageJSON.getLong("userId"));
@@ -177,8 +181,7 @@ public class WebSocketMessage implements Parcelable {
     }
 
     public byte[] getEncryptedMessage() throws JSONException {
-        return org.bouncycastle2.util.encoders.Base64.decode(
-                messageJSON.getString("encryptedMessage").getBytes());
+        return messageJSON.getString("encryptedMessage").getBytes();
     }
 
     public void loadDecryptedJSON(JSONObject decryptedJSON) throws Exception {
@@ -188,10 +191,10 @@ public class WebSocketMessage implements Parcelable {
                 decryptedJSON.getJSONObject("aesParams"));
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
         if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
-        if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
+        if(decryptedJSON.has("deviceFromName")) setDeviceFromName(decryptedJSON.getString("deviceFromName"));
         if(decryptedJSON.has("smimeMessage")) {
             byte[] smimeMessageBytes = Base64.decode(decryptedJSON.getString("smimeMessage").getBytes());
-            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+            setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes)));
         }
     }
 
@@ -203,25 +206,32 @@ public class WebSocketMessage implements Parcelable {
         this.operationVS = operationVS;
     }
 
-    public TypeVS getTypeVS() {
+    public TypeVS getOperation() {
         if(operationVS != null) return operationVS.getTypeVS();
-        return typeVS;
+        return operation;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 
     public Integer getStatusCode() {
         return statusCode;
     }
 
-    public void setStatusCode(Integer statusCode) {
+    public WebSocketMessage setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
+        return this;
     }
 
     public String getMessage() {
         return message;
+    }
+
+    public String getMessageTruncated() {
+        if(message != null && message.length() > TRUNCATED_MSG_SIZE)
+            return message.substring(0, TRUNCATED_MSG_SIZE) + "...";
+        else return message;
     }
 
     public void setMessage(String message) {
@@ -269,13 +279,13 @@ public class WebSocketMessage implements Parcelable {
     }
 
     @Override public String toString() {
-        return this.getClass().getSimpleName() + " - " + getTypeVS() + " - " + UUID;
+        return this.getClass().getSimpleName() + " - " + getOperation() + " - " + UUID;
     }
 
     public ResponseVS getNotificationResponse(Context context) {
         ResponseVS responseVS = new ResponseVS(statusCode, message);
         if(ResponseVS.SC_OK == statusCode) {
-            if(TypeVS.MESSAGEVS_FROM_DEVICE == typeVS) {
+            if(TypeVS.MESSAGEVS_FROM_DEVICE == operation) {
                 responseVS.setIconId(R.drawable.fa_cert_22);
                 responseVS.setCaption(context.getString(R.string.sign_document_lbl));
                 responseVS.setMessage(context.getString(R.string.sign_document_result_ok_msg));
@@ -284,7 +294,23 @@ public class WebSocketMessage implements Parcelable {
         return responseVS;
     }
 
-    public JSONObject getResponse(Integer statusCode, String message,Context context)
+
+    public static JSONObject getMessageJSON(TypeVS operation, String message, Map data,
+            SMIMEMessage smimeMessage, String UUID, Context context) throws IOException,
+            MessagingException {
+        Map messageToServiceMap = new HashMap();
+        messageToServiceMap.put("locale", context.getResources().getConfiguration().locale.getLanguage());
+        messageToServiceMap.put("operation", operation.toString());
+        messageToServiceMap.put("UUID", UUID);
+        if(message != null) messageToServiceMap.put("message", message);
+        if(data != null) messageToServiceMap.put("data", data);
+        if(smimeMessage != null) messageToServiceMap.put("smimeMessage", new String(
+                Base64.encode(smimeMessage.getBytes())));
+        return new JSONObject(messageToServiceMap);
+    }
+
+
+    public JSONObject getResponse(Integer statusCode, String message, Context context)
             throws Exception {
         Map result = new HashMap();
         result.put("sessionId", operationVS.getSessionId());
@@ -350,7 +376,8 @@ public class WebSocketMessage implements Parcelable {
         List<Map> serializedCooinList = Wallet.getSerializedCertificationRequestList(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         AESParams aesParams = new AESParams();
-        contextVS.putSessionVS(randomUUID, new SessionVS(aesParams, cooinList));
+        contextVS.putSession(randomUUID, new WebSocketSession(aesParams, null, cooinList,
+                TypeVS.COOIN_WALLET_CHANGE));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
@@ -368,4 +395,19 @@ public class WebSocketMessage implements Parcelable {
                 deviceToCert, contextVS);
     }
 
+    public String getDeviceFromName() {
+        return deviceFromName;
+    }
+
+    public void setDeviceFromName(String deviceFromName) {
+        this.deviceFromName = deviceFromName;
+    }
+
+    public SMIMEMessage getSmimeMessage() {
+        return smimeMessage;
+    }
+
+    public void setSmimeMessage(SMIMEMessage smimeMessage) {
+        this.smimeMessage = smimeMessage;
+    }
 }

@@ -33,7 +33,7 @@ public class WebSocketMessage {
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
-    public static final int TRUNCATED_MSG_SIZE = 80; //seconds
+    public static final int TRUNCATED_MSG_SIZE = 80; //chars
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}

@@ -53,11 +53,7 @@
             },
             sendMessage: function () {
                 console.log("sendMessageVS")
-
-
-
                 if(this.messageVS.trim() == "") return
-
                 var webAppMessage = new WebAppMessage(Operation.MESSAGEVS)
                 webAppMessage.message = this.messageVS
                 webAppMessage.nif = this.uservs.nif

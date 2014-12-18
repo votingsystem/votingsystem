@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.WebSocketMessage;
+import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.OperationVS;
@@ -121,9 +122,10 @@ public class WebSocketService extends Service {
 
     private WebSocketMessage initAuthenticatedSession() {
         CooinServer cooinServer = contextVS.getCooinServer();
+        String randomUUID = UUID.randomUUID().toString();
         Map mapToSend = new HashMap();
         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
-        mapToSend.put("UUID", UUID.randomUUID().toString());
+        mapToSend.put("UUID", randomUUID);
         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
         try {
             JSONObject requestJSON = new JSONObject(mapToSend);
@@ -131,34 +133,16 @@ public class WebSocketService extends Service {
                     requestJSON.toString(), msgSubject, contextVS.getCooinServer().getTimeStampServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return WebSocketMessage.load(responseVS);
             SMIMEMessage smimeMessage = responseVS.getSMIME();
-            session.getBasicRemote().sendText(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null,
-                    smimeMessage).toString());
+            contextVS.putSession(randomUUID, new WebSocketSession<>(
+                    null, null, null, TypeVS.INIT_VALIDATED_SESSION));
+            session.getBasicRemote().sendText(WebSocketMessage.getMessageJSON(TypeVS.
+                    INIT_VALIDATED_SESSION, null, null, smimeMessage, randomUUID, contextVS).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
             return new WebSocketMessage(ResponseVS.SC_ERROR, ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
         }
         return new WebSocketMessage(ResponseVS.SC_PROCESSING, null, TypeVS.INIT_VALIDATED_SESSION);
     }
-
-    public JSONObject getMessageJSON(TypeVS operation, String message, Map data,
-        SMIMEMessage smimeMessage) {
-        Map messageToServiceMap = new HashMap();
-        messageToServiceMap.put("locale", contextVS.getResources().getConfiguration().locale.getLanguage());
-        messageToServiceMap.put("operation", operation.toString());
-        if(message != null) messageToServiceMap.put("message", message);
-        if(data != null) messageToServiceMap.put("data", data);
-        if(smimeMessage != null) {
-            try {
-                String smimeMessageStr = new String(Base64.encode(smimeMessage.getBytes()));
-                messageToServiceMap.put("smimeMessage", smimeMessageStr);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        JSONObject messageJSON = new JSONObject(messageToServiceMap);
-        return messageJSON;
-    }
-
 
     @Override public IBinder onBind(Intent intent){
         return mBinder;

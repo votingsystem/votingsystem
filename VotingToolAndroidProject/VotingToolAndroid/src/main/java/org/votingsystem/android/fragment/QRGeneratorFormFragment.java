@@ -123,7 +123,7 @@ public class QRGeneratorFormFragment extends Fragment {
             };
         });
 
-        if(contextVS.getWebSocketSession() == null) {
+        if(contextVS.getWebSocketConnection() == null) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.qr_create_lbl), getString(R.string.qr_connection_required_msg),
                     getActivity()).setPositiveButton(getString(R.string.accept_lbl),

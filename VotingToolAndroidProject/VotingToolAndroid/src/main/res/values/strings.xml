@@ -485,4 +485,5 @@
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
+    <string name="messagevs_caption">mensaje cifrado</string>
 </resources>

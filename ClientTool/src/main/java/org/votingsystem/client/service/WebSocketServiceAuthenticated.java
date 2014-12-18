@@ -159,7 +159,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     private void consumeMessage(final String socketMsgStr) {
         try {
             WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(socketMsgStr));
-            WebSocketSession webSocketSession = null;
+            WebSocketSession socketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID());
             log.debug("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
             if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
@@ -170,9 +170,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                     InboxService.getInstance().addMessage(socketMsg);
                     break;
                 case MESSAGEVS_FROM_VS:
-                    if((webSocketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID())) != null) {
-                        socketMsg.setOperation(webSocketSession.getTypeVS());
-                        switch(webSocketSession.getTypeVS()) {
+                    if(socketSession != null) {
+                        socketMsg.setOperation(socketSession.getTypeVS());
+                        switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
                                 if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                                     SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
@@ -181,7 +181,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                                 } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + socketMsg.getStatusCode());
                                 break;
                             default:
-                                log.error("MESSAGEVS_FROM_VS - TypeVS: " + webSocketSession.getTypeVS());
+                                log.error("MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
                     }
                     break;

@@ -69,7 +69,7 @@ public class CooinFragment extends Fragment {
             }
         } else if(socketMsg != null){
             setProgressDialogVisible(false, null, null);
-            switch(socketMsg.getTypeVS()) {
+            switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
                     break;
                 case MESSAGEVS_TO_DEVICE:
@@ -91,7 +91,7 @@ public class CooinFragment extends Fragment {
                                 getFragmentManager());
                     break;
                 default:
-                    LOGD(TAG + ".broadcastReceiver", "socketMsg: " + socketMsg.getTypeVS());
+                    LOGD(TAG + ".broadcastReceiver", "socketMsg: " + socketMsg.getOperation());
             }
         } else {
             setProgressDialogVisible(false, null, null);
@@ -220,7 +220,7 @@ public class CooinFragment extends Fragment {
                             getFragmentManager(), getActivity());
                     break;
                 case R.id.send_to_wallet:
-                    if(contextVS.getWebSocketSession() == null) {
+                    if(contextVS.getWebSocketConnection() == null) {
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 getString(R.string.send_to_wallet),
                                 getString(R.string.send_to_wallet_connection_required_msg),
