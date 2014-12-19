@@ -1,15 +1,21 @@
 package org.votingsystem.model;
 
+import android.net.Uri;
+
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +54,7 @@ public class UserVS implements Serializable {
     private String phone;
     private String reason;
     private String description;
-
+    private transient Uri contactURI;
     private String subjectDN;
     private SignerInformation signer;
     private CertPath certPath;
@@ -59,6 +65,15 @@ public class UserVS implements Serializable {
     private X509Certificate certificate;
     private CertificateVS certificateCA;
 
+
+    public UserVS() {}
+
+    public UserVS(String name, String phone, String email) {
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+
+    }
 
     public static UserVS getUserVS (X509Certificate x509Cert) {
         UserVS userVS = new UserVS();
@@ -84,6 +99,14 @@ public class UserVS implements Serializable {
             }
         } catch(Exception ex) {ex.printStackTrace();}
         return userVS;
+    }
+
+    public Uri getContactURI() {
+        return contactURI;
+    }
+
+    public void setContactURI(Uri contactURI) {
+        this.contactURI = contactURI;
     }
 
     public String getIBAN() {
@@ -314,6 +337,18 @@ public class UserVS implements Serializable {
         this.deviceId = deviceId;
     }
 
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        if(contactURI != null) s.writeObject(contactURI.toString());
+        else s.writeObject(null);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        String contactURIStr = (String) s.readObject();
+        if(contactURIStr != null) contactURI = Uri.parse(contactURIStr);
+    }
+
     public static UserVS parse(JSONObject userJSON) throws Exception {
         UserVS userVS = new UserVS();
         if (userJSON.has("id")) userVS.setId(userJSON.getLong("id"));
@@ -346,7 +381,10 @@ public class UserVS implements Serializable {
 
     public static List<UserVS> parseList(JSONObject usersJSON) throws Exception {
         List<UserVS> result = new ArrayList<>();
-        JSONArray usersArray = usersJSON.getJSONArray("userVSList");
+        JSONArray usersArray = null;
+        if(usersJSON.has("userVSList")) {
+            usersArray = usersJSON.getJSONArray("userVSList");
+        } else return Arrays.asList(UserVS.parse(usersJSON));
         for(int i = 0; i < usersArray.length(); i++) {
             result.add(UserVS.parse(usersArray.getJSONObject(i)));
         }

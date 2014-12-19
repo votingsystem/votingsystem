@@ -56,4 +56,7 @@ public class CooinServer extends ActorVS implements Serializable {
         return getServerURL() + "/userVS/search?searchText=" + searchText;
     }
 
+    public String getSearchServiceURL(String phone, String email) {
+        return getServerURL() + "/userVS/searchByDevice?phone=" + phone + "&email=" + email;
+    }
 }

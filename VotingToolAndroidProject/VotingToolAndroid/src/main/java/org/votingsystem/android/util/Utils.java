@@ -3,6 +3,7 @@ package org.votingsystem.android.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -95,5 +96,11 @@ public class Utils {
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         contextVS.startService(startIntent);
+    }
+
+    public static void closeQuietly(final Cursor cursor) {
+        if (cursor != null) {
+            cursor.close();
+        }
     }
 }

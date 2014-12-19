@@ -44,7 +44,7 @@ public class ContactsMainActivity extends ActivityBase {
 
 	public static final String TAG = ContactsMainActivity.class.getSimpleName();
 
-    WeakReference<ContactsGridFragment> weakRefToFragment;
+    private WeakReference<ContactsGridFragment> weakRefToFragment;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -77,13 +77,16 @@ public class ContactsMainActivity extends ActivityBase {
         return NAVDRAWER_ITEM_CONTACTS;
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+    }
+
     private void setProgressDialogVisible(final boolean isVisible) {
         if (isVisible) {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
-
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");

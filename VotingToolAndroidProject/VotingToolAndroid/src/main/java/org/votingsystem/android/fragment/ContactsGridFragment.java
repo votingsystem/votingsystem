@@ -1,8 +1,11 @@
 package org.votingsystem.android.fragment;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -11,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -25,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -32,6 +37,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ContactPagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
+import org.votingsystem.android.util.DBUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -50,6 +56,8 @@ public class ContactsGridFragment extends Fragment
 
     public static final String TAG = ContactsGridFragment.class.getSimpleName();
 
+    public static final int CONTACT_PICKER = 1;
+
     public enum Mode {SEARCH, CONTACT}
 
     private View rootView;
@@ -62,6 +70,7 @@ public class ContactsGridFragment extends Fragment
     private static final int loaderId = 0;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
     private ResponseVS searchResponseVS;
+    private UserVS contactUserVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -95,7 +104,7 @@ public class ContactsGridFragment extends Fragment
                 " - queryStr: " + queryStr + " - mode: " + mode);
         if(queryStr != null && mode != Mode.SEARCH) {
             mode = Mode.SEARCH;
-            new ContactsFetcher().execute(queryStr);
+            new ContactsFetcher(null).execute(queryStr);
         }
         setHasOptionsMenu(true);
     };
@@ -112,6 +121,13 @@ public class ContactsGridFragment extends Fragment
         }
         rootView = inflater.inflate(R.layout.contacts_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+        Button open_contacts_btn = (Button) rootView.findViewById(R.id.open_contacts_btn);
+        open_contacts_btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivityForResult(new Intent(Intent.ACTION_PICK,
+                        ContactsContract.Contacts.CONTENT_URI), CONTACT_PICKER);
+            }
+        });
         if(savedInstanceState != null) {
             searchResponseVS = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
             try {
@@ -121,6 +137,7 @@ public class ContactsGridFragment extends Fragment
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            contactUserVS = (UserVS) savedInstanceState.getSerializable(ContextVS.USER_KEY);
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
         } else {
@@ -142,10 +159,39 @@ public class ContactsGridFragment extends Fragment
         return rootView;
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult(..)", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode + " - data: " + data);
+        if (resultCode != Activity.RESULT_OK) return;
+        if (data == null) return;
+        switch (requestCode) {
+            case CONTACT_PICKER:
+                final UserVS userVS = DBUtils.extractInfoFromContactPickerIntent(data, getActivity());
+                if(userVS != null && userVS.getId() == null) {
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.error_lbl),
+                        getString(R.string.contactvs_not_found_msg, userVS.getName()),
+                        getActivity()).setPositiveButton(getString(R.string.accept_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                fetchUserVS(userVS);
+                            }
+                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                    UIUtils.showMessageDialog(builder);
+                }
+                break;
+        }
+    }
+
+    private void fetchUserVS(UserVS userVS) {
+        this.contactUserVS = userVS;
+        new ContactsFetcher(userVS).execute("");
+    }
+
     @Override public void onScrollStateChanged(AbsListView view, int scrollState) { }
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                                   int totalItemCount) { }
+            int totalItemCount) { }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
         LOGD(TAG + ".onLongListItemClick", "id: " + id);
@@ -155,6 +201,7 @@ public class ContactsGridFragment extends Fragment
     private void setProgressDialogVisible(final boolean isVisible) {
         if(isVisible && isProgressDialogVisible.get()) return;
         isProgressDialogVisible.set(isVisible);
+        if(!isAdded()) return;
         //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
         new Handler(){
             @Override public void handleMessage(Message msg) {
@@ -173,6 +220,7 @@ public class ContactsGridFragment extends Fragment
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         outState.putSerializable(ContextVS.STATE_KEY, mode);
+        outState.putSerializable(ContextVS.USER_KEY, contactUserVS);
         if(searchResponseVS != null) outState.putParcelable(ContextVS.RESPONSEVS_KEY,
                 searchResponseVS);
     }
@@ -289,12 +337,21 @@ public class ContactsGridFragment extends Fragment
 
     public class ContactsFetcher extends AsyncTask<String, String, ResponseVS> {
 
-        public ContactsFetcher() { }
+        private String phone, email;
+        public ContactsFetcher(UserVS userVS) {
+            this.phone = userVS.getPhone();
+            this.email = userVS.getEmail();
+        }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 
         @Override protected ResponseVS doInBackground(String... params) {
-            String contactsURL = contextVS.getCooinServer().getSearchServiceURL(params[0]);
+            String contactsURL = null;
+            if(phone != null || email != null) {
+                contactsURL = contextVS.getCooinServer().getSearchServiceURL(phone, email);
+            } else {
+                contactsURL = contextVS.getCooinServer().getSearchServiceURL(params[0]);
+            }
             searchResponseVS = HttpHelper.getData(contactsURL, ContentTypeVS.JSON);
             return searchResponseVS;
         }
@@ -304,9 +361,19 @@ public class ContactsGridFragment extends Fragment
         @Override protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    ContactListAdapter adapter = new ContactListAdapter(
-                            UserVS.parseList(responseVS.getMessageJSON()), contextVS);
-                    gridView.setAdapter(adapter);
+                    if(phone != null || email != null) {
+                        searchResponseVS = null;
+                        UserVS userVS = UserVS.parse(responseVS.getMessageJSON());
+                        if(contactUserVS != null) userVS.setContactURI(contactUserVS.getContactURI());
+                        Intent intent = new Intent(contextVS, ContactPagerActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(ContextVS.USER_KEY, userVS);
+                        contextVS.startActivity(intent);
+                    } else {
+                        ContactListAdapter adapter = new ContactListAdapter(
+                                UserVS.parseList(responseVS.getMessageJSON()), contextVS);
+                        gridView.setAdapter(adapter);
+                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,

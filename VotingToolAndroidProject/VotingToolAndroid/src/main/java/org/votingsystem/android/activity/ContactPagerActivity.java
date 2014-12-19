@@ -9,13 +9,18 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.ContactFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -27,7 +32,6 @@ public class ContactPagerActivity extends ActionBarActivity {
     public static final String TAG = ContactPagerActivity.class.getSimpleName();
 
     private Cursor cursor = null;
-    private List<UserVS> userVSList;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
@@ -41,17 +45,25 @@ public class ContactPagerActivity extends ActionBarActivity {
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         ResponseVS searchResponseVS = getIntent().getExtras().getParcelable(ContextVS.RESPONSEVS_KEY);
-        if(searchResponseVS != null) {
+        UserVS userVS = (UserVS) getIntent().getExtras().getSerializable(ContextVS.USER_KEY);
+        if(searchResponseVS != null || userVS != null) {
             try {
-                userVSList = UserVS.parseList(searchResponseVS.getMessageJSON());
+                final List<UserVS> userVSList = new ArrayList<>();
+                if(userVS != null) userVSList.addAll(Arrays.asList(userVS));
+                else userVSList.addAll(UserVS.parseList(searchResponseVS.getMessageJSON()));
                 updateActionBarTitle(userVSList.iterator().next().getFullName());
                 ContactPagerAdapter pagerAdapter = new ContactPagerAdapter(
                         getSupportFragmentManager(), userVSList);
                 mViewPager.setAdapter(pagerAdapter);
+                mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                    @Override public void onPageSelected(int position) {
+                        updateActionBarTitle(userVSList.get(position).getFullName());
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
+        }  else {
             ContactDBPagerAdapter pagerAdapter = new ContactDBPagerAdapter(
                     getSupportFragmentManager());
             mViewPager.setAdapter(pagerAdapter);

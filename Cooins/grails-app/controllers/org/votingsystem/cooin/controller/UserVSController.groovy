@@ -190,6 +190,21 @@ class UserVSController {
         }
     }
 
+    def searchByDevice() {//=" + phone + "&email
+        if(params.phone || params.email) {
+            DeviceVS deviceVS
+            DeviceVS.withTransaction {
+                deviceVS = DeviceVS.findByPhoneOrEmail(params.phone, params.email)
+            }
+            if(deviceVS) {
+                render userVSService.getUserVSDataMap(deviceVS.userVS, false) as JSON
+                return false
+            }
+        }
+        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'deviceNotFoundByPhoneEmail', args:[params.phone, params.email]))]
+    }
+
     def bankVSList() {
         List<BankVS> bankVSList = null
         BankVS.withTransaction {

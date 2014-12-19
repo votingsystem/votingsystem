@@ -491,4 +491,6 @@
     <string name="send_money_lbl">hacer ingreso</string>
     <string name="remove_contact_lbl">borrar contacto</string>
     <string name="add_contact_lbl">añadir contacto</string>
+    <string name="open_contacts_lbl">abrir agenda</string>
+    <string name="contactvs_not_found_msg">no dispone de la información necesaria para enviar cooins o mensajes cifrados a \'%1$s\', ¿desea comprobas si \'%1$s\' se encuentra dado de alta como votante?</string>
 </resources>

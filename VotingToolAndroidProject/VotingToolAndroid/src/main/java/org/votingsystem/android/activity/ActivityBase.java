@@ -113,8 +113,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
     private View[] mNavDrawerItemViews = null;
 
-    // handle to our sync observer (that notifies us about changes in our sync state)
-    private Object mSyncObserverHandle;
+
     Thread mDataBootstrapThread = null;
 
     // variables that control the Action Bar auto hide behavior (aka "quick recall")
@@ -377,8 +376,8 @@ public abstract class ActivityBase extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (result != null) {
             QRMessageVS qrMessageVS = null;
@@ -475,17 +474,12 @@ public abstract class ActivityBase extends ActionBarActivity {
         setConnectionStatusUI();
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
-        mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
     }
 
     @Override protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
-        if (mSyncObserverHandle != null) {
-            ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
-            mSyncObserverHandle = null;
-        }
     }
 
     @Override public void onStart() {

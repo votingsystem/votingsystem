@@ -29,9 +29,9 @@ public class UserContentProvider extends ContentProvider {
     //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DB_NAME = "voting_system_uservs.db";
-    private static final String TABLE_NAME = "uservs";
+    public static final String TABLE_NAME = "uservs";
     public static final String AUTHORITY = "votingsystem.org.uservs";
 
     public static final String ID_COL                  = "_id";
@@ -41,6 +41,7 @@ public class UserContentProvider extends ContentProvider {
     public static final String NUM_REPRESENTATIONS_COL = "numRepresentations";
     public static final String SERIALIZED_OBJECT_COL   = "serializedObject";
     public static final String FULL_NAME_COL           = "fullName";
+    public static final String CONTACT_URI_COL         = "contactUri";
     public static final String TIMESTAMP_CREATED_COL   = "timestampCreated";
     public static final String TIMESTAMP_UPDATED_COL   = "timestampUpdated";
     public static final String DEFAULT_SORT_ORDER      = ID_COL + " DESC";
@@ -144,6 +145,8 @@ public class UserContentProvider extends ContentProvider {
         values.put(UserContentProvider.URL_COL, userVS.getURL());
         values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
         values.put(UserContentProvider.FULL_NAME_COL, userVS.getFullName());
+        values.put(UserContentProvider.CONTACT_URI_COL,
+                userVS.getContactURI() != null? userVS.getContactURI().toString():null);
         values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
                 ObjectUtils.serializeObject(userVS));
         values.put(UserContentProvider.NIF_COL, userVS.getNif());
@@ -208,6 +211,7 @@ public class UserContentProvider extends ContentProvider {
                 NIF_COL                 + " TEXT," +
                 NUM_REPRESENTATIONS_COL + " INTEGER DEFAULT 1, " +
                 FULL_NAME_COL           + " TEXT, " +
+                CONTACT_URI_COL         + " TEXT, " +
                 TYPE_COL                + " TEXT," +
                 SERIALIZED_OBJECT_COL   + " blob, " +
                 TIMESTAMP_UPDATED_COL   + " INTEGER DEFAULT 0, " +
