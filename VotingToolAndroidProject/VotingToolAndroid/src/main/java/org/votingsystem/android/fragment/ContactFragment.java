@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -17,18 +16,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -45,7 +40,6 @@ public class ContactFragment extends Fragment {
     private View rootView;
     private String broadCastId = null;
     private Button toggle_contact_button;
-    private Long contactId;
     private UserVS contact;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -81,39 +75,45 @@ public class ContactFragment extends Fragment {
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.contact, container, false);
         toggle_contact_button = (Button) rootView.findViewById(R.id.toggle_contact_button);
-        contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
-        Cursor cursor = null;
-        if(contactId != null && contactId > 0) {
-            cursor = getActivity().getContentResolver().query(UserContentProvider.
-                    getUserVSURI(contactId), null, null, null, null);
-            cursor.moveToFirst();
-            contact = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                    cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-            toggle_contact_button.setText(getString(R.string.remove_contact_lbl));
+        Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
+        boolean isContactDB = false;
+        if(contactId != null) {
+            contact = UserContentProvider.loadUser(contactId, getActivity());
+            if(contact != null) isContactDB = true;
         } else {
-            contact = (UserVS) getArguments().getSerializable(ContextVS.USER_KEY);
-            String selection = UserContentProvider.NIF_COL + " =? ";
-            cursor = getActivity().getContentResolver().query(UserContentProvider.CONTENT_URI,
-                    null, selection, new String[]{UserVS.Type.CONTACT.toString()}, null);
-            if(cursor.getCount() > 0) {//contact stored
-                contactId = cursor.getLong(cursor.getColumnIndex(UserContentProvider.ID_COL));
-                toggle_contact_button.setText(getString(R.string.remove_contact_lbl));
-            } else toggle_contact_button.setText(getString(R.string.add_contact_lbl));
-        }
-        toggle_contact_button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), RepresentativeDelegationActivity.class);
-                intent.putExtra(ContextVS.USER_KEY, contact);
-                startActivityForResult(intent, REPRESENTATIVE_DELEGATION);
+            contact =  (UserVS) getArguments().getSerializable(ContextVS.USER_KEY);
+            UserVS contactDB = UserContentProvider.loadUser(contact, getActivity());
+            if(contactDB != null) {
+                contact = contactDB;
+                isContactDB = true;
             }
-        });
+        }
+        if(isContactDB) {
+            toggle_contact_button.setText(getString(R.string.remove_contact_lbl));
+            toggle_contact_button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { deleteContact(); }
+            });
+        } else {
+            toggle_contact_button.setText(getString(R.string.add_contact_lbl));
+            toggle_contact_button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { addContact(); }
+            });
+        }
         setHasOptionsMenu(true);
         broadCastId = ContactFragment.class.getSimpleName() + "_" + (contactId != null? contactId:
                 UUID.randomUUID().toString());
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-
         return rootView;
+    }
+
+    private void deleteContact() {
+        getActivity().getContentResolver().delete(contact.getContactURI(), null, null);
+    }
+
+    private void addContact() {
+        getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
+                UserContentProvider.getContentValues(contact));
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {

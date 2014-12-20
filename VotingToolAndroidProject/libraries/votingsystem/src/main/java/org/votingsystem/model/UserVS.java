@@ -1,13 +1,13 @@
 package org.votingsystem.model;
 
 import android.net.Uri;
+import android.util.Log;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -27,6 +27,8 @@ import java.util.Set;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class UserVS implements Serializable {
+
+    public static final String TAG = UserVS.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
 
@@ -345,8 +347,10 @@ public class UserVS implements Serializable {
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
         s.defaultReadObject();
-        String contactURIStr = (String) s.readObject();
-        if(contactURIStr != null) contactURI = Uri.parse(contactURIStr);
+        try {
+            String contactURIStr = (String) s.readObject();
+            if(contactURIStr != null) contactURI = Uri.parse(contactURIStr);
+        } catch(Exception ex) { Log.d(TAG, "readObject EXCEPTION");}
     }
 
     public static UserVS parse(JSONObject userJSON) throws Exception {

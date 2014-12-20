@@ -190,7 +190,7 @@ class UserVSController {
         }
     }
 
-    def searchByDevice() {//=" + phone + "&email
+    def searchByDevice() {
         if(params.phone || params.email) {
             DeviceVS deviceVS
             DeviceVS.withTransaction {

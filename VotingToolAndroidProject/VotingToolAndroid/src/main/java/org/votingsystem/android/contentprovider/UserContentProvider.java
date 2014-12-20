@@ -203,6 +203,36 @@ public class UserContentProvider extends ContentProvider {
         numTotalRepresentatives = numTotal;
     }
 
+    public static UserVS loadUser(UserVS userVS, Context context) {
+        String selection = null;
+        String[] args = null;
+        if(userVS.getContactURI() != null) {
+            selection =  UserContentProvider.CONTACT_URI_COL + " =? ";
+            args = new String[]{userVS.getContactURI().toString()};
+        } else {
+            selection =  UserContentProvider.NIF_COL + " =? ";
+            args = new String[]{userVS.getNif()};
+        }
+        Cursor cursor = context.getContentResolver().query(UserContentProvider.CONTENT_URI, null,
+                selection, args, null);
+        if(cursor.getCount() > 0) {//contact stored
+            cursor.moveToFirst();
+            return (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+        } else return null;
+    }
+
+    public static UserVS loadUser(Long id, Context context) {
+        String selection = UserContentProvider.ID_COL + " =? ";
+        Cursor cursor = context.getContentResolver().query(UserContentProvider.CONTENT_URI, null,
+                selection, new String[]{id.toString()}, null);
+        if(cursor.getCount() > 0) {//contact stored
+            cursor.moveToFirst();
+            return (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+        } else return null;
+    }
+
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
