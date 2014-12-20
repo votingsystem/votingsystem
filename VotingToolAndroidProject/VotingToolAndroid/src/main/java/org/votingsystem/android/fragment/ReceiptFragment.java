@@ -299,7 +299,7 @@ public class ReceiptFragment extends Fragment {
             default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +
                     selectedReceipt.getTypeVS());
         }
-        if(selectedReceipt.getLocalId() < 0) menu.removeItem(R.id.delete_receipt);
+        if(selectedReceipt.getLocalId() < 0) menu.removeItem(R.id.delete_item);
         else menu.removeItem(R.id.save_receipt);
         ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                 selectedReceipt.getTypeDescription(getActivity()));
@@ -381,9 +381,9 @@ public class ReceiptFragment extends Fragment {
                     new VoteVSChecker().execute(((VoteVS)selectedReceipt).getHashCertVSBase64());
                 }
                 return true;
-            case R.id.delete_receipt:
-                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
-                        setMessage(Html.fromHtml(getString(R.string.delete_receipt_msg,
+            case R.id.delete_item:
+                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_item_lbl)).
+                        setMessage(Html.fromHtml(getString(R.string.delete_item_msg,
                                 selectedReceipt.getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {

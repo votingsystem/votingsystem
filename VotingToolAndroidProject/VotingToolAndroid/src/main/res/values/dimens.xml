@@ -1,6 +1,7 @@
 <resources>
+    <integer name="max_size_messagevs">500</integer>
     <dimen name="tag_color_dot_size">12dp</dimen>
-
+    <dimen name="claim_field_text_size">18sp</dimen>
     <dimen name="options_bar_height">64dp</dimen>
     <dimen name="explore_grid_padding">4dp</dimen>
 
@@ -29,9 +30,4 @@
     <dimen name="navdrawer_width">260dp</dimen>
     <dimen name="navdrawer_profile_image_size">40dp</dimen>
 
-    <dimen name="keyline_1">16dp</dimen>
-    <dimen name="keyline_1_minus_8dp">8dp</dimen>
-    <dimen name="keyline_2">72dp</dimen>
-    <dimen name="keyline_2_minus_16dp">56dp</dimen>
-    <dimen name="keyline_2_session_detail">@dimen/keyline_2</dimen>
 </resources>

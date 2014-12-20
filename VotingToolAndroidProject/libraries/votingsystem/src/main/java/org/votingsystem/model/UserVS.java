@@ -41,7 +41,7 @@ public class UserVS implements Serializable {
     private String nif;
     private String IBAN;
     private State state;
-    private Type type;
+    private Type type = Type.USER;
     private byte[] imageBytes;
     private String firstName;
     private String lastName;

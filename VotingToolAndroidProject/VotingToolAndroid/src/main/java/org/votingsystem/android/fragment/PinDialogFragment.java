@@ -60,7 +60,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private EditText userPinEditText;
     private Boolean withPasswordConfirm = null;
     private Boolean withHashValidation = null;
-    private String dialogCaller = null;
+    private String broadCastId = null;
     private String firstPin = null;
     private String newPin = null;
     private PinChangeStep pinChangeStep = PinChangeStep.PIN_REQUEST;
@@ -171,7 +171,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
                 withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
                 withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
-                dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
+                broadCastId = getArguments().getString(ContextVS.CALLER_KEY);
                 builder.setView(view).setOnKeyListener(this);
             }
             if(TypeVS.PIN_CHANGE == typeVS) {
@@ -250,10 +250,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             InputMethodManager imm = (InputMethodManager)getActivity().
                     getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
-            if(dialogCaller != null) {
-                Intent intent = new Intent(dialogCaller);
+            if(broadCastId != null) {
+                Intent intent = new Intent(broadCastId);
                 intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
-                intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
                 ResponseVS responseVS = new ResponseVS(typeVS, pin);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);

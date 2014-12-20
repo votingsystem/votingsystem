@@ -20,7 +20,7 @@
         android:orderInCategory="4"
         android:title="@string/signature_content"/>
 
-    <item android:id="@+id/delete_receipt"
+    <item android:id="@+id/delete_item"
         android:orderInCategory="5"
         android:title="@string/delete_receipt_lbl"/>
 

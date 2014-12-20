@@ -46,13 +46,13 @@ public class MessageDialogFragment extends DialogFragment {
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,
                     String message){
-        MessageDialogFragment frag = new MessageDialogFragment();
+        MessageDialogFragment fragment = new MessageDialogFragment();
         Bundle args = new Bundle();
         if(statusCode != null) args.putInt(ContextVS.RESPONSE_STATUS_KEY, statusCode);
         args.putString(ContextVS.CAPTION_KEY, caption);
         args.putString(ContextVS.MESSAGE_KEY, message);
-        frag.setArguments(args);
-        return frag;
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -16,7 +16,6 @@
 
 package org.votingsystem.android.activity;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -27,7 +26,6 @@ import android.view.MenuItem;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.ContactsGridFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -62,14 +60,6 @@ public class ContactsMainActivity extends ActivityBase {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
         getSupportActionBar().setSubtitle(getString(R.string.contacts_lbl));
-        if(args != null && args.getString(SearchManager.QUERY) != null) {
-            String queryStr = getIntent().getExtras().getString(SearchManager.QUERY);
-            Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
-            Intent startIntent = new Intent(this, EventVSService.class);
-            startIntent.putExtra(ContextVS.QUERY_KEY, queryStr);
-            startIntent.putExtra(ContextVS.OFFSET_KEY, 0L);
-            startService(startIntent);
-        }
     }
 
     @Override protected int getSelfNavDrawerItem() {

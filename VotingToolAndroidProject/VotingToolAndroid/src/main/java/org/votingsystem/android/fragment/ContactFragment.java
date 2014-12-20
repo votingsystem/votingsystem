@@ -13,17 +13,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ResponseVS;
+
 import java.util.UUID;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -34,18 +36,18 @@ public class ContactFragment extends Fragment {
 
 	public static final String TAG = ContactFragment.class.getSimpleName();
 
-    private static final int REPRESENTATIVE_DELEGATION   = 1;
-
     private AppContextVS contextVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button toggle_contact_button;
     private UserVS contact;
+    private Menu menu;
+    private boolean isDBUserVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
         }
         }
@@ -75,30 +77,20 @@ public class ContactFragment extends Fragment {
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.contact, container, false);
         toggle_contact_button = (Button) rootView.findViewById(R.id.toggle_contact_button);
-        Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
-        boolean isContactDB = false;
-        if(contactId != null) {
+        Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY, -1);
+        boolean isDBUserVS = false;
+        if(contactId > 0) {
             contact = UserContentProvider.loadUser(contactId, getActivity());
-            if(contact != null) isContactDB = true;
+            if(contact != null) isDBUserVS = true;
         } else {
             contact =  (UserVS) getArguments().getSerializable(ContextVS.USER_KEY);
             UserVS contactDB = UserContentProvider.loadUser(contact, getActivity());
             if(contactDB != null) {
                 contact = contactDB;
-                isContactDB = true;
+                isDBUserVS = true;
             }
         }
-        if(isContactDB) {
-            toggle_contact_button.setText(getString(R.string.remove_contact_lbl));
-            toggle_contact_button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { deleteContact(); }
-            });
-        } else {
-            toggle_contact_button.setText(getString(R.string.add_contact_lbl));
-            toggle_contact_button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { addContact(); }
-            });
-        }
+        setContactButtonState(isDBUserVS);
         setHasOptionsMenu(true);
         broadCastId = ContactFragment.class.getSimpleName() + "_" + (contactId != null? contactId:
                 UUID.randomUUID().toString());
@@ -108,12 +100,32 @@ public class ContactFragment extends Fragment {
     }
 
     private void deleteContact() {
-        getActivity().getContentResolver().delete(contact.getContactURI(), null, null);
+        getActivity().getContentResolver().delete(UserContentProvider.CONTENT_URI,
+                UserContentProvider.CONTACT_URI_COL + " = ?" ,
+                new String[]{contact.getContactURI().toString()});
+        setContactButtonState(false);
     }
 
     private void addContact() {
         getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
                 UserContentProvider.getContentValues(contact));
+        setContactButtonState(true);
+    }
+
+    private void setContactButtonState(boolean isDBUserVS) {
+        this.isDBUserVS = isDBUserVS;
+        if(isDBUserVS) {
+            if(menu != null) menu.add(R.id.general_items, R.id.delete_item, 3,
+                    getString(R.string.remove_contact_lbl));
+            toggle_contact_button.setVisibility(View.GONE);
+        } else {
+            if(menu != null) menu.removeItem(R.id.delete_item);
+            toggle_contact_button.setVisibility(View.VISIBLE);
+            toggle_contact_button.setText(getString(R.string.add_contact_lbl));
+            toggle_contact_button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { addContact(); }
+            });
+        }
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -137,11 +149,22 @@ public class ContactFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.contact, menu);
+        this.menu = menu;
+        setContactButtonState(isDBUserVS);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
+            case R.id.send_message:
+                MessageVSInputDialogFragment.showDialog(getString(R.string.messagevs_caption),
+                        broadCastId, TypeVS.MESSAGEVS, getFragmentManager());
+                return true;
+            case R.id.send_money:
+                return true;
+            case R.id.delete_item:
+                deleteContact();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

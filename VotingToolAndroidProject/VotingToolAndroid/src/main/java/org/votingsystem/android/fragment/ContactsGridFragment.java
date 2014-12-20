@@ -178,7 +178,7 @@ public class ContactsGridFragment extends Fragment
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
                     UIUtils.showMessageDialog(builder);
-                }
+                } else launchPager(null, userVS);
                 break;
         }
     }
@@ -236,10 +236,15 @@ public class ContactsGridFragment extends Fragment
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
+        launchPager(position, null);
+    }
+
+    private void launchPager(Integer position, UserVS userVS) {
         Intent intent = new Intent(getActivity(), ContactPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         intent.putExtra(ContextVS.STATE_KEY, mode);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, searchResponseVS);
+        intent.putExtra(ContextVS.USER_KEY, userVS);
         startActivity(intent);
     }
 
@@ -365,10 +370,7 @@ public class ContactsGridFragment extends Fragment
                         searchResponseVS = null;
                         UserVS userVS = UserVS.parse(responseVS.getMessageJSON());
                         if(contactUserVS != null) userVS.setContactURI(contactUserVS.getContactURI());
-                        Intent intent = new Intent(contextVS, ContactPagerActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(ContextVS.USER_KEY, userVS);
-                        contextVS.startActivity(intent);
+                        launchPager(null, userVS);
                     } else {
                         ContactListAdapter adapter = new ContactListAdapter(
                                 UserVS.parseList(responseVS.getMessageJSON()), contextVS);

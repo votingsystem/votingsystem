@@ -71,8 +71,7 @@ public class UserContentProvider extends ContentProvider {
     }
 
     @Override public boolean onCreate() {
-        //Delete previous session database
-        getContext().deleteDatabase(DB_NAME);
+        //getContext().deleteDatabase(DB_NAME);//Delete previous session database
         // If database file isn't found this will throw a  FileNotFoundException, and we will
         // then create the database.
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
@@ -143,7 +142,7 @@ public class UserContentProvider extends ContentProvider {
         values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
         values.put(UserContentProvider.ID_COL, userVS.getId());
         values.put(UserContentProvider.URL_COL, userVS.getURL());
-        values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
+        values.put(UserContentProvider.TYPE_COL, userVS.getType().toString());
         values.put(UserContentProvider.FULL_NAME_COL, userVS.getFullName());
         values.put(UserContentProvider.CONTACT_URI_COL,
                 userVS.getContactURI() != null? userVS.getContactURI().toString():null);

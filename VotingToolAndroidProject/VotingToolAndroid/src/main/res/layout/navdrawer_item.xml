@@ -18,8 +18,8 @@
     android:orientation="horizontal"
     android:background="?android:selectableItemBackground"
     android:gravity="start|center_vertical"
-    android:paddingLeft="@dimen/keyline_1"
-    android:paddingRight="@dimen/keyline_1"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:layout_width="match_parent"
     android:layout_height="48dp">
 

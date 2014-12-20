@@ -51,9 +51,8 @@ public class DBUtils {
             if(cursor != null) {
                 cursor.moveToFirst();
                 if(cursor.getCount() > 0) {
-                    UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                            cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-                    email = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    userVS = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                        cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
                 }
             }
             if(userVS == null) {
