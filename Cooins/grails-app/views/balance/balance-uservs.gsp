@@ -6,6 +6,7 @@
 <vs:webresource dir="paper-shadow" file="paper-shadow.html"/>
 <vs:webresource dir="paper-progress" file="paper-progress.html"/>
 <vs:webcomponent path="/balance/balance-uservs-chart"/>
+<vs:webcomponent path="/balance/balance-uservs-chart-donut"/>
 <vs:webcomponent path="/transactionVS/transactionvs-data"/>
 <vs:webcomponent path="/transactionVS/transactionvs-list-balance"/>
 
@@ -101,6 +102,9 @@
                 '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
                 </balance-uservs-chart>
             </div>
+
+
+            <balance-uservs-chart-donut id="donutChart"></balance-uservs-chart-donut>
 
         </div>
     </template>

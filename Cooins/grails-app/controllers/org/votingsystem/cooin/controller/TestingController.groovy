@@ -138,6 +138,8 @@ class TestingController {
 
     def polymer() {}
 
+    def donutChart() {}
+
     /**
      * Invoked if any method in this controller throws an Exception.
      */

@@ -6,7 +6,6 @@
         <div horizontal layout center center-justified>
             <div id="container" style="padding: 10px;"></div>
         </div>
-
     </template>
     <script>
         Polymer('balance-uservs-chart', {

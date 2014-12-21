@@ -2,6 +2,7 @@
 <vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
 <vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
 <vs:webresource dir="paper-button" file="paper-button.html"/>
+<vs:webresource dir="paper-toast" file="paper-toast.html"/>
 
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
@@ -25,6 +26,7 @@
                     </div>
                 </div>
         </paper-dialog>
+        <paper-toast id="toast" role="alert" text="<g:message code="messageSendedLbl"/>"></paper-toast>
     </template>
     <script>
         Polymer('messagevs-send-dialog', {
@@ -65,6 +67,7 @@
                 //alert(JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.opened = false
+                this.$.toast.show()
             }
         });
     </script>

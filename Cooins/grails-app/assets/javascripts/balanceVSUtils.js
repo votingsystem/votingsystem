@@ -30,7 +30,7 @@ function calculateBalanceResultMap(balanceToMapParam, balanceFromMapParam) {
 
 function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
     if(tagBalanceMapParam == null) tagBalanceMapParam = {}
-    var tagBalanceMap = JSON.parse(JSON.stringify(tagBalanceMapParam))
+    var tagBalanceMap = toJSON(tagBalanceMapParam)
     Object.keys(allTagsMap).forEach(function(tag) {
         if(tagBalanceMap[tag] == null) allTagsMap[tag].push(0)
         else allTagsMap[tag].push(parseFloat(tagBalanceMap[tag]))
@@ -47,7 +47,8 @@ function filterMap(detailedBalanceMap, subBalanceParam) {
     return result
 }
 
-//we know the order serie -> incomes, time limited ,expenses, available
+//we know the order serie -> incomes ,expenses, time limited, available
+//[{"name":"WILDTAG","data":[833.33,110,833.33,723.33]}]
 function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanceCash) {
     var allTagsMap = {}
 
@@ -58,9 +59,9 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
     }
 
     enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'total'))
+    enterTagsMapData(allTagsMap, balanceFromMap)
     enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'timeLimited'))
     enterTagsMapData(allTagsMap, balanceCash)
-    enterTagsMapData(allTagsMap, balanceFromMap)
 
     var seriesData = []
     Object.keys(allTagsMap).forEach(function(tag) {
@@ -69,6 +70,70 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
 
     console.log(" seriesData: " + JSON.stringify(seriesData))
     return seriesData
+}
+
+function calculateUserBalanceSeriesDonut(detailedBalanceToMap, balanceFromMap, balanceCash) {
+    var seriesData = calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanceCash)
+    var result = []
+    result.push(tagDataForChartDonut(seriesData))
+    result.push(tagDataExpensesForChartDonut(seriesData))
+    result.push(tagDataIncomesDetailsForChartDonut(seriesData))
+    return result
+}
+
+function tagDataForChartDonut(seriesData) {
+    var result = []
+    var colors = Highcharts.getOptions().colors
+    for(idx in seriesData) {
+        var tagData = seriesData[idx]
+        result.push({
+            name: tagData.name,
+            y: tagData.data[0],
+            color: colors[idx]
+        });
+    }
+}
+
+function tagDataIncomesDetailsForChartDonut(seriesData) {
+    var result = []
+    var colors = Highcharts.getOptions().colors
+    for(idx in seriesData) {
+        var tagData = seriesData[idx]
+        var brightness = 0.2 - (idx / 2) / 5;
+        //add expense
+        result.push({
+            name: tagData.name,
+            y: tagData.data[1],
+            color: 'red'
+        });
+        //add remaining to total
+        result.push({
+            name: tagData.name,
+            y: tagData.data[0] - tagData.data[1],
+            color: colors[idx]
+        });
+    }
+}
+
+function tagDataExpensesForChartDonut(seriesData) {
+    var result = []
+    var colors = Highcharts.getOptions().colors
+    for(idx in seriesData) {
+        var tagData = seriesData[idx]
+        var brightness = 0.2 - (idx / 2) / 5;
+        //add timelimited
+        result.push({
+            name: tagData.name,
+            y: tagData.data[2],
+            color: Highcharts.Color(colors[idx]).brighten(brightness).get()
+        });
+        //add remaining to total
+        result.push({
+            name: tagData.name,
+            y: tagData.data[0] - tagData.data[2],
+            color: Highcharts.Color(colors[idx]).brighten(brightness).get()
+        });
+    }
 }
 
 function checkBalanceMap(transactionVSListBalanceMap, serverBalanceMap) {
