@@ -91,14 +91,26 @@ class TransactionVSService {
         if(!transactionVS.toUserIBAN) throw new ExceptionVS("transactionVS without toUserIBAN")
         CooinAccount accountTo = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
                 currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
+        BigDecimal wildTagExpensesForTag = checkWildTagExpensesForTag(transactionVS.toUserVS, transactionVS.tag,
+                transactionVS.currencyCode)
+        BigDecimal resultAmount =  transactionVS.amount
+        if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
+            resultAmount = resultAmount.subtract(wildTagExpensesForTag)
+            CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                    currencyCode: transactionVS.currencyCode, tag:systemService.getWildTag())
+            if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
+                wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag)).save()
+            } else {
+                wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag.subtract(resultAmount))).save()
+                resultAmount = BigDecimal.ZERO
+            }
+        }
         if(!accountTo) {//new user account for tag
-            accountTo = new CooinAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
+            accountTo = new CooinAccount(IBAN:transactionVS.toUserIBAN, balance:resultAmount,
                     currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
             log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
                     "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
-        } else {
-            accountTo.setBalance(accountTo.balance.add(transactionVS.amount)).save()
-        }
+        } else accountTo.setBalance(accountTo.balance.add(resultAmount)).save()
         return accountTo
     }
 
@@ -268,6 +280,19 @@ class TransactionVSService {
         return transactionMap
     }
 
+
+    public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
+        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Map balancesFrom = TransactionVS.getBalances(getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM)
+        Map balancesTo = TransactionVS.getBalances(getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO)
+        if(balancesFrom[currencyCode] == null) return BigDecimal.ZERO
+        BigDecimal expendedForTagVS = balancesFrom[currencyCode][tagVS.name]
+        if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO
+        BigDecimal incomesForTagVS = balancesTo[currencyCode][tagVS.name].total
+        if(incomesForTagVS.compareTo(expendedForTagVS) < 0) return expendedForTagVS.subtract(incomesForTagVS)
+        else return BigDecimal.ZERO
+    }
+
     public String getTransactionTypeDescription(String transactionType) {
         String typeDescription
         switch(transactionType) {
@@ -331,10 +356,10 @@ class TransactionVSService {
             if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().dateTo
             if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
                 tag = TagVS.findWhere(name:messageJSON.tags[0])
-                if(!tag) throw new ValidationExceptionVS(this.getClass(), "Unknown tag '${messageJSON.tags[0]}'")
+                if(!tag) throw new ValidationExceptionVS(this.getClass(), "unknown tag '${messageJSON.tags[0]}'")
                 if(isTimeLimited && TagVS.WILDTAG.equals(tag.getName()))
-                    throw new ValidationExceptionVS(this.getClass(), "WILDTAG transactions cannot be TimeLimited")
-            } else throw new ValidationExceptionVS(this.getClass(), "Invalid number of tags: '${messageJSON.tags}'")
+                    throw new ValidationExceptionVS(this.getClass(), "WILDTAG transactions cannot be time limited")
+            } else throw new ValidationExceptionVS(this.getClass(), "invalid number of tags: '${messageJSON.tags}'")
         }
 
         public TransactionVSRequest getUserVSRequest() {

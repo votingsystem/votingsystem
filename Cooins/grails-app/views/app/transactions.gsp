@@ -21,8 +21,8 @@
             </p>
             <p><b>¿Qué pasa cuando se extrae dinero asociándolo a una etiqueta?</b>
             Se comprueba si el usuario tiene disponible sufciente en su cuenta asociada  a esa etiqueta y en caso
-            afirmativo se extrae el dinero de esa cuenta, si el disponible en la cuenta es inferior al importe se extrae
-            lo que falte de la cuenta asociada a '<b>gastos generales</b>' (si se dispone de saldo suficiente)
+            afirmativo se extrae el dinero de esa cuenta, si el disponible en la cuenta es inferior al importe lo que
+            falte se obtiene de la cuenta asociada a '<b>gastos generales</b>' (si se dispone de saldo suficiente)
             </p>
             <p><b>¿Qué es un ingreso 'caducable'?</b> Es un ingreso cuyo importe debe gastarse antes de las 24:00 horas
             del domingo de la semana en curso, lo que no se gaste se ingresa en el sistema. Los ingresos <b>caducables</b>

@@ -22,7 +22,8 @@ class WalletVSService {
     @Transactional
     public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, TagVS tag, String currencyCode) {
         List accountList = []
-        def wildTagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:systemService.getWildTag())
+        CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode,
+                tag:systemService.getWildTag())
         if(wildTagAccount) accountList.add(wildTagAccount)
         if(tag) {
             def tagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)

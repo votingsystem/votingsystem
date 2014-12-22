@@ -96,7 +96,8 @@
                             <div><g:message code="selectedTagsAdvice"/></div>
                             <template repeat="{{tag in selectedTags}}">
                                 <div layout horizontal center center-justified style="font-size: 0.9em;">
-                                    <paper-button raised on-click="{{removeTag}}" style="margin:0px; padding:0px; color:#6c0404;">
+                                    <paper-button raised on-click="{{removeTag}}" style="font-size: 0.6em; margin:0px;
+                                        padding:0px; color:#6c0404;">
                                         <i class="fa fa-minus"></i>
                                     </paper-button>
                                     <a class="btn btn-default" data-tagId='{{tag.id}}' style="font-size: 0.9em;

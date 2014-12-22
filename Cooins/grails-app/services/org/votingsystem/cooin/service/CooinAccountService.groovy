@@ -1,11 +1,14 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.WalletVS
+import org.votingsystem.util.DateUtils
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
@@ -17,6 +20,7 @@ class CooinAccountService {
 
 	def grailsApplication
 	def messageSource
+    def transactionVSService
 
 
     WalletVS getUserVSWallet(UserVS user) {
