@@ -1,7 +1,6 @@
 <vs:webresource dir="polymer" file="polymer.html"/>
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
-
-<asset:javascript src="balanceVSUtils.js"/>
+<g:include view="/include/balanceVSUtils_js.gsp"/>
 
 <polymer-element name="transactionvs-list-balance" attributes="transactionList caption">
     <template>

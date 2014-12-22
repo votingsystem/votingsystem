@@ -10,7 +10,8 @@
 <vs:webcomponent path="/transactionVS/transactionvs-data"/>
 <vs:webcomponent path="/transactionVS/transactionvs-list-balance"/>
 
-<asset:javascript src="balanceVSUtils.js"/>
+<g:include view="/include/balanceVSUtils_js.gsp"/>
+
 
 <polymer-element name="balance-uservs" attributes="url balance">
     <template>
@@ -95,16 +96,11 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display: inline-block;">
-                <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"/>"
-                                      xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
-                '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
-                </balance-uservs-chart>
-            </div>
-
-
+        <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display:block;">
             <balance-uservs-chart-donut id="donutChart"></balance-uservs-chart-donut>
+        </div>
 
         </div>
     </template>
@@ -198,14 +194,9 @@
                     var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
                     var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
                     var balancesCashMap = this.balance.balancesCash == null ? {}: this.balance.balancesCash.EUR || {}
-                    var chartSeries = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balancesCashMap)
+                    var chartSeries = calculateUserBalanceSeriesDonut(balancesToMap, balancesFromMap, balancesCashMap)
+                    this.$.donutChart.setSeries(chartSeries)
 
-                    if(chartSeries.length === 0) {
-                        this.$.userBalanceChartDiv.style.display = 'none'
-                    } else {
-                        //we know the order serie -> incomes, expenses, available, time limited available
-                        this.$.balanceChart.series = chartSeries
-                    }
                 }
             },
             viewTransaction: function(e) {

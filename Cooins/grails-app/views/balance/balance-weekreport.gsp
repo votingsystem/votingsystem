@@ -1,6 +1,6 @@
 <vs:webresource dir="polymer" file="polymer.html"/>
 <vs:webresource dir="core-ajax" file="core-ajax.html"/>
-<asset:javascript src="balanceVSUtils.js"/>
+<g:include view="/include/balanceVSUtils_js.gsp"/>
 
 <polymer-element name="balance-uservs-details" attributes="balance type">
     <template>

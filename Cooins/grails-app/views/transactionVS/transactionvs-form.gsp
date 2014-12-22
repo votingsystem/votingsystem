@@ -31,7 +31,7 @@
                         <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </div>
                 </template>
-                <div flex style=" margin:0 0 0 20px; color:#6c0404;">
+                <div flex  style="text-align: center; color:#6c0404;">
                     <div>
                         <div style="font-size: 1.5em; font-weight: bold;">{{operationMsg}}</div>
                         <div>{{fromUserName}}</div>
@@ -56,10 +56,6 @@
 
 
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
-                <div layout horizontal center center-justified>
-                    <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
-                    <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
-                </div>
                 <div>
                     <div horizontal layout center center-justified>
                         <input type="text" id="amount" class="form-control" style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
@@ -75,25 +71,38 @@
                 <div layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div layout horizontal center center-justified style="font-size: 0.8em;">
-                            <div style="width: 180px; margin:0 10px 0 0;">
-                                <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.9em;
-                                margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                                    <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
-                                </paper-button>
+                        <div style="display: {{selectedTags.length > 0 ? 'block':'none'}}" >
+                            <div layout horizontal center center-justified style="margin: 0 0 20px 0;">
+                                <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
+                                <div style="color:#6c0404; font-size: 1.1em;"><g:message code="timeLimitedAdviceMsg"/></div>
                             </div>
-                            <div style="display: {{selectedTags.length == 0? 'block':'none'}};">
-                                <g:message code="transactionvsWithTagAdvertMsg"/>
-                            </div>
-                            <div style="max-width: 400px;">{{selectedTagMsg}}</div>
                         </div>
-                        <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
+                        <template if="{{selectedTags.length === 0}}">
+                            <div layout horizontal center center-justified style="font-size: 0.8em;">
+                                <div style="width: 180px; margin:0 10px 0 0;">
+                                    <paper-button raised on-click="{{showTagDialog}}" style="font-size: 1em;
+                                    margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                                        <i class="fa fa-tag"></i> <g:message code="addTagLbl"/>
+                                    </paper-button>
+                                </div>
+                                <div style="display: {{selectedTags.length == 0? 'block':'none'}};">
+                                    <g:message code="transactionvsWithTagAdvertMsg"/>
+                                </div>
+                                <div style="max-width: 400px;">{{selectedTagMsg}}</div>
+                            </div>
+                        </template>
+                        <div layout horizontal center center-justified style="font-weight:bold;text-align: center;
                             display: {{selectedTags.length == 0? 'none':'block'}};">
-                            <g:message code="selectedTagsLbl"/>
+                            <div><g:message code="selectedTagsAdvice"/></div>
                             <template repeat="{{tag in selectedTags}}">
-                                <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="{{removeTag}}"
-                                   style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                                    <i class="fa fa-minus"></i> {{tag.name}}</a>
+                                <div layout horizontal center center-justified style="font-size: 0.9em;">
+                                    <paper-button raised on-click="{{removeTag}}" style="margin:0px; padding:0px; color:#6c0404;">
+                                        <i class="fa fa-minus"></i>
+                                    </paper-button>
+                                    <a class="btn btn-default" data-tagId='{{tag.id}}' style="font-size: 0.9em;
+                                        margin:5px 5px 0px 5px;padding:3px;"><i class="fa fa-tag"></i> {{tag.name}}
+                                    </a>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -293,7 +302,6 @@
             this.$.amount.value = ""
             this.isWithUserSelector = true
             this.toUserName = null
-            this.$.timeLimitedRButton.checked = false
             switch(operation) {
                 case Operation.FROM_GROUP_TO_MEMBER:
                     this.operationMsg = "<g:message code='transactionVSFromGroupToMember'/>"

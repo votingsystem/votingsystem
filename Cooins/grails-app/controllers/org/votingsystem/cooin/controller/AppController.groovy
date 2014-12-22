@@ -41,6 +41,8 @@ class AppController {
 
     def admin() {}
 
+    def transactions() {}
+
     def userVS() {
         Integer numHours = params.int("numHours") ? -params.int("numHours"):-1; //default to 1 hour
         DateUtils.TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours)

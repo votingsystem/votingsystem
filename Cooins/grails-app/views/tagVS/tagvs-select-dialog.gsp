@@ -10,7 +10,8 @@
 
 <polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
 <template>
-    <paper-dialog id="xDialog" layered backdrop title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <paper-dialog id="xDialog" autoCloseDisabled layered backdrop title="{{caption}}" class="selectTagDialog"
+                  on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
             .selectTagDialog {
                 box-sizing: border-box;
@@ -58,13 +59,13 @@
             </div>
 
             <div style="display: {{searchString!= null ? 'block':'none'}}">
-                <div style="text-align:center;margin:10px 0 0 10px;">
+                <div style="text-align:center;margin:10px 0 0 10px; font-size: 1.1em;">
                     {{messages.searchResultLbl}} <b>'{{searchString}}'</b>
                 </div>
             </div>
 
             <div>
-                <div flex horizontal wrap layout style="">
+                <div flex horizontal wrap layout center center-justified>
                     <template repeat="{{tag in searchedTagList}}">
                         <a class="btn btn-default" on-click="{{selectTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
                             {{tag.name}} <i class="fa fa-plus" style="color: #6c0404;"></i></a>

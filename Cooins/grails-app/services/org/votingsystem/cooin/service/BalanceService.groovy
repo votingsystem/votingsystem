@@ -90,7 +90,7 @@ class BalanceService {
                         BigDecimal timeLimitedNotExpended = TransactionVSUtils.checkRemainingForTag(balanceMap.balancesFrom,
                                 balanceMap.balancesTo, currentTagVS.getName(), currency)
                         BigDecimal amountResult = new BigDecimal(tagVSEntry.getValue()).subtract(timeLimitedNotExpended)
-                        String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
+                        String signedMessageSubject =  messageSource.getMessage('tagInitPeriodMsg',
                                 [tagVSEntry.getKey()].toArray(), locale)
                         ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name,
                                 userVS.getNif(), TransactionVS.getInitPeriodTransactionVSData(amountResult,

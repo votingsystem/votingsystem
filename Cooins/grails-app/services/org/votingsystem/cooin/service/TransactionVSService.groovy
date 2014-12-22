@@ -332,6 +332,8 @@ class TransactionVSService {
             if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
                 tag = TagVS.findWhere(name:messageJSON.tags[0])
                 if(!tag) throw new ValidationExceptionVS(this.getClass(), "Unknown tag '${messageJSON.tags[0]}'")
+                if(isTimeLimited && TagVS.WILDTAG.equals(tag.getName()))
+                    throw new ValidationExceptionVS(this.getClass(), "WILDTAG transactions cannot be TimeLimited")
             } else throw new ValidationExceptionVS(this.getClass(), "Invalid number of tags: '${messageJSON.tags}'")
         }
 

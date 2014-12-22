@@ -1,11 +1,12 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
+import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.WalletVS
-
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza
@@ -63,13 +64,16 @@ class CooinAccountService {
         if(accountsMap?.values().isEmpty()) return
         accountsMap = accountsMap?.values()?.iterator()?.next()
         for(String currency : accountsMap?.keySet()) {
+            BigDecimal tagGap = BigDecimal.ZERO
+            BigDecimal wildTagBalance = BigDecimal.ZERO
             if(balancesMap[currency]) {
                 for(String tag: accountsMap[currency].keySet()) {
                     BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
                     if(balancesMap[currency][tag]) {
                         BigDecimal balanceTagAmount = balancesMap[currency][tag];
-                        if(tagAmount.compareTo(balanceTagAmount) != 0) throw new ExceptionVS("Balance Error with user " +
-                                "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
+                        if(TagVS.WILDTAG.equals(tag)) wildTagBalance = balanceTagAmount
+                        else if(tagAmount.compareTo(balanceTagAmount) != 0)
+                            tagGap = tagGap.add(tagAmount.subtract(balanceTagAmount))
                     } else {
                         if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with user " +
                                 "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
@@ -78,10 +82,18 @@ class CooinAccountService {
             } else {
                 for(String tag: accountsMap[currency].keySet()) {
                     BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
+                    if(!accountsMap.isEmpty() && balancesMap.isEmpty()) throw new ExceptionVS(messageSource.getMessage(
+                            'initPeriodMissingErrorMsg', [userVS.id].toArray(), locale))
                     if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with user '${userVS.id}' " +
                             "tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                 }
             }
+            //check WILDTAG result
+            BigDecimal wildTagAccount = new BigDecimal(accountsMap[currency][TagVS.WILDTAG])
+            if(wildTagAccount.compareTo(wildTagBalance.subtract(tagGap)) != 0) throw new ExceptionVS(
+                    "Balance Error with user " + "'$userVS.id' - '$currency' - accounts: '$accountsMap' - " +
+                            "gap  not resolved '$tagGap'")
+
         }
     }
 
