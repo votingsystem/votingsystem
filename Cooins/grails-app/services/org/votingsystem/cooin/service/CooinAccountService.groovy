@@ -20,7 +20,6 @@ class CooinAccountService {
 
 	def grailsApplication
 	def messageSource
-    def transactionVSService
 
 
     WalletVS getUserVSWallet(UserVS user) {
