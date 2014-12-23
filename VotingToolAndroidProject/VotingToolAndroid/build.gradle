@@ -66,8 +66,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'com.google.zxing:android-core:3.1.0'
     compile 'com.google.zxing:core:3.1.0'
-
-    compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.8.3"
+    compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.9"
     compile project(':libraries:bc')
     compile project(':libraries:votingsystem')
 }

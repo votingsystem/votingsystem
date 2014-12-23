@@ -39,9 +39,13 @@ class AppController {
 
     def tools() {}
 
+    def accounts() {}
+
     def admin() {}
 
     def transactions() {}
+
+    def messagevs() {}
 
     def userVS() {
         Integer numHours = params.int("numHours") ? -params.int("numHours"):-1; //default to 1 hour
