@@ -143,11 +143,6 @@ class CooinFilters {
                                     new ByteArrayInputStream(requestBytes)), request.contentTypeVS)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.messageSMIME
                             break;
-                        case ContentTypeVS.MESSAGEVS:
-                            responseVS = signatureVSService.processMessageVS(requestBytes, request.contentTypeVS)
-                            request.messageVS = responseVS.data?.messageVS
-                            request.messageSMIMEReq = responseVS.data?.messageSMIMEReq
-                            break;
                         default: return;
                     }
                     if(responseVS != null && ResponseVS.SC_OK != responseVS.statusCode)

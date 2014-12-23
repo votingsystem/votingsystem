@@ -314,8 +314,8 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                COOIN_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                notificationId.getAndIncrement(), clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(responseVS.getCaption())

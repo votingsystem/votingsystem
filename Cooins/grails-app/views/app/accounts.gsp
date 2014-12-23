@@ -12,9 +12,13 @@
         tiene asociada una cuenta para <b>gastos libres</b> y cuentas para cada tipo de etiqueta. Es decir, un usuario tiene
         un codigo <b>IBAN</b> que tiene asociadas tantas cuentas como etiquetas.
         </p>
-        <p>Cuando un usuario <b>RECIBE</b> un <b>ingreso con etiqueta</b> el importe se guarda en la cuenta para esa etiqueta
+        <p>Cuando un usuario <b>RECIBE</b> un <b>ingreso</b> el importe se guarda en la cuenta para <b>gastos libres</b>
         asociada al código <b>IBAN</b> del usuario</p>
-        <p>Cuando un usuario <b>HACE</b> un <b>ingreso con etiqueta</b> el importe se extrae de la cuenta para esa etiqueta
+        <p>Cuando un usuario <b>RECIBE</b> un <b>ingreso CON etiqueta</b> el importe se guarda en la cuenta para esa etiqueta
+        asociada al código <b>IBAN</b> del usuario</p>
+        <p>Cuando un usuario <b>HACE</b> un <b>ingreso</b> el importe se extrae de la cuenta para <b>gastos libres</b>
+            asociada al código <b>IBAN</b> del usuario</p>
+        <p>Cuando un usuario <b>HACE</b> un <b>ingreso CON etiqueta</b> el importe se extrae de la cuenta para esa etiqueta
         asociada al código <b>IBAN</b> del usuario, si el importe excede el contenido de la cuenta para la <b>etiqueta</b>
         lo que falta se extrae de la cuenta para <b>gastos libres</b> asociada a ese <b>IBAN</b></p>
     </div>

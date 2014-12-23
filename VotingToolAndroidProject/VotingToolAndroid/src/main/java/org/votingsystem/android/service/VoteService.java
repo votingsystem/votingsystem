@@ -1,14 +1,10 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.text.Html;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -24,12 +20,9 @@ import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
-
 
 /**
  * @author jgzornoza
@@ -135,30 +128,6 @@ public class VoteService extends IntentService {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
             contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
         }
-    }
-
-    private void showNotification(ResponseVS responseVS){
-        Integer notificationIcon = null;
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) notificationIcon = R.drawable.accept_16;
-        else notificationIcon = R.drawable.cancel_16;
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setContentTitle(responseVS.getCaption()).setContentText(
-                responseVS.getNotificationMessage());
-        if(notificationIcon != null) builder.setSmallIcon(notificationIcon);
-        /*Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        clickIntent.setClassName(this, EventsVSActivity.class.getName());
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                VOTE_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
-                .setContentIntent(pendingIntent);
-        builder.setContentIntent(pendingIntent);*/
-        Notification note =  builder.build();
-        //note.flags |= Notification.FLAG_AUTO_CANCEL;
-        //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.VOTE_SERVICE_NOTIFICATION_ID, note);
     }
 
 }

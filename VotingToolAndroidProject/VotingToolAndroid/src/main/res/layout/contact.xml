@@ -5,9 +5,12 @@
     android:background="@color/bkg_screen_vs"
     android:orientation="vertical">
 
-    <Button android:id="@+id/toggle_contact_button"
+    <TextView android:id="@+id/connected_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/select_representative_button" />
+        android:textSize="20sp"
+        android:textColor="@color/text_header"
+        android:text="@string/disconnected_lbl"
+        android:layout_gravity="center"/>
+
 </LinearLayout>

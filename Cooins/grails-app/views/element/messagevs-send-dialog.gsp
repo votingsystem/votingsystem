@@ -7,22 +7,34 @@
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
     <template>
-        <paper-dialog id="xDialog" layered backdrop title="<g:message code="sendMessageVSDialogCaption"/>"
-                             on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop title="<g:message code="sendMessageVSDialogCaption"/>"
+                      on-core-overlay-open="{{onCoreOverlayOpen}}" style="margin:auto;">
             <style></style>
             <g:include view="/include/styles.gsp"/>
-                <div layout vertical style="">
-                    <div vertical flex layout style="padding: 10px 10px 10px 10px; min-height:280px; ">
-                      {{messageToUser}}
-                      <div flex style="font-size: 1.3em; color:#6c0404; text-align: center;">
-                          <textarea rows="12" cols="45" maxlength="{{messageVSMaxLength}}" value="{{messageVS}}"></textarea>
-                      </div>
-                      <div layout horizontal style="padding:20px 20px 20px 20px;">
-                          <div flex></div>
-                          <paper-button raised on-click="{{sendMessage}}">
-                              <i class="fa fa-check"></i> <g:message code="acceptLbl" />
-                          </paper-button>
-                      </div>
+                <div>
+                    <div layout horizontal center center-justified>
+                        <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                            <div style="text-align: center;">
+                                <g:message code="sendEncryptedMessageSubject"/>
+                            </div>
+                        </div>
+                        <div style="position: absolute; top: 0px; right: 0px;">
+                            <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        </div>
+                    </div>
+                    <div layout vertical style="">
+                        <div vertical flex layout style="padding: 10px 10px 10px 10px; min-height:260px; ">
+                            {{messageToUser}}
+                            <div flex style="font-size: 1.3em; color:#6c0404; text-align: center;">
+                                <textarea rows="12" cols="50" maxlength="{{messageVSMaxLength}}" value="{{messageVS}}"></textarea>
+                            </div>
+                            <div layout horizontal style="padding:20px 20px 0 20px;">
+                                <div flex></div>
+                                <paper-button raised on-click="{{sendMessage}}">
+                                    <i class="fa fa-check"></i> <g:message code="acceptLbl" />
+                                </paper-button>
+                            </div>
+                        </div>
                     </div>
                 </div>
         </paper-dialog>

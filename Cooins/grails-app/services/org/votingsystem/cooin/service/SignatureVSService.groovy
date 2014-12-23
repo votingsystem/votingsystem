@@ -11,13 +11,11 @@ import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS
-import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.cooin.model.MessageVS
 import javax.mail.Header
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -297,48 +295,6 @@ class  SignatureVSService {
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
                 extensionChecker:validatorResult.getChecker()])
 	}
-
-    @Transactional
-    private ResponseVS processMessageVS(byte[] messageVSBytes, ContentTypeVS contenType) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(new String(messageVSBytes, "UTF-8"));
-
-        SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(
-                Base64.getDecoder().decode(messageVSJSON.smimeMessage.getBytes())))
-        ResponseVS responseVS = processSMIMERequest(smimeSender, contenType)
-        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-        MessageSMIME messageSMIMEReq = responseVS.messageSMIME
-        UserVS fromUser = messageSMIMEReq.getUserVS()
-        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
-        String msg = null
-        String toUserNIFValidated = org.votingsystem.util.NifUtils.validate(messageVSJSON.toUserNIF)
-        if(!fromUser || ! toUserNIFValidated || !messageVSJSON.encryptedDataList || !messageVSJSON.encryptedDataInfo) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "${methodName} - ${msg}"
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
-        }
-        UserVS toUser = UserVS.findWhere(nif:toUserNIFValidated)
-        messageVSJSON.encryptedDataList.each { dataMap ->
-            def dataMapInfo = messageVSJSON.encryptedDataInfo.find { it ->
-                it.serialNumber == dataMap.serialNumber
-            }
-            String encryptedMessageHash = CMSUtils.getHashBase64(dataMap.encryptedData, ContextVS.VOTING_DATA_DIGEST);
-            if(!encryptedMessageHash.equals(dataMapInfo.encryptedMessageHashBase64))
-                    msg = messageSource.getMessage("messageVSHashErrorMsg",
-                    [dataMapInfo.encryptedMessageHashBase64, encryptedMessageHash].toArray(), locale)
-        }
-        if(msg != null) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
-                message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
-
-        MessageVS messageVS = new MessageVS(content: messageVSBytes, fromUserVS: fromUser, toUserVS: toUser,
-                senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS, state: MessageVS.State.PENDING)
-
-        if (!messageVS.save()) {messageVS.errors.each { log.error("messageVS - error - ${it}")}}
-
-        log.debug("OK - MessageVS from user '${fromUser?.id}' to user '${toUser?.id}'")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[messageVS:messageVS, messageSMIMEReq:messageSMIMEReq])
-    }
 
     @Transactional
     private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType) {

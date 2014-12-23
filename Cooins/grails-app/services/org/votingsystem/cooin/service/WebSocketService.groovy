@@ -1,20 +1,12 @@
 package org.votingsystem.cooin.service
 
-import net.sf.json.JSONNull
 import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
-import org.apache.coyote.http11.upgrade.NioServletOutputStream
-import org.apache.tomcat.websocket.WsRemoteEndpointAsync
-import org.apache.tomcat.websocket.WsSession
-import org.apache.tomcat.websocket.server.WsRemoteEndpointImplServer
+import org.votingsystem.cooin.websocket.SessionVSManager
+import org.votingsystem.groovy.util.SocketServiceRequest
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.cooin.model.MessageVS
-import org.votingsystem.cooin.websocket.SessionVS
-import org.votingsystem.cooin.websocket.SessionVSManager
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
@@ -26,9 +18,9 @@ class WebSocketService {
     def messageSource
 
     public void onTextMessage(Session session, String msg , boolean last) {
-        WebSocketRequest request = null
+        SocketServiceRequest request = null
         try {
-            request = new WebSocketRequest(session, msg, last)
+            request = new SocketServiceRequest(session, msg, last)
             processRequest(request)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -53,7 +45,7 @@ class WebSocketService {
     }
 
     //TODO QUEUE
-    public void processRequest(WebSocketRequest request) {
+    public void processRequest(SocketServiceRequest request) {
         switch(request.operation) {
             case TypeVS.LISTEN_TRANSACTIONS:
                 TransactionVSService transactionVSService = grailsApplication.mainContext.getBean("transactionVSService")
@@ -70,25 +62,28 @@ class WebSocketService {
             case TypeVS.MESSAGEVS_FROM_DEVICE:
                 if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
-                Session originSession = SessionVSManager.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
-                if(!originSession) originSession = SessionVSManager.getInstance().getSession(request.messageJSON.sessionId)
-                if(!originSession) {
+                Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
+                if(!callerSession) callerSession = SessionVSManager.getInstance().getSession(request.messageJSON.sessionId)
+                if(!callerSession) {
                     processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
                                     "messagevsSignRequestorNotFound", null, locale)))
                 } else {
-                    originSession.getBasicRemote().sendText(request.messageJSON.toString())
+                    callerSession.getBasicRemote().sendText(request.messageJSON.toString())
                     processResponse(request.getResponse(ResponseVS.SC_OK, null))
                 }
                 break;
             case TypeVS.INIT_VALIDATED_SESSION:
                 SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
-                SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
-                        request.messageJSON.smimeMessage.decodeBase64()))
-                ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null)
+                ResponseVS responseVS = signatureVSService.processSMIMERequest(request.getSMIME(), null)
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
-                    SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
-                    processResponse(request.getResponse(ResponseVS.SC_OK, null, userVS.id))
+                    if(userVS.getDeviceVS()) {
+                        SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
+                        processResponse(request.getResponse(ResponseVS.SC_OK, null, userVS.id))
+                    } else {
+                        processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
+                                "certWithoutDeviceVSInfoErrorMsg", null, locale), null))
+                    }
                 } else processResponse(request.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(), null))
                 break;
             case TypeVS.WEB_SOCKET_BAN_SESSION:
@@ -118,43 +113,6 @@ class WebSocketService {
     public void processResponse(JSONObject messageJSON) {
         log.debug("processResponse - messageJSON: ${messageJSON.message}")
         SessionVSManager.getInstance().sendMessage(((String)messageJSON.sessionId), messageJSON.toString());
-    }
-
-    public class WebSocketRequest {
-        Session session;
-        JSONObject messageJSON;
-        SessionVS sessionVS
-        Locale locale
-        TypeVS operation
-        InetSocketAddress remoteAddress
-        public WebSocketRequest(Session session, String msg, boolean last) {
-            this.remoteAddress = ((InetSocketAddress)((NioServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
-                    ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.socket.sc.remoteAddress);
-            this.session = session;
-            messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
-            if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
-            if(!messageJSON.locale) throw new ExceptionVS("missing message 'locale'")
-            locale = Locale.forLanguageTag(messageJSON.locale)
-            if(!messageJSON.operation || JSONNull.getInstance().equals(messageJSON.operation))
-                throw new ExceptionVS("missing message 'operation'")
-            operation = TypeVS.valueOf(messageJSON.operation)
-            if(TypeVS.MESSAGEVS_SIGN == operation) {
-                if(!messageJSON.deviceId) throw new ExceptionVS("missing message 'deviceId'")
-            }
-            sessionVS = SessionVSManager.getInstance().getAuthenticatedSession(session)
-            log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - " +
-                    "remoteIp: ${remoteAddress.address} - last: ${last}")
-        }
-        JSONObject getResponse(Integer statusCode, String message){
-            return JSONSerializer.toJSON([statusCode:statusCode, message:message,
-                  sessionId:session.getId(), operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
-        }
-
-        JSONObject getResponse(Integer statusCode, String message, Long userId){
-            return JSONSerializer.toJSON([statusCode:statusCode, message:message, userId:userId,
-                    sessionId:messageJSON.sessionId, operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
-        }
-
     }
 
 }
