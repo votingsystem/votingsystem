@@ -164,8 +164,9 @@ public class CooinFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
         if(isVisible){
-            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
+            if(caption == null) caption = getString(R.string.loading_data_msg);
+            if(message == null) message = getString(R.string.loading_info_msg);
+            ProgressDialogFragment.showDialog(caption, message, getFragmentManager());
         } else ProgressDialogFragment.hide(getFragmentManager());
     }
 

@@ -18,15 +18,14 @@ class WebSocketService {
     def messageSource
 
     public void onTextMessage(Session session, String msg , boolean last) {
-        SocketServiceRequest request = null
         try {
-            request = new SocketServiceRequest(session, msg, last)
+            SocketServiceRequest request = new SocketServiceRequest(session, msg, last)
             processRequest(request)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             String message = ex.getMessage()
             if(message == null) message = messageSource.getMessage('socketRequestErrorMsg', null, locale)
-            processResponse(request.getResponse(ResponseVS.SC_ERROR, message));
+            processResponse(SocketServiceRequest.getResponse(ResponseVS.SC_ERROR, message, session, msg));
         }
     }
 

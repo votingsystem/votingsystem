@@ -9,10 +9,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.telephony.TelephonyManager;
 
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -20,6 +22,7 @@ import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.android.util.WebSocketSession;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -33,6 +36,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -77,7 +81,7 @@ public class WebSocketService extends Service {
         if(intent != null) {
             Bundle arguments = intent.getExtras();
             final ResponseVS responseVS = (ResponseVS)arguments.getParcelable(ContextVS.RESPONSEVS_KEY);
-            if(responseVS != null) {
+            if(responseVS != null && TypeVS.MESSAGEVS != responseVS.getTypeVS()) {
                 new Thread(null, new Runnable() {
                     @Override public void run() {
                         try {
@@ -111,9 +115,8 @@ public class WebSocketService extends Service {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            new Thread(null, new MessageProccessor(
-                    operationType, operationVS, messageToSend, serviceCaller),
-                    "websocket_message_proccessor_thread").start();
+            new Thread(null, new MessageProccessor(operationType, operationVS, responseVS,
+                    messageToSend, serviceCaller), "websocket_message_proccessor_thread").start();
         }
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
@@ -223,22 +226,23 @@ public class WebSocketService extends Service {
 
         private String messageToSend = null;
         private String serviceCaller = null;
-        private TypeVS operationType = null;
+        private TypeVS typeVS = null;
         private OperationVS operationVS = null;
+        private ResponseVS responseData = null;
 
-        public MessageProccessor(TypeVS operationType, OperationVS operationVS,
+        public MessageProccessor(TypeVS typeVS, OperationVS operationVS, ResponseVS responseVS,
                  String messageToSend, String serviceCaller) {
             this.messageToSend = messageToSend;
-            this.operationType = operationType;
+            this.typeVS = typeVS;
             this.operationVS = operationVS;
             this.serviceCaller = serviceCaller;
+            this.responseData = responseVS;
         }
 
         @Override public void run() {
             try {
-                if(operationType == null && operationVS != null)
-                    operationType = operationVS.getTypeVS();
-                switch(operationType) {
+                if(typeVS == null && operationVS != null) typeVS = operationVS.getTypeVS();
+                switch(typeVS) {
                     case WEB_SOCKET_INIT:
                         contextVS.sendWebSocketBroadcast(initAuthenticatedSession());
                         break;
@@ -253,8 +257,22 @@ public class WebSocketService extends Service {
                                 null, operationVS, responseVS.getSMIME(), contextVS);
                         session.getBasicRemote().sendText(responseJSON.toString());
                         break;
+                    case MESSAGEVS:
+                        JSONArray deviceArray = ((JSONObject) responseData.getMessageJSON()).
+                                getJSONArray("deviceList");
+                        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+                        String deviceId = telephonyManager.getDeviceId();
+                        for (int i = 0; i < deviceArray.length(); i++) {
+                            DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
+                            JSONObject socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS,
+                                    null, messageToSend, contextVS);
+                            if(!deviceId.equals(deviceVS.getDeviceId())) {
+                                session.getBasicRemote().sendText(socketMsg.toString());
+                            }
+                        }
+                        break;
                     default:
-                        LOGD(TAG + ".onStartCommand() ", "unknown operation: " + operationType.toString());
+                        LOGD(TAG + ".onStartCommand() ", "unknown operation: " + typeVS.toString());
                 }
             } catch(Exception ex) {ex.printStackTrace();}
         }

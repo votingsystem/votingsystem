@@ -31,6 +31,8 @@ class SocketServiceRequest {
     TypeVS operation
     SMIMEMessage smimeMessage;
     InetSocketAddress remoteAddress
+    boolean hasErrors = false
+
 
     public SocketServiceRequest(Session session, String msg, boolean last) {
         this.remoteAddress = ((InetSocketAddress)((NioServletOutputStream)((WsRemoteEndpointImplServer)(
@@ -51,9 +53,19 @@ class SocketServiceRequest {
         log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - " +
                 "remoteIp: ${remoteAddress.address} - last: ${last}")
     }
+
     JSONObject getResponse(Integer statusCode, String message){
         return JSONSerializer.toJSON([statusCode:statusCode, message:message,
                   sessionId:session.getId(), operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
+    }
+
+    public static JSONObject getResponse(Integer statusCode, String message, Session session, String requestMsg){
+        String requestUUID = null
+        try {
+            requestUUID = ((JSONObject)JSONSerializer.toJSON(requestMsg)).UUID
+        } catch(Exception ex) {log.error("requestMsg not in JSON format")}
+        return JSONSerializer.toJSON([statusCode:statusCode, message:message, sessionId:session.getId(),
+                      operation:TypeVS.MESSAGEVS_FROM_VS, UUID:requestUUID])
     }
 
     JSONObject getResponse(Integer statusCode, String message, Long userId){

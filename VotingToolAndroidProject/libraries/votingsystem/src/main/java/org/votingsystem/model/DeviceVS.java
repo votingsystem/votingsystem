@@ -1,10 +1,13 @@
 package org.votingsystem.model;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author jgzornoza
@@ -25,13 +28,22 @@ public class DeviceVS {
         DeviceVS deviceVS = new DeviceVS();
         deviceVS.setId(jsonObject.getLong("id"));
         deviceVS.setDeviceName(jsonObject.getString("deviceName"));
-        deviceVS.setEmail(jsonObject.getString("email"));
-        deviceVS.setPhone(jsonObject.getString("phone"));
+        if(jsonObject.has("email")) deviceVS.setEmail(jsonObject.getString("email"));
+        if(jsonObject.has("phone")) deviceVS.setPhone(jsonObject.getString("phone"));
         deviceVS.setDeviceId(jsonObject.getString("deviceId"));
         Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                 jsonObject.getString("certPEM").getBytes());
         deviceVS.setX509Certificate(certChain.iterator().next());
         return deviceVS;
+    }
+
+    public static List<DeviceVS> parseArray(JSONArray deviceArray) throws Exception {
+        List<DeviceVS> result = new ArrayList<>();
+        for (int i = 0; i < deviceArray.length(); i++) {
+            DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
+            result.add(deviceVS);
+        }
+        return result;
     }
 
     public Long getId() {

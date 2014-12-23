@@ -1,13 +1,14 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
@@ -19,12 +20,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
+import org.votingsystem.android.service.WebSocketService;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.DeviceVS;
@@ -32,9 +35,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.UUID;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -60,7 +61,26 @@ public class ContactFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            switch(responseVS.getTypeVS()) {
+                case WEB_SOCKET_INIT:
+                    setProgressDialogVisible(true, getString(R.string.connecting_caption),
+                            getString(R.string.connecting_to_service_msg));
+                    Utils.toggleWebSocketServiceConnection(contextVS);
+                    break;
+            }
+        } else setProgressDialogVisible(false, null, null);
+        if(responseVS != null) {
+            switch(responseVS.getTypeVS()) {
+                case MESSAGEVS:
+                    Intent startIntent = new Intent(getActivity(), WebSocketService.class);
+                    startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGEVS);
+                    startIntent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
+                    startIntent.putExtra(ContextVS.RESPONSEVS_KEY, contactDataResponse.setTypeVS(TypeVS.MESSAGEVS));
+                    startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                    getActivity().startService(startIntent);
+                    break;
+            }
         }
         }
     };
@@ -111,6 +131,7 @@ public class ContactFragment extends Fragment {
                 broadcastReceiver, new IntentFilter(broadCastId));
         if(savedInstanceState != null) {
             contactDataResponse = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
+            isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
         }
         if(contactDataResponse == null) new UserVSDataFetcher().execute("");
         return rootView;
@@ -131,16 +152,8 @@ public class ContactFragment extends Fragment {
 
     private void setContactButtonState(boolean isDBUserVS) {
         this.isDBUserVS = isDBUserVS;
-        if(isDBUserVS) {
-            if(menu != null) {
-                menu.add(R.id.general_items, R.id.delete_item, 3,
-                        getString(R.string.remove_contact_lbl));
-            }
-            toggle_contact_button.setVisibility(View.GONE);
-        } else {
-            if(menu != null) {
-                menu.removeItem(R.id.delete_item);
-            }
+        if(isDBUserVS) toggle_contact_button.setVisibility(View.GONE);
+        else {
             toggle_contact_button.setVisibility(View.VISIBLE);
             toggle_contact_button.setText(getString(R.string.add_contact_lbl));
             toggle_contact_button.setOnClickListener(new View.OnClickListener() {
@@ -148,10 +161,12 @@ public class ContactFragment extends Fragment {
             });
         }
         if(menu != null) {
-            if(isConnected) {
-                menu.add(R.id.general_items, R.id.send_message, 1,
-                        getString(R.string.remove_contact_lbl));
-            } else menu.removeItem(R.id.send_message);
+            menu.removeItem(R.id.send_message); //to avoid duplicated items
+            menu.removeItem(R.id.delete_item);
+            if(isConnected) menu.add(R.id.general_items, R.id.send_message, 1,
+                        getString(R.string.send_message_lbl));
+            if(isDBUserVS) menu.add(R.id.general_items, R.id.delete_item, 3,
+                    getString(R.string.remove_contact_lbl));
         }
         if(isConnected) connected_text.setText(getString(R.string.connected_lbl));
         else connected_text.setText(getString(R.string.disconnected_lbl));
@@ -176,6 +191,14 @@ public class ContactFragment extends Fragment {
         } else ProgressDialogFragment.hide(getFragmentManager());
     }
 
+    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
+        if(isVisible){
+            if(caption == null) caption = getString(R.string.loading_data_msg);
+            if(message == null) message = getString(R.string.loading_info_msg);
+            ProgressDialogFragment.showDialog(caption, message, getFragmentManager());
+        } else ProgressDialogFragment.hide(getFragmentManager());
+    }
+
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.contact, menu);
         this.menu = menu;
@@ -186,7 +209,20 @@ public class ContactFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.send_message:
-                MessageVSInputDialogFragment.showDialog(getString(R.string.messagevs_caption),
+                if(contextVS.getWebSocketConnection() == null) {
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            getString(R.string.send_message_lbl),
+                            getString(R.string.connection_required_msg),
+                            getActivity()).setPositiveButton(getString(R.string.connect_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    PinDialogFragment.showPinScreen(getFragmentManager(),
+                                            broadCastId, getString(R.string.init_authenticated_session_pin_msg),
+                                            false, TypeVS.WEB_SOCKET_INIT);
+                                }
+                            }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                    UIUtils.showMessageDialog(builder);
+                } else MessageVSInputDialogFragment.showDialog(getString(R.string.messagevs_caption),
                         broadCastId, TypeVS.MESSAGEVS, getFragmentManager());
                 return true;
             case R.id.send_money:
@@ -203,6 +239,7 @@ public class ContactFragment extends Fragment {
         super.onSaveInstanceState(outState);
         if(contactDataResponse != null) outState.putParcelable(ContextVS.RESPONSEVS_KEY,
                 contactDataResponse);
+        outState.putBoolean(ContextVS.CONNECTED_KEY, isConnected);
     }
 
     @Override public void onPause() {
@@ -239,14 +276,12 @@ public class ContactFragment extends Fragment {
                         }
                     }
                     setContactButtonState(isDBUserVS);
-                } else {
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
+                } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                             responseVS.getMessage(), getFragmentManager());
-                }
                 setProgressDialogVisible(false);
-            } catch (Exception ex) {
-
-            }
+                LOGD(TAG + ".UserVSDataFetcher", "isConnected: " + isConnected);
+            } catch (Exception ex) { ex.printStackTrace(); }
         }
     }
+
 }

@@ -130,16 +130,18 @@ public class ContactsGridFragment extends Fragment
         });
         if(savedInstanceState != null) {
             searchResponseVS = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
-            try {
-                ContactListAdapter adapter = new ContactListAdapter(
-                        UserVS.parseList(searchResponseVS.getMessageJSON()), contextVS);
-                gridView.setAdapter(adapter);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(searchResponseVS != null) {
+                try {
+                    ContactListAdapter adapter = new ContactListAdapter(
+                            UserVS.parseList(searchResponseVS.getMessageJSON()), contextVS);
+                    gridView.setAdapter(adapter);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                contactUserVS = (UserVS) savedInstanceState.getSerializable(ContextVS.USER_KEY);
+                Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+                gridView.onRestoreInstanceState(gridState);
             }
-            contactUserVS = (UserVS) savedInstanceState.getSerializable(ContextVS.USER_KEY);
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
-            gridView.onRestoreInstanceState(gridState);
         } else {
             ContactDBListAdapter adapter = new ContactDBListAdapter(getActivity(), null,false);
             gridView.setAdapter(adapter);

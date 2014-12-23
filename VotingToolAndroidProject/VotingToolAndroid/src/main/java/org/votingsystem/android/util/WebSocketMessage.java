@@ -11,6 +11,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -382,6 +383,31 @@ public class WebSocketMessage implements Parcelable {
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceToCert);
         messageToDevice.put("encryptedMessage", new String(Base64.encode(encryptedRequestBytes)));
+        return new JSONObject(messageToDevice);
+    }
+
+    public static JSONObject getMessageVSToDevice(DeviceVS deviceVS, String toUser,
+          String textToEncrypt, AppContextVS contextVS) throws Exception {
+        Map messageToDevice = new HashMap<>();
+        messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
+        messageToDevice.put("deviceToId", deviceVS.getId());
+        messageToDevice.put("deviceToName", deviceVS.getDeviceName());
+        messageToDevice.put("locale", contextVS.getResources().getConfiguration().locale.getLanguage());
+        String randomUUID = java.util.UUID.randomUUID().toString();
+        messageToDevice.put("UUID", randomUUID);
+        Map encryptedDataMap =  new HashMap<>();
+        encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
+        encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
+        encryptedDataMap.put("toUser", toUser);
+        encryptedDataMap.put("message", textToEncrypt);
+        AESParams aesParams = new AESParams();
+        contextVS.putSession(randomUUID, new WebSocketSession(aesParams, deviceVS, null,
+                TypeVS.COOIN_WALLET_CHANGE));
+        encryptedDataMap.put("aesParams", aesParams.toJSON());
+        byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
+                new JSONObject(encryptedDataMap).toString().getBytes(), deviceVS.getX509Certificate());
+        messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
         return new JSONObject(messageToDevice);
     }
 
