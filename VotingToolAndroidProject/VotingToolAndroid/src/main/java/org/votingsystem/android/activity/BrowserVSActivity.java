@@ -14,24 +14,20 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.service.OperationVSService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -55,34 +51,18 @@ public class BrowserVSActivity extends ActionBarActivity {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
-        else {
-            if(responseVS.getOperation() != null) {
-                if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                    sendMessageToBrowserApp(responseVS.getMessageJSON(),
-                            responseVS.getOperation().getCallerCallback());
-                } else {
-                    sendMessageToBrowserApp(responseVS.getStatusCode(),
-                            responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
-                }
-            } else MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage(), getSupportFragmentManager());
-        }
+        if(responseVS.getOperation() != null) {
+            if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                sendMessageToBrowserApp(responseVS.getMessageJSON(),
+                        responseVS.getOperation().getCallerCallback());
+            } else {
+                sendMessageToBrowserApp(responseVS.getStatusCode(),
+                        responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
+            }
+        } else MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
+                responseVS.getNotificationMessage(), getSupportFragmentManager());
         }
     };
-
-    private void launchSignAndSendService() {
-        LOGD(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
-        try {
-            Intent startIntent = new Intent(this, OperationVSService.class);
-            startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            setProgressDialogVisible(true);
-            startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);

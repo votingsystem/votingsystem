@@ -41,6 +41,8 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_ERROR_TIMESTAMP          = 570;
     public static final int SC_PROCESSING               = 700;
     public static final int SC_TERMINATED               = 710;
+    public static final int SC_WS_MESSAGE_SEND_OK       = 800;
+    public static final int SC_WS_CONNECTION_NOT_FOUND  = 840;
     public static final int SC_CANCELLED                = 0;
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;
@@ -222,8 +224,9 @@ public class ResponseVS<T> implements Parcelable {
     }
 
 
-    public void setMessage(String message) {
+    public ResponseVS setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public EventVSResponse getEventQueryResponse() {

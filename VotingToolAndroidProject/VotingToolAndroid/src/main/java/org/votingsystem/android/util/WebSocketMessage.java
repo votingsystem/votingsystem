@@ -259,8 +259,9 @@ public class WebSocketMessage implements Parcelable {
         return caption;
     }
 
-    public void setCaption(String caption) {
+    public WebSocketMessage setCaption(String caption) {
         this.caption = caption;
+        return this;
     }
 
     public Long getUserId() {
@@ -403,11 +404,11 @@ public class WebSocketMessage implements Parcelable {
         encryptedDataMap.put("message", textToEncrypt);
         AESParams aesParams = new AESParams();
         contextVS.putSession(randomUUID, new WebSocketSession(aesParams, deviceVS, null,
-                TypeVS.COOIN_WALLET_CHANGE));
+                TypeVS.MESSAGEVS));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
                 new JSONObject(encryptedDataMap).toString().getBytes(), deviceVS.getX509Certificate());
-        messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
+        messageToDevice.put("encryptedMessage", new String(Base64.encode(encryptedRequestBytes)));
         return new JSONObject(messageToDevice);
     }
 

@@ -58,6 +58,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.android.util.LogUtils.LOGE;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -246,6 +247,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 setServer(targetServer);
             }
         } catch(Exception ex) {
+            LOGE(TAG + ".getActorVSFromURL", "ERROR fetching: " + serverURL);
             ex.printStackTrace();
         } finally { return targetServer; }
     }
@@ -350,6 +352,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
+                        LOGD(TAG , "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         socketMsg.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
@@ -361,8 +364,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                                 }
                                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                                 break;
-                            default:
-                                LOGD(TAG , "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
+                            default: sendWebSocketBroadcast(socketMsg);
                         }
                     }
                     break;
@@ -389,7 +391,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                         responseVS.setCaption(getString(R.string.messagevs_caption)).
                                 setNotificationMessage(socketMsg.getMessage());
                         showNotification(responseVS);
-                    }
+                    } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);

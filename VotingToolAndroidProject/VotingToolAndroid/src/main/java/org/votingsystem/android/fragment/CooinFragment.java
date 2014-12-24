@@ -87,7 +87,7 @@ public class CooinFragment extends Fragment {
                             });
                         UIUtils.showMessageDialog(builder);
                     } else MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
-                                getString(R.string.error_lbl), socketMsg.getMessage(),
+                                getString(R.string.error_lbl), getString(R.string.device_not_found_error_msg),
                                 getFragmentManager());
                     break;
                 default:

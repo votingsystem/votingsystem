@@ -99,10 +99,10 @@ public class SessionVSManager {
                 while (deviceSessionMap.values().remove(session.getId()));
             }
             if(connectedUserVSDeviceMap.containsKey(removedSessionVS.getUserVS().getId())) {
-                connectedUserVSDeviceMap.replace(removedSessionVS.getUserVS().getId(), connectedUserVSDeviceMap.get(
-                        removedSessionVS.getUserVS().getId()).stream().filter(d -> {
-                        if(removedSessionVS.getUserVS().getDeviceVS().getId() == d.getId()) return false;
-                        else return true; }).collect(toSet()));
+                Set<DeviceVS> userDevices = connectedUserVSDeviceMap.get(removedSessionVS.getUserVS().getId()).stream().
+                        filter(d -> { if(removedSessionVS.getUserVS().getDeviceVS().getId() == d.getId()) return false;
+                        else return true; }).collect(toSet());
+                connectedUserVSDeviceMap.replace(removedSessionVS.getUserVS().getId(), userDevices);
             }
         }
         try {session.close();} catch (Exception ex) {}

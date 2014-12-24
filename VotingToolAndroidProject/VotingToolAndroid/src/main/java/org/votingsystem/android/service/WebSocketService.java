@@ -49,6 +49,7 @@ import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.android.util.LogUtils.LOGE;
 
 /**
  * @author jgzornoza
@@ -82,6 +83,7 @@ public class WebSocketService extends Service {
             Bundle arguments = intent.getExtras();
             final ResponseVS responseVS = (ResponseVS)arguments.getParcelable(ContextVS.RESPONSEVS_KEY);
             if(responseVS != null && TypeVS.MESSAGEVS != responseVS.getTypeVS()) {
+                LOGD(TAG + ".onStartCommand", "processing responseVS: " + responseVS.getTypeVS());
                 new Thread(null, new Runnable() {
                     @Override public void run() {
                         try {
@@ -102,18 +104,22 @@ public class WebSocketService extends Service {
                         ResponseVS.SC_ERROR, getString(R.string.connection_error_msg), operationType));
             }
             try {
-                if(session == null || !session.isOpen()) {
-                    WebSocketListener socketListener = new WebSocketListener(
-                            contextVS.getCooinServer().getWebSocketURL());
-                    new Thread(null, socketListener, "websocket_service_thread").start();
-                }
-                if(latch.getCount() > 0) {
-                    LOGD(TAG + ".onStartCommand", "starting websocket session");
-                    latch.await();
-                    LOGD(TAG + ".onStartCommand", "websocket session started");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                if(contextVS.getCooinServer() != null) {
+                    if(session == null || !session.isOpen()) {
+                        WebSocketListener socketListener = new WebSocketListener(
+                                contextVS.getCooinServer().getWebSocketURL());
+                        new Thread(null, socketListener, "websocket_service_thread").start();
+                    }
+                    if(latch.getCount() > 0) {
+                        LOGD(TAG + ".onStartCommand", "starting websocket session");
+                        latch.await();
+                        LOGD(TAG + ".onStartCommand", "websocket session started");
+                    }
+                } else contextVS.sendWebSocketBroadcast(new WebSocketMessage(ResponseVS.SC_ERROR,
+                        getString(R.string.missing_server_connection), TypeVS.INIT_VALIDATED_SESSION).
+                        setCaption(getString(R.string.connection_error_msg)));
+            } catch (Exception ex) {
+                LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET SERVICE: " + ex.getMessage());
             }
             new Thread(null, new MessageProccessor(operationType, operationVS, responseVS,
                     messageToSend, serviceCaller), "websocket_message_proccessor_thread").start();
@@ -141,7 +147,8 @@ public class WebSocketService extends Service {
                     INIT_VALIDATED_SESSION, null, null, smimeMessage, randomUUID, contextVS).toString());
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new WebSocketMessage(ResponseVS.SC_ERROR, ex.getMessage(), TypeVS.INIT_VALIDATED_SESSION);
+            return new WebSocketMessage(ResponseVS.SC_ERROR, getString(R.string.missing_server_connection),
+                    TypeVS.INIT_VALIDATED_SESSION);
         }
         return new WebSocketMessage(ResponseVS.SC_PROCESSING, null, TypeVS.INIT_VALIDATED_SESSION);
     }

@@ -56,8 +56,8 @@ public class MessageVSInputDialogFragment extends DialogFragment {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     if(messageEditText.getText().toString().trim().isEmpty()) return;
                     Intent intent = new Intent(broadCastId);
-                    ResponseVS responseVS = new ResponseVS(typeVS, messageEditText.getText());
-                    intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                    intent.putExtra(ContextVS.RESPONSEVS_KEY, new ResponseVS(ResponseVS.SC_OK,
+                            typeVS).setMessage(messageEditText.getText().toString()));
                     LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 }
             });

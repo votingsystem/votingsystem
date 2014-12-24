@@ -3,6 +3,7 @@ package org.votingsystem.cooin.service
 import net.sf.json.JSONObject
 import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.SocketServiceRequest
+import org.votingsystem.model.DeviceVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
@@ -53,10 +54,8 @@ class WebSocketService {
             case TypeVS.MESSAGEVS_TO_DEVICE:
                     if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
-                    processResponse(request.getResponse(ResponseVS.SC_OK, null))
-                } else processResponse(request.getResponse(ResponseVS.SC_ERROR,
-                        messageSource.getMessage("webSocketDeviceSessionNotFoundErrorMsg",
-                        [request.messageJSON.deviceToName].toArray(), locale)));
+                    processResponse(request.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null))
+                } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null, locale));
                 break;
             case TypeVS.MESSAGEVS_FROM_DEVICE:
                 if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,

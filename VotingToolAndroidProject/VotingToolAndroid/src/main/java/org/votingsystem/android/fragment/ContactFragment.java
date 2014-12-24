@@ -28,6 +28,7 @@ import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
+import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.DeviceVS;
@@ -61,6 +62,7 @@ public class ContactFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        WebSocketMessage socketMsg = intent.getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case WEB_SOCKET_INIT:
@@ -80,6 +82,13 @@ public class ContactFragment extends Fragment {
                     startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);
                     break;
+            }
+        }
+        if(socketMsg != null) {
+            if(ResponseVS.SC_OK != socketMsg.getStatusCode()) {
+                MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
+                        R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
+                        getFragmentManager());
             }
         }
         }
@@ -129,6 +138,8 @@ public class ContactFragment extends Fragment {
                 UUID.randomUUID().toString());
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
         if(savedInstanceState != null) {
             contactDataResponse = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
             isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
