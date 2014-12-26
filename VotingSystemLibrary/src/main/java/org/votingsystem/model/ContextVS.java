@@ -52,7 +52,7 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int COOIN_TAG                              = 3;
+    public static final int COOIN_TAG                               = 3;
     public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";

@@ -41,8 +41,7 @@ class SocketServiceRequest {
         this.session = session;
         messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
         if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
-        if(!messageJSON.locale) throw new ExceptionVS("missing message 'locale'")
-        locale = Locale.forLanguageTag(messageJSON.locale)
+        if(messageJSON.locale) locale = Locale.forLanguageTag(messageJSON.locale)
         if(!messageJSON.operation || JSONNull.getInstance().equals(messageJSON.operation))
             throw new ExceptionVS("missing message 'operation'")
         operation = TypeVS.valueOf(messageJSON.operation)
@@ -68,8 +67,8 @@ class SocketServiceRequest {
                       operation:TypeVS.MESSAGEVS_FROM_VS, UUID:requestUUID])
     }
 
-    JSONObject getResponse(Integer statusCode, String message, Long userId){
-        return JSONSerializer.toJSON([statusCode:statusCode, message:message, userId:userId,
+    JSONObject getResponse(Integer statusCode, String message, Long deviceId){
+        return JSONSerializer.toJSON([statusCode:statusCode, message:message, deviceId:deviceId,
                   sessionId:messageJSON.sessionId, operation:TypeVS.MESSAGEVS_FROM_VS, UUID:messageJSON.UUID])
     }
 

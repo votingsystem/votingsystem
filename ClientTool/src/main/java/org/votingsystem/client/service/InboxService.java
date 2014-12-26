@@ -6,14 +6,17 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.InboxDialog;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
@@ -40,6 +43,7 @@ public class InboxService {
     private static Logger log = Logger.getLogger(InboxService.class);
 
     private List<WebSocketMessage> socketMsgList = new ArrayList<>();
+    private List<WebSocketMessage> encryptedSocketMsgList = new ArrayList<>();
     private WebSocketMessage timeLimitedWebSocketMessage;
     private File messagesFile;
     private static final InboxService INSTANCE = new InboxService();
@@ -57,8 +61,7 @@ public class InboxService {
             if(messagesFile.createNewFile()) {
                 messageArray = new JSONArray();
                 flush();
-            }
-            else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
+            } else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
             for(int i = 0; i < messageArray.size(); i++) {
                 socketMsgList.add(new WebSocketMessage((net.sf.json.JSONObject) messageArray.get(i)));
             }
@@ -115,17 +118,27 @@ public class InboxService {
 
     public void addMessage(WebSocketMessage socketMsg) {
         socketMsg.setDate(Calendar.getInstance().getTime());
-        if(!socketMsg.isTimeLimited()) {
-            socketMsgList.add(socketMsg);
-            PlatformImpl.runLater(() -> inboxButton.setVisible(true));
-            flush();
-        } else timeLimitedWebSocketMessage = socketMsg;
-        consumeMessageToDevice(null, socketMsg.isTimeLimited());
+        switch(socketMsg.getOperation()) {
+            case MESSAGEVS://message comes decrypted with session keys
+                socketMsgList.add(socketMsg);
+                PlatformImpl.runLater(() -> {showMessage(socketMsg.getMessage());});
+                break;
+            case MESSAGEVS_TO_DEVICE:
+                if(!socketMsg.isTimeLimited()) {
+                    encryptedSocketMsgList.add(socketMsg);
+                    PlatformImpl.runLater(() -> inboxButton.setVisible(true));
+                    flush();
+                } else timeLimitedWebSocketMessage = socketMsg;
+                consumeMessageToDevice(null, socketMsg.isTimeLimited());
+                break;
+            default:
+                log.error("addMessage - unprocessed message: " + socketMsg.getOperation());
+        }
     }
 
     public void removeMessage(WebSocketMessage socketMsg) {
-        socketMsgList = socketMsgList.stream().filter(m -> !m.getUUID().equals(
-                socketMsg.getUUID())).collect(Collectors.toList());
+        socketMsgList = socketMsgList.stream().filter(m -> m.getDate().getTime() !=  socketMsg.getDate().getTime()).
+                collect(Collectors.toList());
         if(socketMsgList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
         flush();
     }
@@ -161,14 +174,16 @@ public class InboxService {
                 }
                 break;
             case MESSAGEVS:
-                showMessage(socketMsg.getMessage());
+                showMessage(socketMsg.getFormattedMessage());
                 break;
             default:log.debug(socketMsg.getOperation() + " not processed");
         }
     }
 
     public List<WebSocketMessage> getMessageList() {
-        return new ArrayList<>(socketMsgList);
+        List<WebSocketMessage> result =  new ArrayList<>(socketMsgList);
+        result.addAll(encryptedSocketMsgList);
+        return result;
     }
 
     public void resetMessageList() {
@@ -183,6 +198,10 @@ public class InboxService {
                 messageArray.add(socketMsg.getMessageJSON());
             }
             FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), messagesFile);
+            messageArray = new JSONArray();
+            for(WebSocketMessage socketMsg: encryptedSocketMsgList) {
+                messageArray.add(socketMsg.getMessageJSON());
+            }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

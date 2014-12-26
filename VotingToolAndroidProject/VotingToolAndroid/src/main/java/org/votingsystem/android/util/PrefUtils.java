@@ -86,6 +86,16 @@ public class PrefUtils {
         return applicationId;
     }
 
+    public static void putApplicationId(String applicationId, Context context) {
+        try {
+            SharedPreferences settings = context.getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(ContextVS.APPLICATION_ID_KEY, applicationId);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
     public static Calendar getLastPendingOperationCheckedTime(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);

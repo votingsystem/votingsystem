@@ -221,7 +221,7 @@ public class CooinFragment extends Fragment {
                             getFragmentManager(), getActivity());
                     break;
                 case R.id.send_to_wallet:
-                    if(contextVS.getWebSocketConnection() == null) {
+                    if(!contextVS.hasWebSocketConnection()) {
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 getString(R.string.send_to_wallet),
                                 getString(R.string.send_to_wallet_connection_required_msg),

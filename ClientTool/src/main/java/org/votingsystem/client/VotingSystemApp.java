@@ -37,7 +37,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -50,10 +49,8 @@ import java.net.URLStreamHandlerFactory;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author jgzornoza
@@ -71,6 +68,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
+    private Long deviceId;
 
     static {
         //Without this WebView always send requests with 'en-us,en;q=0.5'
@@ -128,15 +126,22 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     public void putSession(String UUID, WebSocketSession session) {
-        sessionMap.put(UUID, session);
+        sessionMap.put(UUID, session.setUUID(UUID));
     }
 
     public AESParams getSessionKeys(String UUID) {
-        return sessionMap.get(UUID).getAESParams();
+        WebSocketSession webSocketSession = null;
+        if((webSocketSession = sessionMap.get(UUID)) != null) return webSocketSession.getAESParams();
+        return null;
     }
 
     public WebSocketSession getSession(String UUID) {
         return sessionMap.get(UUID);
+    }
+    public WebSocketSession getSession(Long deviceId) {
+        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k -> k.getValue().getDeviceVS().getId()
+                == deviceId).map(k -> k.getValue()).collect(toList());
+        return result.get(0);
     }
 
     @Override public void stop() {
@@ -384,6 +389,14 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     public static void showMessage(final String message) {
         PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message));
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 
     class Delta { double x, y; }

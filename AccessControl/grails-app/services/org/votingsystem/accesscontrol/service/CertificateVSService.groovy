@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
@@ -102,7 +103,7 @@ class CertificateVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        def messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
+        JSONObject messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
         CertificateVS.State changeCertToState = CertificateVS.State.valueOf(messageJSON.changeCertToState)
         if (!messageJSON.serialNumber ||(TypeVS.CERT_EDIT != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)

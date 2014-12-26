@@ -4,6 +4,7 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -21,6 +22,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.HttpHelper;
 
 import javax.websocket.*;
 import java.net.URI;
@@ -156,6 +158,33 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         }
     }
 
+    public ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
+        log.debug("sendMessageVS");
+        ResponseVS responseVS = null;
+        if(isConnected()) {
+            responseVS = HttpHelper.getInstance().getData(((CooinServer) operationVS.getTargetServer()).
+                    getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                JSONArray deviceArray = ((JSONObject) responseVS.getMessageJSON()).getJSONArray("deviceList");
+                boolean isMessageDelivered = false;
+                for (int i = 0; i < deviceArray.size(); i++) {
+                    DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
+                    if(!SessionVSUtils.getInstance().getDeviceId().equals(deviceVS.getDeviceId())) {
+                        JSONObject socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
+                                operationVS.getMessage());
+                        sendMessage(socketMsg.toString());
+                        isMessageDelivered = true;
+                    }
+                }
+                if(isMessageDelivered) responseVS = new ResponseVS(ResponseVS.SC_OK);
+                else responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(
+                        "uservsWithoutDevicesConnectedMsg", operationVS.getNif()));
+            }
+        } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
+        return responseVS;
+    }
+
     private void consumeMessage(final String socketMsgStr) {
         try {
             WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(socketMsgStr));
@@ -165,7 +194,11 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
+            if(socketSession != null && socketMsg.isEncrypted()) {
+                socketMsg.decryptMessage(socketSession.getAESParams());
+            }
             switch(socketMsg.getOperation()) {
+                case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().addMessage(socketMsg);
                     break;
@@ -174,27 +207,18 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                         socketMsg.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
-                                if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
-                                    SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
-                                    BrowserVS.getInstance().execCommandJS(
-                                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
-                                } else log.error("ERROR - INIT_VALIDATED_SESSION - statusCode: " + socketMsg.getStatusCode());
+                                SessionVSUtils.getInstance().initAuthenticatedSession(socketMsg, userVS);
                                 break;
                             default:
                                 log.error("MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
                     }
                     break;
-                case MESSAGEVS_CONSUMED:
-                    break;
-                case MESSAGEVS_FROM_DEVICE:
-                    if(socketMsg.isEncrypted()) {
-                        socketMsg.decryptMessage(VotingSystemApp.getInstance().getSessionKeys(socketMsg.getUUID()));
-                        SessionVSUtils.setWebSocketMessage(socketMsg);
-                    }
+                case MESSAGEVS_SIGN_RESPONSE:
+                    SessionVSUtils.setSignResponse(socketMsg);
                     break;
                 default:
-                    log.debug("unprocessed socketMsg");
+                    log.debug("unprocessed socketMsg: " + socketMsg.getOperation());
             }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);

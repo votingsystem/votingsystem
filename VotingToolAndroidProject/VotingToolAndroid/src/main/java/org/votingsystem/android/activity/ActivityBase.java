@@ -273,7 +273,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
-                if(contextVS.getWebSocketConnection() == null) {
+                if(!contextVS.hasWebSocketConnection()) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
                 } else {showConnectionStatusDialog();}
@@ -454,7 +454,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private void setConnectionStatusUI() {
-        if(contextVS.getWebSocketConnection() != null) {
+        if(contextVS.hasWebSocketConnection()) {
             connectionStatusText.setText(getString(R.string.connected_lbl));
             connectionStatusView.setVisibility(View.VISIBLE);
         } else {
@@ -516,7 +516,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     }
 
     private void showConnectionStatusDialog() {
-        if(contextVS.getWebSocketConnection() != null) {
+        if(contextVS.hasWebSocketConnection()) {
             UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);

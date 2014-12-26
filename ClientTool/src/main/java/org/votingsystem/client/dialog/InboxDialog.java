@@ -15,17 +15,13 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
-import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
@@ -45,7 +41,13 @@ public class InboxDialog extends DialogVS {
     @FXML private VBox messageListPanel;
     private static InboxDialog dialog;
 
-    private static final Map<WebSocketMessage, HBox> messageMap = new HashMap<WebSocketMessage, HBox>();
+    private static final Map<String, HBox> messageMap = new LinkedHashMap<String, HBox>();
+
+    static final Comparator<WebSocketMessage> msgComparator = new Comparator<WebSocketMessage>() {
+            public int compare(WebSocketMessage msg1, WebSocketMessage msg2) {
+                return msg2.getDate().compareTo(msg1.getDate());
+            }
+        };
 
     private InboxDialog() throws IOException {
         super("/fxml/Inbox.fxml", StageStyle.DECORATED);
@@ -54,7 +56,7 @@ public class InboxDialog extends DialogVS {
     }
 
     private void load(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
-        Task<ObservableList<WebSocketMessage>> task = new DecryptMessageTask(privateKey, timeLimitedWebSocketMessage);
+        Task<ObservableList<WebSocketMessage>> task = new WebSocketMessageLoader(privateKey, timeLimitedWebSocketMessage);
         progressBar.progressProperty().bind(task.progressProperty());
         progressBar.visibleProperty().bind(task.runningProperty());
         task.setOnSucceeded(event -> mainPane.getChildren().remove(progressBar));
@@ -94,7 +96,7 @@ public class InboxDialog extends DialogVS {
         log.debug("processMessage - operation: " + socketMsg.getOperation());
        switch(socketMsg.getState()) {
            case REMOVED:
-               messageMap.remove(socketMsg);
+               messageMap.remove(socketMsg.getUUID());
                if(getStage().isShowing()) refreshView();
                break;
        }
@@ -114,25 +116,30 @@ public class InboxDialog extends DialogVS {
         }
     }
 
-    public class DecryptMessageTask extends Task<ObservableList<WebSocketMessage>> {
+    public class WebSocketMessageLoader extends Task<ObservableList<WebSocketMessage>> {
 
         PrivateKey privateKey;
         private WebSocketMessage timeLimitedWebSocketMessage;
-        public DecryptMessageTask(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
+        public WebSocketMessageLoader(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
             this.privateKey = privateKey;
             this.timeLimitedWebSocketMessage = timeLimitedWebSocketMessage;
         }
 
         @Override protected ObservableList<WebSocketMessage> call() throws Exception {
-            List<WebSocketMessage> messageList = InboxService.getInstance().getMessageList();
+            List<WebSocketMessage> messageList = null;
+            PlatformImpl.runLater(() -> {
+                messageListPanel.getChildren().remove(0, messageListPanel.getChildren().size());
+            });
             if(timeLimitedWebSocketMessage == null) messageList = InboxService.getInstance().getMessageList();
             else messageList = Arrays.asList(timeLimitedWebSocketMessage);
+            Collections.sort(messageList, msgComparator);
+            messageMap.clear();
             try {
                 int i = 0;
                 for(WebSocketMessage socketMsg : messageList) {
                     updateProgress(i++, messageList.size());
-                    if(socketMsg.isEncrypted()) socketMsg.decryptMessage(privateKey);
-                    messageMap.put(socketMsg, new InboxMessageRow(socketMsg).getMainPane());
+                    if(socketMsg.isEncrypted() && privateKey != null) socketMsg.decryptMessage(privateKey);
+                    messageMap.put(socketMsg.getUUID(), new InboxMessageRow(socketMsg).getMainPane());
                 }
                 refreshView();
             } catch(Exception ex) {

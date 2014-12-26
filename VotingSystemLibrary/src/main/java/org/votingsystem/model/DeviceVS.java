@@ -49,6 +49,12 @@ public class DeviceVS implements Serializable {
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
     @Transient private transient X509Certificate x509Certificate;
 
+    public DeviceVS() {}
+
+    public DeviceVS(Long deviceId) {
+        this.id = deviceId;
+    }
+
 	public UserVS getUserVS() {
 		return userVS;
 	}

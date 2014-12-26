@@ -55,9 +55,6 @@
             tienen que estar asociados obligatoriamente a una etiqueta, la unica etiqueta que no permite movimientos
             caducables es la etiqueta WILDTAG (la etiqueta asociada a <b>gastos generales</b>).
             </p>
-            <p><b>¿puedo utilizar un ingreso asociado a una etiqueta para pagar a otro usurio?</b> Sólo si lo cambias a
-            cooins y luego le transfieres los cooins diréctamente.
-            </p>
         </div>
     </div>
 </body>

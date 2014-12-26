@@ -52,22 +52,22 @@ class WebSocketService {
                 transactionVSService.addTransactionListener(request.messageJSON.userId)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
-                    if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
+                if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
                         request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
                     processResponse(request.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null))
-                } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null, locale));
+                } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null, null));
                 break;
             case TypeVS.MESSAGEVS_FROM_DEVICE:
-                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_ERROR,
+                if(!request.sessionVS) processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                         messageSource.getMessage("userNotAuthenticatedErrorMsg", null, request.locale)))
                 Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(request.messageJSON.sessionId)
                 if(!callerSession) callerSession = SessionVSManager.getInstance().getSession(request.messageJSON.sessionId)
                 if(!callerSession) {
-                    processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
+                    processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, messageSource.getMessage(
                                     "messagevsSignRequestorNotFound", null, locale)))
                 } else {
                     callerSession.getBasicRemote().sendText(request.messageJSON.toString())
-                    processResponse(request.getResponse(ResponseVS.SC_OK, null))
+                    processResponse(request.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null))
                 }
                 break;
             case TypeVS.INIT_VALIDATED_SESSION:
@@ -77,12 +77,13 @@ class WebSocketService {
                     UserVS userVS = responseVS.messageSMIME.userVS
                     if(userVS.getDeviceVS()) {
                         SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
-                        processResponse(request.getResponse(ResponseVS.SC_OK, null, userVS.id))
+                        processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null, userVS.deviceVS.id))
                     } else {
-                        processResponse(request.getResponse(ResponseVS.SC_ERROR, messageSource.getMessage(
-                                "certWithoutDeviceVSInfoErrorMsg", null, locale), null))
+                        processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR, messageSource.
+                                getMessage("certWithoutDeviceVSInfoErrorMsg", null, locale), null))
                     }
-                } else processResponse(request.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(), null))
+                } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
+                        responseVS.getMessage(), null))
                 break;
             case TypeVS.WEB_SOCKET_BAN_SESSION:
                 //talks

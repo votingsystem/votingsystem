@@ -85,10 +85,22 @@ public class ContactFragment extends Fragment {
             }
         }
         if(socketMsg != null) {
-            if(ResponseVS.SC_OK != socketMsg.getStatusCode()) {
-                MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
-                        R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
-                        getFragmentManager());
+            switch(socketMsg.getStatusCode()) {
+                case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
+                    MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
+                            R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
+                            getFragmentManager());
+                    break;
+                case ResponseVS.SC_WS_MESSAGE_SEND_OK:
+                    MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
+                            R.string.send_message_lbl), getString(R.string.messagevs_send_ok_msg),
+                            getFragmentManager());
+                    break;
+                case ResponseVS.SC_WS_CONNECTION_INIT_OK:
+                    break;
+                default:
+                    MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
+                            R.string.error_lbl), socketMsg.getMessage(), getFragmentManager());
             }
         }
         }
@@ -136,10 +148,6 @@ public class ContactFragment extends Fragment {
         setHasOptionsMenu(true);
         broadCastId = ContactFragment.class.getSimpleName() + "_" + (contactId != null? contactId:
                 UUID.randomUUID().toString());
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
         if(savedInstanceState != null) {
             contactDataResponse = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
             isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
@@ -179,8 +187,8 @@ public class ContactFragment extends Fragment {
             if(isDBUserVS) menu.add(R.id.general_items, R.id.delete_item, 3,
                     getString(R.string.remove_contact_lbl));
         }
-        if(isConnected) connected_text.setText(getString(R.string.connected_lbl));
-        else connected_text.setText(getString(R.string.disconnected_lbl));
+        if(isConnected) connected_text.setText(getString(R.string.user_connected_lbl, contact.getName()));
+        else connected_text.setText(getString(R.string.uservs_disconnected_lbl, contact.getName()));
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -220,7 +228,7 @@ public class ContactFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.send_message:
-                if(contextVS.getWebSocketConnection() == null) {
+                if(!contextVS.hasWebSocketConnection()) {
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.send_message_lbl),
                             getString(R.string.connection_required_msg),
@@ -251,6 +259,14 @@ public class ContactFragment extends Fragment {
         if(contactDataResponse != null) outState.putParcelable(ContextVS.RESPONSEVS_KEY,
                 contactDataResponse);
         outState.putBoolean(ContextVS.CONNECTED_KEY, isConnected);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onPause() {

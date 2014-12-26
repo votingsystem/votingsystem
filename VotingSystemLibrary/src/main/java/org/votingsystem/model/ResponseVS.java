@@ -44,8 +44,11 @@ public class ResponseVS<T> implements Serializable {
     public static final int SC_ERROR_TIMESTAMP          = 570;
     public static final int SC_PROCESSING               = 700;
     public static final int SC_TERMINATED               = 710;
-    public static final int SC_WS_MESSAGE_SEND_OK       = 800;
-    public static final int SC_WS_CONNECTION_NOT_FOUND  = 840;
+    public static final int SC_WS_CONNECTION_INIT_OK    = 800;
+    public static final int SC_WS_MESSAGE_SEND_OK       = 801;
+    public static final int SC_WS_MESSAGE_ENCRYPTED     = 810;
+    public static final int SC_WS_CONNECTION_INIT_ERROR = 840;
+    public static final int SC_WS_CONNECTION_NOT_FOUND  = 841;
     public static final int SC_CANCELLED                = 0;
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;

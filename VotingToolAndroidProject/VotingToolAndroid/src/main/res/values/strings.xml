@@ -376,7 +376,9 @@
     <string name="sign_request_lbl">solicitud de firma</string>
     <string name="ban_device_lbl">bloquear dispositivo solicitante</string>
     <string name="disconnected_lbl">desconectado</string>
+    <string name="uservs_disconnected_lbl">\'%1$s\' no está conectado</string>
     <string name="connected_lbl">conectado</string>
+    <string name="user_connected_lbl">\'%1$s\' está conectado</string>
     <string name="connected_with_lbl">conectado con</string>
     <string name="disconnect_lbl">desconectar</string>
     <string name="signature_request_from_device">desde \'%1$s\' se le solicita que firme el siguiente documento</string>

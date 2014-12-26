@@ -9,6 +9,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
@@ -28,6 +29,7 @@ import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 import static org.votingsystem.model.ContextVS.State;
+import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 
 /**
  * @author jgzornoza
@@ -66,11 +68,9 @@ public class UserCertRequestService extends IntentService {
                 PrefUtils.putAppCertState(contextVS.getAccessControl().getServerURL(),
                         State.WITH_CSR, null, this);
             }
-            String caption = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                caption = getString(R.string.operation_ok_msg);
-            } else caption = getString(R.string.operation_error_msg);
-            responseVS.setCaption(caption);
+                responseVS.setCaption(getString(R.string.operation_ok_msg));
+            } else responseVS.setCaption(getString(R.string.operation_error_msg));
         } catch (Exception ex){
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
@@ -80,4 +80,7 @@ public class UserCertRequestService extends IntentService {
         }
     }
 
+    private void requestDeviceVSId() {
+
+    }
 }

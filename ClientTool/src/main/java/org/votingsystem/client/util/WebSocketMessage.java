@@ -35,11 +35,23 @@ public class WebSocketMessage {
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
     public static final int TRUNCATED_MSG_SIZE = 80; //chars
 
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private String sessionId;
+    private String from;
+    private Long deviceId;
+    private Long deviceFromId;
     private boolean timeLimited = false;
+    private Boolean isEncrypted;
     private State state = State.PENDING;
     private String locale;
     private String UUID;
@@ -62,6 +74,7 @@ public class WebSocketMessage {
         if(requestJSON.has("operation")) this.operation = TypeVS.valueOf(requestJSON.getString("operation"));
         if(requestJSON.has("timeLimited")) this.timeLimited = requestJSON.getBoolean("timeLimited");
         if(requestJSON.has("statusCode")) this.statusCode = requestJSON.getInt("statusCode");
+        if(requestJSON.has("deviceId")) this.deviceId = requestJSON.getLong("deviceId");
         if(requestJSON.has("URL")) this.URL = requestJSON.getString("URL");
         if(requestJSON.has("locale")) this.locale = requestJSON.getString("locale");
         if(requestJSON.has("UUID")) this.setUUID(requestJSON.getString("UUID"));
@@ -76,13 +89,15 @@ public class WebSocketMessage {
                 if(messageJSON.has("URL")) this.URL = messageJSON.getString("URL");
             } else this.message = requestJSON.getString("message");
         }
-        if(messageJSON.has("aesParams")) {
-            aesParams = AESParams.load(messageJSON.getJSONObject("aesParams"));
-        }
     }
 
     public boolean isEncrypted() {
-        return messageJSON.has("encryptedMessage");
+        if(isEncrypted != null) return isEncrypted;
+        switch (statusCode) {
+            case ResponseVS.SC_WS_CONNECTION_INIT_ERROR: return false;
+            case ResponseVS.SC_WS_CONNECTION_INIT_OK: return false;
+            default: return true;
+        }
     }
 
     public String getURL() {
@@ -124,6 +139,10 @@ public class WebSocketMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getFormattedMessage() {
+        return "<html>" + ContextVS.getMessage("messageFrom") + " <b>" + from + ":</b><br/><br/>" + message + "</html>";
     }
 
     public void setMessage(String message) {
@@ -189,6 +208,22 @@ public class WebSocketMessage {
 
     public AESParams getAESParams() {
         return  aesParams;
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public Long getDeviceFromId() {
+        return deviceFromId;
+    }
+
+    public void setDeviceFromId(Long deviceFromId) {
+        this.deviceFromId = deviceFromId;
     }
 
     public JSONObject getResponse(Integer statusCode, String message) throws Exception {
@@ -271,7 +306,9 @@ public class WebSocketMessage {
         messageToDevice.put("UUID", randomUUID);
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
+        encryptedDataMap.put("from", SessionVSUtils.getInstance().getUserVS().getName());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
+        encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("message", textToEncrypt);
         AESParams aesParams = new AESParams();
@@ -285,8 +322,9 @@ public class WebSocketMessage {
     }
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
-        byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("encryptedMessage").getBytes(), privateKey);
-        loadDecryptedContent((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes, "UTF-8")));
+        byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("aesParams").getBytes(), privateKey);
+        this.aesParams = AESParams.load((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes)));
+        decryptMessage(this.aesParams);
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
@@ -299,6 +337,9 @@ public class WebSocketMessage {
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
         if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
         if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
+        if(decryptedJSON.has("deviceFromId")) deviceFromId = decryptedJSON.getLong("deviceFromId");
+        if(decryptedJSON.has("locale")) this.locale = decryptedJSON.getString("locale");
+        if(decryptedJSON.has("from")) this.from = decryptedJSON.getString("from");
         if(decryptedJSON.has("smimeMessage")) {
             byte[] smimeMessageBytes = Base64.getDecoder().decode(decryptedJSON.getString("smimeMessage").getBytes());
             smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
@@ -313,9 +354,7 @@ public class WebSocketMessage {
                 getCooinList().add(Cooin.load(certificationRequest));
             }
         }
-        if(decryptedJSON.has("aesParams")) {
-            this.aesParams = AESParams.load(decryptedJSON.getJSONObject("aesParams"));
-        }
+        this.isEncrypted = false;
     }
 
     public String getMessageTruncated() {

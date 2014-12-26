@@ -124,7 +124,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = publishSMIME(operationVS);
                             break;
                         case MESSAGEVS:
-                            responseVS = sendMessageVS(operationVS);
+                            responseVS = WebSocketServiceAuthenticated.getInstance().sendMessageVS(operationVS);
                             break;
                         case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
@@ -371,32 +371,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
-            log.debug("sendMessageVS");
-            ResponseVS responseVS = null;
-            if(WebSocketServiceAuthenticated.getInstance().isConnected()) {
-                responseVS = HttpHelper.getInstance().getData(((CooinServer) operationVS.getTargetServer()).
-                        getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    JSONArray deviceArray = ((JSONObject) responseVS.getMessageJSON()).getJSONArray("deviceList");
-                    boolean isMessageDelivered = false;
-                    for (int i = 0; i < deviceArray.size(); i++) {
-                        DeviceVS deviceVS = DeviceVS.parse((JSONObject) deviceArray.get(i));
-                        if(!SessionVSUtils.getInstance().getDeviceId().equals(deviceVS.getDeviceId())) {
-                            JSONObject socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
-                                    operationVS.getMessage());
-                            WebSocketServiceAuthenticated.getInstance().sendMessage(socketMsg.toString());
-                            isMessageDelivered = true;
-                        }
-                    }
-                    if(isMessageDelivered) responseVS = new ResponseVS(ResponseVS.SC_OK);
-                    else responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(
-                            "uservsWithoutDevicesConnectedMsg", operationVS.getNif()));
-                }
-            } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                    ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
-            return responseVS;
-        }
+
 
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {

@@ -10,8 +10,10 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -132,35 +134,29 @@ public class WebSocketService extends Service<ResponseVS> {
 
     private void consumeMessage(final String messageStr){
         try {
-            WebSocketMessage message = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
-            log.debug("consumeMessage - type: " + message.getOperation() +
-                    " - status: " + message.getStatusCode());
-            switch(message.getOperation()) {
-                case MESSAGEVS_SIGN:
-                    if(ResponseVS.SC_OK != message.getStatusCode()) showMessage(
-                            message.getStatusCode(), message.getMessage());
-                    else Platform.runLater(() -> BrowserVS.getInstance().execCommandJSCurrentView(
-                                "alert('" + message.getMessage() + "')"));
-                    break;
-            }
-            if(message.getStatusCode() != null && ResponseVS.SC_ERROR == message.getStatusCode()) {
-                showMessage(message.getStatusCode(), message.getMessage());
+            WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
+            log.debug("consumeMessage - type: " + socketMsg.getOperation() +
+                    " - status: " + socketMsg.getStatusCode());
+            WebSocketSession socketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID());
+            if(socketMsg.getStatusCode() != null && ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
-            switch(message.getOperation()) {
+            if(socketMsg.isEncrypted() && socketSession != null)
+                socketMsg.decryptMessage(socketSession.getAESParams());
+            switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
                     BrowserVS.getInstance().execCommandJS(
-                            message.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                     break;
-                //case MESSAGEVS_SIGN: break;
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().addMessage(message);
+                    InboxService.getInstance().addMessage(socketMsg);
                     break;
-                case MESSAGEVS_FROM_DEVICE:
-                    SessionVSUtils.setWebSocketMessage(message);
+                case MESSAGEVS_SIGN_RESPONSE:
+                    SessionVSUtils.setSignResponse(socketMsg);
                     break;
                 default:
-                    log.debug("unprocessed message");
+                    log.debug("unprocessed socketMsg");
             }
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }

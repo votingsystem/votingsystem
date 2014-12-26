@@ -7,6 +7,8 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.client.service.WebSocketService;
@@ -183,19 +185,25 @@ public class SessionVSUtils {
         flush();
     }
 
-    public WebSocketMessage initAuthenticatedSession(WebSocketMessage message, UserVS userVS) {
+    public WebSocketMessage initAuthenticatedSession(WebSocketMessage socketMsg, UserVS userVS) {
         try {
-            if(ResponseVS.SC_OK == message.getStatusCode()) {
-                message.getMessageJSON().put("userVS", userVS.toJSON());
-                message.setUserVS(userVS);
+            if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
+                socketMsg.getMessageJSON().put("userVS", userVS.toJSON());
+                socketMsg.setUserVS(userVS);
                 browserSessionDataJSON.put("userVS", userVS.toJSON());
                 browserSessionDataJSON.put("isConnected", true);
                 flush();
-            } else log.error("ERROR - initAuthenticatedSession - statusCode: " + message.getStatusCode());
+                VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
+                BrowserVS.getInstance().execCommandJS(
+                        socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+            } else {
+                showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
+                log.error("ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
+            }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
-        return message;
+        return socketMsg;
     }
 
     public void setCSRRequestId(Long id) {
@@ -384,24 +392,19 @@ public class SessionVSUtils {
         }
     }
 
-    public static void setWebSocketMessage(WebSocketMessage message) {
-        switch (message.getOperation()) {
-            case MESSAGEVS_TO_DEVICE:
-                if(ResponseVS.SC_ERROR == message.getStatusCode()) {
-                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, message.getMessage());
-                    countDownLatch.countDown();
-                }
-                break;
-            case MESSAGEVS_FROM_DEVICE:
-                try {
-                    smimeMessage = message.getSMIME();
-                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
-                } catch(Exception ex) {
-                    log.error(ex.getMessage(), ex);
-                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
-                }
-                countDownLatch.countDown();
-                break;
+    public static void setSignResponse(WebSocketMessage socketMsg) {
+        if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, socketMsg.getMessage());
+            countDownLatch.countDown();
+        } else {
+            try {
+                smimeMessage = socketMsg.getSMIME();
+                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
+            } catch(Exception ex) {
+                log.error(ex.getMessage(), ex);
+                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
+            }
+            countDownLatch.countDown();
         }
     }
 

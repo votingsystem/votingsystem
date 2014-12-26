@@ -63,7 +63,11 @@ public class SocketEndpointVS {
 
     @OnClose public void onClose(Session session, CloseReason closeReason) {
         //log.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
-        webSocketService.onClose(session, closeReason);
+        try {
+            webSocketService.onClose(session, closeReason);
+        } catch (Exception ex) {
+            log.error("EXCEPTION CLOSING CONNECTION: " + ex.getMessage());
+        }
     }
 
     /**
