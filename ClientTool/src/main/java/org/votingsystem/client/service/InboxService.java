@@ -78,13 +78,15 @@ public class InboxService {
         inboxButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
         this.inboxButton = inboxButton;
         inboxButton.setOnAction((event) -> {
-            consumeMessageToDevice(ContextVS.getMessage("inboxPinDialogMsg"), false);
+            if(!encryptedSocketMsgList.isEmpty()) {
+                showPasswordDialog(ContextVS.getMessage("inboxPinDialogMsg"), false);
+            } else InboxDialog.show(null, null);
         });
         if(socketMsgList.size() > 0) inboxButton.setVisible(true);
         else inboxButton.setVisible(false);
     }
 
-    private void consumeMessageToDevice(final String pinDialogMessage, final boolean isTimeLimited) {
+    private void showPasswordDialog(final String pinDialogMessage, final boolean isTimeLimited) {
         if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
             if (SessionVSUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
@@ -121,15 +123,17 @@ public class InboxService {
         switch(socketMsg.getOperation()) {
             case MESSAGEVS://message comes decrypted with session keys
                 socketMsgList.add(socketMsg);
-                PlatformImpl.runLater(() -> {showMessage(socketMsg.getMessage());});
+                PlatformImpl.runLater(() -> {
+                    InboxDialog.show(null, null);
+                    showMessage(socketMsg.getMessage());});
+                flush();
                 break;
             case MESSAGEVS_TO_DEVICE:
                 if(!socketMsg.isTimeLimited()) {
                     encryptedSocketMsgList.add(socketMsg);
                     PlatformImpl.runLater(() -> inboxButton.setVisible(true));
-                    flush();
                 } else timeLimitedWebSocketMessage = socketMsg;
-                consumeMessageToDevice(null, socketMsg.isTimeLimited());
+                showPasswordDialog(null, socketMsg.isTimeLimited());
                 break;
             default:
                 log.error("addMessage - unprocessed message: " + socketMsg.getOperation());
@@ -184,10 +188,6 @@ public class InboxService {
         List<WebSocketMessage> result =  new ArrayList<>(socketMsgList);
         result.addAll(encryptedSocketMsgList);
         return result;
-    }
-
-    public void resetMessageList() {
-        socketMsgList = new ArrayList<>();
     }
 
     private void flush() {

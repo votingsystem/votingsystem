@@ -90,7 +90,14 @@ public class InboxDialog extends DialogVS {
         });
     }
 
-    public static InboxDialog getInstance() { return dialog;}
+    public static InboxDialog getInstance() {
+        try {
+            if(dialog == null) dialog = new InboxDialog();
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+        return dialog;
+    }
 
    public void processMessage(WebSocketMessage socketMsg) {
         log.debug("processMessage - operation: " + socketMsg.getOperation());
