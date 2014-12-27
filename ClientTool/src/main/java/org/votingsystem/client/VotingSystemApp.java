@@ -125,20 +125,20 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
     }
 
-    public void putSession(String UUID, WebSocketSession session) {
+    public void putWSSession(String UUID, WebSocketSession session) {
         sessionMap.put(UUID, session.setUUID(UUID));
     }
 
-    public AESParams getSessionKeys(String UUID) {
+    public AESParams getWSSessionKeys(String UUID) {
         WebSocketSession webSocketSession = null;
         if((webSocketSession = sessionMap.get(UUID)) != null) return webSocketSession.getAESParams();
         return null;
     }
 
-    public WebSocketSession getSession(String UUID) {
+    public WebSocketSession getWSSession(String UUID) {
         return sessionMap.get(UUID);
     }
-    public WebSocketSession getSession(Long deviceId) {
+    public WebSocketSession getWSSession(Long deviceId) {
         List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k -> k.getValue().getDeviceVS().getId()
                 == deviceId).map(k -> k.getValue()).collect(toList());
         return result.get(0);

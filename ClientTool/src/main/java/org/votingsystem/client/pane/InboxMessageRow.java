@@ -64,7 +64,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
                 }
             };
             new Thread(task).start();
-        } else dateLbl.setText(DateUtils.getDayWeekDateStr(socketMsg.getDate()));
+        } else dateLbl.setText(DateUtils.getDayWeekDateStr(socketMsg.getDate()) + " - " + socketMsg.getFrom());
         switch(socketMsg.getOperation()) {
             case COOIN_WALLET_CHANGE:
                 messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));

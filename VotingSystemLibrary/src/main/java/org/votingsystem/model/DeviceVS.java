@@ -54,6 +54,10 @@ public class DeviceVS implements Serializable {
     public DeviceVS(Long deviceId) {
         this.id = deviceId;
     }
+    public DeviceVS(Long deviceId, String name) {
+        this.id = deviceId;
+        this.deviceName = name;
+    }
 
 	public UserVS getUserVS() {
 		return userVS;

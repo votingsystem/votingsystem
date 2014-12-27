@@ -41,7 +41,7 @@ public class InboxDialog extends DialogVS {
     @FXML private VBox messageListPanel;
     private static InboxDialog dialog;
 
-    private static final Map<String, HBox> messageMap = new LinkedHashMap<String, HBox>();
+    private static final Map<Long, HBox> messageMap = new LinkedHashMap<Long, HBox>();
 
     static final Comparator<WebSocketMessage> msgComparator = new Comparator<WebSocketMessage>() {
             public int compare(WebSocketMessage msg1, WebSocketMessage msg2) {
@@ -103,7 +103,7 @@ public class InboxDialog extends DialogVS {
         log.debug("processMessage - operation: " + socketMsg.getOperation());
        switch(socketMsg.getState()) {
            case REMOVED:
-               messageMap.remove(socketMsg.getUUID());
+               messageMap.remove(socketMsg.getDate().getTime());
                if(getStage().isShowing()) refreshView();
                break;
        }
@@ -116,7 +116,7 @@ public class InboxDialog extends DialogVS {
                     " - state: " + webSocketMessage.getState());
             switch (webSocketMessage.getState()) {
                 case PROCESSED:
-                    messageMap.remove(webSocketMessage);
+                    messageMap.remove(webSocketMessage.getDate().getTime());
                     refreshView();
                     break;
             }
@@ -145,8 +145,10 @@ public class InboxDialog extends DialogVS {
                 int i = 0;
                 for(WebSocketMessage socketMsg : messageList) {
                     updateProgress(i++, messageList.size());
-                    if(socketMsg.isEncrypted() && privateKey != null) socketMsg.decryptMessage(privateKey);
-                    messageMap.put(socketMsg.getUUID(), new InboxMessageRow(socketMsg).getMainPane());
+                    if(socketMsg.isEncrypted() && privateKey != null) {
+                        socketMsg.decryptMessage(privateKey);
+                    }
+                    messageMap.put(socketMsg.getDate().getTime(), new InboxMessageRow(socketMsg).getMainPane());
                 }
                 refreshView();
             } catch(Exception ex) {

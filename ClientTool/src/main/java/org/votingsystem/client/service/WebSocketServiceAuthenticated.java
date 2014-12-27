@@ -188,7 +188,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     private void consumeMessage(final String socketMsgStr) {
         try {
             WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(socketMsgStr));
-            WebSocketSession socketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID());
+            WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
             log.debug("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
             if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());

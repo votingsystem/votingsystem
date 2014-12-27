@@ -1,6 +1,5 @@
 package org.votingsystem.client.service;
 
-import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
@@ -137,7 +136,7 @@ public class WebSocketService extends Service<ResponseVS> {
             WebSocketMessage socketMsg = new WebSocketMessage((JSONObject) JSONSerializer.toJSON(messageStr));
             log.debug("consumeMessage - type: " + socketMsg.getOperation() +
                     " - status: " + socketMsg.getStatusCode());
-            WebSocketSession socketSession = VotingSystemApp.getInstance().getSession(socketMsg.getUUID());
+            WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
             if(socketMsg.getStatusCode() != null && ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;

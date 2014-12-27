@@ -125,7 +125,7 @@ public class InboxService {
                 socketMsgList.add(socketMsg);
                 PlatformImpl.runLater(() -> {
                     InboxDialog.show(null, null);
-                    showMessage(socketMsg.getMessage());});
+                    showMessage(socketMsg.getFormattedMessage());});
                 flush();
                 break;
             case MESSAGEVS_TO_DEVICE:

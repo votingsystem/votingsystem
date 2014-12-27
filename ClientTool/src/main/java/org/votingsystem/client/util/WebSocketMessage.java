@@ -13,6 +13,7 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.Wallet;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
@@ -68,26 +69,41 @@ public class WebSocketMessage {
     private Date date;
 
 
-    public WebSocketMessage(JSONObject requestJSON) throws ParseException, NoSuchAlgorithmException {
-        this.messageJSON = requestJSON;
-        setSessionId(requestJSON.getString("sessionId"));
-        if(requestJSON.has("operation")) this.operation = TypeVS.valueOf(requestJSON.getString("operation"));
-        if(requestJSON.has("timeLimited")) this.timeLimited = requestJSON.getBoolean("timeLimited");
-        if(requestJSON.has("statusCode")) this.statusCode = requestJSON.getInt("statusCode");
-        if(requestJSON.has("deviceId")) this.deviceId = requestJSON.getLong("deviceId");
-        if(requestJSON.has("URL")) this.URL = requestJSON.getString("URL");
-        if(requestJSON.has("locale")) this.locale = requestJSON.getString("locale");
-        if(requestJSON.has("UUID")) this.setUUID(requestJSON.getString("UUID"));
-        if(requestJSON.has("date")) this.date = DateUtils.getDayWeekDate(requestJSON.getString("date"));
-        if(requestJSON.has("message")) {
-            Object messageObject = requestJSON.get("message");
+    public WebSocketMessage(JSONObject socketMsgJSON) throws ParseException, NoSuchAlgorithmException {
+        this.messageJSON = socketMsgJSON;
+        setSessionId(socketMsgJSON.getString("sessionId"));
+        if(socketMsgJSON.has("operation")) this.operation = TypeVS.valueOf(socketMsgJSON.getString("operation"));
+        if(socketMsgJSON.has("timeLimited")) this.timeLimited = socketMsgJSON.getBoolean("timeLimited");
+        if(socketMsgJSON.has("statusCode")) this.statusCode = socketMsgJSON.getInt("statusCode");
+        if(socketMsgJSON.has("deviceId")) this.deviceId = socketMsgJSON.getLong("deviceId");
+        if(socketMsgJSON.has("URL")) this.URL = socketMsgJSON.getString("URL");
+        if(socketMsgJSON.has("locale")) this.locale = socketMsgJSON.getString("locale");
+        if(socketMsgJSON.has("from")) this.from = socketMsgJSON.getString("from");
+        if(socketMsgJSON.has("deviceFromName")) this.deviceFromName = socketMsgJSON.getString("deviceFromName");
+        if(socketMsgJSON.has("deviceFromId")) this.deviceFromId = socketMsgJSON.getLong("deviceFromId");
+        if(socketMsgJSON.has("UUID")) this.setUUID(socketMsgJSON.getString("UUID"));
+        if(socketMsgJSON.has("date")) this.date = DateUtils.getDayWeekDate(socketMsgJSON.getString("date"));
+        if(socketMsgJSON.has("isEncrypted")) this.isEncrypted = socketMsgJSON.getBoolean("isEncrypted");
+        if(socketMsgJSON.has("message")) {
+            Object messageObject = socketMsgJSON.get("message");
             if(messageObject instanceof  JSONObject) {
-                JSONObject messageJSON = requestJSON.getJSONObject("message");
+                JSONObject messageJSON = socketMsgJSON.getJSONObject("message");
                 this.statusCode = messageJSON.getInt("statusCode");
                 this.operation = TypeVS.valueOf(messageJSON.getString("operation"));
                 if(messageJSON.has("message")) this.message = messageJSON.getString("message");
                 if(messageJSON.has("URL")) this.URL = messageJSON.getString("URL");
-            } else this.message = requestJSON.getString("message");
+            } else this.message = socketMsgJSON.getString("message");
+        }
+        if(socketMsgJSON.has("smimeMessage")) {
+            try {
+                byte[] smimeMessageBytes = Base64.getDecoder().decode(socketMsgJSON.getString("smimeMessage").getBytes());
+                smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+            }catch(Exception ex) {log.error(ex.getMessage(), ex);}
+        }
+        if(socketMsgJSON.has("cooinList")) {
+            try {
+                cooinList = Wallet.getCooinListFromJSONArray(socketMsgJSON.getJSONArray("cooinList"));
+            }catch(Exception ex) {log.error(ex.getMessage(), ex);}
         }
     }
 
@@ -142,7 +158,8 @@ public class WebSocketMessage {
     }
 
     public String getFormattedMessage() {
-        return "<html>" + ContextVS.getMessage("messageFrom") + " <b>" + from + ":</b><br/><br/>" + message + "</html>";
+        return "<html>" + DateUtils.getDayWeekDateStr(date) + " - " + ContextVS.getMessage("messageFrom") + " <b>" +
+                from + ":</b><br/><br/>" + message + "</html>";
     }
 
     public void setMessage(String message) {
@@ -253,7 +270,7 @@ public class WebSocketMessage {
         messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         messageToServiceMap.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
         messageToServiceMap.put("UUID", UUID);
-        VotingSystemApp.getInstance().putSession(UUID, new WebSocketSession<>(
+        VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 null, null, null, TypeVS.INIT_VALIDATED_SESSION));
         return (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
     }
@@ -286,7 +303,7 @@ public class WebSocketMessage {
             encryptedDataMap.put("headers", headersArray);
         }
         AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(
+        VotingSystemApp.getInstance().putWSSession(randomUUID, new WebSocketSession<>(
                 aesParams, null, null, TypeVS.MESSAGEVS_SIGN));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
@@ -312,7 +329,7 @@ public class WebSocketMessage {
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("message", textToEncrypt);
         AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putSession(randomUUID, new WebSocketSession<>(
+        VotingSystemApp.getInstance().putWSSession(randomUUID, new WebSocketSession<>(
                 aesParams, deviceVS, null, TypeVS.MESSAGEVS));
         encryptedDataMap.put("aesParams", aesParams.toJSON());
         byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
@@ -328,11 +345,8 @@ public class WebSocketMessage {
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
-        loadDecryptedContent((JSONObject) JSONSerializer.toJSON(Encryptor.decryptAES(
-                messageJSON.getString("encryptedMessage"), aesParams)));
-    }
-
-    private void loadDecryptedContent(JSONObject decryptedJSON) throws Exception {
+        JSONObject decryptedJSON = (JSONObject) JSONSerializer.toJSON(Encryptor.decryptAES(
+                messageJSON.getString("encryptedMessage"), aesParams));
         if(decryptedJSON.has("operation")) operation = TypeVS.valueOf(decryptedJSON.getString("operation"));
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
         if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
@@ -355,6 +369,8 @@ public class WebSocketMessage {
             }
         }
         this.isEncrypted = false;
+        VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
+                aesParams, new DeviceVS(deviceFromId, deviceFromName), null, operation));
     }
 
     public String getMessageTruncated() {
@@ -387,8 +403,36 @@ public class WebSocketMessage {
     }
 
     public JSONObject getMessageJSON() {
+        JSONObject result = null;
+        if(!isEncrypted) {
+            result = new JSONObject();
+            if(operation != null) result.put("operation", operation.toString());
+            result.put("statusCode", statusCode);
+            result.put("timeLimited", timeLimited);
+            result.put("message", message);
+            result.put("deviceId", deviceId);
+            result.put("URL", URL);
+            result.put("deviceFromName", deviceFromName);
+            result.put("deviceFromId", deviceFromId);
+            result.put("locale", locale);
+            result.put("from", from);
+            result.put("UUID", UUID);
+            if(date != null) result.put("date", DateUtils.getDayWeekDateStr(date));
+            if(smimeMessage != null) {
+                try {
+                    result.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            }
+            if(isEncrypted != null) result.put("isEncrypted", isEncrypted);
+            if(cooinList != null) {
+                try {
+                    List<Map> serializedCooinList = Wallet.getSerializedCooinList(cooinList);
+                    result.put("cooinList", serializedCooinList);
+                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            }
+        } else result = messageJSON;
         if(date != null) messageJSON.put("date", DateUtils.getDayWeekDateStr(date));
-        return messageJSON;
+        return result;
     }
 
     public void setMessageJSON(JSONObject messageJSON) {
