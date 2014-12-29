@@ -31,11 +31,14 @@ import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
+import java.util.Arrays;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -101,8 +104,9 @@ public class CooinFragment extends Fragment {
                 case DEVICE_SELECT:
                     try {
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            DeviceVS targetDevice = DeviceVS.parse(responseVS.getMessageJSON());
                             JSONObject requestJSON = WebSocketMessage.getCooinWalletChangeRequest(
-                                    responseVS.getMessageJSON(), contextVS, cooin);
+                                    targetDevice, Arrays.asList(cooin), contextVS);
                             responseVS = new ResponseVS(ResponseVS.SC_OK, requestJSON.toString());
                             Intent startIntent = new Intent(getActivity(), WebSocketService.class);
                             startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

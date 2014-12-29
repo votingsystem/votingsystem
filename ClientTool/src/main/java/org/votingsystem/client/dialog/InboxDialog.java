@@ -6,7 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
@@ -17,9 +20,11 @@ import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.*;
+
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**

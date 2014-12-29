@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.NotificationRow;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.Notification;
-import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
 import java.io.IOException;

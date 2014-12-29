@@ -12,10 +12,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.client.service.WebSocketService;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.*;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
@@ -30,7 +27,6 @@ import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -376,14 +372,13 @@ public class SessionVSUtils {
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject, headers);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
-                JSONObject mobileTokenJSON = getInstance().getCryptoToken();//{"id":,"deviceName":"","certPEM":""}
-                Long deviceToId = mobileTokenJSON.getLong("id");
-                String deviceToName = mobileTokenJSON.getString("deviceName");
-                String certPEM = mobileTokenJSON.getString("certPEM");
-                X509Certificate deviceToCert =  CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
-                JSONObject jsonObject = WebSocketMessage.getSignRequest(deviceToId, deviceToName,
-                    toUser, textToSign, subject, deviceToCert, headers);
-                WebSocketService.getInstance().sendMessage(jsonObject.toString());
+                DeviceVS deviceVS = DeviceVS.parse(getInstance().getCryptoToken());
+                JSONObject jsonObject = WebSocketMessage.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
+                PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
+                    try {
+                        WebSocketService.getInstance().sendMessage(jsonObject.toString());
+                    } catch (Exception ex) { log.error(ex.getMessage(), ex); }
+                });
                 countDownLatch.await();
                 ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -393,18 +388,27 @@ public class SessionVSUtils {
     }
 
     public static void setSignResponse(WebSocketMessage socketMsg) {
-        if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-            messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, socketMsg.getMessage());
-            countDownLatch.countDown();
-        } else {
-            try {
-                smimeMessage = socketMsg.getSMIME();
-                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
-            } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
-                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-            countDownLatch.countDown();
+        switch(socketMsg.getStatusCode()) {
+            case ResponseVS.SC_WS_MESSAGE_SEND_OK:
+                break;
+            case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
+                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR,
+                        ContextVS.getMessage("deviceVSTokenNotFoundErrorMsg"));
+                countDownLatch.countDown();
+                break;
+            case ResponseVS.SC_ERROR:
+                messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, socketMsg.getMessage());
+                countDownLatch.countDown();
+                break;
+            default:
+                try {
+                    smimeMessage = socketMsg.getSMIME();
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
+                } catch(Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
+                }
+                countDownLatch.countDown();
         }
     }
 

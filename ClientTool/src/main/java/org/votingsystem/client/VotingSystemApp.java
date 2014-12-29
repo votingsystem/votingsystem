@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -37,6 +36,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -50,7 +50,8 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import static java.util.stream.Collectors.*;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jgzornoza
@@ -141,7 +142,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     public WebSocketSession getWSSession(Long deviceId) {
         List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k -> k.getValue().getDeviceVS().getId()
                 == deviceId).map(k -> k.getValue()).collect(toList());
-        return result.get(0);
+        return result.isEmpty()? null : result.get(0);
     }
 
     @Override public void stop() {

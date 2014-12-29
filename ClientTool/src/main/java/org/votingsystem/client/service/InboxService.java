@@ -17,6 +17,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
@@ -26,6 +27,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**

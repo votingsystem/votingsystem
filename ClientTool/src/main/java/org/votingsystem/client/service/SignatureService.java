@@ -22,20 +22,19 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.*;
+import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetAddress;
-import java.security.KeyStore;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 

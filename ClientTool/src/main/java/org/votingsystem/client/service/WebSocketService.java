@@ -154,8 +154,15 @@ public class WebSocketService extends Service<ResponseVS> {
                 case MESSAGEVS_SIGN_RESPONSE:
                     SessionVSUtils.setSignResponse(socketMsg);
                     break;
-                default:
-                    log.debug("unprocessed socketMsg");
+                case MESSAGEVS_FROM_VS:
+                    if(socketSession != null && socketSession.getTypeVS() != null) {
+                        switch(socketSession.getTypeVS()) {
+                            case MESSAGEVS_SIGN:
+                                SessionVSUtils.setSignResponse(socketMsg);
+                                return;
+                        }
+                    }
+                default: log.debug("unprocessed socketMsg");
             }
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }

@@ -29,6 +29,7 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtils;
 import org.votingsystem.util.FileUtils;
@@ -209,9 +210,18 @@ public class WebSocketService extends Service {
         LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                 " - type: " + socketMsg.getOperation() + " - serviceCaller: " + socketMsg.getServiceCaller());
         Intent intent =  new Intent(socketMsg.getServiceCaller());
-        intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
         WebSocketSession socketSession = contextVS.getWSSession(socketMsg.getUUID());
         try {
+            if(socketSession == null && socketMsg.isEncrypted()) {
+                byte[] decryptedBytes = contextVS.decryptMessage(socketMsg.getEncryptedAESParams());
+                AESParams aesParams = AESParams.load( new JSONObject(new String(decryptedBytes)));
+                socketMsg.decryptMessage(aesParams);
+                contextVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(
+                        socketMsg.getAESParams(), null, null, socketMsg.getOperation()));
+            } else if(socketSession != null && socketMsg.isEncrypted()) {
+                socketMsg.decryptMessage(socketSession.getAESParams());
+            }
+            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
@@ -234,19 +244,6 @@ public class WebSocketService extends Service {
                         contextVS.setHasWebSocketConnection(false);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
-                case MESSAGEVS_FROM_DEVICE:
-                    socketMsg.decryptMessage(contextVS.getWSSession(socketMsg.getUUID()).getAESParams());
-                    sendWebSocketBroadcast(socketMsg);
-                    break;
-                case MESSAGEVS_TO_DEVICE:
-                    if(socketMsg.isEncrypted()) {
-                        socketMsg.loadDecryptedJSON(new JSONObject(new String(contextVS.decryptMessage(
-                                socketMsg.getEncryptedMessage()), "UTF-8")));
-                        contextVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(
-                                socketMsg.getAESParams(), null, null, TypeVS.MESSAGEVS_TO_DEVICE));
-                        sendWebSocketBroadcast(socketMsg.setStatusCode(ResponseVS.SC_OK));
-                    } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    break;
                 case MESSAGEVS:
                     if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
@@ -262,9 +259,8 @@ public class WebSocketService extends Service {
                     startActivity(intent);
                     break;
                 case COOIN_WALLET_CHANGE:
-                    WebSocketSession webSocketSession = contextVS.getWSSession(socketMsg.getUUID());
-                    if(ResponseVS.SC_OK == socketMsg.getStatusCode() && webSocketSession != null) {
-                        Wallet.removeCooinList((Collection<Cooin>) webSocketSession.getData(), contextVS);
+                    if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
+                        Wallet.removeCooinList((Collection<Cooin>) socketSession.getData(), contextVS);
                         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     }
                     break;

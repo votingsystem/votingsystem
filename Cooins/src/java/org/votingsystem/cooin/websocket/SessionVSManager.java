@@ -117,7 +117,8 @@ public class SessionVSManager {
     }
 
     public Session getAuthenticatedSession(String sessionId) {
-        return authenticatedSessionMap.get(sessionId).getSession();
+        SessionVS sessionVS = authenticatedSessionMap.get(sessionId);
+        return sessionVS != null? sessionVS.getSession() : null;
     }
 
     public Session getSession(String sessionId) {

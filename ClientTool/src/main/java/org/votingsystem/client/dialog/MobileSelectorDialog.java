@@ -13,6 +13,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -105,10 +106,13 @@ public class MobileSelectorDialog extends DialogVS {
                 });
                 for(int i = 0; i < deviceArray.size() ; i++) {
                     JSONObject deviceData = (JSONObject) deviceArray.get(i);
-                    RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
-                    radioButton.setUserData(deviceData);
-                    radioButton.setToggleGroup(deviceToggleGroup);
-                    deviceListBox.getChildren().add(radioButton);
+                    if(SessionVSUtils.getInstance().getDeviceId() == null ||
+                            !SessionVSUtils.getInstance().getDeviceId().equals(deviceData.getString("deviceId"))) {
+                        RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
+                        radioButton.setUserData(deviceData);
+                        radioButton.setToggleGroup(deviceToggleGroup);
+                        deviceListBox.getChildren().add(radioButton);
+                    }
                 }
                 mainPane.getScene().getWindow().sizeToScene();
             }

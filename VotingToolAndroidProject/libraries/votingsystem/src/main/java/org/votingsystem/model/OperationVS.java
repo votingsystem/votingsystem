@@ -84,6 +84,7 @@ public class OperationVS implements Parcelable {
         toUser = (String) source.readValue(String.class.getClassLoader());
         textToSign = (String) source.readValue(String.class.getClassLoader());
         subject = (String) source.readValue(String.class.getClassLoader());
+        UUID = (String) source.readValue(String.class.getClassLoader());
         String headerArrayStr = (String) source.readValue(String.class.getClassLoader());
         try {
             if(headerArrayStr != null) headerList = getHeadersList(new JSONArray(headerArrayStr));
@@ -110,6 +111,7 @@ public class OperationVS implements Parcelable {
         parcel.writeValue(toUser);
         parcel.writeValue(textToSign);
         parcel.writeValue(subject);
+        parcel.writeValue(UUID);
         try {
             parcel.writeValue(getHeadersJSONArray(headerList).toString());
         } catch (JSONException ex) { ex.printStackTrace(); }

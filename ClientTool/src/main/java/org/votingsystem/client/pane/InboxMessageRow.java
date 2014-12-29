@@ -19,6 +19,7 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 

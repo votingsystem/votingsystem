@@ -55,17 +55,10 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
         signWithDNIeRb.setToggleGroup(tg);
-        signWithDNIeRb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                changeSignatureMode(actionEvent);
-            }});
+        signWithDNIeRb.setOnAction(event -> changeSignatureMode(event));
         signWithMobileRb = new RadioButton(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
         signWithMobileRb.setToggleGroup(tg);
-        signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                changeSignatureMode(actionEvent);
-            }
-        });
+        signWithMobileRb.setOnAction(event -> changeSignatureMode(event));
         mobileDeviceInfo = new HBox(15);
         mobileDeviceInfo.setAlignment(Pos.CENTER);
         mobileDeviceLbl = new Label();

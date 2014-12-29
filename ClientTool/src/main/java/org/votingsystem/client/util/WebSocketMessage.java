@@ -12,16 +12,15 @@ import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSONUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.Wallet;
-
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.*;
 
@@ -75,7 +74,7 @@ public class WebSocketMessage {
         if(socketMsgJSON.has("operation")) this.operation = TypeVS.valueOf(socketMsgJSON.getString("operation"));
         if(socketMsgJSON.has("timeLimited")) this.timeLimited = socketMsgJSON.getBoolean("timeLimited");
         if(socketMsgJSON.has("statusCode")) this.statusCode = socketMsgJSON.getInt("statusCode");
-        if(socketMsgJSON.has("deviceId")) this.deviceId = socketMsgJSON.getLong("deviceId");
+        if(!JSONUtils.isEmpty("deviceId", socketMsgJSON)) this.deviceId = socketMsgJSON.getLong("deviceId");
         if(socketMsgJSON.has("URL")) this.URL = socketMsgJSON.getString("URL");
         if(socketMsgJSON.has("locale")) this.locale = socketMsgJSON.getString("locale");
         if(socketMsgJSON.has("from")) this.from = socketMsgJSON.getString("from");
@@ -112,7 +111,12 @@ public class WebSocketMessage {
         switch (statusCode) {
             case ResponseVS.SC_WS_CONNECTION_INIT_ERROR: return false;
             case ResponseVS.SC_WS_CONNECTION_INIT_OK: return false;
-            default: return true;
+            default:
+                switch(operation) {
+                    case MESSAGEVS_FROM_VS: return false;
+                    default: return true;
+                }
+
         }
     }
 
@@ -275,21 +279,21 @@ public class WebSocketMessage {
         return (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
     }
 
-    public static JSONObject getSignRequest(Long deviceToId, String deviceToName, String toUser, String textToSign,
-            String subject, X509Certificate deviceToCert, Header... headers) throws Exception {
+    public static JSONObject getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject ,
+            Header... headers) throws Exception {
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
-        messageToDevice.put("deviceToId", deviceToId);
-        messageToDevice.put("deviceToName", deviceToName);
-        messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-        String randomUUID = java.util.UUID.randomUUID().toString();
-        messageToDevice.put("UUID", randomUUID);
+        messageToDevice.put("deviceToId", deviceVS.getId());
+        messageToDevice.put("deviceToName", deviceVS.getDeviceName());
+        messageToDevice.put("UUID", socketSession.getUUID());
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS_SIGN.toString());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("textToSign", textToSign);
         encryptedDataMap.put("subject", subject);
+        encryptedDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         if(headers != null) {
             JSONArray headersArray = new JSONArray();
             for(Header header : headers) {
@@ -302,25 +306,36 @@ public class WebSocketMessage {
             }
             encryptedDataMap.put("headers", headersArray);
         }
-        AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putWSSession(randomUUID, new WebSocketSession<>(
-                aesParams, null, null, TypeVS.MESSAGEVS_SIGN));
-        encryptedDataMap.put("aesParams", aesParams.toJSON());
-        byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
-                JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceToCert);
-        messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+        messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
+                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
         return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+    }
+
+    private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)
+            throws NoSuchAlgorithmException {
+        WebSocketSession webSocketSession = VotingSystemApp.getInstance().getWSSession(deviceVS.getId());
+        if(webSocketSession == null) {
+            String randomUUID = java.util.UUID.randomUUID().toString();
+            AESParams aesParams = new AESParams();
+            webSocketSession = new WebSocketSession(aesParams, deviceVS, null, null);
+            VotingSystemApp.getInstance().putWSSession(randomUUID, webSocketSession);
+        }
+        webSocketSession.setData(data);
+        webSocketSession.setTypeVS(typeVS);
+        return webSocketSession;
     }
 
     public static JSONObject getMessageVSToDevice(DeviceVS deviceVS, String toUser, String textToEncrypt) throws Exception {
         Map messageToDevice = new HashMap<>();
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS);
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
         messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
         messageToDevice.put("deviceToId", deviceVS.getId());
         messageToDevice.put("deviceToName", deviceVS.getDeviceName());
-        messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-        String randomUUID = java.util.UUID.randomUUID().toString();
-        messageToDevice.put("UUID", randomUUID);
+        messageToDevice.put("UUID", socketSession.getUUID());
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
         encryptedDataMap.put("from", SessionVSUtils.getInstance().getUserVS().getName());
@@ -328,13 +343,12 @@ public class WebSocketMessage {
         encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
         encryptedDataMap.put("toUser", toUser);
         encryptedDataMap.put("message", textToEncrypt);
-        AESParams aesParams = new AESParams();
-        VotingSystemApp.getInstance().putWSSession(randomUUID, new WebSocketSession<>(
-                aesParams, deviceVS, null, TypeVS.MESSAGEVS));
-        encryptedDataMap.put("aesParams", aesParams.toJSON());
-        byte[] encryptedRequestBytes = Encryptor.encryptToCMS(
-                JSONSerializer.toJSON(encryptedDataMap).toString().getBytes(), deviceVS.getX509Certificate());
-        messageToDevice.put("encryptedMessage", new String(encryptedRequestBytes,"UTF-8"));
+        messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+        messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
+                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
         return (JSONObject) JSONSerializer.toJSON(messageToDevice);
     }
 

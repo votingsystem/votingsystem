@@ -21,6 +21,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.WebSocketMessage;
@@ -46,7 +47,6 @@ public class SMIMESignerActivity extends ActionBarActivity {
     private WebView webView;
     private WebSocketMessage request;
     private OperationVS operationVS;
-    private ProgressDialog progressDialog = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -58,7 +58,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService(null, operationVS);
         else {
-            if(progressDialog != null) progressDialog.dismiss();
+            setProgressDialogVisible(false, null, null);
             if(request != null) {
                 if(TypeVS.MESSAGEVS_FROM_DEVICE == request.getOperation()) {
                     if(ResponseVS.SC_OK == request.getStatusCode()) {
@@ -78,7 +78,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
         startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        if(operationVS != null) showProgressDialog(
+        if(operationVS != null) setProgressDialogVisible(true,
                 getString(R.string.wait_msg), getString(R.string.signing_document_lbl));
         startService(startIntent);
     }
@@ -128,7 +128,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
                     responseVS.setMessageJSON(request.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
-                            DeviceUtils.getDeviceName()), this));
+                            DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE, this));
                     launchService(responseVS, null);
                     this.finish();
                 } catch(Exception ex) {ex.printStackTrace();}
@@ -157,22 +157,12 @@ public class SMIMESignerActivity extends ActionBarActivity {
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
     }
 
-    private void showProgressDialog(final String title, final String dialogMessage) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (progressDialog == null) {
-                    progressDialog = new ProgressDialog(SMIMESignerActivity.this);
-                    progressDialog.setCancelable(true);
-                    progressDialog.setTitle(title);
-                    progressDialog.setMessage(dialogMessage);
-                    progressDialog.setIndeterminate(true);
-                    /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
-                    @Override public void onCancel(DialogInterface dialog){}});*/
-                }
-                progressDialog.show();
-            }
-        });
+    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
+        if(isVisible){
+            if(caption == null) caption = getString(R.string.loading_data_msg);
+            if(message == null) message = getString(R.string.loading_info_msg);
+            ProgressDialogFragment.showDialog(caption, message, getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     @Override public void onResume() {

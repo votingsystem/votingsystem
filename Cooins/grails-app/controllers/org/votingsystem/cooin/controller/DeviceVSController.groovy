@@ -25,7 +25,8 @@ class DeviceVSController {
         for(DeviceVS deviceVS : deviceVSList) {
             String deviceName = deviceVS.deviceName ? deviceVS.deviceName : "${deviceVS.type.toString()} - $deviceVS.email"
             X509Certificate certX509 = CertUtils.loadCertificate (deviceVS.certificateVS.content)
-            result.add([id:deviceVS.id, deviceName:deviceName, certPEM:new String(CertUtils.getPEMEncoded(certX509), "UTF-8")])
+            result.add([id:deviceVS.id, deviceId:deviceVS.deviceId, deviceName:deviceName,
+                        certPEM:new String(CertUtils.getPEMEncoded(certX509), "UTF-8")])
         }
         Map resultMap = [deviceList:result]
         render resultMap as JSON

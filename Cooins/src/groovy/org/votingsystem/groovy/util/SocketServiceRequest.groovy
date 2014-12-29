@@ -63,8 +63,11 @@ class SocketServiceRequest {
         try {
             requestUUID = ((JSONObject)JSONSerializer.toJSON(requestMsg)).UUID
         } catch(Exception ex) {log.error("requestMsg not in JSON format")}
-        return JSONSerializer.toJSON([statusCode:statusCode, message:message, sessionId:session.getId(),
-                      operation:TypeVS.MESSAGEVS_FROM_VS, UUID:requestUUID])
+        Map result = [operation:TypeVS.MESSAGEVS_FROM_VS, UUID:requestUUID]
+        if(statusCode) result.statusCode = statusCode
+        if(message) result.message = message
+        if(session.getId()) result.sessionId = session.getId()
+        return JSONSerializer.toJSON(result)
     }
 
     JSONObject getResponse(Integer statusCode, String message, Long deviceId){
