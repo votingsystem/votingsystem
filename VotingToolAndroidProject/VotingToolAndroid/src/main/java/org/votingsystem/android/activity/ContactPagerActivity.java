@@ -51,13 +51,13 @@ public class ContactPagerActivity extends ActionBarActivity {
                 final List<UserVS> userVSList = new ArrayList<>();
                 if(userVS != null) userVSList.addAll(Arrays.asList(userVS));
                 else userVSList.addAll(UserVS.parseList(searchResponseVS.getMessageJSON()));
-                updateActionBarTitle(userVSList.iterator().next().getFullName());
+                updateActionBarTitle(userVSList.iterator().next().getName());
                 ContactPagerAdapter pagerAdapter = new ContactPagerAdapter(
                         getSupportFragmentManager(), userVSList);
                 mViewPager.setAdapter(pagerAdapter);
                 mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                     @Override public void onPageSelected(int position) {
-                        updateActionBarTitle(userVSList.get(position).getFullName());
+                        updateActionBarTitle(userVSList.get(position).getName());
                     }
                 });
             } catch (Exception e) {

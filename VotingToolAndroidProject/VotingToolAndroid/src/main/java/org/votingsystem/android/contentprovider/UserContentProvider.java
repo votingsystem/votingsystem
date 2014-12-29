@@ -143,7 +143,7 @@ public class UserContentProvider extends ContentProvider {
         values.put(UserContentProvider.ID_COL, userVS.getId());
         values.put(UserContentProvider.URL_COL, userVS.getURL());
         values.put(UserContentProvider.TYPE_COL, userVS.getType().toString());
-        values.put(UserContentProvider.FULL_NAME_COL, userVS.getFullName());
+        values.put(UserContentProvider.FULL_NAME_COL, userVS.getName());
         values.put(UserContentProvider.CONTACT_URI_COL,
                 userVS.getContactURI() != null? userVS.getContactURI().toString():null);
         values.put(UserContentProvider.SERIALIZED_OBJECT_COL,

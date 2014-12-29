@@ -422,7 +422,7 @@ public class WebSocketMessage implements Parcelable {
         messageToDevice.put("UUID", randomUUID);
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
-        encryptedDataMap.put("from", contextVS.getUserVS().getFullName());
+        encryptedDataMap.put("from", contextVS.getUserVS().getName());
         encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
         encryptedDataMap.put("deviceFromId", contextVS.getDeviceId());
         encryptedDataMap.put("toUser", toUser);

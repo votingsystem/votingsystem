@@ -325,7 +325,7 @@ public class ContactsGridFragment extends Fragment
                         Context.LAYOUT_INFLATER_SERVICE);
                 itemView = inflater.inflate(R.layout.contact_card, null);
             }
-            ((TextView)itemView.findViewById(R.id.fullname)).setText(userVS.getFullName());
+            ((TextView)itemView.findViewById(R.id.fullname)).setText(userVS.getName());
             ((TextView) itemView.findViewById(R.id.nif)).setText(userVS.getNif());
             return itemView;
         }

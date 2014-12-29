@@ -108,7 +108,8 @@ public class MessageDialog {
     }
 
     public void showHtmlMessage(String htmlMessage) {
-        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;'>" + htmlMessage + "</html>";
+        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
+                "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
         messageWebView.getEngine().loadContent(finalHTML);
         isHTMLView(true);
         stage.centerOnScreen();
@@ -117,7 +118,9 @@ public class MessageDialog {
     }
 
     public void showHtmlMessage(String htmlMessage, Button optionButton) {
-        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;'>" + htmlMessage + "</html>";
+        //
+        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
+                "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
         if(optionButton != null) {
             footerButtonsBox.getChildren().add(0, optionButton);
             optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED,

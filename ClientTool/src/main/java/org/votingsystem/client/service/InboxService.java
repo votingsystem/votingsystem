@@ -6,22 +6,17 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
-import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
@@ -31,7 +26,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
@@ -143,7 +137,10 @@ public class InboxService {
     public void removeMessage(WebSocketMessage socketMsg) {
         socketMsgList = socketMsgList.stream().filter(m -> m.getDate().getTime() !=  socketMsg.getDate().getTime()).
                 collect(Collectors.toList());
+        encryptedSocketMsgList = encryptedSocketMsgList.stream().filter(m -> m.getDate().getTime() !=  socketMsg.getDate().getTime()).
+                collect(Collectors.toList());
         if(socketMsgList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
+        else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
         flush();
     }
 

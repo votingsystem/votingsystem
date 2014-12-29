@@ -49,7 +49,6 @@ public class UserVS implements Serializable {
     private String cn;
     private String URL;
     private String name;
-    private String fullName;
     private String organization;
     private String deviceId;
     private String email;
@@ -65,8 +64,6 @@ public class UserVS implements Serializable {
     private Set<CommentVS> commentSet = new HashSet<CommentVS>(0);
     private Map<String, X509Certificate> certificateMap;
     private X509Certificate certificate;
-    private CertificateVS certificateCA;
-
 
     public UserVS() {}
 
@@ -74,7 +71,6 @@ public class UserVS implements Serializable {
         this.name = name;
         this.phone = phone;
         this.email = email;
-
     }
 
     public static UserVS getUserVS (X509Certificate x509Cert) {
@@ -86,12 +82,11 @@ public class UserVS implements Serializable {
         if (subjectDN.contains("SERIALNUMBER="))
             userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
         if (subjectDN.contains("SURNAME="))
-            userVS.setFirstName(subjectDN.split("SURNAME=")[1].split(",")[0]);
+            userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
         if (subjectDN.contains("GIVENNAME="))
-            userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
+            userVS.setFirstName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
         if (subjectDN.contains("CN="))
             userVS.setCn(subjectDN.split("CN=")[1]);
-
         try {
             JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
             if(deviceData != null) {
@@ -183,10 +178,6 @@ public class UserVS implements Serializable {
         return certificate;
     }
 
-    public void setCertificateCA(CertificateVS certificateCA) {
-        this.certificateCA = certificateCA;
-    }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -270,21 +261,12 @@ public class UserVS implements Serializable {
     }
 
     public String getName() {
-        if(name == null) return firstName + " " + lastName;
+        if(name == null) return ((firstName != null)? firstName + " ": "") + ((lastName != null)? lastName:"");
         else return name;
     }
 
     public String getLastName() {
         return lastName;
-    }
-
-    public String getFullName() {
-        if(fullName != null) return fullName;
-        else return ((firstName != null)? firstName + " ": "") + ((lastName != null)? lastName:"");
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     public void setLastName(String lastName) {

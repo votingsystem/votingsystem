@@ -350,7 +350,7 @@ public class HttpHelper {
             try {
                 while (!shutdown) {
                     synchronized (this) {
-                        wait(3000);
+                        wait(1000);
                         // Close expired connections
                         connMgr.closeExpiredConnections();
                         // Optionally, close connections

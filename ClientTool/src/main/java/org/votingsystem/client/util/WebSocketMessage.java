@@ -71,7 +71,7 @@ public class WebSocketMessage {
 
     public WebSocketMessage(JSONObject socketMsgJSON) throws ParseException, NoSuchAlgorithmException {
         this.messageJSON = socketMsgJSON;
-        setSessionId(socketMsgJSON.getString("sessionId"));
+        if(socketMsgJSON.has("sessionId")) this.sessionId = socketMsgJSON.getString("sessionId");
         if(socketMsgJSON.has("operation")) this.operation = TypeVS.valueOf(socketMsgJSON.getString("operation"));
         if(socketMsgJSON.has("timeLimited")) this.timeLimited = socketMsgJSON.getBoolean("timeLimited");
         if(socketMsgJSON.has("statusCode")) this.statusCode = socketMsgJSON.getInt("statusCode");
@@ -158,8 +158,8 @@ public class WebSocketMessage {
     }
 
     public String getFormattedMessage() {
-        return "<html>" + DateUtils.getDayWeekDateStr(date) + " - " + ContextVS.getMessage("messageFrom") + " <b>" +
-                from + ":</b><br/><br/>" + message + "</html>";
+        return "<html><span style='font-style: italic;'>" + DateUtils.getDayWeekDateStr(date) + " - " +
+                ContextVS.getMessage("messageFrom") + " <b>" + from + ":</b></span><br/><br/>" + message + "</html>";
     }
 
     public void setMessage(String message) {
@@ -404,7 +404,7 @@ public class WebSocketMessage {
 
     public JSONObject getMessageJSON() {
         JSONObject result = null;
-        if(!isEncrypted) {
+        if(isEncrypted != null && !isEncrypted) {
             result = new JSONObject();
             if(operation != null) result.put("operation", operation.toString());
             result.put("statusCode", statusCode);

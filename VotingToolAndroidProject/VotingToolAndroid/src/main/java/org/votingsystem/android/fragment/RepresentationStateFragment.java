@@ -130,7 +130,7 @@ public class RepresentationStateFragment extends Fragment implements
 
     private void printRepresentativeData(UserVS representative) {
         ((TextView)rootView.findViewById(R.id.representative_name)).setText(
-                representative.getFullName());
+                representative.getName());
         String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
                 representative.getDescription() + "</body></html>";
         ((WebView)rootView.findViewById(R.id.representative_description)).loadData(

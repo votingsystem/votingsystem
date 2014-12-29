@@ -309,8 +309,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                 getElapsedTimeStr(eventVS.getDateBegin()));
                         break;
                 }
-                if(eventVS.getUserVS() != null && !eventVS.getUserVS().getFullName().isEmpty()) {
-                    ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUserVS().getFullName());
+                if(eventVS.getUserVS() != null && !eventVS.getUserVS().getName().isEmpty()) {
+                    ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUserVS().getName());
                 }
                 ((LinearLayout)view.findViewById(R.id.subject_layout)).setBackgroundColor(
                         getResources().getColor(state_color));

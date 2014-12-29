@@ -215,13 +215,13 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);
                     anonymousDelegationToDate = calendar.getTime();
                     confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,
-                            representative.getFullName(),  weeks_delegation.getText().toString(),
+                            representative.getName(),  weeks_delegation.getText().toString(),
                             DateUtils.getDayWeekDateStr(anonymousDelegationFromDate),
                             DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
                     operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
                 }  else {
                     confirmDialogMsg = getString(R.string.public_delegation_confirm_msg,
-                             representative.getFullName());
+                             representative.getName());
                     operationType = TypeVS.REPRESENTATIVE_SELECTION;
                 }
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(

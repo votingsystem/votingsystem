@@ -264,7 +264,7 @@ public class RepresentativeService extends IntentService {
             signatureDataMap.put("UUID", UUID.randomUUID().toString());
             signatureDataMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
             signatureDataMap.put("representativeNif", representative.getNif());
-            signatureDataMap.put("representativeName", representative.getFullName());
+            signatureDataMap.put("representativeName", representative.getName());
             JSONObject signatureContent = new JSONObject(signatureDataMap);
             responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
                     signatureContent.toString(), messageSubject);
@@ -365,7 +365,7 @@ public class RepresentativeService extends IntentService {
                 //delegation signed with anonymous certificate (with delegation data)
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, anonymousDelegation.getDelegation(representative.getNif(),
-                        representative.getFullName()).toString(), messageSubject, null,
+                        representative.getName()).toString(), messageSubject, null,
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
                         (AppContextVS)getApplicationContext());
@@ -380,7 +380,7 @@ public class RepresentativeService extends IntentService {
                     PrefUtils.putAnonymousDelegation(anonymousDelegation, this);
                     responseVS.setCaption(getString(R.string.anonymous_delegation_caption)).setNotificationMessage(
                             getString(R.string.anonymous_delegation_msg,
-                                    representative.getFullName(), weeksOperationActive));
+                                    representative.getName(), weeksOperationActive));
                 } else cancelAnonymousDelegation(anonymousDelegation);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));

@@ -191,7 +191,7 @@ public class AnonymousDelegation extends ReceiptContainer {
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
         result.put("representativeNif", representative.getNif());
-        result.put("representativeName", representative.getFullName());
+        result.put("representativeName", representative.getName());
         result.put("hashCertVSBase64", hashCertVSBase64);
         result.put("originHashCertVSBase64", originHashCertVS);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED.toString());

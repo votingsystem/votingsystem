@@ -152,8 +152,8 @@ public class EventVSSearchResultActivity extends ActionBarActivity {
                             getElapsedTimeStr(eventVS.getDateBegin()));
                     break;
             }
-            if(eventVS.getUserVS() != null && !eventVS.getUserVS().getFullName().isEmpty()) {
-                ((TextView)itemView.findViewById(R.id.publisher)).setText(eventVS.getUserVS().getFullName());
+            if(eventVS.getUserVS() != null && !eventVS.getUserVS().getName().isEmpty()) {
+                ((TextView)itemView.findViewById(R.id.publisher)).setText(eventVS.getUserVS().getName());
             }
             ((LinearLayout)itemView.findViewById(R.id.subject_layout)).setBackgroundColor(
                     getResources().getColor(state_color));

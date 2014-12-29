@@ -128,13 +128,13 @@ public class TransactionVSFragment extends Fragment {
         if(transactionvs.getFromUserVS() != null) {
             from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
                     transactionvs.getFromUserVS().getNif(),
-                    transactionvs.getFromUserVS().getFullName())));
+                    transactionvs.getFromUserVS().getName())));
             from_user.setVisibility(View.VISIBLE);
         }
         if(transactionvs.getToUserVS() != null) {
             to_user.setText(Html.fromHtml(getString(R.string.transactionvs_to_user_lbl,
                     transactionvs.getToUserVS().getNif(),
-                    transactionvs.getToUserVS().getFullName())));
+                    transactionvs.getToUserVS().getName())));
             to_user.setVisibility(View.VISIBLE);
         }
         String transactionHtml = getString(R.string.transactionvs_formatted,

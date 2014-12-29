@@ -307,7 +307,7 @@ public class EventVS implements Serializable {
             androidEventVS.setEventVSId(jsonData.getLong("eventId"));
         if (jsonData.has("userVS")) {
             UserVS userVS = new UserVS();
-            userVS.setFullName(jsonData.getString("userVS"));
+            userVS.setName(jsonData.getString("userVS"));
             androidEventVS.setUserVS(userVS);
         }
         if (jsonData.has("numSignaturesCollected"))
@@ -385,7 +385,7 @@ public class EventVS implements Serializable {
             }
             jsonObject.put("tags", jsonArray);
         }
-        if(userVS != null) jsonObject.put("userVS", userVS.getFullName());
+        if(userVS != null) jsonObject.put("userVS", userVS.getName());
         if (controlCenter != null) {
             Map<String, Object> controlCenterMap = new HashMap<String, Object>();
             controlCenterMap.put("id", controlCenter.getId());
