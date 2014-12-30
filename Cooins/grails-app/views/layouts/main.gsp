@@ -21,7 +21,7 @@
     <vs:webcomponent path="/element/alert-dialog"/>
     <vs:webcomponent path="/layouts/vs-navbar"/>
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>--->
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
     <g:layoutHead/>
     <style>
     </style>

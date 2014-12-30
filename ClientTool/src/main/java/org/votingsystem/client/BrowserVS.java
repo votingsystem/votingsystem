@@ -27,7 +27,7 @@ import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.client.util.BrowserVSClient;
-import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.model.ContentTypeVS;
@@ -209,6 +209,7 @@ public class BrowserVS extends Region implements WebKitHost {
                 locationField.setText(newURL);
             }
         });
+        webView.getEngine().setOnError(event ->  log.error(event.getMessage(), event.getException()));
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().locationProperty().addListener((observable, oldValue, newValue) ->
                 locationField.setText(newValue));
@@ -230,7 +231,7 @@ public class BrowserVS extends Region implements WebKitHost {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new BrowserVSClient(webView));
                             webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                    SessionVSUtils.getInstance().getBrowserSessionData()));
+                                    SessionService.getInstance().getBrowserSessionData()));
                         }
                     } else if (newState.equals(Worker.State.FAILED)) {
                         showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));

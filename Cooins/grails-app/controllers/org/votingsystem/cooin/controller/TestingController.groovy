@@ -36,7 +36,7 @@ class TestingController {
 
     def index() {
         balanceService.initWeekPeriod(Calendar.getInstance())
-        render "initWeekPeriod - OK";
+        render "initWeekPeriod - OK"
         return false
     }
 

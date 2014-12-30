@@ -2,6 +2,7 @@ package org.votingsystem.android.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.telephony.TelephonyManager;
 import android.util.Base64;
 
 import org.json.JSONObject;
@@ -77,7 +78,13 @@ public class PrefUtils {
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String applicationId = settings.getString(ContextVS.APPLICATION_ID_KEY, null);
         if(applicationId == null) {
-            applicationId = UUID.randomUUID().toString();
+            TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(
+                    Context.TELEPHONY_SERVICE);
+            // phone = telephonyManager.getLine1Number(); -> operator dependent
+            //IMSI
+            //phone = telephonyManager.getSubscriberId();
+            //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available.
+            applicationId = telephonyManager.getDeviceId();
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(APPLICATION_ID_KEY, applicationId);
             editor.commit();

@@ -168,10 +168,11 @@
         }
     },
     updateSession:function(userVS, sessionData) {
-        if(sessionData!= null &&sessionData.cryptoTokenVS != null && "MOBILE" === sessionData.cryptoTokenVS.type) {
+        /*if(sessionData!= null && sessionData.cryptoTokenVS != null && "MOBILE" === sessionData.cryptoTokenVS.type) {
             this.$.connectContainer.style.display = 'none'
             return;
-        } else this.$.connectContainer.style.display = 'block'
+        } else this.$.connectContainer.style.display = 'block'*/
+        this.$.connectContainer.style.display = 'block'
         this.sessionData = sessionData
         this.userVS = userVS
         if(this.sessionData != null) {

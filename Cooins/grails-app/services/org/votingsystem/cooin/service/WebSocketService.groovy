@@ -76,12 +76,18 @@ class WebSocketService {
                 if(ResponseVS.SC_OK == responseVS.statusCode) {
                     UserVS userVS = responseVS.messageSMIME.userVS
                     if(userVS.getDeviceVS()) {
+                        //check if accessing from one device and signing from another
+                        if(!userVS.getDeviceVS().getDeviceId().equals(request.deviceFromId)) userVS.setDeviceVS(null)
+                    }
+                    if(!userVS.getDeviceVS() && request.deviceFromId){
+                        DeviceVS deviceVS = DeviceVS.findByDeviceIdAndUserVS(request.deviceFromId, userVS)
+                        userVS.setDeviceVS(deviceVS)
+                    }
+                    if(userVS.getDeviceVS()) {
                         SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
                         processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null, userVS.deviceVS.id))
-                    } else {
-                        processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR, messageSource.
-                                getMessage("certWithoutDeviceVSInfoErrorMsg", null, locale), null))
-                    }
+                    } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
+                            messageSource.getMessage("certWithoutDeviceVSInfoErrorMsg", null, locale), null))
                 } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
                         responseVS.getMessage(), null))
                 break;

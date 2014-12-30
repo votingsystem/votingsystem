@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
@@ -11,7 +11,8 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
-import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -41,9 +42,9 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SessionVSUtils {
+public class SessionService {
 
-    private static Logger log = Logger.getLogger(SessionVSUtils.class);
+    private static Logger log = Logger.getLogger(SessionService.class);
 
     private UserVS userVS;
     private File sessionFile;
@@ -55,9 +56,9 @@ public class SessionVSUtils {
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
-    private static final SessionVSUtils INSTANCE = new SessionVSUtils();
+    private static final SessionService INSTANCE = new SessionService();
 
-    private SessionVSUtils() {
+    private SessionService() {
         try {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
@@ -172,7 +173,7 @@ public class SessionVSUtils {
         }
     }
 
-    public static SessionVSUtils getInstance() {
+    public static SessionService getInstance() {
         return INSTANCE;
     }
 
@@ -290,7 +291,7 @@ public class SessionVSUtils {
 
 
     public void checkCSRRequest() {
-        PlatformImpl.runLater(new Runnable() { @Override public void run() { checkCSR(); } });
+        PlatformImpl.runLater(() -> checkCSR());
     }
 
     private void deleteCSR() {
@@ -359,17 +360,17 @@ public class SessionVSUtils {
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
-                    char[] password, String subject, Header... headers) throws Exception {
+            String password, String subject, Header... headers) throws Exception {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         log.debug("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
-                KeyStore keyStore = ContextVS.getUserKeyStore(password);
+                KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
-                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password, ContextVS.DNIe_SIGN_MECHANISM);
+                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
                 return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
             case DNIe:
-                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject, headers);
+                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject, headers);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = DeviceVS.parse(getInstance().getCryptoToken());

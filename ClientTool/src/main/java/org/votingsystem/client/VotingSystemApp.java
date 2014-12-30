@@ -26,7 +26,7 @@ import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.NotificationService;
-import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
@@ -140,8 +140,8 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         return sessionMap.get(UUID);
     }
     public WebSocketSession getWSSession(Long deviceId) {
-        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k -> k.getValue().getDeviceVS().getId()
-                == deviceId).map(k -> k.getValue()).collect(toList());
+        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k ->  k.getValue().getDeviceVS() != null &&
+                k.getValue().getDeviceVS().getId() == deviceId).map(k -> k.getValue()).collect(toList());
         return result.isEmpty()? null : result.get(0);
     }
 
@@ -188,7 +188,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true, primaryStage);
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
-                        SessionVSUtils.getInstance().checkCSRRequest();
+                        SessionService.getInstance().checkCSRRequest();
                     }
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {

@@ -10,7 +10,6 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
-import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ActorVS;
@@ -101,7 +100,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        SessionVSUtils.getInstance().setIsConnected(false);
+                        SessionService.getInstance().setIsConnected(false);
                     }
 
                     @Override public void onError(Session session, Throwable thr) {
@@ -152,13 +151,13 @@ public class WebSocketService extends Service<ResponseVS> {
                     InboxService.getInstance().addMessage(socketMsg);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    SessionVSUtils.setSignResponse(socketMsg);
+                    SessionService.setSignResponse(socketMsg);
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null && socketSession.getTypeVS() != null) {
                         switch(socketSession.getTypeVS()) {
                             case MESSAGEVS_SIGN:
-                                SessionVSUtils.setSignResponse(socketMsg);
+                                SessionService.setSignResponse(socketMsg);
                                 return;
                         }
                     }

@@ -43,7 +43,6 @@ class BalanceService {
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate))
         String transactionMsgSubject =  messageSource.getMessage('initWeekMsg',
                 [DateUtils.getDayWeekDateStr(timePeriod.getDateTo())].toArray(), locale)
-        Map globalDataMap = [:]
         int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
         log.debug("$methodName - $transactionMsgSubject - numTotalUsers: '$numTotalUsers' - $timePeriod")
         ReportFiles reportFiles
@@ -72,7 +71,7 @@ class BalanceService {
                     continue
                 }
                 reportFiles = new ReportFiles(timePeriod, "$grailsApplication.config.vs.weekReportsPath", userSubPath)
-                log.debug("$methodName - week report for UserVS '$userVS.nif' - dir: '$reportFiles.baseDir.absolutePath'")
+                log.debug("$methodName - week report for UserVS '$userVS.id' - dir: '$reportFiles.baseDir.absolutePath'")
                 Map<String, Map> currencyMap = balanceMap.balancesCash
                 for(String currency: currencyMap.keySet()) {
                     for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap[currency].entrySet()) {
@@ -128,7 +127,7 @@ class BalanceService {
                     //new File(accessRequestBaseDir).mkdirs()
                 }
             } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.error(ex.getMessage());
                 errorsFile.append("${StackTraceUtils.extractRootCause(ex)} ${System.getProperty("line.separator")}")
             }
         }
@@ -180,12 +179,12 @@ class BalanceService {
         Map resultMap = [timePeriod:timePeriod.toJSON(),userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
         JSON userBalancesJSON = new JSON(resultMap)
-        reportFiles.jsonFile.write(userBalancesJSON.toString(3))
+        reportFiles.jsonFile.write(userBalancesJSON.toString())
         String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
                 ["[${DateUtils.getDateStr(timePeriod.getDateFrom())} - ${DateUtils.getDateStr(timePeriod.getDateTo())}]"].toArray(),
                 locale)
-        ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name,
-                "", userBalancesJSON.toString(3), subject)
+        ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name, null,
+                userBalancesJSON.toString(), subject)
         responseVS.getSMIME().writeTo(new FileOutputStream(reportFiles.receiptFile))
         String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
                 System.currentTimeMillis() - beginCalc)

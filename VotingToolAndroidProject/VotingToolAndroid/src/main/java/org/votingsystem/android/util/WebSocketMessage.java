@@ -193,7 +193,8 @@ public class WebSocketMessage implements Parcelable {
             if(messageJSON.has("operation")) operation = TypeVS.valueOf(
                     messageJSON.getString("operation"));
             if(messageJSON.has("statusCode")) setStatusCode(messageJSON.getInt("statusCode"));
-            if(messageJSON.has("deviceId")) deviceId = messageJSON.getLong("deviceId");
+            if(messageJSON.has("deviceId") && !messageJSON.isNull("deviceId"))
+                deviceId = messageJSON.getLong("deviceId");
             if(messageJSON.has("sessionId")) setSessionId(messageJSON.getString("sessionId"));
             if(messageJSON.has("message")) setMessage(messageJSON.getString("message"));
             if(messageJSON.has("URL")) setUrl(messageJSON.getString("URL"));
@@ -337,6 +338,7 @@ public class WebSocketMessage implements Parcelable {
         Map messageToServiceMap = new HashMap();
         messageToServiceMap.put("locale", context.getResources().getConfiguration().locale.getLanguage());
         messageToServiceMap.put("operation", operation.toString());
+        messageToServiceMap.put("deviceFromId", PrefUtils.getApplicationId(context));
         messageToServiceMap.put("UUID", UUID);
         if(message != null) messageToServiceMap.put("message", message);
         if(data != null) messageToServiceMap.put("data", data);

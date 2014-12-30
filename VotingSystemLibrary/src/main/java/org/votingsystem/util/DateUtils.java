@@ -283,7 +283,7 @@ public class DateUtils {
 
     public static Calendar getDayFromPreviousWeek(Calendar requestDate) {
         Calendar result = ((Calendar)requestDate.clone());
-        result.set(Calendar.WEEK_OF_YEAR, (requestDate.get(Calendar.WEEK_OF_YEAR) -1));
+        result.set(Calendar.DAY_OF_YEAR, (requestDate.get(Calendar.DAY_OF_YEAR) - 7));
         return result;
     }
 

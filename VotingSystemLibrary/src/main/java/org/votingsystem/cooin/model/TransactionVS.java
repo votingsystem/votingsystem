@@ -357,8 +357,9 @@ public class TransactionVS  implements Serializable {
                 amountCollector = new TransactionVSToAmountCollector();
                 break;
         }
-        return transactionList.stream().collect(groupingBy(TransactionVS::getCurrencyCode,
+        Map result = transactionList.stream().collect(groupingBy(TransactionVS::getCurrencyCode,
                 groupingBy(TransactionVS::getTagName, amountCollector)));
+        return result;
     }
 
     public void afterInsert() {

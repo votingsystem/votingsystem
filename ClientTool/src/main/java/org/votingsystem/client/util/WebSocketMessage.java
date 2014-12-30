@@ -5,6 +5,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -34,14 +35,6 @@ public class WebSocketMessage {
 
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
     public static final int TRUNCATED_MSG_SIZE = 80; //chars
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
@@ -203,6 +196,14 @@ public class WebSocketMessage {
         return this;
     }
 
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
     public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
@@ -271,6 +272,7 @@ public class WebSocketMessage {
     public static JSONObject getAuthenticationRequest(SMIMEMessage smimeMessage, String UUID) throws Exception {
         Map messageToServiceMap = new HashMap<>();
         messageToServiceMap.put("operation", TypeVS.INIT_VALIDATED_SESSION);
+        messageToServiceMap.put("deviceFromId", SessionService.getInstance().getDeviceId());
         messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         messageToServiceMap.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
         messageToServiceMap.put("UUID", UUID);
@@ -284,6 +286,7 @@ public class WebSocketMessage {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
         messageToDevice.put("deviceToId", deviceVS.getId());
         messageToDevice.put("deviceToName", deviceVS.getDeviceName());
         messageToDevice.put("UUID", socketSession.getUUID());
@@ -338,7 +341,7 @@ public class WebSocketMessage {
         messageToDevice.put("UUID", socketSession.getUUID());
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
-        encryptedDataMap.put("from", SessionVSUtils.getInstance().getUserVS().getName());
+        encryptedDataMap.put("from", SessionService.getInstance().getUserVS().getName());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
         encryptedDataMap.put("toUser", toUser);

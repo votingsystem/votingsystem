@@ -24,6 +24,7 @@ class SocketServiceRequest {
 
     private static Logger log = Logger.getLogger(SocketServiceRequest.class);
 
+    String deviceFromId
     Session session;
     JSONObject messageJSON;
     SessionVS sessionVS
@@ -31,8 +32,6 @@ class SocketServiceRequest {
     TypeVS operation
     SMIMEMessage smimeMessage;
     InetSocketAddress remoteAddress
-    boolean hasErrors = false
-
 
     public SocketServiceRequest(Session session, String msg, boolean last) {
         this.remoteAddress = ((InetSocketAddress)((NioServletOutputStream)((WsRemoteEndpointImplServer)(
@@ -40,6 +39,7 @@ class SocketServiceRequest {
                 socketWrapper.socket.sc.remoteAddress);
         this.session = session;
         messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
+        deviceFromId = messageJSON.deviceFromId
         if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
         if(messageJSON.locale) locale = Locale.forLanguageTag(messageJSON.locale)
         if(!messageJSON.operation || JSONNull.getInstance().equals(messageJSON.operation))

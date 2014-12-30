@@ -14,7 +14,7 @@ import javafx.scene.text.TextAlignment;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SignatureService;
-import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -122,7 +122,7 @@ public class BrowserVSPane extends StackPane {
 
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
-        if(CryptoTokenVS.MOBILE != SessionVSUtils.getCryptoTokenType()) {
+        if(CryptoTokenVS.MOBILE != SessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
         } else signatureService.processOperationVS("", operationVS);
     }

@@ -71,23 +71,23 @@ class CooinAccountService {
             BigDecimal wildTagBalance = BigDecimal.ZERO
             if(balancesMap[currency]) {
                 for(String tag: accountsMap[currency].keySet()) {
-                    BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
+                    BigDecimal tagAccount = new BigDecimal(accountsMap[currency][tag])
                     if(balancesMap[currency][tag]) {
-                        BigDecimal balanceTagAmount = balancesMap[currency][tag];
-                        if(TagVS.WILDTAG.equals(tag)) wildTagBalance = balanceTagAmount
-                        else if(tagAmount.compareTo(balanceTagAmount) != 0)
-                            tagGap = tagGap.add(tagAmount.subtract(balanceTagAmount))
+                        BigDecimal tagBalance = balancesMap[currency][tag];
+                        if(TagVS.WILDTAG.equals(tag)) wildTagBalance = tagBalance
+                        else if(tagAccount.compareTo(tagBalance) != 0)
+                            tagGap = tagGap.add(tagBalance.subtract(tagAccount))
                     } else {
-                        if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with user " +
+                        if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with user " +
                                 "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                     }
                 }
             } else {
                 for(String tag: accountsMap[currency].keySet()) {
-                    BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
+                    BigDecimal tagAccount = new BigDecimal(accountsMap[currency][tag])
                     if(!accountsMap.isEmpty() && balancesMap.isEmpty()) throw new ExceptionVS(messageSource.getMessage(
                             'initPeriodMissingErrorMsg', [userVS.id].toArray(), locale))
-                    if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with user '${userVS.id}' " +
+                    if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with user '${userVS.id}' " +
                             "tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                 }
             }

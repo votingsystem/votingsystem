@@ -63,8 +63,7 @@ class GroupVSService {
             throw new ExceptionVS(messageSource.getMessage('identifierErrorMsg', [groupVS.id, request.id].toArray(),
                 locale), MetaInfMsg.getErrorMsg(methodName, "groupVS_${groupVS?.id}"))
         }
-        groupVS.setDescription(request.groupvsInfo)
-        groupVS.save()
+        groupVS.setDescription(request.groupvsInfo).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.COOIN_GROUP_EDIT, data:groupVS,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}"))
     }
@@ -156,8 +155,7 @@ class GroupVSService {
 
     @Transactional
     public Map getDataWithBalancesMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = [timePeriod:timePeriod.getMap()]
-        resultMap.userVS = getGroupVSDataMap(groupVS)
+        Map resultMap = [timePeriod:timePeriod.getMap(), userVS:getGroupVSDataMap(groupVS)]
 
         Map transactionListWithBalances = transactionVSService.getTransactionListWithBalances(
                 transactionVSService.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM)

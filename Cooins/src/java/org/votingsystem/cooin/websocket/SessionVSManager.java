@@ -57,12 +57,15 @@ public class SessionVSManager {
 
     public Set<Map> connectedDeviceMap(Long userId) {
         if(!connectedUserVSDeviceMap.containsKey(userId)) return new HashSet<>();
-        else return connectedUserVSDeviceMap.get(userId).stream().map(d -> {
-                Map<String, Object> result = new HashMap<String, Object>();
-                result.put("id", d.getId());
-                result.put("name", d.getDeviceName());
-                return result;
-            }).collect(Collectors.toSet());
+        else {
+            Set<Map> userVSConnectedDevices = connectedUserVSDeviceMap.get(userId).stream().map(d -> {
+                    Map<String, Object> result = new HashMap<String, Object>();
+                    result.put("id", d.getId());
+                    result.put("name", d.getDeviceName());
+                    return result;
+                }).collect(Collectors.toSet());
+            return userVSConnectedDevices;
+        }
     }
 
     public Map<Long, Set> getConnectedUsersDataMap() {

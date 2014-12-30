@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.SMIMESignerActivity;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.android.util.WebSocketSession;
@@ -298,6 +299,7 @@ public class WebSocketService extends Service {
                         String randomUUID = UUID.randomUUID().toString();
                         Map mapToSend = new HashMap();
                         mapToSend.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
+                        mapToSend.put("deviceFromId", PrefUtils.getApplicationId(contextVS));
                         mapToSend.put("UUID", randomUUID);
                         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
                         JSONObject requestJSON = new JSONObject(mapToSend);

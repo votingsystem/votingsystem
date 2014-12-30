@@ -19,7 +19,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -269,8 +269,8 @@ public class SignDocumentFormStackPane extends StackPane {
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
                         log.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
-                        smimeMessage = SessionVSUtils.getSMIME(null, toUser,
-                                textToSignJSON.toString(), password.toCharArray(), messageSubject, null);
+                        smimeMessage = SessionService.getSMIME(null, toUser,
+                                textToSignJSON.toString(), password, messageSubject, null);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
                         updateProgress(40, 100);
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);

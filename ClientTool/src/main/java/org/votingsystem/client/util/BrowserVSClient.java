@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.cooin.model.Cooin;
@@ -123,7 +124,7 @@ public class BrowserVSClient {
                     BrowserVS.getInstance().processSignalVS(operationVS.getDocument());
                     break;
                 case REPRESENTATIVE_STATE:
-                    result = SessionVSUtils.getInstance().getRepresentationState().toString();
+                    result = SessionService.getInstance().getRepresentationState().toString();
                     break;
                 case WALLET_STATE:
                     result = Wallet.getWalletState().toString();

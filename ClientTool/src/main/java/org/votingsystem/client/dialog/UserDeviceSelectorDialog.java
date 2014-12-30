@@ -13,7 +13,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.util.SessionVSUtils;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -54,7 +54,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
             @Override public void run() {
                 ResponseVS responseVS = HttpHelper.getInstance().getData(
                         ContextVS.getInstance().getCooinServer().getConnectedDeviceListByNifServiceURL(
-                        SessionVSUtils.getInstance().getUserVS().getNif()), ContentTypeVS.JSON);
+                        SessionService.getInstance().getUserVS().getNif()), ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     updateDeviceList((JSONArray) ((JSONObject)responseVS.getMessageJSON()).getJSONArray("deviceList"));
                 }

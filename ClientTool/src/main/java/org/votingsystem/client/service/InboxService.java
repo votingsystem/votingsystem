@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.util.SessionVSUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
@@ -85,7 +84,7 @@ public class InboxService {
     private void showPasswordDialog(final String pinDialogMessage, final boolean isTimeLimited) {
         if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
-            if (SessionVSUtils.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
+            if (SessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
                 passwordDialog = new PasswordDialog();
                 String dialogMessage = null;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");

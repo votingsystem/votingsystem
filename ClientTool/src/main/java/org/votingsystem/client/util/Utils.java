@@ -20,6 +20,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -296,7 +297,7 @@ public class Utils {
                         ContextVS.saveUserKeyStore(userKeyStore, password);
                         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                 CryptoTokenVS.JKS_KEYSTORE.toString());
-                        SessionVSUtils.getInstance().setUserVS(userVS, false);
+                        SessionService.getInstance().setUserVS(userVS, false);
                         JSONObject userDataJSON = userVS.toJSON();
                         userDataJSON.put("statusCode", ResponseVS.SC_OK);
                         webKitHost.sendMessageToBrowser(userDataJSON, operationVS.getCallerCallback());
