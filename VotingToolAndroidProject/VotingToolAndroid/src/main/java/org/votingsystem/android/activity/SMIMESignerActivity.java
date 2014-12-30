@@ -50,23 +50,22 @@ public class SMIMESignerActivity extends ActionBarActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver",
-                "extras:" + intent.getExtras());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        WebSocketMessage request = intent.getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
+        WebSocketMessage socketMessage = intent.getParcelableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchService(null, operationVS);
         else {
             setProgressDialogVisible(false, null, null);
-            if(request != null) {
-                if(TypeVS.MESSAGEVS_FROM_DEVICE == request.getOperation()) {
-                    if(ResponseVS.SC_OK == request.getStatusCode()) {
-                        UIUtils.launchMessageActivity(request.getNotificationResponse(
+            if(socketMessage != null) {
+                if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessage.getOperation()) {
+                    if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessage.getStatusCode()) {
+                        UIUtils.launchMessageActivity(socketMessage.getNotificationResponse(
                                 SMIMESignerActivity.this), SMIMESignerActivity.this);
                         SMIMESignerActivity.this.finish();
-                    } else showMessage(request.getStatusCode(),
-                            getString(R.string.sign_document_lbl), request.getMessage());
+                    } else showMessage(socketMessage.getStatusCode(),
+                            getString(R.string.sign_document_lbl), socketMessage.getMessage());
                 }
             }
         }
@@ -128,7 +127,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
                     responseVS.setMessageJSON(request.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
-                            DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE, this));
+                            DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE, contextVS));
                     launchService(responseVS, null);
                     this.finish();
                 } catch(Exception ex) {ex.printStackTrace();}

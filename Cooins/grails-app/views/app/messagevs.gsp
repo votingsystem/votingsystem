@@ -11,7 +11,7 @@
         los usuarios sólo pueden ser leidos por el emisor y el receptor.
         </p>
         <p>Para recibir un mensaje tanto el emisor como el receptor tienen que estar conectados e identificados,
-        el sistema no guarda en ningún momento los mensajes.</p>
+        el sistema no guarda en ningún momento los mensajes ni tiene acceso al contenido de los mismos.</p>
     </div>
 </div>
 </body>

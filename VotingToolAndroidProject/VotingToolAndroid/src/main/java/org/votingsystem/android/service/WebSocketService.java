@@ -258,6 +258,9 @@ public class WebSocketService extends Service {
                     intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
                     startActivity(intent);
                     break;
+                case MESSAGEVS_SIGN_RESPONSE:
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    break;
                 case COOIN_WALLET_CHANGE:
                     if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
                         Wallet.removeCooinList((Collection<Cooin>) socketSession.getData(), contextVS);
