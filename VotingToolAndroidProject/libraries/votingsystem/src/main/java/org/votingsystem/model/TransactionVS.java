@@ -33,7 +33,7 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type { COOIN_REQUEST, COOIN_SEND, COOIN_CANCELLATION, FROM_BANKVS, FROM_USERVS,
+    public enum Type { COOIN_REQUEST, COOIN_SEND, FROM_BANKVS, FROM_USERVS,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, COOIN_INIT_PERIOD;}
 
     public enum State { OK, REPEATED, CANCELLED;}
@@ -273,8 +273,6 @@ public class TransactionVS  implements Serializable {
 
     public int getIconId(Context context) {
         switch(type) {
-            case COOIN_CANCELLATION:
-                return R.drawable.edit_redo_24;
             case COOIN_REQUEST:
                 return R.drawable.edit_undo_24;
             case COOIN_SEND:
@@ -296,8 +294,6 @@ public class TransactionVS  implements Serializable {
 
     public static String getDescription(Context context, Type type) {
         switch(type) {
-            case COOIN_CANCELLATION:
-                return context.getString(R.string.cooin_cancellation);
             case FROM_GROUP_TO_ALL_MEMBERS:
             case FROM_GROUP_TO_MEMBER:
             case FROM_GROUP_TO_MEMBER_GROUP:

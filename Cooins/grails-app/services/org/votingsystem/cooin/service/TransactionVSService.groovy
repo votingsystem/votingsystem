@@ -302,9 +302,6 @@ class TransactionVSService {
             case 'COOIN_SEND':
                 typeDescription = messageSource.getMessage('cooinSendLbl', null, locale);
                 break;
-            case 'COOIN_CANCELLATION':
-                typeDescription = messageSource.getMessage('cooinCancellationLbl', null, locale);
-                break;
             case 'FROM_BANKVS':
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;

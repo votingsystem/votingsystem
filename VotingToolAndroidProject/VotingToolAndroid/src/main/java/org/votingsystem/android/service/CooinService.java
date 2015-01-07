@@ -87,80 +87,11 @@ public class CooinService extends IntentService {
                             transactionVS.isTimeLimited(), contextVS.getCooinServer());
                     requestAndSendCooin(serviceCaller, cooinBatch, password);
                     break;
-                case COOIN_CANCEL:
-                    Cooin cooin = (Cooin) ObjectUtils.deSerializeObject(serializedCooin);
-                    ResponseVS responseVS = cancelCooin(cooin);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        cooin.setCancellationReceipt(responseVS.getSMIME());
-                        cooin.setState(Cooin.State.CANCELLED);
-                        responseVS.setCaption(getString(R.string.cooin_cancellation_msg_subject));
-                        responseVS.setNotificationMessage(getString(R.string.cooin_cancellation_msg));
-                        responseVS.setIconId(R.drawable.accept_22);
-                    } else {
-                        responseVS.setCaption(getString(R.string.cooin_cancellation_error_msg_subject));
-                        responseVS.setNotificationMessage(getString(R.string.cooin_cancellation_error_msg_subject));
-                        responseVS.setIconId(R.drawable.cancel_22);
-                        if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED) {
-                            SMIMEMessage signedMessage = responseVS.getSMIME();
-                            LOGD(TAG + ".cancelCooin", "error JSON response: " + signedMessage.getSignedContent());
-                            JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
-                            operation = TypeVS.valueOf(jsonResponse.getString("operation"));
-                            if(TypeVS.COOIN_CANCEL == operation) {
-                                cooin.setCancellationReceipt(responseVS.getSMIME());
-                                cooin.setState(Cooin.State.LAPSED);
-                                responseVS.setCaption(getString(R.string.cooin_cancellation_msg_subject));
-                                responseVS.setNotificationMessage(getString(R.string.cooin_cancellation_msg));
-                                responseVS.setIconId(R.drawable.accept_22);
-                            }
-                        }
-                    }
-                    broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
-                            responseVS, this));
-                    break;
             }
         } catch(Exception ex) {
             ex.printStackTrace();
             broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
                     ResponseVS.getExceptionResponse(ex, this), this));
-        }
-    }
-
-    private ResponseVS cancelCooin(Cooin cooin) {
-        CooinServer cooinServer = contextVS.getCooinServer();
-        ResponseVS responseVS = contextVS.signMessage(cooinServer.getNameNormalized(),
-                cooin.getCancellationRequest().toString(),
-                getString(R.string.cooin_cancellation_msg_subject));
-        try {
-            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                    ContentTypeVS.JSON_SIGNED, cooinServer.getTransactionVSServiceURL());
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
-        } finally {
-            return responseVS;
-        }
-    }
-
-    private ResponseVS cancelCooins(Collection<Cooin> sendedCooins) {
-        CooinServer cooinServer = contextVS.getCooinServer();
-        ResponseVS responseVS = null;
-        try {
-            List<String> cancellationList = new ArrayList<String>();
-            for(Cooin cooin : sendedCooins) {
-                responseVS = contextVS.signMessage(cooinServer.getNameNormalized(),
-                        cooin.getCancellationRequest().toString(),
-                        getString(R.string.cooin_cancellation_msg_subject), contextVS.getTimeStampServiceURL());
-                cancellationList.add(new String(Base64.encode(responseVS.getSMIME().getBytes())));
-            }
-            Map requestMap = new HashMap();
-            requestMap.put("cooinCancellationList", cancellationList);
-            responseVS = HttpHelper.sendData(new JSONObject(requestMap).toString().getBytes(),
-                    ContentTypeVS.JSON, cooinServer.getCooinBatchCancellationServiceURL());
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
-        } finally {
-            return responseVS;
         }
     }
 
@@ -259,12 +190,11 @@ public class CooinService extends IntentService {
                     ex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
-            cancelCooins(sendedCooinsMap.values());
+            //TODO reingresar cooins en cuenta
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                LOGD(TAG + ".cancelCooinRepeated", "cancelCooinRepeated");
                 try {
                     JSONObject responseJSON = new JSONObject(new String(decryptedMessageBytes, ContextVS.UTF_8));
                     String base64EncodedCooinRepeated = responseJSON.getString("messageSMIME");

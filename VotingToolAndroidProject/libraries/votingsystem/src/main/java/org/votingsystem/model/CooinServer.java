@@ -28,14 +28,6 @@ public class CooinServer extends ActorVS implements Serializable {
         return getServerURL() + "/cooin/request";
     }
 
-    public String getCooinBatchCancellationServiceURL() {
-        return getServerURL() + "/cooin/cancelBatch";
-    }
-
-    public String getCooinCancelServiceURL() {
-        return getServerURL() + "/cooin/cancel";
-    }
-
     public String getUserInfoServiceURL(String nif) {
         return getServerURL() + "/userVS/userInfo/" + nif;
     }

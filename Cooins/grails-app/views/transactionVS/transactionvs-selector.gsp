@@ -8,7 +8,6 @@
             <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
             <option value="COOIN_REQUEST"> - <g:message code="selectCooinRequestLbl"/> - </option>
             <option value="COOIN_SEND"> - <g:message code="selectCooinSendLbl"/> - </option>
-            <option value="COOIN_CANCELLATION"> - <g:message code="selectCooinCancellationLbl"/> - </option>
             <option value="COOIN_INIT_PERIOD"> - <g:message code="cooinInitPeriodLbl"/> - </option>
             <option value="COOIN_INIT_PERIOD_TIME_LIMITED"> - <g:message code="cooinInitPeriodTimeLimitedLbl"/> - </option>
             <option value="FROM_BANKVS"> - <g:message code="bankVSInputLbl"/> - </option>

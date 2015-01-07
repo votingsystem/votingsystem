@@ -85,10 +85,6 @@
                 <div class="numTrans">{{transactionVSData.numTransCooinSend}}</div>
                 <div class="transDesc">TransCooinSend</div>
             </div>
-            <div id="COOIN_CANCELLATION" class="transBlock" on-click="{{transBlockSelected}}">
-                <div class="numTrans">{{transactionVSData.numTransCooinCancellation}}</div>
-                <div class="transDesc">TransCooinCancellation</div>
-            </div>
             <div id="CANCELLATION" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransCancellation}}</div>
                 <div class="transDesc">TransCancellation</div>

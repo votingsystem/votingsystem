@@ -40,17 +40,12 @@ class CsrService {
             }
             return cooinBatchRequest;
         } catch(Exception ex) {
-            cancelCooins(cooinBatchRequest.cooinsMap.values(), ex.getMessage())
-            throw new ExceptionVS(messageSource.getMessage('cooinRequestDataError', null,
-                    locale), ex)
-        }
-    }
-
-    private void cancelCooins(Collection<Cooin> issuedCooinList, String reason) {
-        for(Cooin cooin : issuedCooinList) {
-            if(cooin.getId() != null) {
-                cooin.setState(Cooin.State.CANCELLED).setReason(reason).save()
+            for(Cooin cooin : cooinBatchRequest.cooinsMap.values()) {
+                if(cooin.getId() != null) {
+                    cooin.setState(Cooin.State.CANCELLED).setReason(ex.getMessage()).save()
+                }
             }
+            throw new ExceptionVS(messageSource.getMessage('cooinRequestDataError', null, locale), ex)
         }
     }
 

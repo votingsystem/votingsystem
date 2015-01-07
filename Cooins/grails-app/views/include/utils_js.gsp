@@ -90,9 +90,6 @@
             case 'COOIN_SEND':
                 transactionDescription = "<g:message code="selectCooinSendLbl"/>"
                 break;
-            case 'COOIN_CANCELLATION':
-                transactionDescription = "<g:message code="selectCooinCancellationLbl"/>"
-                break;
             case 'COOIN_INIT_PERIOD':
                 transactionDescription = "<g:message code="cooinInitPeriodLbl"/>"
                 break;

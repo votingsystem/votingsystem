@@ -206,6 +206,11 @@ class UrlMappings {
             }
         }
 
+        "/shop/$uuid"{
+            controller = "shopExample"
+            action = "paymentInfo"
+        }
+
         "/testing/$year/$month/$day" {
             controller = "testing"
             action = "index"
@@ -215,7 +220,6 @@ class UrlMappings {
                 day(matches:/\d*/)
             }
         }
-
 
         "/transactionVS/$id"{
             controller = "transactionVS"

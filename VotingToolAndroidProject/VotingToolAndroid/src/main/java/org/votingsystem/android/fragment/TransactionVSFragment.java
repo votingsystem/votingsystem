@@ -159,8 +159,6 @@ public class TransactionVSFragment extends Fragment {
     private void setActionBar() {
         if(selectedTransaction == null) return;
         switch(selectedTransaction.getType()) {
-            case COOIN_CANCELLATION:
-                break;
             case COOIN_REQUEST:
                 //menu.removeItem(R.id.cancel_vote);
                 break;

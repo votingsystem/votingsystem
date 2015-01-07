@@ -9,11 +9,12 @@
         <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
             <p>El intercambio monetario puede producirse mediante <b>transacciones firmadas</b>,
             <b>transacciones firmadas anónimas</b>, o mediante intercambio de directo de <b>cooins</b></p>
-            <ul><li>En las <b>transacciones firmadas</b> queda perfectamente definida la identidad del pagador y del cobrador</li>
+            <ul><li>En las <b>transacciones firmadas</b> queda perfectamente definida la identidad del pagador y del
+            cobrador.</li>
             <li>En las <b>transacciones firmadas anónima</b> queda perfectamente definida sólo la identidad del cobrador,
-            la identidad del pagador es anónima. Para este tipo de transacciones es necesario utilizar un <b>cooin</b></li>
+            la identidad del pagador es anónima. Para este tipo de transacciones es necesario utilizar un <b>cooin</b>.</li>
             <li>En los <b>intercambios directos de cooins</b> permanecen anónimos tanto el cobrador como el pagador (aunque
-            existen mecanismos para poder evitar fraudes ...)</li></ul>
+            existen mecanismos para poder evitar fraudes ...).</li></ul>
 
             <h4>Notas sobre transacciones firmadas</h4>
             <ul>

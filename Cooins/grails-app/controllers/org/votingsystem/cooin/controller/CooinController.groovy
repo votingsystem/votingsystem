@@ -41,21 +41,6 @@ class CooinController {
         }
     }
 
-    def cancel() {
-        MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
-        return [responseVS:cooinService.cancelCooin(messageSMIME)]
-    }
-
-
-    def cancelBatch () {
-        JSONObject jsonRequest = JSON.parse(new String(params.requestBytes))
-        JSONArray cooinCancellationArray = jsonRequest.getJSONArray("cooinCancellationList")
-        cooinCancellationArray.each {
-            log.debug("cooinCancellationArray -it: ${it}")
-        }
-    }
-
     /**
      * Service that validates cash requests
      *

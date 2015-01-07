@@ -36,8 +36,6 @@ class DashBoardService {
                 TransactionVS.Type.COOIN_REQUEST, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransCooinSend = TransactionVS.countByTypeAndDateCreatedBetween(
                 TransactionVS.Type.COOIN_SEND, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransCooinCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
-                TransactionVS.Type.COOIN_CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransCancellation = TransactionVS.countByTypeAndDateCreatedBetween(
                 TransactionVS.Type.CANCELLATION, timePeriod.getDateFrom(), timePeriod.getDateTo())
         return result

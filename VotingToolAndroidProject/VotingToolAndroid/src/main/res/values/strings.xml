@@ -315,7 +315,6 @@
     <string name="transactionvs_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
         <b>nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt">recibo</string>
-    <string name="cooin_cancellation_msg_subject">cancelación de cooin</string>
     <string name="wallet_lbl">monedero</string>
     <string name="cert_info_lbl">datos del certificado</string>
     <string name="cooin_cert_caption">datos del certificado del cooin</string>
@@ -323,8 +322,6 @@
     <string name="cooin_data_info_lbl">válido desde %1$s hasta %2$s</string>
     <string name="cancel_cooin_dialog_msg">va a firmar una solicitud de cancelación de cooin</string>
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
-    <string name="cooin_cancellation_msg">el cooin se ha cancellado correctamente</string>
-    <string name="cooin_cancellation_error_msg_subject">error cancelando Cooin</string>
     <string name="cooin_expended_send_error_msg">los cooins ya habían sido consumidos</string>
     <string name="cooin_repeated_error_msg">en la operación se han mezclado cooins usados, por favor, vuelva a intentarlo</string>
     <string name="browswevs_lbl">sistema de votación</string>

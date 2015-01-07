@@ -32,59 +32,6 @@ class CooinService {
     def timeStampService
     def systemService
 
-    public ResponseVS cancelCooin(MessageSMIME messageSMIMEReq) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
-        UserVS signer = messageSMIMEReq.userVS
-        def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        if(TypeVS.COOIN_CANCEL != TypeVS.valueOf(requestJSON.operation))
-                throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                [TypeVS.COOIN_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
-        def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
-        if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
-            throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
-        Cooin cooin = Cooin.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
-                serialNumber:Long.valueOf(requestJSON.cooinCertSerialNumber))
-        if(Cooin.State.OK == cooin.getState()) {
-            String fromUser = grailsApplication.config.vs.serverName
-            String toUser = smimeMessageReq.getFrom().toString()
-            String subject = messageSource.getMessage('cancelCooinReceiptSubject', null, locale)
-            cooin.setState(Cooin.State.CANCELLED)
-            SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
-                    smimeMessageReq, subject)
-            messageSMIMEReq.setSMIME(receipt)
-            cooin.cancelMessage = messageSMIMEReq
-            cooin.save()
-            TransactionVS transaction = new TransactionVS(amount: cooin.amount, messageSMIME:messageSMIMEReq,
-                    subject:messageSource.getMessage('cancelCooinTransactionSubject', null, locale),
-                    fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
-                    currency:cooin.currency, type:TransactionVS.Type.COOIN_CANCELLATION, validTo:cooin.validTo).save()
-            log.debug("cancelCooin - model: ${cooin.id} - transactionVS: ${transaction.id}");
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED,
-                    messageBytes: cooin.cancelMessage.content, type:TypeVS.COOIN_CANCEL)
-        } else {
-            log.error("$methodName - ERROR - request for cancel cooin: ${cooin.id} - with state: ${cooin.state}");
-            byte[] messageBytes
-            ContentTypeVS contentType = ContentTypeVS.TEXT
-            int statusCode = ResponseVS.SC_ERROR_REQUEST
-            if(Cooin.State.CANCELLED == cooin.getState()) {
-                contentType = ContentTypeVS.JSON_SIGNED
-                messageBytes = cooin.cancelMessage.content
-            } else if(Cooin.State.EXPENDED == cooin.getState()) {
-                contentType = ContentTypeVS.JSON_SIGNED
-                messageBytes = cooin.messageSMIME.content
-            }
-            if(Cooin.State.LAPSED == cooin.getState()) {
-                contentType = ContentTypeVS.TEXT
-                messageBytes = messageSource.getMessage("cooinLapsedErrorMsg",
-                        [cooin.serialNumber].toArray(), locale).getBytes()
-            }
-            return new ResponseVS(type:TypeVS.ERROR, messageBytes: messageBytes, contentType: contentType,
-                    metaInf:MetaInfMsg.getErrorMsg(this.getClass().getSimpleName(), methodName,
-                    "CooinState_" + cooin.getState().toString()), statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-    }
-
     public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
