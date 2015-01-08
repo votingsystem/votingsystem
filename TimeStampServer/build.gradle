@@ -22,14 +22,6 @@ task runApp << { task ->
 	runCommand(project, file(".") ,["grails", "run-app"])	
 }
 
-task installGrailsRestDocPlugin << { task ->
-	installGrailsRestDocPlugin(project)
-}
-
-task generateRestDocs() << {task ->
-	runCommand(project, file(".") ,["grails", "generate-rest-docs"])
-}
-
 task war() << {task ->
 	runCommand(project, file(".") ,["grails", "war"])	
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")

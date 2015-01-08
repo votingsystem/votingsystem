@@ -24,9 +24,26 @@ ext {
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', ':ClientTool:distZip',
-                         'AccessControl:war', 'ControlCenter:war', 'Cooins:war', 'Tests:jar', ':releaseAndroid']) << { }
+task buildAll(dependsOn:['VotingSystemLibrary:publish', ':ClientTool:distZip', 'Tests:jar', ':releaseAndroid',
+                         ':buildWars']) << { }
 
+task buildWars() {
+    doLast {
+        List warProjects = ['AccessControl', 'ControlCenter', 'TimeStampServer', 'Cooins']
+        warProjects.each { projectDir ->
+            println "building project $projectDir"
+            runCommand(project, file("./$projectDir") ,["grails", "war"])
+        }
+    }
+}
+
+/*task installBowerComponents() {
+    List warProjects = ['AccessControl', 'ControlCenter', 'Cooins']
+    warProjects.each { projectDir ->
+        println "building project $projectDir"
+        runCommand(project, file("./$projectDir/web-app") ,["bower", "install"])
+    }
+}*/
 
 task releaseAndroid () {
     doLast {
@@ -40,8 +57,6 @@ task releaseAndroid () {
         }
     }
 }
-
-tasks.getByPath('AccessControl:war').mustRunAfter releaseAndroid
 
 def initRootCertData() {
     if(!rootProject.certsDataMap) {
@@ -94,7 +109,6 @@ task genWebAppsCerts() {
 	}
 }
 
-
 task genAppsCerts() {
     doLast {
         initAppsCertsData()
@@ -122,25 +136,41 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':ClientTool:distZip', ':releaseAndroid']) {
+task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':ClientTool:distZip', ':releaseAndroid']) { }
+
+task copyApps(dependsOn: [':generateVotingSystemApps']) {
+    doLast {
+        List warProjects = ['AccessControl', 'Cooins']
+        warProjects.each { projectDir ->
+            copyVotingSystemApps(projectDir)
+        }
+    }
 }
 
-def copyVotingSystemApps(project) {
-    project.file("web-app/android/").mkdirs();
-	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
+def copyVotingSystemApps(projectDir) {
+    file("./$projectDir/web-app/android/").mkdirs();
+	File votingToolAndroid = file("./$projectDir/web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
 	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
     copyClientTool(project)
 }
 
+task copyWebComponents() {
+    doLast {
+        List warProjects = ['AccessControl', 'ControlCenter', 'Cooins']
+        warProjects.each { projectDir ->
+            copyWebComponents(projectDir)
+        }
+    }
+}
 
-def copyWebComponents(project) {
+def copyWebComponents(projectDir) {
     File[] webComponents = file("./WebComponents").listFiles(new FilenameFilter() {
         public boolean accept(File dir, String fileName) {
             return fileName.startsWith("vs-")
         }
     });
-    String baseDestPath = project.file("web-app/bower_components").absolutePath
+    String baseDestPath = file("./$projectDir/web-app/bower_components").absolutePath
     println "copyWebComponents - baseDestPath: '${baseDestPath}'"
     for(File webComponent:webComponents) {
         copy {
@@ -149,7 +179,6 @@ def copyWebComponents(project) {
         }
     }
 }
-
 
 def copyClientTool(project) {
     project.file("web-app/tools/").mkdirs();
@@ -191,9 +220,6 @@ def runCommand(project, targetDir, commands) {
 	}
 }
 
-task installAllBowerComponents(dependsOn: ['AccessControl:installBowerComponents', 'ControlCenter:installBowerComponents',
-           'Cooins:installBowerComponents']) { }
-
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.
 // This task should be run by "build master" and the resulting output committed to source control.  Its outputs include:
@@ -201,5 +227,5 @@ task installAllBowerComponents(dependsOn: ['AccessControl:installBowerComponents
 //  2) /gradlew.bat which is the windows bat script for for executing builds
 //  3) /wrapper which is a directory named by the "jarPath" config which contains other needed files.
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.1'
+	gradleVersion = '2.2.1'
 }
