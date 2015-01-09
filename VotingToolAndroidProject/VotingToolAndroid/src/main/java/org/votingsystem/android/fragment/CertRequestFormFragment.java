@@ -33,7 +33,6 @@ import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ResponseVS;
 
@@ -50,7 +49,6 @@ import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
-import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 
 /**
  * @author jgzornoza
@@ -103,7 +101,7 @@ public class CertRequestFormFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView", "progressVisible: ");
+        LOGD(TAG + ".onCreateView", "onCreateView");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.cert_request_form, container, false);
         mainLayout = (FrameLayout)rootView.findViewById(R.id.mainLayout);

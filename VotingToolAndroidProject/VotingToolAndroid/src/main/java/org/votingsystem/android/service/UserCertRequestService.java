@@ -9,7 +9,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
@@ -29,7 +28,6 @@ import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 import static org.votingsystem.model.ContextVS.State;
-import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 
 /**
  * @author jgzornoza

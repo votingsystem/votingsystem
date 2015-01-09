@@ -27,21 +27,15 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
-import org.votingsystem.android.fragment.QRGeneratorFormFragment;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
 import org.votingsystem.android.util.BuildConfig;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.WebSocketMessage;
@@ -82,8 +76,9 @@ public abstract class ActivityBase extends ActionBarActivity {
     protected static final int NAVDRAWER_ITEM_RECEIPTS          = 2;
     protected static final int NAVDRAWER_ITEM_COOIN_ACCOUNTS    = 3;
     protected static final int NAVDRAWER_ITEM_WALLET            = 4;
-    protected static final int NAVDRAWER_ITEM_SETTINGS          = 5;
-    protected static final int NAVDRAWER_ITEM_CONTACTS          = 6;
+    protected static final int NAVDRAWER_ITEM_QR_CODES          = 5;
+    protected static final int NAVDRAWER_ITEM_SETTINGS          = 6;
+    protected static final int NAVDRAWER_ITEM_CONTACTS          = 7;
     protected static final int NAVDRAWER_ITEM_INVALID           = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR         = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
@@ -95,6 +90,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.string.receipts_lbl,
             R.string.cooin_accounts_lbl,
             R.string.wallet_lbl,
+            R.string.qr_codes_lbl,
             R.string.navdrawer_item_settings,
             R.string.contacts_lbl
     };
@@ -106,6 +102,7 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.drawable.fa_cert_32,
             R.drawable.fa_bank_32,
             R.drawable.fa_money_32,
+            R.drawable.fa_qrcode_32,
             R.drawable.ic_drawer_settings,
             R.drawable.fa_user_32
     };
@@ -256,6 +253,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         mNavDrawerItems.add(NAVDRAWER_ITEM_WALLET);
         mNavDrawerItems.add(NAVDRAWER_ITEM_CONTACTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_QR_CODES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_RECEIPTS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
@@ -353,15 +351,6 @@ public abstract class ActivityBase extends ActionBarActivity {
         }
         Intent intent = null;
         switch (id) {
-            case R.id.qr_read_menu:
-                Utils.launchQRScanner(this);
-                return true;
-            case R.id.qr_create_menu:
-                intent = new Intent(this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFormFragment.class.getName());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                return true;
             case R.id.menu_debug:
                 if (BuildConfig.DEBUG) {
                     intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
@@ -374,26 +363,6 @@ public abstract class ActivityBase extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (result != null) {
-            QRMessageVS qrMessageVS = null;
-            try {
-                qrMessageVS = new QRMessageVS(result.getContents());
-                Toast.makeText(getApplication(),
-                        getString(R.string.operation_lbl) + " - " +
-                        qrMessageVS.getOperation().toString(), Toast.LENGTH_SHORT).show();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                Toast.makeText(getApplication(),
-                        getString(R.string.error_lbl) + " - " + result.getContents(),
-                        Toast.LENGTH_SHORT).show();
-            }
-
-        }
     }
 
     private void goToNavDrawerItem(int item) {
@@ -419,8 +388,13 @@ public abstract class ActivityBase extends ActionBarActivity {
                 startActivity(intent);
                 finish();
                 break;
+            case NAVDRAWER_ITEM_QR_CODES:
+                intent = new Intent(this, QRCodesActivity.class);
+                startActivity(intent);
+                finish();
+                break;
             case NAVDRAWER_ITEM_CONTACTS:
-                intent = new Intent(this, ContactsMainActivity.class);
+                intent = new Intent(this, ContactsActivity.class);
                 startActivity(intent);
                 finish();
                 break;

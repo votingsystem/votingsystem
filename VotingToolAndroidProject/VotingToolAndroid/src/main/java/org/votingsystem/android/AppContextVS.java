@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+
 import org.json.JSONObject;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
@@ -34,6 +35,7 @@ import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGE;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
@@ -228,10 +231,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 //if invoked from main thread -> android.os.NetworkOnMainThreadException
                 targetServer = getActorVSFromURL(serverURL);
             } else {
-                LOGD(TAG + ".getActorVS", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
+                /*LOGD(TAG + ".getActorVS", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
                 new Thread(new Runnable() {
                     @Override public void run() {  getActorVSFromURL(serverURL);  }
-                }).start();
+                }).start();*/
             }
         }
         return targetServer;
@@ -248,7 +251,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             }
         } catch(Exception ex) {
             LOGE(TAG + ".getActorVSFromURL", "ERROR fetching: " + serverURL);
-            ex.printStackTrace();
         } finally { return targetServer; }
     }
 

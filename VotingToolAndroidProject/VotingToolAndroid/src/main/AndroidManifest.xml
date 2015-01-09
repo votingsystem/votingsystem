@@ -39,7 +39,7 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
         </activity>
 
-        <activity android:name=".activity.ContactsMainActivity"
+        <activity android:name=".activity.ContactsActivity"
             android:label="@string/contacts_lbl" android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -103,6 +103,8 @@
         </activity>
 
         <activity android:name=".activity.MessageActivity" android:theme="@style/Theme.Transparent"/>
+
+        <activity android:name=".activity.QRCodesActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.RepresentativeDelegationActivity"
             android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>

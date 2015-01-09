@@ -16,17 +16,13 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DeviceUtils;
-import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

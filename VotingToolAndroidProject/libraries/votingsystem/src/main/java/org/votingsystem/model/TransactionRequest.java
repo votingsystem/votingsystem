@@ -1,17 +1,17 @@
-package org.votingsystem.cooin;
+package org.votingsystem.model;
 
-import net.sf.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
-
-import javax.servlet.AsyncContext;
+import org.votingsystem.util.ExceptionVS;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import static java.util.stream.Collectors.*;
+
 
 /**
  * @author jgzornoza
@@ -33,7 +33,6 @@ public class TransactionRequest {
     private List<Payment> paymentOptions;
     private Payment paymentSelected;
     private List<String> coinCsrList;
-    private AsyncContext asyncContext;
     //details
     private Integer numItems;
     private BigDecimal itemPrice;
@@ -168,13 +167,6 @@ public class TransactionRequest {
     public void setFromUser(UserVS fromUser) {
         this.fromUser = fromUser;
     }
-    public AsyncContext getAsyncContext() {
-        return asyncContext;
-    }
-
-    public void setAsyncContext(AsyncContext asyncContext) {
-        this.asyncContext = asyncContext;
-    }
 
     public Payment getPaymentSelected() {
         return paymentSelected;
@@ -184,36 +176,36 @@ public class TransactionRequest {
         this.paymentSelected = paymentSelected;
     }
 
-    public void checkRequest(TransactionRequest request) throws ValidationExceptionVS {
-        if(request.getType() != type) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected type " + request.getType().toString() + " found " + type.toString());
-        if(request.getIBAN() != null) if(!request.getIBAN().equals(IBAN)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected IBAN " + request.getIBAN() + " found " + IBAN);
-        if(request.getSubject() != null) if(!request.getSubject().equals(subject)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected subject " + request.getSubject() + " found " + subject);
-        if(request.getToUser() != null) if(!request.getToUser().equals(toUser)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected toUser " + request.getToUser() + " found " + toUser);
-        if(request.getAmount().compareTo(amount) != 0) throw new ValidationExceptionVS(TransactionRequest.class,
+    public void checkRequest(TransactionRequest request) throws ExceptionVS {
+        if(request.getType() != type) throw new ExceptionVS(
+                "expected type " + request.getType().toString() + " found " + type.toString());
+        if(request.getIBAN() != null) if(!request.getIBAN().equals(IBAN)) throw new ExceptionVS(
+                "expected IBAN " + request.getIBAN() + " found " + IBAN);
+        if(request.getSubject() != null) if(!request.getSubject().equals(subject)) throw new ExceptionVS(
+                "expected subject " + request.getSubject() + " found " + subject);
+        if(request.getToUser() != null) if(!request.getToUser().equals(toUser)) throw new ExceptionVS(
+                "expected toUser " + request.getToUser() + " found " + toUser);
+        if(request.getAmount().compareTo(amount) != 0) throw new ExceptionVS(
                 "expected amount " + request.getAmount().toString() + " amount " + amount.toString());
-        if(!request.getCurrency().equals(currency)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected currency " + request.getCurrency() + " found " + currency);
-        if(request.getUUID() != null) if(!request.getUUID().equals(UUID)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected UUID " + request.getUUID() + " found " + UUID);
-        if(request.getNumItems() != null) if(request.getNumItems() != numItems)  throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected numItems " + request.getNumItems() + " found " + numItems);
+        if(!request.getCurrency().equals(currency)) throw new ExceptionVS(
+                "expected currency " + request.getCurrency() + " found " + currency);
+        if(request.getUUID() != null) if(!request.getUUID().equals(UUID)) throw new ExceptionVS(
+                "expected UUID " + request.getUUID() + " found " + UUID);
+        if(request.getNumItems() != null) if(request.getNumItems() != numItems)  throw new ExceptionVS(
+                "expected numItems " + request.getNumItems() + " found " + numItems);
         if(request.getItemPrice() != null) if(request.getItemPrice().compareTo(itemPrice) != 0)
-                throw new ValidationExceptionVS(TransactionRequest.class, "expected itemPrice " +
+                throw new ExceptionVS("expected itemPrice " +
                 request.getItemPrice().toString() + " found " + itemPrice.toString());
         if(request.getDiscount() != null) if(request.getDiscount().compareTo(discount) != 0)
-                throw new ValidationExceptionVS(TransactionRequest.class, "expected discount " +
+                throw new ExceptionVS("expected discount " +
                 request.getDiscount().toString() + " found " + discount.toString());
         if(request.getDateDelivery() != null) if(request.getDateDelivery().compareTo(dateDelivery) != 0)
-                throw new ValidationExceptionVS(TransactionRequest.class, "expected dateDelivery " +
+                throw new ExceptionVS("expected dateDelivery " +
                 request.getDateDelivery().toString() + " found " + dateDelivery.toString());
         if(request.getDeliveryAddressVS() != null) request.getDeliveryAddressVS().checkAddress(deliveryAddressVS);
     }
 
-    public static TransactionRequest parse(JSONObject jsonObject) throws ParseException {
+    public static TransactionRequest parse(JSONObject jsonObject) throws ParseException, JSONException {
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setType(Type.valueOf(jsonObject.getString("type")));
         if(jsonObject.has("IBAN")) transactionRequest.setIBAN(jsonObject.getString("IBAN"));
@@ -237,7 +229,7 @@ public class TransactionRequest {
         return transactionRequest;
     }
 
-    public JSONObject toJSON() {
+    public JSONObject toJSON() throws JSONException {
         JSONObject result = new JSONObject();
         result.put("type" , type.toString());
         result.put("IBAN" , IBAN);
@@ -247,8 +239,9 @@ public class TransactionRequest {
         result.put("amount" , amount);
         result.put("UUID" , currency);
         if(paymentOptions != null) {
-            List<String> paymentOptionsList = paymentOptions.stream().map(option -> option.toString()).collect(toList());
-            result.put("paymentOptions" , paymentOptionsList);
+            List<String> paymentOptionsList = new ArrayList<>();
+            for(Payment payment : paymentOptions) paymentOptionsList.add(payment.toString());
+            result.put("paymentOptions" , paymentOptions);
         }
         return result;
     }

@@ -21,7 +21,6 @@ import android.widget.Spinner;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -47,7 +46,6 @@ public class QRGeneratorFormFragment extends Fragment {
     private Button btn_plus;
     private Button btn_minus;
     private LinearLayout currency_amount_selector;
-    private QRMessageVS qrMessageVS;
     private Spinner operationSpinner;
     private Spinner currencySpinner;
     private EditText amount_text;

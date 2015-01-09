@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -26,8 +27,10 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

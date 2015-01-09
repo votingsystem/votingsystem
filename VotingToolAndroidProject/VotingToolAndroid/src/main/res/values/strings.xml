@@ -496,4 +496,15 @@
     <string name="missing_server_connection">no existe conexión con el servidor</string>
     <string name="device_not_found_error_msg">¿seguro que está conectado el dispositivo al que intenta enviar el cooin?</string>
     <string name="usevs_connection_not_found_error_msg">el destinatario no está conectado</string>
+    <string name="qr_codes_lbl">códigos QR</string>
+    <string name="address_lbl">dirección</string>
+    <string name="postal_code_lbl">código postal</string>
+    <string name="location_lbl">localidad</string>
+    <string name="province_lbl">provincia</string>
+    <string name="country_lbl">país</string>
+    <string name="save_lbl">guardar</string>
+    <string name="enter_address_error_lbl">introduzca la calle</string>
+    <string name="enter_postal_code_error_lbl">introduzca código postal</string>
+    <string name="enter_city_error_lbl">introduzca la localidad</string>
+    <string name="enter_province_error_lbl">introduzca la provincia</string>
 </resources>

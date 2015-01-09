@@ -100,7 +100,7 @@ public class HttpHelper {
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         } catch(Exception ex) {
-            ex.printStackTrace();
+            Log.d(TAG + ".getData" , "exception: " + ex.getMessage());
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return responseVS;

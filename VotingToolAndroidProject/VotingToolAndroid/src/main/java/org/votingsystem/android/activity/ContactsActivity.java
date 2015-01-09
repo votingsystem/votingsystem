@@ -38,9 +38,9 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ContactsMainActivity extends ActivityBase {
+public class ContactsActivity extends ActivityBase {
 
-	public static final String TAG = ContactsMainActivity.class.getSimpleName();
+	public static final String TAG = ContactsActivity.class.getSimpleName();
 
     private WeakReference<ContactsGridFragment> weakRefToFragment;
 

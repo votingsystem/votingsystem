@@ -29,7 +29,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
@@ -38,7 +37,6 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -267,6 +265,10 @@ public class CooinService extends IntentService {
 
     private void updateUserInfo(String serviceCaller) {
         LOGD(TAG + ".updateUserInfo", "updateUserInfo");
+        if(contextVS.getCooinServer() == null) {
+            LOGD(TAG + ".updateUserInfo", "missing connection to Cooin Server");
+            return;
+        }
         ResponseVS responseVS = null;
         try {
             String targetService = contextVS.getCooinServer().getUserInfoServiceURL(

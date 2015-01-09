@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -36,7 +37,9 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import java.util.UUID;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
