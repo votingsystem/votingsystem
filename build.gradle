@@ -27,6 +27,8 @@ ext {
 task buildAll(dependsOn:['VotingSystemLibrary:publish', ':ClientTool:distZip', 'Tests:jar', ':releaseAndroid',
                          ':buildWars']) << { }
 
+buildAll.mustRunAfter tasks.getByPath('VotingSystemLibrary:publish')
+
 task buildWars() {
     doLast {
         List warProjects = ['AccessControl', 'ControlCenter', 'TimeStampServer', 'Cooins']
