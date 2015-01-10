@@ -5,6 +5,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.cooin.Payment
 import org.votingsystem.cooin.TransactionRequest
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessage
 
 import javax.servlet.AsyncContext
@@ -27,7 +28,7 @@ class ShopExampleController {
     //After user interaction we have the data of the service the user wants to buy, with that we create a TransactionRequest
     //and show the QR code with the URL of the transaction data to offer the user the possibility to check the order with the mobile.
     def index() {
-        TransactionRequest transactionRequest = new TransactionRequest(type: TransactionRequest.Type.PAYMENT_REQUEST,
+        TransactionRequest transactionRequest = new TransactionRequest(type: TypeVS.PAYMENT_REQUEST,
                 subject: "shop example payment", toUser:"cooin shop example",
                 amount: new BigDecimal(100), currency: "EUR", date:Calendar.getInstance().getTime(),
                 IBAN: "ES8978788989450000000004", UUID: session.getId())

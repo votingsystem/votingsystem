@@ -16,19 +16,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import org.json.JSONException;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.Country;
 import org.votingsystem.util.ResponseVS;
-
-import java.text.ParseException;
-import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 

@@ -1,18 +1,3 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.votingsystem.android.activity;
 
 import android.content.Intent;
@@ -21,19 +6,21 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
-
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.QRGeneratorFormFragment;
+import org.votingsystem.android.fragment.TransactionRequestFragment;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -116,12 +103,31 @@ public class QRCodesActivity extends ActivityBase {
             return  HttpHelper.getData(urls[0], contentType);
         }
 
-        // This is called each time you call publishProgress()
-        protected void onProgressUpdate(Integer... progress) { }
+        protected void onProgressUpdate(Integer... progress) {}
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
             setProgressDialogVisible(false);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                JSONObject jsonData = responseVS.getMessageJSON();
+                try {
+                    TypeVS typeVS = TypeVS.valueOf(jsonData.getString("typeVS"));
+                    switch (typeVS) {
+                        case PAYMENT:
+                        case PAYMENT_REQUEST:
+                        case DELIVERY_WITHOUT_PAYMENT:
+                        case DELIVERY_WITH_PAYMENT:
+                        case REQUEST_FORM:
+                            Intent intent = new Intent(QRCodesActivity.this, FragmentContainerActivity.class);
+                            intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionRequestFragment.class.getName());
+                            intent.putExtra(ContextVS.JSON_DATA_KEY, responseVS.getMessageJSON().toString());
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            break;
+                    }
+                } catch (JSONException e) { e.printStackTrace();}
+            } else MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                    responseVS.getMessage(), getSupportFragmentManager());
             LOGD(TAG + "GetDataTask.onPostExecute() ", " - MessageJSON: " + responseVS.getMessageJSON());
         }
     }

@@ -508,4 +508,5 @@
     <string name="enter_city_error_lbl">introduzca la localidad</string>
     <string name="enter_province_error_lbl">introduzca la provincia</string>
     <string name="address_saved_msg">su dirección se ha guardado corréctamente</string>
+    <string name="payment_lbl">pago</string>
 </resources>

@@ -2,6 +2,7 @@ package org.votingsystem.cooin;
 
 import net.sf.json.JSONObject;
 import org.votingsystem.model.AddressVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -19,9 +20,7 @@ import static java.util.stream.Collectors.*;
  */
 public class TransactionRequest {
 
-    public enum Type {PAYMENT, PAYMENT_REQUEST, DELIVERY_WITHOUT_PAYMENT, DELIVERY_WITH_PAYMENT, REQUEST_FORM}
-
-    private Type type;
+    private TypeVS type;
     private String IBAN;
     private String subject;
     private String toUser;
@@ -41,11 +40,11 @@ public class TransactionRequest {
     private Date dateDelivery;
     private AddressVS deliveryAddressVS;
 
-    public Type getType() {
+    public TypeVS getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(TypeVS type) {
         this.type = type;
     }
 
@@ -215,7 +214,7 @@ public class TransactionRequest {
 
     public static TransactionRequest parse(JSONObject jsonObject) throws ParseException {
         TransactionRequest transactionRequest = new TransactionRequest();
-        transactionRequest.setType(Type.valueOf(jsonObject.getString("type")));
+        transactionRequest.setType(TypeVS.valueOf(jsonObject.getString("typeVS")));
         if(jsonObject.has("IBAN")) transactionRequest.setIBAN(jsonObject.getString("IBAN"));
         if(jsonObject.has("subject")) transactionRequest.setSubject(jsonObject.getString("subject"));
         if(jsonObject.has("toUser")) transactionRequest.setToUser(jsonObject.getString("toUser"));
@@ -239,7 +238,7 @@ public class TransactionRequest {
 
     public JSONObject toJSON() {
         JSONObject result = new JSONObject();
-        result.put("type" , type.toString());
+        result.put("typeVS" , type.toString());
         result.put("IBAN" , IBAN);
         result.put("subject" , subject);
         result.put("toUser" , toUser);
