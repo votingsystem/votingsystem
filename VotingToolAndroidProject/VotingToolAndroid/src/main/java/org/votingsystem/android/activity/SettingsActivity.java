@@ -24,8 +24,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.AddressFormFragment;
 import org.votingsystem.android.util.HelpUtils;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 
@@ -50,8 +52,22 @@ public class SettingsActivity extends PreferenceActivity
         });
         toolbar.setTitle(R.string.navdrawer_item_settings);
         PrefUtils.registerPreferenceChangeListener(this, this);
-        Preference button = (Preference)findPreference("requestCertButton");
-        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        Preference addressButton = (Preference)findPreference("addressButton");
+        try {
+            AddressVS addressVS = PrefUtils.getAddressVS(this);
+            if(addressVS != null) addressButton.setSummary(addressVS.getName());
+        } catch (Exception ex) { ex.printStackTrace();}
+        addressButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override public boolean onPreferenceClick(Preference arg0) {
+                Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, AddressFormFragment.class.getName());
+                startActivity(intent);
+                return true;
+            }
+        });
+
+        Preference requestCertButton = (Preference)findPreference("requestCertButton");
+        requestCertButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override public boolean onPreferenceClick(Preference arg0) {
                 Intent intent = new Intent(SettingsActivity.this, CertRequestActivity.class);
                 intent.putExtra(ContextVS.OPERATIONVS_KEY, "");
@@ -77,7 +93,15 @@ public class SettingsActivity extends PreferenceActivity
             }
         });
 
+    }
 
+    @Override protected void onResume() {
+        super.onResume();
+        Preference addressButton = (Preference)findPreference("addressButton");
+        try {
+            AddressVS addressVS = PrefUtils.getAddressVS(this);
+            if(addressVS != null) addressButton.setSummary(addressVS.getName());
+        } catch (Exception ex) { ex.printStackTrace();}
     }
 
     @Override protected void onDestroy() {

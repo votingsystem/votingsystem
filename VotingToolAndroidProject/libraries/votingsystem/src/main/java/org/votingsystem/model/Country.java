@@ -1,5 +1,8 @@
 package org.votingsystem.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -79,4 +82,11 @@ public enum Country {
         return null;
     }
 
+    public static List<String> getListValues() {
+        List<String> result = new ArrayList<>();
+        for(Country country: Country.values()) {
+            result.add(country.getName() + " (" + country.toString() + ")");
+        }
+        return result;
+    }
 }

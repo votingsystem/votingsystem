@@ -1,6 +1,8 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -10,14 +12,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import org.json.JSONException;
 import org.votingsystem.android.R;
+import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.Country;
 import org.votingsystem.util.ResponseVS;
+
+import java.text.ParseException;
+import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -34,6 +45,7 @@ public class AddressFormFragment extends Fragment {
     private EditText city;
     private EditText province;
     private Spinner country_spinner;
+
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,18 +68,34 @@ public class AddressFormFragment extends Fragment {
         });
         address = (EditText)rootView.findViewById(R.id.address);
         postal_code = (EditText)rootView.findViewById(R.id.postal_code);
+        city = (EditText)rootView.findViewById(R.id.location);
         province = (EditText)rootView.findViewById(R.id.province);
         country_spinner = (Spinner)rootView.findViewById(R.id.country_spinner);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, Country.getListValues());
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        country_spinner.setAdapter(dataAdapter);
         Country country = Country.valueOf(getResources().getConfiguration().locale.getLanguage().
                 toUpperCase());
         if(country != null) country_spinner.setSelection(country.getPosition());
-        city = (EditText)rootView.findViewById(R.id.location);
         Button save_button = (Button) rootView.findViewById(R.id.save_button);
         save_button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 submitForm();
             }
         });
+        try {
+            AddressVS addressVS = PrefUtils.getAddressVS(getActivity());
+            if(addressVS != null) {
+                address.setText(addressVS.getName());
+                postal_code.setText(addressVS.getPostalCode());
+                city.setText(addressVS.getCity());
+                province.setText(addressVS.getProvince());
+                country_spinner.setSelection(addressVS.getCountry().getPosition());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return rootView;
     }
 
@@ -101,6 +129,16 @@ public class AddressFormFragment extends Fragment {
             addressVS.setCity(city.getText().toString());
             addressVS.setProvince(province.getText().toString());
             addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
+            PrefUtils.putAddressVS(addressVS, getActivity());
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.msg_lbl), getString(R.string.address_saved_msg), getActivity());
+            builder.setPositiveButton(getString(R.string.accept_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            getActivity().finish();
+                        }
+                    });
+            UIUtils.showMessageDialog(builder);
       	}
     }
 

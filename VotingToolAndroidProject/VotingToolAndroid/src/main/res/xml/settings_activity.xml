@@ -6,6 +6,9 @@
         android:summary="CheckBoxPreference_summary"
         android:defaultValue="false" />-->
 
+    <Preference android:title="@string/address_lbl"
+        android:key="addressButton"/>
+
     <Preference android:title="@string/user_cert_lbl"
         android:key="requestCertButton"
         android:summary="@string/request_certificate_menu"/>

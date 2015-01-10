@@ -20,35 +20,4 @@
         <item>JPY</item>
     </string-array>
 
-    <string-array name="country_codes">
-        <item>BE</item>
-        <item>BG</item>
-        <item>CZ</item>
-        <item>DK</item>
-        <item>DE</item>
-        <item>EE</item>
-        <item>IE</item>
-        <item>EL</item>
-        <item>ES</item>
-        <item>FR</item>
-        <item>HR</item>
-        <item>IT</item>
-        <item>CY</item>
-        <item>LV</item>
-        <item>LT</item>
-        <item>LU</item>
-        <item>HU</item>
-        <item>MT</item>
-        <item>NL</item>
-        <item>AT</item>
-        <item>PL</item>
-        <item>PT</item>
-        <item>RO</item>
-        <item>SI</item>
-        <item>SK</item>
-        <item>FI</item>
-        <item>SE</item>
-        <item>UK</item>
-    </string-array>
-
 </resources>

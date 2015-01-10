@@ -123,6 +123,7 @@ public class AddressVS implements Serializable {
         if(jsonObject.has("postalCode")) result.setPostalCode(jsonObject.getString("postalCode"));
         if(jsonObject.has("province")) result.setProvince(jsonObject.getString("province"));
         if(jsonObject.has("city")) result.setCity(jsonObject.getString("city"));
+        if(jsonObject.has("country")) result.setCountry(Country.valueOf(jsonObject.getString("country")));
         if(jsonObject.has("dateCreated")) result.setDateCreated(
                 DateUtils.getDateFromString(jsonObject.getString("dateCreated")));
         return result;
