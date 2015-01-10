@@ -16,6 +16,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSONUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.Wallet;
+
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;

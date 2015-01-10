@@ -22,6 +22,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.HttpHelper;
+
 import javax.websocket.*;
 import java.net.URI;
 import java.security.KeyStore;
@@ -30,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
