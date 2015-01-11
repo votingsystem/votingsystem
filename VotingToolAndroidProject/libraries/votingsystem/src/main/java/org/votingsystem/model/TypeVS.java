@@ -69,4 +69,5 @@ public enum TypeVS {
     WEB_SOCKET_BAN_SESSION,
 
     RECEIPT;
+
 }

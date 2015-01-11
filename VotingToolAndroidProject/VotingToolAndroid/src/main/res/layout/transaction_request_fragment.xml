@@ -7,35 +7,92 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal">
+            <TextView
+                android:layout_width="65dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dip"
-                android:layout_marginBottom="40dip"
-                android:layout_gravity="center_horizontal">
+                android:layout_marginLeft="20dp"
+                android:text="@string/receptor_lbl" />
 
-                <Button
-                    android:id="@+id/cancel_lbl"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="20dip"
-                    android:layout_weight="1"
-                    android:drawableLeft="@drawable/cancel_22"
-                    android:text="@string/cancel_lbl"
-                    android:textStyle="bold"/>
+            <TextView android:id="@+id/receptor"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="@string/receptor_lbl"
+                android:textSize="20sp"
+                android:textColor="@color/msg_content_vs"
+                android:textStyle="bold"
+                android:gravity="left">
+            </TextView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal">
+            <TextView
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="@string/subject_lbl" />
 
-                <Button
-                    android:id="@+id/save_button"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dip"
-                    android:layout_marginRight="30dp"
-                    android:layout_weight="1"
-                    android:drawableLeft="@drawable/accept_22"
-                    android:text="@string/save_lbl"
-                    android:textStyle="bold" />
-            </LinearLayout>
+            <TextView android:id="@+id/subject"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:textSize="18sp"
+                android:textColor="@color/msg_content_vs"
+                android:textStyle="bold"
+                android:gravity="center_vertical|center_horizontal">
+            </TextView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="25dp"
+            android:gravity="center_vertical|center_horizontal">
+            <TextView android:id="@+id/amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40sp"
+                android:text="@string/country_lbl"
+                android:textColor="@color/active_vs" />
+
+            <TextView android:id="@+id/currency"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:textSize="40sp"
+                android:textColor="@color/active_vs">
+            </TextView>
+        </LinearLayout>
+
+        <Spinner android:id="@+id/payment_method_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:prompt="@string/country_lbl"
+            android:layout_gravity="center_horizontal"/>
+
+        <Button android:id="@+id/save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="30dp"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/accept_22"
+            android:text="@string/do_payment_lbl"
+            android:layout_gravity="center_horizontal"
+            android:textStyle="bold" />
     </LinearLayout>
+
 </ScrollView>

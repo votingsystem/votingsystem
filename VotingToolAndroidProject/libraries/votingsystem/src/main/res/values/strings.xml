@@ -55,4 +55,7 @@
     <string name="expended_lbl">consumido</string>
     <string name="lapsed_lbl">caducado</string>
     <string name="rejected_lbl">rechazado</string>
+    <string name="signed_transaction_lbl">ingreso en cuenta</string>
+    <string name="anonymous_signed_transaction_lbl">ingreso anónimo en cuenta</string>
+    <string name="cooin_send_lbl">envío de cooins</string>
 </resources>
