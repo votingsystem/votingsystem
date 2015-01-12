@@ -181,6 +181,7 @@ public class TransactionVSGridFragment extends Fragment
         menuInflater.inflate(R.menu.cooin_accounts, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
+        menu.removeItem(R.id.update_signers_info);
         List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (
                 (AppContextVS)getActivity().getApplicationContext());
         for(final String weekLbl: transactionWeekList) {

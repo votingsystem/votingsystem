@@ -89,6 +89,7 @@ public class QRCodesActivity extends ActivityBase {
         public final String TAG = GetDataTask.class.getSimpleName();
 
         private ContentTypeVS contentType = null;
+        private String infoURL;
 
         public GetDataTask(ContentTypeVS contentType) {
             this.contentType = contentType;
@@ -100,6 +101,7 @@ public class QRCodesActivity extends ActivityBase {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             LOGD(TAG + ".doInBackground", "url: " + urls[0]);
+            infoURL = urls[0];
             return  HttpHelper.getData(urls[0], contentType);
         }
 
@@ -111,6 +113,7 @@ public class QRCodesActivity extends ActivityBase {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject jsonData = responseVS.getMessageJSON();
                 try {
+                    jsonData.put("infoURL", infoURL);
                     TypeVS typeVS = TypeVS.valueOf(jsonData.getString("typeVS"));
                     switch (typeVS) {
                         case PAYMENT:

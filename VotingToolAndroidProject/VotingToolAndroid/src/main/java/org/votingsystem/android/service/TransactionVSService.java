@@ -7,12 +7,15 @@ import android.os.Bundle;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
+import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
@@ -38,14 +41,55 @@ public class TransactionVSService extends IntentService {
         String fromUserIBAN = arguments.getString(ContextVS.IBAN_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
-        LOGD(TAG + ".onHandleIntent", "transactionVS: " + transactionVS.toString());
+        LOGD(TAG + ".onHandleIntent", "onHandleIntent");
+        switch(operation) {
+            case TRANSACTIONVS:
+                try {
+                    sendTransactionVS(transactionVS.getToUserVS().getIBAN(),
+                            transactionVS.transactionFromUserVSJSON(fromUserIBAN), operation);
+                } catch (Exception ex) { ex.printStackTrace(); }
+                break;
+            case PAYMENT:
+                try {
+                    JSONObject transactionRequestJSON =
+                            new JSONObject(arguments.getString(ContextVS.JSON_DATA_KEY));
+                    TransactionRequest transactionRequest = TransactionRequest.parse(transactionRequestJSON);
+                    processPayment(transactionRequest, operation);
+                } catch (Exception ex) { ex.printStackTrace(); }
+                break;
+            default: LOGD(TAG + ".onHandleIntent", "unprocessed operation: " + operation.toString());
+        }
+    }
+
+    private void processPayment(TransactionRequest transactionRequest, TypeVS operation) {
+        LOGD(TAG + ".processPayment", "processPayment");
+        UserVS userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
-        String caption = null;
-        String message = null;
+        switch (transactionRequest.getPaymentMethod()) {
+            case SIGNED_TRANSACTION:
+                try {
+                    responseVS = sendTransactionVS(transactionRequest.getIBAN(),  transactionRequest.
+                            getCooinServerTransaction(userVS.getIBAN()), operation);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                                ContentTypeVS.JSON_SIGNED, transactionRequest.getPaymentConfirmURL());
+                    }
+                } catch (Exception ex) { ex.printStackTrace(); }
+                break;
+            case ANONYMOUS_SIGNED_TRANSACTION:
+                break;
+            case COOIN_SEND:
+                break;
+        }
+    }
+
+    private ResponseVS sendTransactionVS(String toUserIBAN, JSONObject transactionVSJSON,
+           TypeVS operation) {
+        LOGD(TAG + ".sendTransactionVS", "transactionVS: " + transactionVSJSON.toString());
+        ResponseVS responseVS = null;
         try {
-            JSONObject transactionVSJSON = transactionVS.transactionFromUserVSJSON(fromUserIBAN);
             CooinServer cooinServer = contextVS.getCooinServer();
-            responseVS = contextVS.signMessage(transactionVS.getToUserVS().getIBAN(),
+            responseVS = contextVS.signMessage(toUserIBAN,
                     transactionVSJSON.toString(), getString(R.string.FROM_USERVS_msg_subject));
             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                     ContentTypeVS.JSON_SIGNED, cooinServer.getTransactionVSServiceURL());
@@ -54,6 +98,7 @@ public class TransactionVSService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
+            return responseVS;
         }
     }
 

@@ -36,7 +36,7 @@ class ShopExampleService {
     }
 
     public void sendResponse(String sessionId, SMIMEMessage smimeMessage) {
-        log.debug("sendResponse - complete: $sessionId")
+        log.debug("sendResponse")
         TransactionRequest transactionRequest = transactionRequestMap.remove(sessionId)
         if(transactionRequest) {
             SignedReceiptContent receiptContent = new SignedReceiptContent(smimeMessage.getSignedContent())

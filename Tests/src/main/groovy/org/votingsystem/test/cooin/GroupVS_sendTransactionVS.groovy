@@ -6,7 +6,7 @@ import org.votingsystem.model.CooinServer
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.test.util.TransactionVSPlan
 
-Map simulationDataMap = [groupId:10, serverURL:"http://cooins:8086/Cooins"]
+Map simulationDataMap = [groupId:5, serverURL:"http://cooins:8086/Cooins"]
 Logger log = TestUtils.init(GroupVS_sendTransactionVS.class, simulationDataMap)
 
 CooinServer cooinServer = TestUtils.fetchCooinServer(ContextVS.getInstance().config.cooinServerURL)

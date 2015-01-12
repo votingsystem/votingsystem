@@ -73,7 +73,7 @@
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div style="display: {{selectedTags.length > 0 ? 'block':'none'}}" >
                             <div layout horizontal center center-justified style="margin: 0 0 20px 0;">
-                                <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton" toggles/></div>
+                                <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedButton" toggles/></div>
                                 <div style="color:#6c0404; font-size: 1.1em;"><g:message code="timeLimitedAdviceMsg"/></div>
                             </div>
                         </div>
@@ -191,6 +191,7 @@
             this.isWithUserSelector = false
             this.$.amount.value = ""
             this.$.transactionvsSubject.value = ""
+            this.$.timeLimitedButton.checked = false
             this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
             this.$.tagDialog.reset()
@@ -255,7 +256,7 @@
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
-                isTimeLimited:this.$.timeLimitedRButton.checked, tags:tagList, amount: this.$.amount.value,
+                isTimeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
                 currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
                 fromUserIBAN:this.fromUserIBAN}
             if(this.toUserName)  webAppMessage.signedContent.toUser = this.toUserName

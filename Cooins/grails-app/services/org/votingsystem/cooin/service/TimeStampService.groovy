@@ -100,6 +100,7 @@ class TimeStampService {
                     log.debug("Added TimeStampServer Cert: ${timeStampServerCert.id}")
                 }
             } else log.error("ERROR fetching TimeStampServerInfo : ${serverURL}")
+            init();
         }
     }
 

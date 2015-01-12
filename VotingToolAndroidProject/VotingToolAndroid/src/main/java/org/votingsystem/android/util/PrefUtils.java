@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
+import android.widget.LinearLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -159,6 +160,9 @@ public class PrefUtils {
                 DateUtils.TimePeriod timePeriod, Context context) throws Exception {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        UserVS userVS = getSessionUserVS(context);
+        userVS.setIBAN(userInfo.getUserVS().getIBAN());
+        putSessionUserVS(userVS, context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());

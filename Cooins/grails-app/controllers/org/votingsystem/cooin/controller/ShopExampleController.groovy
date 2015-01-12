@@ -5,7 +5,9 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.cooin.Payment
 import org.votingsystem.cooin.TransactionRequest
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TagVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessage
 
 import javax.servlet.AsyncContext
@@ -14,7 +16,7 @@ import javax.servlet.AsyncListener
 
 /**
  * Controller to show how to add this payment system to your website. Requirements:
- * - The web site must have an active account on the Cooin system
+ * - The web site must have an active account as a 'group' on the Cooin system
  * - The web site doesn't need to be built with grails but it has to provide the mechanism to show the QR code, fetch the
  * transaction data, process the payment receipt and notify the user
  */
@@ -29,9 +31,9 @@ class ShopExampleController {
     //and show the QR code with the URL of the transaction data to offer the user the possibility to check the order with the mobile.
     def index() {
         TransactionRequest transactionRequest = new TransactionRequest(type: TypeVS.PAYMENT_REQUEST,
-                subject: "shop example payment", toUser:"cooin shop example",
-                amount: new BigDecimal(100), currency: "EUR", date:Calendar.getInstance().getTime(),
-                IBAN: "ES8978788989450000000004", UUID: session.getId())
+                userToType: UserVS.Type.GROUP, subject: "shop example payment - ${Calendar.getInstance().getTime()}",
+                toUser:"cooin shop example", amount: new BigDecimal(100), currency: "EUR", tagVS:TagVS.WILDTAG,
+                date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005", UUID: session.getId())
         transactionRequest.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
                 Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.COOIN_SEND))
         String serviceURLParam = session.getId().substring(0, 8)
@@ -77,7 +79,7 @@ class ShopExampleController {
         //String paymentReceipt = "${request.getInputStream()}"
         SMIMEMessage smimeMessage = SMIMEMessage(request.getInputStream())
         if (smimeMessage?.isValidSignature()) { //check with your tools if it's signed with valid certificates!!!
-            shopExampleService.sendResponse(session.getId().substring(0, 8), smimeMessage)
+            shopExampleService.sendResponse(params.uuid, smimeMessage)
         }
     }
 

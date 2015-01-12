@@ -70,12 +70,14 @@ import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
+import org.json.JSONException;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.UserVS;
@@ -84,6 +86,7 @@ import org.votingsystem.util.ResponseVS;
 
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -515,6 +518,16 @@ public class UIUtils  {
                 } else return false;
             }
         });
+    }
+
+
+    public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws
+            JSONException, ParseException {
+        AddressVS addressVS = PrefUtils.getAddressVS(contex);
+        ((TextView)linearLayout.findViewById(R.id.name)).setText(addressVS.getName());
+        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(addressVS.getPostalCode());
+        ((TextView)linearLayout.findViewById(R.id.city)).setText(addressVS.getCity());
+        linearLayout.setVisibility(View.VISIBLE);
     }
 
     public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,

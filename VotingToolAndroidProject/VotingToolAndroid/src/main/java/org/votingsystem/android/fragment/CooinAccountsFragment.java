@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -222,6 +223,8 @@ public class CooinAccountsFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
+                Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
+                        Toast.LENGTH_SHORT).show();
                 updateCooinAccountsInfo();
                 return true;
             default:

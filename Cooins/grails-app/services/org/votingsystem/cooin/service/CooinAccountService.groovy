@@ -85,8 +85,6 @@ class CooinAccountService {
             } else {
                 for(String tag: accountsMap[currency].keySet()) {
                     BigDecimal tagAccount = new BigDecimal(accountsMap[currency][tag])
-                    if(!accountsMap.isEmpty() && balancesMap.isEmpty()) throw new ExceptionVS(messageSource.getMessage(
-                            'initPeriodMissingErrorMsg', [userVS.id].toArray(), locale))
                     if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with user '${userVS.id}' " +
                             "tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
                 }

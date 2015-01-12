@@ -1,6 +1,7 @@
 package org.votingsystem.cooin;
 
 import net.sf.json.JSONObject;
+import org.votingsystem.cooin.model.TransactionVS;
 import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -21,16 +22,20 @@ import static java.util.stream.Collectors.*;
 public class TransactionRequest {
 
     private TypeVS type;
+    private TransactionVS.Type transactionType;
+    private UserVS.Type userToType;
     private String IBAN;
     private String subject;
     private String toUser;
     private BigDecimal amount;
     private String currency;
     private UserVS fromUser;
+    private String tagVS;
+    private String infoURL;
     private String UUID;
     private Date date;
     private List<Payment> paymentOptions;
-    private Payment paymentSelected;
+    private Payment paymentMethod;
     private List<String> coinCsrList;
     private AsyncContext asyncContext;
     //details
@@ -175,15 +180,49 @@ public class TransactionRequest {
         this.asyncContext = asyncContext;
     }
 
-    public Payment getPaymentSelected() {
-        return paymentSelected;
+    public Payment getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setPaymentSelected(Payment paymentSelected) {
-        this.paymentSelected = paymentSelected;
+    public void setPaymentMethod(Payment paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public UserVS.Type getUserToType() {
+        return userToType;
+    }
+
+    public void setUserToType(UserVS.Type userToType) {
+        this.userToType = userToType;
+    }
+
+    public TransactionVS.Type getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(TransactionVS.Type transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public String getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(String tagVS) {
+        this.tagVS = tagVS;
+    }
+
+    public String getInfoURL() {
+        return infoURL;
+    }
+
+    public void setInfoURL(String infoURL) {
+        this.infoURL = infoURL;
     }
 
     public void checkRequest(TransactionRequest request) throws ValidationExceptionVS {
+        if(request.getUserToType() != null) throw new ValidationExceptionVS(
+                TransactionRequest.class, "missing user type");
         if(request.getType() != type) throw new ValidationExceptionVS(
                 TransactionRequest.class, "expected type " + request.getType().toString() + " found " + type.toString());
         if(request.getIBAN() != null) if(!request.getIBAN().equals(IBAN)) throw new ValidationExceptionVS(
@@ -216,10 +255,16 @@ public class TransactionRequest {
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setType(TypeVS.valueOf(jsonObject.getString("typeVS")));
         if(jsonObject.has("IBAN")) transactionRequest.setIBAN(jsonObject.getString("IBAN"));
+        if(jsonObject.has("userToType")) transactionRequest.setUserToType(
+                UserVS.Type.valueOf(jsonObject.getString("userToType")));
         if(jsonObject.has("subject")) transactionRequest.setSubject(jsonObject.getString("subject"));
         if(jsonObject.has("toUser")) transactionRequest.setToUser(jsonObject.getString("toUser"));
         if(jsonObject.has("amount")) transactionRequest.setAmount(new BigDecimal(jsonObject.getString("amount")));
         if(jsonObject.has("currency")) transactionRequest.setCurrency(jsonObject.getString("currency"));
+        if(jsonObject.has("tagVS")) transactionRequest.setTagVS(jsonObject.getString("tagVS"));
+        if(jsonObject.has("paymentMethod")) transactionRequest.setPaymentMethod(Payment.valueOf(
+                jsonObject.getString("paymentMethod")));
+        if(jsonObject.has("infoURL")) transactionRequest.setInfoURL(jsonObject.getString("infoURL"));
         if(jsonObject.has("UUID")) transactionRequest.setUUID(jsonObject.getString("UUID"));
         if(jsonObject.has("details")) {
             JSONObject detailsJSON = jsonObject.getJSONObject("details");
@@ -239,12 +284,16 @@ public class TransactionRequest {
     public JSONObject toJSON() {
         JSONObject result = new JSONObject();
         result.put("typeVS" , type.toString());
+        result.put("userToType", userToType.toString());
         result.put("IBAN" , IBAN);
         result.put("subject" , subject);
         result.put("toUser" , toUser);
         result.put("currency" , currency);
         result.put("amount" , amount);
-        result.put("UUID" , currency);
+        if(paymentMethod != null )result.put("paymentMethod" , paymentMethod.toString());
+        result.put("tagVS" , tagVS);
+        result.put("infoURL" , infoURL);
+        result.put("UUID" , UUID);
         if(paymentOptions != null) {
             List<String> paymentOptionsList = paymentOptions.stream().map(option -> option.toString()).collect(toList());
             result.put("paymentOptions" , paymentOptionsList);

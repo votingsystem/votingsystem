@@ -1,15 +1,21 @@
 package org.votingsystem.model;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.votingsystem.android.lib.R;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -19,16 +25,20 @@ import java.util.List;
 public class TransactionRequest {
 
     private TypeVS type;
+    private UserVS.Type userToType;
+    private TransactionVS.Type transactionType;
     private String IBAN;
     private String subject;
     private String toUser;
     private BigDecimal amount;
     private String currency;
     private UserVS fromUser;
+    private String tagVS;
+    private String infoURL;
     private String UUID;
     private Date date;
     private List<Payment> paymentOptions;
-    private Payment paymentSelected;
+    private Payment paymentMethod;
     private List<String> coinCsrList;
     //details
     private Integer numItems;
@@ -165,12 +175,29 @@ public class TransactionRequest {
         this.fromUser = fromUser;
     }
 
-    public Payment getPaymentSelected() {
-        return paymentSelected;
+    public Payment getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setPaymentSelected(Payment paymentSelected) {
-        this.paymentSelected = paymentSelected;
+    public void setPaymentMethod(Payment paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getConfirmMessage(Context context) {
+        return context.getString(R.string.transaction_request_confirm_msg,
+                paymentMethod.getDescription(context), amount.toString() + " " + currency, toUser);
+    }
+
+    public String getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(String tagVS) {
+        this.tagVS = tagVS;
+    }
+
+    public String getPaymentConfirmURL() {
+        return infoURL + "/" + "payment";
     }
 
     public void checkRequest(TransactionRequest request) throws ExceptionVS {
@@ -206,10 +233,16 @@ public class TransactionRequest {
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setType(TypeVS.valueOf(jsonObject.getString("typeVS")));
         if(jsonObject.has("IBAN")) transactionRequest.setIBAN(jsonObject.getString("IBAN"));
+        if(jsonObject.has("userToType")) transactionRequest.setUserToType(
+                UserVS.Type.valueOf(jsonObject.getString("userToType")));
         if(jsonObject.has("subject")) transactionRequest.setSubject(jsonObject.getString("subject"));
         if(jsonObject.has("toUser")) transactionRequest.setToUser(jsonObject.getString("toUser"));
         if(jsonObject.has("amount")) transactionRequest.setAmount(new BigDecimal(jsonObject.getString("amount")));
         if(jsonObject.has("currency")) transactionRequest.setCurrency(jsonObject.getString("currency"));
+        if(jsonObject.has("tagVS")) transactionRequest.setTagVS(jsonObject.getString("tagVS"));
+        if(jsonObject.has("paymentMethod")) transactionRequest.setPaymentMethod(Payment.valueOf(
+                jsonObject.getString("paymentMethod")));
+        if(jsonObject.has("infoURL")) transactionRequest.setInfoURL(jsonObject.getString("infoURL"));
         if(jsonObject.has("UUID")) transactionRequest.setUUID(jsonObject.getString("UUID"));
         if(jsonObject.has("details")) {
             JSONObject detailsJSON = jsonObject.getJSONObject("details");
@@ -229,12 +262,16 @@ public class TransactionRequest {
     public JSONObject toJSON() throws JSONException {
         JSONObject result = new JSONObject();
         result.put("typeVS" , type.toString());
+        result.put("userToType" , getUserToType().toString());
         result.put("IBAN" , IBAN);
         result.put("subject" , subject);
         result.put("toUser" , toUser);
         result.put("currency" , currency);
         result.put("amount" , amount);
-        result.put("UUID" , currency);
+        if(paymentMethod != null )result.put("paymentMethod" , paymentMethod.toString());
+        result.put("tagVS" , tagVS);
+        result.put("infoURL" , infoURL);
+        result.put("UUID" , UUID);
         if(paymentOptions != null) {
             List<String> paymentOptionsList = new ArrayList<>();
             for(Payment payment : paymentOptions) paymentOptionsList.add(payment.toString());
@@ -243,4 +280,45 @@ public class TransactionRequest {
         return result;
     }
 
+    public UserVS.Type getUserToType() {
+        return userToType;
+    }
+
+    public void setUserToType(UserVS.Type userToType) {
+        this.userToType = userToType;
+    }
+
+    public TransactionVS.Type getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(TransactionVS.Type transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public JSONObject getCooinServerTransaction(String fromUserIBAN) throws Exception {
+        Map mapToSend = new HashMap();
+        mapToSend.put("operation", TypeVS.FROM_USERVS.toString());
+        mapToSend.put("fromUserIBAN", fromUserIBAN);
+        mapToSend.put("subject", subject);
+        mapToSend.put("toUser", toUser);
+        mapToSend.put("toUserIBAN", Arrays.asList(IBAN));
+        mapToSend.put("tags", Arrays.asList(tagVS));
+        mapToSend.put("amount", amount.toString());
+        mapToSend.put("currencyCode", currency);
+        Map details = new HashMap();
+        details.put("UUID", UUID);
+        mapToSend.put("details", details);
+        mapToSend.put("UUID", java.util.UUID.randomUUID().toString());
+        return new JSONObject(mapToSend);
+    }
+
+
+    public String getInfoURL() {
+        return infoURL;
+    }
+
+    public void setInfoURL(String infoURL) {
+        this.infoURL = infoURL;
+    }
 }

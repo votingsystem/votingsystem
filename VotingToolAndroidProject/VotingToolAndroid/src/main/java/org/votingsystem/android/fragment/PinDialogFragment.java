@@ -131,14 +131,15 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateDialog", "savedInstanceState: " + savedInstanceState);
+        LOGD(TAG + ".onCreateDialog", "savedInstanceState: ");
         LayoutInflater inflater = getActivity().getLayoutInflater();
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         final ContextVS.State appState = contextVS.getState();
+        AlertDialog.Builder builder = null;
         if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+            builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.cert_not_found_caption),
                     getString(R.string.cert_not_found_msg), getActivity()).setPositiveButton(
                     R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
@@ -160,7 +161,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             View view = inflater.inflate(R.layout.pin_dialog, null);
             msgTextView = (TextView) view.findViewById(R.id.msg);
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder = new AlertDialog.Builder(getActivity());
             if(savedInstanceState != null) {
                 pinChangeStep = (PinChangeStep) savedInstanceState.getSerializable(
                         TypeVS.PIN_CHANGE.toString());
@@ -188,8 +189,10 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                         break;
                 }
             }
-            return builder.create();
         }
+        Dialog dialog = builder.create();
+        dialog.setOnKeyListener(this);
+        return dialog;
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -246,6 +249,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
             }
         }
+        if(withHashValidation && !isHashOK(pin)) return;
         try {
             InputMethodManager imm = (InputMethodManager)getActivity().
                     getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -284,7 +288,8 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         //so you have to filter:
         if (event.getAction()!=KeyEvent.ACTION_DOWN) return true;
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            dialog.dismiss();
+            ((PinDialogFragment) getFragmentManager().
+                    findFragmentByTag(PinDialogFragment.TAG)).dismiss();
         }
         //if (keyCode == KeyEvent.KEYCODE_DEL) { } 
         if (keyCode == KeyEvent.KEYCODE_ENTER) {

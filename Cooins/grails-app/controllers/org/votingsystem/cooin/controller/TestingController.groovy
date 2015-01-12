@@ -35,10 +35,8 @@ class TestingController {
     def bankVSService
 
     def index() {
-        //balanceService.initWeekPeriod(Calendar.getInstance())
-        //render "initWeekPeriod - OK"
-        net.sf.json.JSONObject responseJSON = [status:ResponseVS.SC_OK, message:"message"]
-        render responseJSON.toString()
+        balanceService.initWeekPeriod(Calendar.getInstance())
+        render "initWeekPeriod - OK"
         return false
     }
 

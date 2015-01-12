@@ -76,13 +76,6 @@ public class CooinAccountsMainActivity extends ActivityBase {
                 intent.putExtra(ContextVS.URL_KEY, contextVS.getCooinServer().getMenuAdminURL());
                 startActivity(intent);
                 return true;*/
-            case R.id.update_signers_info:
-                Toast.makeText(this, getString(R.string.fetching_uservs_accounts_info_msg),
-                        Toast.LENGTH_SHORT).show();
-                Intent startIntent = new Intent(this, CooinService.class);
-                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
-                startService(startIntent);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

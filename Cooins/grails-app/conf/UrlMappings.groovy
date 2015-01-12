@@ -211,6 +211,11 @@ class UrlMappings {
             action = "paymentInfo"
         }
 
+        "/shop/$uuid/payment"{
+            controller = "shopExample"
+            action = "payment"
+        }
+
         "/testing/$year/$month/$day" {
             controller = "testing"
             action = "index"

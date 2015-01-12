@@ -511,4 +511,5 @@
     <string name="payment_lbl">pago</string>
     <string name="receptor_lbl">receptor</string>
     <string name="do_payment_lbl">realizar pago</string>
+    <string name="sending_payment_lbl">realizando pago</string>
 </resources>
