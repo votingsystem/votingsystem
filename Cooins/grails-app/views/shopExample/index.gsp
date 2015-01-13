@@ -4,7 +4,6 @@
     <title>ShopExampleController</title>
     <vs:webscript dir='webcomponentsjs' file="webcomponents.min.js"/>
     <vs:webresource dir="polymer" file="polymer.html"/>
-    <vs:webresource dir="font-roboto" file="roboto.html"/>
     <vs:webresource dir="core-ajax" file="core-ajax.html"/>
 </head>
 <script>
@@ -21,7 +20,7 @@
     <template is="auto-binding">
         <core-ajax auto response="{{data}}" on-core-response="{{ajaxHandler}}"
                    url="${createLink(controller:'shopExample', action:"listenTransactionChanges", absolute:true)}" handleAs="json"></core-ajax>
-        <h1>{{data}}</h1>
+        <h3>{{data.message}}</h3>
     </template>
 </body>
 </html>

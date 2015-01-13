@@ -1,7 +1,5 @@
 grails.server.port.http = 8086
 
-grails.tomcat.nio = true
-grails.tomcat.scan.enabled = true
 
 grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.project.class.dir = "target/classes"
@@ -11,6 +9,9 @@ grails.project.work.dir = "target/work"
 grails.project.target.level = 1.8
 grails.project.source.level = 1.8
 grails.project.war.file = "target/${appName}.war"
+
+grails.tomcat.nio = true
+grails.tomcat.scan.enabled = true
 
 grails.project.fork = [
     // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
@@ -83,9 +84,10 @@ grails.project.dependency.resolution = {
     plugins {
 
         // plugins for the build system only
-        build ":tomcat8:8.0.5"
+        //build ":tomcat8:8.0.5"
 
         // plugins for the compile step
+        build ":tomcat:8.0.15"
         compile ":scaffolding:2.1.2"
         compile ':cache:1.1.8'
         compile ":asset-pipeline:1.9.9"

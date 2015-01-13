@@ -92,7 +92,7 @@ public class TransactionVSPlan {
         for(TransactionVS transactionVS : groupVSTransacionList) {
             UserVS representative = ((GroupVS)transactionVS.fromUserVS).representative
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
-                    representative.nif, UserVS.Type.GROUP)
+                    representative.nif, UserVS.Type.USER)
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.nif,
                     cooinServer.getNameNormalized(), JSONSerializer.toJSON(
                     TransactionVSUtils.getGroupVSTransactionVS(transactionVS, transactionVS.fromUserVS)).toString(),

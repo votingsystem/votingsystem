@@ -32,7 +32,7 @@ class ShopExampleController {
     def index() {
         TransactionRequest transactionRequest = new TransactionRequest(type: TypeVS.PAYMENT_REQUEST,
                 userToType: UserVS.Type.GROUP, subject: "shop example payment - ${Calendar.getInstance().getTime()}",
-                toUser:"cooin shop example", amount: new BigDecimal(100), currency: "EUR", tagVS:TagVS.WILDTAG,
+                toUser:"cooin shop example", amount: new BigDecimal(10), currencyCode: "EUR", tagVS:TagVS.WILDTAG,
                 date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005", UUID: session.getId())
         transactionRequest.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
                 Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.COOIN_SEND))
@@ -77,10 +77,14 @@ class ShopExampleController {
     //S/MIME document (http://en.wikipedia.org/wiki/S/MIME)
     def payment() {
         //String paymentReceipt = "${request.getInputStream()}"
-        SMIMEMessage smimeMessage = SMIMEMessage(request.getInputStream())
+        SMIMEMessage smimeMessage = new SMIMEMessage(request.getInputStream())
+        ResponseVS responseVS = null;
         if (smimeMessage?.isValidSignature()) { //check with your tools if it's signed with valid certificates!!!
-            shopExampleService.sendResponse(params.uuid, smimeMessage)
-        }
+            responseVS = shopExampleService.sendResponse(params.uuid, smimeMessage)
+        } else responseVS = new ResponseVS(ResponseVS.SC_ERROR, "invalid receipt")
+        response.status = responseVS.getStatusCode()
+        render responseVS.getMessage()
+        return false
     }
 
     /**

@@ -338,7 +338,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(responseVS.getCaption())
                 .setContentText(responseVS.getNotificationMessage()).setSound(soundUri);
-        if(responseVS.getIconId() != null) builder.setSmallIcon(responseVS.getIconId());
+        if(responseVS.getStatusCode() == ResponseVS.SC_ERROR)
+            builder.setSmallIcon(R.drawable.cancel_22);
+        else if(responseVS.getStatusCode() == ResponseVS.SC_OK)
+            builder.setSmallIcon(R.drawable.fa_check_32);
         else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
         mgr.notify(notificationId.getAndIncrement(), builder.build());
     }

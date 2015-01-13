@@ -1,5 +1,6 @@
 package org.votingsystem.cooin.service
 
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.MetaInfMsg
@@ -35,10 +36,8 @@ class TransactionVS_UserVSService {
         request.messageSMIME.setSMIME(receipt)
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionVS.id}_${request.operation.toString()}")
         log.debug(metaInfMsg)
-        String msg = messageSource.getMessage('transactionVSFromUserVSOKMsg',
-                ["${request.amount} ${request.currencyCode}", request.toUserVS.name].toArray(), locale)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:request.operation)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK,  metaInf:metaInfMsg, type:request.operation,
+                messageSMIME:receipt, contentType: ContentTypeVS.JSON_SIGNED)
     }
-
 
 }

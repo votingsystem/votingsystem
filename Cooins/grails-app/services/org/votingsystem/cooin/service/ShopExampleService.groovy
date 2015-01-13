@@ -35,21 +35,31 @@ class ShopExampleService {
         transactionRequestMap.get(sessionId).setAsyncContext(ctx)
     }
 
-    public void sendResponse(String sessionId, SMIMEMessage smimeMessage) {
+    public ResponseVS sendResponse(String sessionId, SMIMEMessage smimeMessage) {
         log.debug("sendResponse")
         TransactionRequest transactionRequest = transactionRequestMap.remove(sessionId)
         if(transactionRequest) {
+            ResponseVS responseVS = null;
             SignedReceiptContent receiptContent = new SignedReceiptContent(smimeMessage.getSignedContent())
             try {
                 receiptContent.transactionRequest.checkRequest(transactionRequest)
                 JSONObject responseJSON = [status:ResponseVS.SC_OK, message:receiptContent.getMessage()]
                 transactionRequest.getAsyncContext().response.getWriter().write(responseJSON.toString())
+                responseVS = new ResponseVS(ResponseVS.SC_OK, receiptContent.getMessage())
             } catch(ExceptionVS ex)  {
                 log.error(ex.getMessage())
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())
                 JSONObject responseJSON = [status:ResponseVS.SC_ERROR, message:ex.getMessage()]
                 transactionRequest.getAsyncContext().response.getWriter().write(responseJSON.toString())
-            } finally {transactionRequest.getAsyncContext().complete()}
-        } else log.debug("sendResponse - transactionRequest with sessionId $sessionId has expired  ");
+            } finally {
+                transactionRequest.getAsyncContext().complete()
+                return responseVS
+            }
+        } else {
+            log.debug("sendResponse - transactionRequest with sessionId $sessionId has expired  ");
+            return new ResponseVS(ResponseVS.SC_ERROR, "sessionId has expired")
+        }
+
     }
 
     private class SignedReceiptContent {
@@ -62,7 +72,7 @@ class ShopExampleService {
 
         public String getMessage() {
             messageSource.getMessage('transactionRequestOKMsg', [transactionRequest.getAmount().toString(),
-                    transactionRequest.getCurrency()].toArray(), locale)
+                    transactionRequest.getCurrencyCode()].toArray(), locale)
         }
     }
 

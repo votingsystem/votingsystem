@@ -49,7 +49,6 @@ class TransactionVSService {
             case TypeVS.FROM_GROUP_TO_MEMBER_GROUP:
             case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVS_GroupVSService.processTransactionVS(request.getGroupVSRequest())
-            case TypeVS.FROM_USERVS_TO_USERVS:
             case TypeVS.FROM_USERVS:
                 return transactionVS_UserVSService.processTransactionVS(request.getUserVSRequest())
             default:
@@ -133,7 +132,6 @@ class TransactionVSService {
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
                 case TransactionVS.Type.FROM_USERVS:
-                case TransactionVS.Type.FROM_USERVS_TO_USERVS:
                 case TransactionVS.Type.COOIN_REQUEST:
                     updateUserVSAccountFrom(transactionVS)
                     updateUserVSAccountTo(transactionVS)
@@ -204,8 +202,7 @@ class TransactionVSService {
                         eq('state', TransactionVS.State.OK)
                         isNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-                        inList("type", [TransactionVS.Type.COOIN_REQUEST, TransactionVS.Type.FROM_USERVS,
-                                        TransactionVS.Type.FROM_USERVS_TO_USERVS] )
+                        inList("type", [TransactionVS.Type.COOIN_REQUEST, TransactionVS.Type.FROM_USERVS] )
                     }
                 }
 
@@ -361,19 +358,9 @@ class TransactionVSService {
         }
 
         public TransactionVSRequest getUserVSRequest() {
-            if(!(TypeVS.FROM_USERVS == operation || TypeVS.FROM_USERVS_TO_USERVS == operation))
+            if(TypeVS.FROM_USERVS != operation)
                     throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'FROM_USERVS' - operation found: " + operation.toString())
-            if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
-                    "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
-            toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
-            if(!toUserVS) throw new ValidationExceptionVS(this.getClass(), "invalid 'toUserIBAN': '${messageJSON.toUserIBAN}'");
-            return this;
-        }
-
-        public TransactionVSRequest getUserVSToUserVSRequest() {
-            if(TypeVS.FROM_USERVS_TO_USERVS != operation) throw new ValidationExceptionVS(this.getClass(),
-                    "Operation expected: 'FROM_USERVS_TO_USERVS' - operation found: " + operation.toString())
             if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
                     "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
             toUserVS = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))

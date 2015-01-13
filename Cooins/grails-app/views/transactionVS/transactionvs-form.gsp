@@ -50,10 +50,6 @@
                     </div>
                 </div>
             </div>
-            <template if="{{'FROM_USERVS_TO_USERVS' === operation}}">
-                <div class="adviceToUser"><g:message code="fromUserVSToUserVSAdviceMsg"/></div>
-            </template>
-
 
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div>
@@ -321,7 +317,6 @@
                     this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
                 case Operation.FROM_USERVS:
-                case Operation.FROM_USERVS_TO_USERVS:
                     this.operationMsg = "<g:message code='transactionVSFromUserVS'/> <g:message code='forLbl'/> '" +
                             userName + "'"
                     this.fromUserName = null

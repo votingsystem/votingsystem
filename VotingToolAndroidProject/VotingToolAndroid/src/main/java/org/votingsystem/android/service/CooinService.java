@@ -255,7 +255,7 @@ public class CooinService extends IntentService {
                     R.string.cooin_request_error_caption));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this).setIconId(R.drawable.cancel_22);
+            responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             contextVS.broadcastResponse(
                     responseVS.setTypeVS(TypeVS.COOIN_REQUEST).setServiceCaller(serviceCaller));

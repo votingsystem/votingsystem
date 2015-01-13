@@ -41,10 +41,6 @@
                 <div class="numTrans">{{transactionVSData.numTransFromUserVS}}</div>
                 <div class="transDesc">TransFromUserVS</div>
             </div>
-            <div id="FROM_USERVS_TO_USERVS" class="transBlock" on-click="{{transBlockSelected}}">
-                <div class="numTrans">{{transactionVSData.numTransFromUserVSToUserVS}}</div>
-                <div class="transDesc">TransFromUserVSToUserVS</div>
-            </div>
             <div id="FROM_GROUP_TO_MEMBER" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromGroupVSToMember}}</div>
                 <div class="transDesc">numTransFromGroupVSToMember</div>

@@ -43,7 +43,7 @@ class CooinService {
         SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 smimeMessageReq, subject)
         messageSMIMEReq.setSMIME(smimeMessageResp)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.COOIN_CANCEL, data:messageSMIMEReq,
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.COOIN_CANCEL, data:messageSMIMEReq,
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
 

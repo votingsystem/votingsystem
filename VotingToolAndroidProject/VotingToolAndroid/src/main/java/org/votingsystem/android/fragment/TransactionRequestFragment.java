@@ -54,7 +54,13 @@ public class TransactionRequestFragment extends Fragment {
             String pin = intent.getStringExtra(PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) launchPayment();
-            else {}
+            else {
+                setProgressDialogVisible(false);
+                String caption = ResponseVS.SC_OK == responseVS.getStatusCode()?getString(
+                        R.string.ok_lbl):getString(R.string.error_lbl);
+                MessageDialogFragment.showDialog(responseVS.getStatusCode(), caption,
+                        responseVS.getMessage(), getFragmentManager());
+            }
         }
     };
 
@@ -98,7 +104,7 @@ public class TransactionRequestFragment extends Fragment {
             receptor.setText(transactionRequest.getToUser());
             subject.setText(transactionRequest.getSubject());
             amount.setText(transactionRequest.getAmount().toString());
-            currency.setText(transactionRequest.getCurrency());
+            currency.setText(transactionRequest.getCurrencyCode());
             switch(transactionRequest.getType()) {
                 case DELIVERY_WITH_PAYMENT:
                 case DELIVERY_WITHOUT_PAYMENT:
@@ -106,11 +112,6 @@ public class TransactionRequestFragment extends Fragment {
                             getActivity());
                     break;
             }
-
-            UIUtils.fillAddressInfo((LinearLayout)rootView.findViewById(R.id.address_info),
-                    getActivity());
-
-
         } catch (Exception ex) { ex.printStackTrace(); }
         Button save_button = (Button) rootView.findViewById(R.id.save_button);
         save_button.setOnClickListener(new OnClickListener() {

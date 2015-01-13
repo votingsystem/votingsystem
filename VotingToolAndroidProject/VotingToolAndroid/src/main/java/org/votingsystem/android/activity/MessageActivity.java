@@ -56,7 +56,6 @@ public class MessageActivity extends ActionBarActivity {
         ((TextView) view.findViewById(R.id.caption_text)).setText(responseVS.getCaption());
         ((TextView) view.findViewById(R.id.message_text)).setText(Html.fromHtml(
                 responseVS.getNotificationMessage()));
-        ImageView icon = (ImageView) view.findViewById(R.id.icon);
         AlertDialog.Builder builder = new AlertDialog.Builder(this).setView(view);
         builder.setPositiveButton(getString(R.string.accept_lbl),
                 new DialogInterface.OnClickListener() {
@@ -65,10 +64,6 @@ public class MessageActivity extends ActionBarActivity {
                         finish();
                     }
                 });
-        if(responseVS.getIconId() != null && responseVS.getIconId() > 0) {
-            icon.setImageResource(responseVS.getIconId());
-            icon.setVisibility(View.VISIBLE);
-        }
         builder.show();
     }
 

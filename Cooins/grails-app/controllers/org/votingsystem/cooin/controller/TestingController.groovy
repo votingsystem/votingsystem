@@ -31,7 +31,6 @@ class TestingController {
     def balanceService
     def systemService
     def groupVSService
-    def transactionVS_UserVSService
     def bankVSService
 
     def index() {

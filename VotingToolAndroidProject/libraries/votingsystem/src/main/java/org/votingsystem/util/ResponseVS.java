@@ -52,7 +52,6 @@ public class ResponseVS<T> implements Parcelable {
 
 
     private int statusCode;
-    private Integer iconId = null;
     private StatusVS<?> status;
     private OperationVS operation;
     private EventVSResponse eventQueryResponse;
@@ -76,7 +75,6 @@ public class ResponseVS<T> implements Parcelable {
     public ResponseVS(Parcel source) {
         // Must read values in the same order as they were placed in
         statusCode = source.readInt();
-        iconId = (Integer) source.readValue(Integer.class.getClassLoader());
         serviceCaller = source.readString();
         caption = source.readString();
         notificationMessage = source.readString();
@@ -105,16 +103,6 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-              TypeVS typeVS, Integer iconId) {
-        this.statusCode = statusCode;
-        this.serviceCaller = serviceCaller;
-        this.caption = caption;
-        this.message = message;
-        this.typeVS = typeVS;
-        this.iconId = iconId;
-    }
-
-    public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
               TypeVS typeVS, SMIMEMessage smimeMessage) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
@@ -122,17 +110,6 @@ public class ResponseVS<T> implements Parcelable {
         this.message = message;
         this.typeVS = typeVS;
         this.smimeMessage = smimeMessage;
-    }
-
-    public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-            TypeVS typeVS, SMIMEMessage smimeMessage, Integer iconId) {
-        this.statusCode = statusCode;
-        this.serviceCaller = serviceCaller;
-        this.caption = caption;
-        this.message = message;
-        this.typeVS = typeVS;
-        this.smimeMessage = smimeMessage;
-        this.iconId = iconId;
     }
 
     public ResponseVS(int statusCode, TypeVS typeVS) {
@@ -275,9 +252,10 @@ public class ResponseVS<T> implements Parcelable {
 	}
 
     public SMIMEMessage getSMIME() {
-        if(smimeMessage == null && smimeMessageBytes != null) {
+        if(smimeMessage == null && (smimeMessageBytes != null || messageBytes != null)) {
             try {
-                smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+                byte[] smimeBytes = (smimeMessageBytes != null)? smimeMessageBytes:messageBytes;
+                smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -303,15 +281,6 @@ public class ResponseVS<T> implements Parcelable {
 
     public void setContentType(ContentTypeVS contentType) {
         this.contentType = contentType;
-    }
-
-    public Integer getIconId() {
-        return iconId;
-    }
-
-    public ResponseVS setIconId(Integer iconId) {
-        this.iconId = iconId;
-        return this;
     }
 
     public String getCaption() {
@@ -366,7 +335,6 @@ public class ResponseVS<T> implements Parcelable {
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(statusCode);
-        parcel.writeValue(iconId);
         parcel.writeString(serviceCaller);
         parcel.writeString(caption);
         parcel.writeString(notificationMessage);

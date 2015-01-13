@@ -42,11 +42,14 @@ public class TransactionVSService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         LOGD(TAG + ".onHandleIntent", "onHandleIntent");
+        ResponseVS responseVS = null;
         switch(operation) {
             case TRANSACTIONVS:
                 try {
-                    sendTransactionVS(transactionVS.getToUserVS().getIBAN(),
-                            transactionVS.transactionFromUserVSJSON(fromUserIBAN), operation);
+                    responseVS = sendTransactionVS(transactionVS.getToUserVS().getIBAN(),
+                            transactionVS.transactionFromUserVSJSON(fromUserIBAN));
+                    broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
+                            responseVS, contextVS));
                 } catch (Exception ex) { ex.printStackTrace(); }
                 break;
             case PAYMENT:
@@ -69,22 +72,26 @@ public class TransactionVSService extends IntentService {
             case SIGNED_TRANSACTION:
                 try {
                     responseVS = sendTransactionVS(transactionRequest.getIBAN(),  transactionRequest.
-                            getCooinServerTransaction(userVS.getIBAN()), operation);
+                            getCooinServerTransaction(userVS.getIBAN()));
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                                ContentTypeVS.JSON_SIGNED, transactionRequest.getPaymentConfirmURL());
+                                ContentTypeVS.TEXT, transactionRequest.getPaymentConfirmURL());
                     }
-                } catch (Exception ex) { ex.printStackTrace(); }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    responseVS = ResponseVS.getExceptionResponse(ex, this);
+                }
                 break;
             case ANONYMOUS_SIGNED_TRANSACTION:
                 break;
             case COOIN_SEND:
                 break;
         }
+        broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
+                responseVS, contextVS));
     }
 
-    private ResponseVS sendTransactionVS(String toUserIBAN, JSONObject transactionVSJSON,
-           TypeVS operation) {
+    private ResponseVS sendTransactionVS(String toUserIBAN, JSONObject transactionVSJSON) {
         LOGD(TAG + ".sendTransactionVS", "transactionVS: " + transactionVSJSON.toString());
         ResponseVS responseVS = null;
         try {
@@ -97,7 +104,6 @@ public class TransactionVSService extends IntentService {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
-            broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
             return responseVS;
         }
     }

@@ -14,8 +14,6 @@ class DashBoardService {
                 TransactionVS.Type.FROM_BANKVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
                 TransactionVS.Type.FROM_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
-        result.numTransFromUserVSToUserVS = TransactionVS.countByTypeAndDateCreatedBetween(
-                TransactionVS.Type.FROM_USERVS_TO_USERVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromGroupVSToMember = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 TransactionVS.Type.FROM_GROUP_TO_MEMBER, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.transFromGroupVSToMemberGroup = [numTrans:TransactionVS.countByToUserVSIsNullAndTypeAndDateCreatedBetween(
