@@ -93,7 +93,7 @@ class CooinAccountService {
             BigDecimal wildTagAccount = new BigDecimal(accountsMap[currency][TagVS.WILDTAG])
             if(wildTagAccount.compareTo(wildTagBalance.subtract(tagGap)) != 0) throw new ExceptionVS(
                     "Balance Error with user " + "'$userVS.id' - '$currency' - accounts: '$accountsMap' - " +
-                            "gap  not resolved '$tagGap'")
+                    "gap  not resolved '$tagGap'")
 
         }
     }

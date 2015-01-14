@@ -33,13 +33,15 @@ class ShopExampleController {
         TransactionRequest transactionRequest = new TransactionRequest(type: TypeVS.PAYMENT_REQUEST,
                 userToType: UserVS.Type.GROUP, subject: "shop example payment - ${Calendar.getInstance().getTime()}",
                 toUser:"cooin shop example", amount: new BigDecimal(10), currencyCode: "EUR", tagVS:TagVS.WILDTAG,
-                date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005", UUID: session.getId())
+                date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005",
+                UUID:java.util.UUID.randomUUID().toString())
         transactionRequest.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
                 Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.COOIN_SEND))
-        String serviceURLParam = session.getId().substring(0, 8)
-        String paymentInfoServiceURL = grailsLinkGenerator.link(controller: 'shop', absolute:true) + "/${serviceURLParam}"
-        shopExampleService.putTransactionRequest(serviceURLParam, transactionRequest)
-        render(view:'index', model:[paymentInfoServiceURL:paymentInfoServiceURL, transactionRequest:transactionRequest])
+        String shopSessionID = transactionRequest.getUUID().substring(0, 8)
+        String paymentInfoServiceURL = grailsLinkGenerator.link(controller: 'shop', absolute:true) + "/${shopSessionID}"
+        shopExampleService.putTransactionRequest(shopSessionID, transactionRequest)
+        render(view:'index', model:[paymentInfoServiceURL:paymentInfoServiceURL, transactionRequest:transactionRequest,
+                shopSessionID:shopSessionID])
     }
 
     //Called with async Javascript from the web page that shows the QR code, we store an AsyncContext in order to notify
@@ -57,7 +59,7 @@ class ShopExampleController {
             @Override public void onStartAsync(AsyncEvent event) throws IOException { }
         });
         ctx.setTimeout(SESSION_TIMEOUT);
-        shopExampleService.bindContext(session.getId().substring(0, 8), ctx)
+        shopExampleService.bindContext(params.shopSessionID, ctx)
         ctx.start { }
     }
 

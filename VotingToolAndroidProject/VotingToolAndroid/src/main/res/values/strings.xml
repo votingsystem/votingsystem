@@ -297,7 +297,7 @@
     <string name="cooin_request_error_caption">error retirando dinero</string>
     <string name="cooin_request_ok_msg"><![CDATA[su disponible se ha incrementado en <b>\'%1$s\' %2$s</b>]]></string>
     <string name="insufficient_cash_for_tagvs_caption">disponible insuficiente para \'%1$s\'</string>
-    <string name="insufficient_cash_caption">disponible insuficiente</string>
+    <string name="insufficient_cash_caption">no dispone de saldo sufuciente</string>
     <string name="insufficient_cash_msg"><![CDATA[importe solicitado <b>\'%2$s\' %1$s</b><br/>
     disponible <b>\'%3$s\' %1$s</b>]]></string>
     <string name="cooin_send_ok_caption">pago realizado con éxito</string>
@@ -512,4 +512,8 @@
     <string name="receptor_lbl">receptor</string>
     <string name="do_payment_lbl">realizar pago</string>
     <string name="sending_payment_lbl">realizando pago</string>
+    <string name="check_available_lbl">comprobar disponible</string>
+    <string name="payment_session_expired_msg">la sesión de pago ha caducado</string>
+    <string name="payment_ok_caption">pago completado con éxito</string>
+    <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
 </resources>

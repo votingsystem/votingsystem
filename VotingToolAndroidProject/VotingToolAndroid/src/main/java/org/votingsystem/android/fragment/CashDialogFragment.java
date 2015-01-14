@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -63,12 +64,14 @@ public class CashDialogFragment extends DialogFragment {
     private TextView tag_text;
     private TagVS tagVS;
     private TextView msgTextView;
+    private TextView currency_text;
     private Button add_tag_btn;
     private TextView errorMsgTextView;
     private String broadCastId = CashDialogFragment.class.getSimpleName();
-    private HorizontalNumberPicker horizontal_number_picker;
+    private EditText amount;
     private CheckBox time_limited_checkbox;
     private String dialogCaller = null;
+    private BigDecimal maxValue;
     private String currencyCode = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -113,7 +116,7 @@ public class CashDialogFragment extends DialogFragment {
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        BigDecimal maxValue = (BigDecimal) getArguments().getSerializable(MAX_VALUE_KEY);
+        maxValue = (BigDecimal) getArguments().getSerializable(MAX_VALUE_KEY);
         String caption = getArguments().getString(ContextVS.CAPTION_KEY);
         currencyCode = getArguments().getString(ContextVS.CURRENCY_KEY);
         final ContextVS.State appState = contextVS.getState();
@@ -145,13 +148,18 @@ public class CashDialogFragment extends DialogFragment {
             tag_info = (LinearLayout) view.findViewById(R.id.tag_info);
             ((TextView) view.findViewById(R.id.caption)).setText(caption);
             msgTextView = (TextView) view.findViewById(R.id.msg);
-            horizontal_number_picker = (HorizontalNumberPicker)view.findViewById(R.id.horizontal_number_picker);
+            amount = (EditText) view.findViewById(R.id.amount);
+            currency_text = (TextView) view.findViewById(R.id.currency_text);
+            currency_text.setText(currencyCode);
             time_limited_checkbox = (CheckBox) view.findViewById(R.id.time_limited_checkbox);
             errorMsgTextView = (TextView) view.findViewById(R.id.errorMsg);
-            horizontal_number_picker.setMaxValue(maxValue, currencyCode);
             add_tag_btn = (Button) view.findViewById(R.id.add_tag_btn);
             add_tag_btn.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) { addTagClicked(); }
+                @Override public void onClick(View v) {
+                    if(tagVS == null) SelectTagVSDialogFragment.showDialog(broadCastId,
+                            getActivity().getSupportFragmentManager(), SelectTagVSDialogFragment.TAG);
+                    else setTagVS(null);
+                }
             });
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             if(savedInstanceState != null) {
@@ -204,19 +212,19 @@ public class CashDialogFragment extends DialogFragment {
         }
     }
 
-    public void addTagClicked() {
-        if(tagVS == null) SelectTagVSDialogFragment.showDialog(broadCastId,
-                getActivity().getSupportFragmentManager(), SelectTagVSDialogFragment.TAG);
-        else setTagVS(null);
-    }
-
     private void sendCashValue() {
-        if(horizontal_number_picker.getValue().compareTo(new BigDecimal(0)) > 0) {
+        BigDecimal selectedAmount = new BigDecimal(amount.getText().toString());
+        if(selectedAmount.compareTo(maxValue) > 0) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.available_exceded_error_msg), getFragmentManager());
+            return;
+        }
+        if(selectedAmount.compareTo(new BigDecimal(0)) > 0) {
             if(dialogCaller != null) {
                 Intent intent = new Intent(dialogCaller);
                 ResponseVS responseVS = new ResponseVS(ResponseVS.SC_PROCESSING, typeVS);
                 tagVS = (tagVS == null) ? new TagVS(TagVS.WILDTAG):tagVS;
-                TransactionVS transactionVS = new TransactionVS(horizontal_number_picker.getValue(),
+                TransactionVS transactionVS = new TransactionVS(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
                 responseVS.setData(transactionVS);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

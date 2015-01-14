@@ -19,6 +19,10 @@ import java.util.Date;
 public class DateUtils {
 
 
+    public static boolean inRange(Date initDate, Date lapsedDate, long timeRange) {
+        return initDate.getTime() - lapsedDate.getTime() < timeRange;
+    }
+
     public static int getDayOfMonthFromDate (Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

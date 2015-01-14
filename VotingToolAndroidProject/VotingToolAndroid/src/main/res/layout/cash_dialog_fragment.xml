@@ -75,12 +75,27 @@
         android:layout_gravity="center"
         android:text="@string/time_limited_checkbox_msg"/>
 
-    <org.votingsystem.android.ui.HorizontalNumberPicker android:id ="@+id/horizontal_number_picker"
-        android:layout_width ="wrap_content"
-        android:padding="10dp"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/msg_content_vs"
-        android:layout_height ="wrap_content"
-        android:layout_gravity="center_horizontal" />
+        android:orientation="horizontal" >
+
+        <EditText android:id="@+id/amount"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:gravity="center">
+            <requestFocus />
+        </EditText>
+
+        <TextView android:id="@+id/currency_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"/>
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

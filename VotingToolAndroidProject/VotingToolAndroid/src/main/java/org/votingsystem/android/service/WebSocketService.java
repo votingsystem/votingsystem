@@ -338,7 +338,13 @@ public class WebSocketService extends Service {
                     default:
                         LOGD(TAG + ".onStartCommand() ", "unknown operation: " + typeVS.toString());
                 }
-            } catch(Exception ex) {ex.printStackTrace();}
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                Intent intent =  new Intent(serviceCaller);
+                intent.putExtra(ContextVS.RESPONSEVS_KEY,
+                        ResponseVS.getExceptionResponse(ex, WebSocketService.this));
+                LocalBroadcastManager.getInstance(WebSocketService.this).sendBroadcast(intent);
+            }
         }
     }
 }

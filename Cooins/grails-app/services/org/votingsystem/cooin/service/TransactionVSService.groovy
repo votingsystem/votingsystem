@@ -132,9 +132,12 @@ class TransactionVSService {
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
                 case TransactionVS.Type.FROM_USERVS:
-                case TransactionVS.Type.COOIN_REQUEST:
                     updateUserVSAccountFrom(transactionVS)
                     updateUserVSAccountTo(transactionVS)
+                    systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
+                    break;
+                case TransactionVS.Type.COOIN_REQUEST:
+                    updateUserVSAccountFrom(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
                 case TransactionVS.Type.COOIN_SEND:

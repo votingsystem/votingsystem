@@ -1,7 +1,9 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -21,13 +23,19 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.service.TransactionVSService;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.model.Payment;
 import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
+
+import java.math.BigDecimal;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.*;
@@ -53,11 +61,22 @@ public class TransactionRequestFragment extends Fragment {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             String pin = intent.getStringExtra(PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) launchPayment();
+            if(pin != null) {
+                switch(responseVS.getTypeVS()) {
+                    case SIGNED_TRANSACTION:
+                        launchPayment();
+                        break;
+                    case ANONYMOUS_SIGNED_TRANSACTION:
+                        break;
+                    case COOIN:
+                        break;
+                }
+
+            }
             else {
                 setProgressDialogVisible(false);
                 String caption = ResponseVS.SC_OK == responseVS.getStatusCode()?getString(
-                        R.string.ok_lbl):getString(R.string.error_lbl);
+                        R.string.payment_ok_caption):getString(R.string.error_lbl);
                 MessageDialogFragment.showDialog(responseVS.getStatusCode(), caption,
                         responseVS.getMessage(), getFragmentManager());
             }
@@ -147,8 +166,42 @@ public class TransactionRequestFragment extends Fragment {
     private void submitForm() {
         transactionRequest.setPaymentMethod(Payment.getByPosition(
                 payment_method_spinner.getSelectedItemPosition()));
-        PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(), broadCastId,
-                transactionRequest.getConfirmMessage(getActivity()), false, TypeVS.PAYMENT);
+        switch (transactionRequest.getPaymentMethod()) {
+            case SIGNED_TRANSACTION:
+                try {
+                    CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(getActivity());
+                    BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
+                            transactionRequest.getCurrencyCode(), transactionRequest.getTagVS());
+                    if(availableForTagVS.compareTo(transactionRequest.getAmount()) < 0) {
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                getString(R.string.insufficient_cash_caption),
+                                getString(R.string.insufficient_cash_msg,
+                                transactionRequest.getCurrencyCode(),
+                                transactionRequest.getAmount().toString(),
+                                availableForTagVS.toString()), getActivity());
+                        builder.setPositiveButton(getString(R.string.check_available_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                                        intent.putExtra(ContextVS.REFRESH_KEY, true);
+                                        intent.putExtra(ContextVS.FRAGMENT_KEY, CooinAccountsFragment.class.getName());
+                                        startActivity(intent);
+                                    }
+                                });
+                        UIUtils.showMessageDialog(builder);
+                        return;
+                    } else  PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(),
+                            broadCastId, transactionRequest.getConfirmMessage(getActivity()),
+                            false, TypeVS.SIGNED_TRANSACTION);
+                } catch(Exception ex) { ex.printStackTrace();}
+                break;
+            case ANONYMOUS_SIGNED_TRANSACTION:
+
+                break;
+            case COOIN_SEND:
+                break;
+        }
+
     }
 
     private void setProgressDialogVisible(boolean isVisible) {

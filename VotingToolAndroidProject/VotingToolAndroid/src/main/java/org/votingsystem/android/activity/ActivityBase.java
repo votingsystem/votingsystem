@@ -148,6 +148,11 @@ public abstract class ActivityBase extends ActionBarActivity {
                         MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
                                 socketMsg.getCaption(), socketMsg.getMessage(),
                                 getSupportFragmentManager());
+            } else if(responseVS != null) {
+                if(ResponseVS.SC_ERROR == responseVS.getStatusCode())
+                    MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                            getString(R.string.error_lbl), responseVS.getMessage(),
+                            getSupportFragmentManager());
             }
         }
     };

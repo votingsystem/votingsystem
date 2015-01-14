@@ -216,6 +216,12 @@ class UrlMappings {
             action = "payment"
         }
 
+        "/shop/listenTransactionChanges/$shopSessionID"{
+            controller = "shopExample"
+            action = "listenTransactionChanges"
+        }
+
+
         "/testing/$year/$month/$day" {
             controller = "testing"
             action = "index"

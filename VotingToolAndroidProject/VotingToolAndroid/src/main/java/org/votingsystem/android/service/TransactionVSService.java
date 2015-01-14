@@ -16,8 +16,11 @@ import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
+import java.util.Calendar;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -26,6 +29,8 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TransactionVSService extends IntentService {
+
+    public static final long FOUR_MINUTES = 60 * 4 * 1000;
 
     public static final String TAG = TransactionVSService.class.getSimpleName();
 
@@ -71,11 +76,18 @@ public class TransactionVSService extends IntentService {
         switch (transactionRequest.getPaymentMethod()) {
             case SIGNED_TRANSACTION:
                 try {
-                    responseVS = sendTransactionVS(transactionRequest.getIBAN(),  transactionRequest.
-                            getCooinServerTransaction(userVS.getIBAN()));
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                                ContentTypeVS.TEXT, transactionRequest.getPaymentConfirmURL());
+                    if(transactionRequest.getDate() != null && DateUtils.inRange(
+                            transactionRequest.getDate(), Calendar.getInstance().getTime(),
+                            FOUR_MINUTES)) {
+                        responseVS = sendTransactionVS(transactionRequest.getIBAN(),  transactionRequest.
+                                getCooinServerTransaction(userVS.getIBAN()));
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                                    ContentTypeVS.TEXT, transactionRequest.getPaymentConfirmURL());
+                        }
+                    } else {
+                        responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                                getString(R.string.payment_session_expired_msg));
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();

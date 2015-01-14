@@ -138,7 +138,9 @@ public class SelectTagVSDialogFragment extends DialogFragment {
                     for(int i = 0 ; i < tagRecords.length(); i++) {
                         tagList.add(tagRecords.getJSONObject(i).getString("name"));
                     }
-                }
+                } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                        getString(R.string.error_lbl), responseVS.getMessage(),
+                        getFragmentManager());
             } catch (JSONException e) {
                 e.printStackTrace();
             }

@@ -31,6 +31,7 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -145,6 +146,9 @@ public class CooinAccountsFragment extends Fragment {
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
             transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
+        } else {
+            Intent intent = getActivity().getIntent();
+            if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCooinAccountsInfo();
         }
         return rootView;
     }
@@ -223,8 +227,6 @@ public class CooinAccountsFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
-                Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
-                        Toast.LENGTH_SHORT).show();
                 updateCooinAccountsInfo();
                 return true;
             default:
@@ -239,6 +241,8 @@ public class CooinAccountsFragment extends Fragment {
     }
 
     private void updateCooinAccountsInfo() {
+        Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
+                Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), CooinService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
@@ -332,18 +336,21 @@ public class CooinAccountsFragment extends Fragment {
             TagVSInfo selectedTag = tagVSListBalances.get(tagVSList.get(position));
             final BigDecimal accountBalance = selectedTag.getCash();
             Button request_button = (Button) accountView.findViewById(R.id.cash_button);
-            if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
-                request_button.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        CooinAccountsFragment.this.currencyCode = currencyCode;
-                        CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                                getString(R.string.cash_request_dialog_caption),
-                                getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
-                                accountBalance, currencyCode, TypeVS.COOIN_REQUEST);
-                    }
-                });
-                request_button.setVisibility(View.VISIBLE);
+            if(TagVS.WILDTAG.equals(selectedTag.getName())) {
+                if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
+                    request_button.setOnClickListener(new OnClickListener() {
+                        public void onClick(View v) {
+                            CooinAccountsFragment.this.currencyCode = currencyCode;
+                            CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                                    getString(R.string.cash_request_dialog_caption),
+                                    getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
+                                    accountBalance, currencyCode, TypeVS.COOIN_REQUEST);
+                        }
+                    });
+                    request_button.setVisibility(View.VISIBLE);
+                } else request_button.setVisibility(View.GONE);
             } else request_button.setVisibility(View.GONE);
+
             TextView tag_text = (TextView)accountView.findViewById(R.id.tag_text);
             String tag_text_msg = "'" + MsgUtils.getTagVSMessage(selectedTag.getName(), getActivity()) +
                     "' " + getString(R.string.currency_lbl) + " " + currencyCode;
