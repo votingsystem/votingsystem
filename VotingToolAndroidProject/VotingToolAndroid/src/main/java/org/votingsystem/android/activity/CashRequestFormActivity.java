@@ -1,8 +1,10 @@
 package org.votingsystem.android.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -20,20 +22,24 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.CooinAccountsFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.SelectTagVSDialogFragment;
 import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
 import java.math.BigDecimal;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
@@ -62,7 +68,7 @@ public class CashRequestFormActivity extends ActionBarActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TagVS tagVS = (TagVS) intent.getSerializableExtra(ContextVS.TAG_KEY);
             if(tagVS != null) setTagVS(tagVS);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -74,17 +80,20 @@ public class CashRequestFormActivity extends ActionBarActivity {
             } else if(responseVS != null){
                 switch(responseVS.getTypeVS()) {
                     case COOIN_REQUEST:
-                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 responseVS.getCaption(), responseVS.getNotificationMessage(),
-                                getSupportFragmentManager());
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            CashRequestFormActivity.this.setResult(Activity.RESULT_OK, null);
-                            finish();
-                        }
+                                CashRequestFormActivity.this);
+                        builder.setPositiveButton(getString(R.string.accept_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                                        CashRequestFormActivity.this.setResult(Activity.RESULT_OK, null);
+                                        finish();
+                                    }
+                                }
+                            });
+                        UIUtils.showMessageDialog(builder);
                         break;
-                    default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                            responseVS.getCaption(), responseVS.getNotificationMessage(),
-                            getSupportFragmentManager());
                 }
                 setProgressDialogVisible(false, null, null);
             }
@@ -99,7 +108,6 @@ public class CashRequestFormActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
         maxValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.MAX_VALUE_KEY);
         currencyCode = getIntent().getStringExtra(ContextVS.CURRENCY_KEY);
-
         tag_text = (TextView)findViewById(R.id.tag_text);
         tag_info = (LinearLayout)findViewById(R.id.tag_info);
         msgTextView = (TextView)findViewById(R.id.msg);

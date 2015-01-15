@@ -23,24 +23,24 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CashRequestFormActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.service.TransactionVSService;
-import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.model.Payment;
 import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
@@ -80,6 +80,11 @@ public class TransactionRequestFragment extends Fragment {
                         launchPayment(TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
                         break;
                     case COOIN:
+                        try {
+                            List<Cooin> cooinList = Wallet.getCooinList((String) responseVS.getData(),
+                                    (AppContextVS) getActivity().getApplicationContext());
+                            submitForm();
+                        } catch(Exception ex) { ex.printStackTrace(); }
                         break;
                 }
 
@@ -178,99 +183,110 @@ public class TransactionRequestFragment extends Fragment {
         LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode); //Activity.RESULT_OK;
         if(Activity.RESULT_OK == resultCode) {
-
+            submitForm();
         }
     }
 
     private void submitForm() {
-        transactionRequest.setPaymentMethod(Payment.getByPosition(
-                payment_method_spinner.getSelectedItemPosition()));
-        CooinAccountsInfo userInfo = null;
-        BigDecimal availableForTagVS = null;
         try {
-            userInfo = PrefUtils.getCooinAccountsInfo(getActivity());
-            availableForTagVS = userInfo.getAvailableForTagVS(
+            transactionRequest.setPaymentMethod(Payment.getByPosition(
+                    payment_method_spinner.getSelectedItemPosition()));
+            CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(getActivity());
+            final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
                     transactionRequest.getCurrencyCode(), transactionRequest.getTagVS());
-        } catch(Exception ex) { ex.printStackTrace();}
-        switch (transactionRequest.getPaymentMethod()) {
-            case SIGNED_TRANSACTION:
-                try {
-                    if(availableForTagVS.compareTo(transactionRequest.getAmount()) < 0) {
-                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                                getString(R.string.insufficient_cash_caption),
-                                getString(R.string.insufficient_cash_msg,
-                                transactionRequest.getCurrencyCode(),
-                                transactionRequest.getAmount().toString(),
-                                availableForTagVS.toString()), getActivity());
-                        builder.setPositiveButton(getString(R.string.check_available_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                                        intent.putExtra(ContextVS.REFRESH_KEY, true);
-                                        intent.putExtra(ContextVS.FRAGMENT_KEY, CooinAccountsFragment.class.getName());
-                                        startActivity(intent);
-                                    }
-                                });
-                        UIUtils.showMessageDialog(builder);
+            switch (transactionRequest.getPaymentMethod()) {
+                case SIGNED_TRANSACTION:
+                    try {
+                        if(availableForTagVS.compareTo(transactionRequest.getAmount()) < 0) {
+                            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                    getString(R.string.insufficient_cash_caption),
+                                    getString(R.string.insufficient_cash_msg,
+                                            transactionRequest.getCurrencyCode(),
+                                            transactionRequest.getAmount().toString(),
+                                            availableForTagVS.toString()), getActivity());
+                            builder.setPositiveButton(getString(R.string.check_available_lbl),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            Intent intent = new Intent(getActivity(),
+                                                    FragmentContainerActivity.class);
+                                            intent.putExtra(ContextVS.REFRESH_KEY, true);
+                                            intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                                    CooinAccountsFragment.class.getName());
+                                            startActivity(intent);
+                                        }
+                                    });
+                            UIUtils.showMessageDialog(builder);
+                            return;
+                        } else  PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(),
+                                broadCastId, transactionRequest.getConfirmMessage(getActivity()),
+                                false, TypeVS.SIGNED_TRANSACTION);
+                    } catch(Exception ex) { ex.printStackTrace();}
+                    break;
+                case ANONYMOUS_SIGNED_TRANSACTION:
+                    if(Wallet.getCooinList() == null) {
+                        PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
+                                getString(R.string.enter_wallet_pin_msg), false,
+                                TypeVS.COOIN);
                         return;
-                    } else  PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(),
-                            broadCastId, transactionRequest.getConfirmMessage(getActivity()),
-                            false, TypeVS.SIGNED_TRANSACTION);
-                } catch(Exception ex) { ex.printStackTrace();}
-                break;
-            case ANONYMOUS_SIGNED_TRANSACTION:
-                if(Wallet.getCooinList() == null) {
-                    PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                            getString(R.string.enter_wallet_pin_msg), false,
-                            TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
-                    return;
-                }
-                BigDecimal availableForTagVSWallet = Wallet.getAvailableForTagVS(
-                        transactionRequest.getCurrencyCode(), transactionRequest.getTagVS());
-                if(availableForTagVSWallet.compareTo(transactionRequest.getAmount()) < 0) {
-                    BigDecimal amountToRequest = transactionRequest.getAmount().subtract(
-                            availableForTagVSWallet);
-                    if(availableForTagVS.compareTo(amountToRequest) < 0) {
-                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                                getString(R.string.insufficient_cash_caption),
-                                getString(R.string.insufficient_anonymous_money_msg,
-                                        transactionRequest.getCurrencyCode(),
-                                        availableForTagVSWallet.toString(),
-                                        amountToRequest.toString(),
-                                        availableForTagVS.toString()), getActivity());
-                        builder.setPositiveButton(getString(R.string.check_available_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                                        intent.putExtra(ContextVS.REFRESH_KEY, true);
-                                        intent.putExtra(ContextVS.FRAGMENT_KEY, CooinAccountsFragment.class.getName());
-                                        startActivity(intent);
-                                    }
-                                });
-                        UIUtils.showMessageDialog(builder);
-                        return;
-                    } else {
-                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                                getString(R.string.insufficient_cash_caption),
-                                getString(R.string.insufficient_anonymous_cash_msg,
-                                        transactionRequest.getCurrencyCode(),
-                                        transactionRequest.getAmount().toString(),
-                                        availableForTagVS.toString()), getActivity());
-                        builder.setPositiveButton(getString(R.string.check_available_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        Intent intent = new Intent(getActivity(), CashRequestFormActivity.class);
-                                        startActivityForResult(intent, COOIN_REQUEST);
-                                    }
-                                });
-                        UIUtils.showMessageDialog(builder);
                     }
-                }
-                break;
-            case COOIN_SEND:
-                break;
-        }
-
+                    final BigDecimal availableForTagVSWallet = Wallet.getAvailableForTagVS(
+                            transactionRequest.getCurrencyCode(), transactionRequest.getTagVS());
+                    if(availableForTagVSWallet.compareTo(transactionRequest.getAmount()) < 0) {
+                        final BigDecimal amountToRequest = transactionRequest.getAmount().subtract(
+                                availableForTagVSWallet);
+                        if(availableForTagVS.compareTo(amountToRequest) < 0) {
+                            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                    getString(R.string.insufficient_cash_caption),
+                                    getString(R.string.insufficient_anonymous_money_msg,
+                                            transactionRequest.getCurrencyCode(),
+                                            availableForTagVSWallet.toString(),
+                                            amountToRequest.toString(),
+                                            availableForTagVS.toString()), getActivity());
+                            builder.setPositiveButton(getString(R.string.check_available_lbl),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            Intent intent = new Intent(getActivity(),
+                                                    FragmentContainerActivity.class);
+                                            intent.putExtra(ContextVS.REFRESH_KEY, true);
+                                            intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                                    CooinAccountsFragment.class.getName());
+                                            startActivity(intent);
+                                        }
+                                    });
+                            UIUtils.showMessageDialog(builder);
+                            return;
+                        } else {
+                            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                                    getString(R.string.insufficient_cash_caption),
+                                    getString(R.string.insufficient_anonymous_cash_msg,
+                                            transactionRequest.getCurrencyCode(),
+                                            transactionRequest.getAmount().toString(),
+                                            availableForTagVSWallet.toString()), getActivity());
+                            builder.setPositiveButton(getString(R.string.request_cash_lbl),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            Intent intent = new Intent(getActivity(),
+                                                    CashRequestFormActivity.class);
+                                            intent.putExtra(ContextVS.MAX_VALUE_KEY,
+                                                    availableForTagVS);
+                                            intent.putExtra(ContextVS.CURRENCY_KEY,
+                                                    transactionRequest.getCurrencyCode());
+                                            intent.putExtra(ContextVS.MESSAGE_KEY,
+                                                    getString(R.string.cash_for_payment_dialog_msg,
+                                                    transactionRequest.getCurrencyCode(),
+                                                    amountToRequest.toString(),
+                                                    availableForTagVS.toString()));
+                                            startActivityForResult(intent, COOIN_REQUEST);
+                                        }
+                                    });
+                            UIUtils.showMessageDialog(builder);
+                        }
+                    }
+                    break;
+                case COOIN_SEND:
+                    break;
+            }
+        } catch(Exception ex) { ex.printStackTrace();}
     }
 
     private void setProgressDialogVisible(boolean isVisible) {

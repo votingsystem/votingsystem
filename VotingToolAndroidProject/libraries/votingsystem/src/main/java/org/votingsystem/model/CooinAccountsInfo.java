@@ -80,15 +80,17 @@ public class CooinAccountsInfo {
     }
 
     public BigDecimal getAvailableForTagVS(String currencyCode, String tagStr) throws ExceptionVS {
+        BigDecimal cash = BigDecimal.ZERO;
         if(balancesCashMap.containsKey(currencyCode)) {
             Map<String, TagVS> currencyMap = balancesCashMap.get(currencyCode);
-            BigDecimal cash = BigDecimal.ZERO;
             if(currencyMap.containsKey(TagVS.WILDTAG)) cash = cash.add(
                     currencyMap.get(TagVS.WILDTAG).getTotal());
-            if(currencyMap.containsKey(tagStr)) cash = cash.add(currencyMap.get(tagStr).getTotal());
-            return cash;
+            if(!TagVS.WILDTAG.equals(tagStr)) {
+                if(currencyMap.containsKey(tagStr)) cash =
+                        cash.add(currencyMap.get(tagStr).getTotal());
+            }
         }
-        throw new ExceptionVS("User has not account for tag '" + tagStr + "' with currency '" + currencyCode +"'");
+        return cash;
     }
 
     public Map<String, TagVSInfo> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
@@ -192,9 +194,7 @@ public class CooinAccountsInfo {
                     data.put("total", tagVSMap.get(tag).getTotal());
                     data.put("timeLimited", tagVSMap.get(tag).getTimeLimited());
                     jsonTagVSData.put(tag, data);
-                } else {
-                    jsonTagVSData.put(tag, tagVSMap.get(tag).getTotal());
-                }
+                } else jsonTagVSData.put(tag, tagVSMap.get(tag).getTotal());
             }
             jsonData.put(currency, jsonTagVSData);
         }

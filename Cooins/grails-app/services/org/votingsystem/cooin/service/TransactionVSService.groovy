@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
@@ -233,7 +234,7 @@ class TransactionVSService {
         for(TransactionVS transaction : transactionList) {
             transactionFromList.add(getTransactionMap(transaction))
         }
-        return [transactionList:transactionFromList, balances:TransactionVS.getBalances(transactionList, source)]
+        return [transactionList:transactionFromList, balances:BalanceUtils.getBalances(transactionList, source)]
     }
 
     @Transactional
@@ -284,8 +285,8 @@ class TransactionVSService {
 
     public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        Map balancesFrom = TransactionVS.getBalances(getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM)
-        Map balancesTo = TransactionVS.getBalances(getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO)
+        Map balancesFrom = BalanceUtils.getBalances(getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM)
+        Map balancesTo = BalanceUtils.getBalances(getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO)
         if(balancesFrom[currencyCode] == null) return BigDecimal.ZERO
         BigDecimal expendedForTagVS = balancesFrom[currencyCode][tagVS.name]
         if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO

@@ -10,10 +10,6 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collector;
-import org.votingsystem.util.TransactionVSFromAmountCollector;
-import org.votingsystem.util.TransactionVSToAmountCollector;
-import static java.util.stream.Collectors.groupingBy;
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -345,21 +341,6 @@ public class TransactionVS  implements Serializable {
     public void addAccountFromMovement(CooinAccount cooinAccount, BigDecimal amount) {
         if(accountFromMovements == null)  accountFromMovements = new HashMap<CooinAccount, BigDecimal>();
         accountFromMovements.put(cooinAccount, amount);
-    }
-
-    public static Map getBalances(Collection<TransactionVS> transactionList, Source source) {
-        Collector<TransactionVS, ?, ?> amountCollector = null;
-        switch(source) {
-            case FROM:
-                amountCollector = new TransactionVSFromAmountCollector();
-                break;
-            case TO:
-                amountCollector = new TransactionVSToAmountCollector();
-                break;
-        }
-        Map result = transactionList.stream().collect(groupingBy(TransactionVS::getCurrencyCode,
-                groupingBy(TransactionVS::getTagName, amountCollector)));
-        return result;
     }
 
     public void afterInsert() {

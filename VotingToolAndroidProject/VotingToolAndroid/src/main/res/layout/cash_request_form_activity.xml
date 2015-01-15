@@ -7,12 +7,11 @@
     <include layout="@layout/toolbar_vs" />
 
     <Button android:id="@+id/add_tag_btn"
-        android:textSize="12sp"
-        android:padding="10dp"
-        android:layout_margin="3dp"
-        android:gravity="center_vertical|center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
         android:text="@string/add_tag_lbl" />
 
     <LinearLayout android:id="@+id/tag_info"

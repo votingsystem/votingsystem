@@ -7,6 +7,8 @@ apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
 apply plugin: "idea"
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 install {
     repositories.mavenInstaller {

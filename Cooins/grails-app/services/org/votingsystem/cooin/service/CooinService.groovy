@@ -1,6 +1,7 @@
 package org.votingsystem.cooin.service
 
 import grails.converters.JSON
+import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -85,7 +86,7 @@ class CooinService {
         }
         Map resultMap = [statusCode:ResponseVS.SC_OK, message: messageSource.getMessage('cooinSendResultMsg',
                 [toUserVS.name, TransactionVSUtils.getBalancesMapMsg(messageSource.getMessage('forLbl', null, locale),
-                        TransactionVS.getBalances(transactionVSList, TransactionVS.Source.FROM))].toArray(),
+                        BalanceUtils.getBalances(transactionVSList, TransactionVS.Source.FROM))].toArray(),
                 locale), receiptList:responseList]
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)
     }

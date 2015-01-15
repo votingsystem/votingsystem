@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.cooin.util;
 
 import org.votingsystem.cooin.model.TransactionVS;
 

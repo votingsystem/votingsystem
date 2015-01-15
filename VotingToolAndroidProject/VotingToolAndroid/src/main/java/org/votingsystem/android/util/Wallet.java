@@ -202,8 +202,10 @@ public class Wallet {
             Map<String, Map> currencyMap = balancesCashMap.get(currencyCode);
             if(currencyMap.containsKey(TagVS.WILDTAG)) cash = cash.add(
                     (BigDecimal) currencyMap.get(TagVS.WILDTAG).get("total"));
-            if(currencyMap.containsKey(tagStr)) cash = cash.add((BigDecimal) currencyMap.get(tagStr).get("total"));
-            return cash;
+            if(!TagVS.WILDTAG.equals(tagStr)) {
+                if(currencyMap.containsKey(tagStr)) cash =
+                        cash.add((BigDecimal) currencyMap.get(tagStr).get("total"));
+            }
         }
         return cash;
     }
