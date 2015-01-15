@@ -285,7 +285,7 @@
     <string name="cooin_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
     <string name="cooin_last_request_info_lbl"><![CDATA[última actualización el <u><b>%1$s</b></u>]]></string>
     <string name="time_remaining_info_lbl">tienes que gastar \'%1$s\' antes del domingo a las 24:00 horas</string>
-    <string name="cash_request_dialog_caption">retirar dinero</string>
+    <string name="cash_request_dialog_caption">retirar efectivo</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
@@ -297,9 +297,15 @@
     <string name="cooin_request_error_caption">error retirando dinero</string>
     <string name="cooin_request_ok_msg"><![CDATA[su disponible se ha incrementado en <b>\'%1$s\' %2$s</b>]]></string>
     <string name="insufficient_cash_for_tagvs_caption">disponible insuficiente para \'%1$s\'</string>
-    <string name="insufficient_cash_caption">no dispone de saldo sufuciente</string>
+    <string name="insufficient_cash_caption">no dispone de saldo suficiente</string>
     <string name="insufficient_cash_msg"><![CDATA[importe solicitado <b>\'%2$s\' %1$s</b><br/>
     disponible <b>\'%3$s\' %1$s</b>]]></string>
+    <string name="insufficient_anonymous_cash_msg"><![CDATA[importe solicitado <b>\'%2$s\' %1$s</b><br/>
+        disponible <b>\'%3$s\' %1$s</b></br>no dispone de suficiente dinero en efectivo para hacer
+        una transacción anónima, ¿desea retirar de su cuenta para completar la operación?]]></string>
+    <string name="insufficient_anonymous_money_msg"><![CDATA[no puede completar la transacción anónima,
+        dispone de <b>\'%2$s\' %1$s</b> en efectivo, necesita retirar <b>\'%3$s\' %1$s</b> en cooins<br/>
+        y en su cuenta sólo dispone de <b>\'%4$s\' %1$s</b>]]></string>
     <string name="cooin_send_ok_caption">pago realizado con éxito</string>
     <string name="cooin_send_ok_msg"><![CDATA[ha realizado un pago de <b>\'%1$s\' %2$s</b> bajo el
     concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>

@@ -19,6 +19,9 @@
         <activity android:name=".activity.BrowserVSActivity"
             android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
+        <activity android:name=".activity.CashRequestFormActivity" android:noHistory="true"
+            android:label="@string/cash_request_dialog_caption" android:theme="@style/ThemeVS"/>
+
         <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 

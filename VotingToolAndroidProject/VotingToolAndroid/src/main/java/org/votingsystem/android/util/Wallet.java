@@ -6,6 +6,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
@@ -192,6 +193,19 @@ public class Wallet {
             PrefUtils.putWallet(encryptedWalletBytes, context);
         } else PrefUtils.putWallet(null, context);
 
+    }
+
+    public static BigDecimal getAvailableForTagVS(String currencyCode, String tagStr) {
+        Map<String, Map<String, Map>> balancesCashMap = getCurrencyMap();
+        BigDecimal cash = BigDecimal.ZERO;
+        if(balancesCashMap.containsKey(currencyCode)) {
+            Map<String, Map> currencyMap = balancesCashMap.get(currencyCode);
+            if(currencyMap.containsKey(TagVS.WILDTAG)) cash = cash.add(
+                    (BigDecimal) currencyMap.get(TagVS.WILDTAG).get("total"));
+            if(currencyMap.containsKey(tagStr)) cash = cash.add((BigDecimal) currencyMap.get(tagStr).get("total"));
+            return cash;
+        }
+        return cash;
     }
 
 }

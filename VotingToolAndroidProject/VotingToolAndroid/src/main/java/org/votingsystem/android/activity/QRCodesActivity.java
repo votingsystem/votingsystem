@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
@@ -21,6 +23,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**

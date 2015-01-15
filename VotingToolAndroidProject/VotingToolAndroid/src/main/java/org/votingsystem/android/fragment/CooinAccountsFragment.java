@@ -1,11 +1,14 @@
 package org.votingsystem.android.fragment;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +27,7 @@ import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.CashRequestFormActivity;
 import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
@@ -56,7 +60,8 @@ public class CooinAccountsFragment extends Fragment {
 
 	public static final String TAG = CooinAccountsFragment.class.getSimpleName();
 
-    private String currencyCode;
+    private static final int COOIN_REQUEST   = 1;
+
     private TransactionVS transactionVS;
     private View rootView;
     private String broadCastId = CooinAccountsFragment.class.getSimpleName();
@@ -71,9 +76,6 @@ public class CooinAccountsFragment extends Fragment {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
-                case COOIN_REQUEST:
-                    sendCooinRequest((String) responseVS.getData());
-                    break;
                 case COOIN_SEND:
                     sendCooin();
                     break;
@@ -83,21 +85,6 @@ public class CooinAccountsFragment extends Fragment {
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case COOIN_REQUEST:
-                    if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
-                        transactionVS = (TransactionVS) responseVS.getData();
-                        PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                MsgUtils.getCooinRequestMessage(transactionVS, getActivity()),
-                                false, TypeVS.COOIN_REQUEST);
-                    } else {
-                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                                responseVS.getCaption(), responseVS.getNotificationMessage(),
-                                getFragmentManager());
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            loadUserInfo(DateUtils.getCurrentWeekPeriod());
-                        }
-                    }
-                    break;
                 case COOIN_SEND:
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage(), getFragmentManager());
@@ -192,6 +179,14 @@ public class CooinAccountsFragment extends Fragment {
         }
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode); //Activity.RESULT_OK;
+        if(Activity.RESULT_OK == resultCode) {
+            loadUserInfo(DateUtils.getCurrentWeekPeriod());
+        }
+    }
+
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = PrefUtils.getCooinAccountsLastCheckDate(getActivity());
         if(lastCheckedTime == null) {
@@ -248,17 +243,6 @@ public class CooinAccountsFragment extends Fragment {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.fetching_uservs_accounts_info_msg));
-        getActivity().startService(startIntent);
-    }
-
-    private void sendCooinRequest(String pin) {
-        Intent startIntent = new Intent(getActivity(), CooinService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_REQUEST);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.PIN_KEY, pin);
-        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true, getString(R.string.cooin_request_msg_subject),
-                MsgUtils.getCooinRequestMessage(transactionVS, getActivity()));
         getActivity().startService(startIntent);
     }
 
@@ -340,11 +324,12 @@ public class CooinAccountsFragment extends Fragment {
                 if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                     request_button.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
-                            CooinAccountsFragment.this.currencyCode = currencyCode;
-                            CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                                    getString(R.string.cash_request_dialog_caption),
-                                    getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
-                                    accountBalance, currencyCode, TypeVS.COOIN_REQUEST);
+                            Intent intent = new Intent(getActivity(), CashRequestFormActivity.class);
+                            intent.putExtra(ContextVS.MAX_VALUE_KEY, accountBalance);
+                            intent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
+                            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cash_dialog_msg,
+                                    accountBalance, currencyCode));
+                            startActivityForResult(intent, COOIN_REQUEST);
                         }
                     });
                     request_button.setVisibility(View.VISIBLE);

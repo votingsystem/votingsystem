@@ -108,6 +108,7 @@ public class ContextVS {
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String QUERY_KEY                   = "QUERY_KEY";
     public static final String REFRESH_KEY                 = "REFRESH_KEY";
+    public static final String MAX_VALUE_KEY = "MAX_VALUE_KEY";
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
             "PENDING_OPERATIONS_LAST_CHECKED_KEY";
 

@@ -57,13 +57,15 @@ public class TransactionVSService extends IntentService {
                             responseVS, contextVS));
                 } catch (Exception ex) { ex.printStackTrace(); }
                 break;
-            case PAYMENT:
+            case SIGNED_TRANSACTION:
                 try {
                     JSONObject transactionRequestJSON =
                             new JSONObject(arguments.getString(ContextVS.JSON_DATA_KEY));
                     TransactionRequest transactionRequest = TransactionRequest.parse(transactionRequestJSON);
                     processPayment(transactionRequest, operation);
                 } catch (Exception ex) { ex.printStackTrace(); }
+                break;
+            case ANONYMOUS_SIGNED_TRANSACTION:
                 break;
             default: LOGD(TAG + ".onHandleIntent", "unprocessed operation: " + operation.toString());
         }
