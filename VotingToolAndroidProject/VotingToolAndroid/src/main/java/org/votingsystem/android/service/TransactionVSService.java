@@ -75,34 +75,31 @@ public class TransactionVSService extends IntentService {
         LOGD(TAG + ".processPayment", "processPayment");
         UserVS userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
-        switch (transactionRequest.getPaymentMethod()) {
-            case SIGNED_TRANSACTION:
-                try {
-                    if(transactionRequest.getDate() != null && DateUtils.inRange(
-                            transactionRequest.getDate(), Calendar.getInstance().getTime(),
-                            FOUR_MINUTES)) {
+        if(transactionRequest.getDate() != null && DateUtils.inRange(transactionRequest.getDate(),
+                Calendar.getInstance().getTime(), FOUR_MINUTES)) {
+            try {
+                switch (transactionRequest.getPaymentMethod()) {
+                    case SIGNED_TRANSACTION:
                         responseVS = sendTransactionVS(transactionRequest.getIBAN(),  transactionRequest.
                                 getCooinServerTransaction(userVS.getIBAN()));
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                                     ContentTypeVS.TEXT, transactionRequest.getPaymentConfirmURL());
                         }
-                    } else {
-                        responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                                getString(R.string.payment_session_expired_msg));
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    responseVS = ResponseVS.getExceptionResponse(ex, this);
+                        break;
+                    case ANONYMOUS_SIGNED_TRANSACTION:
+                        break;
+                    case COOIN_SEND:
+                        break;
                 }
-                break;
-            case ANONYMOUS_SIGNED_TRANSACTION:
-                break;
-            case COOIN_SEND:
-                break;
-        }
-        broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
-                responseVS, contextVS));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                responseVS = ResponseVS.getExceptionResponse(ex, this);
+            }
+        } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                    getString(R.string.payment_session_expired_msg));
+        broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS,
+                contextVS));
     }
 
     private ResponseVS sendTransactionVS(String toUserIBAN, JSONObject transactionVSJSON) {

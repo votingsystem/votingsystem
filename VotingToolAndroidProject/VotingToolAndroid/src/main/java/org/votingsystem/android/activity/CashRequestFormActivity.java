@@ -62,6 +62,7 @@ public class CashRequestFormActivity extends ActionBarActivity {
     private EditText amount;
     private CheckBox time_limited_checkbox;
     private BigDecimal maxValue;
+    private BigDecimal defaultValue;
     private String currencyCode = null;
     private TransactionVS transactionVS = null;
 
@@ -107,11 +108,13 @@ public class CashRequestFormActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         maxValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.MAX_VALUE_KEY);
+        defaultValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.DEFAULT_VALUE_KEY);
         currencyCode = getIntent().getStringExtra(ContextVS.CURRENCY_KEY);
         tag_text = (TextView)findViewById(R.id.tag_text);
         tag_info = (LinearLayout)findViewById(R.id.tag_info);
         msgTextView = (TextView)findViewById(R.id.msg);
         amount = (EditText)findViewById(R.id.amount);
+        if(defaultValue != null) amount.setText(defaultValue.toString());
         currency_text = (TextView)findViewById(R.id.currency_text);
         currency_text.setText(currencyCode);
         time_limited_checkbox = (CheckBox)findViewById(R.id.time_limited_checkbox);

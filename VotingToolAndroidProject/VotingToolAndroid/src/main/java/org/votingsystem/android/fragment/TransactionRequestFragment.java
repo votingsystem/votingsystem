@@ -269,6 +269,8 @@ public class TransactionRequestFragment extends Fragment {
                                                     CashRequestFormActivity.class);
                                             intent.putExtra(ContextVS.MAX_VALUE_KEY,
                                                     availableForTagVS);
+                                            intent.putExtra(ContextVS.DEFAULT_VALUE_KEY,
+                                                    amountToRequest);
                                             intent.putExtra(ContextVS.CURRENCY_KEY,
                                                     transactionRequest.getCurrencyCode());
                                             intent.putExtra(ContextVS.MESSAGE_KEY,
@@ -281,6 +283,8 @@ public class TransactionRequestFragment extends Fragment {
                                     });
                             UIUtils.showMessageDialog(builder);
                         }
+                    } else {
+                        launchPayment(TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
                     }
                     break;
                 case COOIN_SEND:

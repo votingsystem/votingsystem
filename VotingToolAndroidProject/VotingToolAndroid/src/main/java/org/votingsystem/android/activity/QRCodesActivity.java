@@ -124,10 +124,12 @@ public class QRCodesActivity extends ActivityBase {
                         case DELIVERY_WITHOUT_PAYMENT:
                         case DELIVERY_WITH_PAYMENT:
                         case REQUEST_FORM:
-                            Intent intent = new Intent(QRCodesActivity.this, FragmentContainerActivity.class);
-                            intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionRequestFragment.class.getName());
-                            intent.putExtra(ContextVS.JSON_DATA_KEY, responseVS.getMessageJSON().toString());
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            Intent intent = new Intent(QRCodesActivity.this,
+                                    FragmentContainerActivity.class);
+                            intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                    TransactionRequestFragment.class.getName());
+                            intent.putExtra(ContextVS.JSON_DATA_KEY,
+                                    responseVS.getMessageJSON().toString());
                             startActivity(intent);
                             break;
                     }

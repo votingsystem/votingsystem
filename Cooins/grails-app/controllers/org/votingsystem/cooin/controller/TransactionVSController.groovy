@@ -113,7 +113,7 @@ class TransactionVSController {
     }
 
     /**
-     * Servicio que recibe una transacción compuesta por un lote de Cooins
+     * Service that process an anonymous transaction.
      *
      * @httpMethod [POST]
      * @serviceURL [/transactionVS/cooin]

@@ -304,7 +304,7 @@
     disponible <b>%3$s %1$s</b>]]></string>
     <string name="insufficient_anonymous_cash_msg"><![CDATA[importe solicitado <b>%2$s %1$s</b><br/>
         disponible en efectivo <b>%3$s %1$s</b><br/> no dispone efectivo suficiente para hacer
-        una transacción anónima,<br/> ¿desea retirar <b>cooins</b> de su cuenta para completar la operación?]]></string>
+        una transacción anónima,<br/> ¿desea retirar <b>efectivo</b> de su cuenta para completar la operación?]]></string>
     <string name="insufficient_anonymous_money_msg"><![CDATA[no puede completar la transacción anónima,
         dispone de <b>\'%2$s\' %1$s</b> en efectivo, necesita retirar <b>\'%3$s\' %1$s</b> en cooins<br/>
         y en su cuenta sólo dispone de <b>\'%4$s\' %1$s</b>]]></string>
