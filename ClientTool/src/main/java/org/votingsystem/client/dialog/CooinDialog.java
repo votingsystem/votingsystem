@@ -161,7 +161,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
         cooinHashLbl.setText(cooin.getHashCertVS());
         cooinValueLbl.setText(cooin.getAmount().toPlainString());
         currencyLbl.setText(cooin.getCurrencyCode());
-        cooinTagLbl.setText(Utils.getTagDescription(cooin.getSignedTagVS()));
+        cooinTagLbl.setText(Utils.getTagDescription(cooin.getCertTagVS()));
         operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
         operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED));
         String cooinDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
@@ -219,7 +219,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                     fxmlLoader.setController(cooinDialog);
                         stage.setScene(new Scene(fxmlLoader.load()));
                     stage.setTitle("Cooin - " + cooin.getAmount().toPlainString() + " " + cooin.getCurrencyCode() +
-                            " " + Utils.getTagForDescription(cooin.getSignedTagVS()));
+                            " " + Utils.getTagForDescription(cooin.getCertTagVS()));
                     stage.initModality(Modality.WINDOW_MODAL);
                     //stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
                     stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));

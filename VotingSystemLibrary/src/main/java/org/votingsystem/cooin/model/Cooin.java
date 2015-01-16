@@ -82,14 +82,17 @@ public class Cooin implements Serializable  {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
+    @Transient private TypeVS operation;
+    @Transient private BigDecimal batchAmount;
     @Transient private CertificationRequestVS certificationRequest;
     @Transient private PKCS10CertificationRequest csr;
     @Transient private X509Certificate x509AnonymousCert;
     @Transient private transient SMIMEMessage smimeMessage;
     @Transient private File file;
-    @Transient private String signedTagVS;
+    @Transient private String certTagVS;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
+    @Transient private String cooinBatchUUID;
     @Transient private Cooin.CertSubject certSubject;
 
     public Cooin() {}
@@ -128,11 +131,11 @@ public class Cooin implements Serializable  {
         certSubject = new Cooin.CertSubject(subjectDN, hashCertVS);
         amount = new BigDecimal(certExtensionData.getString("cooinValue"));
         currencyCode = certExtensionData.getString("currencyCode");
-        signedTagVS = certExtensionData.getString("tag");
+        certTagVS = certExtensionData.getString("tag");
         if(!certSubject.getCooinServerURL().equals(cooinServerURL) ||
                 certSubject.getCooinValue().compareTo(amount) != 0 ||
                 !certSubject.getCurrencyCode().equals(currencyCode) ||
-                !certSubject.getTag().equals(signedTagVS)) throw new ExceptionVS("Cooin with errors. SubjectDN: '" +
+                !certSubject.getTag().equals(certTagVS)) throw new ExceptionVS("Cooin with errors. SubjectDN: '" +
                 subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
         return this;
     }
@@ -143,7 +146,7 @@ public class Cooin implements Serializable  {
         if(!cooinRequest.getCooinServerURL().equals(cooinServerURL))  throw new ExceptionVS("checkRequestWithDB_cooinServerURL");
         if(!cooinRequest.getHashCertVS().equals(hashCertVS))  throw new ExceptionVS("checkRequestWithDB_hashCertVS");
         if(!cooinRequest.getCurrencyCode().equals(currencyCode))  throw new ExceptionVS("checkRequestWithDB_currencyCode");
-        if(!cooinRequest.getSignedTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
+        if(!cooinRequest.getCertTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(cooinRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
         this.smimeMessage = cooinRequest.getSMIME();
         this.x509AnonymousCert = cooinRequest.getX509AnonymousCert();
@@ -159,16 +162,24 @@ public class Cooin implements Serializable  {
 
     public void validateSignedData() throws Exception {
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
-        BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
-        TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
+        if(messageJSON.has("amount")) {
+            BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
+            if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS(getErrorPrefix() + "and value '" + amount +
+                    "' has signed amount  '" + toUserVSAmount + "'");
+        } else if(messageJSON.has("batchAmount")) {
+            this.batchAmount = new BigDecimal(messageJSON.getString("batchAmount"));
+        }
+        if(messageJSON.has("cooinBatchUUID")) this.cooinBatchUUID = messageJSON.getString("cooinBatchUUID");
+        operation = TypeVS.valueOf(messageJSON.getString("operation"));
         if(TypeVS.COOIN_SEND != operation)
             throw new ExceptionVS("Error - Cooin with invalid operation '" + operation.toString() + "'");
-        if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS(getErrorPrefix() + "and value '" + amount +
-                "' has signed amount  '" + toUserVSAmount + "'");
+
         if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS(getErrorPrefix() +
                 "currencyCode '" + currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
-        if(!signedTagVS.equals(messageJSON.getString("tag"))) throw new ExceptionVS(getErrorPrefix() + "tag '" +
-                signedTagVS + "' has signed tag  '" + messageJSON.getString("tag"));
+        tag = new TagVS(messageJSON.getString("tag"));
+        if(!TagVS.WILDTAG.equals(certTagVS) && !certTagVS.equals(tag.getName()))
+                throw new ExceptionVS(getErrorPrefix() + "tag '" + certTagVS + "' has signed tag  '" +
+                messageJSON.getString("tag"));
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
@@ -198,6 +209,14 @@ public class Cooin implements Serializable  {
         return cooin;
     }
 
+    public BigDecimal getBatchAmount() {
+        return batchAmount;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
     public Boolean getIsTimeLimited() {
         return isTimeLimited;
     }
@@ -212,6 +231,10 @@ public class Cooin implements Serializable  {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public String getCooinBatchUUID() {
+        return cooinBatchUUID;
     }
 
     public String getToUserIBAN() {
@@ -230,8 +253,8 @@ public class Cooin implements Serializable  {
         this.subject = subject;
     }
 
-    public String getSignedTagVS() {
-        return signedTagVS;
+    public String getCertTagVS() {
+        return certTagVS;
     }
 
     public JSONObject getCertExtensionData() throws IOException {

@@ -5,6 +5,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.cooin.model.CooinTransactionBatch
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.CooinUtils
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -117,15 +118,15 @@ class TransactionVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/transactionVS/cooin]
-     * @requestContentType Documento JSON con la extructura https://github.com/votingsystem/votingsystem/wiki/Lote-de-Cooins
-     * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los model recibidos.
+     * @requestContentType [JSON] https://github.com/votingsystem/votingsystem/wiki/Lote-de-Cooins
+     * @responseContentType [application/pkcs7-mime]. batch receipt.
      * @return
      */
     def cooin() {
         if(!request.JSON) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = cooinService.processCooinTransaction(new CooinTransactionBatch(request.JSON.toString()))
+        ResponseVS responseVS = cooinService.processCooinTransaction(CooinUtils.getCooinTransactionBatch(request.JSON))
         return [responseVS:responseVS]
     }
 

@@ -75,7 +75,7 @@ public class CooinRequestBatch extends BatchRequest implements Serializable  {
                     cooinRequestJSON.getString("csr").getBytes());
             Cooin cooin = new Cooin(csr);
             if(cooinValue.compareTo(cooin.getAmount()) != 0 || !currencyCode.equals(cooin.getCurrencyCode()) ||
-                    !csrTagVS.equals(cooin.getSignedTagVS())) throw new ExceptionVS(
+                    !csrTagVS.equals(cooin.getCertTagVS())) throw new ExceptionVS(
                     "Cooin CSR request number '" + i + "' with ERRORS. JSON request: '" + cooinRequestJSON.toString() +
                             "'. Cert extension data: '" + cooin.getCertExtensionData().toString() + "'");
             if (!localServer.equals(cooin.getCooinServerURL()))  throw new ExceptionVS("Cooin signed server URL '" +

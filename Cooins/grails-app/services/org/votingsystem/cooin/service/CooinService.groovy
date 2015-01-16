@@ -1,6 +1,7 @@
 package org.votingsystem.cooin.service
 
 import grails.converters.JSON
+import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
@@ -53,22 +54,47 @@ class CooinService {
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         UserVS toUserVS;
+        BigDecimal cooinAmount = BigDecimal.ZERO
         for(Cooin cooin : cooinBatch.getCooinList()) {
-            try {
+            if(!toUserVS) {
                 toUserVS = UserVS.findWhere(IBAN:cooin.getToUserIBAN())
                 if(!toUserVS) throw new ExceptionVS("Error - Cooin with hash '${cooin?.hashCertVS}' has wrong receptor IBAN '" +
                         cooin.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
-                cooin.setToUserVS(toUserVS)
+                cooinBatch.loadTransactionData(cooin)
+            } else {
+                cooinBatch.checkCooinData(cooin)
+            }
+            cooinAmount = cooinAmount.add(cooin.getAmount())
+            cooin.setToUserVS(toUserVS)
+            try {
                 validatedCooinList.add(validateCooin(cooin));
             } catch(Exception ex) {
-                String msg = "Error validating Cooin with id '${cooin?.id}' and hash '${cooin?.hashCertVS}'";
                 if(ex instanceof ExceptionVS) throw ex
-                else throw new ExceptionVS("Error validating Cooin with id '${cooin?.id}' and hash '${cooin?.hashCertVS}'",
+                else throw new ExceptionVS("Error validating Cooin with hashCertVS '${cooin?.hashCertVS}'",
                         MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'), ex)
             }
         }
+        BigDecimal amountOver = cooinAmount.subtract(cooinBatch.getBatchAmount())
+        if(amountOver.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
+                "CooinTransactionBatch insufficientCash", MetaInfMsg.getErrorMsg(methodName, 'insufficientCash'))
+
+        if(amountOver.compareTo(BigDecimal.ZERO) > 0 && cooinBatch.getCsrCooin() != null) {
+            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
+                    cooinBatch.getCsrCooin().getBytes());
+            Cooin newCooin = new Cooin(csr);
+            if(amountOver.compareTo(newCooin.getAmount()) != 0) throw new ExceptionVS(
+                    "CooinTransactionBatch overMissMatch, expected '${amountOver.toString()}' " +
+                    "found '${newCooin.getAmount().toString()}'",
+                    MetaInfMsg.getErrorMsg(methodName, 'overMissMatch'))
+        }
+
+
+
+        //TODO
+
+
+
         List responseList = []
-        Map currencyMap = [:]
         List<TransactionVS> transactionVSList = []
         for(Cooin cooin: validatedCooinList) {
             Date validTo = null
@@ -108,8 +134,8 @@ class CooinService {
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             CertExtensionCheckerVS extensionChecker
             timeStampService.validateToken(userVS.getTimeStampToken())
-            CertUtils.CertValidatorResultVS certValidatorResult = CertUtils.verifyCertificate(signatureVSService.getCooinAnchors(),
-                    false, [userVS.getCertificate()])
+            CertUtils.CertValidatorResultVS certValidatorResult = CertUtils.verifyCertificate(
+                    signatureVSService.getCooinAnchors(), false, [userVS.getCertificate()])
             X509Certificate certCaResult = certValidatorResult.result.trustAnchor.trustedCert;
             extensionChecker = certValidatorResult.checker
             //if (extensionChecker.isAnonymousSigner()) { }
