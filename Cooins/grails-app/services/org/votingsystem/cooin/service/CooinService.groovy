@@ -1,6 +1,7 @@
 package org.votingsystem.cooin.service
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.groovy.util.TransactionVSUtils
@@ -34,26 +35,16 @@ class CooinService {
     def timeStampService
     def systemService
 
-    public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
-        //messageSMIMEReq?.getSMIME()?.getSigner()?.certificate
-        log.debug(smimeMessageReq.getSignedContent())
-        String fromUser = grailsApplication.config.vs.serverName
-        String toUser = smimeMessageReq.getFrom().toString()
-        String subject = messageSource.getMessage('cooinReceiptSubject', null, locale)
-        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
-                smimeMessageReq, subject)
-        messageSMIMEReq.setSMIME(smimeMessageResp)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.COOIN_CANCEL, data:messageSMIMEReq,
-                contentType: ContentTypeVS.JSON_SIGNED)
-    }
-
     public ResponseVS processCooinTransaction(CooinTransactionBatch cooinBatch) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        Map resultMap = [:]
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         UserVS toUserVS = UserVS.findWhere(IBAN:cooinBatch.getToUserIBAN());
+        TagVS tagVS = TagVS.findWhere(name:cooinBatch.getTag())
+        if(!tagVS) throw new ExceptionVS(
+                "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' missing TagVS '",
+                MetaInfMsg.getErrorMsg(methodName, 'missingTagVS'))
+        cooinBatch.setTagVS(tagVS)
         if(!toUserVS) throw new ExceptionVS(
                 "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' has wrong receptor IBAN '" +
                 cooinBatch.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
@@ -67,46 +58,26 @@ class CooinService {
                         MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'), ex)
             }
         }
-        BigDecimal batchLeftOver = cooinBatch.getLeftOver()
-        if(batchLeftOver.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
-                "CooinTransactionBatch insufficientCash", MetaInfMsg.getErrorMsg(methodName, 'insufficientCash'))
-
-        if(batchLeftOver.compareTo(BigDecimal.ZERO) > 0 && cooinBatch.getCsrCooin() != null) {
-            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
-                    cooinBatch.getCsrCooin().getBytes());
-            Cooin newCooin = new Cooin(csr);
-            if(batchLeftOver.compareTo(newCooin.getAmount()) != 0) throw new ExceptionVS(
-                    "CooinTransactionBatch overMissMatch, expected '${batchLeftOver.toString()}' " +
-                    "found '${newCooin.getAmount().toString()}'",
-                    MetaInfMsg.getErrorMsg(methodName, 'overMissMatch'))
+        if(cooinBatch.getLeftOverCooin()) {
+            Cooin leftOverCoin = csrService.signCooinRequest(cooinBatch.getLeftOverCooin())
+            resultMap.leftOverCoin = new String(leftOverCoin.getIssuedCertPEM(), "UTF-8")
         }
-
-
-
-        //TODO
-
-
-
-        List responseList = []
-        List<TransactionVS> transactionVSList = []
+        cooinBatch.setToUserVS(toUserVS).save()
+        JSONObject batchDataJSON = cooinBatch.getDataJSON()
+        SMIMEMessage receipt = signatureVSService.getSMIME(systemService.getSystemUser().getName(),
+                cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject())
+        MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.RECEIPT, batchRequest:cooinBatch).save()
+        Date validTo = null
+        //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        //if(cooinBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
+        TransactionVS transactionVS = new TransactionVS(amount: cooinBatch.getBatchAmount(), messageSMIME:messageSMIME,
+                cooinTransactionBatch:cooinBatch, toUserIBAN:cooinBatch.getToUserIBAN(), state:TransactionVS.State.OK,
+                validTo: validTo, subject:cooinBatch.getSubject(), toUserVS: toUserVS, type:TransactionVS.Type.COOIN_SEND,
+                currencyCode: cooinBatch.getCurrencyCode(), tag:cooinBatch.getTagVS()).save()
         for(Cooin cooin: validatedCooinList) {
-            Date validTo = null
-            if(cooin.isTimeLimited == true) validTo = timePeriod.getDateTo()
-            SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(systemService.getSystemUser().getName(),
-                    cooin.getHashCertVS(), cooin.getSMIME(), cooin.getSubject())
-            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.COOIN_SEND).save()
-            TransactionVS transactionVS = new TransactionVS(amount: cooin.amount, messageSMIME:messageSMIME,
-                    toUserIBAN:cooin.getToUserIBAN(), state:TransactionVS.State.OK, validTo: validTo,
-                    subject:cooin.getSubject(), toUserVS: cooin.getToUserVS(), type:TransactionVS.Type.COOIN_SEND,
-                    currencyCode: cooin.getCurrencyCode(), tag:cooin.getTag()).save()
-            transactionVSList.add(transactionVS)
             cooin.setState(Cooin.State.EXPENDED).setTransactionVS(transactionVS).save()
-            responseList.add([(cooin.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
-        Map resultMap = [statusCode:ResponseVS.SC_OK, message: messageSource.getMessage('cooinSendResultMsg',
-                [toUserVS.name, TransactionVSUtils.getBalancesMapMsg(messageSource.getMessage('forLbl', null, locale),
-                        BalanceUtils.getBalances(transactionVSList, TransactionVS.Source.FROM))].toArray(),
-                locale), receiptList:responseList]
+        resultMap.receipt = Base64.getEncoder().encodeToString(receipt.getBytes())
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)
     }
 

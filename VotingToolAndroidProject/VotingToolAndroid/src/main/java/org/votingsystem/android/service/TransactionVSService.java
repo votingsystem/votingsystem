@@ -89,7 +89,7 @@ public class TransactionVSService extends IntentService {
                         break;
                     case ANONYMOUS_SIGNED_TRANSACTION:
                         break;
-                    case COOIN_SEND:
+                    case CASH_SEND:
                         break;
                 }
             } catch (Exception ex) {

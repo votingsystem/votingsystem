@@ -61,13 +61,10 @@ public class TransactionVS  implements Serializable {
     @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="cooinTransactionBatch") private CooinTransactionBatch cooinTransactionBatch;
+    @OneToOne private CooinTransactionBatch cooinTransactionBatch;
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
-
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
-    @Column(name="batchUUID") private String batchUUID;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -245,19 +242,10 @@ public class TransactionVS  implements Serializable {
         this.tag = tag;
     }
 
-    public String getBatchUUID() {
-        return batchUUID;
-    }
-
-    public void setBatchUUID(String batchUUID) {
-        this.batchUUID = batchUUID;
-    }
-
     public String getTagName() {
         if(tag == null) return null;
         else return tag.getName();
     }
-
 
     public CooinTransactionBatch getCooinTransactionBatch() {
         return cooinTransactionBatch;

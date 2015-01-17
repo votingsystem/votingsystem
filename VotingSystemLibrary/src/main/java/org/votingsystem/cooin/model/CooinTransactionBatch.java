@@ -4,6 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.hibernate.annotations.Entity;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.*;
@@ -31,19 +32,23 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
 
     private static Logger log = Logger.getLogger(CooinTransactionBatch.class);
 
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="toUserVS") private UserVS toUserVS;
     @Column(name="batchAmount") private BigDecimal batchAmount = null;
     @Column(name="cooinAmount") private BigDecimal cooinAmount = null;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
+    @Column(name="paymentOption", nullable=false) @Enumerated(EnumType.STRING) private Payment paymentOption;
     @Column(name="batchUUID") private String batchUUID;
+    @Column(name="subject") private String subject;
 
-    private List<Cooin> cooinList;
-    private String csrCooin;
-    private TypeVS operation;
-    private String subject;
-    private String currencyCode;
-    private String toUserIBAN;
-    private String tag;
+    @Transient private List<Cooin> cooinList;
+    @Transient private Cooin leftOverCooin;
+    @Transient private BigDecimal leftOver;
+    @Transient private TypeVS operation;
+    @Transient private String currencyCode;
+    @Transient private String toUserIBAN;
+    @Transient private String tag;
 
     public CooinTransactionBatch(InputStream inputStream) throws Exception {
         super(inputStream);
@@ -51,7 +56,11 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(new String(getContent(), "UTF-8"));
         cooinList = new ArrayList<Cooin>();
         JSONArray jsonArray = jsonObject.getJSONArray("cooins");
-        if(jsonObject.containsKey("csrCooin")) csrCooin = jsonObject.getString("csrCooin");
+        if(jsonObject.containsKey("csrCooin")) {
+            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
+                    jsonObject.getString("csrCooin").getBytes());
+            leftOverCooin = new Cooin(csr);
+        }
         for(int i = 0; i < jsonArray.size(); i++) {
             SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
                     Base64.getDecoder().decode(jsonArray.getString(i).getBytes())));
@@ -61,10 +70,11 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
                 cooinList.add(cooin);
                 if(i == 0) {
                     this.operation = cooin.getOperation();
-                    this.subject = cooin.getSubject();
+                    this.paymentOption = cooin.getPaymentOption();
+                    this.setSubject(cooin.getSubject());
                     this.toUserIBAN = cooin.getToUserIBAN();
                     this.batchAmount = cooin.getBatchAmount();
-                    this.currencyCode = cooin.getCurrencyCode();
+                    this.setCurrencyCode(cooin.getCurrencyCode());
                     this.tag = cooin.getTag().getName();
                     this.batchUUID = cooin.getBatchUUID();
                 } else checkCooinData(cooin);
@@ -72,18 +82,35 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
                 throw new ExceptionVS("Error with cooin : '" + i + "' - " + ex.getMessage(), ex);
             }
         }
+        leftOver = cooinAmount.subtract(batchAmount);
+        if(leftOver.compareTo(BigDecimal.ZERO) < 0) new ValidationExceptionVS(CooinTransactionBatch.class,
+                "CooinTransactionBatch insufficientCash - required '" + batchAmount.toString() + "' " + "found '" +
+                cooinAmount.toString() + "'");
+        if(leftOverCooin != null && leftOver.compareTo(leftOverCooin.getAmount()) != 0) new ValidationExceptionVS(
+                CooinTransactionBatch.class, "CooinTransactionBatch leftOverMissMatch, expected '" + leftOver.toString() +
+                "found '" + leftOverCooin.getAmount().toString() + "'");
+    }
+
+    public JSONObject getDataJSON() {
+        JSONObject result = new JSONObject();
+        result.put("operation", this.operation.toString());
+        result.put("paymentOption", this.paymentOption.toString());
+        if(getSubject() != null) result.put("subject", getSubject());
+        if(toUserIBAN != null) result.put("toUserIBAN", toUserIBAN);
+        if(batchAmount != null) result.put("batchAmount", batchAmount.toString());
+        if(cooinAmount != null) result.put("cooinAmount", cooinAmount.toString());
+        if(getCurrencyCode() != null) result.put("currencyCode", getCurrencyCode());
+        if(tag != null) result.put("tag", tag);
+        List<String> hashCertVSCooins = new ArrayList<>();
+        for(Cooin cooin: cooinList) {
+            hashCertVSCooins.add(cooin.getHashCertVS());
+        }
+        result.put("hashCertVSCooins", hashCertVSCooins);
+        if(batchUUID != null) result.put("batchUUID", batchUUID);
+        return result;
     }
 
     public CooinTransactionBatch() {}
-
-    public CooinTransactionBatch(List<Cooin> cooinList) {
-        this.cooinList = cooinList;
-    }
-
-    public CooinTransactionBatch(List<Cooin> cooinList, String csrCooin) {
-        this.cooinList = cooinList;
-        this.csrCooin = csrCooin;
-    }
 
     public void addCooin(Cooin cooin) {
         if(cooinList == null) cooinList = new ArrayList<Cooin>();
@@ -97,38 +124,20 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         addCooin(cooin);
     }
 
-    public BigDecimal getLeftOver() {
-        BigDecimal result = BigDecimal.ZERO;
-        if(batchAmount != null && cooinAmount != null) return cooinAmount.subtract(batchAmount);
-        return result;
-    }
-
-    public CooinTransactionBatch(String cooinsArrayStr) throws Exception {
-        JSONArray cooinsArray = (JSONArray) JSONSerializer.toJSON(cooinsArrayStr);
-        cooinList = new ArrayList<Cooin>();
-        for (int i = 0; i < cooinsArray.size(); i++) {
-            SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.getDecoder().decode(cooinsArray.getString(i).getBytes())));
-            try {
-                cooinList.add(new Cooin(smimeMessage));
-            } catch (Exception ex) {
-                throw new ExceptionVS("Error on cooin number: '" + i + "' - " + ex.getMessage(), ex);
-            }
-        }
-    }
-
     public void checkCooinData(Cooin cooin) throws ExceptionVS {
         String cooinData = "Cooin with hash '" + cooin.getHashCertVS() + "' ";
         if(operation != cooin.getOperation()) throw new ValidationExceptionVS(CooinTransactionBatch.class,
-                cooinData + "expected operation " + operation.toString() + " found " + cooin.getOperation().toString());
-        if(!subject.equals(cooin.getSubject())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
-                cooinData + "expected subject " + subject + " found " + cooin.getSubject());
+                cooinData + "expected operation " + operation + " found " + cooin.getOperation());
+        if(paymentOption != cooin.getPaymentOption()) throw new ValidationExceptionVS(CooinTransactionBatch.class,
+                cooinData + "expected paymentOption " + paymentOption + " found " + cooin.getPaymentOption());
+        if(!getSubject().equals(cooin.getSubject())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
+                cooinData + "expected subject " + getSubject() + " found " + cooin.getSubject());
         if(!toUserIBAN.equals(cooin.getToUserIBAN())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
                 cooinData + "expected subject " + toUserIBAN + " found " + cooin.getToUserIBAN());
         if(batchAmount.compareTo(cooin.getBatchAmount()) != 0) throw new ValidationExceptionVS(CooinTransactionBatch.class,
                 cooinData + "expected batchAmount " + batchAmount.toString() + " found " + cooin.getBatchAmount().toString());
-        if(!currencyCode.equals(cooin.getCurrencyCode())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
-                cooinData + "expected currencyCode " + currencyCode + " found " + cooin.getCurrencyCode());
+        if(!getCurrencyCode().equals(cooin.getCurrencyCode())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
+                cooinData + "expected currencyCode " + getCurrencyCode() + " found " + cooin.getCurrencyCode());
         if(!tag.equals(cooin.getTag().getName())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
                 cooinData + "expected tag " + tag + " found " + cooin.getTag().getName());
         if(!batchUUID.equals(cooin.getBatchUUID())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
@@ -182,6 +191,10 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         return result;
     }
 
+    public Cooin getLeftOverCooin() {
+        return leftOverCooin;
+    }
+
     public List<Cooin> getCooinList() {
         return cooinList;
     }
@@ -195,20 +208,16 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         return batchAmount;
     }
 
-    public String getCsrCooin() {
-        return csrCooin;
-    }
-
-    public void setCsrCooin(String csrCooin) {
-        this.csrCooin = csrCooin;
-    }
-
     public BigDecimal getCooinAmount() {
         return cooinAmount;
     }
 
     public void setCooinAmount(BigDecimal cooinAmount) {
         this.cooinAmount = cooinAmount;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public TagVS getTagVS() {
@@ -235,4 +244,44 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         this.batchUUID = batchUUID;
     }
 
+    public Payment getPaymentOption() {
+        return paymentOption;
+    }
+
+    public void setPaymentOption(Payment paymentOption) {
+        this.paymentOption = paymentOption;
+    }
+
+    public UserVS getToUserVS() {
+        return toUserVS;
+    }
+
+    public CooinTransactionBatch setToUserVS(UserVS toUserVS) {
+        this.toUserVS = toUserVS;
+        return this;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public BigDecimal getLeftOver() {
+        return leftOver;
+    }
+
+    public void setLeftOver(BigDecimal leftOver) {
+        this.leftOver = leftOver;
+    }
 }

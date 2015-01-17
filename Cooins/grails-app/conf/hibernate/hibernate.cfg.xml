@@ -36,6 +36,7 @@
         <mapping class="org.votingsystem.model.VoteVSCanceller"/>
         <mapping class="org.votingsystem.model.VoteVS" />
 
+        <mapping class="org.votingsystem.cooin.model.CooinTransactionBatch" />
         <mapping class="org.votingsystem.cooin.model.MessageVS" />
         <mapping class="org.votingsystem.cooin.model.TransactionVS" />
         <mapping class="org.votingsystem.cooin.model.CooinAccount" />

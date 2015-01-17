@@ -2,7 +2,7 @@ package org.votingsystem.cooin.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.votingsystem.cooin.Payment
+import org.votingsystem.cooin.model.Payment
 import org.votingsystem.cooin.TransactionRequest
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
@@ -36,7 +36,7 @@ class ShopExampleController {
                 date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005",
                 UUID:java.util.UUID.randomUUID().toString())
         transactionRequest.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
-                Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.COOIN_SEND))
+                Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.CASH_SEND))
         String shopSessionID = transactionRequest.getUUID().substring(0, 8)
         String paymentInfoServiceURL = grailsLinkGenerator.link(controller: 'shop', absolute:true) + "/${shopSessionID}"
         shopExampleService.putTransactionRequest(shopSessionID, transactionRequest)

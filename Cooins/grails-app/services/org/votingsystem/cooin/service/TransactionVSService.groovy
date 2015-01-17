@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.cooin.model.Payment
 import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -142,8 +143,15 @@ class TransactionVSService {
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
                 case TransactionVS.Type.COOIN_SEND:
-                    updateUserVSAccountTo(transactionVS)
-                    systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
+                    switch(transactionVS.getCooinTransactionBatch().getPaymentOption()) {
+                        case Payment.ANONYMOUS_SIGNED_TRANSACTION:
+                            updateUserVSAccountTo(transactionVS)
+                            systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode,
+                                    transactionVS.tag)
+                            break;
+                        case Payment.CASH_SEND:
+                            break;
+                    }
                     break;
                 default:
                     if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors

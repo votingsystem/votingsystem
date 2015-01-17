@@ -48,6 +48,7 @@ public class Cooin implements Serializable  {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
+    @Column(name="paymentOption") @Enumerated(EnumType.STRING) private Payment paymentOption;
     @Column(name="currency", nullable=false) private String currencyCode;
     @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
 
@@ -170,6 +171,7 @@ public class Cooin implements Serializable  {
             this.batchAmount = new BigDecimal(messageJSON.getString("batchAmount"));
         }
         if(messageJSON.has("batchUUID")) this.batchUUID = messageJSON.getString("batchUUID");
+        if(messageJSON.has("paymentOption")) this.paymentOption = Payment.valueOf(messageJSON.getString("paymentOption"));
         operation = TypeVS.valueOf(messageJSON.getString("operation"));
         if(TypeVS.COOIN_SEND != operation)
             throw new ExceptionVS("Error - Cooin with invalid operation '" + operation.toString() + "'");
@@ -483,6 +485,14 @@ public class Cooin implements Serializable  {
 
     public void setCertificationRequest(CertificationRequestVS certificationRequest) {
         this.certificationRequest = certificationRequest;
+    }
+
+    public Payment getPaymentOption() {
+        return paymentOption;
+    }
+
+    public void setPaymentOption(Payment paymentOption) {
+        this.paymentOption = paymentOption;
     }
 
     public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {

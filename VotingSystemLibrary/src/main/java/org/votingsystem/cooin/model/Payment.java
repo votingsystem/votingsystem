@@ -1,4 +1,4 @@
-package org.votingsystem.cooin;
+package org.votingsystem.cooin.model;
 
 /**
  * @author jgzornoza
@@ -6,6 +6,6 @@ package org.votingsystem.cooin;
  */
 public enum Payment {
 
-    SIGNED_TRANSACTION, ANONYMOUS_SIGNED_TRANSACTION, COOIN_SEND;
+    SIGNED_TRANSACTION, ANONYMOUS_SIGNED_TRANSACTION, CASH_SEND;
 
 }

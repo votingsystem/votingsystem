@@ -12,7 +12,7 @@ import java.util.List;
  */
 public enum Payment {
 
-    SIGNED_TRANSACTION, ANONYMOUS_SIGNED_TRANSACTION, COOIN_SEND;
+    SIGNED_TRANSACTION, ANONYMOUS_SIGNED_TRANSACTION, CASH_SEND;
 
     public static List<String> getPaymentMethods(Context context) {
         //preserve the same order
@@ -26,7 +26,7 @@ public enum Payment {
     public static Payment getByPosition(int position) {
         if(position == 0) return SIGNED_TRANSACTION;
         if(position == 1) return ANONYMOUS_SIGNED_TRANSACTION;
-        if(position == 2) return COOIN_SEND;
+        if(position == 2) return CASH_SEND;
         return null;
     }
 
@@ -34,7 +34,7 @@ public enum Payment {
         switch(this) {
             case SIGNED_TRANSACTION: return context.getString(R.string.signed_transaction_lbl);
             case ANONYMOUS_SIGNED_TRANSACTION: return context.getString(R.string.anonymous_signed_transaction_lbl);
-            case COOIN_SEND: return context.getString(R.string.cooin_send_lbl);
+            case CASH_SEND: return context.getString(R.string.cooin_send_lbl);
         }
         return null;
     }

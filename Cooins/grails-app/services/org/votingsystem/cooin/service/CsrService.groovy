@@ -49,4 +49,24 @@ class CsrService {
         }
     }
 
+    public synchronized Cooin signCooinRequest (Cooin cooin){
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        DateUtils.TimePeriod timePeriod = null
+        if(cooin.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
+        else {
+            Date dateFrom = DateUtils.resetCalendar().getTime()
+            Date dateTo = DateUtils.addDays(dateFrom, 365).getTime() //one year
+            timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo)
+        }
+        CertificateVS authorityCertificateVS = signatureVSService.getServerCertificateVS()
+        try {
+            X509Certificate x509AnonymousCert = signatureVSService.signCSR(
+                    cooin.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo())
+            cooin.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS).save()
+            LoggerVS.logCooinIssued(cooin.id, cooin.currencyCode, cooin.amount, cooin.tag,
+                    cooin.isTimeLimited, timePeriod.getDateFrom(), timePeriod.getDateTo())
+        } catch(Exception ex) {
+            throw new ExceptionVS(messageSource.getMessage('cooinRequestDataError', null, locale), ex)
+        }
+    }
 }

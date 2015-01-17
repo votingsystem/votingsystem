@@ -1,6 +1,7 @@
 package org.votingsystem.cooin;
 
 import net.sf.json.JSONObject;
+import org.votingsystem.cooin.model.Payment;
 import org.votingsystem.cooin.model.TransactionVS;
 import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.TypeVS;
