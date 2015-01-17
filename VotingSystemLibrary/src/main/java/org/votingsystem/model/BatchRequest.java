@@ -1,8 +1,11 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
+import org.votingsystem.util.FileUtils;
 
 import javax.persistence.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -35,6 +38,12 @@ public class BatchRequest implements Serializable  {
     @JoinColumn(name="userVS") private UserVS userVS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+
+    public BatchRequest(InputStream inputStream) throws IOException {
+        this.content = FileUtils.getBytesFromInputStream(inputStream);
+    }
+
+    public BatchRequest() {}
 
     public Long getId() {
         return id;

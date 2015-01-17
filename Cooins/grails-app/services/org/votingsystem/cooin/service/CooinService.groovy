@@ -53,18 +53,11 @@ class CooinService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        UserVS toUserVS;
-        BigDecimal cooinAmount = BigDecimal.ZERO
+        UserVS toUserVS = UserVS.findWhere(IBAN:cooinBatch.getToUserIBAN());
+        if(!toUserVS) throw new ExceptionVS(
+                "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' has wrong receptor IBAN '" +
+                cooinBatch.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
         for(Cooin cooin : cooinBatch.getCooinList()) {
-            if(!toUserVS) {
-                toUserVS = UserVS.findWhere(IBAN:cooin.getToUserIBAN())
-                if(!toUserVS) throw new ExceptionVS("Error - Cooin with hash '${cooin?.hashCertVS}' has wrong receptor IBAN '" +
-                        cooin.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
-                cooinBatch.loadTransactionData(cooin)
-            } else {
-                cooinBatch.checkCooinData(cooin)
-            }
-            cooinAmount = cooinAmount.add(cooin.getAmount())
             cooin.setToUserVS(toUserVS)
             try {
                 validatedCooinList.add(validateCooin(cooin));
@@ -74,16 +67,16 @@ class CooinService {
                         MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'), ex)
             }
         }
-        BigDecimal amountOver = cooinAmount.subtract(cooinBatch.getBatchAmount())
-        if(amountOver.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
+        BigDecimal batchLeftOver = cooinBatch.getLeftOver()
+        if(batchLeftOver.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
                 "CooinTransactionBatch insufficientCash", MetaInfMsg.getErrorMsg(methodName, 'insufficientCash'))
 
-        if(amountOver.compareTo(BigDecimal.ZERO) > 0 && cooinBatch.getCsrCooin() != null) {
+        if(batchLeftOver.compareTo(BigDecimal.ZERO) > 0 && cooinBatch.getCsrCooin() != null) {
             PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
                     cooinBatch.getCsrCooin().getBytes());
             Cooin newCooin = new Cooin(csr);
-            if(amountOver.compareTo(newCooin.getAmount()) != 0) throw new ExceptionVS(
-                    "CooinTransactionBatch overMissMatch, expected '${amountOver.toString()}' " +
+            if(batchLeftOver.compareTo(newCooin.getAmount()) != 0) throw new ExceptionVS(
+                    "CooinTransactionBatch overMissMatch, expected '${batchLeftOver.toString()}' " +
                     "found '${newCooin.getAmount().toString()}'",
                     MetaInfMsg.getErrorMsg(methodName, 'overMissMatch'))
         }

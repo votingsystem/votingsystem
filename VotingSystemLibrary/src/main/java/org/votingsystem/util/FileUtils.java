@@ -40,6 +40,15 @@ public class FileUtils {
         return outputStream.toByteArray();
     }
 
+    public static String getStringFromInputStream(InputStream inputStream) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        String line;
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        while ((line = br.readLine()) != null) { sb.append(line);  }
+        if (br != null) br.close();
+        return sb.toString();
+    }
+
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
         FileInputStream fs = new FileInputStream(file);

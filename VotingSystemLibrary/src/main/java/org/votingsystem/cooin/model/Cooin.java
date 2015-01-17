@@ -56,6 +56,7 @@ public class Cooin implements Serializable  {
     @Column(name="cooinServerURL") private String cooinServerURL;
     @Column(name="reason") private String reason;
     @Column(name="metaInf") private String metaInf;
+    @Column(name="batchUUID") private String batchUUID;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) @Lob private byte[] content;
@@ -92,7 +93,6 @@ public class Cooin implements Serializable  {
     @Transient private String certTagVS;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
-    @Transient private String cooinBatchUUID;
     @Transient private Cooin.CertSubject certSubject;
 
     public Cooin() {}
@@ -169,7 +169,7 @@ public class Cooin implements Serializable  {
         } else if(messageJSON.has("batchAmount")) {
             this.batchAmount = new BigDecimal(messageJSON.getString("batchAmount"));
         }
-        if(messageJSON.has("cooinBatchUUID")) this.cooinBatchUUID = messageJSON.getString("cooinBatchUUID");
+        if(messageJSON.has("batchUUID")) this.batchUUID = messageJSON.getString("batchUUID");
         operation = TypeVS.valueOf(messageJSON.getString("operation"));
         if(TypeVS.COOIN_SEND != operation)
             throw new ExceptionVS("Error - Cooin with invalid operation '" + operation.toString() + "'");
@@ -233,8 +233,8 @@ public class Cooin implements Serializable  {
         this.file = file;
     }
 
-    public String getCooinBatchUUID() {
-        return cooinBatchUUID;
+    public String getBatchUUID() {
+        return batchUUID;
     }
 
     public String getToUserIBAN() {

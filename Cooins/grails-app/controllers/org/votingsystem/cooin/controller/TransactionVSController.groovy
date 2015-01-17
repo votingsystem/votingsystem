@@ -5,7 +5,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.cooin.model.CooinTransactionBatch
 import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.util.CooinUtils
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -126,7 +125,7 @@ class TransactionVSController {
         if(!request.JSON) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = cooinService.processCooinTransaction(CooinUtils.getCooinTransactionBatch(request.JSON))
+        ResponseVS responseVS = cooinService.processCooinTransaction(new CooinTransactionBatch(request.getInputStream()))
         return [responseVS:responseVS]
     }
 

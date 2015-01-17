@@ -24,7 +24,7 @@ class CsrService {
         DateUtils.TimePeriod timePeriod = null
         if(cooinBatchRequest.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
         else {
-            Date dateFrom = Calendar.getInstance().getTime()
+            Date dateFrom = DateUtils.resetCalendar().getTime()
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime() //one year
             timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo)
         }

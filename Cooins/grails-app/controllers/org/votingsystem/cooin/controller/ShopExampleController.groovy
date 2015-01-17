@@ -78,7 +78,6 @@ class ShopExampleController {
     //here you must check with the tools of your choice the validity of the receipt. The receipt is an standard
     //S/MIME document (http://en.wikipedia.org/wiki/S/MIME)
     def payment() {
-        //String paymentReceipt = "${request.getInputStream()}"
         SMIMEMessage smimeMessage = new SMIMEMessage(request.getInputStream())
         ResponseVS responseVS = null;
         if (smimeMessage?.isValidSignature()) { //check with your tools if it's signed with valid certificates!!!
