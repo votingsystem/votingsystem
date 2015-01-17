@@ -5,7 +5,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.hibernate.annotations.Entity;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -50,10 +49,10 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
     @Transient private String toUserIBAN;
     @Transient private String tag;
 
-    public CooinTransactionBatch(InputStream inputStream) throws Exception {
-        super(inputStream);
+    public CooinTransactionBatch(String contentStr) throws Exception {
+        super(contentStr.getBytes("UTF-8"));
         cooinAmount = BigDecimal.ZERO;
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(new String(getContent(), "UTF-8"));
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(contentStr);
         cooinList = new ArrayList<Cooin>();
         JSONArray jsonArray = jsonObject.getJSONArray("cooins");
         if(jsonObject.containsKey("csrCooin")) {
@@ -64,6 +63,7 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         for(int i = 0; i < jsonArray.size(); i++) {
             SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
                     Base64.getDecoder().decode(jsonArray.getString(i).getBytes())));
+            smimeMessage.isValidSignature();
             try {
                 Cooin cooin = new Cooin(smimeMessage);
                 cooinAmount = cooinAmount.add(cooin.getAmount());
@@ -157,16 +157,41 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
             cooin.setSMIME(timeStamper.getSMIME());
         }
     }
-
-    public JSONArray getTransactionVSRequest() throws Exception {
+    public JSONObject getTransactionVSRequest(TypeVS operation, Payment paymentOption, String subject, String toUserIBAN,
+            BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
+            throws Exception {
+        this.operation = operation;
+        this.paymentOption = paymentOption;
+        this.subject = subject;
+        this.toUserIBAN = toUserIBAN;
+        this.batchAmount = batchAmount;
+        this.currencyCode = currencyCode;
+        this.tag = tag;
+        this.batchUUID = UUID.randomUUID().toString();
+        JSONObject transactionRequest = getDataJSON();
+        JSONObject requestJSON = new JSONObject();
         List<String> cooinTransactionBatch = new ArrayList<String>();
-        for(Cooin cooin : cooinList) {
+        for (Cooin cooin : cooinList) {
+            SMIMEMessage smimeMessage = cooin.getCertificationRequest().getSMIME(cooin.getHashCertVS(),
+                    StringUtils.getNormalized(cooin.getToUserName()), transactionRequest.toString(), subject, null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
+            ResponseVS responseVS = timeStamper.call();
+            if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
+            cooin.setSMIME(timeStamper.getSMIME());
             cooinTransactionBatch.add(Base64.getEncoder().encodeToString(cooin.getSMIME().getBytes()));
         }
-        return (JSONArray) JSONSerializer.toJSON(cooinTransactionBatch);
+        requestJSON.put("cooins", cooinTransactionBatch);
+        return requestJSON;
     }
 
-    public void validateTransactionVSResponse(JSONArray responseJSON, Set<TrustAnchor> trustAnchor) throws Exception {
+    public void validateTransactionVSResponse(JSONObject responseJSON, Set<TrustAnchor> trustAnchor) throws Exception {
+        SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
+                Base64.getDecoder().decode(responseJSON.getString("receipt").getBytes())));
+        if(responseJSON.containsKey("leftOverCoin")) {
+
+        }
+
+
         Map<String, Cooin> cooinMap = getCooinMap();
         if(cooinMap.size() != responseJSON.size()) throw new ExceptionVS("Num. cooins: '" +
                 cooinMap.size() + "' - num. receipts: " + responseJSON.size());

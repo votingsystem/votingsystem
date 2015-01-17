@@ -125,7 +125,7 @@ class TransactionVSController {
         if(!request.JSON) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = cooinService.processCooinTransaction(new CooinTransactionBatch(request.getInputStream()))
+        ResponseVS responseVS = cooinService.processCooinTransaction(new CooinTransactionBatch(request.JSON.toString()))
         return [responseVS:responseVS]
     }
 

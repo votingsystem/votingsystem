@@ -39,8 +39,8 @@ public class BatchRequest implements Serializable  {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public BatchRequest(InputStream inputStream) throws IOException {
-        this.content = FileUtils.getBytesFromInputStream(inputStream);
+    public BatchRequest(byte[] content) throws IOException {
+        this.content = content;
     }
 
     public BatchRequest() {}

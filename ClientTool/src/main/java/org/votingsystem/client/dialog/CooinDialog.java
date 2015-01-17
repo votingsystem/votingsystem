@@ -31,6 +31,7 @@ import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
+import org.votingsystem.cooin.model.Payment;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
@@ -39,6 +40,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -258,18 +260,18 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                 @Override protected Object call() throws Exception {
                     updateProgress(1, 10);
                     updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-                    transactionBatch.initTransactionVSRequest(transactionData.getToUserName(), transactionData.getToUserIBAN(),
-                            transactionData.getSubject(), false, cooinServer.getTimeStampServiceURL());
+                    JSONObject requestJSON =  transactionBatch.getTransactionVSRequest(TypeVS.COOIN_SEND,
+                            Payment.ANONYMOUS_SIGNED_TRANSACTION, transactionData.getSubject(),
+                            transactionData.getToUserIBAN(), cooin.getAmount(), cooin.getCurrencyCode(),
+                            cooin.getTag().getName(), false, cooinServer.getTimeStampServiceURL());
                     updateProgress(3, 10);
-                    ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                            transactionBatch.getTransactionVSRequest().toString().getBytes(),
+                    ResponseVS responseVS = HttpHelper.getInstance().sendData(requestJSON.toString().getBytes(),
                             ContentTypeVS.JSON, cooinServer.getCooinTransactionServiceURL());
                     updateProgress(8, 10);
                     log.debug("Cooin Transaction result: " + responseVS.getStatusCode());
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
                     JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
-                    transactionBatch.validateTransactionVSResponse(responseJSON.getJSONArray("receiptList"),
-                            cooinServer.getTrustAnchors());
+                    transactionBatch.validateTransactionVSResponse(responseJSON, cooinServer.getTrustAnchors());
                     Thread.sleep(3000);
                     setProgressVisible(false, false);
                     showMessage(null, responseJSON.getString("message"));

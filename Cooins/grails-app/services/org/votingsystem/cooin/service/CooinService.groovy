@@ -40,6 +40,7 @@ class CooinService {
         Map resultMap = [:]
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
         UserVS toUserVS = UserVS.findWhere(IBAN:cooinBatch.getToUserIBAN());
+        cooinBatch.setToUserVS(toUserVS).save()
         TagVS tagVS = TagVS.findWhere(name:cooinBatch.getTag())
         if(!tagVS) throw new ExceptionVS(
                 "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' missing TagVS '",
@@ -49,7 +50,6 @@ class CooinService {
                 "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' has wrong receptor IBAN '" +
                 cooinBatch.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
         for(Cooin cooin : cooinBatch.getCooinList()) {
-            cooin.setToUserVS(toUserVS)
             try {
                 validatedCooinList.add(validateCooin(cooin));
             } catch(Exception ex) {
@@ -58,11 +58,6 @@ class CooinService {
                         MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'), ex)
             }
         }
-        if(cooinBatch.getLeftOverCooin()) {
-            Cooin leftOverCoin = csrService.signCooinRequest(cooinBatch.getLeftOverCooin())
-            resultMap.leftOverCoin = new String(leftOverCoin.getIssuedCertPEM(), "UTF-8")
-        }
-        cooinBatch.setToUserVS(toUserVS).save()
         JSONObject batchDataJSON = cooinBatch.getDataJSON()
         SMIMEMessage receipt = signatureVSService.getSMIME(systemService.getSystemUser().getName(),
                 cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject())
@@ -76,6 +71,10 @@ class CooinService {
                 currencyCode: cooinBatch.getCurrencyCode(), tag:cooinBatch.getTagVS()).save()
         for(Cooin cooin: validatedCooinList) {
             cooin.setState(Cooin.State.EXPENDED).setTransactionVS(transactionVS).save()
+        }
+        if(cooinBatch.getLeftOverCooin()) {
+            Cooin leftOverCoin = csrService.signCooinRequest(cooinBatch.getLeftOverCooin())
+            resultMap.leftOverCoin = new String(leftOverCoin.getIssuedCertPEM(), "UTF-8")
         }
         resultMap.receipt = Base64.getEncoder().encodeToString(receipt.getBytes())
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: resultMap)

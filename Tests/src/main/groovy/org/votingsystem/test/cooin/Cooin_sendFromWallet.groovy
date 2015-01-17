@@ -3,10 +3,12 @@ package org.votingsystem.test.cooin
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
+import org.votingsystem.cooin.model.Payment
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.CooinServer
+import org.votingsystem.model.TypeVS
 import org.votingsystem.test.util.TestUtils
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
@@ -26,9 +28,10 @@ if(!cooinFiles || cooinFiles.length == 0) throw new ExceptionVS(" --- Empty wall
 //we have al the Cooins initialized, now we can make de transactions
 CooinTransactionBatch transactionBatch = new CooinTransactionBatch()
 transactionBatch.addCooin(cooinFiles[0])
-transactionBatch.initTransactionVSRequest("toUserName", "ES0878788989450000000007",
-        "First Cooin Transaction", true, cooinServer.getTimeStampServiceURL())
-responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVSRequest().toString().getBytes(),
+JSONObject requestJSON =  transactionBatch.getTransactionVSRequest(TypeVS.COOIN_SEND,
+        Payment.ANONYMOUS_SIGNED_TRANSACTION, "First Cooin Transaction",
+        "ES0878788989450000000007", new BigDecimal(9), "EUR", "WILDTAG", false, cooinServer.getTimeStampServiceURL());
+responseVS = HttpHelper.getInstance().sendData(requestJSON.toString().getBytes(),
         ContentTypeVS.JSON, cooinServer.getCooinTransactionServiceURL());
 log.debug("Cooin Transaction result: " + responseVS.getStatusCode())
 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
