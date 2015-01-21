@@ -22,7 +22,7 @@ public class CertificateVS implements Serializable {
 
     private static Logger log = Logger.getLogger(CertificateVS.class);
 
-    public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
+    public enum State {OK, ERROR, CANCELLED, USED, LAPSED, UNKNOWN}
 
     public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
         ANONYMOUS_REPRESENTATIVE_DELEGATION, COOIN, TIMESTAMP_SERVER}

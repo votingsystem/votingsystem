@@ -50,7 +50,7 @@ class CooinAccountService {
         if(accountsMap?.values().isEmpty()) return
         accountsMap = accountsMap?.values()?.iterator()?.next()
         for(String currency : accountsMap?.keySet()) {
-            BigDecimal tagGap = BigDecimal.ZERO
+            BigDecimal wildTagExpendedInTags = BigDecimal.ZERO
             BigDecimal wildTagBalance = BigDecimal.ZERO
             if(balancesMap[currency]) {
                 for(String tag: accountsMap[currency].keySet()) {
@@ -59,7 +59,7 @@ class CooinAccountService {
                         BigDecimal tagBalance = balancesMap[currency][tag];
                         if(TagVS.WILDTAG.equals(tag)) wildTagBalance = tagBalance
                         else if(tagAccount.compareTo(tagBalance) != 0)
-                            tagGap = tagGap.add(tagBalance.subtract(tagAccount))
+                            wildTagExpendedInTags = wildTagExpendedInTags.add(tagBalance.subtract(tagAccount))
                     } else {
                         if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with user " +
                                 "'$userVS.id' - tag '$tag' '$currency' - accounts: '$accountsMap' - balance '$balancesMap'")
@@ -74,9 +74,9 @@ class CooinAccountService {
             }
             //check WILDTAG result
             BigDecimal wildTagAccount = new BigDecimal(accountsMap[currency][TagVS.WILDTAG])
-            if(wildTagAccount.compareTo(wildTagBalance.subtract(tagGap)) != 0) throw new ExceptionVS(
+            if(wildTagAccount.compareTo(wildTagBalance.subtract(wildTagExpendedInTags)) != 0) throw new ExceptionVS(
                     "Balance Error with user " + "'$userVS.id' - '$currency' - accounts: '$accountsMap' - " +
-                    "gap  not resolved '$tagGap'")
+                    "wildTagExpendedInTags  not resolved '$wildTagExpendedInTags'")
 
         }
     }

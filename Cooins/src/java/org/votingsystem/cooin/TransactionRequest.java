@@ -12,6 +12,7 @@ import org.votingsystem.util.DateUtils;
 import javax.servlet.AsyncContext;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import static java.util.stream.Collectors.*;
@@ -302,7 +303,12 @@ public class TransactionRequest {
         if(date != null) result.put("date" , DateUtils.getDateStr(date));
         result.put("UUID" , UUID);
         if(paymentOptions != null) {
-            List<String> paymentOptionsList = paymentOptions.stream().map(option -> option.toString()).collect(toList());
+            List<String> paymentOptionsList = new ArrayList<>();
+            for(Payment paymentOption : paymentOptions) {
+                paymentOptionsList.add(paymentOption.toString());
+            }
+            //Problems with spring-loaded:
+            //List<String> paymentOptionsList = paymentOptions.stream().map(option -> option.toString()).collect(toList());
             result.put("paymentOptions" , paymentOptionsList);
         }
         return result;

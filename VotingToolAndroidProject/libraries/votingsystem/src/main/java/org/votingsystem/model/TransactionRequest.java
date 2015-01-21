@@ -299,7 +299,7 @@ public class TransactionRequest {
         this.transactionType = transactionType;
     }
 
-    public JSONObject getCooinServerTransaction(String fromUserIBAN) throws Exception {
+    public JSONObject getSignedTransaction(String fromUserIBAN) throws Exception {
         Map mapToSend = new HashMap();
         mapToSend.put("operation", TypeVS.FROM_USERVS.toString());
         mapToSend.put("typeVS", type.toString());

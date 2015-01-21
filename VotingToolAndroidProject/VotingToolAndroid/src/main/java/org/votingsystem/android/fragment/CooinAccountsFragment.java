@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,13 +25,11 @@ import android.widget.Toast;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CashRequestFormActivity;
-import org.votingsystem.android.service.CooinService;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinAccountsInfo;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TagVSInfo;
 import org.votingsystem.model.TransactionVS;
@@ -73,22 +70,8 @@ public class CooinAccountsFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            switch(responseVS.getTypeVS()) {
-                case COOIN_SEND:
-                    sendCooin();
-                    break;
-                case TRANSACTIONVS:
-                    sendTransactionVS();
-                    break;
-            }
         } else {
             switch(responseVS.getTypeVS()) {
-                case COOIN_SEND:
-                    MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                            responseVS.getNotificationMessage(), getFragmentManager());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                        loadUserInfo(DateUtils.getCurrentWeekPeriod());
-                    break;
                 case COOIN_ACCOUNTS_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getCurrentWeekPeriod());
@@ -136,45 +119,6 @@ public class CooinAccountsFragment extends Fragment {
             if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCooinAccountsInfo();
         }
         return rootView;
-    }
-
-    @Override public void onStart() {
-        super.onStart();
-        if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
-            transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
-                    ContextVS.URI_KEY));
-        }
-        OperationVS operationVS = null;
-        if(getArguments().getSerializable(ContextVS.OPERATIONVS_KEY) != null) {
-            operationVS = (OperationVS)getArguments().getSerializable(ContextVS.OPERATIONVS_KEY);
-            try {
-                transactionVS = TransactionVS.parse(operationVS);
-            } catch (Exception ex) {ex.printStackTrace();}
-        }
-        if(operationVS != null){
-            BigDecimal cashAvailable = BigDecimal.ZERO;
-            try {
-                CooinAccountsInfo userInfo = PrefUtils.getCooinAccountsInfo(contextVS);
-                IBAN = userInfo.getUserVS().getIBAN();
-                cashAvailable = userInfo.getAvailableForTagVS(transactionVS.getCurrencyCode(),
-                        transactionVS.getTagVS().getName());
-            } catch(Exception ex) {ex.printStackTrace();}
-            if(cashAvailable != null && cashAvailable.compareTo(transactionVS.getAmount()) == 1) {
-                TransactionVSDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.transactionvs_send_pin_msg, transactionVS.getAmount(),
-                            transactionVS.getCurrencyCode(), transactionVS.getToUserVS().getName(),
-                            transactionVS.getSubject()), false, null);
-            } else {
-                String caption = null;
-                if(transactionVS.getTagVS() != null){
-                    caption = getString(R.string.insufficient_cash_for_tagvs_caption,
-                            transactionVS.getTagVS().getName());
-                } else caption = getString(R.string.insufficient_cash_caption);
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, caption,
-                        getString(R.string.insufficient_cash_msg, transactionVS.getCurrencyCode(),
-                                transactionVS.getAmount().toString(), cashAvailable), getFragmentManager());
-            }
-        }
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -236,33 +180,11 @@ public class CooinAccountsFragment extends Fragment {
     private void updateCooinAccountsInfo() {
         Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
-        Intent startIntent = new Intent(getActivity(), CooinService.class);
+        Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.fetching_uservs_accounts_info_msg));
-        getActivity().startService(startIntent);
-    }
-
-    private void sendCooin() {
-        Intent startIntent = new Intent(getActivity(), CooinService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_SEND);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
-        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                getString(R.string.loading_info_msg));
-        getActivity().startService(startIntent);
-    }
-
-    private void sendTransactionVS() {
-        Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
-        startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                getString(R.string.loading_info_msg));
         getActivity().startService(startIntent);
     }
 

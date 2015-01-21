@@ -33,7 +33,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.android.service.CooinService;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
@@ -94,7 +94,7 @@ public class TransactionVSGridFragment extends Fragment
     private void launchUpdateUserInfoService() {
         LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
-            Intent startIntent = new Intent(getActivity(), CooinService.class);
+            Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_ACCOUNTS_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);

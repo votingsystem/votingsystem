@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,8 +35,10 @@ import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.CooinAccountsInfo;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.Payment;
 import org.votingsystem.model.TransactionRequest;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ResponseVS;
 
@@ -52,13 +55,13 @@ import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionRequestFragment extends Fragment {
+public class PaymentFragment extends Fragment {
 
-	public static final String TAG = TransactionRequestFragment.class.getSimpleName();
+	public static final String TAG = PaymentFragment.class.getSimpleName();
 
     private static final int COOIN_REQUEST   = 1;
 
-    private String broadCastId = TransactionRequestFragment.class.getSimpleName();
+    private String broadCastId = PaymentFragment.class.getSimpleName();
     private TextView receptor;
     private TextView subject;
     private TextView amount;
@@ -74,10 +77,10 @@ public class TransactionRequestFragment extends Fragment {
             if(pin != null) {
                 switch(responseVS.getTypeVS()) {
                     case SIGNED_TRANSACTION:
-                        launchPayment(TypeVS.SIGNED_TRANSACTION);
+                        launchSignedTransaction();
                         break;
                     case ANONYMOUS_SIGNED_TRANSACTION:
-                        launchPayment(TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
+                        launchAnonymousSignedTransaction();
                         break;
                     case COOIN:
                         try {
@@ -99,13 +102,25 @@ public class TransactionRequestFragment extends Fragment {
         }
     };
 
-    private void launchPayment(TypeVS paymentType) {
-        LOGD(TAG + ".launchPayment() ", "launchPayment");
+    private void launchSignedTransaction() {
+        LOGD(TAG + ".launchSignedTransaction() ", "launchSignedTransaction");
         Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
         try {
             startIntent.putExtra(JSON_DATA_KEY, transactionRequest.toJSON().toString());
             startIntent.putExtra(CALLER_KEY, broadCastId);
-            startIntent.putExtra(TYPEVS_KEY, paymentType);
+            startIntent.putExtra(TYPEVS_KEY, TypeVS.SIGNED_TRANSACTION);
+            getActivity().startService(startIntent);
+            setProgressDialogVisible(true);
+        } catch (JSONException ex) { ex.printStackTrace(); }
+    }
+
+    private void launchAnonymousSignedTransaction() {
+        LOGD(TAG + ".launchAnonymousSignedTransaction() ", "launchAnonymousSignedTransaction");
+        Intent startIntent = new Intent(getActivity(), TransactionVSService.class);
+        try {
+            startIntent.putExtra(JSON_DATA_KEY, transactionRequest.toJSON().toString());
+            startIntent.putExtra(CALLER_KEY, broadCastId);
+            startIntent.putExtra(TYPEVS_KEY, TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
             getActivity().startService(startIntent);
             setProgressDialogVisible(true);
         } catch (JSONException ex) { ex.printStackTrace(); }
@@ -155,6 +170,22 @@ public class TransactionRequestFragment extends Fragment {
             }
         });
         return rootView;
+    }
+
+    @Override public void onStart() {
+        super.onStart();
+        TransactionVS transactionVS = null;
+        if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
+            transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
+                    ContextVS.URI_KEY));
+        }
+        OperationVS operationVS = null;
+        if(getArguments().getSerializable(ContextVS.OPERATIONVS_KEY) != null) {
+            operationVS = (OperationVS)getArguments().getSerializable(ContextVS.OPERATIONVS_KEY);
+            try {
+                transactionVS = TransactionVS.parse(operationVS);
+            } catch (Exception ex) {ex.printStackTrace();}
+        }
     }
 
     @Override public void onResume() {
@@ -284,7 +315,7 @@ public class TransactionRequestFragment extends Fragment {
                             UIUtils.showMessageDialog(builder);
                         }
                     } else {
-                        launchPayment(TypeVS.ANONYMOUS_SIGNED_TRANSACTION);
+                        launchAnonymousSignedTransaction();
                     }
                     break;
                 case CASH_SEND:

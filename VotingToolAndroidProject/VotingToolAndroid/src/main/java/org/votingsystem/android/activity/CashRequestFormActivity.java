@@ -24,12 +24,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.CooinAccountsFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.SelectTagVSDialogFragment;
-import org.votingsystem.android.service.CooinService;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
@@ -184,7 +183,7 @@ public class CashRequestFormActivity extends ActionBarActivity {
     }
 
     private void sendCooinRequest(String pin) {
-        Intent startIntent = new Intent(this, CooinService.class);
+        Intent startIntent = new Intent(this, TransactionVSService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_REQUEST);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);

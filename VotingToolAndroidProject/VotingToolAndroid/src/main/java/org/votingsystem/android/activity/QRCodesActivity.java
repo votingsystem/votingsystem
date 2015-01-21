@@ -14,9 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.PaymentFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.fragment.QRGeneratorFormFragment;
-import org.votingsystem.android.fragment.TransactionRequestFragment;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -127,7 +127,7 @@ public class QRCodesActivity extends ActivityBase {
                             Intent intent = new Intent(QRCodesActivity.this,
                                     FragmentContainerActivity.class);
                             intent.putExtra(ContextVS.FRAGMENT_KEY,
-                                    TransactionRequestFragment.class.getName());
+                                    PaymentFragment.class.getName());
                             intent.putExtra(ContextVS.JSON_DATA_KEY,
                                     responseVS.getMessageJSON().toString());
                             startActivity(intent);

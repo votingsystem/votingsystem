@@ -50,8 +50,11 @@ class TimeStampService {
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
                 if(timeStampServerCert) {
                     x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.content)
-                    signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
-                } else {
+                    if(Calendar.getInstance().getTime().before(x509TimeStampServerCert.notAfter)) {
+                        signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
+                    } else timeStampServerCert.setState(CertificateVS.State.LAPSED).save()
+                }
+                if(!signingCertPEMBytes) {
                     fetchTimeStampServerInfo(timeStampServer);
                     return null
                 }
