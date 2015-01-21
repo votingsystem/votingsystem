@@ -28,6 +28,8 @@ class SystemService {
     def subscriptionVSService
     def signatureVSService
     def messageSource
+    Map<String, TagVS> tagMap = [:]
+
 
     @Transactional
     public synchronized Map init() throws Exception {
@@ -121,6 +123,15 @@ class SystemService {
         resultMap.transactionToList = transactionListWithBalances.transactionList
         resultMap.balancesTo = transactionListWithBalances.balances
         return resultMap
+    }
+
+    public TagVS getTag(String tagName) throws Exception{
+        if(!tagMap[tagName]) {
+            TagVS tag = TagVS.findWhere(name:tagName)
+            if(!tag) throw new Exception("TagVS with name '${tagName}' not found")
+            tagMap[(tagName)] = tag
+        }
+        return tagMap[tagName]
     }
 
     public String getTagMessage(String tag) {

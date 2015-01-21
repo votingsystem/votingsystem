@@ -52,8 +52,8 @@ class WebSocketService {
                 transactionVSService.addTransactionListener(request.messageJSON.userId)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
-                if(SessionVSManager.getInstance().sendMessageToDevice(Long.valueOf(
-                        request.messageJSON.deviceToId), request.messageJSON.toString())) {//message send OK
+                if(SessionVSManager.getInstance().sendMessageToDevice(
+                        request.deviceToId, request.messageJSON.toString())) {//message send OK
                     processResponse(request.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null))
                 } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null, null));
                 break;

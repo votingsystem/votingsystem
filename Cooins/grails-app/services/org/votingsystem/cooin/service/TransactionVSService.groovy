@@ -150,6 +150,8 @@ class TransactionVSService {
                                     transactionVS.tag)
                             break;
                         case Payment.CASH_SEND:
+                            systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode,
+                                    transactionVS.tag)
                             break;
                     }
                     break;

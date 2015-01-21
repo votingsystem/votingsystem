@@ -13,31 +13,25 @@ import org.votingsystem.cooin.util.WalletVS
 @Transactional
 class WalletVSService {
 
-	def grailsApplication
-	def messageSource
     def systemService
 
-	public void init() { }
-
-    @Transactional
-    public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, TagVS tag, String currencyCode) {
+    public WalletVS getWalletVS(String userIBAN, TagVS tag, String currencyCode) {
         List accountList = []
-        CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode,
+        CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:userIBAN, currencyCode: currencyCode,
                 tag:systemService.getWildTag())
         if(wildTagAccount) accountList.add(wildTagAccount)
         if(tag) {
-            def tagAccount = CooinAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)
+            def tagAccount = CooinAccount.findWhere(IBAN:userIBAN, currencyCode: currencyCode, tag:tag)
             if(tagAccount) accountList.add(tagAccount)
         }
         if(accountList.isEmpty()) throw new ExceptionVS(
-                "No accounts for IBAN: '$fromUserIBAN' - tag: '$tag.name' - currencyCode: '$currencyCode'")
+                "No accounts for IBAN: '$userIBAN' - tag: '$tag.name' - currencyCode: '$currencyCode'")
         else return new WalletVS(accountList, currencyCode)
     }
 
-    @Transactional
     public Map<CooinAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
             TagVS tag, BigDecimal amount, String currencyCode) {
-        WalletVS transactionWallet = getWalletVSForTransactionVS(fromUserIBAN, tag, currencyCode)
+        WalletVS transactionWallet = getWalletVS(fromUserIBAN, tag, currencyCode)
         return transactionWallet.getAccountMovementsForTransaction(tag, amount, currencyCode)
     }
 

@@ -1,5 +1,6 @@
 package org.votingsystem.cooin.service
 
+import grails.transaction.Transactional
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -9,7 +10,7 @@ import org.votingsystem.cooin.model.CooinAccount
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
-//@Transactional
+@Transactional
 class TransactionVS_UserVSService {
 
     def walletVSService
@@ -18,7 +19,6 @@ class TransactionVS_UserVSService {
     def signatureVSService
     def grailsApplication
 
-  //@Transactional
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         Map<CooinAccount, BigDecimal> accountFromMovements = walletVSService.getAccountMovementsForTransaction(
@@ -34,7 +34,8 @@ class TransactionVS_UserVSService {
         SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(fromUser, toUser,
                 request.messageSMIME.getSMIME(), request.messageSMIME.getSMIME().subject)
         request.messageSMIME.setSMIME(receipt)
-        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionVS.id}_${request.operation.toString()}")
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName,
+                "transactionVS_${transactionVS.id}_${request.operation.toString()}")
         log.debug(metaInfMsg)
         return new ResponseVS(statusCode:ResponseVS.SC_OK,  metaInf:metaInfMsg, type:request.operation,
                 messageSMIME:receipt, contentType: ContentTypeVS.JSON_SIGNED)

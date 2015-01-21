@@ -20,7 +20,6 @@ class TransactionVS_GroupVSService {
     def systemService
     def signatureVSService
 
-    @Transactional
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         String msg
@@ -56,7 +55,6 @@ class TransactionVS_GroupVSService {
         }
     }
 
-    @Transactional
     private ResponseVS processTransactionVSForAllMembers(TransactionVSService.TransactionVSRequest request,
              Map<CooinAccount, BigDecimal> accountFromMovements) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -68,16 +66,17 @@ class TransactionVS_GroupVSService {
                 fromUserVS:request.groupVS, fromUserIBAN: request.groupVS.IBAN, state:TransactionVS.State.OK,
                 validTo: request.validTo, subject:request.subject, currencyCode: request.currencyCode,
                 type:transactionVSType, tag:request.tag, accountFromMovements: accountFromMovements).save()
-        def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+        List<SubscriptionVS> subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
             eq("groupVS", request.groupVS)
             eq("state", SubscriptionVS.State.ACTIVE)
         }
-        subscriptionList.each { it ->
-            SMIMEMessage receipt = request.signReceptorData(request.messageSMIME.id, it.userVS.getNif(),
+        for(SubscriptionVS subscription : subscriptionList) {
+            SMIMEMessage receipt = request.signReceptorData(request.messageSMIME.id, subscription.userVS.getNif(),
                     subscriptionList.totalCount, userPart)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:request.messageSMIME,
                     type:TypeVS.FROM_GROUP_TO_ALL_MEMBERS, smimeMessage:receipt).save()
-            TransactionVS.generateTriggeredTransaction(transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
+            TransactionVS.generateTriggeredTransaction(transactionParent, userPart, subscription.userVS,
+                    subscription.userVS.IBAN).save()
         }
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName,
                 "transactionVS_${transactionParent.id}_${request.operation.toString()}")

@@ -1,5 +1,4 @@
 package org.votingsystem.cooin.service
-
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.hibernate.ScrollableResults
@@ -25,16 +24,6 @@ class BalanceService {
     def userVSService
     def bankVSService
     def signatureVSService
-    Map<String, TagVS> tagMap = [:]
-
-    public TagVS getTag(String tagName) throws Exception{
-        if(!tagMap[tagName]) {
-            TagVS tag = TagVS.findWhere(name:tagName)
-            if(!tag) throw new Exception("TagVS with name '${tagName}' not found")
-            tagMap[(tagName)] = tag
-        }
-        return tagMap[tagName]
-    }
 
     public initWeekPeriod(Calendar requestDate) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -75,7 +64,7 @@ class BalanceService {
                 Map<String, Map> currencyMap = balanceMap.balancesCash
                 for(String currency: currencyMap.keySet()) {
                     for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap[currency].entrySet()) {
-                        TagVS currentTagVS = getTag(tagVSEntry.key)
+                        TagVS currentTagVS = systemService.getTag(tagVSEntry.key)
                         List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0) {
                             ge("dateCreated", timePeriod.getDateFrom())
                             eq("type", TransactionVS.Type.COOIN_INIT_PERIOD)

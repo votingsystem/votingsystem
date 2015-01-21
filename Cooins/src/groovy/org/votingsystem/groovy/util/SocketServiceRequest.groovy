@@ -25,6 +25,7 @@ class SocketServiceRequest {
     private static Logger log = Logger.getLogger(SocketServiceRequest.class);
 
     String deviceFromId
+    Long deviceToId
     Session session;
     JSONObject messageJSON;
     SessionVS sessionVS
@@ -40,6 +41,7 @@ class SocketServiceRequest {
         this.session = session;
         messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
         deviceFromId = messageJSON.deviceFromId
+        if(messageJSON.deviceToId) deviceToId = Long.valueOf(messageJSON.deviceToId)
         if(!messageJSON.sessionId) messageJSON.sessionId = session.getId()
         if(messageJSON.locale) locale = Locale.forLanguageTag(messageJSON.locale)
         if(!messageJSON.operation || JSONNull.getInstance().equals(messageJSON.operation))

@@ -16,7 +16,6 @@ class TransactionVS_BankVSService {
     def messageSource
     def systemService
 
-    @Transactional
     private ResponseVS processTransactionVS(TransactionVSService.TransactionVSRequest request) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         BankVS bankVS = BankVS.findWhere(nif:request.fromUserVS.nif)

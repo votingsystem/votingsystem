@@ -11,9 +11,7 @@ import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-
 import java.security.cert.X509Certificate
-
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
@@ -40,7 +38,7 @@ class UserVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        if(!isUserAdmin(userSigner.getNif())) throw new ExceptionVS(messageSource.getMessage(
+        if(!systemService.isUserAdmin(userSigner.getNif())) throw new ExceptionVS(messageSource.getMessage(
                 'userWithoutPrivilegesErrorMsg', [userSigner.getNif(), TypeVS.CERT_CA_NEW.toString()].toArray(), locale),
                 MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         JSONObject messageJSON = JSON.parse(messageSMIMEReq.getSMIME()?.getSignedContent())
@@ -138,4 +136,3 @@ class UserVSService {
         return resultMap
     }
 }
-

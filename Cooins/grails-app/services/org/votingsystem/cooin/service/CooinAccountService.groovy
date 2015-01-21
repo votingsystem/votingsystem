@@ -6,9 +6,6 @@ import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.CooinAccount
-import org.votingsystem.cooin.util.WalletVS
-import org.votingsystem.util.DateUtils
-
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
@@ -20,20 +17,6 @@ class CooinAccountService {
 
 	def grailsApplication
 	def messageSource
-
-
-    WalletVS getUserVSWallet(UserVS user) {
-        def userAccountsDB
-        CooinAccount.withTransaction { userAccountsDB = CooinAccount.createCriteria().list(sort:'dateCreated', order:'asc') {
-            eq("userVS", userVS)
-            eq("state", CooinAccount.State.ACTIVE)
-        }}
-        WalletVS walletVS = new WalletVS()
-        List userAccounts = []
-        userAccountsDB.each { it ->
-            userAccounts.add(getUserVSAccountMap(it))
-        }
-    }
 
     Map getUserVSAccountMap(CooinAccount cooinAccount) {
         Map result = [id:cooinAccount.id, currency:cooinAccount.currencyCode, IBAN:cooinAccount.IBAN,

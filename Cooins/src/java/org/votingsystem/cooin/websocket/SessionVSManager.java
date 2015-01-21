@@ -103,8 +103,7 @@ public class SessionVSManager {
             }
             if(connectedUserVSDeviceMap.containsKey(removedSessionVS.getUserVS().getId())) {
                 Set<DeviceVS> userDevices = connectedUserVSDeviceMap.get(removedSessionVS.getUserVS().getId()).stream().
-                        filter(d -> { if(removedSessionVS.getUserVS().getDeviceVS().getId() == d.getId()) return false;
-                        else return true; }).collect(toSet());
+                        filter(d -> { return removedSessionVS.getUserVS().getDeviceVS().getId() != d.getId();}).collect(toSet());
                 connectedUserVSDeviceMap.replace(removedSessionVS.getUserVS().getId(), userDevices);
             }
         }

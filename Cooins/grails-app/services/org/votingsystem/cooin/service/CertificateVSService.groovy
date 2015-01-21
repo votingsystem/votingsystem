@@ -121,33 +121,28 @@ class CertificateVSService {
                     "certificateVS_notFound_serialNumber_${messageJSON.serialNumber}"),
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        certificateVS.messageSMIME = messageSMIMEReq
-        certificateVS.state = changeCertToState
-        certificateVS.description = (certificateVS.description)? "${certificateVS.description}<br/>${messageJSON.reason}":messageJSON.reason
-        certificateVS.save()
+        certificateVS.description = (certificateVS.description)?
+                "${certificateVS.description}<br/>${messageJSON.reason}":messageJSON.reason
+        certificateVS.setMessageSMIME(messageSMIMEReq).setState(changeCertToState).save()
         signatureVSService.initCertAuthorities() //load changes
         return new ResponseVS(type:TypeVS.CERT_EDIT, statusCode:ResponseVS.SC_OK,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"))
     }
 
-
+    @Transactional
     private void cancelCert(long serialNumberCert) {
         log.debug "cancelCert - serialNumberCert: ${serialNumberCert}"
-        CertificateVS.withTransaction {
-            CertificateVS certificate = CertificateVS.findWhere(serialNumber:serialNumberCert)
-            if(certificate) {
-                log.debug "cancelCert - certificateVS.id '${certificate?.id}'  --- "
-                if(CertificateVS.State.OK == certificate.state) {
-                    certificate.cancelDate = new Date(System.currentTimeMillis());
-                    certificate.state = CertificateVS.State.CANCELLED;
-                    certificate.save()
-                    log.debug "cancelCert - certificateVS '${certificate?.id}' cancelled"
-                } else log.debug "CertificateVS.id '${certificate?.id}' already cancelled"
-            } else log.debug "CertificateVS with num. serie '${serialNumberCert}' not found"
-        }
+        CertificateVS certificate = CertificateVS.findWhere(serialNumber:serialNumberCert)
+        if(certificate) {
+            log.debug "cancelCert - certificateVS.id '${certificate?.id}'  --- "
+            if(CertificateVS.State.OK == certificate.state) {
+                certificate.cancelDate = new Date(System.currentTimeMillis());
+                certificate.setState(CertificateVS.State.CANCELLED).save()
+                log.debug "cancelCert - certificateVS '${certificate?.id}' cancelled"
+            } else log.debug "CertificateVS.id '${certificate?.id}' already cancelled"
+        } else log.debug "CertificateVS with num. serie '${serialNumberCert}' not found"
     }
 
-    @Transactional
     public Map getCertificateVSDataMap(CertificateVS certificate) {
         X509Certificate x509Cert = CertUtils.loadCertificate (certificate.content)
         //SerialNumber as String to avoid Javascript problem handling such big numbers
@@ -159,7 +154,8 @@ class CertificateVSService {
                issuerDN: x509Cert.getIssuerDN().toString(), sigAlgName:x509Cert.getSigAlgName(),
                notBefore:DateUtils.getDateStr(x509Cert.getNotBefore()),
                notAfter:DateUtils.getDateStr(x509Cert.getNotAfter())]
-        if(certificate.getAuthorityCertificateVS()) certMap.issuerSerialNumber = "${certificate.getAuthorityCertificateVS()?.serialNumber}"
+        if(certificate.getAuthorityCertificateVS()) certMap.issuerSerialNumber =
+                "${certificate.getAuthorityCertificateVS()?.serialNumber}"
         return certMap
     }
 
