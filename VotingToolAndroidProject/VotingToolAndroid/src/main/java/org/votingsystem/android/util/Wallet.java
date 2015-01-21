@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,12 @@ public class Wallet {
     private static final String TAG = Wallet.class.getSimpleName();
 
     private static List<Cooin> cooinList = null;
+
+    private static Comparator<Cooin> cooinComparator = new Comparator<Cooin>() {
+        public int compare(Cooin c1, Cooin c2) {
+            return c1.getAmount().compareTo(c2.getAmount());
+        }
+    };
 
     public static List<Cooin> getCooinList() {
         if(cooinList == null) return null;
@@ -208,6 +216,138 @@ public class Wallet {
             }
         }
         return cash;
+    }
+
+    public static CooinBundle getCooinBundleForTag(String currencyCode, String tag) {
+        BigDecimal sumTotal = BigDecimal.ZERO;
+        List<Cooin> result = new ArrayList<>();
+        for(Cooin cooin: cooinList) {
+            if(cooin.getCurrencyCode().equals(currencyCode) && tag.equals(cooin.getSignedTagVS())) {
+                result.add(cooin);
+                sumTotal = sumTotal.add(cooin.getAmount());
+            }
+        }
+        return new CooinBundle(sumTotal, result, tag);
+    }
+
+    public static CooinBundle getCooinBundleForTransaction(BigDecimal requestAmount,
+            String currencyCode, String tagStr) throws ExceptionVS {
+        CooinBundle tagBundle = getCooinBundleForTag(currencyCode, tagStr);
+        BigDecimal remaining = null;
+        if(tagBundle.getAmount().compareTo(requestAmount) < 0) {
+            remaining = requestAmount.subtract(tagBundle.getAmount());
+            BigDecimal wildtagAccumulated = BigDecimal.ZERO;
+            CooinBundle wildtagBundle =  getCooinBundleForTag(currencyCode, TagVS.WILDTAG);
+            if(wildtagBundle.getAmount().compareTo(remaining) < 0) throw new ExceptionVS(
+                "insufficient cash for request: " + requestAmount + " " + currencyCode + " - " +
+                tagStr);
+            List<Cooin> wildtagCooins = new ArrayList<>();
+            while(wildtagAccumulated.compareTo(remaining) < 0) {
+                Cooin newCooin = wildtagBundle.getCooinList().remove(0);
+                wildtagAccumulated = wildtagAccumulated.add(newCooin.getAmount());
+                wildtagCooins.add(newCooin);
+            }
+            if(wildtagAccumulated.compareTo(remaining) > 0) {
+                Cooin lastRemoved = null;
+                while(wildtagAccumulated.compareTo(remaining) > 0) {
+                    lastRemoved = wildtagCooins.remove(0);
+                    wildtagAccumulated = wildtagAccumulated.subtract(lastRemoved.getAmount());
+                }
+                if(wildtagAccumulated.compareTo(remaining) < 0) {
+                    wildtagCooins.add(0, lastRemoved);
+                    wildtagAccumulated = wildtagAccumulated.add(lastRemoved.getAmount());
+                }
+                tagBundle.setWildTagAmount(wildtagAccumulated);
+                tagBundle.setWildTagCooinList(wildtagCooins);
+            }
+        } else {
+            BigDecimal accumulated = BigDecimal.ZERO;
+            List<Cooin> tagCooins = new ArrayList<>();
+            while(accumulated.compareTo(requestAmount) < 0) {
+                Cooin newCooin = tagBundle.getCooinList().remove(0);
+                accumulated = accumulated.add(newCooin.getAmount());
+                tagCooins.add(newCooin);
+            }
+            if(accumulated.compareTo(requestAmount) > 0) {
+                Cooin lastRemoved = null;
+                while(accumulated.compareTo(requestAmount) > 0) {
+                    lastRemoved = tagCooins.remove(0);
+                    accumulated = accumulated.subtract(lastRemoved.getAmount());
+                }
+                if(accumulated.compareTo(requestAmount) < 0) {
+                    tagCooins.add(0, lastRemoved);
+                    accumulated = accumulated.add(lastRemoved.getAmount());
+                }
+                tagBundle.setAmount(accumulated);
+                tagBundle.setCooinList(tagCooins);
+            }
+        }
+        return tagBundle;
+    }
+
+    public static class CooinBundle {
+
+        private BigDecimal amount;
+        private BigDecimal wildTagAmount;
+        private List<Cooin> cooinList;
+        private List<Cooin> wildTagCooinList;
+        private String tagVS;
+
+        public CooinBundle(BigDecimal amount, List<Cooin> cooinList, String tag) {
+            this.tagVS = tag;
+            this.amount = amount;
+            this.cooinList = cooinList;
+            Collections.sort(this.cooinList, cooinComparator);
+        }
+
+        public List<Cooin> getCooinList() {
+            return cooinList;
+        }
+
+        public void setCooinList(List<Cooin> cooinList) {
+            this.cooinList = cooinList;
+        }
+
+        public BigDecimal getAmount() {
+            return amount;
+        }
+
+        public void setAmount(BigDecimal amount) {
+            this.amount = amount;
+        }
+
+        public String getTagVS() {
+            return tagVS;
+        }
+
+        public void setTagVS(String tagVS) {
+            this.tagVS = tagVS;
+        }
+
+        public List<Cooin> getWildTagCooinList() {
+            return wildTagCooinList;
+        }
+
+        public void setWildTagCooinList(List<Cooin> wildTagCooinList) {
+            this.wildTagCooinList = wildTagCooinList;
+        }
+
+        public BigDecimal getWildTagAmount() {
+            return wildTagAmount;
+        }
+
+        public void setWildTagAmount(BigDecimal wildTagAmount) {
+            this.wildTagAmount = wildTagAmount;
+        }
+
+        public BigDecimal getTotalAmount() {
+            if(amount != null) {
+                if(wildTagAmount != null) return amount.add(wildTagAmount);
+                else return amount;
+            } else if(wildTagAmount != null) {
+                return wildTagAmount;
+            } else return BigDecimal.ZERO;
+        }
     }
 
 }

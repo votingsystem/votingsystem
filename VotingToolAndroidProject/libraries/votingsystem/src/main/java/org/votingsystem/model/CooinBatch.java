@@ -42,8 +42,21 @@ public class CooinBatch {
         this.cooinsValue = cooinsValue;
         this.isTimeLimited = isTimeLimited;
         this.tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
-        this.cooinsMap = getCooinBatch(totalAmount,cooinsValue, currencyCode, tagVS, cooinServer);
-        cooinCSRList = new ArrayList<Map>();
+    }
+
+    public static CooinBatch getRequestBatch(BigDecimal totalAmount, BigDecimal cooinsValue,
+            String currencyCode, String tagVS, Boolean isTimeLimited, CooinServer cooinServer)
+            throws Exception {
+        CooinBatch result = new CooinBatch(totalAmount, cooinsValue, currencyCode, tagVS,
+                isTimeLimited, cooinServer);
+        Map<String, Cooin> cooinsMap = new HashMap<String, Cooin>();
+        BigDecimal numCooins = totalAmount.divide(cooinsValue);
+        for(int i = 0; i < numCooins.intValue(); i++) {
+            Cooin cooin = new Cooin(cooinServer.getServerURL(),
+                    cooinsValue, currencyCode, tagVS, TypeVS.COOIN);
+            cooinsMap.put(cooin.getHashCertVS(), cooin);
+        }
+        List<Map> cooinCSRList = new ArrayList<Map>();
         for(Cooin cooin : cooinsMap.values()) {
             Map csrCooinMap = new HashMap();
             csrCooinMap.put("currencyCode", currencyCode);
@@ -52,6 +65,17 @@ public class CooinBatch {
             csrCooinMap.put("csr", new String(cooin.getCertificationRequest().getCsrPEM(), "UTF-8"));
             cooinCSRList.add(csrCooinMap);
         }
+        result.cooinsMap = cooinsMap;
+        result.cooinCSRList = cooinCSRList;
+        return result;
+    }
+
+    public static CooinBatch getAnonymousSignedTransactionBatch(BigDecimal totalAmount,
+            String currencyCode, String tagVS, Boolean isTimeLimited,
+            CooinServer cooinServer) throws Exception {
+        CooinBatch result = new CooinBatch(totalAmount, null, currencyCode, tagVS,
+                isTimeLimited, cooinServer);
+        return result;
     }
 
     public Map<String, Cooin> getCooinsMap() {
@@ -92,18 +116,6 @@ public class CooinBatch {
 
     public void setCooinsValue(BigDecimal cooinsValue) {
         this.cooinsValue = cooinsValue;
-    }
-
-    public static Map<String, Cooin> getCooinBatch(BigDecimal requestAmount,
-             BigDecimal cooinsValue, String currencyCode, String tagVS, CooinServer cooinServer) {
-        Map<String, Cooin> cooinsMap = new HashMap<String, Cooin>();
-        BigDecimal numCooins = requestAmount.divide(cooinsValue);
-        for(int i = 0; i < numCooins.intValue(); i++) {
-            Cooin cooin = new Cooin(cooinServer.getServerURL(),
-                    cooinsValue, currencyCode, tagVS, TypeVS.COOIN);
-            cooinsMap.put(cooin.getHashCertVS(), cooin);
-        }
-        return cooinsMap;
     }
 
     public JSONObject getRequestDataToSignJSON() {

@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,7 +33,6 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
-
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
@@ -74,29 +72,35 @@ public class TransactionVSService extends IntentService {
         byte[] serializedCooin = arguments.getByteArray(ContextVS.COOIN_KEY);
         tagVS = tagVS == null? TagVS.WILDTAG:tagVS;
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
+        TransactionRequest transactionRequest = null;
+        if(arguments.getString(ContextVS.JSON_DATA_KEY) != null) {
+            try {
+                JSONObject transactionRequestJSON =
+                        new JSONObject(arguments.getString(ContextVS.JSON_DATA_KEY));
+                transactionRequest = TransactionRequest.parse(transactionRequestJSON);
+            } catch (Exception ex) { ex.printStackTrace(); }
+        }
         try {
             switch(operation) {
                 case COOIN_ACCOUNTS_INFO:
                     updateUserInfo(serviceCaller);
                     break;
                 case COOIN_REQUEST:
-                    cooinRequest(serviceCaller, new CooinBatch(transactionVS.getAmount(),
+                    cooinRequest(serviceCaller, CooinBatch.getRequestBatch(transactionVS.getAmount(),
                             transactionVS.getAmount(), transactionVS.getCurrencyCode(), tagVS,
                             transactionVS.isTimeLimited(), contextVS.getCooinServer()), password);
                     break;
-                case COOIN_SEND:
+                /*case COOIN_SEND:
                     CooinBatch cooinBatch = new CooinBatch(transactionVS.getAmount(),
                             transactionVS.getAmount(), transactionVS.getCurrencyCode(), tagVS,
                             transactionVS.isTimeLimited(), contextVS.getCooinServer());
                     requestAndSendCooin(serviceCaller, cooinBatch, password);
-                    break;
+                    break;*/
                 case SIGNED_TRANSACTION:
-                    try {
-                        JSONObject transactionRequestJSON =
-                                new JSONObject(arguments.getString(ContextVS.JSON_DATA_KEY));
-                        TransactionRequest transactionRequest = TransactionRequest.parse(transactionRequestJSON);
-                        processSignedTransaction(serviceCaller, transactionRequest, operation);
-                    } catch (Exception ex) { ex.printStackTrace(); }
+                case ANONYMOUS_SIGNED_TRANSACTION:
+                    processTransaction(serviceCaller, transactionRequest, operation);
+                    break;
+                case CASH_SEND:
                     break;
             }
         } catch(Exception ex) {
@@ -106,9 +110,9 @@ public class TransactionVSService extends IntentService {
         }
     }
 
-    private void processSignedTransaction(String serviceCaller,
+    private void processTransaction(String serviceCaller,
               TransactionRequest transactionRequest, TypeVS operation) {
-        LOGD(TAG + ".processSignedTransaction", "processSignedTransaction - operation: " + operation);
+        LOGD(TAG + ".processTransaction", "processTransaction - operation: " + operation);
         UserVS userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
         if(transactionRequest.getDate() != null && DateUtils.inRange(transactionRequest.getDate(),
@@ -178,7 +182,6 @@ public class TransactionVSService extends IntentService {
                 SMIMEMessage smimeMessage = cooin.getCertificationRequest().getSMIME(
                         cooin.getHashCertVS(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);
-                smimeMessage.getSigner().getCertificate().getSerialNumber();
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
                 responseVS = timeStamper.call();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode())
@@ -270,31 +273,31 @@ public class TransactionVSService extends IntentService {
         }
     }
 
-    private ResponseVS cooinRequest(String serviceCaller, CooinBatch cooinBatch, String password){
-        CooinServer cooinServer = cooinBatch.getCooinServer();
+    private ResponseVS cooinRequest(String serviceCaller, CooinBatch requestBatch, String password){
+        CooinServer cooinServer = requestBatch.getCooinServer();
         ResponseVS responseVS = null;
         try {
-            LOGD(TAG + ".cooinRequest", "Amount: " + cooinBatch.getTotalAmount().toPlainString());
+            LOGD(TAG + ".cooinRequest", "Amount: " + requestBatch.getTotalAmount().toPlainString());
             String messageSubject = getString(R.string.cooin_request_msg_subject);
             String fromUser = contextVS.getUserVS().getNif();
             String requestDataFileName = ContextVS.COOIN_REQUEST_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
-            JSONArray cooinCSRList = new JSONArray(cooinBatch.getCooinCSRList());
+            JSONArray cooinCSRList = new JSONArray(requestBatch.getCooinCSRList());
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
                     cooinCSRList.toString().getBytes());
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    cooinServer.getNameNormalized(), cooinBatch.getRequestDataToSignJSON().toString(),
+                    cooinServer.getNameNormalized(), requestBatch.getRequestDataToSignJSON().toString(),
                     mapToSend, messageSubject, null, cooinServer.getCooinRequestServiceURL(),
                     requestDataFileName, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject responseJSON = new JSONObject (new String(responseVS.getMessageBytes(), "UTF-8"));
-                cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
+                requestBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
                 responseVS.setCaption(getString(R.string.cooin_request_ok_caption)).setNotificationMessage(
-                        getString(R.string.cooin_request_ok_msg, cooinBatch.getTotalAmount(),
-                        cooinBatch.getCurrencyCode()));
-                Wallet.saveCooinList(cooinBatch.getCooinsMap().values(), password, contextVS);
+                        getString(R.string.cooin_request_ok_msg, requestBatch.getTotalAmount(),
+                        requestBatch.getCurrencyCode()));
+                Wallet.saveCooinList(requestBatch.getCooinsMap().values(), password, contextVS);
                 updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
                     R.string.cooin_request_error_caption));
