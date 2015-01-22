@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.EventVS;
@@ -12,8 +13,12 @@ import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.VoteVS;
 
+import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -74,10 +79,8 @@ public class MsgUtils {
 
     public static String getCooinStateMessage(Cooin cooin, Context context) {
         switch(cooin.getState()) {
-            case CANCELLED: return context.getString(R.string.cancelled_lbl);
             case EXPENDED: return context.getString(R.string.expended_lbl);
             case LAPSED: return context.getString(R.string.lapsed_lbl);
-            case REJECTED: return context.getString(R.string.rejected_lbl);
             default:return null;
         }
     }
@@ -115,5 +118,41 @@ public class MsgUtils {
             case ERROR: return context.getString(R.string.votevs_error_msg);
             default: return voteState.toString();
         }
+    }
+
+    public static String getUpdateCooinsWithErrorMsg(List<Cooin> cooinWithErrors, Context context) {
+        Map<String, BigDecimal> expendedMap = new HashMap<>();
+        Map<String, BigDecimal> lapsedMap = new HashMap<>();
+        for(Cooin cooin : cooinWithErrors) {
+            switch (cooin.getState()) {
+                case LAPSED:
+                    if(lapsedMap.containsKey(cooin.getCurrencyCode())) {
+                        BigDecimal total = lapsedMap.get(cooin.getCurrencyCode()).add(cooin.getAmount());
+                        lapsedMap.put(cooin.getCurrencyCode(), total);
+                    } else lapsedMap.put(cooin.getCurrencyCode(), cooin.getAmount());
+                    break;
+                case EXPENDED:
+                    if(expendedMap.containsKey(cooin.getCurrencyCode())) {
+                        BigDecimal total = expendedMap.get(cooin.getCurrencyCode()).add(cooin.getAmount());
+                        expendedMap.put(cooin.getCurrencyCode(), total);
+                    } else expendedMap.put(cooin.getCurrencyCode(), cooin.getAmount());
+                    break;
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        if(expendedMap.size() > 0) {
+            for(String currency : lapsedMap.keySet()) {
+
+            }
+            sb.append("<br/>");
+        }
+        if(lapsedMap.size() > 0) {
+            for(String currency : expendedMap.keySet()) {
+
+            }
+            sb.append("<br/>");
+        }
+        String result = context.getString(R.string.updated_cooins_with_error_msg) + sb.toString();
+        return result;
     }
 }

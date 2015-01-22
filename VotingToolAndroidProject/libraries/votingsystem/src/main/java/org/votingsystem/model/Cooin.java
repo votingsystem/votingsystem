@@ -34,7 +34,7 @@ public class Cooin extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 
-    public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
+    public enum State { OK, EXPENDED, LAPSED;}
 
     private Long localId = -1L;
     private TransactionVS transaction;
@@ -109,10 +109,8 @@ public class Cooin extends ReceiptContainer {
     public String getStateMsg(Context context) {
         switch (state) {
             case OK: return context.getString(R.string.active_lbl);
-            case CANCELLED: return context.getString(R.string.cancelled_lbl);
             case EXPENDED: return context.getString(R.string.expended_lbl);
             case LAPSED: return context.getString(R.string.lapsed_lbl);
-            case REJECTED: return context.getString(R.string.rejected_lbl);
             default: return state.toString();
         }
     }

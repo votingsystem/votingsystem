@@ -42,8 +42,12 @@ public class CooinServer extends ActorVS implements Serializable {
         return getServerURL() + "/cooin/request";
     }
 
-    public String getCooinStatusServiceURL(String hashCertVS) {
+    public String getCooinStateServiceURL(String hashCertVS) {
         return getServerURL() + "/cooin/state/" +DatatypeConverter.printHexBinary(hashCertVS.getBytes());
+    }
+
+    public String getCooinBundleStateServiceURL() {
+        return getServerURL() + "/cooin/bundleState";
     }
 
     public String getCooinTransactionServiceURL() {

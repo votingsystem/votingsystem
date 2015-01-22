@@ -54,8 +54,17 @@ public class Wallet {
         else return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Cooin> getCooinList(String password, AppContextVS context) throws Exception {
-        JSONArray storedWalletJSON = getWallet(password, context);
+    public static List<String> getHashCertVSList() {
+        if(cooinList == null) return null;
+        List<String> result = new ArrayList<>();
+        for(Cooin cooin : cooinList) {
+            result.add(cooin.getHashCertVS());
+        }
+        return result;
+    }
+
+    public static List<Cooin> getCooinList(String pin, AppContextVS context) throws Exception {
+        JSONArray storedWalletJSON = getWallet(pin, context);
         if(storedWalletJSON == null) cooinList = new ArrayList<Cooin>();
         else cooinList = getCooinListFromJSONArray(storedWalletJSON);
         return new ArrayList<Cooin>(cooinList);
@@ -71,9 +80,9 @@ public class Wallet {
         return cooinList;
     }
 
-    public static void saveCooinList(Collection<Cooin> newCooinList, String password,
+    public static void saveCooinList(Collection<Cooin> newCooinList, String pin,
              AppContextVS context) throws Exception {
-        Object wallet = getWallet(password, context);
+        Object wallet = getWallet(pin, context);
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
         else storedWalletJSON = (JSONArray) wallet;
@@ -81,7 +90,7 @@ public class Wallet {
         for(Map cooin : serializedCooinList) {
             storedWalletJSON.put(new JSONObject(cooin));
         }
-        Wallet.saveWallet(storedWalletJSON, password, context);
+        Wallet.saveWallet(storedWalletJSON, pin, context);
         cooinList = getCooinListFromJSONArray(storedWalletJSON);
     }
 
@@ -99,6 +108,7 @@ public class Wallet {
         Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
     }
 
+
     public static Cooin removeExpendedCooin(String hashCertVS, AppContextVS context) throws Exception {
         Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
         for(Cooin cooin:cooinList) {
@@ -110,6 +120,25 @@ public class Wallet {
         cooinList = new ArrayList<>(cooinMap.values());
         Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
         return expendedCooin;
+    }
+
+    public static List<Cooin> updateCooinWithErrors(List<String> cooinListToRemove,
+            AppContextVS contextVS) throws Exception {
+        List<Cooin> errorList = new ArrayList<>();
+        Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
+        for(Cooin cooin:cooinList) {
+            cooinMap.put(cooin.getHashCertVS(), cooin);
+        }
+        for(String hashCertVS : cooinListToRemove) {
+            Cooin removedCooin = cooinMap.remove(hashCertVS);
+            if(removedCooin != null)  {
+                LOGD(TAG +  ".updateCooinWithErrors", "removed cooin: " + hashCertVS);
+                errorList.add(removedCooin);
+            }
+        }
+        cooinList = new ArrayList<>(cooinMap.values());
+        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, contextVS);
+        return errorList;
     }
 
     public static Map<String, Map<String, Map>> getCurrencyMap() {
@@ -184,17 +213,17 @@ public class Wallet {
         return jsonArray;
     }
 
-    public static JSONArray getWallet(String password, AppContextVS context) throws Exception {
-        byte[] walletBytes = getWalletBytes(password, context);
+    public static JSONArray getWallet(String pin, AppContextVS context) throws Exception {
+        byte[] walletBytes = getWalletBytes(pin, context);
         if(walletBytes == null) return null;
         else return new JSONArray(new String(walletBytes, "UTF-8"));
     }
 
-    private static byte[] getWalletBytes(String password, AppContextVS context) throws Exception {
-        if(password != null) {
-            String storedPasswordHash = PrefUtils.getPinHash(context);
-            String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
-            if(!passwordHash.equals(storedPasswordHash)) {
+    private static byte[] getWalletBytes(String pin, AppContextVS context) throws Exception {
+        if(pin != null) {
+            String storedPinHash = PrefUtils.getPinHash(context);
+            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg));
             }
         }
@@ -207,12 +236,12 @@ public class Wallet {
             return null; }
     }
 
-    public static void saveWallet(Object walletJSON, String password, AppContextVS context)
+    public static void saveWallet(Object walletJSON, String pin, AppContextVS context)
             throws Exception {
-        if(password != null) {
-            String storedPasswordHash = PrefUtils.getPinHash(context);
-            String passwordHash = CMSUtils.getHashBase64(password, ContextVS.VOTING_DATA_DIGEST);
-            if(!passwordHash.equals(storedPasswordHash)) {
+        if(pin != null) {
+            String storedPinHash = PrefUtils.getPinHash(context);
+            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg));
             }
         }
@@ -224,36 +253,36 @@ public class Wallet {
 
     }
 
-    public static BigDecimal getAvailableForTagVS(String currencyCode, String tagStr) {
+    public static BigDecimal getAvailableForTagVS(String currencyCode, String tagVS) {
         Map<String, Map<String, Map>> balancesCashMap = getCurrencyMap();
         BigDecimal cash = BigDecimal.ZERO;
         if(balancesCashMap.containsKey(currencyCode)) {
             Map<String, Map> currencyMap = balancesCashMap.get(currencyCode);
             if(currencyMap.containsKey(TagVS.WILDTAG)) cash = cash.add(
                     (BigDecimal) currencyMap.get(TagVS.WILDTAG).get("total"));
-            if(!TagVS.WILDTAG.equals(tagStr)) {
-                if(currencyMap.containsKey(tagStr)) cash =
-                        cash.add((BigDecimal) currencyMap.get(tagStr).get("total"));
+            if(!TagVS.WILDTAG.equals(tagVS)) {
+                if(currencyMap.containsKey(tagVS)) cash =
+                        cash.add((BigDecimal) currencyMap.get(tagVS).get("total"));
             }
         }
         return cash;
     }
 
-    public static CooinBundle getCooinBundleForTag(String currencyCode, String tag) {
+    public static CooinBundle getCooinBundleForTag(String currencyCode, String tagVS) {
         BigDecimal sumTotal = BigDecimal.ZERO;
         List<Cooin> result = new ArrayList<>();
         for(Cooin cooin: cooinList) {
-            if(cooin.getCurrencyCode().equals(currencyCode) && tag.equals(cooin.getSignedTagVS())) {
+            if(cooin.getCurrencyCode().equals(currencyCode) && tagVS.equals(cooin.getSignedTagVS())) {
                 result.add(cooin);
                 sumTotal = sumTotal.add(cooin.getAmount());
             }
         }
-        return new CooinBundle(sumTotal, currencyCode, result, tag);
+        return new CooinBundle(sumTotal, currencyCode, result, tagVS);
     }
 
     public static CooinBundle getCooinBundleForTransaction(BigDecimal requestAmount,
-            String currencyCode, String tagStr) throws ExceptionVS {
-        CooinBundle tagBundle = getCooinBundleForTag(currencyCode, tagStr);
+            String currencyCode, String tagVS) throws ExceptionVS {
+        CooinBundle tagBundle = getCooinBundleForTag(currencyCode, tagVS);
         CooinBundle result = null;
         BigDecimal remaining = null;
         if(tagBundle.getAmount().compareTo(requestAmount) < 0) {
@@ -263,7 +292,7 @@ public class Wallet {
             CooinBundle wildtagBundle =  getCooinBundleForTag(currencyCode, TagVS.WILDTAG);
             if(wildtagBundle.getAmount().compareTo(remaining) < 0) throw new ExceptionVS(
                 "insufficient cash for request: " + requestAmount + " " + currencyCode + " - " +
-                tagStr);
+                tagVS);
             List<Cooin> wildtagCooins = new ArrayList<>();
             while(wildtagAccumulated.compareTo(remaining) < 0) {
                 Cooin newCooin = wildtagBundle.getTagCooinList().remove(0);
@@ -302,9 +331,7 @@ public class Wallet {
                     accumulated = accumulated.add(lastRemoved.getAmount());
                 }
             }
-            result = new CooinBundle();
-            result.setAmount(accumulated);
-            result.setTagCooinList(tagCooins);
+            result = new CooinBundle(accumulated, tagCooins, currencyCode, tagVS);
         }
         return result;
     }
@@ -319,7 +346,13 @@ public class Wallet {
         private String tagVS;
         private Cooin leftOverCooin;
 
-        public CooinBundle() { }
+        public CooinBundle(BigDecimal amount, List<Cooin> tagCooinList, String currencyCode,
+                String tagVS) {
+            this.amount = amount;
+            this.tagCooinList = tagCooinList;
+            this.currencyCode = currencyCode;
+            this.tagVS = tagVS;
+        }
 
         public CooinBundle(BigDecimal amount, String currencyCode, List<Cooin> tagCooinList,
                 String tag) {

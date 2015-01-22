@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Toast;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -62,6 +64,12 @@ public class TransactionVSService extends IntentService {
 
     @Override protected void onHandleIntent(Intent intent) {
         contextVS = (AppContextVS) getApplicationContext();
+        if(contextVS.getCooinServer() == null) {
+            LOGD(TAG + ".updateUserInfo", "missing connection to Cooin Server");
+            Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
+                    contextVS.getCooinServerURL()), Toast.LENGTH_LONG).show();
+            return;
+        }
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
@@ -79,6 +87,9 @@ public class TransactionVSService extends IntentService {
             switch(operation) {
                 case COOIN_ACCOUNTS_INFO:
                     updateUserInfo(serviceCaller);
+                    break;
+                case COOIN_CHECK:
+                    checkCooins(serviceCaller);
                     break;
                 case COOIN_REQUEST:
                     cooinRequest(serviceCaller, CooinBatch.getRequestBatch(transactionVS,
@@ -384,6 +395,40 @@ public class TransactionVSService extends IntentService {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_ACCOUNTS_INFO);
             broadCastResponse(responseVS);
         }
+    }
+
+    private void checkCooins(String serviceCaller) {
+        LOGD(TAG + ".checkCooins", "checkCooins");
+        ResponseVS responseVS = null;
+        try {
+            List<String> hashCertVSList = Wallet.getHashCertVSList();
+            if(hashCertVSList == null) {
+                LOGD(TAG + ".checkCooins", "empty hashCertVSList");
+                return;
+            }
+            responseVS = HttpHelper.sendData(new JSONArray(hashCertVSList).toString().getBytes(),
+                    ContentTypeVS.JSON,  contextVS.getCooinServer().getCooinBundleStateServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                JSONArray result = new JSONArray(responseVS.getMessage());
+                List<String> cooinWithErrorList = new ArrayList<>();
+                List<Cooin> cooinWithErrors = null;
+                for(int i = 0; i < result.length(); i++) {
+                    JSONObject cooinData = result.getJSONObject(i);
+                    if(Cooin.State.OK != Cooin.State.valueOf(cooinData.getString("state"))) {
+                        cooinWithErrorList.add(cooinData.getString("hashCertVS"));
+                    }
+                    if(cooinWithErrorList.size() > 0) {
+                        cooinWithErrors = Wallet.updateCooinWithErrors(cooinWithErrorList, contextVS);
+                    }
+                }
+                if(cooinWithErrors != null && !cooinWithErrors.isEmpty()) {
+                    responseVS.setNotificationMessage(MsgUtils.getUpdateCooinsWithErrorMsg(
+                            cooinWithErrors, contextVS));
+                    responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
+                    broadCastResponse(responseVS);
+                }
+            }
+        } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
     private void broadCastResponse(ResponseVS responseVS) {

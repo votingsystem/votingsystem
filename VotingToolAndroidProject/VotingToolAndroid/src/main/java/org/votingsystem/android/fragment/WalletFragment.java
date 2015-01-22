@@ -67,9 +67,6 @@ public class WalletFragment extends Fragment {
                         try {
                             cooinList = Wallet.getCooinList((String) responseVS.getData(),
                                     (AppContextVS) getActivity().getApplicationContext());
-                            adapter.setItemList(cooinList);
-                            adapter.notifyDataSetChanged();
-                            if(menu != null) menu.removeItem(R.id.open_wallet);
                             printSummary();
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -80,6 +77,15 @@ public class WalletFragment extends Fragment {
                 }
             } else {
                 switch(responseVS.getTypeVS()) {
+                    case COOIN_CHECK:
+                        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                            cooinList = Wallet.getCooinList();
+                            printSummary();
+                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                    getString(R.string.error_lbl), responseVS.getMessage(),
+                                    getFragmentManager());
+                        }
+                        break;
                     case COOIN_ACCOUNTS_INFO:
                         break;
                 }
@@ -131,6 +137,9 @@ public class WalletFragment extends Fragment {
     }
 
     private void printSummary() {
+        adapter.setItemList(cooinList);
+        adapter.notifyDataSetChanged();
+        if(menu != null) menu.removeItem(R.id.open_wallet);
         LinearLayout summary = (LinearLayout) rootView.findViewById(R.id.summary);
         Map<String, Map<String, Map>> currencyMap = Wallet.getCurrencyMap();
         for(String currency : currencyMap.keySet()) {

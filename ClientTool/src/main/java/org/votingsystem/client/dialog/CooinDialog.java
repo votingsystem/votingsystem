@@ -95,7 +95,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     cooinServer = (CooinServer) responseVS.getData();
                     responseVS = HttpHelper.getInstance().getData(
-                            cooinServer.getCooinStatusServiceURL(cooin.getHashCertVS()), null);
+                            cooinServer.getCooinStateServiceURL(cooin.getHashCertVS()), null);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         sendMenuItem.setText(responseVS.getMessage());
                         sendMenuItem.setVisible(true);

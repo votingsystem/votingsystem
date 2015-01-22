@@ -36,7 +36,7 @@ public class CooinStatusChecker implements Runnable{
                 responseVS = Utils.checkServer(cooin.getCooinServerURL());
                 cooinServer = (CooinServer) responseVS.getData();
                 responseVS = HttpHelper.getInstance().getData(
-                        cooinServer.getCooinStatusServiceURL(cooin.getHashCertVS()), null);
+                        cooinServer.getCooinStateServiceURL(cooin.getHashCertVS()), null);
                 listener.processCooinStatus(cooin, responseVS.getStatusCode());
             }
         } catch (Exception e) {

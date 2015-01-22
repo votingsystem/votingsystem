@@ -32,6 +32,7 @@ public enum TypeVS {
 
     COOIN,
     COOIN_CANCEL,
+    COOIN_CHECK,
     FROM_USERVS,
     COOIN_GROUP_NEW,
     COOIN_INIT_PERIOD,

@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import org.bouncycastle2.util.encoders.Hex;
 import org.votingsystem.util.DateUtils;
 
 import java.io.Serializable;
@@ -51,4 +52,13 @@ public class CooinServer extends ActorVS implements Serializable {
     public String getSearchServiceURL(String phone, String email) {
         return getServerURL() + "/userVS/searchByDevice?phone=" + phone + "&email=" + email;
     }
+    public String getCooinStateServiceURL(String hashCertVS) {
+        return getServerURL() + "/cooin/state/" +
+                new String(Hex.encode(hashCertVS.getBytes()), ContextVS.UTF_8);
+    }
+
+    public String getCooinBundleStateServiceURL() {
+        return getServerURL() + "/cooin/bundleState";
+    }
+
 }

@@ -87,9 +87,6 @@ class CooinController {
                 case Cooin.State.EXPENDED:
                     msg = message(code:'cooinExpendedShortErrorMsg')
                     break;
-                case Cooin.State.CANCELLED:
-                    msg = message(code:'cooinCancelledErrorMsg')
-                    break;
                 case Cooin.State.OK:
                     if(cooin.validTo.after(Calendar.getInstance().getTime())) {
                         statusCode = ResponseVS.SC_OK
@@ -112,6 +109,7 @@ class CooinController {
     def bundleState() {
         return [responseVS:cooinService.checkBundleState(request.JSON)]
     }
+
     /**
      * Invoked if any method in this controller throws an Exception.
      */
