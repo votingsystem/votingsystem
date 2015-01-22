@@ -254,9 +254,11 @@ public class Wallet {
     public static CooinBundle getCooinBundleForTransaction(BigDecimal requestAmount,
             String currencyCode, String tagStr) throws ExceptionVS {
         CooinBundle tagBundle = getCooinBundleForTag(currencyCode, tagStr);
+        CooinBundle result = null;
         BigDecimal remaining = null;
         if(tagBundle.getAmount().compareTo(requestAmount) < 0) {
-            remaining = requestAmount.subtract(tagBundle.getAmount());
+            result = tagBundle;
+            remaining = requestAmount.subtract(result.getAmount());
             BigDecimal wildtagAccumulated = BigDecimal.ZERO;
             CooinBundle wildtagBundle =  getCooinBundleForTag(currencyCode, TagVS.WILDTAG);
             if(wildtagBundle.getAmount().compareTo(remaining) < 0) throw new ExceptionVS(
@@ -278,8 +280,8 @@ public class Wallet {
                     wildtagCooins.add(0, lastRemoved);
                     wildtagAccumulated = wildtagAccumulated.add(lastRemoved.getAmount());
                 }
-                tagBundle.setWildTagAmount(wildtagAccumulated);
-                tagBundle.setWildTagCooinList(wildtagCooins);
+                result.setWildTagAmount(wildtagAccumulated);
+                result.setWildTagCooinList(wildtagCooins);
             }
         } else {
             BigDecimal accumulated = BigDecimal.ZERO;
@@ -299,11 +301,12 @@ public class Wallet {
                     tagCooins.add(0, lastRemoved);
                     accumulated = accumulated.add(lastRemoved.getAmount());
                 }
-                tagBundle.setAmount(accumulated);
-                tagBundle.setTagCooinList(tagCooins);
             }
+            result = new CooinBundle();
+            result.setAmount(accumulated);
+            result.setTagCooinList(tagCooins);
         }
-        return tagBundle;
+        return result;
     }
 
     public static class CooinBundle {
@@ -316,7 +319,10 @@ public class Wallet {
         private String tagVS;
         private Cooin leftOverCooin;
 
-        public CooinBundle(BigDecimal amount, String currencyCode, List<Cooin> tagCooinList, String tag) {
+        public CooinBundle() { }
+
+        public CooinBundle(BigDecimal amount, String currencyCode, List<Cooin> tagCooinList,
+                String tag) {
             this.tagVS = tag;
             this.amount = amount;
             this.currencyCode = currencyCode;
