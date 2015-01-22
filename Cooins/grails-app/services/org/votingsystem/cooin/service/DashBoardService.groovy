@@ -1,8 +1,8 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.votingsystem.util.DateUtils
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.util.DateUtils
 
 @Transactional
 class DashBoardService {

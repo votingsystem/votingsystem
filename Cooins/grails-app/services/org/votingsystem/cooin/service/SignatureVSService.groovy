@@ -1,9 +1,6 @@
 package org.votingsystem.cooin.service
 
-import grails.converters.JSON
 import grails.transaction.Transactional
-import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.springframework.dao.DataAccessException
@@ -16,6 +13,7 @@ import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
+
 import javax.mail.Header
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -23,6 +21,7 @@ import java.security.PublicKey
 import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 @Transactional

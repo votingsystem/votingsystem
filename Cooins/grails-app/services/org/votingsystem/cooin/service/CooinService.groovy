@@ -1,19 +1,15 @@
 package org.votingsystem.cooin.service
 
-import grails.converters.JSON
 import net.sf.json.JSONObject
-import org.bouncycastle.jce.PKCS10CertificationRequest
-import org.votingsystem.cooin.util.BalanceUtils
-import org.votingsystem.groovy.util.TransactionVSUtils
+import org.votingsystem.cooin.model.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.DateUtils
+import org.votingsystem.throwable.CooinExpendedException
 import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.cooin.model.*
 
 import java.security.cert.X509Certificate
 
@@ -40,7 +36,7 @@ class CooinService {
         Map resultMap = [:]
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
         UserVS toUserVS = UserVS.findWhere(IBAN:cooinBatch.getToUserIBAN());
-        cooinBatch.setToUserVS(toUserVS).save()
+        cooinBatch.setToUserVS(toUserVS)
         TagVS tagVS = TagVS.findWhere(name:cooinBatch.getTag())
         if(!tagVS) throw new ExceptionVS(
                 "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' missing TagVS '",
@@ -53,14 +49,16 @@ class CooinService {
             try {
                 validatedCooinList.add(validateCooin(cooin));
             } catch(Exception ex) {
-                if(ex instanceof ExceptionVS) throw ex
+                if(ex instanceof CooinExpendedException) return new ResponseVS(ResponseVS.SC_COOIN_EXPENDED, ex.getMessage())
+                else if(ex instanceof ExceptionVS) throw ex
                 else throw new ExceptionVS("Error validating Cooin with hashCertVS '${cooin?.hashCertVS}'",
                         MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'), ex)
             }
         }
         JSONObject batchDataJSON = cooinBatch.getDataJSON()
         SMIMEMessage receipt = signatureVSService.getSMIME(systemService.getSystemUser().getName(),
-                cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject())
+                cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject(), null)
+        cooinBatch.setState(BatchRequest.State.OK).save()
         MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.RECEIPT, batchRequest:cooinBatch).save()
         Date validTo = null
         //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
@@ -73,6 +71,7 @@ class CooinService {
             cooin.setState(Cooin.State.EXPENDED).setTransactionVS(transactionVS).save()
         }
         if(cooinBatch.getLeftOverCooin()) {
+            cooinBatch.getLeftOverCooin().setTag(systemService.getTag(cooinBatch.getLeftOverCooin().getCertTagVS()))
             Cooin leftOverCoin = csrService.signCooinRequest(cooinBatch.getLeftOverCooin())
             resultMap.leftOverCoin = new String(leftOverCoin.getIssuedCertPEM(), "UTF-8")
         }
@@ -90,9 +89,7 @@ class CooinService {
                 MetaInfMsg.getErrorMsg(methodName, 'cooinDBMissing'))
         cooin = cooinDB.checkRequestWithDB(cooin)
         if(cooin.state == Cooin.State.EXPENDED) {
-            throw new ExceptionVS(messageSource.getMessage('cooinExpendedErrorMsg',
-                    [cooin.getHashCertVS()].toArray(), locale),
-                    MetaInfMsg.getErrorMsg(methodName, 'cooinExpended'))
+            throw new CooinExpendedException(cooin.getHashCertVS())
         } else if(cooin.state == Cooin.State.OK) {
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             CertExtensionCheckerVS extensionChecker

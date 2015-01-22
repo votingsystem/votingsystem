@@ -1,6 +1,5 @@
 package org.votingsystem.cooin.service
 
-import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
@@ -8,7 +7,9 @@ import org.votingsystem.cooin.TransactionRequest
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.throwable.ExceptionVS
+
 import javax.servlet.AsyncContext
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 @Transactional

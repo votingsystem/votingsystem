@@ -8,6 +8,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.VoteVS;
 
@@ -92,6 +93,14 @@ public class MsgUtils {
         }
     }
 
+    public static String getAnonymousSignedTransactionOKMsg(TransactionRequest transactionRequest,
+                 Context context) {
+        String toUser = transactionRequest.getToUserName()  != null?
+                transactionRequest.getToUserName(): transactionRequest.getIBAN();
+        return context.getString(org.votingsystem.android.lib.R.string.anonymous_signed_transaction_ok_msg,
+                transactionRequest.getAmount().toString() + " " + transactionRequest.getCurrencyCode(),
+                toUser);
+    }
 
     public static String getCooinRequestMessage(TransactionVS transactionVS, Context context) {
         String tagMessage = getTagVSMessage(transactionVS.getTagVS().getName(), context);

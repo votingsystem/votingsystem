@@ -1,15 +1,17 @@
 package org.votingsystem.cooin.service
+
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.hibernate.ScrollableResults
+import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
-import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.CooinAccount
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 //@Transactional

@@ -1,17 +1,25 @@
 package org.votingsystem.android.util;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.TransactionRequest;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.TimestampException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -89,6 +97,19 @@ public class Wallet {
         }
         cooinList = new ArrayList<>(cooinMap.values());
         Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
+    }
+
+    public static Cooin removeExpendedCooin(String hashCertVS, AppContextVS context) throws Exception {
+        Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
+        for(Cooin cooin:cooinList) {
+            cooinMap.put(cooin.getHashCertVS(), cooin);
+        }
+        Cooin expendedCooin = null;
+        if((expendedCooin = cooinMap.remove(hashCertVS)) != null)  LOGD(TAG +  ".removeCooinList",
+                "removed cooin: " + hashCertVS);
+        cooinList = new ArrayList<>(cooinMap.values());
+        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
+        return expendedCooin;
     }
 
     public static Map<String, Map<String, Map>> getCurrencyMap() {
@@ -227,7 +248,7 @@ public class Wallet {
                 sumTotal = sumTotal.add(cooin.getAmount());
             }
         }
-        return new CooinBundle(sumTotal, result, tag);
+        return new CooinBundle(sumTotal, currencyCode, result, tag);
     }
 
     public static CooinBundle getCooinBundleForTransaction(BigDecimal requestAmount,
@@ -243,7 +264,7 @@ public class Wallet {
                 tagStr);
             List<Cooin> wildtagCooins = new ArrayList<>();
             while(wildtagAccumulated.compareTo(remaining) < 0) {
-                Cooin newCooin = wildtagBundle.getCooinList().remove(0);
+                Cooin newCooin = wildtagBundle.getTagCooinList().remove(0);
                 wildtagAccumulated = wildtagAccumulated.add(newCooin.getAmount());
                 wildtagCooins.add(newCooin);
             }
@@ -264,7 +285,7 @@ public class Wallet {
             BigDecimal accumulated = BigDecimal.ZERO;
             List<Cooin> tagCooins = new ArrayList<>();
             while(accumulated.compareTo(requestAmount) < 0) {
-                Cooin newCooin = tagBundle.getCooinList().remove(0);
+                Cooin newCooin = tagBundle.getTagCooinList().remove(0);
                 accumulated = accumulated.add(newCooin.getAmount());
                 tagCooins.add(newCooin);
             }
@@ -279,7 +300,7 @@ public class Wallet {
                     accumulated = accumulated.add(lastRemoved.getAmount());
                 }
                 tagBundle.setAmount(accumulated);
-                tagBundle.setCooinList(tagCooins);
+                tagBundle.setTagCooinList(tagCooins);
             }
         }
         return tagBundle;
@@ -289,23 +310,32 @@ public class Wallet {
 
         private BigDecimal amount;
         private BigDecimal wildTagAmount;
-        private List<Cooin> cooinList;
+        private List<Cooin> tagCooinList;
         private List<Cooin> wildTagCooinList;
+        private String currencyCode;
         private String tagVS;
+        private Cooin leftOverCooin;
 
-        public CooinBundle(BigDecimal amount, List<Cooin> cooinList, String tag) {
+        public CooinBundle(BigDecimal amount, String currencyCode, List<Cooin> tagCooinList, String tag) {
             this.tagVS = tag;
             this.amount = amount;
-            this.cooinList = cooinList;
-            Collections.sort(this.cooinList, cooinComparator);
+            this.currencyCode = currencyCode;
+            this.tagCooinList = tagCooinList;
+            Collections.sort(this.tagCooinList, cooinComparator);
         }
 
         public List<Cooin> getCooinList() {
-            return cooinList;
+            List<Cooin> result = new ArrayList<>(tagCooinList);
+            if(wildTagCooinList != null) result.addAll(wildTagCooinList);
+            return result;
         }
 
-        public void setCooinList(List<Cooin> cooinList) {
-            this.cooinList = cooinList;
+        public List<Cooin> getTagCooinList() {
+            return tagCooinList;
+        }
+
+        public void setTagCooinList(List<Cooin> tagCooinList) {
+            this.tagCooinList = tagCooinList;
         }
 
         public BigDecimal getAmount() {
@@ -322,6 +352,10 @@ public class Wallet {
 
         public void setTagVS(String tagVS) {
             this.tagVS = tagVS;
+        }
+
+        public void setCurrencyCode(String currencyCode) {
+            this.currencyCode = currencyCode;
         }
 
         public List<Cooin> getWildTagCooinList() {
@@ -347,6 +381,45 @@ public class Wallet {
             } else if(wildTagAmount != null) {
                 return wildTagAmount;
             } else return BigDecimal.ZERO;
+        }
+
+        public Cooin getLeftOverCooin(BigDecimal requestAmount, String cooinServerURL)
+                throws Exception {
+            BigDecimal bundleAmount = getTotalAmount();
+            if(bundleAmount.compareTo(requestAmount) == 0) return null;
+            if(leftOverCooin == null) {
+                leftOverCooin = new Cooin(cooinServerURL, requestAmount,
+                        currencyCode, tagVS, TypeVS.COOIN);
+            }
+            return leftOverCooin;
+        }
+
+        public JSONArray getTransactionData(TransactionRequest transactionRequest,
+                AppContextVS contextVS) throws Exception {
+            JSONArray result = new JSONArray();
+            JSONObject transactionData = transactionRequest.getAnonymousSignedTransaction(false);
+            List<Cooin> transactionCooins = new ArrayList<>(tagCooinList);
+            if(wildTagCooinList != null) transactionCooins.addAll(wildTagCooinList);
+            ResponseVS responseVS = null;
+            for(Cooin cooin : transactionCooins) {
+                SMIMEMessage smimeMessage = cooin.getCertificationRequest().getSMIME(
+                        cooin.getHashCertVS(), StringUtils.getNormalized(
+                        transactionRequest.getToUserName()), transactionData.toString(),
+                        transactionRequest.getSubject(), null);
+                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
+                responseVS = timeStamper.call();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode())
+                    throw new TimestampException(responseVS.getMessage());
+                result.put(new String(Base64.encode(smimeMessage.getBytes())));
+            }
+            return result;
+        }
+
+        public void updateWallet(Cooin leftOverCooin, AppContextVS contextVS) throws Exception {
+            List<Cooin> cooinToRemove = getCooinList();
+            removeCooinList(cooinToRemove, contextVS);
+            cooinList.add(leftOverCooin);
+            Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, contextVS);
         }
     }
 

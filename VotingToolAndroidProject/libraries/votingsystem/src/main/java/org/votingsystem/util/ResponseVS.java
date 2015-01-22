@@ -36,6 +36,7 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_ERROR_REQUEST_REPEATED   = 409;
     public static final int SC_EXCEPTION                = 490;
     public static final int SC_NULL_REQUEST             = 472;
+    public static final int SC_COOIN_EXPENDED           = 473;
     public static final int SC_ERROR                    = 500;
     public static final int SC_CONNECTION_TIMEOUT       = 522;
     public static final int SC_ERROR_TIMESTAMP          = 570;

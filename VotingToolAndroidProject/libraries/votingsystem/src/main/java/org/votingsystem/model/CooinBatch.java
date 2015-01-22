@@ -70,6 +70,27 @@ public class CooinBatch {
         return result;
     }
 
+    public static CooinBatch getRequestBatch(TransactionVS transactionVS, CooinServer cooinServer)
+            throws Exception {
+        CooinBatch result = new CooinBatch(transactionVS.getAmount(), transactionVS.getAmount(),
+                transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName(),
+                transactionVS.isTimeLimited(), cooinServer);
+        Map<String, Cooin> cooinsMap = new HashMap<String, Cooin>();
+        Cooin cooin = new Cooin(cooinServer.getServerURL(), transactionVS.getAmount(),
+                transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName(), TypeVS.COOIN);
+        cooinsMap.put(cooin.getHashCertVS(), cooin);
+        List<Map> cooinCSRList = new ArrayList<Map>();
+        Map csrCooinMap = new HashMap();
+        csrCooinMap.put("currencyCode", transactionVS.getCurrencyCode());
+        csrCooinMap.put("tag", transactionVS.getTagVS().getName());
+        csrCooinMap.put("cooinValue", transactionVS.getAmount().toString());
+        csrCooinMap.put("csr", new String(cooin.getCertificationRequest().getCsrPEM(), "UTF-8"));
+        cooinCSRList.add(csrCooinMap);
+        result.cooinsMap = cooinsMap;
+        result.cooinCSRList = cooinCSRList;
+        return result;
+    }
+
     public static CooinBatch getAnonymousSignedTransactionBatch(BigDecimal totalAmount,
             String currencyCode, String tagVS, Boolean isTimeLimited,
             CooinServer cooinServer) throws Exception {

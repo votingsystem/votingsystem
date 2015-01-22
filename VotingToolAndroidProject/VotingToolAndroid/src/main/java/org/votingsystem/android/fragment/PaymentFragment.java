@@ -91,8 +91,7 @@ public class PaymentFragment extends Fragment {
                         break;
                 }
 
-            }
-            else {
+            } else {
                 setProgressDialogVisible(false);
                 String caption = ResponseVS.SC_OK == responseVS.getStatusCode()?getString(
                         R.string.payment_ok_caption):getString(R.string.error_lbl);
@@ -151,7 +150,7 @@ public class PaymentFragment extends Fragment {
         try {
             JSONObject jsonObject = new JSONObject(getArguments().getString(ContextVS.JSON_DATA_KEY));
             transactionRequest = TransactionRequest.parse(jsonObject);
-            receptor.setText(transactionRequest.getToUser());
+            receptor.setText(transactionRequest.getToUserName());
             subject.setText(transactionRequest.getSubject());
             amount.setText(transactionRequest.getAmount().toString());
             currency.setText(transactionRequest.getCurrencyCode());

@@ -524,4 +524,5 @@
     <string name="payment_session_expired_msg">la sesión de pago ha caducado</string>
     <string name="payment_ok_caption">pago completado con éxito</string>
     <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
+    <string name="expended_cooin_error_msg">tenía en su monedero un cooin de \'%1$s\' que ya había sido consumido, por favor repita la operación</string>
 </resources>

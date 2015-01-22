@@ -48,7 +48,7 @@ public class Cooin implements Serializable  {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
-    @Column(name="paymentOption") @Enumerated(EnumType.STRING) private Payment paymentOption;
+    @Column(name="paymentMethod") @Enumerated(EnumType.STRING) private Payment paymentMethod;
     @Column(name="currency", nullable=false) private String currencyCode;
     @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
 
@@ -171,7 +171,7 @@ public class Cooin implements Serializable  {
             this.batchAmount = new BigDecimal(messageJSON.getString("batchAmount"));
         }
         if(messageJSON.has("batchUUID")) this.batchUUID = messageJSON.getString("batchUUID");
-        if(messageJSON.has("paymentOption")) this.paymentOption = Payment.valueOf(messageJSON.getString("paymentOption"));
+        if(messageJSON.has("paymentMethod")) this.paymentMethod = Payment.valueOf(messageJSON.getString("paymentMethod"));
         operation = TypeVS.valueOf(messageJSON.getString("operation"));
         if(TypeVS.COOIN_SEND != operation)
             throw new ExceptionVS("Error - Cooin with invalid operation '" + operation.toString() + "'");
@@ -185,11 +185,6 @@ public class Cooin implements Serializable  {
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
-        if(messageJSON.getBoolean("isTimeLimited") == false) {
-            boolean isTimeLimited = checkIfTimeLimited(x509AnonymousCert.getNotBefore(), x509AnonymousCert.getNotAfter());
-            if(isTimeLimited) throw new ExceptionVS(getErrorPrefix() +
-                    "Time limited Cooin with 'isTimeLimited' signature param set to false");
-        }
         subject = messageJSON.getString("subject");
         toUserIBAN = messageJSON.getString("toUserIBAN");
         toUserName = messageJSON.getString("toUserName");
@@ -487,12 +482,12 @@ public class Cooin implements Serializable  {
         this.certificationRequest = certificationRequest;
     }
 
-    public Payment getPaymentOption() {
-        return paymentOption;
+    public Payment getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setPaymentOption(Payment paymentOption) {
-        this.paymentOption = paymentOption;
+    public void setPaymentMethod(Payment paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {

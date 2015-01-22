@@ -2,11 +2,11 @@ package org.votingsystem.cooin.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import org.votingsystem.cooin.model.Cooin
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.Cooin
 
 import java.text.SimpleDateFormat
 

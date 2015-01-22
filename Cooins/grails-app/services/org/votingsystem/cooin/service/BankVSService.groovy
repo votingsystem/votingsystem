@@ -4,15 +4,15 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.iban4j.Iban
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.CooinAccount
-import org.votingsystem.cooin.util.IbanVSUtil
+import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 
@@ -76,7 +76,7 @@ class BankVSService {
         }
         subscriptionVSService.setUserCertificate(bankVSDB, null)
         new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
-                IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
+                IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getTag(TagVS.WILDTAG)).save()
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
         String metaInfMsg = MetaInfMsg.getOKMsg(this.class.getSimpleName(), methodName,

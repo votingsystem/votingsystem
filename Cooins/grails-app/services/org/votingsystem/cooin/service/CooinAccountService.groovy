@@ -1,12 +1,10 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.cooin.model.CooinAccount
-import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**
 * @author jgzornoza

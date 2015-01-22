@@ -37,7 +37,8 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
     @Column(name="cooinAmount") private BigDecimal cooinAmount = null;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
-    @Column(name="paymentOption", nullable=false) @Enumerated(EnumType.STRING) private Payment paymentOption;
+    @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
+    @Column(name="paymentMethod", nullable=false) @Enumerated(EnumType.STRING) private Payment paymentMethod;
     @Column(name="batchUUID") private String batchUUID;
     @Column(name="subject") private String subject;
 
@@ -70,12 +71,13 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
                 cooinList.add(cooin);
                 if(i == 0) {
                     this.operation = cooin.getOperation();
-                    this.paymentOption = cooin.getPaymentOption();
+                    this.paymentMethod = cooin.getPaymentMethod();
                     this.setSubject(cooin.getSubject());
                     this.toUserIBAN = cooin.getToUserIBAN();
                     this.batchAmount = cooin.getBatchAmount();
                     this.setCurrencyCode(cooin.getCurrencyCode());
                     this.tag = cooin.getTag().getName();
+                    this.isTimeLimited = cooin.getIsTimeLimited();
                     this.batchUUID = cooin.getBatchUUID();
                 } else checkCooinData(cooin);
             } catch(Exception ex) {
@@ -94,7 +96,7 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
     public JSONObject getDataJSON() {
         JSONObject result = new JSONObject();
         result.put("operation", this.operation.toString());
-        result.put("paymentOption", this.paymentOption.toString());
+        result.put("paymentMethod", this.paymentMethod.toString());
         if(getSubject() != null) result.put("subject", getSubject());
         if(toUserIBAN != null) result.put("toUserIBAN", toUserIBAN);
         if(batchAmount != null) result.put("batchAmount", batchAmount.toString());
@@ -106,6 +108,7 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
             hashCertVSCooins.add(cooin.getHashCertVS());
         }
         result.put("hashCertVSCooins", hashCertVSCooins);
+        result.put("isTimeLimited", isTimeLimited);
         if(batchUUID != null) result.put("batchUUID", batchUUID);
         return result;
     }
@@ -128,8 +131,8 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         String cooinData = "Cooin with hash '" + cooin.getHashCertVS() + "' ";
         if(operation != cooin.getOperation()) throw new ValidationExceptionVS(CooinTransactionBatch.class,
                 cooinData + "expected operation " + operation + " found " + cooin.getOperation());
-        if(paymentOption != cooin.getPaymentOption()) throw new ValidationExceptionVS(CooinTransactionBatch.class,
-                cooinData + "expected paymentOption " + paymentOption + " found " + cooin.getPaymentOption());
+        if(paymentMethod != cooin.getPaymentMethod()) throw new ValidationExceptionVS(CooinTransactionBatch.class,
+                cooinData + "expected paymentOption " + paymentMethod + " found " + cooin.getPaymentMethod());
         if(!getSubject().equals(cooin.getSubject())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
                 cooinData + "expected subject " + getSubject() + " found " + cooin.getSubject());
         if(!toUserIBAN.equals(cooin.getToUserIBAN())) throw new ValidationExceptionVS(CooinTransactionBatch.class,
@@ -157,11 +160,11 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
             cooin.setSMIME(timeStamper.getSMIME());
         }
     }
-    public JSONObject getTransactionVSRequest(TypeVS operation, Payment paymentOption, String subject, String toUserIBAN,
+    public JSONObject getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
             BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
             throws Exception {
         this.operation = operation;
-        this.paymentOption = paymentOption;
+        this.paymentMethod = paymentMethod;
         this.subject = subject;
         this.toUserIBAN = toUserIBAN;
         this.batchAmount = batchAmount;
@@ -269,12 +272,12 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
         this.batchUUID = batchUUID;
     }
 
-    public Payment getPaymentOption() {
-        return paymentOption;
+    public Payment getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setPaymentOption(Payment paymentOption) {
-        this.paymentOption = paymentOption;
+    public void setPaymentMethod(Payment paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public UserVS getToUserVS() {
@@ -308,5 +311,13 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
 
     public void setLeftOver(BigDecimal leftOver) {
         this.leftOver = leftOver;
+    }
+
+    public Boolean getIsTimeLimited() {
+        return isTimeLimited;
+    }
+
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
     }
 }

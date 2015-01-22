@@ -8,9 +8,11 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.throwable.ExceptionVS
+
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 class WebSocketService {

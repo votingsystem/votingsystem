@@ -8,10 +8,12 @@ import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
+
 import java.security.cert.X509Certificate
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 /**

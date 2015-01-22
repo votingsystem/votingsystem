@@ -3,13 +3,13 @@ package org.votingsystem.cooin.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
+import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.CooinAccount
-import org.votingsystem.cooin.util.IbanVSUtil
+import org.votingsystem.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 
@@ -124,7 +124,7 @@ class SubscriptionVSService {
         if(!userAccount) {
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
-                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
+                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getTag(TagVS.WILDTAG)).save()
         }
         return userAccount
     }
@@ -179,7 +179,7 @@ class SubscriptionVSService {
         TypeVS operation;
         Long id;
         public SubscriptionVSRequest(String signedContent) {
-            def messageJSON = JSON.parse(signedContent)
+            JSONObject messageJSON = JSON.parse(signedContent)
             operation = TypeVS.valueOf(messageJSON.operation)
             groupvsName = messageJSON.groupvs.name;
             userVSName = messageJSON.uservs.name

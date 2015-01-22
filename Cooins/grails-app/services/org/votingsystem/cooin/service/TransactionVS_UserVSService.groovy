@@ -1,14 +1,12 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
+import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.model.TransactionVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.CooinAccount
-
-import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
 @Transactional
 class TransactionVS_UserVSService {

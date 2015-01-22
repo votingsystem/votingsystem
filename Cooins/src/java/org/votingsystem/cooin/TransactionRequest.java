@@ -28,7 +28,7 @@ public class TransactionRequest {
     private UserVS.Type userToType;
     private String IBAN;
     private String subject;
-    private String toUser;
+    private String toUserName;
     private BigDecimal amount;
     private String currencyCode;
     private UserVS fromUser;
@@ -71,12 +71,12 @@ public class TransactionRequest {
         this.subject = subject;
     }
 
-    public String getToUser() {
-        return toUser;
+    public String getToUserName() {
+        return toUserName;
     }
 
-    public void setToUser(String toUser) {
-        this.toUser = toUser;
+    public void setToUserName(String toUserName) {
+        this.toUserName = toUserName;
     }
 
     public BigDecimal getAmount() {
@@ -232,8 +232,8 @@ public class TransactionRequest {
                 TransactionRequest.class, "expected IBAN " + request.getIBAN() + " found " + IBAN);
         if(request.getSubject() != null) if(!request.getSubject().equals(subject)) throw new ValidationExceptionVS(
                 TransactionRequest.class, "expected subject " + request.getSubject() + " found " + subject);
-        if(request.getToUser() != null) if(!request.getToUser().equals(toUser)) throw new ValidationExceptionVS(
-                TransactionRequest.class, "expected toUser " + request.getToUser() + " found " + toUser);
+        if(request.getToUserName() != null) if(!request.getToUserName().equals(toUserName)) throw new ValidationExceptionVS(
+                TransactionRequest.class, "expected toUserName " + request.getToUserName() + " found " + toUserName);
         if(request.getAmount().compareTo(amount) != 0) throw new ValidationExceptionVS(TransactionRequest.class,
                 "expected amount " + request.getAmount().toString() + " amount " + amount.toString());
         if(!request.getCurrencyCode().equals(currencyCode)) throw new ValidationExceptionVS(
@@ -262,7 +262,7 @@ public class TransactionRequest {
         if(jsonObject.has("userToType")) transactionRequest.setUserToType(
                 UserVS.Type.valueOf(jsonObject.getString("userToType")));
         if(jsonObject.has("subject")) transactionRequest.setSubject(jsonObject.getString("subject"));
-        if(jsonObject.has("toUser")) transactionRequest.setToUser(jsonObject.getString("toUser"));
+        if(jsonObject.has("toUserName")) transactionRequest.setToUserName(jsonObject.getString("toUserName"));
         if(jsonObject.has("amount")) transactionRequest.setAmount(new BigDecimal(jsonObject.getString("amount")));
         if (jsonObject.has("currencyCode")) transactionRequest.setCurrencyCode(jsonObject.getString("currencyCode"));
         if(jsonObject.has("tagVS")) transactionRequest.setTagVS(jsonObject.getString("tagVS"));
@@ -294,7 +294,7 @@ public class TransactionRequest {
         result.put("userToType", userToType.toString());
         result.put("IBAN" , IBAN);
         result.put("subject" , subject);
-        result.put("toUser" , toUser);
+        result.put("toUserName" , toUserName);
         result.put("currencyCode" , currencyCode);
         result.put("amount" , amount);
         if(paymentMethod != null )result.put("paymentMethod" , paymentMethod.toString());

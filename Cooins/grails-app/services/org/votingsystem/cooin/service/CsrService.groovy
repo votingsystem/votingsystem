@@ -1,12 +1,12 @@
 package org.votingsystem.cooin.service
 
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.util.DateUtils
-import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.Cooin
 import org.votingsystem.cooin.model.CooinRequestBatch
 import org.votingsystem.cooin.util.LoggerVS
+import org.votingsystem.model.CertificateVS
+import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
 
@@ -68,5 +68,6 @@ class CsrService {
         } catch(Exception ex) {
             throw new ExceptionVS(messageSource.getMessage('cooinRequestDataError', null, locale), ex)
         }
+        return cooin
     }
 }

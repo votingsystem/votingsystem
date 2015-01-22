@@ -3,16 +3,16 @@ package org.votingsystem.cooin.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
+import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.CooinAccount
-import org.votingsystem.cooin.util.IbanVSUtil
+import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
@@ -84,7 +84,7 @@ class GroupVSService {
                 description:request.groupvsInfo,tagVSSet:request.tagSet).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
         new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
-                balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN(), tag:systemService.getWildTag()).save()
+                balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN(), tag:systemService.getTag(TagVS.WILDTAG)).save()
         String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
         String fromUser = grailsApplication.config.vs.serverName
         String toUser = userSigner.getNif()

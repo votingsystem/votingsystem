@@ -2,17 +2,17 @@ package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
+import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.CertUtils
-import org.votingsystem.util.DateUtils
 import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
-import org.votingsystem.cooin.model.TransactionVS
-import org.votingsystem.cooin.model.CooinAccount
-import org.votingsystem.cooin.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
@@ -22,7 +22,6 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 class SystemService {
 
     private UserVS systemUser
-    private TagVS wildTag
     private Locale defaultLocale
     def grailsApplication
     def subscriptionVSService
@@ -40,7 +39,7 @@ class SystemService {
                     name:grailsApplication.config.vs.serverName).save()
             systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
             systemUser.save()
-            wildTag = new TagVS(name:TagVS.WILDTAG).save()
+            TagVS wildTag = new TagVS(name:TagVS.WILDTAG).save()
             String[] defaultTags = grailsApplication.mainContext.getResource(
                     grailsApplication.config.vs.defaulTagsFilePath).getFile()?.text.split(",")
             for(String tag: defaultTags) {
@@ -156,11 +155,6 @@ class SystemService {
     public UserVS getSystemUser() {
         if(!systemUser) systemUser = init().systemUser
         return systemUser;
-    }
-
-    public TagVS getWildTag() {
-        if(!wildTag) wildTag = TagVS.findWhere(name:TagVS.WILDTAG)
-        return wildTag
     }
 
 }

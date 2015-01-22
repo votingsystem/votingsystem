@@ -73,8 +73,9 @@ public class BatchRequest implements Serializable  {
         return state;
     }
 
-    public void setState(State state) {
+    public BatchRequest setState(State state) {
         this.state = state;
+        return this;
     }
 
     public String getReason() {

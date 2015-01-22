@@ -4,23 +4,24 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.cooin.model.Payment
-import org.votingsystem.cooin.util.BalanceUtils
-import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.DateUtils
-import org.votingsystem.throwable.ExceptionVS
-import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.throwable.ValidationExceptionVS
-import org.votingsystem.cooin.model.TransactionVS
-
-import static org.votingsystem.cooin.model.TransactionVS.*
 import org.votingsystem.cooin.model.CooinAccount
+import org.votingsystem.cooin.model.Payment
+import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.BalanceUtils
 import org.votingsystem.cooin.util.CoreSignal
 import org.votingsystem.cooin.util.IbanVSUtil
 import org.votingsystem.cooin.util.LoggerVS
+import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.throwable.ExceptionVS
+import org.votingsystem.throwable.ValidationExceptionVS
+import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
+
 import java.math.RoundingMode
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
+import static org.votingsystem.cooin.model.TransactionVS.Source
 
 /**
 * @author jgzornoza
@@ -98,7 +99,7 @@ class TransactionVSService {
         if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
             resultAmount = resultAmount.subtract(wildTagExpensesForTag)
             CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
-                    currencyCode: transactionVS.currencyCode, tag:systemService.getWildTag())
+                    currencyCode: transactionVS.currencyCode, tag:systemService.getTag(TagVS.WILDTAG))
             if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
                 wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag)).save()
             } else {
@@ -143,7 +144,7 @@ class TransactionVSService {
                     systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
                     break;
                 case TransactionVS.Type.COOIN_SEND:
-                    switch(transactionVS.getCooinTransactionBatch().getPaymentOption()) {
+                    switch(transactionVS.getCooinTransactionBatch().getPaymentMethod()) {
                         case Payment.ANONYMOUS_SIGNED_TRANSACTION:
                             updateUserVSAccountTo(transactionVS)
                             systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode,

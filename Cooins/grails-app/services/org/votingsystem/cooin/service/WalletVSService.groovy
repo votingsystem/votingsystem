@@ -1,10 +1,10 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.votingsystem.model.TagVS
-import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.util.WalletVS
+import org.votingsystem.model.TagVS
+import org.votingsystem.throwable.ExceptionVS
 
 /**
 * @author jgzornoza
@@ -18,7 +18,7 @@ class WalletVSService {
     public WalletVS getWalletVS(String userIBAN, TagVS tag, String currencyCode) {
         List accountList = []
         CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:userIBAN, currencyCode: currencyCode,
-                tag:systemService.getWildTag())
+                tag:systemService.getTag(TagVS.WILDTAG))
         if(wildTagAccount) accountList.add(wildTagAccount)
         if(tag) {
             def tagAccount = CooinAccount.findWhere(IBAN:userIBAN, currencyCode: currencyCode, tag:tag)
