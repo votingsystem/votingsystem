@@ -70,7 +70,7 @@ class CooinController {
 
     def wallet() {}
 
-    def status() {
+    def state() {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(params.hashCertVSHex))
         Cooin cooin
         Cooin.withTransaction {
@@ -109,6 +109,9 @@ class CooinController {
         return false
     }
 
+    def bundleState() {
+        return [responseVS:cooinService.checkBundleState(request.JSON)]
+    }
     /**
      * Invoked if any method in this controller throws an Exception.
      */

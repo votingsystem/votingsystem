@@ -311,7 +311,7 @@ class UrlMappings {
             action = [POST:"processRequestFileMap", GET:"request"]
         }
 
-        "/cooin/status/$hashCertVSHex" {
+        "/cooin/state/$hashCertVSHex" {
             controller = "cooin"
             action = "status"
         }
