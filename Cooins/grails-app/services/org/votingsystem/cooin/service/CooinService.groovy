@@ -1,7 +1,8 @@
 package org.votingsystem.cooin.service
 
-import net.sf.json.JSONArray
-import net.sf.json.JSONObject
+import grails.transaction.Transactional
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.cooin.model.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -125,11 +126,12 @@ class CooinService {
                 type:TypeVS.COOIN_REQUEST);
     }
 
+    @Transactional
     public ResponseVS checkBundleState(JSONArray hashCertVSArray) {
         List resultList = []
         hashCertVSArray.each {it ->
             Cooin cooin = Cooin.findWhere(hashCertVS:it)
-            resultList.add([state:cooin.state, hashCertVS:it])
+            if(cooin) resultList.add([state:cooin.state.toString(), hashCertVS:it])
         }
         return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultList);
     }

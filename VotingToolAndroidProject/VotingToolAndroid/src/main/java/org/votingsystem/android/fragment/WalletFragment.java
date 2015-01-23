@@ -25,7 +25,9 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
@@ -67,6 +69,7 @@ public class WalletFragment extends Fragment {
                         try {
                             cooinList = Wallet.getCooinList((String) responseVS.getData(),
                                     (AppContextVS) getActivity().getApplicationContext());
+                            Utils.launchCooinStatusCheck(broadCastId, getActivity());
                             printSummary();
                         } catch (Exception ex) {
                             ex.printStackTrace();

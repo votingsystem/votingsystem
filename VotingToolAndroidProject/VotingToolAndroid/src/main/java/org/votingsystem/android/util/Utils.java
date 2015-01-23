@@ -11,6 +11,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -83,6 +84,13 @@ public class Utils {
             arguments.putAll(intent.getExtras());
         }
         return arguments;
+    }
+
+    public static void launchCooinStatusCheck(String broadCastId, Context context) {
+        Intent startIntent = new Intent(context, TransactionVSService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_CHECK);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        context.startService(startIntent);
     }
 
     public static void toggleWebSocketServiceConnection(AppContextVS contextVS) {

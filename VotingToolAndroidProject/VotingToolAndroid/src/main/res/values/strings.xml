@@ -525,5 +525,7 @@
     <string name="payment_ok_caption">pago completado con éxito</string>
     <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
     <string name="expended_cooin_error_msg">tenía en su monedero un cooin de \'%1$s\' que ya había sido consumido, por favor repita la operación</string>
-    <string name="updated_cooins_with_error_msg">actualizado el dinero del que disponía en su monedero</string>
+    <string name="updated_cooins_with_error_msg">se han eliminido de su monedero</string>
+    <string name="cooin_expended_msg">\'%1$s\' para \'%2$s\' que ya habían sido consumidos</string>
+    <string name="cooin_lapsed_msg">\'%1$s\' para \'%2$s\' que ya habían caducado</string>
 </resources>

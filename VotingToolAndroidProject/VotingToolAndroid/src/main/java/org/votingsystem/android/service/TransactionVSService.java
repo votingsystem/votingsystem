@@ -422,10 +422,10 @@ public class TransactionVSService extends IntentService {
                     }
                 }
                 if(cooinWithErrors != null && !cooinWithErrors.isEmpty()) {
-                    responseVS.setNotificationMessage(MsgUtils.getUpdateCooinsWithErrorMsg(
+                    responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCooinsWithErrorMsg(
                             cooinWithErrors, contextVS));
                     responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
-                    broadCastResponse(responseVS);
+                    contextVS.broadcastResponse(responseVS);
                 }
             }
         } catch(Exception ex) {  ex.printStackTrace(); }

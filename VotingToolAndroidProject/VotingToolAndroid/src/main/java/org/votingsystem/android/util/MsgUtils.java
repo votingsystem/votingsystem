@@ -121,38 +121,72 @@ public class MsgUtils {
     }
 
     public static String getUpdateCooinsWithErrorMsg(List<Cooin> cooinWithErrors, Context context) {
-        Map<String, BigDecimal> expendedMap = new HashMap<>();
-        Map<String, BigDecimal> lapsedMap = new HashMap<>();
+        Map<String,  Map<String, BigDecimal>> expendedMap = new HashMap<>();
+        Map<String,  Map<String, BigDecimal>> lapsedMap = new HashMap<>();
         for(Cooin cooin : cooinWithErrors) {
             switch (cooin.getState()) {
                 case LAPSED:
                     if(lapsedMap.containsKey(cooin.getCurrencyCode())) {
-                        BigDecimal total = lapsedMap.get(cooin.getCurrencyCode()).add(cooin.getAmount());
-                        lapsedMap.put(cooin.getCurrencyCode(), total);
-                    } else lapsedMap.put(cooin.getCurrencyCode(), cooin.getAmount());
+                        Map<String, BigDecimal> tagInfo = lapsedMap.get(cooin.getCurrencyCode());
+                        if(tagInfo == null) {
+                            tagInfo = new HashMap<>();
+                            tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        } else {
+                            BigDecimal tagAccumulated = tagInfo.get(cooin.getSignedTagVS()).add(
+                                    cooin.getAmount());
+                            tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        }
+                        lapsedMap.put(cooin.getCurrencyCode(), tagInfo);
+                    } else {
+                        Map<String, BigDecimal> tagInfo = new HashMap<>();
+                        tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        lapsedMap.put(cooin.getCurrencyCode(), tagInfo);
+                    }
                     break;
                 case EXPENDED:
                     if(expendedMap.containsKey(cooin.getCurrencyCode())) {
-                        BigDecimal total = expendedMap.get(cooin.getCurrencyCode()).add(cooin.getAmount());
-                        expendedMap.put(cooin.getCurrencyCode(), total);
-                    } else expendedMap.put(cooin.getCurrencyCode(), cooin.getAmount());
+                        Map<String, BigDecimal> tagInfo = expendedMap.get(cooin.getCurrencyCode());
+                        if(tagInfo == null) {
+                            tagInfo = new HashMap<>();
+                            tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        } else {
+                            BigDecimal tagAccumulated = tagInfo.get(cooin.getSignedTagVS()).add(
+                                    cooin.getAmount());
+                            tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        }
+                        expendedMap.put(cooin.getCurrencyCode(), tagInfo);
+                    } else {
+                        Map<String, BigDecimal> tagInfo = new HashMap<>();
+                        tagInfo.put(cooin.getSignedTagVS(), cooin.getAmount());
+                        expendedMap.put(cooin.getCurrencyCode(), tagInfo);
+                    }
                     break;
             }
         }
         StringBuilder sb = new StringBuilder();
         if(expendedMap.size() > 0) {
-            for(String currency : lapsedMap.keySet()) {
+            for(String currency : expendedMap.keySet()) {
+                Map<String, BigDecimal> tagInfo = expendedMap.get(currency);
+                for(String tagVS: tagInfo.keySet()) {
+                    sb.append(context.getString(R.string.cooin_expended_msg, tagInfo.get(tagVS).
+                            toString() + " " + currency, getTagVSMessage(tagVS, context)) + "<br/>");
+                }
 
             }
-            sb.append("<br/>");
+
         }
         if(lapsedMap.size() > 0) {
-            for(String currency : expendedMap.keySet()) {
+            for(String currency : lapsedMap.keySet()) {
+                Map<String, BigDecimal> tagInfo = lapsedMap.get(currency);
+                for(String tagVS: tagInfo.keySet()) {
+                    sb.append(context.getString(R.string.cooin_lapsed_msg, tagInfo.get(tagVS).
+                            toString() + " " + currency, getTagVSMessage(tagVS, context)) + "<br/>");
 
+                }
             }
-            sb.append("<br/>");
         }
-        String result = context.getString(R.string.updated_cooins_with_error_msg) + sb.toString();
+        String result = context.getString(R.string.updated_cooins_with_error_msg) + ":<br/>" +
+                sb.toString();
         return result;
     }
 }
