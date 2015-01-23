@@ -45,15 +45,16 @@ class ShopExampleService {
             try {
                 receiptContent.transactionRequest.checkRequest(transactionRequest)
                 JSONObject responseJSON = [status:ResponseVS.SC_OK, message:receiptContent.getMessage()]
-                transactionRequest.getAsyncContext().response.getWriter().write(responseJSON.toString())
                 responseVS = new ResponseVS(ResponseVS.SC_OK, receiptContent.getMessage())
+                transactionRequest.getAsyncContext().response.getWriter().write(responseJSON.toString())
+                transactionRequest.getAsyncContext().complete()
             } catch(ExceptionVS ex)  {
                 log.error(ex.getMessage())
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())
                 JSONObject responseJSON = [status:ResponseVS.SC_ERROR, message:ex.getMessage()]
                 transactionRequest.getAsyncContext().response.getWriter().write(responseJSON.toString())
-            } finally {
                 transactionRequest.getAsyncContext().complete()
+            } finally {
                 return responseVS
             }
         } else {

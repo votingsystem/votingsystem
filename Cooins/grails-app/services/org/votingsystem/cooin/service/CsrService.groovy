@@ -1,5 +1,6 @@
 package org.votingsystem.cooin.service
 
+import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.cooin.model.Cooin
 import org.votingsystem.cooin.model.CooinRequestBatch
@@ -7,19 +8,20 @@ import org.votingsystem.cooin.util.LoggerVS
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.DateUtils
-
 import java.security.cert.X509Certificate
-
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 
+@Transactional
 class CsrService {
 
     private LinkGenerator grailsLinkGenerator
-	def grailsApplication
+	private BigDecimal cooinMinValue = new BigDecimal(1)
+    def grailsApplication
 	def messageSource
     def signatureVSService
 
-    public synchronized CooinRequestBatch signCooinBatchRequest (CooinRequestBatch cooinBatchRequest){
+
+    public synchronized CooinRequestBatch signCooinBatchRequest (CooinRequestBatch cooinBatchRequest) throws ExceptionVS {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         DateUtils.TimePeriod timePeriod = null
         if(cooinBatchRequest.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
@@ -42,15 +44,17 @@ class CsrService {
         } catch(Exception ex) {
             for(Cooin cooin : cooinBatchRequest.cooinsMap.values()) {
                 if(cooin.getId() != null) {
-                    cooin.setState(Cooin.State.CANCELLED).setReason(ex.getMessage()).save()
+                    cooin.setState(Cooin.State.ERROR).setReason(ex.getMessage()).save()
                 }
             }
             throw new ExceptionVS(messageSource.getMessage('cooinRequestDataError', null, locale), ex)
         }
     }
 
-    public synchronized Cooin signCooinRequest (Cooin cooin){
+    public synchronized Cooin signCooinRequest (Cooin cooin) throws ExceptionVS {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        if(cooinMinValue.compareTo(cooin.amount) > 0) throw new ExceptionVS(messageSource.getMessage(
+                'cooinMinValueError', [cooinMinValue.toString(), cooin.amount.toString()].toArray(), locale))
         DateUtils.TimePeriod timePeriod = null
         if(cooin.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
         else {

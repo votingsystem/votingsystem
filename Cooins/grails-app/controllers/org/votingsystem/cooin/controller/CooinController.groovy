@@ -22,6 +22,7 @@ class CooinController {
     def cooinService
     def userVSService
     def transactionVSService
+    def systemService
 
 
     def request() {
@@ -56,15 +57,9 @@ class CooinController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-
         CooinRequestBatch cooinBatch = new CooinRequestBatch(params[ContextVS.CSR_FILE_NAME], messageSMIMEReq,
                 grailsApplication.config.grails.serverURL)
-        if(!cooinBatch.tagVS) {
-            TagVS.withTransaction {
-                TagVS tagVS = TagVS.findWhere(name:cooinBatch.getTag())
-                cooinBatch.setTagVS(tagVS)
-            }
-        }
+        cooinBatch.setTagVS(systemService.getTag(cooinBatch.getTag()))
         return [responseVS:cooinService.processCooinRequest(cooinBatch)]
     }
 

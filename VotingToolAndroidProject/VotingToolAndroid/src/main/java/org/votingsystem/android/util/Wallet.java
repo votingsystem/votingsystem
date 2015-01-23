@@ -426,8 +426,8 @@ public class Wallet {
                 throws Exception {
             BigDecimal bundleAmount = getTotalAmount();
             if(bundleAmount.compareTo(requestAmount) == 0) return null;
-            if(leftOverCooin == null) {
-                leftOverCooin = new Cooin(cooinServerURL, requestAmount,
+            if(leftOverCooin == null && requestAmount.compareTo(bundleAmount) < 0) {
+                leftOverCooin = new Cooin(cooinServerURL, bundleAmount.subtract(requestAmount),
                         currencyCode, tagVS, TypeVS.COOIN);
             }
             return leftOverCooin;
@@ -457,7 +457,7 @@ public class Wallet {
         public void updateWallet(Cooin leftOverCooin, AppContextVS contextVS) throws Exception {
             List<Cooin> cooinToRemove = getCooinList();
             removeCooinList(cooinToRemove, contextVS);
-            cooinList.add(leftOverCooin);
+            if(leftOverCooin != null) cooinList.add(leftOverCooin);
             Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, contextVS);
         }
     }

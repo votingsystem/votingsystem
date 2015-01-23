@@ -31,13 +31,11 @@ class TestingController {
     def balanceService
     def systemService
     def groupVSService
-    def cooinService
+    def bankVSService
 
     def index() {
-        org.codehaus.groovy.grails.web.json.JSONArray arr = new org.codehaus.groovy.grails.web.json.JSONArray(["dasd"])
-        cooinService.checkBundleState(arr)
-        //balanceService.initWeekPeriod(Calendar.getInstance())
-        render "cooinService - OK"
+        balanceService.initWeekPeriod(Calendar.getInstance())
+        render "initWeekPeriod - OK"
         return false
     }
 

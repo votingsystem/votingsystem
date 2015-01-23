@@ -1,5 +1,6 @@
 package org.votingsystem.cooin;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.votingsystem.cooin.model.Payment;
 import org.votingsystem.cooin.model.TransactionVS;
@@ -256,9 +257,14 @@ public class TransactionRequest {
 
     public static TransactionRequest parse(JSONObject jsonObject) throws ParseException {
         TransactionRequest transactionRequest = new TransactionRequest();
-        transactionRequest.setType(TypeVS.valueOf(jsonObject.getString("typeVS")));
+        if(jsonObject.has("typeVS")) transactionRequest.setType(TypeVS.valueOf(jsonObject.getString("typeVS")));
         if(jsonObject.has("IBAN")) transactionRequest.setIBAN(jsonObject.getString("IBAN"));
-        if(jsonObject.has("toUserIBAN")) transactionRequest.setIBAN(jsonObject.getJSONArray("toUserIBAN").getString(0));
+        if(jsonObject.has("toUserIBAN")) {
+            if(jsonObject.get("toUserIBAN") instanceof JSONArray) transactionRequest.setIBAN(jsonObject.getJSONArray(
+                    "toUserIBAN").getString(0));
+            else if (jsonObject.get("toUserIBAN") instanceof String) transactionRequest.setIBAN(jsonObject.getString(
+                    "toUserIBAN"));
+        }
         if(jsonObject.has("userToType")) transactionRequest.setUserToType(
                 UserVS.Type.valueOf(jsonObject.getString("userToType")));
         if(jsonObject.has("subject")) transactionRequest.setSubject(jsonObject.getString("subject"));

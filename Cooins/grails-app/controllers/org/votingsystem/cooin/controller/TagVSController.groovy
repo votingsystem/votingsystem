@@ -1,6 +1,7 @@
 package org.votingsystem.cooin.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.cooin.model.CooinAccount
@@ -22,13 +23,12 @@ class TagVSController {
 
     def index() {
         if("POST".equals(request.method)|| "OPTIONS".equals(request.method)) {
-            def requestJSON = request.JSON
+            JSONObject requestJSON = request.JSON
             if(!requestJSON.tag) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                         message(code: 'missingParamErrorMsg', args:['tag']))]
             } else  {
-                TagVS tag
-                TagVS.withTransaction { tag = TagVS.findWhere(name:requestJSON.tag) }
+                TagVS tag = systemService.getTag(requestJSON.tag)
                 if(!tag) {
                     String tagName = requestJSON.tag
                     tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(

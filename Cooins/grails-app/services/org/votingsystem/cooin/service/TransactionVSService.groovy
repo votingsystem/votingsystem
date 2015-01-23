@@ -365,7 +365,7 @@ class TransactionVSService {
             isTimeLimited = messageJSON.isTimeLimited
             if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().dateTo
             if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-                tag = TagVS.findWhere(name:messageJSON.tags[0])
+                tag = systemService.getTag(messageJSON.tags[0])
                 if(!tag) throw new ValidationExceptionVS(this.getClass(), "unknown tag '${messageJSON.tags[0]}'")
                 if(isTimeLimited && TagVS.WILDTAG.equals(tag.getName()))
                     throw new ValidationExceptionVS(this.getClass(), "WILDTAG transactions cannot be time limited")

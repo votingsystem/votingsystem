@@ -42,7 +42,7 @@ public class Cooin implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public enum State { OK, EXPENDED, LAPSED;} //Lapsed -> for not expended time limited cooins
+    public enum State { OK, EXPENDED, LAPSED, ERROR;} //Lapsed -> for not expended time limited cooins
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;

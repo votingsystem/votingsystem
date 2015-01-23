@@ -25,7 +25,6 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
@@ -107,7 +106,7 @@ public class WalletFragment extends Fragment {
     };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         ((ActionBarActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));
         rootView = inflater.inflate(R.layout.wallet_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
@@ -125,6 +124,8 @@ public class WalletFragment extends Fragment {
             }
         });
         cooinList = Wallet.getCooinList();
+        adapter = new CooinListAdapter(cooinList, getActivity());
+        gridView.setAdapter(adapter);
         if(cooinList == null) {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
@@ -133,9 +134,14 @@ public class WalletFragment extends Fragment {
             printSummary();
             walletLoaded = true;
         }
-        adapter = new CooinListAdapter(cooinList, getActivity());
-        gridView.setAdapter(adapter);
         setHasOptionsMenu(true);
+        ResponseVS responseVS = (getArguments() != null)? (ResponseVS) getArguments().getParcelable(
+                ContextVS.RESPONSEVS_KEY) :null;
+        if(responseVS != null) {
+            MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                    responseVS.getCaption(), responseVS.getMessage(),
+                    getFragmentManager());
+        }
         return rootView;
     }
 

@@ -328,8 +328,8 @@ public class TransactionRequest {
     public void setAnonymousSignedTransactionReceipt(SMIMEMessage smimeMessage,
             List<Cooin> cooinList) throws JSONException, ExceptionVS {
         JSONObject messageJSON = new  JSONObject(smimeMessage.getSignedContent());
-        if(TypeVS.valueOf(messageJSON.getString("operation")) != TypeVS.FROM_USERVS) throw
-                new ExceptionVS("Expected operation: " + TypeVS.FROM_USERVS + " - found: " +
+        if(TypeVS.valueOf(messageJSON.getString("operation")) != TypeVS.COOIN_SEND) throw
+                new ExceptionVS("Expected operation: " + TypeVS.COOIN_SEND + " - found: " +
                 messageJSON.getString("operation"));
         if(Payment.valueOf(messageJSON.getString("paymentMethod")) != paymentMethod) throw
                 new ExceptionVS("Expected paymentMethod: " + paymentMethod + " - found: " +

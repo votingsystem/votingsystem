@@ -136,7 +136,11 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return result;
     }
 
-    public String getSignedContent() {
+    public String getSignedContent() throws ExceptionVS {
+        try {
+            if(contentInfo == null) contentInfo =
+                    new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
+        } catch (Exception ex) { throw new ExceptionVS(ex.getMessage(), ex);}
         return signedContent;
     }
 

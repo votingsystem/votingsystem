@@ -373,8 +373,11 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.save_receipt);
                 break;
             case R.id.signature_content:
-                MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.signature_content),
-                        selectedReceiptSMIME.getSignedContent(), getFragmentManager());
+                try {
+                    MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(
+                            R.string.signature_content), selectedReceiptSMIME.getSignedContent(),
+                            getFragmentManager());
+                } catch(Exception ex) { ex.printStackTrace();}
                 break;
             case R.id.check_receipt:
                 if(selectedReceipt instanceof VoteVS) {

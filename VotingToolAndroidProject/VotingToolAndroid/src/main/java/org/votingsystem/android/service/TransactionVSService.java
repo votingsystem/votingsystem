@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.WalletActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -348,6 +349,7 @@ public class TransactionVSService extends IntentService {
                 JSONObject responseJSON = responseVS.getMessageJSON();
                 if(leftOverCooin != null) {
                     leftOverCooin.initSigner(responseJSON.getString("leftOverCoin").getBytes());
+                    leftOverCooin.setState(Cooin.State.OK);
                 }
                 SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
                         Base64.decode(responseJSON.getString("receipt"))));
@@ -424,8 +426,12 @@ public class TransactionVSService extends IntentService {
                 if(cooinWithErrors != null && !cooinWithErrors.isEmpty()) {
                     responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCooinsWithErrorMsg(
                             cooinWithErrors, contextVS));
-                    responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
-                    contextVS.broadcastResponse(responseVS);
+                    responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
+                            serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
+                    Intent intent = new Intent(this, WalletActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                    startActivity(intent);
                 }
             }
         } catch(Exception ex) {  ex.printStackTrace(); }

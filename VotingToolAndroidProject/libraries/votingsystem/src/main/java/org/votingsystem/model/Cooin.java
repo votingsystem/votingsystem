@@ -107,6 +107,7 @@ public class Cooin extends ReceiptContainer {
     }
 
     public String getStateMsg(Context context) {
+        if(state == null) return null;
         switch (state) {
             case OK: return context.getString(R.string.active_lbl);
             case EXPENDED: return context.getString(R.string.expended_lbl);
@@ -115,7 +116,8 @@ public class Cooin extends ReceiptContainer {
         }
     }
 
-    public int getStateColor(Context context) {
+    public Integer getStateColor(Context context) {
+        if(state == null) return context.getResources().getColor(R.color.unknown_vs);
         switch (state) {
             case OK: return context.getResources().getColor(R.color.active_vs);
             default: return context.getResources().getColor(R.color.terminated_vs);

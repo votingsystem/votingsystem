@@ -187,7 +187,7 @@ class GroupVSService {
             if(TypeVS.COOIN_GROUP_NEW != TypeVS.valueOf(messageJSON.operation)) throw new ValidationExceptionVS(this.getClass(),
                     "Operation expected: 'COOIN_GROUP_NEW' - operation found: " + messageJSON.operation)
             messageJSON.tags?.each {tag ->
-                TagVS tagVS = TagVS.findWhere(name:tag.name)
+                TagVS tagVS = systemService.getTag(tag.name)
                 if(tagVS) tagSet.add(tagVS)
                 else throw new ValidationExceptionVS(this.getClass(), "Tag '${tag}' not found");
             }

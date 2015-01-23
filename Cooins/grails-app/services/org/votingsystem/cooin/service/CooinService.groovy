@@ -1,8 +1,7 @@
 package org.votingsystem.cooin.service
 
 import grails.transaction.Transactional
-import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONObject
+import net.sf.json.JSONObject
 import org.votingsystem.cooin.model.*
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -21,6 +20,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class CooinService {
 
     def messageSource
@@ -39,7 +39,7 @@ class CooinService {
         List<Cooin> validatedCooinList = new ArrayList<Cooin>()
         UserVS toUserVS = UserVS.findWhere(IBAN:cooinBatch.getToUserIBAN());
         cooinBatch.setToUserVS(toUserVS)
-        TagVS tagVS = TagVS.findWhere(name:cooinBatch.getTag())
+        TagVS tagVS = systemService.getTag(cooinBatch.getTag())
         if(!tagVS) throw new ExceptionVS(
                 "Error - CooinTransactionBatch '${cooinBatch?.getBatchUUID()}' missing TagVS '",
                 MetaInfMsg.getErrorMsg(methodName, 'missingTagVS'))
@@ -58,10 +58,13 @@ class CooinService {
             }
         }
         JSONObject batchDataJSON = cooinBatch.getDataJSON()
-        SMIMEMessage receipt = signatureVSService.getSMIME(systemService.getSystemUser().getName(),
-                cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject(), null)
+        ResponseVS responseVS = signatureVSService.getSMIMETimeStamped(systemService.getSystemUser().getName(),
+                cooinBatch.getBatchUUID(), batchDataJSON.toString(), cooinBatch.getSubject())
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
+        SMIMEMessage receipt = responseVS.getSMIME()
         cooinBatch.setState(BatchRequest.State.OK).save()
         MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.RECEIPT, batchRequest:cooinBatch).save()
+        log.debug("$methodName - cooinBatch: ${cooinBatch.id} - messageSMIME: ${messageSMIME.id}")
         Date validTo = null
         //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         //if(cooinBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
@@ -126,10 +129,9 @@ class CooinService {
                 type:TypeVS.COOIN_REQUEST);
     }
 
-    @Transactional
-    public ResponseVS checkBundleState(JSONArray hashCertVSArray) {
+    public ResponseVS checkBundleState(List hashCertVSList) {
         List resultList = []
-        hashCertVSArray.each {it ->
+        hashCertVSList.each {it ->
             Cooin cooin = Cooin.findWhere(hashCertVS:it)
             if(cooin) resultList.add([state:cooin.state.toString(), hashCertVS:it])
         }
