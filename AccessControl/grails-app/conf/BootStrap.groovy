@@ -13,6 +13,7 @@ class BootStrap {
     def filesService
     def signatureVSService
     def systemService
+    def timeStampService
 
     def init = { servletContext ->
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
@@ -20,6 +21,7 @@ class BootStrap {
         signatureVSService.init();
         systemService.init()
         filesService.init()
+        timeStampService.init()
         JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }
         JSON.registerObjectMarshaller(RepresentativeVS) {
             def returnMap = [:]

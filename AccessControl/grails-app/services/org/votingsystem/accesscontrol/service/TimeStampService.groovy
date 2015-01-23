@@ -33,40 +33,35 @@ class TimeStampService {
 	private byte[] signingCertPEMBytes
 
 
-	public synchronized Map init() {
-		log.debug(" - init - init - init");
+    public synchronized Map init() {
+        log.debug("init");
         try {
             String serverURL = StringUtils.checkURL(grailsApplication.config.vs.urlTimeStampServer)
             ActorVS timeStampServer = ActorVS.findWhere(serverURL:serverURL)
             X509Certificate x509TimeStampServerCert = null;
             CertificateVS timeStampServerCert = null;
             if(!timeStampServer) {
-                ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                        ContentTypeVS.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage())).save();
-                    Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
-                    x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
-                    signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
-                    log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
-                }
+                fetchTimeStampServerInfo(new ActorVS(serverURL:serverURL));
+                return null
             } else {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
                 if(timeStampServerCert) {
                     x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.content)
-                    signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
-                } else {
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                            ContentTypeVS.JSON);
-                    timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                    Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
-                    x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
-                    signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
+                    if(Calendar.getInstance().getTime().before(x509TimeStampServerCert.notAfter)) {
+                        signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
+                    } else {
+                        log.debug("timeStampServerCert lapsed - not valid after: ${x509TimeStampServerCert.notAfter}")
+                        timeStampServerCert.setState(CertificateVS.State.LAPSED).save()
+                    }
+                }
+                if(!signingCertPEMBytes) {
+                    fetchTimeStampServerInfo(timeStampServer);
+                    return null
                 }
             }
-            ContextVS.getInstance().setTimeStampServerCert(x509TimeStampServerCert)
             if(x509TimeStampServerCert) {
+                ContextVS.getInstance().setTimeStampServerCert(x509TimeStampServerCert)
                 timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(x509TimeStampServerCert)
                 X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
@@ -76,20 +71,41 @@ class TimeStampService {
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex)
         }
-	}
+    }
 
-    private Map saveTimeStampServerCert(ActorVS timeStampServer)  {
-        X509Certificate x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
-                timeStampServer.certChainPEM.getBytes()).iterator().next()
-        byte[] signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
-        CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
-                certChainPEM:timeStampServer.certChainPEM.getBytes(),
-                content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,
-                serialNumber:x509TimeStampServerCert?.getSerialNumber()?.longValue(),
-                validFrom:x509TimeStampServerCert?.getNotBefore(), type:CertificateVS.Type.TIMESTAMP_SERVER,
-                validTo:x509TimeStampServerCert?.getNotAfter()).save();
-        return [x509TimeStampServerCert:x509TimeStampServerCert, signingCertPEMBytes:signingCertPEMBytes,
-                timeStampServerCert:timeStampServerCert]
+    private void fetchTimeStampServerInfo(ActorVS timeStampServer) {
+        log.debug("fetchTimeStampServerInfo : ${timeStampServer.serverURL}")
+        runAsync {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(timeStampServer.serverURL),
+                    ContentTypeVS.JSON);
+            X509Certificate x509TimeStampServerCert = null
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                ActorVS.withTransaction{
+                    ActorVS newTimeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                    if(timeStampServer.serverURL.equals(newTimeStampServer.getServerURL())) {
+                        if(!timeStampServer.id) {
+                            newTimeStampServer.save();
+                            timeStampServer = newTimeStampServer;
+                        } else timeStampServer.setCertChainPEM(newTimeStampServer.getCertChainPEM())
+                        x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
+                                timeStampServer.certChainPEM.getBytes()).iterator().next()
+                        log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
+                    } else {
+                        log.error("Expected server URL '${timeStampServer.serverURL}' but found '${newTimeStampServer.getServerURL()}'")
+                    }
+                }
+                CertificateVS.withTransaction {
+                    CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
+                            certChainPEM:timeStampServer.certChainPEM.getBytes(),
+                            content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,
+                            serialNumber:x509TimeStampServerCert?.getSerialNumber()?.longValue(),
+                            validFrom:x509TimeStampServerCert?.getNotBefore(), type:CertificateVS.Type.TIMESTAMP_SERVER,
+                            validTo:x509TimeStampServerCert?.getNotAfter()).save();
+                    log.debug("Added TimeStampServer Cert: ${timeStampServerCert.id}")
+                }
+            } else log.error("ERROR fetching TimeStampServerInfo : ${serverURL}")
+            init();
+        }
     }
 	
 	public byte[] getSigningCertPEMBytes() {

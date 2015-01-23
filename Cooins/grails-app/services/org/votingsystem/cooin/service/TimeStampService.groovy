@@ -52,7 +52,10 @@ class TimeStampService {
                     x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.content)
                     if(Calendar.getInstance().getTime().before(x509TimeStampServerCert.notAfter)) {
                         signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
-                    } else timeStampServerCert.setState(CertificateVS.State.LAPSED).save()
+                    } else {
+                        log.debug("timeStampServerCert lapsed - not valid after: ${x509TimeStampServerCert.notAfter}")
+                        timeStampServerCert.setState(CertificateVS.State.LAPSED).save()
+                    }
                 }
                 if(!signingCertPEMBytes) {
                     fetchTimeStampServerInfo(timeStampServer);
@@ -107,25 +110,9 @@ class TimeStampService {
         }
     }
 
-
-
     public byte[] getSigningCertPEMBytes() {
         if(!signingCertPEMBytes) signingCertPEMBytes = init()?.signingCertPEMBytes
         return signingCertPEMBytes
-    }
-
-    private Map saveTimeStampServerCert(ActorVS timeStampServer)  {
-        X509Certificate x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
-                timeStampServer.certChainPEM.getBytes()).iterator().next()
-        byte[] signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
-        CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
-                certChainPEM:timeStampServer.certChainPEM.getBytes(),
-                content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,
-                serialNumber:x509TimeStampServerCert?.getSerialNumber()?.longValue(),
-                validFrom:x509TimeStampServerCert?.getNotBefore(), type:CertificateVS.Type.TIMESTAMP_SERVER,
-                validTo:x509TimeStampServerCert?.getNotAfter()).save();
-        return [x509TimeStampServerCert:x509TimeStampServerCert, signingCertPEMBytes:signingCertPEMBytes,
-                timeStampServerCert:timeStampServerCert]
     }
 
     public void validateToken(TimeStampToken tsToken) throws ExceptionVS {
