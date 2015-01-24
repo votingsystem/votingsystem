@@ -59,6 +59,7 @@ class EventVSElectionController {
                     render(view:"eventVSElection", model: [eventMap: eventVSElectionService.getEventVSElectionMap(eventVS)])
                 }
             }
+            return false
         }
         List<EventVSElection> resultList
         Map eventsVSMap = new HashMap()
@@ -105,7 +106,27 @@ class EventVSElectionController {
         return [responseVS : eventVSElectionService.saveEvent(messageSMIME)]
 	}
 
-	/**
+    def stats () {
+        if (params.long('id')) {
+            EventVSElection eventVSElection
+            if (!params.eventVS) {
+                EventVSElection.withTransaction {eventVSElection = EventVSElection.get(params.id)}
+            } else eventVSElection = params.eventVS
+            if (eventVSElection) {
+                response.status = ResponseVS.SC_OK
+                def statsMap = eventVSElectionService.getStatsMap(eventVSElection)
+                if(request.contentType?.contains("json")) {
+                    if (params.callback) render "${params.callback}(${statsMap as JSON})"
+                    else render statsMap as JSON
+                } else render(view:"stats", model: [statsJSON: statsMap  as JSON])
+            } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
+    }
+
+
+    /**
 	 * Servicio de consulta de los votesVS
 	 *
 	 * @param [eventAccessControlURL] Obligatorio. URL del evento en el Control de Acceso.

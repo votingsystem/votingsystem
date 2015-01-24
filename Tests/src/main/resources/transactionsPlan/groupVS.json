@@ -2,7 +2,7 @@
     "userVSList":[],
     "groupVSList":[
         {"fromUserVSId":5, "toUserVSList":[],"operation":"FROM_GROUP_TO_ALL_MEMBERS", "subject":"GroupVS Transaction Test",
-            "amount":"10000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
+            "amount":"20000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
 
     ],
     "bankVSList":[]

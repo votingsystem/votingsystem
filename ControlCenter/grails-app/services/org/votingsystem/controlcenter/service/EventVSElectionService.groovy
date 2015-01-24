@@ -239,8 +239,7 @@ class EventVSElectionService {
 			state:eventVS.state.toString(),
 			dateBegin: eventVS.getDateBegin(),
 			dateFinish:eventVS.getDateFinish(),
-            dateBeginStr:DateUtils.getDateStr(eventVS.getDateBegin()),
-            dateFinishStr:DateUtils.getDateStr(eventVS.getDateFinish()),
+            dateBeginStr:eventVS.getDateBegin(),
             accessControlEventVSId: eventVS.accessControlEventVSId,
 			eventVSRootCertURL:"${grailsLinkGenerator.link(controller:"certificateVS", action:"eventCA")}eventCA?eventAccessControlURL=${eventVS.url}",
 			accessControlVoteVSInfoURL: "${eventVS.accessControlVS?.serverURL}/eventVS/${eventVS.accessControlEventVSId}/voteVSInfo",
@@ -257,4 +256,20 @@ class EventVSElectionService {
 		return eventVSMap
 	}
 
+    public Map getStatsMap (EventVSElection eventVS) {
+        if(!eventVS) throw new ExceptionVS("EventVSElection null")
+        def statsMap = new HashMap()
+        statsMap.fieldsEventVS = []
+        statsMap.id = eventVS.id
+        statsMap.subject = eventVS.subject
+        statsMap.numVotesVS = VoteVS.countByEventVS(eventVS)
+        statsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVS, VoteVS.State.OK)
+        statsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVS,VoteVS.State.CANCELLED)
+        eventVS.fieldsEventVS.each { option ->
+            def numVotesVS = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
+            def optionMap = [id:option.id, content:option.content, numVotesVS:numVotesVS]
+            statsMap.fieldsEventVS.add(optionMap)
+        }
+        return statsMap
+    }
 }

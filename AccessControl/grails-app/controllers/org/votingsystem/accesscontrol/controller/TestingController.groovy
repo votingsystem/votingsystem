@@ -16,9 +16,7 @@ class TestingController {
     def grailsApplication
 
     def index() {
-        ResponseVS responseVS = ResponseVS.getExceptionResponse(null, null, new ExceptionVS("Test"),
-                new ExceptionVS("Throwable"))
-        render responseVS.metaInf
+        render "OK"
         return false
     }
 

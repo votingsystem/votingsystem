@@ -78,7 +78,7 @@ class EventVSElectionController {
         if(!eventVSState) eventVSState = EventVS.State.ACTIVE
         EventVSElection.withTransaction {
             resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
-                    sort:params.sort, order:'desc') {
+                    sort:params.sort, order:'asc') {
                 if(eventVSState == EventVS.State.TERMINATED) {
                     or{
                         eq("state", EventVS.State.TERMINATED)

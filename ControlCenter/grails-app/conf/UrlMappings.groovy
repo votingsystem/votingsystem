@@ -51,6 +51,14 @@ class UrlMappings {
             }
         }
 
+        "/eventVSElection/$id/stats" {
+            controller = "eventVSElection"
+            action = "stats"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
         "/messageSMIME/$id"{
             controller = "messageSMIME"
             action = "index"

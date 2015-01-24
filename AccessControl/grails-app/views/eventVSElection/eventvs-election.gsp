@@ -1,14 +1,30 @@
 <vs:webresource dir="polymer" file="polymer.html"/>
 <vs:webresource dir="paper-fab" file="paper-fab.html"/>
+<vs:webresource dir="core-media-query" file="core-media-query.html"/>
 <vs:webcomponent path="/eventVSElection/eventvs-election-voteconfirm-dialog"/>
 <vs:webcomponent path="/element/eventvs-admin-dialog"/>
 <vs:webcomponent path="/element/votevs-result-dialog"/>
 <vs:webcomponent path="/eventVSElection/eventvs-election-stats"/>
+<vs:webresource dir="paper-tabs" file="paper-tabs.html"/>
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <style></style>
+        <style>
+            .tabContent { margin:0px auto 0px auto; width:auto; }
+            .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
+            .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
+            paper-tabs.transparent-teal { padding: 0px; background-color: #ffeeee; color:#ba0011;
+                box-shadow: none; cursor: pointer; height: 35px;
+            }
+            paper-tabs.transparent-teal::shadow #selectionBar {
+                background-color: #ba0011;
+            }
+            paper-tabs.transparent-teal paper-tab::shadow #ink {
+                color: #ba0011;
+            }
+        </style>
+        <core-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></core-media-query>
         <div vertical layout>
             <div style="text-align: center;">
                 <template if="{{'admin' == menuType}}">
@@ -54,8 +70,17 @@
                     <b><g:message code="publishedByLbl"/>: </b>{{eventvs.userVS}}
                 </div>
 
-                <div horizontal layout class="fieldsBox" style="">
-                    <div style="width: 100%;">
+                <template if="{{smallScreen}}">
+                    <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
+                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                        <paper-tab name="optionsTab" style="width: 400px"><g:message code="pollFieldLegend"/></paper-tab>
+                        <paper-tab name="statsTab"><g:message code="resultsLbl"/></paper-tab>
+                    </paper-tabs>
+                </template>
+
+
+                <div horizontal layout class="fieldsBox">
+                    <div style="width: 100%;display:{{smallScreen?(selectedTab == 'optionsTab'?'block':'none'):'block'}}">
                         <fieldset>
                             <legend><g:message code="pollFieldLegend"/></legend>
                             <div>
@@ -80,7 +105,9 @@
                             </div>
                         </fieldset>
                     </div>
-                    <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
+                    <div style="display:{{smallScreen?(selectedTab == 'statsTab'?'block':'none'):'block'}}">
+                        <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
+                    </div>
                 </div>
             </div>
             </div>

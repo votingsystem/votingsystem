@@ -3,12 +3,16 @@ import org.votingsystem.model.RepresentativeVS
 import grails.converters.JSON
 import org.votingsystem.model.ContextVS
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class BootStrap {
 
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
     def grailsApplication
     def filesService
     def signatureVSService
@@ -22,7 +26,8 @@ class BootStrap {
         systemService.init()
         filesService.init()
         timeStampService.init()
-        JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        JSON.registerObjectMarshaller(Date) { return dateFormat.format(it); }
         JSON.registerObjectMarshaller(RepresentativeVS) {
             def returnMap = [:]
             returnMap['optionSelectedId'] = it.optionSelectedId
