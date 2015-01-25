@@ -83,6 +83,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.8'
         compile ":asset-pipeline:2.1.0"
         compile ':executor:0.3'
+        compile ":quartz:1.0.2"
         compile ':rendering:1.0.0'
 
         // plugins needed at runtime but not for compilation

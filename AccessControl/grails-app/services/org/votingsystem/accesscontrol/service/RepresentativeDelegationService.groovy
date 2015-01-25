@@ -19,7 +19,7 @@ import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
 
-//@Transactional
+@Transactional
 class RepresentativeDelegationService {
 	
 	enum State {WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
@@ -209,15 +209,15 @@ class RepresentativeDelegationService {
                 type:request.operation, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
-        RepresentationDocumentVS representationDocument = RepresentationDocumentVS.
-                findWhere(userVS:userVS, state:RepresentationDocumentVS.State.OK)
+	public void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
+        RepresentationDocumentVS representationDocument = RepresentationDocumentVS.findWhere(userVS:userVS,
+                state:RepresentationDocumentVS.State.OK)
         if(representationDocument) {
             log.debug("cancelRepresentationDocument - User changing representative")
             representationDocument.state = RepresentationDocumentVS.State.CANCELLED
             representationDocument.cancellationSMIME = messageSMIMEReq
             representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
-            representationDocument.save(flush:true)
+            representationDocument.save()
             log.debug("cancelRepresentationDocument - user '${userVS.nif}' " +
                     " - representationDocument ${representationDocument.id}")
         } else log.debug("cancelRepresentationDocument - user '${userVS.nif}' doesn't have representative")

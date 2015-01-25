@@ -44,9 +44,8 @@
                 </template>
                 <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
-
-            <div layout horizontal style="width: 100%;">
-                <div flex>
+            <div layout vertical?="{{smallScreen}}" horizontal?="{{!smallScreen}}" style="width: 100%;">
+                <div flex style="display: block;">
                     <template if="{{'PENDING' == eventvs.state}}">
                         <div style="font-size: 1.3em; font-weight:bold;color:#fba131;"><g:message code="eventVSPendingMsg"/></div>
                     </template>
@@ -104,6 +103,13 @@
                                 </template>
                             </div>
                         </fieldset>
+                        <div style="margin: 10px 0 0 0;">
+                            <template if="{{'TERMINATED' == eventvs.state}}">
+                                <paper-button raised on-click="{{accept}}">
+                                    <i class="fa fa-bar-chart"></i> <g:message code="getResultsLbl"/>
+                                </paper-button>
+                            </template>
+                        </div>
                     </div>
                     <div style="display:{{smallScreen?(selectedTab == 'statsTab'?'block':'none'):'block'}}">
                         <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
@@ -132,6 +138,7 @@
             },
             ready: function() {
                 console.log(this.tagName + "- subpage:  " + this.subpage)
+                this.selectedTab = 'optionsTab'
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))

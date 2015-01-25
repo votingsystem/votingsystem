@@ -98,7 +98,7 @@ public class SignedFile {
     }
     
     public String getNifFromRepresented() {
-        if(name != null && name.contains("_RepDoc_")) return name.split("_RepDoc_")[1].split("\\.")[0];
+        if(name != null && name.contains("_delegation_")) return name.split("_delegation_")[1].split("\\.")[0];
         else return null;
     }
     

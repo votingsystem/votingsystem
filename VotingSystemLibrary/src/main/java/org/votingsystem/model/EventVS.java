@@ -292,8 +292,9 @@ public class EventVS implements Serializable {
 		return metaInf;
 	}
 
-	public void setMetaInf(String metaInf) {
+	public EventVS setMetaInf(String metaInf) {
 		this.metaInf = metaInf;
+        return this;
 	}
 
     public AccessControlVS getAccessControlVS() {

@@ -13,6 +13,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -67,7 +68,7 @@ public class OCSPUtils {
             X509Certificate interCert = readCert("./test/inter.pem");
             X509Certificate clientCert = readCert("./test/client.pem");
             log.info("Cert state: " + validateCert(interCert, clientCert.getSerialNumber(),
-                    new Date(System.currentTimeMillis())).toString());
+                    Calendar.getInstance().getTime()).toString());
         } catch (Exception ex){
             log.error(ex.getMessage(), ex);
         }

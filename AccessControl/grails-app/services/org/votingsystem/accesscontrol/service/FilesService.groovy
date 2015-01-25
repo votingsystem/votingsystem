@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
+import org.votingsystem.throwable.ExceptionVS
 import static org.springframework.context.i18n.LocaleContextHolder.*
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.TypeVS
@@ -24,51 +25,26 @@ class FilesService {
         }
 	}
 
- 	public Map<String, File> getBackupFiles(EventVS event, TypeVS type){
-		 String servicePathPart = null
-		 Map<String, File> result = new HashMap<String, File>()
-		 String datePathPart = DateUtils.getDateStr(event.getDateFinish(), "yyyy/MM/dd")
-		 String baseDirPath ="${grailsApplication.config.vs.backupCopyPath}/${datePathPart}/Event_${event.id}"
-		 String filesDirPath = null
-		 String zipFilesDirPath = "${baseDirPath}/zip"
-		 new File(zipFilesDirPath).mkdirs()
-		 result.metaInfFile = new File("${baseDirPath}/meta.inf")
-		 switch(type) {
-			 case TypeVS.REPRESENTATIVE_DATA:
-				 servicePathPart = messageSource.getMessage('repAccreditationsBackupPartPath', null,
-                         locale)
-				 filesDirPath = "${baseDirPath}/files/${servicePathPart}"
-				 new File(filesDirPath).mkdirs()
-				 String reportPathPart = messageSource.getMessage('representativeReport', null,
-                         locale)
-				 //result.representativesReportFile = new File("${filesDirPath}/${reportPathPart}.csv")
-				 result.filesDir = new File(filesDirPath)
-				 break; 
-			 case TypeVS.VOTING_EVENT:
-				 servicePathPart = messageSource.getMessage('votingBackupPartPath', [event.id].toArray(),
-                         locale)
-				 filesDirPath = "${baseDirPath}/files"
-				 result.filesDir = new File(filesDirPath)
-				 break;
-			case TypeVS.MANIFEST_EVENT:
-				servicePathPart = messageSource.getMessage('manifestsBackupPartPath', [event.id].toArray(),
-                        locale)
-				result.filesDir = new File("${baseDirPath}/files") 
+ 	public Map<String, File> getBackupFiles(EventVS event, TypeVS type) throws ExceptionVS {
+		Map<String, File> result = new HashMap<String, File>()
+		String datePartPath = DateUtils.getDateStr(event.getDateFinish(), "yyyy_MM_dd")
+		String baseDirPath ="${grailsApplication.config.vs.backupCopyPath}/${datePartPath}/EventVS_${event.id}"
+		new File("$baseDirPath").mkdirs()
+		String filesDirPath = "$baseDirPath/${type.toString()}"
+		new File(filesDirPath).mkdirs()
+		result.filesDir = new File(filesDirPath)
+		result.zipResult = new File("$baseDirPath/${type.toString()}.zip")
+		switch(type) {
+			case TypeVS.REPRESENTATIVE_DATA:
+				result.metaInfFile = new File("$filesDirPath/meta.inf")
+				result.reportFile = new File("$baseDirPath/${type.toString()}_REPORTS.csv")
 				break;
-			case TypeVS.CLAIM_EVENT:
-				servicePathPart = messageSource.getMessage('claimsBackupPartPath', [event.id].toArray(),
-                        locale)
-				result.filesDir = new File("${baseDirPath}/files")
-
+			case TypeVS.VOTING_EVENT:
+				result.metaInfFile = new File("${baseDirPath}/meta.inf")
 				break;
-		     default: 
-			 	log.error("getBackupZipPath - map files not found for type ${type}")
-				return;
-		 }
-		 if(result.filesDir) result.filesDir.mkdirs();
-		 result.zipResult = new File("${zipFilesDirPath}/${servicePathPart}.zip")
-		 return result
+			default: throw new ExceptionVS("unprocessed type: ${type}")
+		}
+		return result
 	 }			 
 
 }
-

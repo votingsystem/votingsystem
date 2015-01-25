@@ -30,7 +30,7 @@
                            placeholder="<g:message code="subjectLbl"/>" error="<g:message code="requiredLbl"/>" required/>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
-                    <label><g:message code="dateElectionLbl"/></label>
+                    <label><g:message code="electionDateLbl"/></label>
                     <div id="dateBegin">
                         <g:datePicker name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
                     </div>

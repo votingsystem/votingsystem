@@ -136,7 +136,7 @@ class CertificateVSService {
         if(certificate) {
             log.debug "cancelCert - certificateVS.id '${certificate?.id}'  --- "
             if(CertificateVS.State.OK == certificate.state) {
-                certificate.cancelDate = new Date(System.currentTimeMillis());
+                certificate.cancelDate = Calendar.getInstance().getTime();
                 certificate.setState(CertificateVS.State.CANCELLED).save()
                 log.debug "cancelCert - certificateVS '${certificate?.id}' cancelled"
             } else log.debug "CertificateVS.id '${certificate?.id}' already cancelled"

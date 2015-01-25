@@ -270,7 +270,7 @@ class RepresentativeController {
 		if(!event) return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventVSNotFound'))]
 		else {
             if(event.isActive(Calendar.getInstance().getTime())) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventDateNotFinished'))]
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventActiveErrorMsg'))]
             } else {
                 return [responseVS : representativeService.getAccreditationsBackupForEvent(event)]
             }

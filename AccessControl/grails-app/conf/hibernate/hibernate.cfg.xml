@@ -25,6 +25,7 @@
         <mapping class="org.votingsystem.model.MessageSMIME" />
         <mapping class="org.votingsystem.model.PDFDocumentVS" />
         <mapping class="org.votingsystem.model.RepresentationDocumentVS" />
+        <mapping class="org.votingsystem.accesscontrol.model.RepresentativeDocument" />
         <mapping class="org.votingsystem.model.ResponseVS" />
         <mapping class="org.votingsystem.model.SignatureVS" />
         <mapping class="org.votingsystem.model.SubscriptionVS" />

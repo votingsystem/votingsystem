@@ -91,21 +91,16 @@ class SignatureVSService {
         return result
     }
 
-    public ResponseVS getEventTrustedCerts(EventVS event) {
+    public Set<X509Certificate> getEventTrustedCerts(EventVS event) throws ExceptionVS {
         log.debug("getEventTrustedCerts")
         if(!event) throw new ExceptionVS("EventVS null")
         CertificateVS eventVSCertificateVS = CertificateVS.findWhere(eventVSElection:event, state:CertificateVS.State.OK,
                 type:CertificateVS.Type.VOTEVS_ROOT)
-        if(!eventVSCertificateVS) {
-            String msg = messageSource.getMessage('eventWithoutCAErrorMsg', [event.id].toArray(), locale)
-            log.error ("getEventTrustedCerts - ERROR EVENT CA CERT -> '${msg}'")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,
-                    type:TypeVS.VOTE_ERROR, eventVS:event)
-        }
-        X509Certificate certCAEventVS = CertUtils.loadCertificate(eventVSCertificateVS.content)
+        if(!eventVSCertificateVS) throw new ExceptionVS(messageSource.getMessage('eventWithoutCAErrorMsg',
+                [event.id].toArray(), locale));
         Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>()
-        eventTrustedCerts.add(certCAEventVS)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:eventTrustedCerts)
+        eventTrustedCerts.add(CertUtils.loadCertificate(eventVSCertificateVS.content))
+        return eventTrustedCerts
     }
 
     /**
@@ -221,7 +216,7 @@ class SignatureVSService {
             if(certificate) {
                 log.debug "Comprobando certificateVS.id '${certificate?.id}'  --- "
                 if(CertificateVS.State.OK == certificate.state) {
-                    certificate.cancelDate = new Date(System.currentTimeMillis());
+                    certificate.cancelDate = Calendar.getInstance().getTime();
                     certificate.state = CertificateVS.State.CANCELLED;
                     certificate.save()
                     log.debug "cancelado certificateVS '${certificate?.id}'"

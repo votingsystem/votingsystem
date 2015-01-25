@@ -16,8 +16,7 @@ class UserVSController {
 
 	
 	/**
-	 * Servicio que sirve para añadir usuarios de pruebas.
-	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
+	 * (DISPONIBLES EN ENTORNOS DE DESARROLLO) Servicio que añade usuarios de pruebas.
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/user]
@@ -39,8 +38,6 @@ class UserVSController {
 			ResponseVS responseVS = subscriptionVSService.checkUser(userVS)
 			responseVS.userVS.type = UserVS.Type.USER
 			responseVS.userVS.representative = null
-			responseVS.userVS.representativeMessage = null
-			responseVS.userVS.representativeRegisterDate = null
 			responseVS.userVS.metaInf = null
 			UserVS.withTransaction { responseVS.userVS.save() }
             return [responseVS : responseVS]
@@ -49,10 +46,8 @@ class UserVSController {
 	
 	
 	/**
-	 *
-	 * Servicio que sirve para prepaparar la base de usuarios
+	 * (DISPONIBLES SOLO EN ENTORNOS DE DESARROLLO) Servicio que sirve para prepaparar la base de usuarios
 	 * antes de lanzar simulaciones.
-	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
 	 *
 	 * @httpMethod [GET]
 	 * @serviceURL [/user/prepareUserBaseData]
@@ -63,20 +58,17 @@ class UserVSController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		def usersVS = UserVS.findAll()
+		List<UserVS> usersVS = UserVS.findAll()
         usersVS.each { user ->
 			user.type = UserVS.Type.USER
 			user.representative = null
-			user.representativeMessage = null
-			user.representativeRegisterDate = null
 			user.metaInf = null
-			def repDocsFromUser
+			List<RepresentationDocumentVS> repDocsFromUser
 			RepresentationDocumentVS.withTransaction {
 				repDocsFromUser = RepresentationDocumentVS.findAllWhere(userVS:user)
 				repDocsFromUser.each { repDocFromUser ->
-					repDocFromUser.state = RepresentationDocumentVS.State.CANCELLED
 					repDocFromUser.dateCanceled = Calendar.getInstance().getTime()
-					repDocFromUser.save()
+					repDocFromUser.setState(RepresentationDocumentVS.State.CANCELLED).save()
 				}
 			}
 			String userId = String.format('%05d', user.id)

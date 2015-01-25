@@ -60,8 +60,6 @@ public class UserVS implements Serializable {
 
     @Column(name="description", columnDefinition="TEXT" ) private String description;
     
-    @Column(name="representativeMessage" ) private MessageSMIME representativeMessage;
-    
     @Column(name="country" ) private String country;
     
     @Column(name="phone" ) private String phone;
@@ -91,9 +89,6 @@ public class UserVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="representativeRegisterDate", length=23) private Date representativeRegisterDate;
     
     @Transient private transient X509Certificate certificate;
     @Transient private transient CertificateVS certificateVS;
@@ -250,15 +245,6 @@ public class UserVS implements Serializable {
         return this;
     }
 
-	public MessageSMIME getRepresentativeMessage() {
-		return representativeMessage;
-	}
-
-	public UserVS setRepresentativeMessage(MessageSMIME representativeMessage) {
-		this.representativeMessage = representativeMessage;
-        return this;
-	}
-
 	public TimeStampToken getTimeStampToken() {
 		return timeStampToken;
 	}
@@ -273,14 +259,6 @@ public class UserVS implements Serializable {
 
 	public void setMetaInf(String metaInf) {
 		this.metaInf = metaInf;
-	}
-
-	public Date getRepresentativeRegisterDate() {
-		return representativeRegisterDate;
-	}
-
-	public void setRepresentativeRegisterDate(Date representativeRegisterDate) {
-		this.representativeRegisterDate = representativeRegisterDate;
 	}
     
     public void setSignerInformation(SignerInformation signer) {

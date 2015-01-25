@@ -53,7 +53,7 @@ class EventVSService {
 	}
 	
    ResponseVS setEventDatesState (EventVS eventVS) {
-       if(!eventVS.dateBegin) eventVS.dateBegin = new Date(System.currentTimeMillis());
+       if(!eventVS.dateBegin) eventVS.dateBegin = Calendar.getInstance().getTime();
        Date todayDate = new Date(System.currentTimeMillis() + 1);// to avoid race conditions
        if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(

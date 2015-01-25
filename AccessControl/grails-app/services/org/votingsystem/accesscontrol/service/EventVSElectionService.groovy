@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import net.sf.json.JSONSerializer
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -121,163 +122,131 @@ class EventVSElectionService {
                 messageSMIME: messageSMIME, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
+    public synchronized ResponseVS generateBackups () {
+        Date dateFinishFrom = DateUtils.addDays(Calendar.getInstance().getTime(), -1)
+        List<EventVSElection> terminatedPolls = EventVSElection.createCriteria().list {
+            eq("state", EventVS.State.TERMINATED)
+            gt("dateFinish", dateFinishFrom)
+            eq("backupAvailable", Boolean.FALSE)
+        }
+        for(EventVSElection eventVS : terminatedPolls) {
+            generateBackup(eventVS)
+        }
+    }
+
     @Transactional
-	public synchronized ResponseVS generateBackup (EventVSElection eventVS) {
-		log.debug("generateBackup - eventVSId: ${eventVS.id}")
-		ResponseVS responseVS;
-		String msg = null
-		try {
-			if (eventVS.isActive(Calendar.getInstance().getTime())) {
-				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
-				String currentDateStr = DateUtils.getDateStr(
-					new Date(System.currentTimeMillis()))
-				log.error("generateBackup - DATE ERROR  ${msg} - " +
-					"Actual date '${currentDateStr}' - dateFinish eventVS '${eventVS.dateFinish}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,  message:msg, type:TypeVS.ERROR)
-			}
-			
-			Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT)
-			File zipResult   = mapFiles.zipResult
-			File metaInfFile = mapFiles.metaInfFile
-			File filesDir    = mapFiles.filesDir
-			
-			String serviceURLPart = messageSource.getMessage('votingBackupPartPath', [eventVS.id].toArray(),
-                    locale)
-			String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy/MM/dd")
-			String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
-			String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
-			
-			if(zipResult.exists()) {
-				log.debug("generateBackup - backup file already exists")
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
-			}
-			responseVS = representativeService.getAccreditationsBackupForEvent(eventVS)
-			Map representativeDataMap = responseVS.data
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error("generateBackup - REPRESENTATIVE BACKUP DATA GENERATION ERROR:  ${responseVS.message}")
-				return responseVS
-			}			
-			
-			responseVS = signatureVSService.getEventTrustedCerts(eventVS)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				responseVS.type = TypeVS.ERROR
-				return responseVS
-			}
-			
-			Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
-			byte[] systemTrustedCertsPEMBytes = CertUtils.getPEMEncoded(systemTrustedCerts)
-			File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
-			systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
-			
-			Set<X509Certificate> eventTrustedCerts = (Set<X509Certificate>) responseVS.data
-			byte[] eventTrustedCertsPEMBytes = CertUtils.getPEMEncoded(eventTrustedCerts)
-			File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
-			eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
+	public synchronized ResponseVS generateBackup (EventVSElection eventVS) throws ExceptionVS {
+		log.debug("generateBackup - eventVS: ${eventVS.id}")
+        if (eventVS.isActive(Calendar.getInstance().getTime())) {
+            throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))
+        }
+        Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT)
+        File zipResult   = mapFiles.zipResult
+        File metaInfFile = mapFiles.metaInfFile
+        File filesDir    = mapFiles.filesDir
+        String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy_MM_dd")
+        String backupURL = "/backup/${datePathPart}/${TypeVS.VOTING_EVENT.toString()}_${eventVS.id}.zip"
+        String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+        if(zipResult.exists()) {
+            log.debug("generateBackup - backup file already exists")
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
+        }
+        ResponseVS responseVS = representativeService.getAccreditationsBackupForEvent(eventVS)
+        Map representativeDataMap = responseVS.data
+        Set<X509Certificate> eventTrustedCerts = signatureVSService.getEventTrustedCerts(eventVS)
+        Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
+        byte[] systemTrustedCertsPEMBytes = CertUtils.getPEMEncoded(systemTrustedCerts)
+        File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
+        systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 
-			byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
-			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
-			timeStampCertFile.setBytes(timeStampCertPEMBytes)
-				
-			int numTotalVotes = VoteVS.countByStateAndEventVS(VoteVS.State.OK, eventVS)
-			int numTotalAccessRequests = AccessRequestVS.countByStateAndEventVSElection(
-                    AccessRequestVS.State.OK, eventVS)
-			def backupMetaInfMap = [numVotes:numTotalVotes,
-				numAccessRequest:numTotalAccessRequests]
-			Map eventMetaInfMap = eventVSService.getMetaInfMap(eventVS)
-			eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
-			eventMetaInfMap.put(TypeVS.REPRESENTATIVE_DATA.toString(), representativeDataMap);
-			
-			metaInfFile.write((eventMetaInfMap as JSON).toString())
-			
-			String voteFileName = messageSource.getMessage('voteFileName', null, locale)
-			String representativeVoteFileName = messageSource.getMessage(
-				'representativeVoteFileName', null, locale)
-			String accessRequestFileName = messageSource.getMessage(
-				'accessRequestFileName', null, locale)
-			
-			DecimalFormat formatted = new DecimalFormat("00000000");
-			int votesBatch = 0;
-			String votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
-			new File(votesBaseDir).mkdirs()
+        byte[] eventTrustedCertsPEMBytes = CertUtils.getPEMEncoded(eventTrustedCerts)
+        File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
+        eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
 
-			int accessRequestBatch = 0;
-			String accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
-			new File(accessRequestBaseDir).mkdirs()
-			def votes = null
-			long begin = System.currentTimeMillis()
-            votes = VoteVS.createCriteria().scroll {
-                eq("state", VoteVS.State.OK)
-                eq("eventVS", eventVS)
-            }
-            while (votes.next()) {
-                VoteVS voteVS = (VoteVS) votes.get(0);
-                UserVS representative = voteVS?.certificateVS?.userVS
-                String voteFilePath = null
-                if(representative) {//representative vote, not anonymous
-                    voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
-                } else {
-                    //user vote, is anonymous
-                    voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voteVS.id)}.p7m"
-                }
-                MessageSMIME messageSMIME = voteVS.messageSMIME
-                File smimeFile = new File(voteFilePath)
-                smimeFile.setBytes(messageSMIME.content)
-                if((votes.getRowNumber() % 100) == 0) {
-                    String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                            System.currentTimeMillis() - begin)
-                    log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
-                    sessionFactory.currentSession.flush()
-                    sessionFactory.currentSession.clear()
-                }
-                if(((votes.getRowNumber() + 1) % 2000) == 0) {
-                    votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
-                    new File(votesBaseDir).mkdirs()
-                }
-            }
-			def accessRequests = null
-			begin = System.currentTimeMillis()
-            accessRequests = AccessRequestVS.createCriteria().scroll {
-                eq("state", AccessRequestVS.State.OK)
-                eq("eventVSElection", eventVS)
-            }
-            while (accessRequests.next()) {
-                AccessRequestVS accessRequest = (AccessRequestVS) accessRequests.get(0);
-                MessageSMIME messageSMIME = accessRequest.messageSMIME
-                File smimeFile = new File("${accessRequestBaseDir}/${accessRequestFileName}_${accessRequest.userVS.nif}.p7m")
-                smimeFile.setBytes(messageSMIME.content)
-                if((accessRequests.getRowNumber() % 100) == 0) {
-                    String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                            System.currentTimeMillis() - begin)
-                    log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
-                    sessionFactory.currentSession.flush()
-                    sessionFactory.currentSession.clear()
-                }
-                if(((accessRequests.getRowNumber() + 1) % 2000) == 0) {
-                    accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
-                    new File(accessRequestBaseDir).mkdirs()
-                }
-            }
-			
-			def ant = new AntBuilder()
-			ant.zip(destfile: zipResult, basedir: "${filesDir}") {
-				fileset(dir:"${filesDir}/..", includes: "meta.inf")
-			}
-            //The file is copied and available to download but triggers a null pointer exception with ResourcesPlugin
-			ant.copy(file: zipResult, tofile: webappBackupPath)
-			
-			if (!eventVS.isAttached()) { eventVS.attach() }
-			eventVS.metaInf = eventMetaInfMap as JSON
-			eventVS.save()
-			
-			log.debug("zip backup of event ${eventVS.id} on file ${zipResult.absolutePath}")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT,
-                    message:backupURL, data:eventMetaInfMap)
-		} catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg =  messageSource.getMessage('backupError', [eventVS?.id].toArray(), locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,  message:msg, type:TypeVS.ERROR)
-		}
+        byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
+        File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
+        timeStampCertFile.setBytes(timeStampCertPEMBytes)
 
+        int numTotalVotes = VoteVS.countByStateAndEventVS(VoteVS.State.OK, eventVS)
+        int numTotalAccessRequests = AccessRequestVS.countByStateAndEventVSElection(AccessRequestVS.State.OK, eventVS)
+        def backupMetaInfMap = [numVotes:numTotalVotes, numAccessRequest:numTotalAccessRequests]
+        Map eventMetaInfMap = eventVSService.getMetaInfMap(eventVS)
+        eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
+        eventMetaInfMap.put(TypeVS.REPRESENTATIVE_DATA.toString(), representativeDataMap);
+        metaInfFile.write((eventMetaInfMap as JSON).toString())
+        DecimalFormat formatted = new DecimalFormat("00000000");
+        int votesBatch = 0;
+        String votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
+        new File(votesBaseDir).mkdirs()
+
+        int accessRequestBatch = 0;
+        String accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
+        new File(accessRequestBaseDir).mkdirs()
+        def votes = null
+        long begin = System.currentTimeMillis()
+        votes = VoteVS.createCriteria().scroll {
+            eq("state", VoteVS.State.OK)
+            eq("eventVS", eventVS)
+        }
+        while (votes.next()) {
+            VoteVS voteVS = (VoteVS) votes.get(0);
+            UserVS representative = voteVS?.certificateVS?.userVS
+            File smimeFile = null
+            if(representative) {//not anonymous, representative vote
+                smimeFile = new File("${votesBaseDir}/representativeVote_${representative.nif}.p7m")
+            } else {//anonymous, user vote
+                smimeFile = new File("${votesBaseDir}/vote_${formatted.format(voteVS.id)}.p7m")
+            }
+            MessageSMIME messageSMIME = voteVS.messageSMIME
+            smimeFile.setBytes(messageSMIME.content)
+            if((votes.getRowNumber() % 100) == 0) {
+                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                        System.currentTimeMillis() - begin)
+                log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
+                sessionFactory.currentSession.flush()
+                sessionFactory.currentSession.clear()
+            }
+            if(((votes.getRowNumber() + 1) % 2000) == 0) {
+                votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
+                new File(votesBaseDir).mkdirs()
+            }
+        }
+        def accessRequests = null
+        begin = System.currentTimeMillis()
+        accessRequests = AccessRequestVS.createCriteria().scroll {
+            eq("state", AccessRequestVS.State.OK)
+            eq("eventVSElection", eventVS)
+        }
+        while (accessRequests.next()) {
+            AccessRequestVS accessRequest = (AccessRequestVS) accessRequests.get(0);
+            MessageSMIME messageSMIME = accessRequest.messageSMIME
+            File smimeFile = new File("${accessRequestBaseDir}/accessRequest_${accessRequest.userVS.nif}.p7m")
+            smimeFile.setBytes(messageSMIME.content)
+            if((accessRequests.getRowNumber() % 100) == 0) {
+                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                        System.currentTimeMillis() - begin)
+                log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
+                sessionFactory.currentSession.flush()
+                sessionFactory.currentSession.clear()
+            }
+            if(((accessRequests.getRowNumber() + 1) % 2000) == 0) {
+                accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
+                new File(accessRequestBaseDir).mkdirs()
+            }
+        }
+
+        def ant = new AntBuilder()
+        ant.zip(destfile: zipResult, basedir: "${filesDir}") {
+            fileset(dir:"${filesDir}/..", includes: "meta.inf")
+        }
+        //The file is copied and available to download but triggers a null pointer exception with ResourcesPlugin
+        ant.copy(file: zipResult, tofile: webappBackupPath)
+
+        if (!eventVS.isAttached()) { eventVS.attach() }
+        eventVS.setMetaInf(JSONSerializer.toJSON(eventMetaInfMap).toString()).save()
+        log.debug("zip backup of event ${eventVS.id} on file ${zipResult.absolutePath}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT,
+                message:backupURL, data:eventMetaInfMap)
 	}
         
     public Map getStatsMap (EventVSElection eventVS) {

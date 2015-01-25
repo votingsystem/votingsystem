@@ -173,7 +173,7 @@ class EventVSElectionController {
             MessageSMIME messageSMIME
             if (eventVS) {
                 MessageSMIME.withTransaction {
-                    List results =MessageSMIME.createCriteria().list {
+                    List results = MessageSMIME.createCriteria().list {
                         smimeParent{
                             eq("eventVS", eventVS)
                             eq("type", TypeVS.VOTING_EVENT)
