@@ -1,5 +1,6 @@
 package org.votingsystem.controlcenter.service
 
+import grails.transaction.Transactional
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DERObject
 import org.bouncycastle.asn1.cms.CMSAttributes
@@ -24,6 +25,7 @@ import org.votingsystem.util.StringUtils
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
 
+@Transactional
 class TimeStampService {
 	
 	def grailsApplication
@@ -73,7 +75,8 @@ class TimeStampService {
     }
 
     private void fetchTimeStampServerInfo(ActorVS timeStampServer) {
-        log.debug("fetchTimeStampServerInfo : ${timeStampServer.serverURL}")
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug("$methodName - ${timeStampServer.serverURL}")
         runAsync {
             ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(timeStampServer.serverURL),
                     ContentTypeVS.JSON);
@@ -83,15 +86,16 @@ class TimeStampService {
                     ActorVS newTimeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
                     if(timeStampServer.serverURL.equals(newTimeStampServer.getServerURL())) {
                         if(!timeStampServer.id) {
-                            newTimeStampServer.save();
-                            timeStampServer = newTimeStampServer;
+                            timeStampServer = newTimeStampServer.save(flush:true);
                         } else timeStampServer.setCertChainPEM(newTimeStampServer.getCertChainPEM())
                         x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
                                 timeStampServer.certChainPEM.getBytes()).iterator().next()
-                        log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
-                    } else {
-                        log.error("Expected server URL '${timeStampServer.serverURL}' but found '${newTimeStampServer.getServerURL()}'")
-                    }
+                        if(Calendar.getInstance().getTime().after(x509TimeStampServerCert.notAfter)) {
+                            throw new ExceptionVS("${timeStampServer.serverURL} signing cert is lapsed")
+                        }
+                        log.debug("$methodName - updated TimeStampServer '${timeStampServer.id}' signing cert")
+                    } else log.error("Expected server URL '${timeStampServer.serverURL}' but found " +
+                            "'${newTimeStampServer.getServerURL()}'")
                 }
                 CertificateVS.withTransaction {
                     CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
@@ -102,7 +106,7 @@ class TimeStampService {
                             validTo:x509TimeStampServerCert?.getNotAfter()).save();
                     log.debug("Added TimeStampServer Cert: ${timeStampServerCert.id}")
                 }
-            } else log.error("ERROR fetching TimeStampServerInfo : ${serverURL}")
+            } else log.error("ERROR fetching TimeStampServerInfo : ${timeStampServer.serverURL}")
             init();
         }
     }
