@@ -125,11 +125,11 @@ class EventVSElectionService {
     public synchronized ResponseVS generateBackups () {
         Date dateFinishFrom = DateUtils.addDays(Calendar.getInstance().getTime(), -1)
         List<EventVSElection> terminatedPolls = EventVSElection.createCriteria().list {
-            eq("state", EventVS.State.TERMINATED)
             gt("dateFinish", dateFinishFrom)
             eq("backupAvailable", Boolean.FALSE)
         }
         for(EventVSElection eventVS : terminatedPolls) {
+            eventVS.setState(EventVS.State.TERMINATED).save()
             generateBackup(eventVS)
         }
     }
@@ -146,7 +146,7 @@ class EventVSElectionService {
         File filesDir    = mapFiles.filesDir
         String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy_MM_dd")
         String backupURL = "/backup/${datePathPart}/${TypeVS.VOTING_EVENT.toString()}_${eventVS.id}.zip"
-        String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+        String webResourcePath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
         if(zipResult.exists()) {
             log.debug("generateBackup - backup file already exists")
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
@@ -155,17 +155,14 @@ class EventVSElectionService {
         Map representativeDataMap = responseVS.data
         Set<X509Certificate> eventTrustedCerts = signatureVSService.getEventTrustedCerts(eventVS)
         Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
-        byte[] systemTrustedCertsPEMBytes = CertUtils.getPEMEncoded(systemTrustedCerts)
         File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
-        systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
+        systemTrustedCertsFile.setBytes(CertUtils.getPEMEncoded(systemTrustedCerts))
 
-        byte[] eventTrustedCertsPEMBytes = CertUtils.getPEMEncoded(eventTrustedCerts)
         File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
-        eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
+        eventTrustedCertsFile.setBytes(CertUtils.getPEMEncoded(eventTrustedCerts))
 
-        byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
         File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
-        timeStampCertFile.setBytes(timeStampCertPEMBytes)
+        timeStampCertFile.setBytes(timeStampService.getSigningCertPEMBytes())
 
         int numTotalVotes = VoteVS.countByStateAndEventVS(VoteVS.State.OK, eventVS)
         int numTotalAccessRequests = AccessRequestVS.countByStateAndEventVSElection(AccessRequestVS.State.OK, eventVS)
@@ -240,7 +237,7 @@ class EventVSElectionService {
             fileset(dir:"${filesDir}/..", includes: "meta.inf")
         }
         //The file is copied and available to download but triggers a null pointer exception with ResourcesPlugin
-        ant.copy(file: zipResult, tofile: webappBackupPath)
+        ant.copy(file: zipResult, tofile: webResourcePath)
 
         if (!eventVS.isAttached()) { eventVS.attach() }
         eventVS.setMetaInf(JSONSerializer.toJSON(eventMetaInfMap).toString()).save()
