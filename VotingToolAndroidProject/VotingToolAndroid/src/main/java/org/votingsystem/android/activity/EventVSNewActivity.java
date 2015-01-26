@@ -112,20 +112,19 @@ public class EventVSNewActivity extends ActionBarActivity {
     DatePickerDialog.OnDateSetListener dateElectionListener = new DatePickerDialog.OnDateSetListener() {
 
         @Override public void onDateSet(DatePicker view, int year, int monthOfYear,int dayOfMonth) {
-        //Double triggering problem
-        if (!view.isShown()) return;
-        Calendar todayCalendar = Calendar.getInstance();
-        Calendar electionCalendar = DateUtils.getEventVSElectionDateBeginCalendar(
-                year, monthOfYear, dayOfMonth);
-        if(todayCalendar.compareTo(electionCalendar) < 0) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(
-                    R.string.error_lbl), getString(R.string.date_error_lbl),
-                    getSupportFragmentManager());
-        } else {
-            dateElectionCalendar = electionCalendar;
-            dateElectionText.setText(DateUtils.getDayWeekDateStr(
-                    dateElectionCalendar.getTime()));
-        }
+            //Double triggering problem
+            if (!view.isShown()) return;
+            Calendar todayCalendar = Calendar.getInstance();
+            Calendar electionCalendar = DateUtils.getEventVSElectionDateBeginCalendar(
+                    year, monthOfYear, dayOfMonth);
+            if(todayCalendar.compareTo(electionCalendar) > 0) {
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        getString(R.string.date_error_lbl),
+                        getSupportFragmentManager());
+            } else {
+                dateElectionCalendar = electionCalendar;
+                dateElectionText.setText(DateUtils.getDayWeekDateStr(dateElectionCalendar.getTime()));
+            }
         }
 
     };

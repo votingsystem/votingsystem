@@ -90,6 +90,8 @@ class TimeStampService {
                         x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
                                 timeStampServer.certChainPEM.getBytes()).iterator().next()
                         if(Calendar.getInstance().getTime().after(x509TimeStampServerCert.notAfter)) {
+                            log.error("${timeStampServer.serverURL} signing cert is lapsed - " +
+                                " cert not valid after: ${x509TimeStampServerCert.notAfter.toString()}")
                             throw new ExceptionVS("${timeStampServer.serverURL} signing cert is lapsed")
                         }
                         log.debug("$methodName - updated TimeStampServer '${timeStampServer.id}' signing cert")

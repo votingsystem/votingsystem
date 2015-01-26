@@ -22,9 +22,9 @@ import java.util.concurrent.Future
 isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2015/01/23 00:00:00", dateFinish:"2014/01/24 00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2015/01/26 00:00:00", dateFinish:"2014/01/27 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1000, numUsersWithoutRepresentativeWithVote:1000,
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
                        numRepresentatives:2, numRepresentativesWithVote:0,
                        numUsersWithRepresentative:0, numUsersWithRepresentativeWithVote:0]
 
@@ -40,7 +40,7 @@ log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(J
 
 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
         TestUtils.simulationData.getAccessControlURL()),ContentTypeVS.JSON);
-if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
 ActorVS actorVS = ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " + actorVS.getType().toString());
 if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {

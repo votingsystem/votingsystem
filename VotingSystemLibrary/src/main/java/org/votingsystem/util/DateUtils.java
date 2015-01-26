@@ -8,10 +8,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author jgzornoza
@@ -55,7 +52,18 @@ public class DateUtils {
     }
 
     public static Date getDateFromString (String dateString) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        DateFormat formatter = null;
+        if(dateString.endsWith("Z")) {
+            formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
+        else formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        return formatter.parse(dateString);
+    }
+
+    public static Date getDateFromString (String dateString, Locale locale) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.parse(dateString);
     }
 
