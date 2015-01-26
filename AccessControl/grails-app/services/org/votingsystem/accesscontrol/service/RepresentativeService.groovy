@@ -39,11 +39,11 @@ class RepresentativeService {
 	 * Creates backup of the state of all the representatives for a closed event
 	 */
 	private synchronized ResponseVS getAccreditationsBackupForEvent (EventVSElection event){
-		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
-		if(event.isActive(Calendar.getInstance().getTime())) {
+		log.debug("getAccreditationsBackupForEvent --- event: ${event.id}")
+		/*if(event.isActive(Calendar.getInstance().getTime())) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage('eventActiveErrorMsg',
                     [event.id].toArray(), locale))
-		}
+		}*/
 		Map<String, File> mapFiles = filesService.getBackupFiles(event, TypeVS.REPRESENTATIVE_DATA)
 		File zipResult   = mapFiles.zipResult
 		File filesDir    = mapFiles.filesDir

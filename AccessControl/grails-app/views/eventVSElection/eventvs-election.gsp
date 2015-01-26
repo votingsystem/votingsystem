@@ -111,7 +111,7 @@
                             </template>
                         </div>
                     </div>
-                    <div style="display:{{smallScreen?(selectedTab == 'statsTab'?'block':'none'):'block'}}">
+                    <div vertical layout center center-justified style="display:{{smallScreen?(selectedTab == 'statsTab'?'block':'none'):'block'}}">
                         <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                     </div>
                 </div>

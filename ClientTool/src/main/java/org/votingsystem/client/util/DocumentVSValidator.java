@@ -29,7 +29,7 @@ public class DocumentVSValidator {
     //{"operation":"SEND_SMIME_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
     //"optionSelectedContent":"option A","eventURL":"http://sistemavotacion.org/AccessControl/eventVSElection/1"}
     public static ResponseVS<Long> validateVote(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
-               Set<TrustAnchor> eventTrustedAnchors, Long optionSelectedId, String eventURL, Date dateInit,
+               Set<TrustAnchor> eventTrustedAnchors, Long optionSelectedId, String eventURL, Date dateBegin,
                Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         Long signedFileOptionSelectedId = null;
         if(!signedFile.isValidSignature()) {
@@ -62,10 +62,10 @@ public class DocumentVSValidator {
         }
         Date tokenDate = signedFile.getSMIME().getSigner().getTimeStampToken().
                 getTimeStampInfo().getGenTime();
-        if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
+        if(tokenDate.before(dateBegin) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
-                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
+                    DateUtils.getDateStr(dateBegin), DateUtils.getDateStr(dateFinish)));
         }
 
         JSONObject contentJSON = signedFile.getContent();
@@ -161,7 +161,7 @@ public class DocumentVSValidator {
 
 
     public static ResponseVS validateAccessRequest(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
-            String eventURL, Date dateInit, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
+            String eventURL, Date dateBegin, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "signatureErrorMsg", signedFile.getName()));
@@ -204,16 +204,16 @@ public class DocumentVSValidator {
                     getMessage("timestampValidationErrorMsg", signedFile.getName()));
         }
         Date tokenDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
+        if(tokenDate.before(dateBegin) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
-                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
+                    DateUtils.getDateStr(dateBegin), DateUtils.getDateStr(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }
 
     public static ResponseVS validateClaim(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
-            String eventURL, Date dateInit, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
+            String eventURL, Date dateBegin, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
@@ -255,10 +255,10 @@ public class DocumentVSValidator {
                     getMessage("timestampValidationErrorMsg", signedFile.getName()));
         }
         Date tokenDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
+        if(tokenDate.before(dateBegin) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
-                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
+                    DateUtils.getDateStr(dateBegin), DateUtils.getDateStr(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }

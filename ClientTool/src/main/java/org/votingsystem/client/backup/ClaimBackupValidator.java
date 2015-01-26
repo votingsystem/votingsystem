@@ -124,7 +124,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(claim);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, claim.getName(), null);
                     ResponseVS validationResponse = DocumentVSValidator.validateClaim(signedFile, trustAnchors,
-                            eventURL, metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);
+                            eventURL, metaInf.getDateBegin(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
                         boolean repeatedSignature = signersNifMap.containsKey(signedFile.getSignerNif());

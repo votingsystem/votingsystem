@@ -35,11 +35,11 @@ public class EventVSInfoPane extends GridPane {
         Label subjectValueLabel = new Label(metaInf.getSubject());
         add(subjectValueLabel, 1, 0);
 
-        Label dateInitLabel = new Label(ContextVS.getMessage("dateInitLbl") + ": ");
-        dateInitLabel.setStyle("-fx-font-weight: bold;");
-        add(dateInitLabel, 0 , 1);
-        Label dateInitValueLabel = new Label(DateUtils.getDateStr(metaInf.getDateInit(), "yyyy/MM/dd"));
-        add(dateInitValueLabel, 1, 1);
+        Label dateBeginLabel = new Label(ContextVS.getMessage("dateBeginLbl") + ": ");
+        dateBeginLabel.setStyle("-fx-font-weight: bold;");
+        add(dateBeginLabel, 0 , 1);
+        Label dateBeginValueLabel = new Label(DateUtils.getDateStr(metaInf.getDateBegin(), "yyyy/MM/dd"));
+        add(dateBeginValueLabel, 1, 1);
 
         Label dateFinishLabel = new Label(ContextVS.getMessage("dateFinishLbl") + ": ");
         dateFinishLabel.setStyle("-fx-font-weight: bold;");

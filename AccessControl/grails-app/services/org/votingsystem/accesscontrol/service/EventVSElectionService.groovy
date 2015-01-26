@@ -136,10 +136,10 @@ class EventVSElectionService {
 
     @Transactional
 	public synchronized ResponseVS generateBackup (EventVSElection eventVS) throws ExceptionVS {
-		log.debug("generateBackup - eventVS: ${eventVS.id}")
-        if (eventVS.isActive(Calendar.getInstance().getTime())) {
+		log.debug("generateBackup -- eventVS: ${eventVS.id}")
+        /*if (eventVS.isActive(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))
-        }
+        }*/
         Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT)
         File zipResult   = mapFiles.zipResult
         File metaInfFile = mapFiles.metaInfFile
@@ -240,7 +240,7 @@ class EventVSElectionService {
         ant.copy(file: zipResult, tofile: webResourcePath)
 
         if (!eventVS.isAttached()) { eventVS.attach() }
-        eventVS.setMetaInf(JSONSerializer.toJSON(eventMetaInfMap).toString()).save()
+        eventVS.setMetaInf((eventMetaInfMap as JSON).toString()).save()
         log.debug("zip backup of event ${eventVS.id} on file ${zipResult.absolutePath}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT,
                 message:backupURL, data:eventMetaInfMap)

@@ -10,7 +10,7 @@
         <div id="messageToUser" vertical layout center center-justified style="padding: 10px;font-weight: bold;display:none">
             <g:message code="withoutVotesLbl"/>
         </div>
-        <div id="graphContainer" vertical layout center center-justified style="margin:0 0 0 10px;width: 250px; height: 250px;"></div>
+        <div id="graphContainer" vertical layout center center-justified style="margin:0 0 0 10px; height: 150px;display: block;"></div>
     </template>
     <script>
         Polymer('eventvs-election-stats', {

@@ -81,7 +81,7 @@
                 }
 
                 if(dateFinish < new Date() ) {
-                    this.messageToUser = '<g:message code="dateInitERRORMsg"/>'
+                    this.messageToUser = '<g:message code="dateBeginERRORMsg"/>'
                     return
                 }
 

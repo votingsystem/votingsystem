@@ -70,7 +70,7 @@ class EventVSElectionController {
         if(!eventVSState) eventVSState = EventVS.State.ACTIVE
         EventVSElection.withTransaction {
             resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
-                    sort:params.sort, order:'desc') {
+                    sort:params.sort) {
                 if(eventVSState == EventVS.State.TERMINATED) {
                     or{
                         eq("state", EventVS.State.TERMINATED)
@@ -79,6 +79,7 @@ class EventVSElectionController {
                 } else if(eventVSState && eventVSState != EventVS.State.DELETED_FROM_SYSTEM) {
                     eq("state", eventVSState)
                 }
+                order("dateCreated", "desc")
             }
         }
         eventsVSMap.totalCount = resultList?.totalCount

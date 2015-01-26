@@ -210,7 +210,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                         SignedFile vote = new SignedFile(fileBytes, voteFile.getName(), null);
                         ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(vote,
                                 trustAnchors, eventTrustedAnchors,  representativeDataMetaInf.
-                                getOptionSelectedId(), eventURL, metaInf.getDateInit(), metaInf.getDateFinish(),
+                                getOptionSelectedId(), eventURL, metaInf.getDateBegin(), metaInf.getDateFinish(),
                                 timeStampServerCert);
                         if (ResponseVS.SC_OK != representativeVoteResponse.getStatusCode()) {
                             errorList.add(representativeVoteResponse.getMessage());
@@ -273,7 +273,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName(), null);
                     ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(signedFile,
-                            trustAnchors, eventURL, metaInf.getDateInit(),
+                            trustAnchors, eventURL, metaInf.getDateBegin(),
                             metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
@@ -330,7 +330,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                     SignedFile signedFile = new SignedFile(voteBytes, vote.getName(), null);
                     ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
                             trustAnchors, eventTrustedAnchors, null, eventURL,
-                            metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);
+                            metaInf.getDateBegin(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
                         boolean repeatedVote = signerCertMap.containsKey(signedFile.getSignerCertSerialNumber());

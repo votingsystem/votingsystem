@@ -24,7 +24,7 @@ public class MetaInf {
 
     private Long id;
     private Date dateFinish;
-    private Date dateInit;
+    private Date dateBegin;
     private TypeVS type;
     private String subject;
     private String serverURL;
@@ -116,14 +116,10 @@ public class MetaInf {
                 metaInf.setNumAccessRequest(backupJSON.getLong("numAccessRequest")); 
         }
         if(metaInfoJSON.containsKey("dateFinish")) {
-            Date dateFinish = DateUtils.getDateFromString(
-                    metaInfoJSON.getString("dateFinish"));
-            metaInf.setDateFinish(dateFinish);
+            metaInf.setDateFinish(DateUtils.getDateFromString(metaInfoJSON.getString("dateFinish")));
         }
-        if(metaInfoJSON.containsKey("dateInit")) {
-            Date dateInit = DateUtils.getDateFromString(
-                    metaInfoJSON.getString("dateInit"));
-            metaInf.setDateInit(dateInit);
+        if(metaInfoJSON.containsKey("dateBegin")) {
+            metaInf.setDateBegin(DateUtils.getDateFromString(metaInfoJSON.getString("dateBegin")));
         }
         if(metaInfoJSON.containsKey("REPRESENTATIVE_DATA")) {
             RepresentativesData representativesData = new RepresentativesData();
@@ -331,8 +327,8 @@ public class MetaInf {
         this.dateFinish = dateFinish;
     }
 
-    public void setDateInit(Date dateInit) {
-        this.dateInit = dateInit;
+    public void setDateBegin(Date dateBegin) {
+        this.dateBegin = dateBegin;
     }    
 
     public Long getId() {
@@ -382,7 +378,7 @@ public class MetaInf {
         this.representativesData = representativesData;
     }
     
-    public Date getDateInit() {
-        return dateInit;
+    public Date getDateBegin() {
+        return dateBegin;
     }
 }

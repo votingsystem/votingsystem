@@ -77,9 +77,9 @@ DateUtils.parseInput = function (dateStr) {
     return dateObject
 }
 
-DateUtils.checkDate = function (dateInit, dateFinish) {
+DateUtils.checkDate = function (dateBegin, dateFinish) {
     var todayDate = new Date();
-    if(todayDate > dateInit && todayDate < dateFinish) return true;
+    if(todayDate > dateBegin && todayDate < dateFinish) return true;
     else return false;
 }
 
