@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
@@ -42,6 +43,7 @@ public class HTMLMessageDialog {
         webView = new WebView();
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.setPrefHeight(400);
+        VBox.setVgrow(webView, Priority.ALWAYS);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {

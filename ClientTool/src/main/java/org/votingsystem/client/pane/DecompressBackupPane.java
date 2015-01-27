@@ -93,34 +93,32 @@ public class DecompressBackupPane extends StackPane {
     public static void showDialog(final Listener listener, final File fileToOpen) {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
         log.debug("showDialog - outputFolder: " + outputFolder);
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) { }
-                });
-                File file = fileToOpen;
-                if(file == null) {
-                    FileChooser fileChooser = new FileChooser();
-                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                            ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
-                    fileChooser.getExtensionFilters().add(extFilter);
-                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                    file = fileChooser.showOpenDialog(stage);
-                }
-                if(file != null){
-                    log.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
-                    DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
-                            file.getAbsolutePath(), outputFolder);
-                    decompressBackupPane.init();
-                    stage.setScene(new Scene(decompressBackupPane));
-                    stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
-                    stage.centerOnScreen();
-                    stage.show();
-                }
+        Platform.runLater(() -> {
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            //stage.initOwner(window);
+            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+                @Override public void handle(WindowEvent window) { }
+            });
+            File file = fileToOpen;
+            if(file == null) {
+                FileChooser fileChooser = new FileChooser();
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                        ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
+                fileChooser.getExtensionFilters().add(extFilter);
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                file = fileChooser.showOpenDialog(stage);
+            }
+            if(file != null){
+                log.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
+                DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
+                        file.getAbsolutePath(), outputFolder);
+                decompressBackupPane.init();
+                stage.setScene(new Scene(decompressBackupPane));
+                stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
+                stage.centerOnScreen();
+                stage.show();
             }
         });
     }
@@ -183,7 +181,7 @@ public class DecompressBackupPane extends StackPane {
             responseVS = new ResponseVS(ResponseVS.SC_OK);
             responseVS.setData(outputFolder);
             decompressListener.processDecompressedFile(responseVS);
-            DecompressBackupPane.this.getScene().getWindow().hide();
+            Platform.runLater(() -> DecompressBackupPane.this.getScene().getWindow().hide());
             return responseVS;
         }
     }

@@ -152,7 +152,6 @@ class EventVSElectionService {
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
         }
         ResponseVS responseVS = representativeService.getAccreditationsBackupForEvent(eventVS)
-        Map representativeDataMap = responseVS.data
         Set<X509Certificate> eventTrustedCerts = signatureVSService.getEventTrustedCerts(eventVS)
         Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
         File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
@@ -169,7 +168,6 @@ class EventVSElectionService {
         def backupMetaInfMap = [numVotes:numTotalVotes, numAccessRequest:numTotalAccessRequests]
         Map eventMetaInfMap = eventVSService.getMetaInfMap(eventVS)
         eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
-        eventMetaInfMap.put(TypeVS.REPRESENTATIVE_DATA.toString(), representativeDataMap);
         metaInfFile.write((eventMetaInfMap as JSON).toString())
         DecimalFormat formatted = new DecimalFormat("00000000");
         int votesBatch = 0;

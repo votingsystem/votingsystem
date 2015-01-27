@@ -474,7 +474,7 @@ class RepresentativeService {
 		UserVS userVS = messageSMIMEReq.getUserVS();
         JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-        Date selectedDate = getDateFromString(messageJSON.selectedDate)
+        Date selectedDate = DateUtils.getDateFromString(messageJSON.selectedDate)
         if(!requestValidatedNIF || !messageJSON.operation ||
                 (TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != TypeVS.valueOf(messageJSON.operation))||
                 !selectedDate || !messageJSON.email || !messageJSON.UUID ){

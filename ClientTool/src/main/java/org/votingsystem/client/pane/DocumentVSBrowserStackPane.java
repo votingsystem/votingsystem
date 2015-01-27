@@ -16,11 +16,12 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CooinDialog;
-import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
@@ -28,6 +29,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -47,19 +49,20 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DocumentVSBrowserStackPane extends StackPane {
+public class DocumentVSBrowserStackPane extends StackPane implements DecompressBackupPane.Listener {
 
     private static Logger log = Logger.getLogger(DocumentVSBrowserStackPane.class);
 
     private TabPane tabPane;
+    private static Stage dialogStage;
     private String fileDir = null;
     private String dialogTitle = null;
     private String decompressedBackupBaseDir = null;
-    private MessageDialog messageDialog = null;
     private MetaInf metaInf;
     private Button validateBackupButton;
     private int selectedFileIndex;
     private Text progressMessageText;
+    private VBox mainVBox;
     private VBox progressBox;
     private List<String> fileList = new ArrayList<String>();
 
@@ -78,7 +81,7 @@ public class DocumentVSBrowserStackPane extends StackPane {
         setProgressVisible(false, null);
         getChildren().addAll(progressBox);
 
-        VBox mainVBox = new VBox();
+        mainVBox = new VBox();
         mainVBox.setPrefWidth(560);
         HBox buttonsHBox = new HBox();
         HBox navigateButtonsHBox = new HBox();
@@ -189,46 +192,51 @@ public class DocumentVSBrowserStackPane extends StackPane {
     }
 
     public static void showDialog(final String signedDocumentStr, Map operationDocument) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(documentVSBrowserStackPane));
-                documentVSBrowserStackPane.init();
-                stage.initModality(Modality.WINDOW_MODAL);
-                stage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
-                stage.setResizable(true);
-                File file = null;
-                if(signedDocumentStr == null) {
-                    FileChooser fileChooser = new FileChooser();
+        Platform.runLater(() -> {
+            DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
+            dialogStage = new Stage();
+            dialogStage.setScene(new Scene(documentVSBrowserStackPane));
+            documentVSBrowserStackPane.init();
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
+            dialogStage.setResizable(true);
+            File file = null;
+            if(signedDocumentStr == null) {
+                FileChooser fileChooser = new FileChooser();
                     /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                             ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
                     fileChooser.getExtensionFilters().add(extFilter);*/
-                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                    file = fileChooser.showOpenDialog(stage);
-                } else file = FileUtils.getFileFromString(signedDocumentStr);
-                if(file != null){
-                    try {
-                        if(FileUtils.isZipFile(file)){
-                            DecompressBackupPane.showDialog(VotingSystemApp.getInstance(), file);
-                            return;
-                        }
-                        if(file.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
-                            CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
-                        } else {
-                            documentVSBrowserStackPane.openFile(file, operationDocument);
-                            stage.centerOnScreen();
-                            stage.show();
-                        }
-                    } catch (IOException ex) {
-                        log.error(ex.getMessage(), ex);
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                file = fileChooser.showOpenDialog(dialogStage);
+            } else file = FileUtils.getFileFromString(signedDocumentStr);
+            if(file != null){
+                try {
+                    if(FileUtils.isZipFile(file)){
+                        DecompressBackupPane.showDialog(documentVSBrowserStackPane, file);
+                        return;
                     }
-                } else log.debug("File null dialog will not be opened");
-            }
+                    if(file.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
+                        CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
+                    } else {
+                        documentVSBrowserStackPane.openFile(file, operationDocument);
+                        dialogStage.centerOnScreen();
+                        dialogStage.show();
+                    }
+                } catch (IOException ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+            } else log.debug("File null dialog will not be opened");
         });
     }
-
+    @Override public void processDecompressedFile(ResponseVS response) {
+        log.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
+        if(ResponseVS.SC_OK == response.getStatusCode()) {
+            Platform.runLater(() -> {
+                setVisible((String) response.getData());
+            });
+        }
+    }
 
     public void saveMessage () {
         try {
@@ -280,17 +288,21 @@ public class DocumentVSBrowserStackPane extends StackPane {
         log.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
         this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
+        File representativeMetaInfFile = new File(decompressedBackupBaseDir + File.separator + "REPRESENTATIVE_DATA"  +
+                File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
             String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
             log.error(message);
-            showMessage(null, "Error - " + message);
+            showMessage(ResponseVS.SC_ERROR, "Error - " + message);
             return;
         }
         try {
-            metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
+            metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
+            if(representativeMetaInfFile.exists()) metaInf.loadRepresentativeData((JSONObject)
+                    JSONSerializer.toJSON(FileUtils.getStringFromFile(representativeMetaInfFile)));
             EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf);
             tabPane.getTabs().removeAll(tabPane.getTabs());
-            String dialogTitle = null;
+            dialogTitle = null;
             switch(metaInf.getType()) {
                 case CLAIM_EVENT:
                     dialogTitle = ContextVS.getMessage("claimEventTabTitle");
@@ -306,6 +318,13 @@ public class DocumentVSBrowserStackPane extends StackPane {
                     TypeVS.CLAIM_EVENT == metaInf.getType()) {
                 validateBackupButton.setVisible(true);
             }
+            Tab newTab = new Tab();
+            newTab.setText(dialogTitle);
+            newTab.setContent(eventPanel);
+            tabPane.getTabs().add(newTab);
+            dialogStage.centerOnScreen();
+            dialogStage.show();
+
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

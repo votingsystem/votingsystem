@@ -57,7 +57,7 @@ import static java.util.stream.Collectors.toList;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VotingSystemApp extends Application implements DecompressBackupPane.Listener {
+public class VotingSystemApp extends Application {
 
     private static Logger log = Logger.getLogger(VotingSystemApp.class);
 
@@ -402,13 +402,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     class Delta { double x, y; }
 
-    @Override public void processDecompressedFile(ResponseVS response) {
-        log.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
-        if(ResponseVS.SC_OK == response.getStatusCode()) {
-            DocumentVSBrowserStackPane documentBrowser = new DocumentVSBrowserStackPane();
-            documentBrowser.setVisible((String) response.getData());
-        }
-    }
+
 
     public static void main(String[] args) {
         ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);

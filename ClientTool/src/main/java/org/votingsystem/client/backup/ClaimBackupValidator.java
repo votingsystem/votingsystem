@@ -1,5 +1,7 @@
 package org.votingsystem.client.backup;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
@@ -75,7 +77,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         if(!metaInfFile.exists()) {
             log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
-            metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
+            metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
             eventURL= EventVS.getURL(null, metaInf.getServerURL(), metaInf.getId());
         }
 

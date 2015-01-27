@@ -54,48 +54,51 @@
                 "dateBegin":"2015/01/26 00:00:00",
                 "dateFinish":"2015/01/27 00:00:00",
                 "type":"VOTING_EVENT",
-                "BACKUP":{"numVotes":16, "numAccessRequest":16},
-                "REPRESENTATIVE_DATA":{"numRepresentatives":10,
-                                "numRepresentativesWithAccessRequest":2,
-                                "numRepresentativesWithVote":2,
-                                "numRepresentedWithAccessRequest":5,
-                                "numRepresented":71,
-                                "numVotesRepresentedByRepresentatives":11,
-                                "options":{
-                                    "15":{"content":"field1",
-                                          "numVoteRequests":11,
-                                          "numUsersWithVote":9,
-                                          "numRepresentativesWithVote":2,
-                                          "numVotesResult":11
-                                    },
-                                    "16":{"content":"field2",
-                                          "numVoteRequests":5,
-                                          "numUsersWithVote":5,
-                                          "numRepresentativesWithVote":0,
-                                          "numVotesResult":0
-                                    }
-                                }
-                                "representatives":{
-                                    "00000202H":{"id":42,
-                                        "optionSelectedId":null,
-                                        "numRepresentedWithVote":2,
-                                        "numRepresentations":9,
-                                        "numVotesRepresented":0
-                                    }, ...
-                                    "00000103B":{"id":10,
-                                        "optionSelectedId":null,
-                                        "numRepresentedWithVote":0,
-                                        "numRepresentations":8,
-                                        "numVotesRepresented":0
-                                    }
-                                }
-                }}
+                "BACKUP":{"numVotes":16, "numAccessRequest":16}}
             </g:decorate>
             </li>
             <li><b>REPRESENTATIVE_DATA</b>: directorio con todos los archivos necesarios para verificar el estado
             de los representantes y las delegaciones de los usuarios el día de la votación. Estructura del directorio:<br/>
                 <ul>
-                    <li><b>meta.inf</b>: Archivo con el resumen de la información del directorio</li>
+                    <li><b>meta.inf</b>: Archivo con información sonre los datos de los representantes</li>
+                    <g:decorate>
+                        [source]
+
+                        {"numRepresentatives":10,
+                        "numRepresentativesWithAccessRequest":2,
+                        "numRepresentativesWithVote":2,
+                        "numRepresentedWithAccessRequest":5,
+                        "numRepresented":71,
+                        "numVotesRepresentedByRepresentatives":11,
+                        "options":{
+                            "15":{"content":"field1",
+                                  "numVoteRequests":11,
+                                  "numUsersWithVote":9,
+                                  "numRepresentativesWithVote":2,
+                                  "numVotesResult":11
+                            },
+                            "16":{"content":"field2",
+                                  "numVoteRequests":5,
+                                  "numUsersWithVote":5,
+                                  "numRepresentativesWithVote":0,
+                                  "numVotesResult":0
+                            }
+                        }
+                        "representatives":{
+                            "00000202H":{"id":42,
+                                "optionSelectedId":null,
+                                "numRepresentedWithVote":2,
+                                "numRepresentations":9,
+                                "numVotesRepresented":0
+                            }, ...
+                            "00000103B":{"id":10,
+                                "optionSelectedId":null,
+                                "numRepresentedWithVote":0,
+                                "numRepresentations":8,
+                                "numVotesRepresented":0
+                            }
+                        }}
+                    </g:decorate>
                     <li><b>representative_$nif_N</b>: Directorio con el estado de las delegaciones del
                     representante con nif 'nif_N'. El directorio de cada representante tiene la estructura:
                     <g:decorate>
