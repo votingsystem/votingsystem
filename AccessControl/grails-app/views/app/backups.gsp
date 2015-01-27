@@ -109,7 +109,7 @@
                     un representante tiene por ejemplo 6000 delegaciones, estas estarán distribuidas en los directorios
                     de lotes 'batch_00000001', 'batch_00000002' y 'batch_00000003'.<br/>
                     Dentro de cada directorio de lotes van las copias de las delegaciones de los usuarios. Si un usuario
-                    con delegación a votado el nombre del archivo incluye la cadena '_delegation_with_vote'
+                    con delegación ha votado el nombre del archivo incluye la cadena '_delegation_with_vote'
                     </li>
                 </ul>
             </li>
@@ -140,7 +140,8 @@
         <li><b>Voto:</b> documento firmado por el <b>certificado anónimo</b> en el que figura la opción seleccioda.
         Los votos se encuentran en el directorio 'VOTING_EVENT/votes'</li>
         <li>Se puede verificar si un usuario con representante ha votado porque en el archivo de delegación figura
-        la cadena '_delegation_with_vote' y el <b>nif</b> </li>
+        la cadena '_delegation_with_vote' junto al <b>nif</b>, con ese nif se puede obtener del directorio
+        'VOTING_EVENT/accessRequest' la solicitud de acceso asociada y verificar que la información es correcta.</li>
     </ul>
 
 
