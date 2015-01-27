@@ -136,7 +136,7 @@ class EventVSElectionService {
 
     @Transactional
 	public synchronized ResponseVS generateBackup (EventVSElection eventVS) throws ExceptionVS {
-		log.debug("generateBackup -- eventVS: ${eventVS.id}")
+		log.debug("generateBackup - eventVS: ${eventVS.id}")
         /*if (eventVS.isActive(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))
         }*/
@@ -233,9 +233,7 @@ class EventVSElectionService {
         }
 
         def ant = new AntBuilder()
-        ant.zip(destfile: zipResult, basedir: "${filesDir}") {
-            fileset(dir:"${filesDir}/..", includes: "meta.inf")
-        }
+        ant.zip(destfile: zipResult, basedir: "${mapFiles.baseDir}")
         //The file is copied and available to download but triggers a null pointer exception with ResourcesPlugin
         ant.copy(file: zipResult, tofile: webResourcePath)
 

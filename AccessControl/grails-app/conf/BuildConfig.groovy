@@ -85,6 +85,7 @@ grails.project.dependency.resolution = {
         compile ':executor:0.3'
         compile ":quartz:1.0.2"
         compile ':rendering:1.0.0'
+        compile ":decorator-asciidoctor:0.4"
 
         // plugins needed at runtime but not for compilation
         runtime ":hibernate4:4.3.6.1" // or ":hibernate:3.6.10.15"

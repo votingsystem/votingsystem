@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta name="layout" content="simplePage" />
-    <!--https://github.com/josdejong/jsoneditor-->
-    <link rel="stylesheet" type="text/css" href="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.css')}">
-    <script type="text/javascript" src="${resource(dir: '/bower_components/jsoneditor', file: 'jsoneditor.min.js')}"></script>
+    <vs:webcss dir="jsoneditor" file="jsoneditor.min.css"/>
+    <vs:webscript dir='jsoneditor' file="jsoneditor.min.js"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 

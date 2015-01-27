@@ -29,18 +29,20 @@ class FilesService {
 		Map<String, File> result = new HashMap<String, File>()
 		String datePartPath = DateUtils.getDateStr(event.getDateFinish(), "yyyy_MM_dd")
 		String baseDirPath ="${grailsApplication.config.vs.backupCopyPath}/${datePartPath}/EventVS_${event.id}"
-		new File("$baseDirPath").mkdirs()
 		String filesDirPath = "$baseDirPath/${type.toString()}"
-		new File(filesDirPath).mkdirs()
+		result.baseDir = new File(baseDirPath)
+		result.baseDir.mkdirs()
 		result.filesDir = new File(filesDirPath)
-		result.zipResult = new File("$baseDirPath/${type.toString()}.zip")
+		result.filesDir.mkdirs()
 		switch(type) {
 			case TypeVS.REPRESENTATIVE_DATA:
 				result.metaInfFile = new File("$filesDirPath/meta.inf")
 				result.reportFile = new File("$baseDirPath/${type.toString()}_REPORTS.csv")
+				result.zipResult = new File("$baseDirPath/${type.toString()}_EventVS_${event.id}.zip")
 				break;
 			case TypeVS.VOTING_EVENT:
 				result.metaInfFile = new File("${baseDirPath}/meta.inf")
+				result.zipResult = new File("$baseDirPath/${type.toString()}_${event.id}.zip")
 				break;
 			default: throw new ExceptionVS("unprocessed type: ${type}")
 		}

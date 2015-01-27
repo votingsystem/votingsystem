@@ -36,10 +36,12 @@ class RepresentativeService {
 	LinkGenerator grailsLinkGenerator
 
 	/**
-	 * Creates backup of the state of all the representatives for a closed event
+	 * Creates backup of the state of all the representatives for a closed election. This is to create backups in order
+	 * external entities can verify results.
 	 */
+	@Transactional
 	private synchronized ResponseVS getAccreditationsBackupForEvent (EventVSElection event){
-		log.debug("getAccreditationsBackupForEvent --- event: ${event.id}")
+		String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		/*if(event.isActive(Calendar.getInstance().getTime())) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage('eventActiveErrorMsg',
                     [event.id].toArray(), locale))
@@ -48,13 +50,13 @@ class RepresentativeService {
 		File zipResult   = mapFiles.zipResult
 		File filesDir    = mapFiles.filesDir
 		File metaInfFile = mapFiles.metaInfFile
-        String downloadFileName = messageSource.getMessage('repAccreditationsBackupForEventFileName',
-                [event.id].toArray(), locale)
+		log.debug("$methodName - event: ${event.id} - dir: ${filesDir.getAbsolutePath()}")
+        String backupFileName = "${TypeVS.REPRESENTATIVE_DATA.toString()}_EventVS_${event.id}.zip"
 		if(zipResult.exists()) {
-			log.debug("getAccreditationsBackupForEvent - backup file already exists")
-			Map metaInfFileMap = JSONSerializer.toJSON(reportsFile.text)
+			log.debug("$methodName - backup file '$backupFileName' already exists")
+			Map metaInfFileMap = JSONSerializer.toJSON(metaInfFile.text)
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.ZIP,
-                    messageBytes: zipResult.getBytes(), message: downloadFileName, data:metaInfFileMap)
+                    messageBytes: zipResult.getBytes(), message: backupFileName, data:metaInfFileMap)
 		}
 		Map optionsMap = [:]
         for(FieldEventVS option : event.fieldsEventVS) {
@@ -70,24 +72,24 @@ class RepresentativeService {
 			Map optionMap = [content:option.content,
 				numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
 				numRepresentativesWithVote:numRepresentativesWithVote,
-				numVotesResult:numUsersWithVote]
+				numVotesResult:0]
 			optionsMap[option.id] = optionMap
 		}
 		int numRepresentatives = RepresentativeDocument.createCriteria().count {
-			le("dateCreated", event.getDateBegin())
+			lt("dateCreated", event.getDateBegin())
 			or {
 				isNull("dateCanceled")
-				ge("dateCanceled", event.getDateFinish())
+				gt("dateCanceled", event.getDateFinish())
 			}
 		}
-		log.debug("num representatives: ${numRepresentatives}")
+		log.debug("$methodName - num representatives: ${numRepresentatives}")
 		int numRepresentativesWithAccessRequest = 0
 		int numRepresentativesWithVote = 0
 		int numTotalRepresented = 0
 		int numTotalRepresentedWithAccessRequest = 0
 		int numVotesRepresentedByRepresentatives = 0
 		long representativeBegin = System.currentTimeMillis()
-		def representativeDocs = RepresentativeDocument.createCriteria().scroll {
+		def representativeDocsScroll = RepresentativeDocument.createCriteria().scroll {
 			lt("dateCreated", event.getDateFinish())
 			or {
 				isNull("dateCanceled")
@@ -95,17 +97,16 @@ class RepresentativeService {
 			}
 		}
 		Map representativesMap = [:]
-		while (representativeDocs.next()) {
-			UserVS representative = (UserVS) representativeDocs.get(0).getUserVS();
+		while (representativeDocsScroll.next()) {
+			UserVS representative = (UserVS) representativeDocsScroll.get(0).getUserVS();
 			DecimalFormat formatted = new DecimalFormat("00000000");
-			int delegationsBatch = 0
+			int batch = 0
 			String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}/" +
-					"batch_${formatted.format(++delegationsBatch)}"
+					"batch_${formatted.format(++batch)}"
 			new File(representativeBaseDir).mkdirs()
-			//representative active on selected date
 			int numRepresented = 1 //The representative itself
 			int numRepresentedWithAccessRequest = 0
-			def representationDocuments = RepresentationDocumentVS.createCriteria().scroll {
+			def representationDocScroll = RepresentationDocumentVS.createCriteria().scroll {
 					eq("representative", representative)
 					le("dateCreated", event.getDateBegin())
 					or {
@@ -113,26 +114,26 @@ class RepresentativeService {
 						gt("dateCanceled", event.getDateFinish())
 					}
 			}
-			while (representationDocuments.next()) {
+			while (representationDocScroll.next()) {
 				++numRepresented
-				RepresentationDocumentVS repDocument = (RepresentationDocumentVS) representationDocuments.get(0);
+				RepresentationDocumentVS repDocument = (RepresentationDocumentVS) representationDocScroll.get(0);
 				UserVS represented = repDocument.userVS
 				AccessRequestVS representedAccessRequest = AccessRequestVS.findWhere(
 					state:AccessRequestVS.State.OK, userVS:represented, eventVSElection:event)
 				String repDocFileName = null
 				if(representedAccessRequest) {
 					numRepresentedWithAccessRequest++
-					repDocFileName = "${representativeBaseDir}/${representationDocuments.getRowNumber()}_delegation_with_vote_${represented.nif}.p7m"
-				} else repDocFileName = "${representativeBaseDir}/${representationDocuments.getRowNumber()}_delegation_${represented.nif}.p7m"
+					repDocFileName = "${representativeBaseDir}/${represented.nif}_delegation_with_vote.p7m"
+				} else repDocFileName = "${representativeBaseDir}/${represented.nif}_delegation.p7m"
 				File representationDocFile = new File(repDocFileName)
 				representationDocFile.setBytes(repDocument.activationSMIME.content)
-				if(((representationDocuments.getRowNumber() + 1)  % 100) == 0) {
+				if(((representationDocScroll.getRowNumber() + 1)  % 100) == 0) {
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()
-					log.debug("Representative ${representative.nif} - processed ${representationDocuments.getRowNumber()} representations");
+					log.debug("Representative ${representative.nif} - processed ${representationDocScroll.getRowNumber()} representations");
 				}
-				if(((representationDocuments.getRowNumber() + 1) % 2000) == 0) {
-					representativeBaseDir= "${filesDir.absolutePath}/representative_${representative.nif}/batch_${formatted.format(++delegationsBatch)}"
+				if(((representationDocScroll.getRowNumber() + 1) % 2000) == 0) {
+					representativeBaseDir= "${filesDir.absolutePath}/representative_${representative.nif}/batch_${formatted.format(++batch)}"
 					new File(representativeBaseDir).mkdirs()
 				}
 			}
@@ -174,8 +175,8 @@ class RepresentativeService {
 			    "numRepresentedWithAccessRequest:${formatted.format(numRepresentedWithAccessRequest)}, " +
 			    "${state.toString()}\n"
 			reportFile.append(csvLine)*/
-			log.debug("processed ${representativeDocs.getRowNumber()} of ${numRepresentatives} representatives - ${elapsedTimeStr}")
-			if(((representativeDocs.getRowNumber() + 1)  % 100) == 0) {
+			log.debug("processed ${representativeDocsScroll.getRowNumber()} of ${numRepresentatives} representatives - ${elapsedTimeStr}")
+			if(((representativeDocsScroll.getRowNumber() + 1)  % 100) == 0) {
 				sessionFactory.currentSession.flush()
 				sessionFactory.currentSession.clear()
 			}
@@ -186,14 +187,14 @@ class RepresentativeService {
 			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented, 
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
-			representatives: representativesMap, options:optionsMap]
+			options:optionsMap, representatives: representativesMap]
 		metaInfFile.write((metaInfMap as JSON).toString())
 		return new ResponseVS(data:metaInfMap, statusCode:ResponseVS.SC_OK)
 	}
 
 	private synchronized ResponseVS getAccreditationsBackup (UserVS representative, Date selectedDate){
 		log.debug("getAccreditationsBackup - representative: ${representative.nif}" +" - selectedDate: ${selectedDate}")
-		def representationDocuments = RepresentationDocumentVS.createCriteria().scroll {
+		def representationDocScroll = RepresentationDocumentVS.createCriteria().scroll {
             eq("representative", representative)
             le("dateCreated", selectedDate)
             or {
@@ -225,16 +226,16 @@ class RepresentativeService {
 		new File(basedir).mkdirs()
 		String accreditationFileName = messageSource.getMessage('accreditationFileName', null, locale)
 		int numAccreditations = 0
-		while (representationDocuments.next()) {
+		while (representationDocScroll.next()) {
 			++numAccreditations
-			RepresentationDocumentVS representationDocument = (RepresentationDocumentVS)representationDocuments.get(0);
+			RepresentationDocumentVS representationDocument = (RepresentationDocumentVS)representationDocScroll.get(0);
 			MessageSMIME messageSMIME = representationDocument.activationSMIME
 			File smimeFile = new File("${basedir}/${accreditationFileName}_${representationDocument.id}")
 			smimeFile.setBytes(messageSMIME.content)
-			if((representationDocuments.getRowNumber() % 100) == 0) {
+			if((representationDocScroll.getRowNumber() % 100) == 0) {
 				sessionFactory.currentSession.flush() 
 				sessionFactory.currentSession.clear()
-				log.debug("getAccreditationsBackup - processed ${representationDocuments.getRowNumber()} representations")
+				log.debug("getAccreditationsBackup - processed ${representationDocScroll.getRowNumber()} representations")
 			}
 				
 		}
@@ -440,18 +441,18 @@ class RepresentativeService {
                 log.debug("processRevoke - processed ${representedUsers.getRowNumber()} user updates")
             }
         }
-        def representationDocuments = RepresentationDocumentVS.createCriteria().scroll {
+        def representationDocScroll = RepresentationDocumentVS.createCriteria().scroll {
             eq("state", RepresentationDocumentVS.State.OK)
             eq("representative", userVS)
         }
-        while (representationDocuments.next()) {
-            RepresentationDocumentVS representationDocument = (RepresentationDocumentVS) representationDocuments.get(0);
+        while (representationDocScroll.next()) {
+            RepresentationDocumentVS representationDocument = (RepresentationDocumentVS) representationDocScroll.get(0);
             representationDocument.setState(RepresentationDocumentVS.State.CANCELLED_BY_REPRESENTATIVE).setCancellationSMIME(
 					messageSMIMEReq).setDateCanceled(userVS.getTimeStampToken().getTimeStampInfo().getGenTime()).save()
-            if((representationDocuments.getRowNumber() % 100) == 0) {
+            if((representationDocScroll.getRowNumber() % 100) == 0) {
                 sessionFactory.currentSession.flush()
                 sessionFactory.currentSession.clear()
-                log.debug("processRevoke - processed ${representationDocuments.getRowNumber()} representationDocument updates")
+                log.debug("processRevoke - processed ${representationDocScroll.getRowNumber()} representationDocument updates")
             }
         }
         userVS.setType(UserVS.Type.USER).save()

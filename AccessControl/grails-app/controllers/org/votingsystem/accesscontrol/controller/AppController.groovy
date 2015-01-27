@@ -45,6 +45,8 @@ class AppController {
 
     def jsonDocs() { }
 
+    def backups() { }
+
     /**
      * Invoked if any method in this controller throws an Exception.
      */
