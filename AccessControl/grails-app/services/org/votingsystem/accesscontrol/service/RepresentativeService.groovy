@@ -72,17 +72,19 @@ class RepresentativeService {
 			Map optionMap = [content:option.content,
 				numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
 				numRepresentativesWithVote:numRepresentativesWithVote,
-				numVotesResult:0]
+				numVotesResult:numVoteRequests]
 			optionsMap[option.id] = optionMap
 		}
+		log.debug("this is for TEST - CHANGE dateCreated to dateBegin !!!")
 		int numRepresentatives = RepresentativeDocument.createCriteria().count {
-			lt("dateCreated", event.getDateBegin())
+			lt("dateCreated", event.getDateFinish())
 			or {
 				isNull("dateCanceled")
 				gt("dateCanceled", event.getDateFinish())
 			}
+			inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
 		}
-		log.debug("$methodName - num representatives: ${numRepresentatives}")
+		log.debug("$methodName - num. representatives: ${numRepresentatives}")
 		int numRepresentativesWithAccessRequest = 0
 		int numRepresentativesWithVote = 0
 		int numTotalRepresented = 0
@@ -95,6 +97,7 @@ class RepresentativeService {
 				isNull("dateCanceled")
 				gt("dateCanceled", event.getDateFinish())
 			}
+			inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
 		}
 		Map representativesMap = [:]
 		while (representativeDocsScroll.next()) {
@@ -108,7 +111,7 @@ class RepresentativeService {
 			int numRepresentedWithAccessRequest = 0
 			def representationDocScroll = RepresentationDocumentVS.createCriteria().scroll {
 					eq("representative", representative)
-					le("dateCreated", event.getDateBegin())
+					le("dateCreated", event.getDateFinish()) //this is for TEST, CHANGE dateCreated to dateBegin !!!
 					or {
 						isNull("dateCanceled")
 						gt("dateCanceled", event.getDateFinish())
@@ -158,7 +161,7 @@ class RepresentativeService {
 				++numRepresentativesWithVote
 				numVotesRepresentedByRepresentative = numRepresented  - numRepresentedWithAccessRequest
 				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
-				optionsMap[representativeVote.optionSelected.id].numVotesResult += numVotesRepresentedByRepresentative
+				optionsMap[representativeVote.optionSelected.id].numVotesResult += numVotesRepresentedByRepresentative - 1
 			}
 			Map representativeMap = [id:representative.id,
 				optionSelectedId:representativeVote?.optionSelected?.id,

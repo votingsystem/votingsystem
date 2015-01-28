@@ -120,12 +120,9 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                 break;
             case VOTE_FINISH:
                 String message = null;
-                ImageView icon = null;
                 if(errorList == null || errorList.isEmpty()) {
-                    icon = new ImageView(Utils.getImage(this, "accept_32"));
                     message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
                 } else {
-                    icon = new ImageView(Utils.getImage(this, "cancel_32"));
                     message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
                 cancelButton.setText(ContextVS.getInstance().getMessage("closeLbl"));

@@ -42,11 +42,10 @@ class UserVSController {
 			responseVS.userVS.metaInf = null
 
 			RepresentativeDocument.withTransaction {
-				RepresentativeDocument representativeDocument = RepresentativeDocument.findWhere(userVS:userVS)
-				if(RepresentativeDocument.State.CANCELLED != representativeDocument.state)
+				RepresentativeDocument representativeDocument = RepresentativeDocument.findWhere(userVS:responseVS.userVS)
+				if(representativeDocument && RepresentativeDocument.State.CANCELLED != representativeDocument.state)
 					representativeDocument.setState(RepresentativeDocument.State.CANCELLED).save()
 			}
-
 
 			UserVS.withTransaction { responseVS.userVS.save() }
             return [responseVS : responseVS]
@@ -86,6 +85,33 @@ class UserVSController {
 		}
 		response.status = ResponseVS.SC_OK
 		render "OK"
+	}
+
+	/**
+	 * (DISPONIBLES SOLO EN ENTORNOS DE DESARROLLO) Servicio que sirve para prepaparar la base de usuarios
+	 * antes de lanzar simulaciones.
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/user/prepareUserBaseData]
+	 *
+	 */
+	def resetRepresentatives() {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
+			return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		int numChanges = 0;
+		RepresentativeDocument.withTransaction {
+			List<RepresentativeDocument> repDocs = RepresentativeDocument.createCriteria().list {
+				inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
+			}
+			for(RepresentativeDocument repDoc:repDocs) {
+				repDoc.userVS.setType(UserVS.Type.USER).save()
+				repDoc.setState(RepresentativeDocument.State.CANCELLED).save()
+				numChanges++
+			}
+		}
+		render "num. representatives reset: $numChanges"
 	}
 
     /**

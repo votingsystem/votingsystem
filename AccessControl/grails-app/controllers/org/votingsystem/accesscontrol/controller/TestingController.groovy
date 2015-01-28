@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.votingsystem.accesscontrol.model.RepresentativeDocument
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
@@ -20,12 +21,13 @@ class TestingController {
     def eventVSElectionService
     def representativeService
 
+
     def index() {
         EventVSElection eventVS = null;
-        EventVSElection.withTransaction {eventVS = EventVSElection.get(8L)}
+        EventVSElection.withTransaction {eventVS = EventVSElection.get(15L)}
         //representativeService.getAccreditationsBackupForEvent(eventVS)
         eventVSElectionService.generateBackup(eventVS)
-        render "OK"
+        render "generated backup for eventVS '${eventVS.id}'"
         return false
     }
 

@@ -32,6 +32,7 @@ public class SignedFile {
         smimeMessage = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
         signatureVerified = smimeMessage.isValidSignature();
         this.operationDocument = operationDocument;
+        this.name = name;
     }
     
     public boolean isValidSignature() {

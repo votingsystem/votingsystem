@@ -163,11 +163,11 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
         RepresentativesData representativesData = metaInf.getRepresentativesData();
         for(File file : representativeDirList) {
             log.debug("checking representative dir:" + file.getAbsolutePath());
-            numRepresentatives++;
             long numRepresentedWithVote = 0;
             long numRepresentations = 1;//the representative itself
             long numVotesRepresented = 0;
             if(file.isDirectory()) {
+                numRepresentatives++;
                 File[] batchDirList = file.listFiles();
                 String representativeNif = file.getAbsolutePath().split("representative_")[1];
                 RepresentativeData representativeDataMetaInf = metaInf.getRepresentativeData(representativeNif);
@@ -181,7 +181,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                         numRepresentations++;
                         byte[] fileBytes = FileUtils.getBytesFromFile(repDoc);
                         SignedFile signedFile = new SignedFile(fileBytes, repDoc.getName(), null);
-                        if(repDoc.getAbsolutePath().contains("_delegation_with_vote_")) {
+                        if(repDoc.getAbsolutePath().contains("_delegation_with_vote")) {
                             List<File> result = FileUtils.findRecursively(
                                     accessRequestsDir, signedFile.getNifFromRepresented());
                             if(!result.isEmpty()) {
