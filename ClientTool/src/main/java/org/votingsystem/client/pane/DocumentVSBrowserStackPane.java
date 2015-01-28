@@ -20,7 +20,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
@@ -55,6 +54,8 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
 
     private TabPane tabPane;
     private static Stage dialogStage;
+    private HBox buttonsHBox;
+    private Button saveButton;
     private String fileDir = null;
     private String dialogTitle = null;
     private String decompressedBackupBaseDir = null;
@@ -83,50 +84,27 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
 
         mainVBox = new VBox();
         mainVBox.setPrefWidth(560);
-        HBox buttonsHBox = new HBox();
+        buttonsHBox = new HBox();
         HBox navigateButtonsHBox = new HBox();
-
         Button nextButton = new Button(ContextVS.getMessage("buttonNextLbl"));
-        nextButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                goNext();
-            }
-        });
-
+        nextButton.setOnAction(actionEvent ->  goNext());
         nextButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
         Button prevButton =  new Button(ContextVS.getMessage("buttonPreviousLbl"));
-        prevButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                goPrevious();
-            }
-        });
+        prevButton.setOnAction(actionEvent ->  goPrevious());
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         navigateButtonsHBox.getChildren().addAll(prevButton, nextButton);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
         validateBackupButton = new Button(ContextVS.getMessage("validateBackupLbl"));
-        validateBackupButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                BackupValidatorPane.showDialog(decompressedBackupBaseDir, metaInf);
-            }
-        });
-
+        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.showDialog(decompressedBackupBaseDir, metaInf));
         validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
-
-        Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
+        saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
-        saveButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                saveMessage();
-            }
-        });
+        saveButton.setOnAction(actionEvent ->  saveMessage());
         HBox.setMargin(saveButton, new Insets(5, 10, 5, 0));
-        HBox.setMargin(validateBackupButton, new Insets(0, 10, 0, 0));
+        HBox.setMargin(validateBackupButton, new Insets(5, 10, 0, 0));
 
         navigateButtonsHBox.setVisible(false);
-        buttonsHBox.getChildren().addAll(navigateButtonsHBox, spacer, saveButton);
+        buttonsHBox.getChildren().addAll(navigateButtonsHBox, Utils.getSpacer(), validateBackupButton, saveButton);
+
 
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
@@ -196,6 +174,7 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
             DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
             dialogStage = new Stage();
             dialogStage.setScene(new Scene(documentVSBrowserStackPane));
+            dialogStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             documentVSBrowserStackPane.init();
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
@@ -318,78 +297,13 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
                     TypeVS.CLAIM_EVENT == metaInf.getType()) {
                 validateBackupButton.setVisible(true);
             }
-            Tab newTab = new Tab();
-            newTab.setText(dialogTitle);
-            newTab.setContent(eventPanel);
-            tabPane.getTabs().add(newTab);
+            tabPane.getTabs().add(Utils.getTab(dialogTitle, eventPanel));
             dialogStage.centerOnScreen();
             dialogStage.show();
-
+            if(buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
-
-        /*try {
-            ZipFile backupZip = new ZipFile(zip);
-            new File(ClientToolContext.DEFAULTS.APPTEMPDIR + File.separator +
-                    zip.getName()).mkdirs();
-            setTitle(zip.getName());
-            Enumeration entries = backupZip.entries();
-            while(entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry)entries.nextElement();
-                if(entry.isDirectory()) {
-                    //archivoDestino.mkdirs();
-                    //continue;
-                } else {
-                    byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
-                        backupZip.getInputStream(entry));
-                    String msg = checkByteArraySize(signedFileBytes);
-                    if(msg == null) {
-                        if ("meta.inf".equals(entry.getName())) {
-                            byte[] metaInfBytes = FileUtils.getBytesFromInputStream(
-                                    backupZip.getInputStream(entry));
-                            InformacionEventoPanel informacionEventoPanel =
-                                new InformacionEventoPanel(metaInfBytes);
-                            tabbedPane.removeAll();
-                            tabbedPane.addTab("<html><b>" + entry.getName() +
-                                    "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>",
-                                    informacionEventoPanel);
-                        } else {
-                            SignedFile signedFile = new SignedFile(
-                                    signedFileBytes, entry.getName());
-                            signedFileList.add(signedFile);
-
-                            showProgress(false);
-                        }
-                    } else {
-                        log.error("ERROR ZipEntry '" + entry.getName() + "'  -> " + msg);
-                    }
-                }
-            }
-            backupZip.close();
-            log.debug("Numero archivos en lista: " + signedFileList.size());
-            selectedFileIndex = 0;
-            SignedFile primerArchivo = signedFileList.get(selectedFileIndex++);
-            SignedFilePanel signedFilePanel =
-                    new SignedFilePanel(primerArchivo);
-            signedFilePanel.setContentFormated(checkBox.isSelected());
-            tabbedPane.addTab(primerArchivo.getName(), signedFilePanel);
-            tabbedPane.setSelectedIndex(0);
-            tabbedPane.setVisible(true);
-            navegacionPanel.setVisible(true);
-        } catch (ZipException ex) {/*
-            File fileDir = archivo.getParentFile();
-            signedFileListCMS = Arrays.asList(fileDir.listFiles(new CMSFilter()));
-            selectedFileIndex = signedFileListCMS.indexOf(archivo);
-            if (signedFileListCMS.size() < 2) habilitarBotones(false);
-            else habilitarBotones(true);
-            contexto = ClientToolContext.EXPLORANDO_DIRECTORIO;
-            openFile(archivo);
-            showProgress(false);
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-            showProgress(false);
-        } */
     }
 
 }

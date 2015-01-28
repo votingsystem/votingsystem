@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
-import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.NotificationService;
@@ -203,8 +202,6 @@ public class VotingSystemApp extends Application {
         }).start();
         mainBox = new VBox();
         headerButtonsBox = new HBox(20);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
         VBox.setMargin(headerButtonsBox, new Insets(0, 0, 20, 0));
         ChoiceBox documentChoiceBox = new ChoiceBox();
         documentChoiceBox.setPrefWidth(150);
@@ -288,12 +285,9 @@ public class VotingSystemApp extends Application {
         headerButtonsBox.getChildren().addAll(adminChoiceBox, documentChoiceBox);
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                VotingSystemApp.this.stop();
-            }});
+        cancelButton.setOnAction(actionEvent -> VotingSystemApp.this.stop());
         HBox footerButtonsBox = new HBox(10);
-        footerButtonsBox.getChildren().addAll(spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 10));
         mainBox.getChildren().addAll(footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");

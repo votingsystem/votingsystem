@@ -40,12 +40,7 @@ public class SMIMESignersPane extends GridPane {
 
         Button closeButton = new Button(ContextVS.getMessage("closeLbl"));
                 closeButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                SMIMESignersPane.this.setVisible(false);
-            }
-        });
-
+        closeButton.setOnAction(actionEvent -> SMIMESignersPane.this.setVisible(false));
         Tab newTab = null;
         try {
             Set<UserVS> signersVS = signedFile.getSMIME().getSigners();
@@ -74,10 +69,7 @@ public class SMIMESignersPane extends GridPane {
                 Stage stage = new Stage();
                 stage.initModality(Modality.WINDOW_MODAL);
                 //stage.initOwner(window);
-
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) { }
-                });
+                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
                 SMIMESignersPane SMIMESignersPane = new SMIMESignersPane(signedFile);
                 stage.setScene(new Scene(SMIMESignersPane));
                 stage.setTitle(ContextVS.getMessage("signersLbl"));

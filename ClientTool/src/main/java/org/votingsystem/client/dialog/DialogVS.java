@@ -56,9 +56,7 @@ public class DialogVS {
         this.rootNode = rootNode;
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {      }
-        });
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         stage.centerOnScreen();
         // allow the dialog to be dragged around.
         final Delta dragDelta = new Delta();

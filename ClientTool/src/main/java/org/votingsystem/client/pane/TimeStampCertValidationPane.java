@@ -50,27 +50,14 @@ public class TimeStampCertValidationPane extends GridPane {
         textArea.setWrapText(true);
         textArea.setStyle("-fx-font-size: 10;-fx-pref-height: 400;");
         add(textArea, 0, 1);
-
         validateTimeStampButton = new Button(ContextVS.getMessage("validateLbl"));
         validateTimeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CHECK)));
-        validateTimeStampButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                validateTimeStamp();
-            }
-        });
-
+        validateTimeStampButton.setOnAction(actionEvent -> validateTimeStamp());
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK)));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                TimeStampCertValidationPane.this.getScene().getWindow().hide();
-            }
-        });
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        buttonsBox.getChildren().addAll(validateTimeStampButton, spacer, cancelButton);
+        cancelButton.setOnAction(actionEvent ->TimeStampCertValidationPane.this.getScene().getWindow().hide());
+        buttonsBox.getChildren().addAll(validateTimeStampButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 2);
     }
@@ -111,11 +98,7 @@ public class TimeStampCertValidationPane extends GridPane {
                 Stage stage = new Stage();
                 stage.initModality(Modality.WINDOW_MODAL);
                 //stage.initOwner(window);
-
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) {
-                    }
-                });
+                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
                 TimeStampCertValidationPane timeStampCertValidationPane = new TimeStampCertValidationPane(timeStampToken);
                 stage.setScene(new Scene(timeStampCertValidationPane, javafx.scene.paint.Color.TRANSPARENT));
                 stage.setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));

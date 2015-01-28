@@ -67,20 +67,12 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
         signButton = new Button(ContextVS.getMessage("signLbl"));
         signButton.setGraphic((Utils.getImage(FontAwesome.Glyph.PENCIL)));
-        signButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                documentSignerHelper.processOperation(SignDocumentFormStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
-                        textArea.getText(), messageSubjectTextField.getText(), smimeMessage, null);
-            }
-        });
-
+        signButton.setOnAction(actionEvent -> documentSignerHelper.processOperation(
+                SignDocumentFormStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
+                textArea.getText(), messageSubjectTextField.getText(), smimeMessage, null));
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
-        saveButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                saveMessage(smimeMessage);
-            }
-        });
+        saveButton.setOnAction(actionEvent -> saveMessage(smimeMessage));
         HBox.setMargin(saveButton, new Insets(0, 40, 0, 10));
 
         serviceURLTextField = new TextField();
@@ -99,11 +91,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         HBox.setHgrow(serviceURLTextField, Priority.ALWAYS);
         Button sendButton = new Button(ContextVS.getMessage("sendLbl"));
         sendButton.setGraphic((Utils.getImage(FontAwesome.Glyph.UPLOAD)));
-        sendButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                sendDocumentToService();
-            }
-        });
+        sendButton.setOnAction(actionEvent -> sendDocumentToService());
         HBox.setMargin(sendButton, new Insets(0, 0, 0, 30));
 
         messageSubjectTextField = new TextField();
@@ -130,27 +118,15 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK)));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                SignDocumentFormPane.this.getScene().getWindow().hide();
-            }
-        });
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        buttonsBox.getChildren().addAll(signButton, spacer, cancelButton);
+        cancelButton.setOnAction(actionEvent -> SignDocumentFormPane.this.getScene().getWindow().hide());
+        buttonsBox.getChildren().addAll(signButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 4);
         textArea.requestFocus();
-
         stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
         //stage.initOwner(window);
-
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {
-            }
-        });
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         documentSignerHelper = new SignDocumentFormStackPane(this);
         documentSignerHelper.getChildren().add(0, this);
         stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));

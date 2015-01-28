@@ -39,7 +39,6 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     private String eventURL = null;
     private String representativeVoteFileName = null;
     private String accessRequestFileName = null;
-    private String representativeReportFileName = null;
     private Map<Long, Long> optionsMap = new HashMap<Long, Long>();
     private Map<String, Long> representativeVotesMap = new HashMap<String, Long>();
     
@@ -49,8 +48,8 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
-        accessRequestsDir = new File(backupPath + "/accessRequest");
-        votesDir = new File(backupPath + "/votes");
+        accessRequestsDir = new File(backupPath + File.separator + TypeVS.VOTING_EVENT.toString() + "/accessRequest");
+        votesDir = new File(backupPath + File.separator + TypeVS.VOTING_EVENT.toString() + "/votes");
     }
    
     private String checkByteArraySize (byte[] signedFileBytes) {
@@ -65,12 +64,12 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
-        representativeReportFileName = ContextVS.getMessage("representativeReportFileName");
-        accessRequestFileName = ContextVS.getMessage("accessRequestFileName");
-        representativeVoteFileName = ContextVS.getMessage("representativeVoteFileName");
+        accessRequestFileName = "accessRequest_";
+        representativeVoteFileName = "representativeVote_";
 
         String backupPath = backupDir.getAbsolutePath();
-        File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
+        String voteInfoPath = backupPath + File.separator + "VOTING_EVENT" + File.separator;
+        File trustedCertsFile = new File(voteInfoPath + "systemTrustedCerts.pem");
         Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         trustAnchors = new HashSet<TrustAnchor>();
@@ -78,7 +77,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             TrustAnchor anchor = new TrustAnchor(certificate, null);
             trustAnchors.add(anchor);
         }
-        File eventTrustedCertsFile = new File(backupPath + File.separator + "eventTrustedCerts.pem");
+        File eventTrustedCertsFile = new File(voteInfoPath + "eventTrustedCerts.pem");
         Collection<X509Certificate> eventTrustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(eventTrustedCertsFile));
         eventTrustedAnchors = new HashSet<TrustAnchor>();
@@ -86,16 +85,20 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             TrustAnchor anchor = new TrustAnchor(certificate, null);
             eventTrustedAnchors.add(anchor);
         }
-        File timeStampCertFile = new File(backupPath + File.separator + "timeStampCert.pem");
+        File timeStampCertFile = new File(voteInfoPath + "timeStampCert.pem");
         Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
         timeStampServerCert = timeStampCerts.iterator().next();
             
         File metaInfFile = new File(backupPath + File.separator + "meta.inf");
+        File representativeMetaInfFile = new File(backupPath + File.separator + "REPRESENTATIVE_DATA"  +
+                File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
             log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
             metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
+            metaInf.loadRepresentativeData((JSONObject) JSONSerializer.toJSON(
+                    FileUtils.getStringFromFile(representativeMetaInfFile)));
             eventURL= EventVS.getURL(TypeVS.VOTING_EVENT, metaInf.getServerURL(), metaInf.getId());
         }
         for(FieldEventVS option : metaInf.getOptionList()) {
@@ -157,7 +160,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
         long numVotesRepresentedByRepresentatives = 0;
         
         String repAccreditationsBackupPath = backupDir.getAbsolutePath() + 
-            File.separator + ContextVS.getInstance().getMessage("repAccreditationsBackupPartPath");
+            File.separator + TypeVS.REPRESENTATIVE_DATA.toString();
         File representativesDir = new File(repAccreditationsBackupPath);
         File[] representativesDirs = representativesDir.listFiles();
         RepresentativesData representativesData = metaInf.getRepresentativesData();
@@ -169,7 +172,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             long numVotesRepresented = 0;
             if(file.isDirectory()) {
                 File[] representativesBatchDirs = file.listFiles();
-                String representativeNif = file.getAbsolutePath().split("_representative_")[1];
+                String representativeNif = file.getAbsolutePath().split("representative_")[1];
                 RepresentativeData representativeDataMetaInf = metaInf.getRepresentativeData(representativeNif);
                 log.debug("representativeNif: " + representativeNif +
                         " - vote: " + representativeDataMetaInf.getOptionSelectedId());

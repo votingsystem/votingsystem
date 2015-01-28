@@ -98,9 +98,7 @@ public class BrowserVSPane extends StackPane {
                     java.awt.event.KeyEvent.VK_CAPS_LOCK));
         });
         HBox footerButtonsBox = new HBox();
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        footerButtonsBox.getChildren().addAll(cancelButton, spacer, acceptButton);
+        footerButtonsBox.getChildren().addAll(cancelButton, Utils.getSpacer(), acceptButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));

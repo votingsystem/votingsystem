@@ -44,10 +44,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         setVgap(10);
         setPadding(new Insets(10, 10, 10, 10));
         Button openSignatureInfoButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
-        openSignatureInfoButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                SMIMESignersPane.showDialog(signedFile);
-            }});
+        openSignatureInfoButton.setOnAction(actionEvent -> SMIMESignersPane.showDialog(signedFile));
         openSignatureInfoButton.setPrefWidth(150);
 
         ColumnConstraints column1 = new ColumnConstraints();
@@ -77,11 +74,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
         timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
-        timeStampButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                TimeStampPane.showDialog(timeStampToken);
-            }
-        });
+        timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(timeStampToken));
         setMargin(timeStampButton, new Insets(10, 0, 10, 0));
 
         VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);

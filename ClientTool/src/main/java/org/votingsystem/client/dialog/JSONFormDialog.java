@@ -50,11 +50,7 @@ public class JSONFormDialog {
             }
         });
         //stage.initOwner(window);
-
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {      }
-        });
-
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         VBox mainBox = new VBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
@@ -66,25 +62,18 @@ public class JSONFormDialog {
         textArea.setStyle("-fx-word-wrap:break-word;");
 
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                if(listener != null) listener.processJSONForm((JSONObject) JSONSerializer.toJSON(textArea.getText()));
-                else log.debug("No listeners to send JSON form");
-                stage.hide();
-            }});
+        acceptButton.setOnAction(actionEvent -> {
+            if(listener != null) listener.processJSONForm((JSONObject) JSONSerializer.toJSON(textArea.getText()));
+            else log.debug("No listeners to send JSON form");
+            stage.hide();
+        });
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                stage.hide();
-            }});
+        cancelButton.setOnAction(actionEvent -> stage.hide());
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         HBox footerButtonsBox = new HBox(10);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        footerButtonsBox.getChildren().addAll(spacer,cancelButton, acceptButton);
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
 
         mainBox.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");

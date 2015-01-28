@@ -65,26 +65,17 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
         mobileDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.EXCHANGE));
-        mobileDeviceButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                MobileSelectorDialog.show(ContextVS.getMessage("setMobileSignatureMechanismMsg"),
-                        ContextVS.getMessage("setMobileSignatureMechanismAdv"), SettingsDialog.this);
-            }
-        });
+        mobileDeviceButton.setOnAction(actionEvent -> MobileSelectorDialog.show(ContextVS.getMessage(
+                "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
+                SettingsDialog.this));
         mobileDeviceInfo.getChildren().addAll(mobileDeviceLbl, mobileDeviceButton);
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
         signWithKeystoreRb.setToggleGroup(tg);
-        signWithKeystoreRb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                changeSignatureMode(actionEvent);
-            }});
+        signWithKeystoreRb.setOnAction(actionEvent -> changeSignatureMode(actionEvent));
         keyStoreVBox = new VBox(10);
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
         selectKeyStoreButton.setGraphic(Utils.getImage(FontAwesome.Glyph.KEY));
-        selectKeyStoreButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                selectKeystoreFile();
-            }});
+        selectKeyStoreButton.setOnAction(actionEvent -> selectKeystoreFile());
         keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
@@ -92,38 +83,26 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         keyStoreVBox.getStyleClass().add("settings-vbox");
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
-        requestCertButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                if (ContextVS.getInstance().getAccessControl() != null) {
-                    Platform.runLater(new Runnable() {
-                        @Override public void run() {
-                            BrowserVS.getInstance().newTab(
-                                    ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
-                            getStage().close();
-                        }
-                    });
-                } else {
-                    log.error("missing 'access control'");
-                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
-                }
+        requestCertButton.setOnAction(actionEvent -> {
+            if (ContextVS.getInstance().getAccessControl() != null) {
+                Platform.runLater(() -> {
+                    BrowserVS.getInstance().newTab(
+                            ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
+                    getStage().close();
+                });
+            } else {
+                log.error("missing 'access control'");
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
             }
         });
 
         HBox footerButtonsBox = new HBox(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                getStage().close();
-            }});
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        cancelButton.setOnAction(actionEvent -> getStage().close());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                validateForm();
-            }});
-        footerButtonsBox.getChildren().addAll(spacer, cancelButton, acceptButton);
+        acceptButton.setOnAction(actionEvent -> validateForm());
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
         gridPane.add(requestCertButton,0,0);
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));

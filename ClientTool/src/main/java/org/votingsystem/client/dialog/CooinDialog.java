@@ -40,7 +40,6 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -127,34 +126,19 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
         NotificationService.getInstance().registerToEventBus(new EventBusDeleteCooinListener());
         sendMenuItem = new MenuItem("");
         sendMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-        sendMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-                showForm(new Cooin.TransactionVSData("", "", "", true).getJSON());
-            }
-        });
+        sendMenuItem.setOnAction(actionEvent -> showForm(new Cooin.TransactionVSData("", "", "", true).getJSON()));
         deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
-        deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
+        deleteMenuItem.setOnAction(actionEvent -> {
                 System.out.println("deleteMenuItem");
                 OperationVS operationVS = new OperationVS(TypeVS.COOIN_DELETE);
                 operationVS.setMessage(cooin.getHashCertVS());
                 BrowserVS.getInstance().processOperationVS(operationVS, null);
-            }
-        });
+            });
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
-        saveMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-                System.out.println("saveMenuItem");
-            }
-        });
+        saveMenuItem.setOnAction(actionEvent -> System.out.println("saveMenuItem"));
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
-        changeWalletMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
-                        ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this);
-            }
-        });
-
+        changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
+                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this));
         contextMenu.getItems().addAll(sendMenuItem, changeWalletMenuItem, deleteMenuItem, saveMenuItem);
         contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
         setProgressVisible(false, true);

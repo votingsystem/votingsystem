@@ -2,7 +2,6 @@ package org.votingsystem.client.model;
 
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -40,7 +39,7 @@ public class MetaInf {
     
     
     public String getFormattedInfo() {
-        StringBuilder result = new StringBuilder("<html>");
+        StringBuilder result = new StringBuilder("<html style='font-family: arial, helvetica, sans-serif; color: #555;'>");
         result.append("<b>" + ContextVS.getMessage("eventIdLbl") + "</b>:" + getId() + "<br/>");
         String eventURL = EventVS.getURL(type, serverURL, id);
         result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
@@ -219,7 +218,7 @@ public class MetaInf {
     }
         
     public String getRepresentativesHTML() {
-        StringBuilder result = new StringBuilder("<HTML>");
+        StringBuilder result = new StringBuilder("<HTML style='font-family: arial, helvetica, sans-serif; color: #555;'>");
         if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
             Map<String, RepresentativeData> representativesMap = 

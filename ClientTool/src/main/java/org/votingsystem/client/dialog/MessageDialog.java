@@ -43,9 +43,7 @@ public class MessageDialog {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
         //stage.initOwner(window);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {      }
-        });
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         mainBox  = new VBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
@@ -57,16 +55,11 @@ public class MessageDialog {
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                stage.hide();
-            }});
+        acceptButton.setOnAction(actionEvent -> stage.hide());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
         footerButtonsBox = new HBox(10);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        footerButtonsBox.getChildren().addAll(spacer, acceptButton);
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
 
         mainBox.getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
         mainBox.getStyleClass().add("modal-dialog");

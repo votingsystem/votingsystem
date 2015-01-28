@@ -2,13 +2,19 @@ package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.sf.json.JSONArray;
@@ -18,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.service.SessionService;
@@ -27,6 +34,10 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.Wallet;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.events.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -50,6 +61,11 @@ public class Utils {
     public static final String COLOR_RED = "#ba0011";
     public static final String COLOR_RED_DARK = "#6c0404";
     public static final String COLOR_YELLOW_ALERT = "#fa1";
+
+
+    public static final String EVENT_TYPE_CLICK = "click";
+    public static final String EVENT_TYPE_MOUSEOVER = "mouseover";
+    public static final String EVENT_TYPE_MOUSEOUT = "mouseclick";
 
     private static Logger log = Logger.getLogger(Utils.class);
 
@@ -112,6 +128,46 @@ public class Utils {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         return spacer;
+    }
+
+    public static Region getSpacer(){
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        return spacer;
+    }
+
+    public static Tab getTab(String caption, Pane content) {
+        Tab newTab = new Tab();
+        newTab.setText(caption);
+        newTab.setContent(content);
+        return newTab;
+    }
+
+    public static void browserVSLinkListener(WebView webView) {
+        webView.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<Worker.State>() {
+            @Override
+            public void changed(ObservableValue ov, Worker.State oldState, Worker.State newState) {
+                if (newState == Worker.State.SUCCEEDED) {
+                    org.w3c.dom.events.EventListener listener = evt -> {
+                        String domEventType = evt.getType();
+                        if (domEventType.equals(EVENT_TYPE_CLICK)) {
+                            webView.getEngine().getLoadWorker().cancel();
+                            String href = ((Element)evt.getTarget()).getAttribute("href");
+                            evt.preventDefault();
+                            BrowserVS.getInstance().newTab(href, null, null);
+                        }
+                    };
+
+                    Document doc = webView.getEngine().getDocument();
+                    NodeList nodeList = doc.getElementsByTagName("a");
+                    for (int i = 0; i < nodeList.getLength(); i++) {
+                        ((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_CLICK, listener, false);
+                        //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
+                        //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
+                    }
+                }
+            }
+        });
     }
 
     public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {

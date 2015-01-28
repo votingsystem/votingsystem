@@ -48,28 +48,14 @@ public class PEMCertValidatorPane extends GridPane {
         textArea.setPrefHeight(400);
         textArea.setWrapText(true);
         add(textArea, 0, 1);
-
         acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CHECK)));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                validatePublicKey();
-            }
-        });
-
-
+        acceptButton.setOnAction(actionEvent -> validatePublicKey());
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK)));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                PEMCertValidatorPane.this.getScene().getWindow().hide();
-            }
-        });
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        buttonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        cancelButton.setOnAction(actionEvent -> PEMCertValidatorPane.this.getScene().getWindow().hide());
+        buttonsBox.getChildren().addAll(acceptButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 2);
     }
@@ -112,11 +98,7 @@ public class PEMCertValidatorPane extends GridPane {
                 stage.centerOnScreen();
                 stage.initModality(Modality.WINDOW_MODAL);
                 //stage.initOwner(window);
-
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) {
-                    }
-                });
+                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
                 PEMCertValidatorPane validatorPane = new PEMCertValidatorPane();
                 stage.setScene(new Scene(validatorPane, javafx.scene.paint.Color.TRANSPARENT));
                 stage.setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));

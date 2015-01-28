@@ -33,16 +33,10 @@ public class TimeStampCertPane extends GridPane {
             Label signerLabel = new Label(ContextVS.getMessage("timeStampCertSignerLbl"));
             add(signerLabel, 0, 0);
         }
-
         Button showPEMcertButton = new Button(ContextVS.getMessage("showCertPemLbl"));
-        showPEMcertButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                showPEMCert();
-            }
-        });
+        showPEMcertButton.setOnAction(actionEvent -> showPEMCert());
         showPEMcertButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CERTIFICATE));
         add(showPEMcertButton, 0, 1);
-
         WebView certInfoWebView = new WebView();
         certInfoWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         certInfoWebView.setPrefHeight(400);

@@ -105,18 +105,21 @@ public class SignDocumentFormStackPane extends StackPane {
         password2Field = new PasswordField();
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                setPasswordDialogVisible(false);
-            }});
+        cancelButton.setOnAction(actionEvent -> setPasswordDialogVisible(false));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                checkPasswords();
-            }});
+        acceptButton.setOnAction(actionEvent -> checkPasswords());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+
+        password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+                if ((event.getCode() == KeyCode.ENTER)) {
+                    acceptButton.fire();
+                }
+                setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
+                        java.awt.event.KeyEvent.VK_CAPS_LOCK));
+            }
+        );
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {
@@ -141,12 +144,8 @@ public class SignDocumentFormStackPane extends StackPane {
                 }
             }
         );
-
         HBox footerButtonsBox = new HBox();
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        footerButtonsBox.getChildren().addAll(acceptButton, Utils.getSpacer(), cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
 
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));

@@ -49,15 +49,10 @@ public class SignatureInfoPane extends GridPane {
             signatureDateLabel.setStyle("-fx-font-weight: bold;");
             add(signatureDateLabel, 0, 1);
             Label signatureDateValueLabel = new Label(DateUtils.getDateStr(signer.getSignatureDate(), "dd/MMM/yyyy HH:mm"));
-
             add(signatureDateValueLabel, 1, 1);
             Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
             timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
-            timeStampButton.setOnAction(new EventHandler<ActionEvent>() {
-                @Override public void handle(ActionEvent actionEvent) {
-                    TimeStampPane.showDialog(signer.getTimeStampToken());
-                }
-            });
+            timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(signer.getTimeStampToken()));
             add(timeStampButton, 2, 1);
             setMargin(timeStampButton, new Insets(10, 0, 10, 0));
         }

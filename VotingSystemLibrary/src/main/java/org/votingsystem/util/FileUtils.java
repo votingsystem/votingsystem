@@ -181,27 +181,21 @@ public class FileUtils {
      * http://www.mkyong.com/java/how-to-delete-directory-in-java/
      */
     public static void deleteRecursively(File file) throws IOException {
-        if(file.isDirectory()){
-            //directory is empty, then delete it
-            if(file.list().length==0){
+        if(file.isDirectory()) {
+            log.debug("deleteRecursively dir: " + file.getAbsolutePath());
+            if(file.list().length == 0){ //directory is empty, then delete it
                 file.delete();
-                log.debug("Deleted dir: " + file.getAbsolutePath());
-            }else{
-                //list all the directory contents
+            } else { //list all the directory contents
                 String files[] = file.list();
                 for (String temp : files) {
-                    //construct the file structure
                     File fileDelete = new File(file, temp);
-                    //recursive delete
                     deleteRecursively(fileDelete);
                 }
-                //check the directory again, if empty then delete it
-                if(file.list().length==0){
+                if(file.list().length == 0){
                     file.delete();
-                    log.debug("Deleted file: " + file.getAbsolutePath());
                 }
             }
-        } else file.delete();//if file, then delete it
+        } else file.delete();
     }
 
     public static String getStringFromFile (File file) throws FileNotFoundException, IOException {

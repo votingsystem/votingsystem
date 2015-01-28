@@ -28,6 +28,7 @@ import org.votingsystem.model.ResponseVS;
 
 import java.io.File;
 
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -65,37 +66,19 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
         progressBar.setPrefWidth(200);
         progressBar.setLayoutY(10);
 
-
-
         HBox buttonHBox = new HBox();
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
         errorsButton = new Button(ContextVS.getMessage("errorsLbl"));
-        errorsButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                showErrors();
-            }});
+        errorsButton.setOnAction(actionEvent -> showErrors());
         errorsButton.setVisible(false);
 
-
         cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                runningTask.cancel();
-            }});
+        cancelButton.setOnAction(actionEvent -> runningTask.cancel());
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-
-        buttonHBox.getChildren().addAll(errorsButton, spacer, cancelButton);
-
+        buttonHBox.getChildren().addAll(errorsButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonHBox, new Insets(30, 20, 0, 20));
-
         progressBox.getChildren().addAll(progressMessageText, progressBar);
         getChildren().addAll(progressRegion, progressBox, buttonHBox);
-
         runningTask = new BackupValidationTask(decompressedBackupBaseDir);
-
-
         File backupDir = new File(decompressedBackupBaseDir);
         numFilesToProcess = backupDir.listFiles().length;
     }
@@ -222,21 +205,17 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
 
     public static void showDialog(String decompressedBackupBaseDir, MetaInf metaInf) {
         log.debug("showDialog - zipFilePath");
-        final BackupValidatorPane decompressBackupPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
-        decompressBackupPane.init();
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) { }
-                });
-                stage.setScene(new Scene(decompressBackupPane));
-                stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
-                stage.centerOnScreen();
-                stage.show();
-            }
+        final BackupValidatorPane validatorPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
+        validatorPane.init();
+        Platform.runLater(() -> {
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            //stage.initOwner(window);
+            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
+            stage.setScene(new Scene(validatorPane));
+            stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
+            stage.centerOnScreen();
+            stage.show();
         });
     }
 
@@ -263,6 +242,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
                 }
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
+                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
             return new ResponseVS(ResponseVS.SC_ERROR, "Unknown event type: " + metaInf.getType());
         }

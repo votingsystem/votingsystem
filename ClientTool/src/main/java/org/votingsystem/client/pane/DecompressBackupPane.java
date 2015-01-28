@@ -2,16 +2,12 @@ package org.votingsystem.client.pane;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -37,7 +33,7 @@ import java.util.zip.ZipInputStream;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DecompressBackupPane extends StackPane {
+public class DecompressBackupPane extends VBox {
 
     private static Logger log = Logger.getLogger(DecompressBackupPane.class);
 
@@ -51,39 +47,30 @@ public class DecompressBackupPane extends StackPane {
 
     public DecompressBackupPane(Listener listener, final String zipFilePath, final String outputFolder) {
         decompressListener = listener;
-        Region progressRegion = new Region();
-        progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
-        progressRegion.setPrefSize(240, 160);
-
         VBox progressBox = new VBox();
         progressBox.setAlignment(Pos.CENTER);
-        progressBox.setPrefWidth(400);
-        progressBox.setPrefHeight(300);
-
+        progressBox.setPrefWidth(300);
+        progressBox.setPrefHeight(150);
         Text progressMessageText = new Text();
         progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(200);
         progressBar.setLayoutY(10);
-
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                runningTask.cancel();
-            }});
+        cancelButton.setOnAction(actionEvent -> {
+            runningTask.cancel();
+            getScene().getWindow().hide();
+        });
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-
-        progressBox.setMargin(cancelButton, new Insets(30, 20, 0, 20));
-
-        progressBox.getChildren().addAll(progressMessageText, progressBar, cancelButton);
-        getChildren().addAll(progressRegion, progressBox);
-
+        HBox footerButtonBox = new HBox();
+        footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
+        progressBox.setMargin(footerButtonBox, new Insets(30, 30, 0, 20));
+        progressBox.getChildren().addAll(progressMessageText, progressBar, footerButtonBox);
         runningTask = new DecompressBackupTask(zipFilePath, outputFolder);
-
         progressMessageText.textProperty().bind(runningTask.messageProperty());
         progressBar.progressProperty().bind(runningTask.progressProperty());
-        progressRegion.visibleProperty().bind(runningTask.runningProperty());
         progressBox.visibleProperty().bind(runningTask.runningProperty());
+        getChildren().add(progressBox);
     }
 
     private void init() {
@@ -97,9 +84,7 @@ public class DecompressBackupPane extends StackPane {
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
             //stage.initOwner(window);
-            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                @Override public void handle(WindowEvent window) { }
-            });
+            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
             File file = fileToOpen;
             if(file == null) {
                 FileChooser fileChooser = new FileChooser();

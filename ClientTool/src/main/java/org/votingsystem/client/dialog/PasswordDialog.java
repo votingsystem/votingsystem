@@ -54,10 +54,7 @@ public class PasswordDialog {
     public PasswordDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent window) {      }
-        });
-
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         dialogVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
@@ -104,10 +101,7 @@ public class PasswordDialog {
         );
 
         HBox footerButtonsBox = new HBox();
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        footerButtonsBox.getChildren().addAll(cancelButton, spacer, acceptButton);
+        footerButtonsBox.getChildren().addAll(cancelButton, Utils.getSpacer(), acceptButton);
         VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
 
 

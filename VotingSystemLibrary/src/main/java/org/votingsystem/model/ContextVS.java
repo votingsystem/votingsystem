@@ -222,6 +222,7 @@ public class ContextVS {
                 TrustAnchor anchor = new TrustAnchor(certificate, null);
                 votingSystemSSLTrustAnchors.add(anchor);
             }
+            Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdown(); } });
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("localizatedMessagesFileName: " + localizatedMessagesFileName);

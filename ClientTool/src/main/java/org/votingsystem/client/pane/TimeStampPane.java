@@ -134,28 +134,13 @@ public class TimeStampPane extends GridPane {
         //AttributeTable  table = timeStampToken.getSignedAttributes();
         HBox buttonsHBox = new HBox();
 
-
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
         certValidationButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-        certValidationButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                TimeStampCertValidationPane.showDialog(timeStampToken);
-            }
-        });
-
+        certValidationButton.setOnAction(actionEvent -> TimeStampCertValidationPane.showDialog(timeStampToken));
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                TimeStampPane.this.getScene().getWindow().hide();
-            }
-        });
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        buttonsHBox.getChildren().addAll(certValidationButton, spacer, cancelButton);
+        cancelButton.setOnAction(actionEvent -> TimeStampPane.this.getScene().getWindow().hide());
+        buttonsHBox.getChildren().addAll(certValidationButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsHBox, new Insets(20, 20, 0, 20));
         add(buttonsHBox, 0, 6, 2, 1);
     }
@@ -167,9 +152,7 @@ public class TimeStampPane extends GridPane {
                 Stage stage = new Stage();
                 stage.initModality(Modality.WINDOW_MODAL);
                 //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) { }
-                });
+                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
                 TimeStampPane timeStampPane = new TimeStampPane(timeStampToken);
                 stage.setScene(new Scene(timeStampPane));
                 stage.setTitle(ContextVS.getMessage("timeStampInfoDialogCaption"));
