@@ -1,4 +1,4 @@
-package org.votingsystem.client.model;
+package org.votingsystem.signature.util;
 
 
 import net.sf.json.JSONObject;
@@ -24,7 +24,6 @@ public class SignedFile {
     private byte[] signedFileBytes = null;
     private String name = null;
     private Map operationDocument = null;
-    private TimeStampToken timeStampToken = null;
     private SMIMEMessage smimeMessage = null;
     private boolean signatureVerified = false;
 
@@ -67,11 +66,12 @@ public class SignedFile {
     public JSONObject getContent() throws Exception {
         JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         return contentJSON;
-    }    
-    
-    /**
-     * @param name the name to set
-     */
+    }
+
+    public TimeStampToken getTimeStampToken () {
+        return smimeMessage.getTimeStampToken();
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -98,7 +98,7 @@ public class SignedFile {
     }
     
     public String getNifFromRepresented() {
-        if(name != null && name.contains("_delegation_")) return name.split("_delegation_")[1].split("\\.")[0];
+        if(name != null && name.contains("_delegation_")) return name.split("_delegation_")[0];
         else return null;
     }
     

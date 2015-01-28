@@ -7,5 +7,5 @@ package org.votingsystem.client.backup;
 public enum ValidationEvent {
         REPRESENTATIVE, REPRESENTATIVE_FINISH, 
         ACCESS_REQUEST, ACCESS_REQUEST_FINISH, VOTE, VOTE_FINISH,
-        CLAIM, CLAIM_FINISH, MANIFEST, MANIFEST_FINISIH;
+        CLAIM, CLAIM_FINISH;
 }

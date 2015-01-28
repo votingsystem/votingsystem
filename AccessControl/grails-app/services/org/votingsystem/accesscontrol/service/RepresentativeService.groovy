@@ -175,7 +175,7 @@ class RepresentativeService {
 			    "numRepresentedWithAccessRequest:${formatted.format(numRepresentedWithAccessRequest)}, " +
 			    "${state.toString()}\n"
 			reportFile.append(csvLine)*/
-			log.debug("processed ${representativeDocsScroll.getRowNumber()} of ${numRepresentatives} representatives - ${elapsedTimeStr}")
+			log.debug("processed ${representativeDocsScroll.getRowNumber() + 1} of ${numRepresentatives} representatives - ${elapsedTimeStr}")
 			if(((representativeDocsScroll.getRowNumber() + 1)  % 100) == 0) {
 				sessionFactory.currentSession.flush()
 				sessionFactory.currentSession.clear()

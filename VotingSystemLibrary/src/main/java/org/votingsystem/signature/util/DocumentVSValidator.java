@@ -1,15 +1,13 @@
-package org.votingsystem.client.util;
+package org.votingsystem.signature.util;
 
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 
 import java.security.cert.TrustAnchor;
@@ -38,12 +36,14 @@ public class DocumentVSValidator {
 
         }
         Set<UserVS> signersVS = signedFile.getSMIME().getSigners();
+        Date voteDate = signedFile.getTimeStampToken().getTimeStampInfo().getGenTime();
         for(UserVS signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
-                    CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()));
+                    CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()),
+                            voteDate);
                 } else {//server signature
-                    CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()));
+                    CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()), voteDate);
                 }
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
@@ -102,7 +102,7 @@ public class DocumentVSValidator {
 
     //{"representativeNif":"00000002W","operation":"REPRESENTATIVE_SELECTION","UUID":"dcfacb17-a323-4853-b446-8e28d8f2d0a4"}
     public static ResponseVS validateRepresentationDocument(SignedFile signedFile,
-            Set<TrustAnchor> trustAnchors, Date dateFinish, String representativeNif,
+            Set<TrustAnchor> trustAnchors, Date dateBegin, Date dateFinish, String representativeNif,
             X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
@@ -147,7 +147,7 @@ public class DocumentVSValidator {
 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
-            if(TypeVS.REPRESENTATIVE_SELECTION != operationType ||
+            if(TypeVS.REPRESENTATIVE_SELECTION != operationType &&
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                         getMessage("operationErrorMsg", TypeVS.REPRESENTATIVE_SELECTION.toString(),

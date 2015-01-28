@@ -1,7 +1,6 @@
 package org.votingsystem.client.pane;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,7 +14,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -170,7 +168,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
     }
 
     public static void showDialog() {
-        log.debug("showDialog");
+        log.debug("validateBackup");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 SignDocumentFormPane signDocumentFormPane = new SignDocumentFormPane();

@@ -37,7 +37,7 @@ import org.votingsystem.util.Wallet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.events.*;
+import org.w3c.dom.events.EventTarget;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -1,8 +1,6 @@
 package org.votingsystem.client.pane;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -11,7 +9,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -22,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.client.model.SignedFile;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
@@ -94,28 +95,24 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         navigateButtonsHBox.getChildren().addAll(prevButton, nextButton);
         validateBackupButton = new Button(ContextVS.getMessage("validateBackupLbl"));
-        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.showDialog(decompressedBackupBaseDir, metaInf));
+        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.validateBackup(decompressedBackupBaseDir, metaInf));
         validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(actionEvent ->  saveMessage());
         HBox.setMargin(saveButton, new Insets(5, 10, 5, 0));
         HBox.setMargin(validateBackupButton, new Insets(5, 10, 0, 0));
-
         navigateButtonsHBox.setVisible(false);
         buttonsHBox.getChildren().addAll(navigateButtonsHBox, Utils.getSpacer(), validateBackupButton, saveButton);
-
-
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         tabPane.setSide(Side.TOP);
-
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
-
         mainVBox.getChildren().addAll(buttonsHBox, tabPane);
         getChildren().add(0, mainVBox);
+        validateBackupButton.setVisible(false);
     }
 
     public void init() {
@@ -199,7 +196,6 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
                         CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file)));
                     } else {
                         documentVSBrowserStackPane.openFile(file, operationDocument);
-                        dialogStage.centerOnScreen();
                         dialogStage.show();
                     }
                 } catch (IOException ex) {
@@ -298,9 +294,10 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
                 validateBackupButton.setVisible(true);
             }
             tabPane.getTabs().add(Utils.getTab(dialogTitle, eventPanel));
+            if(buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
+            validateBackupButton.setVisible(true);
             dialogStage.centerOnScreen();
             dialogStage.show();
-            if(buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

@@ -4,8 +4,8 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.client.model.SignedFile;
-import org.votingsystem.client.util.DocumentVSValidator;
+import org.votingsystem.signature.util.SignedFile;
+import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
@@ -154,24 +154,19 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        log.debug("numClaimsOK: " + numClaimsOK +
-                " - numClaimsERROR: " + numClaimsERROR);
+        log.debug("numClaimsOK: " + numClaimsOK + " - numClaimsERROR: " + numClaimsERROR);
         String message = null;
         if(metaInf.getNumSignatures() != numClaimsOK) {
             statusCode = ResponseVS.SC_ERROR;
             message = ContextVS.getInstance().getMessage("numClaimSignaturesErrorMsg",
                     metaInf.getNumAccessRequest(), numClaimsOK);
-        } else message =  ContextVS.getInstance().getMessage(
-                "claimsValidationResultMsg", metaInf.getNumAccessRequest());
+        } else message =  ContextVS.getInstance().getMessage("claimsValidationResultMsg", metaInf.getNumAccessRequest());
         return new ResponseVS(statusCode, message);
     }
     
     public static void main(String[] args) throws Exception {
-        
-        ClaimBackupValidator dirBackupValidator = new ClaimBackupValidator(
-                "./Descargas/ClaimsEvent_5", null);
+        ClaimBackupValidator dirBackupValidator = new ClaimBackupValidator(args[0], null);
         dirBackupValidator.call();
-
         System.exit(0);
     }
 

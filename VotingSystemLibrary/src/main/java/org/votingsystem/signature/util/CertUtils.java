@@ -274,8 +274,14 @@ public class CertUtils {
      */
     public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws ExceptionVS {
+        return verifyCertificate(anchors, checkCRL, certs, Calendar.getInstance().getTime());
+    }
+
+    public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
+              boolean checkCRL, List<X509Certificate> certs, Date signingDate) throws ExceptionVS {
         try {
             PKIXParameters pkixParameters = new PKIXParameters(anchors);
+            pkixParameters.setDate(signingDate);
             CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
             pkixParameters.addCertPathChecker(checker);
             pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's

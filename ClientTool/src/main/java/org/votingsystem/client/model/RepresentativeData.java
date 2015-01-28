@@ -1,6 +1,7 @@
 package org.votingsystem.client.model;
 
 import org.apache.log4j.Logger;
+import org.votingsystem.signature.util.SignedFile;
 
 import java.util.ArrayList;
 import java.util.List;

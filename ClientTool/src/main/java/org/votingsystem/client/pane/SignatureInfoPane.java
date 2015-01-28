@@ -1,7 +1,5 @@
 package org.votingsystem.client.pane;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -56,13 +54,10 @@ public class SignatureInfoPane extends GridPane {
             add(timeStampButton, 2, 1);
             setMargin(timeStampButton, new Insets(10, 0, 10, 0));
         }
-
         Label signerLabel = new Label(ContextVS.getMessage("signerLbl") + ": ");
         signerLabel.setStyle("-fx-font-weight: bold;");
-
         WebView webView = new WebView();
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-
         String finalHTML = "<html style='font-size:0.9em;background: #f9f9f9;'>" +
                 Formatter.getInfoCert(signer.getCertificate()) + "</html>";
         webView.getEngine().loadContent(finalHTML);
@@ -73,6 +68,5 @@ public class SignatureInfoPane extends GridPane {
         add(webView, 0, 2, 3, 1);
         getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(500), new ColumnConstraints());
     }
-
 
 }

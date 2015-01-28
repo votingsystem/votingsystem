@@ -7,7 +7,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -52,7 +53,7 @@ public class DecompressBackupPane extends VBox {
         progressBox.setPrefWidth(300);
         progressBox.setPrefHeight(150);
         Text progressMessageText = new Text();
-        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
+        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #555;");
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(200);
         progressBar.setLayoutY(10);
@@ -79,7 +80,7 @@ public class DecompressBackupPane extends VBox {
 
     public static void showDialog(final Listener listener, final File fileToOpen) {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-        log.debug("showDialog - outputFolder: " + outputFolder);
+        log.debug("validateBackup - outputFolder: " + outputFolder);
         Platform.runLater(() -> {
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
@@ -94,9 +95,8 @@ public class DecompressBackupPane extends VBox {
                 fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                 file = fileChooser.showOpenDialog(stage);
-            }
-            if(file != null){
-                log.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
+            } else {
+                log.debug("validateBackup - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
                 DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
                         file.getAbsolutePath(), outputFolder);
                 decompressBackupPane.init();

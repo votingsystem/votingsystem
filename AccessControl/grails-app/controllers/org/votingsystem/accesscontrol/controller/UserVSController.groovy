@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.votingsystem.accesscontrol.model.RepresentativeDocument
 import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
@@ -39,6 +40,14 @@ class UserVSController {
 			responseVS.userVS.type = UserVS.Type.USER
 			responseVS.userVS.representative = null
 			responseVS.userVS.metaInf = null
+
+			RepresentativeDocument.withTransaction {
+				RepresentativeDocument representativeDocument = RepresentativeDocument.findWhere(userVS:userVS)
+				if(RepresentativeDocument.State.CANCELLED != representativeDocument.state)
+					representativeDocument.setState(RepresentativeDocument.State.CANCELLED).save()
+			}
+
+
 			UserVS.withTransaction { responseVS.userVS.save() }
             return [responseVS : responseVS]
 		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))]

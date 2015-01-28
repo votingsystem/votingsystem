@@ -1,7 +1,5 @@
 package org.votingsystem.client.pane;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -15,7 +13,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.model.SignedFile;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
