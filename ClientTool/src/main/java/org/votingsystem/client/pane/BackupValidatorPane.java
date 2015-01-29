@@ -7,7 +7,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -19,7 +18,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.backup.ClaimBackupValidator;
 import org.votingsystem.client.backup.ValidationEvent;
 import org.votingsystem.client.backup.ValidatorListener;
-import org.votingsystem.client.backup.VotingBackupValidator;
+import org.votingsystem.client.backup.ElectionBackupValidator;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -44,13 +43,14 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
     private Button errorsButton;
     private ProgressBar progressBar;
     private Text progressMessageText;
+    private VBox progressBox;
     private Button cancelButton;
     private BackupValidationTask runningTask;
 
 
     public BackupValidatorPane(String decompressedBackupBaseDir, MetaInf metaInf) {
         this.metaInf = metaInf;
-        VBox progressBox = new VBox();
+        progressBox = new VBox();
         progressBox.setAlignment(Pos.CENTER);
         progressBox.setPrefWidth(330);
         progressBox.setPrefHeight(150);
@@ -125,9 +125,10 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                 } else {
                     message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
-                cancelButton.setText(ContextVS.getInstance().getMessage("closeLbl"));
-                progressMessageText.setText(message);
-                progressBar.setVisible(false);
+                showMessage(message);
+                if(errorList!= null && errorList.size() > 0) {
+                    progressBox.setVisible(false);
+                } else getScene().getWindow().hide();
                 break;
             default: log.debug("processVotingValidationEvent - unprocessed: " + responseVS.getData().toString());
         }
@@ -199,9 +200,9 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
             try {
                 switch(metaInf.getType()) {
                     case VOTING_EVENT:
-                        VotingBackupValidator votingBackupValidator = new VotingBackupValidator(
+                        ElectionBackupValidator electionBackupValidator = new ElectionBackupValidator(
                                 decompressedBackupBaseDir, BackupValidatorPane.this);
-                        return votingBackupValidator.call();
+                        return electionBackupValidator.call();
                     case CLAIM_EVENT:
                         ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(
                                 decompressedBackupBaseDir, BackupValidatorPane.this);

@@ -8,6 +8,7 @@ var Operation = {
     MANIFEST_SIGN: "MANIFEST_SIGN",
     CLAIM_PUBLISHING: "CLAIM_PUBLISHING",
     SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
+    FILE_FROM_URL:"FILE_FROM_URL",
     VOTING_PUBLISHING: "VOTING_PUBLISHING",
     SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
     SELECT_IMAGE:"SELECT_IMAGE",
@@ -80,6 +81,13 @@ Date.prototype.format = function() {
     var curr_month = this.getMonth() + 1; //Months are zero based
     var curr_year = this.getFullYear();
     return curr_year + "/" + curr_month + "/" + curr_date
+};
+
+Date.prototype.urlFormat = function() {
+    var curr_date = pad(this.getDate(), 2);
+    var curr_month = pad(this.getMonth() + 1, 2); //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + "_" + curr_month + "_" + curr_date
 };
 
 function pad(n, width, z) {

@@ -54,6 +54,9 @@ public class BrowserVSClient {
                 case DISCONNECT:
                     WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(false, null);
                     break;
+                case FILE_FROM_URL:
+                    BrowserVS.getInstance().processOperationVS(null, operationVS);
+                    break;
                 case MESSAGEVS_TO_DEVICE:
                     WebSocketService.getInstance().sendMessage(jsonStr);
                     break;
@@ -66,7 +69,7 @@ public class BrowserVSClient {
                 case OPEN_SMIME:
                     String smimeMessageStr = new String(Base64.getDecoder().decode(
                             operationVS.getMessage().getBytes()), "UTF-8");
-                    DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operationVS.getDocument());
+                    DocumentVSBrowserStackPane.showDialog(smimeMessageStr, null, operationVS.getDocument());
                     break;
                 case OPEN_COOIN:
                     CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((

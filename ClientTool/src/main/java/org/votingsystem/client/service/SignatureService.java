@@ -127,6 +127,9 @@ public class SignatureService extends Service<ResponseVS> {
                         case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
                             break;
+                        case FILE_FROM_URL:
+                            responseVS = openFileFromURL(operationVS);
+                            break;
                         case COOIN_REQUEST:
                             responseVS = sendCooinRequest(operationVS);
                             break;
@@ -158,6 +161,15 @@ public class SignatureService extends Service<ResponseVS> {
             } else return operationVS.getSignedMessageSubject();
         }
 
+        private ResponseVS openFileFromURL(final OperationVS operationVS) throws Exception {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(operationVS.getDocumentURL(), null);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                DocumentVSBrowserStackPane.showDialog(null, FileUtils.getFileFromBytes(responseVS.getMessageBytes()), null);
+                return new ResponseVS(ResponseVS.SC_OK);
+            }
+            return responseVS;
+        }
+
         private ResponseVS openReceiptFromURL(final OperationVS operationVS) throws Exception {
             ResponseVS responseVS = null;
             if(VotingSystemApp.getInstance().getSMIME(operationVS.getServiceURL()) != null) {
@@ -175,7 +187,7 @@ public class SignatureService extends Service<ResponseVS> {
                 operationVS.setMessage(responseVS.getMessage());
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
-                        DocumentVSBrowserStackPane.showDialog(operationVS.getMessage(), operationVS.getDocument());
+                        DocumentVSBrowserStackPane.showDialog(operationVS.getMessage(), null, operationVS.getDocument());
                     }
                 });
             }

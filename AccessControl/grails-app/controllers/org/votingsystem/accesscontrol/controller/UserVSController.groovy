@@ -51,68 +51,6 @@ class UserVSController {
             return [responseVS : responseVS]
 		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))]
 	}
-	
-	
-	/**
-	 * (DISPONIBLES SOLO EN ENTORNOS DE DESARROLLO) Servicio que sirve para prepaparar la base de usuarios
-	 * antes de lanzar simulaciones.
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/user/prepareUserBaseData]
-	 *
-	 */
-	def prepareUserBaseData() {
-		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
-		}
-		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		List<UserVS> usersVS = UserVS.findAll()
-        usersVS.each { user ->
-			user.type = UserVS.Type.USER
-			user.representative = null
-			user.metaInf = null
-			List<RepresentationDocumentVS> repDocsFromUser
-			RepresentationDocumentVS.withTransaction {
-				repDocsFromUser = RepresentationDocumentVS.findAllWhere(userVS:user)
-				repDocsFromUser.each { repDocFromUser ->
-					repDocFromUser.dateCanceled = Calendar.getInstance().getTime()
-					repDocFromUser.setState(RepresentationDocumentVS.State.CANCELLED).save()
-				}
-			}
-			String userId = String.format('%05d', user.id)
-			render "prepareUserBaseData - user: ${userId} of ${usersVS.size()} - ${repDocsFromUser.size()} representations<br/>"
-			log.info("prepareUserBaseData - user: ${userId} of ${usersVS.size()} - ${repDocsFromUser.size()} representations");
-		}
-		response.status = ResponseVS.SC_OK
-		render "OK"
-	}
-
-	/**
-	 * (DISPONIBLES SOLO EN ENTORNOS DE DESARROLLO) Servicio que sirve para prepaparar la base de usuarios
-	 * antes de lanzar simulaciones.
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/user/prepareUserBaseData]
-	 *
-	 */
-	def resetRepresentatives() {
-		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
-			return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
-		}
-		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		int numChanges = 0;
-		RepresentativeDocument.withTransaction {
-			List<RepresentativeDocument> repDocs = RepresentativeDocument.createCriteria().list {
-				inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
-			}
-			for(RepresentativeDocument repDoc:repDocs) {
-				repDoc.userVS.setType(UserVS.Type.USER).save()
-				repDoc.setState(RepresentativeDocument.State.CANCELLED).save()
-				numChanges++
-			}
-		}
-		render "num. representatives reset: $numChanges"
-	}
 
     /**
      * Invoked if any method in this controller throws an Exception.

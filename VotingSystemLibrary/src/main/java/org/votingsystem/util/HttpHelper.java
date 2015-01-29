@@ -117,7 +117,7 @@ public class HttpHelper {
             log.error(ex.getMessage(), ex);
         }
     }
-    
+
     public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
         log.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;

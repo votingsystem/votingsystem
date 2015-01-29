@@ -24,9 +24,9 @@ import java.util.concurrent.Callable;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class VotingBackupValidator implements Callable<ResponseVS> {
+public class ElectionBackupValidator implements Callable<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(VotingBackupValidator.class);
+    private static Logger log = Logger.getLogger(ElectionBackupValidator.class);
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
@@ -43,7 +43,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     private Map<Long, Long> optionsMap = new HashMap<Long, Long>();
     private Map<String, Long> representativeVotesMap = new HashMap<String, Long>();
     
-    public VotingBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
+    public ElectionBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
             ContextVS.init("log4jClientTool.properties", "clientToolMessages.properties", "es");
         }
@@ -392,7 +392,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     }
     
     public static void main(String[] args) throws Exception {
-        VotingBackupValidator backupValidator = new VotingBackupValidator(args[0], null);
+        ElectionBackupValidator backupValidator = new ElectionBackupValidator(args[0], null);
         backupValidator.call();
         System.exit(0);
     }

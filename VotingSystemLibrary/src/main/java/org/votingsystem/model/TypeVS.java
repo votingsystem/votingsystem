@@ -94,6 +94,8 @@ public enum TypeVS {
     CERT_CA_NEW,
     CERT_EDIT,
 
+    FILE_FROM_URL,
+
     FROM_BANKVS,
     FROM_GROUP_TO_MEMBER,
     FROM_GROUP_TO_MEMBER_GROUP,
@@ -131,4 +133,5 @@ public enum TypeVS {
     WALLET_OPEN,
     WALLET_SAVE,
     WALLET_STATE, COOIN_IMPORT;
+
 }

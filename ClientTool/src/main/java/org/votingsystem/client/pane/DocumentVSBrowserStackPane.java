@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -84,7 +85,7 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         getChildren().addAll(progressBox);
 
         mainVBox = new VBox();
-        mainVBox.setPrefWidth(560);
+        mainVBox.setPrefWidth(650);
         buttonsHBox = new HBox();
         HBox navigateButtonsHBox = new HBox();
         Button nextButton = new Button(ContextVS.getMessage("buttonNextLbl"));
@@ -166,7 +167,7 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         }
     }
 
-    public static void showDialog(final String signedDocumentStr, Map operationDocument) {
+    public static void showDialog(final String signedDocumentStr, File fileParam, Map operationDocument) {
         Platform.runLater(() -> {
             DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
             dialogStage = new Stage();
@@ -176,16 +177,18 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
             dialogStage.setResizable(true);
-            File file = null;
-            if(signedDocumentStr == null) {
-                FileChooser fileChooser = new FileChooser();
+            File file = fileParam;
+            if(file == null) {
+                if(signedDocumentStr == null) {
+                    FileChooser fileChooser = new FileChooser();
                     /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                             ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
                     fileChooser.getExtensionFilters().add(extFilter);*/
-                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                file = fileChooser.showOpenDialog(dialogStage);
-            } else file = FileUtils.getFileFromString(signedDocumentStr);
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                    file = fileChooser.showOpenDialog(dialogStage);
+                } else file = FileUtils.getFileFromString(signedDocumentStr);
+            }
             if(file != null){
                 try {
                     if(FileUtils.isZipFile(file)){

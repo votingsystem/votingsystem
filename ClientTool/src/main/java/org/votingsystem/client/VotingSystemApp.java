@@ -211,7 +211,7 @@ public class VotingSystemApp extends Application {
                 log.debug("value: " + value + " -new_value: " + new_value + " - option: " + documentOptions[new_value.intValue()]);
                 String selectedOption = documentOptions[new_value.intValue()];
                 if(ContextVS.getMessage("openFileButtonLbl").equals(selectedOption)) {
-                    DocumentVSBrowserStackPane.showDialog(null, null);
+                    DocumentVSBrowserStackPane.showDialog(null, null, null);
                 } else if(ContextVS.getMessage("signDocumentButtonLbl").equals(selectedOption)) {
                     SignDocumentFormPane.showDialog();
                 }

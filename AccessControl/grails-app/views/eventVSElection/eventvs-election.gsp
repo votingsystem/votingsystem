@@ -105,7 +105,7 @@
                         </fieldset>
                         <div style="margin: 10px 0 0 0;">
                             <template if="{{'TERMINATED' == eventvs.state}}">
-                                <paper-button raised on-click="{{accept}}">
+                                <paper-button raised on-click="{{getResults}}">
                                     <i class="fa fa-bar-chart"></i> <g:message code="getResultsLbl"/>
                                 </paper-button>
                             </template>
@@ -135,6 +135,7 @@
             },
             eventvsChanged:function() {
                 this.optionVSSelected = null
+                this.dateFinish = new Date(this.eventvs.dateFinish)
             },
             ready: function() {
                 console.log(this.tagName + "- subpage:  " + this.subpage)
@@ -153,6 +154,22 @@
                 console.log(this.tagName + " showConfirmDialog")
                 this.optionVSSelected = e.target.templateInstance.model.optionvs
                 this.$.confirmOptionDialog.show(this.optionVSSelected.content)
+            },
+            getResults:function() {
+                console.log("getResults")
+                var fileURL = "${createLink( controller:'backup', absolute:true)}/" + this.dateFinish.urlFormat() +
+                        "/VOTING_EVENT_" + this.eventvs.id + ".zip"
+                if(window['isClientToolConnected']) {
+                    var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)
+                    webAppMessage.subject = '<g:message code="downloadingFileMsg"/>'
+                    webAppMessage.documentURL = fileURL
+                    webAppMessage.setCallback(function(appMessage) {
+                        console.log(this.tagName + " - vote callback - message: " + appMessage);
+                        var appMessageJSON = toJSON(appMessage)
+                        if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
+                    }.bind(this))
+                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+                } else window.location.href = fileURL
             },
             submitVote:function() {
                 console.log("submitVote")

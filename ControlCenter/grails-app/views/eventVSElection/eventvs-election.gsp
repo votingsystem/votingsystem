@@ -54,6 +54,13 @@
                                 </template>
                             </div>
                         </fieldset>
+                        <div style="margin: 10px 0 0 0;">
+                            <template if="{{'TERMINATED' == eventvs.state}}">
+                                <paper-button raised on-click="{{getResults}}">
+                                    <i class="fa fa-bar-chart"></i> <g:message code="getResultsLbl"/>
+                                </paper-button>
+                            </template>
+                        </div>
                     </div>
                     <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                 </div>
@@ -76,12 +83,29 @@
             },
             eventvsChanged:function() {
                 this.optionVSSelected = null
+                this.dateFinish = new Date(this.eventvs.dateFinish)
             },
             ready: function() {
                 console.log(this.tagName + "- subpage:  " + this.subpage)
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))
+            },
+            getResults:function() {
+                console.log("getResults")
+                var fileURL = this.eventvs.accessControl.serverURL + "/backup/" + this.dateFinish.urlFormat() +
+                        "/VOTING_EVENT_" + this.eventvs.accessControlEventVSId + ".zip"
+                if(window['isClientToolConnected']) {
+                    var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)
+                    webAppMessage.subject = '<g:message code="downloadingFileMsg"/>'
+                    webAppMessage.documentURL = fileURL
+                    webAppMessage.setCallback(function(appMessage) {
+                        console.log(this.tagName + " - vote callback - message: " + appMessage);
+                        var appMessageJSON = toJSON(appMessage)
+                        if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
+                    }.bind(this))
+                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+                } else window.location.href = fileURL
             },
             back:function() {
                 this.fire('core-signal', {name: "eventvs-election-closed", data: null});
