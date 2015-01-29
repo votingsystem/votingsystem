@@ -6,10 +6,10 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.RepresentativeData;
 import org.votingsystem.client.model.RepresentativesData;
-import org.votingsystem.signature.util.SignedFile;
-import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.DocumentVSValidator;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -376,7 +376,7 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
             errorList.add(ContextVS.getMessage("numVotesResultErrorMsg", metaInf.getNumVotes(), numVotesOK));
         }
         for(FieldEventVS option : metaInf.getOptionList()) {
-            if(option.getNumVotesResult() != optionsMap.get(option.getId())) {
+            if(option.getNumVotesResult().longValue() != optionsMap.get(option.getId()).longValue()) {
                 statusCode = ResponseVS.SC_ERROR;
                 errorList.add(ContextVS.getMessage("numVotesOptionErrorMsg", option.getContent(),
                         option.getNumVotesResult(), optionsMap.get(option.getId())));

@@ -13,12 +13,12 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;

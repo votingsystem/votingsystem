@@ -17,14 +17,12 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
@@ -32,6 +30,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -58,15 +57,13 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
     private static Stage dialogStage;
     private HBox buttonsHBox;
     private Button saveButton;
-    private String fileDir = null;
     private String dialogTitle = null;
-    private String decompressedBackupBaseDir = null;
     private MetaInf metaInf;
-    private Button validateBackupButton;
     private int selectedFileIndex;
     private Text progressMessageText;
     private VBox mainVBox;
     private VBox progressBox;
+    private File backup;
     private List<String> fileList = new ArrayList<String>();
 
     public DocumentVSBrowserStackPane() {
@@ -74,7 +71,6 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         progressBox.setAlignment(Pos.CENTER);
         progressBox.setPrefWidth(400);
         progressBox.setPrefHeight(300);
-
         progressMessageText = new Text();
         progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
         ProgressBar progressBar = new ProgressBar();
@@ -83,9 +79,8 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         progressBox.getChildren().addAll(progressMessageText, progressBar);
         setProgressVisible(false, null);
         getChildren().addAll(progressBox);
-
         mainVBox = new VBox();
-        mainVBox.setPrefWidth(650);
+        mainVBox.setPrefWidth(800);
         buttonsHBox = new HBox();
         HBox navigateButtonsHBox = new HBox();
         Button nextButton = new Button(ContextVS.getMessage("buttonNextLbl"));
@@ -95,16 +90,12 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         prevButton.setOnAction(actionEvent ->  goPrevious());
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
         navigateButtonsHBox.getChildren().addAll(prevButton, nextButton);
-        validateBackupButton = new Button(ContextVS.getMessage("validateBackupLbl"));
-        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.validateBackup(decompressedBackupBaseDir, metaInf));
-        validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(actionEvent ->  saveMessage());
         HBox.setMargin(saveButton, new Insets(5, 10, 5, 0));
-        HBox.setMargin(validateBackupButton, new Insets(5, 10, 0, 0));
         navigateButtonsHBox.setVisible(false);
-        buttonsHBox.getChildren().addAll(navigateButtonsHBox, Utils.getSpacer(), validateBackupButton, saveButton);
+        buttonsHBox.getChildren().addAll(navigateButtonsHBox, Utils.getSpacer(), saveButton);
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -113,7 +104,6 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         VBox.setVgrow(tabPane, Priority.ALWAYS);
         mainVBox.getChildren().addAll(buttonsHBox, tabPane);
         getChildren().add(0, mainVBox);
-        validateBackupButton.setVisible(false);
     }
 
     public void init() {
@@ -144,7 +134,6 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
 
     private void openFile (File file, Map operationDocument) {
         log.debug("openFile - file: " + file.getAbsolutePath());
-        fileDir = file.getParent();
         try {
             int fileIndex = fileList.indexOf(file.getPath());
             if (fileIndex != -1 && !tabPane.getSelectionModel().isEmpty()) {
@@ -171,10 +160,10 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         Platform.runLater(() -> {
             DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
             dialogStage = new Stage();
+            dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setScene(new Scene(documentVSBrowserStackPane));
             dialogStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             documentVSBrowserStackPane.init();
-            dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
             dialogStage.setResizable(true);
             File file = fileParam;
@@ -193,6 +182,7 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
                 try {
                     if(FileUtils.isZipFile(file)){
                         DecompressBackupPane.showDialog(documentVSBrowserStackPane, file);
+                        documentVSBrowserStackPane.setBackup(file);
                         return;
                     }
                     if(file.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
@@ -220,13 +210,20 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(getScene().getWindow());
-            DocumentVS selectedDocumentVS = ((DocumentVS)tabPane.getSelectionModel().getSelectedItem().getContent());
+            Object tabContent = tabPane.getSelectionModel().getSelectedItem().getContent();
             if(file != null) {
                 String fileName = file.getAbsolutePath();
-                if(!fileName.contains(".")) fileName = fileName + selectedDocumentVS.getContentTypeVS().getExtension();
-                FileOutputStream fos = new FileOutputStream(new File(fileName));
-                fos.write(selectedDocumentVS.getDocumentBytes());
-                fos.close();
+                if(tabContent instanceof DocumentVS) {
+                    if(!fileName.contains(".")) fileName = fileName + ((DocumentVS)tabContent).getContentTypeVS().getExtension();
+                    FileOutputStream fos = new FileOutputStream(new File(fileName));
+                    fos.write(((DocumentVS)tabContent).getDocumentBytes());
+                    fos.close();
+                } else if(tabContent instanceof EventVSInfoPane) {
+                    if(!fileName.contains(".")) fileName = fileName + ContentTypeVS.ZIP.getExtension();
+                    FileOutputStream fos = new FileOutputStream(new File(fileName));
+                    fos.write(FileUtils.getBytesFromFile(backup));
+                    fos.close();
+                }
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -252,6 +249,14 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
         return result;
     }
 
+    public File getBackup() {
+        return backup;
+    }
+
+    public void setBackup(File backup) {
+        this.backup = backup;
+    }
+
     private class CMSFilter implements java.io.FileFilter {
         @Override public boolean accept(File file) {
             return (checkFileSize(file) == null);
@@ -264,7 +269,6 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
 
     public void setVisible(String decompressedBackupBaseDir) {
         log.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
-        this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
         File representativeMetaInfFile = new File(decompressedBackupBaseDir + File.separator + "REPRESENTATIVE_DATA"  +
                 File.separator + "meta.inf");
@@ -278,7 +282,7 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
             metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
             if(representativeMetaInfFile.exists()) metaInf.loadRepresentativeData((JSONObject)
                     JSONSerializer.toJSON(FileUtils.getStringFromFile(representativeMetaInfFile)));
-            EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf);
+            EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);
             tabPane.getTabs().removeAll(tabPane.getTabs());
             dialogTitle = null;
             switch(metaInf.getType()) {
@@ -294,12 +298,9 @@ public class DocumentVSBrowserStackPane extends StackPane implements DecompressB
             }
             if(TypeVS.VOTING_EVENT == metaInf.getType() || TypeVS.MANIFEST_EVENT == metaInf.getType() ||
                     TypeVS.CLAIM_EVENT == metaInf.getType()) {
-                validateBackupButton.setVisible(true);
             }
             tabPane.getTabs().add(Utils.getTab(dialogTitle, eventPanel));
             if(buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
-            validateBackupButton.setVisible(true);
-            dialogStage.centerOnScreen();
             dialogStage.show();
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);

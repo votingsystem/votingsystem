@@ -10,10 +10,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
@@ -82,10 +79,11 @@ public class DecompressBackupPane extends VBox {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
         log.debug("validateBackup - outputFolder: " + outputFolder);
         Platform.runLater(() -> {
-            Stage stage = new Stage();
+            Stage stage = new Stage(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);
             //stage.initOwner(window);
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
+            stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             File file = fileToOpen;
             if(file == null) {
                 FileChooser fileChooser = new FileChooser();
@@ -99,10 +97,11 @@ public class DecompressBackupPane extends VBox {
                 log.debug("validateBackup - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
                 DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
                         file.getAbsolutePath(), outputFolder);
+                decompressBackupPane.getStyleClass().add("modal-dialog");
                 decompressBackupPane.init();
                 stage.setScene(new Scene(decompressBackupPane));
+                stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
                 stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
-                stage.centerOnScreen();
                 stage.show();
             }
         });

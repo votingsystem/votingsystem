@@ -376,7 +376,7 @@ public class UserVS implements Serializable {
     }
 
     public JSONObject getMetaInfJSON() {
-        if(metaInfJSON == null) metaInfJSON = (JSONObject) JSONSerializer.toJSON(metaInf);
+        if(metaInfJSON == null) metaInfJSON = (JSONObject) JSONSerializer.toJSON(metaInf != null?metaInf:"{}");
         return metaInfJSON;
     }
 

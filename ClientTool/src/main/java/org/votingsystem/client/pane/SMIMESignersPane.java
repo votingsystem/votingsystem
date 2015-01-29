@@ -13,10 +13,10 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.util.SignedFile;
 
 import java.util.Set;
 

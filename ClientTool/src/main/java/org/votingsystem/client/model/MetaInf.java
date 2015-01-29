@@ -39,7 +39,8 @@ public class MetaInf {
     
     
     public String getFormattedInfo() {
-        StringBuilder result = new StringBuilder("<html style='font-family: arial, helvetica, sans-serif; color: #555;'>");
+        StringBuilder result = new StringBuilder(
+                "<html style='font-family: arial, helvetica, sans-serif; color: #555; padding:5px 15px 0 15px;'>");
         result.append("<b>" + ContextVS.getMessage("eventIdLbl") + "</b>:" + getId() + "<br/>");
         String eventURL = EventVS.getURL(type, serverURL, id);
         result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
@@ -69,11 +70,11 @@ public class MetaInf {
                             representativesData.getNumRepresentedWithAccessRequest() + "<br/>");
                 }
                 if(optionList != null) {
-                    result.append("<div style='font-size:1.1em;'><b><u>" + ContextVS.getMessage("votingResultLbl") +
-                            "</u><b></div>");
+                    result.append("<br/><br/><div style='font-size:1.1em;'><b><u>" +
+                            ContextVS.getMessage("votingResultLbl") + "</u><b></div>");
                     for(FieldEventVS option: optionList) {
                         result.append("<div style='margin:10px 0 0 40px;'>");
-                        result.append("<div style='font-size:1.1em;'><b>" + option.getContent() +"</b></div>");
+                        result.append("<div style='font-size:1.1em;'><b> - " + option.getContent() +"</b></div>");
                         result.append("<b>" + ContextVS.getMessage("numVoteRequestsLbl") +": </b>" +
                                 option.getNumVoteRequests() + "<br/>");
                         result.append("<b>" + ContextVS.getMessage("numUsersWithVoteLbl") +": </b>" +

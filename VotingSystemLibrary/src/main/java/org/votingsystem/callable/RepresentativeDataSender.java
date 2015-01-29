@@ -46,12 +46,12 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             representativeDataSmimeMessage = timeStamper.getSMIME();
-            byte[] representativeEncryptedDataBytes = Encryptor.encryptSMIME(
-                    representativeDataSmimeMessage, accesRequestServerCert);
+            //byte[] representativeEncryptedDataBytes = Encryptor.encryptSMIME(
+            //        representativeDataSmimeMessage, accesRequestServerCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
-            fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
+                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName();
+            fileMap.put(representativeDataFileName, representativeDataSmimeMessage.getBytes());
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
             responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, urlToSendDocument);
         } catch (Exception ex) {

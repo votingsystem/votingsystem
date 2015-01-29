@@ -6,8 +6,9 @@ import org.votingsystem.model.UserVS
 
 println  "resetDelegations - Evironment: '${grails.util.Environment.current}' - isWarDeployed: ${Metadata.current.isWarDeployed()}"
 
-List<UserVS> usersVS = UserVS.findAll()
-usersVS.each { user ->
+List<UserVS> userList = UserVS.findAll()
+for(UserVS user : userList) {
+    if(UserVS.Type.SYSTEM == user.type) continue
     user.type = UserVS.Type.USER
     user.representative = null
     user.metaInf = null
@@ -20,16 +21,18 @@ usersVS.each { user ->
         }
     }
     String userId = String.format('%05d', user.id)
-    println("resetDelegations - user: ${userId} of ${usersVS.size()} - num. RepresentationDocumentVS: ${repDocsFromUser.size()}");
+    println("resetDelegations - user: ${userId} of ${userList.size()} - num. RepresentationDocumentVS: ${repDocsFromUser.size()}");
 }
 
 int numRepresentativeDocumentChanges = 0;
-List<RepresentativeDocument> repDocs = RepresentativeDocument.createCriteria().list {
-    inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
-}
-for(RepresentativeDocument repDoc:repDocs) {
-    repDoc.userVS.setType(UserVS.Type.USER).save()
-    repDoc.setState(RepresentativeDocument.State.CANCELLED).save()
-    numRepresentativeDocumentChanges++
+RepresentationDocumentVS.withTransaction {
+    List<RepresentativeDocument> repDocs = RepresentativeDocument.createCriteria().list {
+        inList("state", [RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED])
+    }
+    for(RepresentativeDocument repDoc:repDocs) {
+        repDoc.userVS.setType(UserVS.Type.USER).save()
+        repDoc.setState(RepresentativeDocument.State.CANCELLED).save()
+        numRepresentativeDocumentChanges++
+    }
 }
 println "resetDelegations - numRepresentativeDocumentChanges $numRepresentativeDocumentChanges"

@@ -22,7 +22,7 @@
       "jsoneditor":"jsoneditor#~3.1.2",
       "juicy-jsoneditor":"juicy-jsoneditor#~0.0.3",
       "highcharts":"highcharts#~4.0.4",
-      "font-awesome":"font-awesome#~4.2.0",
+      "font-awesome":"font-awesome#~4.3.0",
       "ckeditor":"ckeditor#~4.4.6",
 	  "polymer": "Polymer/polymer",
       "core-ajax":"Polymer/core-ajax",

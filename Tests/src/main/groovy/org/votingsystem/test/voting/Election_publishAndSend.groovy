@@ -22,11 +22,11 @@ import java.util.concurrent.Future
 isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2015/01/28 00:00:00", dateFinish:"2014/01/28 00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2015/01/29 00:00:00", dateFinish:"2014/01/30 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:10, numUsersWithoutRepresentativeWithVote:9,
-                       numRepresentatives:3, numRepresentativesWithVote:2,
-                       numUsersWithRepresentative:20, numUsersWithRepresentativeWithVote:5]
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:100, numUsersWithoutRepresentativeWithVote:90,
+                       numRepresentatives:10, numRepresentativesWithVote:8,
+                       numUsersWithRepresentative:200, numUsersWithRepresentativeWithVote:60]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
     Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,

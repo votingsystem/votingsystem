@@ -164,7 +164,6 @@
                     webAppMessage.subject = '<g:message code="downloadingFileMsg"/>'
                     webAppMessage.documentURL = fileURL
                     webAppMessage.setCallback(function(appMessage) {
-                        console.log(this.tagName + " - vote callback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
                     }.bind(this))

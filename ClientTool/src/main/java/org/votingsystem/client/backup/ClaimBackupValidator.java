@@ -4,12 +4,12 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.signature.util.SignedFile;
-import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.DocumentVSValidator;
+import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 

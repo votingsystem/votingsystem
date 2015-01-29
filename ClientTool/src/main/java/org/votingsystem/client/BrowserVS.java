@@ -47,6 +47,7 @@ import static org.votingsystem.client.VotingSystemApp.showMessage;
 public class BrowserVS extends Region implements WebKitHost {
 
     private static Logger log = Logger.getLogger(BrowserVS.class);
+
     private static final int BROWSER_WIDTH = 1200;
     private static final int BROWSER_HEIGHT = 1000;
     private static final int MAX_CHARACTERS_TAB_CAPTION = 25;
@@ -58,8 +59,6 @@ public class BrowserVS extends Region implements WebKitHost {
     private HBox toolBar;
     private TabPane tabPane;
     private Button prevButton;
-    private WebSocketServiceAuthenticated webSocketServiceAuthenticated;
-    private WebSocketService webSocketService;
     private static final BrowserVS INSTANCE = new BrowserVS();
 
     public static BrowserVS getInstance() {
