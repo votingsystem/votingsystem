@@ -46,10 +46,6 @@ public class MetaInf {
         result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
         result.append("<a href='" + eventURL + "'>" + eventURL +"</a><br/>");
         switch (type) {
-            case MANIFEST_EVENT:
-                result.append("<b>" + ContextVS.getMessage("numSignaturesLbl") +": </b>" +
-                        String.valueOf(numSignatures) + "<br/>");
-                break;
             case CLAIM_EVENT:
                 result.append("<b>" + ContextVS.getMessage("numClaimsLbl") +": </b>" +
                         String.valueOf(numSignatures) + "<br/>");
@@ -210,8 +206,6 @@ public class MetaInf {
             return serverURL + "/eventVSElection/" + id;
         } else if (TypeVS.CLAIM_EVENT == type) {
             return serverURL + "/eventVSClaim/" + id;
-        } else if (TypeVS.MANIFEST_EVENT == type) {
-            return serverURL + "/eventVSManifest/" + id;
         } else {
             log.error("Unknown server type: " + type);
             return null;

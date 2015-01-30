@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
-import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.SessionService;
@@ -211,7 +210,7 @@ public class VotingSystemApp extends Application {
                 log.debug("value: " + value + " -new_value: " + new_value + " - option: " + documentOptions[new_value.intValue()]);
                 String selectedOption = documentOptions[new_value.intValue()];
                 if(ContextVS.getMessage("openFileButtonLbl").equals(selectedOption)) {
-                    DocumentVSBrowserStackPane.showDialog(null, null, null);
+                    Platform.runLater(() -> BrowserVS.getInstance().showDocumentVS(null, null, null));
                 } else if(ContextVS.getMessage("signDocumentButtonLbl").equals(selectedOption)) {
                     SignDocumentFormPane.showDialog();
                 }

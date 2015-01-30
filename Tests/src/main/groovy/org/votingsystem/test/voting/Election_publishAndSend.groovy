@@ -22,21 +22,23 @@ import java.util.concurrent.Future
 isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2015/01/29 00:00:00", dateFinish:"2014/01/30 00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2015/01/30 00:00:00", dateFinish:"2014/01/31 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:100, numUsersWithoutRepresentativeWithVote:90,
-                       numRepresentatives:10, numRepresentativesWithVote:8,
-                       numUsersWithRepresentative:200, numUsersWithRepresentativeWithVote:60]
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:10000, numUsersWithoutRepresentativeWithVote:8950,
+                       numRepresentatives:25, numRepresentativesWithVote:23,
+                       numUsersWithRepresentative:20000, numUsersWithRepresentativeWithVote:2444]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
-    Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
-                         userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
-                         backupRequestEmail:"", event:eventDataMap,
-                         dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
-                         timer:[active:false, time:"00:00:10"]]
+Map simulationDataMap = [accessControlURL:"http://sistemavotacion.org/AccessControl", maxPendingResponses:10,
+                 userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
+                 backupRequestEmail:"", event:eventDataMap,
+                 dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
+                 timer:[active:false, time:"00:00:10"]]
 
 
 log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(JSONSerializer.toJSON(simulationDataMap)))
+
+HttpHelper.getInstance().initMultiThreadedMode()
 
 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
         TestUtils.simulationData.getAccessControlURL()),ContentTypeVS.JSON);

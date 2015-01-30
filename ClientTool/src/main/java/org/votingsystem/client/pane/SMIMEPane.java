@@ -38,9 +38,9 @@ public class SMIMEPane extends GridPane implements DocumentVS {
     public SMIMEPane(final SignedFile signedFile) {
         super();
         this.signedFile = signedFile;
-        setHgap(10);
-        setVgap(10);
-        setPadding(new Insets(10, 10, 10, 10));
+        setHgap(3);
+        setVgap(3);
+        setPadding(new Insets(5, 10, 5, 10));
         Button openSignatureInfoButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignatureInfoButton.setOnAction(actionEvent -> SMIMESignersPane.showDialog(signedFile));
         openSignatureInfoButton.setPrefWidth(150);
@@ -68,14 +68,14 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             contentStr = signedFile.getSMIME().getSignedContent();
         }
         signatureContentWebView.getEngine().loadContent(contentStr);
-        signatureContentWebView.setPrefHeight(400);
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
         timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
         timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(timeStampToken));
-        setMargin(timeStampButton, new Insets(10, 0, 10, 0));
+        setMargin(timeStampButton, new Insets(5, 0, 5, 0));
 
         VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);
+        VBox.setVgrow(this, Priority.ALWAYS);
         add(timeStampButton, 0, 0);
         add(openSignatureInfoButton, 1, 0);
         add(signatureContentWebView, 0, 1);

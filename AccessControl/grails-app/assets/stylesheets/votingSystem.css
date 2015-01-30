@@ -206,33 +206,6 @@ hr {
     padding:0px 0px 0px 0px;
 }
 
-
-.col-subsystem {
-    font-size: 0.75em;
-    width: 150px;
-    display:table-cell;
-    vertical-align:middle;
-    padding:0px 0px 0px 20px;
-}
-
-.col-subsystem a {
-    display:block;
-    text-decoration: none;
-}
-
-.col-selectedSystem {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 0px auto 0px auto;
-    display:table-cell;
-    vertical-align:middle;
-    text-align:center;
-    width: 580px;
-    height: 100%;
-}
-
-.col-selectedSystem a {text-decoration: none;}
-
 .col-advancedSearch {
     width: 360px;
     display:table-cell;
@@ -645,11 +618,6 @@ fieldset[disabled] .form-control {
 }
 textarea.form-control {
     height: auto;
-}
-
-paper-button {
-    font-size: 0.8em;
-    color: #6c0404;
 }
 
 .formFieldError{

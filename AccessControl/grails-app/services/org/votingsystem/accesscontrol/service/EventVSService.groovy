@@ -235,8 +235,6 @@ class EventVSService {
 			eventMap.put("type", TypeVS.VOTING_EVENT.toString())
 		} else if(event instanceof EventVSClaim) {
 			eventMap.put("type", TypeVS.CLAIM_EVENT.toString());
-		} else if(event instanceof EventVSManifest) {
-			eventMap.put("type", TypeVS.MANIFEST_EVENT.toString());
 		}
 		log.debug("getMetaInfMap - Event type: ${eventMap.type?.toString()}")
 		return eventMap

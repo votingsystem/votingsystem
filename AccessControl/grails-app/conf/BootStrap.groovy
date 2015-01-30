@@ -2,6 +2,7 @@ import grails.util.Metadata
 import org.votingsystem.model.RepresentativeVS
 import grails.converters.JSON
 import org.votingsystem.model.ContextVS
+import org.votingsystem.util.HttpHelper
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,7 +22,7 @@ class BootStrap {
 
     def init = { servletContext ->
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        ContextVS.init()
+        ContextVS.initModeServer()
         signatureVSService.init();
         systemService.init()
         filesService.init()

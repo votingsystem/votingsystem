@@ -186,15 +186,6 @@ var ResponseVS = {
     SC_PAUSED:10
 }
 
-var SubSystem = {
-    VOTES : "VOTES",
-    CLAIMS: "CLAIMS",
-    MANIFESTS: "MANIFESTS",
-    REPRESENTATIVES:"REPRESENTATIVES",
-    FEEDS:"FEEDS"
-}
-
-
 function getUrlParam(paramName, staticURL, decode){
     var currLocation = (staticURL.length)? staticURL : window.location.search,
         parArr = currLocation.split("?")[1].split("&");

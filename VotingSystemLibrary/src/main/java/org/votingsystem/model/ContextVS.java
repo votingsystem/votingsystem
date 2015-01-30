@@ -258,6 +258,12 @@ public class ContextVS {
         KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
+    public static void initModeServer () throws Exception {
+        INSTANCE = new ContextVS();
+        HttpHelper.getInstance().initMultiThreadedMode();
+        KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+    }
+
     public static void init (ApplicationVS applicationVS) throws Exception {
         INSTANCE = new ContextVS();
         INSTANCE.applicationVS = applicationVS;

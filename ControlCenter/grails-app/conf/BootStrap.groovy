@@ -2,6 +2,7 @@ import grails.converters.JSON
 import grails.util.Environment
 import org.votingsystem.model.ContextVS
 import grails.util.Metadata
+import org.votingsystem.util.HttpHelper
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,7 +22,7 @@ class BootStrap {
             //return it?.format("yyyy/MM/dd' 'HH:mm:ss")
         }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        ContextVS.init()
+        ContextVS.initModeServer()
         filesService.init()
         signatureVSService.init();
         timeStampService.init()

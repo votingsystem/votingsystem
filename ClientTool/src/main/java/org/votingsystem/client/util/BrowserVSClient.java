@@ -7,7 +7,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
-import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
@@ -69,7 +68,7 @@ public class BrowserVSClient {
                 case OPEN_SMIME:
                     String smimeMessageStr = new String(Base64.getDecoder().decode(
                             operationVS.getMessage().getBytes()), "UTF-8");
-                    DocumentVSBrowserStackPane.showDialog(smimeMessageStr, null, operationVS.getDocument());
+                    BrowserVS.getInstance().showDocumentVS(smimeMessageStr, null, operationVS.getDocument());
                     break;
                 case OPEN_COOIN:
                     CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((

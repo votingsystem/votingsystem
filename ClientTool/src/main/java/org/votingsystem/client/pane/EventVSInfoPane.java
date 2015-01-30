@@ -39,7 +39,7 @@ public class EventVSInfoPane extends VBox {
 
         HBox subjectHBox = new HBox();
         subjectHBox.getChildren().addAll(subjectLabel, subjectValueLabel);
-        VBox.setMargin(subjectHBox, new Insets(10, 15, 10, 15));
+        VBox.setMargin(subjectHBox, new Insets(5, 15, 10, 15));
 
         HBox dateBeginHBox = new HBox();
         Label dateBeginLabel = new Label(ContextVS.getMessage("dateBeginLbl") + ": ");
@@ -70,6 +70,7 @@ public class EventVSInfoPane extends VBox {
         dateBeginHBox.getChildren().add(validateBackupButton);
         this.getChildren().addAll(subjectHBox, dateBeginHBox, webView);
         HBox.setHgrow(this, Priority.ALWAYS);
+        VBox.setVgrow(this, Priority.ALWAYS);
         VBox.setVgrow(webView, Priority.ALWAYS);
     }
 

@@ -22,7 +22,10 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.pane.BrowserVSPane;
-import org.votingsystem.client.service.*;
+import org.votingsystem.client.pane.DocumentVSBrowserPane;
+import org.votingsystem.client.service.InboxService;
+import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
@@ -136,7 +139,9 @@ public class BrowserVS extends Region implements WebKitHost {
                     if (locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
                         targetURL = locationField.getText().trim();
                     } else targetURL = "http://" + locationField.getText().trim();
-                    ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().load(targetURL);
+                    Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
+                    if(content instanceof  WebView) ((WebView) content).getEngine().load(targetURL);
+                    else newTab(targetURL, null, null);
                 }
             }
         });
@@ -172,8 +177,10 @@ public class BrowserVS extends Region implements WebKitHost {
         browserStage.setWidth(BROWSER_WIDTH);
         browserStage.setHeight(BROWSER_HEIGHT);
         browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
-        locationField.setOnMouseClicked(event -> createHistoryMenu(((WebView)tabPane.getSelectionModel().getSelectedItem().
-                getContent())).show(locationField, Side.BOTTOM, 0, 0));
+        locationField.setOnMouseClicked(event -> {
+                Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
+                if(content instanceof WebView) createHistoryMenu((WebView)content).show(locationField, Side.BOTTOM, 0, 0);
+            });
     }
 
     public WebView newTab(String URL, String tabCaption, String jsCommand) {
@@ -238,6 +245,7 @@ public class BrowserVS extends Region implements WebKitHost {
         VBox.setVgrow(webView, Priority.ALWAYS);
         Tab newTab = new Tab();
         newTab.setOnSelectionChanged(event -> {
+                log.debug("selectedIdx - EventType: " + event.getEventType());
                 int selectedIdx = tabPane.getSelectionModel().getSelectedIndex();
                 ObservableList<WebHistory.Entry> entries = ((WebView)tabPane.getSelectionModel().getSelectedItem().
                         getContent()).getEngine().getHistory().getEntries();
@@ -308,6 +316,22 @@ public class BrowserVS extends Region implements WebKitHost {
             }
         }
         return historyMenu;
+    }
+
+    public void showDocumentVS(final String signedDocumentStr, File fileParam, Map operationDocument) {
+        DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane();
+        Tab newTab = new Tab();
+        newTab.setText(ContextVS.getMessage("signedDocumentBrowserCaption"));
+        newTab.setContent(documentVSBrowserPane);
+        newTab.setOnSelectionChanged(event -> {
+            log.debug("selectedIdx DocumentVS - EventType: " + event.getEventType());
+            locationField.setText("");
+        });
+        tabPane.getTabs().add(newTab);
+        tabPane.getSelectionModel().select(newTab);
+        browserStage.show();
+        browserStage.toFront();
+        documentVSBrowserPane.init(signedDocumentStr, fileParam, operationDocument);
     }
 
     public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,
