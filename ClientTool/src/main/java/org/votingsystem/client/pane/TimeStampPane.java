@@ -23,6 +23,7 @@ import org.bouncycastle.util.CollectionStore;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigInteger;
@@ -122,7 +123,7 @@ public class TimeStampPane extends GridPane {
                     log.error(ex.getMessage(), ex);
                 }
                 if(!validationOk) {
-                    showMessage(null, ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
                 }
                 add(certsVBox, 0, 5, 2, 1);
             }

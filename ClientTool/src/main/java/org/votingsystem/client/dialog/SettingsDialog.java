@@ -167,8 +167,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 try {
                     userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                 } catch(Exception ex) {
-                    showMessage(null, ContextVS.getMessage("errorLbl") + " " +
-                            ContextVS.getMessage("keyStoreNotValidErrorMsg"));
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotValidErrorMsg"));
                 }
                 X509Certificate certSigner = (X509Certificate) userKeyStore.getCertificate("UserTestKeysStore");
                 keyStoreLbl.setText(certSigner.getSubjectDN().toString());
@@ -186,8 +185,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         CryptoTokenVS newCryptoTokenVS = null;
         if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
-                showMessage(null, ContextVS.getMessage("errorLbl") + " " +
-                        ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
                 return;
             }
         }
@@ -200,14 +198,14 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                     deviceDataJSON = ContextVS.saveUserKeyStore(userKeyStore, password).toJSON();
                     newCryptoTokenVS = CryptoTokenVS.JKS_KEYSTORE;
                 } catch(Exception ex) {
-                    showMessage(null, ContextVS.getMessage("errorStoringKeyStoreMsg"));
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }
             }
         }
         if(signWithDNIeRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.DNIe;
         if(signWithMobileRb.isSelected() && deviceDataJSON == null) {
-            showMessage(null, ContextVS.getMessage("deviceDataMissingErrorMsg"));
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("deviceDataMissingErrorMsg"));
             return;
         } else if(signWithMobileRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.MOBILE;
         SessionService.getInstance().setCryptoToken(newCryptoTokenVS, deviceDataJSON);

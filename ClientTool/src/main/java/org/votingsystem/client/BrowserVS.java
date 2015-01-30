@@ -319,19 +319,31 @@ public class BrowserVS extends Region implements WebKitHost {
     }
 
     public void showDocumentVS(final String signedDocumentStr, File fileParam, Map operationDocument) {
-        DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane();
-        Tab newTab = new Tab();
-        newTab.setText(ContextVS.getMessage("signedDocumentBrowserCaption"));
-        newTab.setContent(documentVSBrowserPane);
-        newTab.setOnSelectionChanged(event -> {
-            log.debug("selectedIdx DocumentVS - EventType: " + event.getEventType());
-            locationField.setText("");
+        PlatformImpl.runLater(() -> {
+            DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
+                    signedDocumentStr, fileParam, operationDocument);
+            Tab newTab = new Tab();
+            newTab.setText(documentVSBrowserPane.getCaption());
+            newTab.setContent(documentVSBrowserPane);
+            newTab.setOnSelectionChanged(event -> {
+                log.debug("selectedIdx DocumentVS - EventType: " + event.getEventType());
+                locationField.setText("");
+            });
+            tabPane.getTabs().add(newTab);
+            tabPane.getSelectionModel().select(newTab);
+            browserStage.show();
+            browserStage.toFront();
         });
-        tabPane.getTabs().add(newTab);
-        tabPane.getSelectionModel().select(newTab);
-        browserStage.show();
-        browserStage.toFront();
-        documentVSBrowserPane.init(signedDocumentStr, fileParam, operationDocument);
+    }
+
+    public void newTab(final Pane tabContent, final String caption){
+        PlatformImpl.runLater(() -> {
+            Tab newTab = Utils.getTab(tabContent, caption);
+            tabPane.getTabs().add(newTab);
+            tabPane.getSelectionModel().select(newTab);
+            browserStage.show();
+            browserStage.toFront();
+        });
     }
 
     public void newTab(final String urlToLoad, String callback, String callbackMsg, final String caption,

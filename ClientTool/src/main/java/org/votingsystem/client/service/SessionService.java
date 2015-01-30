@@ -336,7 +336,7 @@ public class SessionService {
                             serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
                         } catch (Exception ex) {
                             passwd = null;
-                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), null);
+                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ContextVS.getMessage("errorLbl"));
                         }
                     }
                     CertificationRequestVS certificationRequest =
@@ -348,12 +348,12 @@ public class SessionService {
                     ContextVS.saveUserKeyStore(userKeyStore, passwd);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             CryptoTokenVS.JKS_KEYSTORE.toString());
-                    showMessage(ContextVS.getMessage("certInstallOKMsg"), null);
+                    showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
                     csrFile.delete();
-                } else showMessage(ContextVS.getMessage("certPendingMsg"), null);
+                } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                showMessage(ContextVS.getMessage("errorStoringKeyStoreMsg"), null);
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
             }
         }
 

@@ -136,7 +136,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                     } else new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
                             password, targetServer)).start();
                 } else if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
-                    showMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                     new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
                             null, targetServer)).start();
                 }

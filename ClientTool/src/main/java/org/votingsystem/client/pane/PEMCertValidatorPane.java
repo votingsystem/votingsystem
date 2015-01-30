@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.security.cert.X509Certificate;
@@ -64,10 +65,10 @@ public class PEMCertValidatorPane extends GridPane {
             certs = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            showMessage(null, ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
-            showMessage(null, "ERROR - " + ContextVS.getMessage("certNotFoundErrorMsg"));
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
                 log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
@@ -75,7 +76,7 @@ public class PEMCertValidatorPane extends GridPane {
 
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
-                    showMessage(null, "ERROR - " + ex.getMessage());
+                    showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
             }
             acceptButton.setVisible(false);

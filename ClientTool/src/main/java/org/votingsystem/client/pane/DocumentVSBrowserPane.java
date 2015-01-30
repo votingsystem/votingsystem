@@ -1,10 +1,9 @@
 package org.votingsystem.client.pane;
 
-import javafx.application.Platform;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -49,15 +48,44 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
     private int selectedFileIndex;
     private File backup;
     private List<String> fileList = new ArrayList<String>();
+    private String caption;
 
-    public DocumentVSBrowserPane() {
+    public DocumentVSBrowserPane(final String signedDocumentStr, File fileParam, Map operationDocument) {
+        this.backup = fileParam;
         buttonsHBox = new HBox();
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(actionEvent ->  saveMessage());
-        HBox.setMargin(saveButton, new Insets(5, 10, 5, 0));
+        HBox.setMargin(saveButton, new Insets(5, 10, 0, 0));
         buttonsHBox.getChildren().addAll(Utils.getSpacer(), saveButton);
         getChildren().addAll(buttonsHBox);
+        saveButton.setVisible(false);
+        if(backup == null) {
+            if(signedDocumentStr == null) {
+                FileChooser fileChooser = new FileChooser();
+                    /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                            ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
+                    fileChooser.getExtensionFilters().add(extFilter);*/
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                backup = fileChooser.showOpenDialog(new Stage());
+            } else backup = FileUtils.getFileFromString(signedDocumentStr);
+        }
+        if(backup != null) {
+            try {
+                if(FileUtils.isZipFile(backup)){
+                    DecompressBackupPane.showDialog(DocumentVSBrowserPane.this, backup);
+                    return;
+                }
+                if(backup.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
+                    CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)));
+                } else {
+                    openFile(backup, operationDocument);
+                }
+            } catch (IOException ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        } else log.debug("backup null");
     }
 
     public void goNext() {
@@ -85,58 +113,50 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
             SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
             SMIMEPane SMIMEPane = new SMIMEPane(signedFile);
             getChildren().add(1, SMIMEPane);
+            saveButton.setVisible(true);
+            this.caption = SMIMEPane.getCaption();
         } catch (Exception ex) {
-            showMessage(null, ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
             log.error(ex.getMessage(), ex);
         }
     }
 
-    public void init(final String signedDocumentStr, File fileParam, Map operationDocument) {
-        this.backup = fileParam;
-        Platform.runLater(() -> {
-            if(backup == null) {
-                if(signedDocumentStr == null) {
-                    FileChooser fileChooser = new FileChooser();
-                    /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                            ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
-                    fileChooser.getExtensionFilters().add(extFilter);*/
-                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                    backup = fileChooser.showOpenDialog(new Stage());
-                } else backup = FileUtils.getFileFromString(signedDocumentStr);
-            }
-            if(backup != null){
-                try {
-                    if(FileUtils.isZipFile(backup)){
-                        DecompressBackupPane.showDialog(DocumentVSBrowserPane.this, backup);
-                        return;
-                    }
-                    if(backup.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
-                        CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)));
-                    } else {
-                        openFile(backup, operationDocument);
-                    }
-                } catch (IOException ex) {
-                    log.error(ex.getMessage(), ex);
-                }
-            } else log.debug("File null dialog will not be opened");
-        });
-    }
     @Override public void processDecompressedFile(ResponseVS response) {
         log.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
-        if(ResponseVS.SC_OK == response.getStatusCode()) {
-            Platform.runLater(() -> {
-                setVisible((String) response.getData());
-            });
-        }
+        PlatformImpl.runLater(() -> {
+            if (ResponseVS.SC_OK == response.getStatusCode()) {
+                String decompressedBackupBaseDir = (String) response.getData();
+                log.debug("processDecompressedFile - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
+                File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
+                File representativeMetaInfFile = new File(decompressedBackupBaseDir + File.separator + "REPRESENTATIVE_DATA" +
+                        File.separator + "meta.inf");
+                if (!metaInfFile.exists()) {
+                    String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
+                    log.error(message);
+                    showMessage(ResponseVS.SC_ERROR, "Error - " + message);
+                    return;
+                }
+                try {
+                    metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
+                    if (representativeMetaInfFile.exists()) metaInf.loadRepresentativeData((JSONObject)
+                            JSONSerializer.toJSON(FileUtils.getStringFromFile(representativeMetaInfFile)));
+                    EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);
+                    getChildren().add(1, eventPanel);
+                    if (buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+                saveButton.setVisible(true);
+            }
+        });
     }
 
     public void saveMessage () {
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(new Stage());
-            Object content = getChildren().get(1);
             if(file != null) {
+                Object content = getChildren().get(1);
                 String fileName = file.getAbsolutePath();
                 if(content instanceof DocumentVS) {
                     if(!fileName.contains(".")) fileName = fileName + ((DocumentVS)content).getContentTypeVS().getExtension();
@@ -192,36 +212,9 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
         return "<html><b>" + ContextVS.getMessage("signatureDateLbl") + DateUtils.getDateStr(date) + "</html>";
     }
 
-    public void setVisible(String decompressedBackupBaseDir) {
-        log.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
-        File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
-        File representativeMetaInfFile = new File(decompressedBackupBaseDir + File.separator + "REPRESENTATIVE_DATA"  +
-                File.separator + "meta.inf");
-        if(!metaInfFile.exists()) {
-            String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
-            log.error(message);
-            showMessage(ResponseVS.SC_ERROR, "Error - " + message);
-            return;
-        }
-        try {
-            metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
-            if(representativeMetaInfFile.exists()) metaInf.loadRepresentativeData((JSONObject)
-                    JSONSerializer.toJSON(FileUtils.getStringFromFile(representativeMetaInfFile)));
-            EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);
-            String dialogTitle = null;
-            switch(metaInf.getType()) {
-                case CLAIM_EVENT:
-                    dialogTitle = ContextVS.getMessage("claimEventTabTitle");
-                    break;
-                case VOTING_EVENT:
-                    dialogTitle = ContextVS.getMessage("electionEventTabTitle");
-                    break;
-            }
-            getChildren().add(1, eventPanel);
-            if(buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+    public String getCaption() {
+        if(caption == null) caption = ContextVS.getMessage("backupCaption");
+        return caption;
     }
 
 }

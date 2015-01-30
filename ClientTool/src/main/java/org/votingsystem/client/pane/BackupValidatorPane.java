@@ -125,7 +125,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                 } else {
                     message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
-                showMessage(message);
+                showMessage(message, ContextVS.getMessage("validationFinishedLbl"));
                 if(errorList!= null && errorList.size() > 0) {
                     progressBox.setVisible(false);
                 } else getScene().getWindow().hide();
@@ -165,9 +165,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         for(String error: errorList) {
             sb.append("<br/><br/><b>" + ++numError + "</b> - " + error);
         }
-        HTMLMessageDialog messageDialog = new HTMLMessageDialog();
-        messageDialog.showMessage("<html style='font-family: arial, helvetica, sans-serif; color: #555;'>" +
-                sb.toString() + "</html>", ContextVS.getInstance().getMessage("votingBackupErrorCaption"));
+        showMessage(sb.toString(), ContextVS.getInstance().getMessage("votingBackupErrorCaption"));
     }
 
     public static void validateBackup(String decompressedBackupBaseDir, MetaInf metaInf) {

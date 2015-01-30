@@ -136,7 +136,7 @@ public class Utils {
         return spacer;
     }
 
-    public static Tab getTab(String caption, Pane content) {
+    public static Tab getTab(Pane content, String caption) {
         Tab newTab = new Tab();
         newTab.setText(caption);
         newTab.setContent(content);

@@ -73,7 +73,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
                 new Thread(new CooinStatusChecker(socketMsg.getCooinList(), this)).start();
                 break;
             case MESSAGEVS:
-                messageButton.setText(ContextVS.getMessage("messagevs_lbl"));
+                messageButton.setText(ContextVS.getMessage("messageLbl"));
                 descriptionLbl.setText(socketMsg.getMessageTruncated());
                 break;
             default:

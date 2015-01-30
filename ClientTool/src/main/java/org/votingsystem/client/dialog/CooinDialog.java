@@ -102,7 +102,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                         mainPane.getStyleClass().add("cooin-error");
                         cooinStatusLbl.setText(ContextVS.getMessage("invalidCooin"));
                         sendMenuItem.setVisible(false);
-                        showMessage(null, responseVS.getMessage());
+                        showMessage(ResponseVS.SC_ERROR, responseVS.getMessage());
                     }
 
                 }
@@ -180,7 +180,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                         DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(cooin.getValidTo()), "dd MMM yyyy' 'HH:mm");
             }
-            showMessage(msg);
+            showMessage(ResponseVS.SC_ERROR, msg);
         }
     }
 
@@ -257,7 +257,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                     transactionBatch.validateTransactionVSResponse(responseJSON, cooinServer.getTrustAnchors());
                     Thread.sleep(3000);
                     setProgressVisible(false, false);
-                    showMessage(null, responseJSON.getString("message"));
+                    showMessage(ResponseVS.SC_OK, responseJSON.getString("message"));
                     return true;
                 }
             };
@@ -271,7 +271,7 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
             new Thread(transactionTask).start();
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            showMessage(null, ex.getMessage());
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             setProgressVisible(false, true);
         }
     }

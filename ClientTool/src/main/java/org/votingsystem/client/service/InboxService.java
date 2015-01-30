@@ -120,7 +120,7 @@ public class InboxService {
                 socketMsgList.add(socketMsg);
                 PlatformImpl.runLater(() -> {
                     InboxDialog.show(null, null);
-                    showMessage(socketMsg.getFormattedMessage());});
+                    showMessage(socketMsg.getFormattedMessage(), ContextVS.getMessage("messageLbl"));});
                 flush();
                 break;
             case MESSAGEVS_TO_DEVICE:
@@ -176,7 +176,7 @@ public class InboxService {
                 }
                 break;
             case MESSAGEVS:
-                showMessage(socketMsg.getFormattedMessage());
+                showMessage(socketMsg.getFormattedMessage(), ContextVS.getMessage("messageLbl"));
                 break;
             default:log.debug(socketMsg.getOperation() + " not processed");
         }

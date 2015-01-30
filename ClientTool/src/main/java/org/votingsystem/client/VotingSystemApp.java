@@ -336,7 +336,7 @@ public class VotingSystemApp extends Application {
     private void openVotingSystemURL(final String URL, final String caption) {
         log.debug("openVotingSystemURL: " + URL);
         if(ContextVS.getInstance().getAccessControl() == null) {
-            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
             return;
         }
         Platform.runLater(() -> BrowserVS.getInstance().newTab(URL, caption, null));
@@ -345,7 +345,7 @@ public class VotingSystemApp extends Application {
     private void openCooinURL(final String URL, final String caption) {
         log.debug("openCooinURL: " + URL);
         if(ContextVS.getInstance().getCooinServer() == null) {
-            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
             return;
         }
         Platform.runLater(() -> BrowserVS.getInstance().newTab(URL, caption, null));
@@ -363,7 +363,7 @@ public class VotingSystemApp extends Application {
         String message = responseVS.getMessage() == null? "":responseVS.getMessage();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
         else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
-        showMessage(null, message);
+        showMessage(responseVS.getStatusCode(), message);
     }
 
     public static void showMessage(Integer statusCode, String message) {
@@ -377,8 +377,8 @@ public class VotingSystemApp extends Application {
         PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, optionButton));
     }
 
-    public static void showMessage(final String message) {
-        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message));
+    public static void showMessage(final String message, final String caption) {
+        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, caption));
     }
 
     public Long getDeviceId() {

@@ -213,7 +213,7 @@ public class MetaInf {
     }
         
     public String getRepresentativesHTML() {
-        StringBuilder result = new StringBuilder("<HTML style='font-family: arial, helvetica, sans-serif; color: #555;'>");
+        StringBuilder result = new StringBuilder("<HTML style='font-family: arial, helvetica, sans-serif; color: #555; margin:10px 0 0 0;'>");
         if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
             Map<String, RepresentativeData> representativesMap = 

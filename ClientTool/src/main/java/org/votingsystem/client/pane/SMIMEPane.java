@@ -32,9 +32,6 @@ public class SMIMEPane extends GridPane implements DocumentVS {
     private static Logger log = Logger.getLogger(SMIMEPane.class);
 
     private SignedFile signedFile;
-    private WebView signatureContentWebView;
-    private String receiptViewerURL;
-
     public SMIMEPane(final SignedFile signedFile) {
         super();
         this.signedFile = signedFile;
@@ -50,7 +47,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         ColumnConstraints column2 = new ColumnConstraints();
         getColumnConstraints().addAll(column1, column2);
         setHalignment(openSignatureInfoButton, HPos.RIGHT);
-        signatureContentWebView = new WebView();
+        WebView signatureContentWebView = new WebView();
         signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         if (signedFile.isValidSignature()) {
             openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
@@ -103,6 +100,10 @@ public class SMIMEPane extends GridPane implements DocumentVS {
             log.debug("### NULL signedFile");
             return;
         }
+    }
+
+    public String getCaption() {
+        return ContextVS.getMessage("signedDocumentCaption");
     }
 
     public SignedFile getSignedFile () {

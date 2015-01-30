@@ -84,7 +84,7 @@ public class MobileSelectorDialog extends DialogVS {
                 }
             }).start();
         } catch(Exception ex) {
-            showMessage(null, ex.getMessage());
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         }
 
     }

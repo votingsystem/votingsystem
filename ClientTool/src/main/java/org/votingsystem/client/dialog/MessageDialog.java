@@ -27,14 +27,14 @@ import java.io.File;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MessageDialog {
+public class MessageDialog extends VBox {
 
     private static Logger log = Logger.getLogger(MessageDialog.class);
 
-    private final Stage stage;
+    private Stage stage;
     private HBox footerButtonsBox;
-    private VBox mainBox;
     private Label messageLabel;
+    private Label captionLabel;
     private WebView messageWebView;
 
     public MessageDialog() {
@@ -42,8 +42,8 @@ public class MessageDialog {
         stage.initModality(Modality.APPLICATION_MODAL);
         //stage.initOwner(window);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-        mainBox  = new VBox(10);
         messageLabel = new Label();
+        captionLabel = new Label();
         messageLabel.setWrapText(true);
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
@@ -59,9 +59,9 @@ public class MessageDialog {
         footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
 
-        mainBox.getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
-        mainBox.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(mainBox, Color.TRANSPARENT));
+        getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
+        getStyleClass().add("modal-dialog");
+        stage.setScene(new Scene(this, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
@@ -84,52 +84,48 @@ public class MessageDialog {
 
     private void isHTMLView(boolean isHTMLView) {
         if(isHTMLView) {
-            if(!mainBox.getChildren().contains(messageWebView)) {
-                mainBox.getChildren().add(messageWebView);
-            } if(mainBox.getChildren().contains(messageLabel)) {
-                mainBox.getChildren().remove(messageLabel);
+            if(!getChildren().contains(messageWebView)) {
+                getChildren().add(messageWebView);
+            } if(getChildren().contains(messageLabel)) {
+                getChildren().remove(messageLabel);
             }
         } else {
-            if(mainBox.getChildren().contains(messageWebView)) {
-                mainBox.getChildren().remove(messageWebView);
-            }if(!mainBox.getChildren().contains(messageLabel)) {
-                mainBox.getChildren().add(messageLabel);
+            if(getChildren().contains(messageWebView)) {
+                getChildren().remove(messageWebView);
+            }if(!getChildren().contains(messageLabel)) {
+                getChildren().add(messageLabel);
             }
         }
     }
 
-    public void showHtmlMessage(String htmlMessage) {
+    public void showHtmlMessage(String htmlMessage, String caption) {
         String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
                 "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
         messageWebView.getEngine().loadContent(finalHTML);
         isHTMLView(true);
-        stage.centerOnScreen();
-        stage.show();
-        stage.toFront();
+        if(caption != null) {
+            if(!getChildren().contains(captionLabel)) getChildren().add(0, captionLabel);
+            captionLabel.setText(caption);
+        } else if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
+        show();
     }
 
     public void showHtmlMessage(String htmlMessage, Button optionButton) {
-        //
+        if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
         String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
                 "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
         if(optionButton != null) {
             footerButtonsBox.getChildren().add(0, optionButton);
-            optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                new EventHandler<MouseEvent>() {
-                    @Override public void handle(MouseEvent e) {
-                        stage.hide();
-                    }
-                });
+            optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> stage.hide());
         }
         messageWebView.getEngine().loadContent(finalHTML);
         isHTMLView(true);
-        stage.centerOnScreen();
-        stage.show();
-        stage.toFront();
+        show();
     }
 
 
     public void showMessage(Integer statusCode, String message) {
+        if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
         messageLabel.setText(message);
         isHTMLView(false);
         if(statusCode != null) {
@@ -138,6 +134,10 @@ public class MessageDialog {
             } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
             messageLabel.setGraphicTextGap(15);
         }
+        show();
+    }
+    
+    private void show() {
         stage.centerOnScreen();
         stage.show();
         stage.toFront();
