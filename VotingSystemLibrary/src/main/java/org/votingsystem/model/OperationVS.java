@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.util.StringUtils;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;

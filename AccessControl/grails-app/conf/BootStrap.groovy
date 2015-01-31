@@ -22,7 +22,7 @@ class BootStrap {
 
     def init = { servletContext ->
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        ContextVS.initModeServer()
+        ContextVS.init()
         signatureVSService.init();
         systemService.init()
         filesService.init()

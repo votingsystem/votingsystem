@@ -4,7 +4,6 @@ import org.bouncycastle.util.Store;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.Set;
 
 /**
  * @author jgzornoza

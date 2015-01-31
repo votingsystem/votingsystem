@@ -5,7 +5,6 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.File;

@@ -16,7 +16,10 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 
 import javax.persistence.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.util.*;

@@ -24,12 +24,12 @@ publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
                     dateBegin:"2015/01/31 00:00:00", dateFinish:"2014/02/01 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
-Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:3000, numUsersWithoutRepresentativeWithVote:2500,
+Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:4000, numUsersWithoutRepresentativeWithVote:3800,
                        numRepresentatives:5, numRepresentativesWithVote:4,
-                       numUsersWithRepresentative:1500, numUsersWithRepresentativeWithVote:500]
+                       numUsersWithRepresentative:5000, numUsersWithRepresentativeWithVote:900]
 
 // whenFinishChangeEventStateTo: one of EventVS.State,
-Map simulationDataMap = [accessControlURL:"http://www.sistemavotacion.org/AccessControl", maxPendingResponses:10,
+Map simulationDataMap = [accessControlURL:"http://cooins/AccessControl", maxPendingResponses:10,
                  userBaseData:userBaseDataMap, whenFinishChangeEventStateTo:"",
                  backupRequestEmail:"", event:eventDataMap,
                  dateBeginDocument:"2014/10/17 00:00:00", dateFinishDocument:"2014/10/19 00:00:00",
@@ -38,11 +38,9 @@ Map simulationDataMap = [accessControlURL:"http://www.sistemavotacion.org/Access
 
 log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(JSONSerializer.toJSON(simulationDataMap)))
 
-HttpHelper.getInstance().initMultiThreadedMode()
-
 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
         TestUtils.simulationData.getAccessControlURL()),ContentTypeVS.JSON);
-    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
+if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
 ActorVS actorVS = ActorVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " + actorVS.getType().toString());
 if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {

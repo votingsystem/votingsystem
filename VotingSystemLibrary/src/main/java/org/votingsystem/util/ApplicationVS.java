@@ -1,7 +1,7 @@
 package org.votingsystem.util;
 
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.cooin.model.TransactionVS;
+import org.votingsystem.model.ResponseVS;
 
 /**
  * @author jgzornoza

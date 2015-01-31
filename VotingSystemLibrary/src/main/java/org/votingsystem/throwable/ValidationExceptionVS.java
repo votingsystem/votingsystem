@@ -1,7 +1,5 @@
 package org.votingsystem.throwable;
 
-import org.votingsystem.throwable.ExceptionVS;
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

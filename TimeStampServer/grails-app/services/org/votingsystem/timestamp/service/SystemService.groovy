@@ -61,8 +61,7 @@ class SystemService {
             signingCertChainPEMBytes = CertUtils.getPEMEncoded (Arrays.asList(chain))
             Store certs = new JcaCertStore(Arrays.asList(chain));
             signingData = new SignatureData(signingCert, signingKey, certs);
-            return [signingCertPEMBytes: signingCertPEMBytes,
-                    signingCertChainPEMBytes: signingCertChainPEMBytes,
+            return [signingCertPEMBytes: signingCertPEMBytes, signingCertChainPEMBytes: signingCertChainPEMBytes,
                     timeStampSignerInfoVerifier:timeStampSignerInfoVerifier]
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex)
@@ -73,7 +72,12 @@ class SystemService {
     public SignatureData getSigningData () {
         return signingData;
     }
-	
+
+    public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
+        if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init()?.timeStampSignerInfoVerifier
+        return timeStampSignerInfoVerifier
+    }
+
 	public byte[] getSigningCertPEMBytes() {
 		if(!signingCertPEMBytes) signingCertPEMBytes = init()?.signingCertPEMBytes
 		return signingCertPEMBytes
@@ -130,11 +134,6 @@ class SystemService {
             throw new ExceptionVS("algorithmStr: '${algorithmStr} 'resultDigestStr '${resultDigestStr} - digestTokenStr '${digestTokenStr}'")
         }
     }
-	
-	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init()?.timeStampSignerInfoVerifier
-		return timeStampSignerInfoVerifier
-	}
 			
 	public byte[] getTimeStampRequest(byte[] digest) throws TSPException, IOException, Exception  {
 		log.debug("getTimeStampRequest")
@@ -143,6 +142,5 @@ class SystemService {
 		TimeStampRequest timeStampRequest = reqgen.generate(TSPAlgorithms.SHA256, digest);
 		return timeStampRequest.getEncoded();
 	}
-
 	
 }

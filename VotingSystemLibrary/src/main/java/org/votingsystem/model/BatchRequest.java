@@ -1,11 +1,9 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.util.FileUtils;
 
 import javax.persistence.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Date;
 

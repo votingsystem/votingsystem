@@ -1,41 +1,36 @@
 package org.votingsystem.util;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.KeyStore;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -47,42 +42,39 @@ import java.util.concurrent.TimeUnit;
 public class HttpHelper {
     
     private static Logger log = Logger.getLogger(HttpHelper.class);
-    
-    private HttpClient httpclient;
-    private PoolingClientConnectionManager cm;
-    private IdleConnectionEvictor connEvictor;
 
+    private static final int REQUEST_TIME_OUT = 30000; //30 seconds
+
+    private PoolingHttpClientConnectionManager cm;
+    private IdleConnectionEvictor connEvictor;
+    private RequestConfig requestConfig;
+    private SSLConnectionSocketFactory sslSocketFactory;
+    private boolean sslMode = false;
     public static HttpHelper INSTANCE = new HttpHelper();
     
     
     private HttpHelper() {
-        /*SchemeRegistry schemeRegistry = new SchemeRegistry();
-            schemeRegistry.register(
-        new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
-        cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(4);
-        cm.setDefaultMaxPerRoute(4);
+        cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(200);
+        cm.setDefaultMaxPerRoute(20);
         connEvictor = new IdleConnectionEvictor(cm);
         connEvictor.start();
-        final HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
-        httpclient = new DefaultHttpClient(cm, httpParams);
+        requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
+                .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
     }
 
     public void initVotingSystemSSLMode() {
         log.debug("initVotingSystemSSLMode");
         try {
+            sslMode =  true;
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
             X509Certificate sslServerCert = ContextVS.getInstance().getVotingSystemSSLCerts().iterator().next();
             trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
-            SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-            Scheme sch = new Scheme("https", 8443, socketFactory);
-            log.debug("Added Scheme https with port 8443 to Apache httpclient");
-            final HttpParams httpParams = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
-            httpclient = new DefaultHttpClient(cm, httpParams);
-            httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+            SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            // Allow TLSv1 protocol only
+            sslSocketFactory = new SSLConnectionSocketFactory( sslcontext, new String[] { "TLSv1" }, null,
+                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -92,23 +84,16 @@ public class HttpHelper {
         return INSTANCE;
     }
 
-    
-    public synchronized void initMultiThreadedMode() {
-        log.debug("initMultiThreadedMode");
-        if(cm != null) cm.shutdown();
-        cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(10);
-        cm.setDefaultMaxPerRoute(10);
-        connEvictor = new IdleConnectionEvictor(cm);
-        connEvictor.start();
-        final HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 40000);
-        httpclient = new DefaultHttpClient(cm, httpParams);
+    private CloseableHttpClient getHttpClient() {
+        if(sslMode) {
+            return HttpClients.custom().setSSLSocketFactory(sslSocketFactory).setDefaultRequestConfig(
+                    requestConfig).build();
+        } else return HttpClients.custom().setConnectionManager(cm).setDefaultRequestConfig(
+                requestConfig).build();
     }
-    
+
     public void shutdown () {
-        try { 
-            httpclient.getConnectionManager().shutdown(); 
+        try {
             if(connEvictor != null) {
                 connEvictor.shutdown();
                 connEvictor.join();
@@ -124,10 +109,11 @@ public class HttpHelper {
         HttpResponse response = null;
         HttpGet httpget = null;
         ContentTypeVS responseContentType = null;
+        CloseableHttpClient httpClient = getHttpClient();
         try {
             httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
-            response = httpclient.execute(httpget);
+            response = httpClient.execute(httpget);
             log.debug("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) {
@@ -144,66 +130,17 @@ public class HttpHelper {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()), responseContentType);
             }
-            if(response != null) EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "hostConnectionErrorMsg", serverURL));
             if(httpget != null) httpget.abort();
         } finally {
+            try {
+                if(response != null) EntityUtils.consume(response.getEntity());
+            } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
-    }
-    
-    public X509Certificate getCertFromServer (String serverURL) throws Exception {
-        log.debug("getCertFromServer - serverURL: " + serverURL);
-        HttpGet httpget = new HttpGet(serverURL);
-        X509Certificate certificate = null;
-        HttpResponse response = httpclient.execute(httpget);
-        log.debug("----------------------------------------");
-        log.debug(response.getStatusLine().toString());
-        log.debug("----------------------------------------");
-        HttpEntity entity = response.getEntity();
-        if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificate = CertUtils.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
-        }
-        EntityUtils.consume(response.getEntity());
-        return certificate;
-    }
-    
-    public Collection<X509Certificate> getCertChainHTTP (String serverURL) throws Exception {
-        log.debug("getCertChainHTTP - serverURL: " + serverURL);
-        HttpGet httpget = new HttpGet(serverURL);
-        Collection<X509Certificate> certificates = null;
-        HttpResponse response = httpclient.execute(httpget);
-        log.debug("----------------------------------------");
-        log.debug(response.getStatusLine().toString());
-        log.debug("----------------------------------------");
-        HttpEntity entity = response.getEntity();
-        if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificates = CertUtils.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
-        }
-        EntityUtils.consume(response.getEntity());
-        return certificates;
-    }
-   
-    public PKIXParameters getPKIXParametersHTTP (String certChainURL) throws Exception {
-        log.debug("getPKIXParametersHTTP - certChainURL: " + certChainURL);
-        Set<TrustAnchor> anchors = getTrustAnchorHTTP(certChainURL);
-        PKIXParameters params = new PKIXParameters(anchors);
-        params.setRevocationEnabled(false); // tell system do not check CRL's
-        return params;       
-    }   
-    
-    public Set<TrustAnchor> getTrustAnchorHTTP (String certChainURL) throws Exception {
-        log.debug("getTrustAnchorHTTP - certChainURL: " + certChainURL);
-        Collection<X509Certificate> certificates = getCertChainHTTP(certChainURL);
-        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-        for (X509Certificate certificate:certificates) {
-            TrustAnchor certAnchor = new TrustAnchor(certificate, null);
-            anchors.add(certAnchor);
-        }
-        return anchors;
     }
     
     public ResponseVS sendFile (File file, ContentTypeVS contentTypeVS, String serverURL,  String... headerNames) {
@@ -211,13 +148,15 @@ public class HttpHelper {
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         ContentTypeVS responseContentType = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = getHttpClient();
         try {
             httpPost = new HttpPost(serverURL);
             ContentType contentType = null;
             if(contentTypeVS != null) contentType = ContentType.create(contentTypeVS.getName());
             FileEntity entity = new FileEntity(file, contentType);
             httpPost.setEntity(entity);
-            HttpResponse response = httpclient.execute(httpPost);
+            response = httpClient.execute(httpPost);
             log.debug("----------------------------------------");
             log.debug(response.getStatusLine().toString());
             log.debug("----------------------------------------");
@@ -233,13 +172,16 @@ public class HttpHelper {
                 }
                 responseVS.setData(headerValues);
             }
-            EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
+        } finally {
+            try {
+                if(response != null) EntityUtils.consume(response.getEntity());
+            } catch (Exception ex) { log.error(ex.getMessage(), ex);}
+            return responseVS;
         }
-        return responseVS;
     }
     
     public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
@@ -248,13 +190,14 @@ public class HttpHelper {
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         HttpResponse response = null;
+        CloseableHttpClient httpClient = getHttpClient();
         try {
             httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
             if(contentType != null) entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType.getName()));
             else entity = new ByteArrayEntity(byteArray);
             httpPost.setEntity(entity);
-            response = httpclient.execute(httpPost);
+            response = httpClient.execute(httpPost);
             ContentTypeVS responseContentType = null;
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
@@ -271,22 +214,19 @@ public class HttpHelper {
                 }
                 responseVS.setData(headerValues);
             }
-            EntityUtils.consume(response.getEntity());
         } catch(HttpHostConnectException ex){
             log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                     getMessage("hostConnectionErrorMsg", serverURL));
-            if(httpPost != null) httpPost.abort();
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
-        }  finally {
+        } finally {
             if(response != null) EntityUtils.consume(response.getEntity());
             return responseVS;
         }
     }
-    
     
     public ResponseVS sendObjectMap(Map<String, Object> fileMap, String serverURL) throws Exception {
         log.debug("sendObjectMap - serverURL: " + serverURL);
@@ -296,6 +236,7 @@ public class HttpHelper {
         HttpPost httpPost = null;
         HttpResponse response = null;
         ContentTypeVS responseContentType = null;
+        CloseableHttpClient httpClient = getHttpClient();
         try {
             httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
@@ -313,7 +254,7 @@ public class HttpHelper {
                 }
             }
             httpPost.setEntity(reqEntity);
-            response = httpclient.execute(httpPost);
+            response = httpClient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             log.debug("----------------------------------------");
@@ -321,41 +262,39 @@ public class HttpHelper {
             log.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
-            //EntityUtils.consume(response.getEntity());
+            EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             String statusLine = null;
-            if(response != null) {
-                statusLine = response.getStatusLine().toString();
-            }
+            if(response != null) statusLine = response.getStatusLine().toString();
             log.error(ex.getMessage() + " - StatusLine: " + statusLine, ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
+        }  finally {
+            if(response != null) EntityUtils.consume(response.getEntity());
+            return responseVS;
         }
-        return responseVS;  
     }
 
     public static class IdleConnectionEvictor extends Thread {
 
-        private final ClientConnectionManager connMgr;
+        private final HttpClientConnectionManager connMgr;
 
         private volatile boolean shutdown;
 
-        public IdleConnectionEvictor(ClientConnectionManager connMgr) {
+        public IdleConnectionEvictor(HttpClientConnectionManager connMgr) {
             super();
             this.connMgr = connMgr;
         }
 
-        @Override
-        public void run() {
+        @Override public void run() {
             try {
                 while (!shutdown) {
                     synchronized (this) {
                         wait(1000);
                         // Close expired connections
                         connMgr.closeExpiredConnections();
-                        // Optionally, close connections
-                        // that have been idle longer than 30 sec
-                        //connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+                        // Optionally, close connections that have been idle longer than 30 sec
+                        connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
                     }
                 }
             } catch (InterruptedException ex) {
@@ -370,7 +309,6 @@ public class HttpHelper {
             }
         }
     }
-
 
     public static String getLocalIP() throws SocketException {
         Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
@@ -387,7 +325,5 @@ public class HttpHelper {
         }
         return null;
     }
-
-    public static void main(String[] args) throws IOException, Exception { }
     
 }

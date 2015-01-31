@@ -9,6 +9,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import org.votingsystem.cooin.model.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -16,7 +17,6 @@ import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.cooin.model.TransactionVS;
 
 import javax.mail.Session;
 import javax.security.auth.x500.X500PrivateCredential;
@@ -255,12 +255,6 @@ public class ContextVS {
 
     public static void init () throws Exception {
         INSTANCE = new ContextVS();
-        KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-    }
-
-    public static void initModeServer () throws Exception {
-        INSTANCE = new ContextVS();
-        HttpHelper.getInstance().initMultiThreadedMode();
         KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 

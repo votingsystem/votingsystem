@@ -22,7 +22,7 @@ class BootStrap {
             //return it?.format("yyyy/MM/dd' 'HH:mm:ss")
         }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        ContextVS.initModeServer()
+        ContextVS.init()
         filesService.init()
         signatureVSService.init();
         timeStampService.init()

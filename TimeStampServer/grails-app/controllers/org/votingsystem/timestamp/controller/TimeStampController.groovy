@@ -127,7 +127,7 @@ class TimeStampController {
      * @return Si todo va bien devuelve un código de estado HTTP 200.
      */
     def validateTestMessage() {
-        ResponseVS responseVS =  testService.validateMessage("${request.getInputStream()}".getBytes())
+        ResponseVS responseVS =  testService.validateMessage(request.getInputStream())
         response.status = responseVS.statusCode
         render responseVS.message
         return false
