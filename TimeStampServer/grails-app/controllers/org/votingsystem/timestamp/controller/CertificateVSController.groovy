@@ -1,7 +1,8 @@
 package org.votingsystem.timestamp.controller
 
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.votingsystem.model.*
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.util.CertUtils
 
 import java.security.cert.X509Certificate
@@ -15,7 +16,7 @@ import java.security.cert.X509Certificate
 */
 class CertificateVSController {
 
-    def timeStampTestService
+    def testService
     /**
      * (Disponible sólo para pruebas)
      *
@@ -48,7 +49,7 @@ class CertificateVSController {
                 return false
             }
             X509Certificate x509NewCACert = certX509CertCollection.iterator()?.next()
-            timeStampTestService.addTrustedCert(x509NewCACert)
+            testService.addTrustedCert(x509NewCACert)
             response.status = ResponseVS.SC_OK
             render "Cert '${x509NewCACert.getSubjectDN()}' added to trusted list"
         }

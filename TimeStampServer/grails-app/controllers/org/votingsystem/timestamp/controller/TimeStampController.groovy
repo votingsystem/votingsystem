@@ -2,16 +2,14 @@ package org.votingsystem.timestamp.controller
 
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.util.FileUtils
-import java.util.Calendar
+import org.votingsystem.model.TimeStampVS
+import org.votingsystem.signature.util.TimeStampResponseGenerator
 
 class TimeStampController {
-	
-	def timeStampService
-    def timeStampTestService
+
+    def systemService
+    def testService
 
     /**
      * Servicio de generación de sellos de tiempo 'discretos'. Para dificultar la asociación de socilicitudes de acceso
@@ -27,11 +25,16 @@ class TimeStampController {
      * segundos puestos a 0)
      */
     def discrete() {
-        byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
         Calendar calendar = Calendar.getInstance()
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        byte[] responseBytes = timeStampService.processRequest(timeStampRequestBytes, calendar.getTime())
+        TimeStampResponseGenerator responseGenerator = new TimeStampResponseGenerator(request.getInputStream(),
+                systemService.getSigningData(), calendar.getTime());
+        byte[] responseBytes = responseGenerator.getTimeStampToken().getEncoded()
+        TimeStampVS.withTransaction {
+            new TimeStampVS(serialNumber:responseGenerator.getSerialNumber().longValue(), tokenBytes:responseBytes,
+                    state:TimeStampVS.State.OK).save()
+        }
         response.status = ResponseVS.SC_OK
         response.contentLength = responseBytes.length
         response.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName())
@@ -52,8 +55,13 @@ class TimeStampController {
 	 * @return Si todo es correcto un sello de tiempo en formato RFC 3161.
 	 */
 	def index() {
-        byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-        byte[] responseBytes = timeStampService.processRequest(timeStampRequestBytes, Calendar.getInstance().getTime())
+        TimeStampResponseGenerator responseGenerator = new TimeStampResponseGenerator(request.getInputStream(),
+            systemService.getSigningData(), Calendar.getInstance().getTime());
+        byte[] responseBytes = responseGenerator.getTimeStampToken().getEncoded()
+        TimeStampVS.withTransaction {
+            new TimeStampVS(serialNumber:responseGenerator.getSerialNumber().longValue(), tokenBytes:responseBytes,
+                    state:TimeStampVS.State.OK).save()
+        }
         response.status = ResponseVS.SC_OK
         response.contentLength = responseBytes.length
         response.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName())
@@ -71,7 +79,7 @@ class TimeStampController {
 	 * @return El certificado en formato PEM con el que se firman los sellos de tiempo
 	 */
 	def cert() {
-        byte[] signingCertPEMBytes = timeStampService.getSigningCertPEMBytes()
+        byte[] signingCertPEMBytes = systemService.getSigningCertPEMBytes()
         response.status = ResponseVS.SC_OK
         response.contentLength = signingCertPEMBytes.length
         response.setContentType(ContentTypeVS.X509_CA.getName())
@@ -119,7 +127,7 @@ class TimeStampController {
      * @return Si todo va bien devuelve un código de estado HTTP 200.
      */
     def validateTestMessage() {
-        ResponseVS responseVS =  timeStampTestService.validateMessage("${request.getInputStream()}".getBytes())
+        ResponseVS responseVS =  testService.validateMessage("${request.getInputStream()}".getBytes())
         response.status = responseVS.statusCode
         render responseVS.message
         return false

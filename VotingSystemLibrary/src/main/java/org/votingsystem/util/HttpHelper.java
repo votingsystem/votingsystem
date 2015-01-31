@@ -355,7 +355,7 @@ public class HttpHelper {
                         connMgr.closeExpiredConnections();
                         // Optionally, close connections
                         // that have been idle longer than 30 sec
-                        connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+                        //connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
                     }
                 }
             } catch (InterruptedException ex) {

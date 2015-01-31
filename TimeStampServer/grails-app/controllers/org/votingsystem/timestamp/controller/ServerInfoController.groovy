@@ -5,7 +5,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 
 /**
  * @infoController Información de la aplicación
@@ -16,7 +15,7 @@ import org.votingsystem.model.TypeVS
  * */
 class ServerInfoController {
 
-	def timeStampService
+    def systemService
     
 	/**
 	 * @httpMethod [GET]
@@ -25,7 +24,7 @@ class ServerInfoController {
 	 */
 	def index() {
         HashMap serverInfo = new HashMap()
-        serverInfo.certChainPEM = new String(timeStampService.getSigningCertChainPEMBytes())
+        serverInfo.certChainPEM = new String(systemService.getSigningCertChainPEMBytes())
         serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
         serverInfo.name = grailsApplication.config.vs.serverName
         serverInfo.serverType = ActorVS.Type.TIMESTAMP_SERVER.toString()
@@ -42,7 +41,7 @@ class ServerInfoController {
      * @return La cadena de certificación en formato PEM del servidor
      */
     def certChain () {
-        byte[] serverCertPEMBytes = timeStampService.getSigningCertChainPEMBytes()
+        byte[] serverCertPEMBytes = systemService.getSigningCertChainPEMBytes()
         response.setContentType(ContentTypeVS.TEXT.getName()+";charset=UTF-8")
         response.outputStream <<  serverCertPEMBytes
         response.outputStream.flush()

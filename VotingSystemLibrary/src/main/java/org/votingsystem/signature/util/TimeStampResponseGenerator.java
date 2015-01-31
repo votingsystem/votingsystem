@@ -1,281 +1,224 @@
 package org.votingsystem.signature.util;
 
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIFreeText;
-import org.bouncycastle.asn1.cmp.PKIStatus;
 import org.bouncycastle.asn1.cmp.PKIStatusInfo;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.tsp.TimeStampResp;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.*;
-
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.throwable.ExceptionVS;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Date;
-import java.util.Set;
+import java.security.cert.CertificateEncodingException;
+import java.util.*;
 
 /**
- * Generator for RFC 3161 Time Stamp Responses.
- * 
- * The difference from the one in Bouncycastle is that this doesn't accumulate
- * message errors from previous requests
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TimeStampResponseGenerator
-{
-    int status;
+public class TimeStampResponseGenerator {
 
-    ASN1EncodableVector statusStrings;
+    private static Logger log = Logger.getLogger(TimeStampResponseGenerator.class);
 
-    int failInfo;
+    private static Set acceptedAlgorithms = new HashSet<>(Arrays.asList(TSPAlgorithms.SHA1, TSPAlgorithms.SHA256,
+            TSPAlgorithms.SHA512));
+    private static Set acceptedPolicies = new HashSet<>(Arrays.asList("1.2.3", "1.2.4"));
+    private static Set acceptedExtensions = new HashSet<>();
+
+    public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+    public static final String DEFAULT_TSA_POLICY_OID = "1.2.3";
+    public static final Integer ACCURACYMICROS = 500;
+    public static final Integer ACCURACYMILLIS = 500;
+    public static final Integer ACCURACYSECONDS = 1;
+
+    //# Optional. Specify if requests are ordered. Only false is supported.
+    public static boolean ORDERING = false;
+
+    private TimeStampToken token;
+    private BigInteger serialNumber;
+    private int status;
+    private ASN1EncodableVector statusStrings;
+    private int failInfo;
     private TimeStampTokenGenerator tokenGenerator;
-    private Set                     acceptedAlgorithms;
-    private Set                     acceptedPolicies;
-    private Set                     acceptedExtensions;
-    
-    public TimeStampResponseGenerator(
-        TimeStampTokenGenerator tokenGenerator,
-        Set                     acceptedAlgorithms)
-    {
-        this(tokenGenerator, acceptedAlgorithms, null, null);
-    }
-    
-    public TimeStampResponseGenerator(
-        TimeStampTokenGenerator tokenGenerator,
-        Set                     acceptedAlgorithms,
-        Set                     acceptedPolicy)
-    {
-        this(tokenGenerator, acceptedAlgorithms, acceptedPolicy, null);
+
+    public TimeStampResponseGenerator(InputStream requestInputStream, SignatureData signingData, Date timeStampDate)
+            throws ExceptionVS, OperatorCreationException, CertificateEncodingException, TSPException {
+        TimeStampRequest timeStampRequest;
+        try {
+            timeStampRequest = new TimeStampRequest(requestInputStream);
+        } catch (Exception ex) {throw new ExceptionVS("request null");}
+        this.statusStrings = new ASN1EncodableVector();
+        serialNumber = KeyGeneratorVS.INSTANCE.getSerno();
+        log.debug("getTimeStampResponse - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
+        JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
+                new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
+        tokenGenerator = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
+                new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(
+                        ContextVS.PROVIDER).build(signingData.getSigningKey()), signingData.getSigningCert()),
+                new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
+        tokenGenerator.setAccuracyMicros(ACCURACYMICROS);
+        tokenGenerator.setAccuracyMillis(ACCURACYMILLIS);
+        tokenGenerator.setAccuracySeconds(ACCURACYSECONDS);
+        tokenGenerator.setOrdering(ORDERING);
+        tokenGenerator.addCertificates(signingData.getCerts());
+        token = tokenGenerator.generate(timeStampRequest, serialNumber, timeStampDate);
     }
 
-    public TimeStampResponseGenerator(
-        TimeStampTokenGenerator tokenGenerator,
-        Set                     acceptedAlgorithms,
-        Set                     acceptedPolicies,
-        Set                     acceptedExtensions)
-    {
+    public TimeStampToken getTimeStampToken() { return token; }
+
+    public BigInteger getSerialNumber () { return serialNumber; }
+
+    //InputStream requestInputStream, Date timeStampDate
+    public TimeStampResponseGenerator(TimeStampTokenGenerator tokenGenerator, Set acceptedAlgorithms) {
+        this(tokenGenerator, acceptedAlgorithms, (Set)null, (Set)null);
+    }
+
+    public TimeStampResponseGenerator(TimeStampTokenGenerator tokenGenerator, Set acceptedAlgorithms, Set acceptedPolicy) {
+        this(tokenGenerator, acceptedAlgorithms, acceptedPolicy, (Set)null);
+    }
+
+    public TimeStampResponseGenerator(TimeStampTokenGenerator tokenGenerator, Set acceptedAlgorithms, Set acceptedPolicies, Set acceptedExtensions) {
         this.tokenGenerator = tokenGenerator;
         this.acceptedAlgorithms = acceptedAlgorithms;
         this.acceptedPolicies = acceptedPolicies;
         this.acceptedExtensions = acceptedExtensions;
-
-        statusStrings = new ASN1EncodableVector();
+        this.statusStrings = new ASN1EncodableVector();
     }
 
-    private void addStatusString(String statusString)
-    {
-        statusStrings.add(new DERUTF8String(statusString));
+    private void addStatusString(String statusString) {
+        this.statusStrings.add(new DERUTF8String(statusString));
     }
 
-    private void setFailInfoField(int field)
-    {
-        failInfo = failInfo | field;
+    private void setFailInfoField(int field) {
+        this.failInfo |= field;
     }
 
-    private PKIStatusInfo getPKIStatusInfo()
-    {
+    private PKIStatusInfo getPKIStatusInfo() {
         ASN1EncodableVector v = new ASN1EncodableVector();
-        
-        v.add(new DERInteger(status));
-        
-        if (statusStrings.size() > 0)
-        {
-            v.add(new PKIFreeText(new DERSequence(statusStrings)));
+        v.add(new DERInteger(this.status));
+        if(this.statusStrings.size() > 0) {
+            v.add(new PKIFreeText(new DERSequence(this.statusStrings)));
         }
 
-        if (failInfo != 0)
-        {
-            DERBitString failInfoBitString = new FailInfo(failInfo);
+        if(this.failInfo != 0) {
+            TimeStampResponseGenerator.FailInfo failInfoBitString = new TimeStampResponseGenerator.FailInfo(this.failInfo);
             v.add(failInfoBitString);
         }
 
         return new PKIStatusInfo(new DERSequence(v));
     }
 
-    /**
-     * Return an appropriate TimeStampResponse.
-     * <p>
-     * If genTime is null a timeNotAvailable error response will be returned.
-     *
-     * @param request the request this response is for.
-     * @param serialNumber serial number for the response token.
-     * @param genTime generation time for the response token.
-     * @param provider provider to use for signature calculation.
-     * @deprecated use method that does not require provider
-     * @return
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.NoSuchProviderException
-     * @throws org.bouncycastle.tsp.TSPException
-     */
-    public TimeStampResponse generate(
-        TimeStampRequest    request,
-        BigInteger          serialNumber,
-        Date                genTime,
-        String              provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, TSPException
-    {
+    /** @deprecated */
+    public TimeStampResponse generate(TimeStampRequest request, BigInteger serialNumber, Date genTime, String provider) throws NoSuchAlgorithmException, NoSuchProviderException, TSPException {
         TimeStampResp resp;
-
+        PKIStatusInfo pkiStatusInfo;
         try {
-            if (genTime == null) {
-                throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
+            if(genTime == null) {
+                throw new TSPValidationException("The time source is not available.", 512);
             }
 
-            request.validate(acceptedAlgorithms, acceptedPolicies, acceptedExtensions, provider);
-
-            status = PKIStatus.GRANTED;
+            request.validate(this.acceptedAlgorithms, this.acceptedPolicies, this.acceptedExtensions, provider);
+            this.status = 0;
             this.addStatusString("Operation OK");
+            PKIStatusInfo e = this.getPKIStatusInfo();
+            pkiStatusInfo = null;
 
-            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
-
-            ContentInfo tstTokenContentInfo = null;
+            ContentInfo pkiStatusInfo1;
             try {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                		tokenGenerator.generate(request, serialNumber, genTime, provider).toCMSSignedData().getEncoded());
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
-
-                tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
-            }
-            catch (IOException ioEx) {
-                throw new TSPException(
-                        "Timestamp token received cannot be converted to ContentInfo", ioEx);
+                ByteArrayInputStream ioEx = new ByteArrayInputStream(this.tokenGenerator.generate(request, serialNumber, genTime, provider).toCMSSignedData().getEncoded());
+                ASN1InputStream aIn = new ASN1InputStream(ioEx);
+                pkiStatusInfo1 = ContentInfo.getInstance(aIn.readObject());
+            } catch (IOException var11) {
+                throw new TSPException("Timestamp token received cannot be converted to ContentInfo", var11);
             }
 
-            resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
-        }
-        catch (TSPValidationException e) {
-            status = PKIStatus.REJECTION;
-
-            this.setFailInfoField(e.getFailureCode());
-            this.addStatusString(e.getMessage());
-
-            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
-
-            resp = new TimeStampResp(pkiStatusInfo, null);
+            resp = new TimeStampResp(e, pkiStatusInfo1);
+        } catch (TSPValidationException var12) {
+            this.status = 2;
+            this.setFailInfoField(var12.getFailureCode());
+            this.addStatusString(var12.getMessage());
+            pkiStatusInfo = this.getPKIStatusInfo();
+            resp = new TimeStampResp(pkiStatusInfo, (ContentInfo)null);
         }
 
         try {
             return new TimeStampResponse(resp);
-        }
-        catch (IOException e) {
+        } catch (IOException var10) {
             throw new TSPException("created badly formatted response!");
         }
     }
 
-    /**
-     * Return an appropriate TimeStampResponse.
-     * <p>
-     * If genTime is null a timeNotAvailable error response will be returned.
-     *
-     * @param request the request this response is for.
-     * @param serialNumber serial number for the response token.
-     * @param genTime generation time for the response token.
-     * @return
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws org.bouncycastle.tsp.TSPException
-     */
-    public TimeStampResponse generate(
-        TimeStampRequest    request,
-        BigInteger          serialNumber,
-        Date                genTime)
-        throws TSPException
-    {
+    public TimeStampResponse generate(TimeStampRequest request, BigInteger serialNumber, Date genTime) throws TSPException {
+        this.statusStrings = new ASN1EncodableVector();
+
         TimeStampResp resp;
-        statusStrings = new ASN1EncodableVector();
-        try
-        {
-            if (genTime == null)
-            {
-                throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
+        PKIStatusInfo pkiStatusInfo;
+        try {
+            if(genTime == null) {
+                throw new TSPValidationException("The time source is not available.", 512);
             }
 
-            request.validate(acceptedAlgorithms, acceptedPolicies, acceptedExtensions);
-
-            status = PKIStatus.GRANTED;
+            request.validate(this.acceptedAlgorithms, this.acceptedPolicies, this.acceptedExtensions);
+            this.status = 0;
             this.addStatusString("Operation Okay");
+            PKIStatusInfo e = this.getPKIStatusInfo();
+            pkiStatusInfo = null;
 
-            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
-
-            ContentInfo tstTokenContentInfo = null;
-            try
-            {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(tokenGenerator.generate(request, serialNumber, genTime).toCMSSignedData().getEncoded());
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
-
-                tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
-            }
-            catch (IOException ioEx)
-            {
-                throw new TSPException(
-                        "Timestamp token received cannot be converted to ContentInfo", ioEx);
+            ContentInfo pkiStatusInfo1;
+            try {
+                ByteArrayInputStream ioEx = new ByteArrayInputStream(this.tokenGenerator.generate(request, serialNumber, genTime).toCMSSignedData().getEncoded());
+                ASN1InputStream aIn = new ASN1InputStream(ioEx);
+                pkiStatusInfo1 = ContentInfo.getInstance(aIn.readObject());
+            } catch (IOException var10) {
+                throw new TSPException("Timestamp token received cannot be converted to ContentInfo", var10);
             }
 
-            resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
-        }
-        catch (TSPValidationException e)
-        {
-            status = PKIStatus.REJECTION;
-
-            this.setFailInfoField(e.getFailureCode());
-            this.addStatusString(e.getMessage());
-
-            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
-
-            resp = new TimeStampResp(pkiStatusInfo, null);
+            resp = new TimeStampResp(e, pkiStatusInfo1);
+        } catch (TSPValidationException var11) {
+            this.status = 2;
+            this.setFailInfoField(var11.getFailureCode());
+            this.addStatusString(var11.getMessage());
+            pkiStatusInfo = this.getPKIStatusInfo();
+            resp = new TimeStampResp(pkiStatusInfo, (ContentInfo)null);
         }
 
-        try
-        {
+        try {
             return new TimeStampResponse(resp);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException var9) {
             throw new TSPException("created badly formatted response!");
         }
     }
 
-    class FailInfo extends DERBitString
-    {
-        FailInfo(int failInfoValue)
-        {
-            super(getBytes(failInfoValue), getPadBits(failInfoValue));
-        }
-    }
-
-    /**
-     * Generate a TimeStampResponse with chosen status and FailInfoField.
-     *
-     * @param status the PKIStatus to set.
-     * @param failInfoField the FailInfoField to set.
-     * @param statusString an optional string describing the failure.
-     * @return a TimeStampResponse with a failInfoField and optional statusString
-     * @throws org.bouncycastle.tsp.TSPException in case the response could not be created
-     */
-    public TimeStampResponse generateFailResponse(int status, int failInfoField, String statusString)
-        throws TSPException
-    {
+    public TimeStampResponse generateFailResponse(int status, int failInfoField, String statusString) throws TSPException {
         this.status = status;
-
         this.setFailInfoField(failInfoField);
-
-        if (statusString != null)
-        {
+        if(statusString != null) {
             this.addStatusString(statusString);
         }
 
-        PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
+        PKIStatusInfo pkiStatusInfo = this.getPKIStatusInfo();
+        TimeStampResp resp = new TimeStampResp(pkiStatusInfo, (ContentInfo)null);
 
-        TimeStampResp resp = new TimeStampResp(pkiStatusInfo, null);
-
-        try
-        {
+        try {
             return new TimeStampResponse(resp);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException var7) {
             throw new TSPException("created badly formatted response!");
+        }
+    }
+
+    class FailInfo extends DERBitString {
+        FailInfo(int failInfoValue) {
+            super(getBytes(failInfoValue), getPadBits(failInfoValue));
         }
     }
 }

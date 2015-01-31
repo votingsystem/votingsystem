@@ -16,10 +16,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 //http://www.sistemavotacion.org/TimeStampServer
-Map simulationDataMap = [serverURL:"http://www.sistemavotacion.org/TimeStampServer", maxPendingResponses:10,
-                         numRequestsProjected:1, timer:[active:false, time:"00:00:10"]]
+Map simulationDataMap = [serverURL:"http://localhost:8080/TimeStampServer", maxPendingResponses:50,
+                         numRequestsProjected:1000, timer:[active:false, time:"00:00:10"]]
 
-log = TestUtils.init(Multisign_send.class, simulationDataMap)
+log = TestUtils.init(TimeStamp_request.class, simulationDataMap)
 
 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
         TestUtils.simulationData.getServerURL()),ContentTypeVS.JSON);
@@ -67,7 +67,7 @@ public void sendRequests () throws Exception {
         if((TestUtils.simulationData.getNumRequests() - TestUtils.simulationData.
                 getNumRequestsCollected()) <= TestUtils.simulationData.getMaxPendingResponses()) {
             String nifFrom = NifUtils.getNif(TestUtils.simulationData.getAndIncrementNumRequests().intValue());
-            signCompletionService.submit(new TimeStamperTestSender(nifFrom, TestUtils.simulationData.getServerURL()));
+            signCompletionService.submit(new TimeStamperTestSender(nifFrom, TestUtils.simulationData.getServerURL(), false));
         } else Thread.sleep(300);
     }
 }
