@@ -43,7 +43,6 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
@@ -51,11 +50,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -138,11 +133,10 @@ public class HttpHelper {
                     .register("http", PlainConnectionSocketFactory.INSTANCE)
                     .register("https", new SSLConnectionSocketFactory(sslcontext))
                     .build();
-            // Create socket configuration
-            SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
-            // Configure the connection manager to use socket configuration either
-            // by default or for a specific host.
-            connManager.setDefaultSocketConfig(socketConfig);
+            //Create socket configuration
+            //SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
+            //Configure the connection manager to use socket configuration either by default or for a specific host.
+            //connManager.setDefaultSocketConfig(socketConfig);
             connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);
             connManager.setMaxTotal(200);
             connManager.setDefaultMaxPerRoute(20);
