@@ -1,23 +1,43 @@
 package org.votingsystem.util;
 
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.config.MessageConstraints;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.*;
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.conn.*;
+import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
+import org.apache.http.io.HttpMessageParser;
+import org.apache.http.io.HttpMessageParserFactory;
+import org.apache.http.io.HttpMessageWriterFactory;
+import org.apache.http.io.SessionInputBuffer;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicLineParser;
+import org.apache.http.message.LineParser;
+import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
@@ -30,7 +50,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -45,52 +70,93 @@ public class HttpHelper {
 
     private static final int REQUEST_TIME_OUT = 30000; //30 seconds
 
-    private PoolingHttpClientConnectionManager cm;
+    private PoolingHttpClientConnectionManager connManager;
     private IdleConnectionEvictor connEvictor;
     private RequestConfig requestConfig;
     private SSLConnectionSocketFactory sslSocketFactory;
     private boolean sslMode = false;
     public static HttpHelper INSTANCE = new HttpHelper();
-    
-    
-    private HttpHelper() {
-        cm = new PoolingHttpClientConnectionManager();
-        cm.setMaxTotal(200);
-        cm.setDefaultMaxPerRoute(20);
-        connEvictor = new IdleConnectionEvictor(cm);
-        connEvictor.start();
-        requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
-                .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
-    }
 
-    public void initVotingSystemSSLMode() {
-        log.debug("initVotingSystemSSLMode");
+    // Use custom message parser / writer to customize the way HTTP
+    // messages are parsed from and written out to the data stream.
+    HttpMessageParserFactory<HttpResponse> responseParserFactory = new DefaultHttpResponseParserFactory() {
+        @Override public HttpMessageParser<HttpResponse> create(
+                SessionInputBuffer buffer, MessageConstraints constraints) {
+            LineParser lineParser = new BasicLineParser() {
+                @Override public Header parseHeader(final CharArrayBuffer buffer) {
+                    try {
+                        return super.parseHeader(buffer);
+                    } catch (ParseException ex) {
+                        return new BasicHeader(buffer.toString(), null);
+                    }
+                }
+            };
+            return new DefaultHttpResponseParser(
+                    buffer, lineParser, DefaultHttpResponseFactory.INSTANCE, constraints) {
+                @Override protected boolean reject(final CharArrayBuffer line, int count) {
+                    // try to ignore all garbage preceding a status line infinitely
+                    return false;
+                }
+            };
+        }
+    };
+    HttpMessageWriterFactory<HttpRequest> requestWriterFactory = new DefaultHttpRequestWriterFactory();
+    // Use a custom connection factory to customize the process of
+    // initialization of outgoing HTTP connections. Beside standard connection
+    // configuration parameters HTTP connection factory can define message
+    // parser / writer routines to be employed by individual connections.
+    HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> connFactory = new ManagedHttpClientConnectionFactory(
+            requestWriterFactory, responseParserFactory);
+
+    // Use custom DNS resolver to override the system DNS resolution.
+    DnsResolver dnsResolver = new SystemDefaultDnsResolver() {
+        @Override public InetAddress[] resolve(final String host) throws UnknownHostException {
+            /*if (host.equalsIgnoreCase("myhost")) {
+                return new InetAddress[] { InetAddress.getByAddress(new byte[] {127, 0, 0, 1}) };
+            } else { return super.resolve(host);  }*/
+            return super.resolve(host);
+        }
+
+    };
+
+    private HttpHelper() {
         try {
-            sslMode =  true;
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
-            X509Certificate sslServerCert = ContextVS.getInstance().getVotingSystemSSLCerts().iterator().next();
-            trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
-            SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-            // Allow TLSv1 protocol only
-            sslSocketFactory = new SSLConnectionSocketFactory( sslcontext, new String[] { "TLSv1" }, null,
-                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+            SSLContext sslcontext = null;
+            if(ContextVS.getInstance().getVotingSystemSSLCerts() != null) {
+                log.debug("loading SSLContext with app certifcates");
+                X509Certificate sslServerCert = ContextVS.getInstance().getVotingSystemSSLCerts().iterator().next();
+                trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
+                sslcontext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            } else {
+                sslcontext = SSLContexts.createSystemDefault();
+                log.debug("loading default SSLContext");
+            }
+            // Create a registry of custom connection socket factories for supported protocol schemes.
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", PlainConnectionSocketFactory.INSTANCE)
+                    .register("https", new SSLConnectionSocketFactory(sslcontext))
+                    .build();
+            // Create socket configuration
+            SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
+            // Configure the connection manager to use socket configuration either
+            // by default or for a specific host.
+            connManager.setDefaultSocketConfig(socketConfig);
+            connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);
+            connManager.setMaxTotal(200);
+            connManager.setDefaultMaxPerRoute(20);
+            connEvictor = new IdleConnectionEvictor(connManager);
+            connEvictor.start();
+            requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
+                    .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
+        } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }
 
     public static HttpHelper getInstance() {
         return INSTANCE;
     }
 
-    private CloseableHttpClient getHttpClient() {
-        if(sslMode) {
-            return HttpClients.custom().setSSLSocketFactory(sslSocketFactory).setDefaultRequestConfig(
-                    requestConfig).build();
-        } else return HttpClients.custom().setConnectionManager(cm).setDefaultRequestConfig(
-                requestConfig).build();
-    }
 
     public void shutdown () {
         try {
@@ -109,7 +175,8 @@ public class HttpHelper {
         HttpResponse response = null;
         HttpGet httpget = null;
         ContentTypeVS responseContentType = null;
-        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
+                requestConfig).build();;
         try {
             httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
@@ -138,6 +205,7 @@ public class HttpHelper {
         } finally {
             try {
                 if(response != null) EntityUtils.consume(response.getEntity());
+                if(httpClient != null) httpClient.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -149,7 +217,8 @@ public class HttpHelper {
         HttpPost httpPost = null;
         ContentTypeVS responseContentType = null;
         HttpResponse response = null;
-        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
+                requestConfig).build();;
         try {
             httpPost = new HttpPost(serverURL);
             ContentType contentType = null;
@@ -179,6 +248,7 @@ public class HttpHelper {
         } finally {
             try {
                 if(response != null) EntityUtils.consume(response.getEntity());
+                if(httpClient != null) httpClient.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -190,7 +260,8 @@ public class HttpHelper {
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         HttpResponse response = null;
-        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
+                requestConfig).build();;
         try {
             httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
@@ -224,6 +295,7 @@ public class HttpHelper {
             if(httpPost != null) httpPost.abort();
         } finally {
             if(response != null) EntityUtils.consume(response.getEntity());
+            if(httpClient != null) httpClient.close();
             return responseVS;
         }
     }
@@ -236,7 +308,8 @@ public class HttpHelper {
         HttpPost httpPost = null;
         HttpResponse response = null;
         ContentTypeVS responseContentType = null;
-        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
+                requestConfig).build();
         try {
             httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
@@ -271,6 +344,7 @@ public class HttpHelper {
             if(httpPost != null) httpPost.abort();
         }  finally {
             if(response != null) EntityUtils.consume(response.getEntity());
+            if(httpClient != null) httpClient.close();
             return responseVS;
         }
     }
@@ -294,7 +368,7 @@ public class HttpHelper {
                         // Close expired connections
                         connMgr.closeExpiredConnections();
                         // Optionally, close connections that have been idle longer than 30 sec
-                        connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+                        connMgr.closeIdleConnections(5, TimeUnit.SECONDS);
                     }
                 }
             } catch (InterruptedException ex) {

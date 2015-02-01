@@ -22,7 +22,7 @@ import java.util.concurrent.Future
 isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2015/01/31 00:00:00", dateFinish:"2014/02/01 00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2015/02/01 00:00:00", dateFinish:"2014/02/2 00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:4000, numUsersWithoutRepresentativeWithVote:3800,
                        numRepresentatives:5, numRepresentativesWithVote:4,

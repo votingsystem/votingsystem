@@ -33,6 +33,10 @@ environments {
             } else {
                 dbCreate = "update" // one of 'create', 'create-drop','update'
                 url="jdbc:postgresql://localhost:5432/AccessControl"
+                maxActive = 100
+                maxIdle=30
+                maxWait=10000
+                validationQuery = "SELECT 1"
             }
         }
     }

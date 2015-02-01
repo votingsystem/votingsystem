@@ -169,7 +169,7 @@ public class VotingSystemApp extends Application {
                 String accessControlServerURL = null;
                 String cooinsServerURL = null;
                 if(loadedFromJar) {
-                    HttpHelper.getInstance().initVotingSystemSSLMode();
+                    //HttpHelper must load app certificates for SSL connections
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
                     cooinsServerURL = ContextVS.getMessage("prodCooinsServerURL");
                 } else {
