@@ -5,20 +5,18 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.*;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
@@ -69,7 +67,7 @@ public class HttpHelper {
     private IdleConnectionEvictor connEvictor;
     private RequestConfig requestConfig;
     private SSLConnectionSocketFactory sslSocketFactory;
-    private boolean sslMode = false;
+    private CloseableHttpClient httpClient;
     public static HttpHelper INSTANCE = new HttpHelper();
 
     // Use custom message parser / writer to customize the way HTTP
@@ -145,6 +143,8 @@ public class HttpHelper {
             requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
                     .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
             //connManager.setMaxPerRoute(new HttpRoute(new HttpHost("www.sistemavotacion.org/TimestampServer", 80)), 100);
+            httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
+                    requestConfig).build();
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }
 
@@ -159,6 +159,7 @@ public class HttpHelper {
                 connEvictor.shutdown();
                 connEvictor.join();
             }
+            if(httpClient != null) httpClient.close();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -167,11 +168,9 @@ public class HttpHelper {
     public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
         log.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         HttpGet httpget = null;
         ContentTypeVS responseContentType = null;
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
-                requestConfig).build();;
         try {
             httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
@@ -199,8 +198,7 @@ public class HttpHelper {
             if(httpget != null) httpget.abort();
         } finally {
             try {
-                if(response != null) EntityUtils.consume(response.getEntity());
-                //if(httpClient != null) httpClient.close();
+                if(response != null) response.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -211,9 +209,7 @@ public class HttpHelper {
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         ContentTypeVS responseContentType = null;
-        HttpResponse response = null;
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
-                requestConfig).build();;
+        CloseableHttpResponse response = null;
         try {
             httpPost = new HttpPost(serverURL);
             ContentType contentType = null;
@@ -242,8 +238,7 @@ public class HttpHelper {
             if(httpPost != null) httpPost.abort();
         } finally {
             try {
-                if(response != null) EntityUtils.consume(response.getEntity());
-                //if(httpClient != null) httpClient.close();
+                if(response != null) response.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -254,9 +249,7 @@ public class HttpHelper {
         log.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
-        HttpResponse response = null;
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
-                requestConfig).build();;
+        CloseableHttpResponse response = null;
         try {
             httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
@@ -289,8 +282,9 @@ public class HttpHelper {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         } finally {
-            if(response != null) EntityUtils.consume(response.getEntity());
-            //if(httpClient != null) httpClient.close();
+            try {
+                if(response != null) response.close();
+            } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
     }
@@ -301,10 +295,8 @@ public class HttpHelper {
         if(fileMap == null || fileMap.isEmpty()) throw new Exception(
                 ContextVS.getInstance().getMessage("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         ContentTypeVS responseContentType = null;
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
-                requestConfig).build();
         try {
             httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
@@ -338,8 +330,9 @@ public class HttpHelper {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         }  finally {
-            if(response != null) EntityUtils.consume(response.getEntity());
-            //if(httpClient != null) httpClient.close();
+            try {
+                if(response != null) response.close();
+            } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
     }

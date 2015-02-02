@@ -123,7 +123,7 @@ class EventVSElectionService {
     }
 
     public synchronized ResponseVS generateBackups () {
-        Date dateFinishFrom = DateUtils.addDays(Calendar.getInstance().getTime(), -1)
+        Date dateFinishFrom = DateUtils.addDays(Calendar.getInstance().getTime(), -1).getTime()
         List<EventVSElection> terminatedPolls = EventVSElection.createCriteria().list {
             gt("dateFinish", dateFinishFrom)
             eq("backupAvailable", Boolean.FALSE)
