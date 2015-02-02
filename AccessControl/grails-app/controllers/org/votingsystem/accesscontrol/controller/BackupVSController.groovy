@@ -35,7 +35,7 @@ class BackupVSController {
             final EventVS event = eventVS
             final String emailRequest = params.email
             runAsync {
-                ResponseVS backupResponse = eventVSElectionService.generateBackup(event)
+                ResponseVS backupResponse = eventVSElectionService.generateBackup(event, null)
                 if(ResponseVS.SC_OK == backupResponse?.statusCode) {
                     BackupRequestVS backupRequest = new BackupRequestVS(
                             filePath:backupResponse.message, type:TypeVS.VOTING_EVENT, email:emailRequest)
@@ -66,7 +66,7 @@ class BackupVSController {
             if(!event) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))]
             } else {
-                ResponseVS requestBackup = eventVSElectionService.generateBackup(event)
+                ResponseVS requestBackup = eventVSElectionService.generateBackup(event, null)
                 if(ResponseVS.SC_OK == requestBackup?.statusCode) redirect(uri: requestBackup.message)
                 else return [responseVS:requestBackup]
             }

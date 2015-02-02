@@ -39,7 +39,8 @@ class ServerInfoController {
 		File certChain = grailsApplication.mainContext.getResource(
 			grailsApplication.config.vs.certChainPath).getFile();
 		serverInfo.certChainPEM = certChain?.text
-		serverInfo.timeStampCertPEM = new String(timeStampService.getSigningCertPEMBytes())
+        byte[] getSigningCertPEMBytes = timeStampService.getSigningCertPEMBytes()
+        if(getSigningCertPEMBytes) serverInfo.timeStampCertPEM = new String(getSigningCertPEMBytes)
 		
 		response.setHeader('Access-Control-Allow-Origin', "*")
 		

@@ -26,7 +26,7 @@ class TestingController {
         EventVSElection eventVS = null;
         EventVSElection.withTransaction {eventVS = EventVSElection.get(15L)}
         //representativeService.getAccreditationsBackupForEvent(eventVS)
-        eventVSElectionService.generateBackup(eventVS)
+        eventVSElectionService.generateBackup(eventVS, null)
         render "generated backup for eventVS '${eventVS.id}'"
         return false
     }

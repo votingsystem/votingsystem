@@ -135,7 +135,7 @@ class EventVSElectionService {
     }
 
     @Transactional
-	public synchronized ResponseVS generateBackup (EventVSElection eventVS) throws ExceptionVS {
+	public synchronized ResponseVS generateBackup (EventVSElection eventVS, String serverURL) throws ExceptionVS {
 		log.debug("generateBackup - eventVS: ${eventVS.id}")
         /*if (eventVS.isActive(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))
@@ -167,6 +167,7 @@ class EventVSElectionService {
         int numTotalAccessRequests = AccessRequestVS.countByStateAndEventVSElection(AccessRequestVS.State.OK, eventVS)
         def backupMetaInfMap = [numVotes:numTotalVotes, numAccessRequest:numTotalAccessRequests]
         Map eventMetaInfMap = eventVSService.getMetaInfMap(eventVS)
+        if(serverURL) eventMetaInfMap.serverURL = serverURL
         eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
         metaInfFile.write((eventMetaInfMap as JSON).toString())
         DecimalFormat formatted = new DecimalFormat("00000000");
