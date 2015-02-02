@@ -144,6 +144,7 @@ public class HttpHelper {
             connEvictor.start();
             requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
                     .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
+            //connManager.setMaxPerRoute(new HttpRoute(new HttpHost("www.sistemavotacion.org/TimestampServer", 80)), 100);
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }
 
@@ -199,7 +200,7 @@ public class HttpHelper {
         } finally {
             try {
                 if(response != null) EntityUtils.consume(response.getEntity());
-                if(httpClient != null) httpClient.close();
+                //if(httpClient != null) httpClient.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -242,7 +243,7 @@ public class HttpHelper {
         } finally {
             try {
                 if(response != null) EntityUtils.consume(response.getEntity());
-                if(httpClient != null) httpClient.close();
+                //if(httpClient != null) httpClient.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
             return responseVS;
         }
@@ -289,7 +290,7 @@ public class HttpHelper {
             if(httpPost != null) httpPost.abort();
         } finally {
             if(response != null) EntityUtils.consume(response.getEntity());
-            if(httpClient != null) httpClient.close();
+            //if(httpClient != null) httpClient.close();
             return responseVS;
         }
     }
@@ -338,7 +339,7 @@ public class HttpHelper {
             if(httpPost != null) httpPost.abort();
         }  finally {
             if(response != null) EntityUtils.consume(response.getEntity());
-            if(httpClient != null) httpClient.close();
+            //if(httpClient != null) httpClient.close();
             return responseVS;
         }
     }
