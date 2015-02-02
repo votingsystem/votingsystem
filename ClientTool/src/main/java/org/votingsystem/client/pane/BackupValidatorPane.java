@@ -12,13 +12,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.backup.ClaimBackupValidator;
-import org.votingsystem.client.backup.ElectionBackupValidator;
-import org.votingsystem.client.backup.ValidationEvent;
-import org.votingsystem.client.backup.ValidatorListener;
+import org.votingsystem.client.backup.*;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -36,11 +34,12 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
 
     private java.util.List<String> errorList;
     private MetaInf metaInf;
-    private int filesProcessed = 0;
-    private int numFilesToProcess = 0;
+    private Integer filesProcessed = 0;
+    private Integer numFilesToProcess = 0;
     private Button errorsButton;
     private ProgressBar progressBar;
     private Text progressMessageText;
+    private Text progressMessageCounter;
     private VBox progressBox;
     private Button cancelButton;
     private BackupValidationTask runningTask;
@@ -53,7 +52,9 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         progressBox.setPrefWidth(330);
         progressBox.setPrefHeight(150);
         progressMessageText = new Text();
-        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #555;");
+        progressMessageCounter = new Text();
+        progressMessageText.setStyle("-fx-font-size: 14;-fx-font-weight: bold;-fx-fill: #555;");
+        progressMessageCounter.setStyle("-fx-font-size: 9;-fx-font-weight: bold;-fx-fill: #888;-fx-start-margin: 10;");
         progressBar = new ProgressBar();
         progressBar.setPrefWidth(200);
         progressBar.setLayoutY(10);
@@ -63,13 +64,13 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         errorsButton.setVisible(false);
         cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> {
-                runningTask.cancel();
+                runningTask.cancelValidation();
                 getScene().getWindow().hide();
             });
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         buttonHBox.getChildren().addAll(errorsButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonHBox, new Insets(30, 20, 20, 20));
-        progressBox.getChildren().addAll(progressMessageText, progressBar);
+        progressBox.getChildren().addAll(progressMessageText, progressMessageCounter, progressBar);
         getChildren().addAll(progressBox, buttonHBox);
         runningTask = new BackupValidationTask(decompressedBackupBaseDir);
         File backupDir = new File(decompressedBackupBaseDir);
@@ -101,7 +102,11 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                     ContextVS.getInstance().getMessage("errorLbl");
             errorsButton.setText(errorList.size() + " " + msg);
         }
-        progressBar.setProgress(filesProcessed++/numFilesToProcess);
+        Platform.runLater(() ->  {
+            progressBar.setProgress((filesProcessed++).doubleValue() / numFilesToProcess.doubleValue());
+            progressMessageCounter.setText(filesProcessed + "/" + numFilesToProcess);
+        });
+
         switch(responseVS.getData()) {
             case REPRESENTATIVE:
                 progressMessageText.setText(ContextVS.getMessage("validatingRepresentativeDataMsg"));
@@ -166,12 +171,13 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         showMessage(sb.toString(), ContextVS.getInstance().getMessage("votingBackupErrorCaption"));
     }
 
-    public static void validateBackup(String decompressedBackupBaseDir, MetaInf metaInf) {
+    public static void validateBackup(String decompressedBackupBaseDir, MetaInf metaInf, Window parentWindow) {
         log.debug("validateBackup - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
         final BackupValidatorPane validatorPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
         validatorPane.init();
         Platform.runLater(() -> {
             Stage stage = new Stage();
+            stage.initOwner(parentWindow);
             stage.initModality(Modality.WINDOW_MODAL);
             //stage.initOwner(window);
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
@@ -186,23 +192,29 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
     public class BackupValidationTask extends Task<ResponseVS> {
 
         private String decompressedBackupBaseDir = null;
+        private BackupValidator<ResponseVS> backupValidator;
 
         public BackupValidationTask(String decompressedBackupBaseDir) {
             this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         }
 
+        public void cancelValidation() {
+            if(backupValidator != null) backupValidator.cancel();
+            this.cancel(true);
+        }
+
         @Override protected ResponseVS call() throws Exception {
-            log.debug("worker.doInBackground: ");
+            log.debug("worker.doInBackground");
             try {
                 switch(metaInf.getType()) {
                     case VOTING_EVENT:
-                        ElectionBackupValidator electionBackupValidator = new ElectionBackupValidator(
+                        backupValidator = new ElectionBackupValidator (
                                 decompressedBackupBaseDir, BackupValidatorPane.this);
-                        return electionBackupValidator.call();
+                        return backupValidator.call();
                     case CLAIM_EVENT:
-                        ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(
+                        backupValidator = new ClaimBackupValidator(
                                 decompressedBackupBaseDir, BackupValidatorPane.this);
-                        return claimBackupValidator.call();
+                        return backupValidator.call();
                 }
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);

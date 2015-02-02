@@ -1,4 +1,4 @@
-//grails prod run-script src/scripts/genElectionBackup.groovy -DserverURL=http://www.sistemavotacion.org/AccessControl -DeventId=1 --stacktrace
+//grails run-script src/scripts/genElectionBackup.groovy -DserverURL=http://www.sistemavotacion.org/AccessControl -DeventId=1 --stacktrace
 import grails.util.Metadata
 import org.votingsystem.accesscontrol.service.EventVSElectionService
 import org.votingsystem.model.EventVSElection

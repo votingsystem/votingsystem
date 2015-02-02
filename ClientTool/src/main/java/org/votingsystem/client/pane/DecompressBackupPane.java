@@ -17,7 +17,6 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -119,10 +118,7 @@ public class DecompressBackupPane extends VBox {
 
         @Override protected ResponseVS call() throws Exception {
             ResponseVS responseVS = null;
-            for (int i = 0; i < 500; i++) {
-                updateProgress(i, 500);
-                Thread.sleep(5);
-            }
+            updateMessage(ContextVS.getMessage("openingFileMsg"));
             updateMessage(ContextVS.getMessage("decompressProgressBarLabel", zipFilePath));
             byte[] buffer = new byte[2048];
             try{
@@ -137,7 +133,7 @@ public class DecompressBackupPane extends VBox {
                 while( zipEntry != null && !runningTask.isDone()){
                     fileIndex++;
                     updateProgress(fileIndex, zipFileSize);
-                    String msg = ContextVS.getInstance().getMessage("decompressProgressBarMsg", fileIndex, zipFileSize);
+                    String msg = ContextVS.getMessage("decompressProgressBarMsg", fileIndex, zipFileSize);
                     updateMessage(msg);
                     String fileName = zipEntry.getName();
                     File newFile = new File(outputFolder + File.separator + fileName);
@@ -145,7 +141,6 @@ public class DecompressBackupPane extends VBox {
                         newFile.mkdirs();
                         log.debug("mkdirs : "+ newFile.getAbsoluteFile());
                     } else {
-                        new File(newFile.getParent()).mkdirs();
                         FileOutputStream fos = new FileOutputStream(newFile);
                         int len;
                         while ((len = zis.read(buffer)) > 0) {

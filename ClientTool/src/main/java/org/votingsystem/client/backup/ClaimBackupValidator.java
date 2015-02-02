@@ -18,12 +18,13 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class ClaimBackupValidator implements Callable<ResponseVS> {
+public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
     
     private static Logger log = Logger.getLogger(ClaimBackupValidator.class);
 
@@ -35,6 +36,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     private MetaInf metaInf;
     private String eventURL = null;
     private String claimFileName = null;
+    private AtomicBoolean isCanceled = new AtomicBoolean(false);
     
     public ClaimBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
@@ -53,7 +55,11 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         }
         return result;
     }
-    
+
+    @Override public void cancel() {
+        isCanceled.set(true);
+    }
+
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
         claimFileName = ContextVS.getMessage("claimFileName");
@@ -118,6 +124,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         int numClaimsERROR = 0;
         Map<String, String> signersNifMap = new HashMap<String, String>();
         for(File batchDir:batchDirs) {
+            if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
             if(batchDir.isDirectory()) {
                 File[] claims = batchDir.listFiles();
                 for(File claim : claims) {

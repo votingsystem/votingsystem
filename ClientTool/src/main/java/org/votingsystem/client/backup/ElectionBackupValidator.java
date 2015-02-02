@@ -19,12 +19,13 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class ElectionBackupValidator implements Callable<ResponseVS> {
+public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     
     private static Logger log = Logger.getLogger(ElectionBackupValidator.class);
 
@@ -42,6 +43,7 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
     private String accessRequestFileName = "accessRequest_";
     private Map<Long, Long> optionsMap = new HashMap<Long, Long>();
     private Map<String, Long> representativeVotesMap = new HashMap<String, Long>();
+    private AtomicBoolean isCanceled = new AtomicBoolean(false);
     
     public ElectionBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
@@ -62,7 +64,11 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
         }
         return result;
     }
-    
+
+    public void cancel() {
+        isCanceled.set(true);
+    }
+
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
         String backupPath = backupDir.getAbsolutePath();
@@ -104,16 +110,19 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
         }
         
         ResponseVS responseVS = validateRepresentativeData();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         notifyValidationListener(responseVS.getStatusCode(), responseVS.getMessage(),
                 ValidationEvent.REPRESENTATIVE_FINISH);
         String representativeValidationDurationStr = DateUtils.
                 getElapsedTimeHoursMinutesFromMilliseconds(System.currentTimeMillis() - begin);
         responseVS = validateAccessRequests();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         notifyValidationListener(responseVS.getStatusCode(), 
                 responseVS.getMessage(), ValidationEvent.ACCESS_REQUEST_FINISH);
         String accessRequestValidationDurationStr = DateUtils.
                 getElapsedTimeHoursMinutesFromMilliseconds(System.currentTimeMillis() - begin);
         responseVS = validateVotes();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         String votesValidationDurationStr = DateUtils.
                 getElapsedTimeHoursMinutesFromMilliseconds(System.currentTimeMillis() - begin);
         notifyValidationListener(responseVS.getStatusCode(),votesValidationDurationStr, ValidationEvent.VOTE_FINISH);
@@ -177,6 +186,7 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
                     log.debug("checking dir: " + batchDir.getAbsolutePath());
                     File[] repDocs = batchDir.listFiles();
                     for(File repDoc: repDocs) {
+                        if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
                         numRepresented++;
                         numRepresentations++;
                         byte[] fileBytes = FileUtils.getBytesFromFile(repDoc);
@@ -197,8 +207,8 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
                         ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(signedFile,
                                 trustAnchors, metaInf.getDateBegin(),  metaInf.getDateFinish(), representativeNif,
                                 timeStampServerCert);
-                        log.debug("responseVS.getStatusCode(): " +  responseVS.getStatusCode());
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                            log.debug("ERROR - responseVS.getStatusCode(): " +  responseVS.getStatusCode());
                             errorList.add(responseVS.getMessage());
                         }
                         notifyValidationListener(responseVS.getStatusCode(), 
@@ -273,6 +283,7 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
             if(batchDir.isDirectory()) {
                 File[] accessRequests = batchDir.listFiles();
                 for(File accessRequest : accessRequests) {
+                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName(), null);
@@ -330,6 +341,7 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
             if(batchDir.isDirectory()) {
                 File[] votes = batchDir.listFiles();
                 for(File vote : votes) {
+                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
                     byte[] voteBytes = FileUtils.getBytesFromFile(vote);
                     SignedFile signedFile = new SignedFile(voteBytes, vote.getName(), null);
                     ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
@@ -382,7 +394,6 @@ public class ElectionBackupValidator implements Callable<ResponseVS> {
                         option.getNumVotesResult(), optionsMap.get(option.getId())));
             }
         }
-
         if(metaInf.getRepresentativesData().getNumRepresentativesWithVote() != numRepresentativeVotes) {
             statusCode = ResponseVS.SC_ERROR;
             errorList.add(ContextVS.getInstance().getMessage("numRepresentativesVotesErrorMsg",

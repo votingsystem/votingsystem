@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate
 
 log = TestUtils.init(VoteValidation.class)
 
-File voteFile = TestUtils.getFileFromResources("voting/vote_00000028.p7m")
+File voteFile = TestUtils.getFileFromResources("voting/vote.p7m")
 byte[] voteBytes = FileUtils.getBytesFromFile(voteFile)
 File trustedCertsFile = TestUtils.getFileFromResources("voting/systemTrustedCerts.pem")
 Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(

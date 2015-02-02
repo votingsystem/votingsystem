@@ -64,7 +64,8 @@ public class EventVSInfoPane extends VBox {
             dateBeginHBox.getChildren().addAll(Utils.getSpacer(), representativesButton);
         }
         validateBackupButton = new Button(ContextVS.getMessage("validateBackupLbl"));
-        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.validateBackup(decompressedBackupBaseDir, metaInf));
+        validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.validateBackup(decompressedBackupBaseDir,
+                metaInf, getScene().getWindow()));
         validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
         HBox.setMargin(validateBackupButton, new Insets(0, 0, 0, 10));
         dateBeginHBox.getChildren().add(validateBackupButton);
