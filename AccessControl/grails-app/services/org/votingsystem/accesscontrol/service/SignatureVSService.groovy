@@ -281,6 +281,10 @@ class SignatureVSService {
         return validateSignersCerts(smimeMessage)
     }
 
+    public CertUtils.CertValidatorResultVS verifyCertificate(X509Certificate certToValidate) throws Exception {
+        return CertUtils.verifyCertificate(getTrustAnchors(), false, [certToValidate])
+    }
+
     public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {
         CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                 getTrustAnchors(), false, [userVS.getCertificate()])

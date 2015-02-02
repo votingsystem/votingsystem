@@ -91,8 +91,9 @@ public class ActorVS implements Serializable {
         return state;
     }
 
-    public void setState(State state) {
+    public ActorVS setState(State state) {
         this.state = state;
+        return this;
     }
 
     public String getName() {
@@ -143,8 +144,9 @@ public class ActorVS implements Serializable {
         return x509Certificate;
     }
 
-    public void setX509Certificate(X509Certificate x509Certificate) {
+    public ActorVS setX509Certificate(X509Certificate x509Certificate) {
         this.x509Certificate = x509Certificate;
+        return this;
     }
 
     public CertificateVS getCertificateVS() {

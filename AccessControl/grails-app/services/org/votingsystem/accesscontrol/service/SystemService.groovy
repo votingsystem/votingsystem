@@ -32,7 +32,7 @@ class SystemService {
     }
 
     public ControlCenterVS getControlCenter() {
-        if(controlCenter == null) controlCenter = loadControlCenter()
+        if(controlCenter == null) runAsync { loadControlCenter() }
         return controlCenter
     }
 
@@ -59,10 +59,11 @@ class SystemService {
             userVS = responseVS.userVS
             adminsArray.add(userVS.getNif())
         }
-        getSystemUser().getMetaInfJSON().put("adminsDNI", adminsArray)
-        getSystemUser().setMetaInf(getSystemUser().getMetaInfJSON().toString())
-        getSystemUser().save()
-        log.debug("$methodName - admins list: '${getSystemUser().getMetaInfJSON().adminsDNI}'")
+        UserVS userVS = getSystemUser();
+        userVS.getMetaInfJSON().put("adminsDNI", adminsArray)
+        userVS.setMetaInf(userVS.getMetaInfJSON().toString())
+        userVS.save()
+        log.debug("$methodName - admins list: '${userVS.getMetaInfJSON().adminsDNI}'")
         return systemUser.getMetaInfJSON().adminsDNI
     }
 
@@ -93,8 +94,8 @@ class SystemService {
         } else  targetURL = "${grailsApplication.config.vs.dev.controlCenterURL}"
         ResponseVS responseVS = ((SubscriptionVSService)grailsApplication.mainContext.getBean(
                 "subscriptionVSService")).checkControlCenter(targetURL)
-        if(ResponseVS.SC_OK == responseVS.statusCode) return responseVS.data.controlCenterVS
-        return null;
+        controlCenter = responseVS.data?.controlCenterVS
+        return controlCenter;
     }
 
     public UserVS getSystemUser() {

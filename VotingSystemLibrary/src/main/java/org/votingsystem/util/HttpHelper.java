@@ -177,10 +177,9 @@ public class HttpHelper {
             response = httpClient.execute(httpget);
             log.debug("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
-            for (int i = 0; i < headers.length; i++) {
-            System.out.println(headers[i]);
-            }*/
-            log.debug(response.getStatusLine().toString());
+            for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
+            log.debug(response.getStatusLine().toString() + " - connManager stats: " +
+                    connManager.getTotalStats().toString());
             log.debug("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
@@ -218,7 +217,8 @@ public class HttpHelper {
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
             log.debug("----------------------------------------");
-            log.debug(response.getStatusLine().toString());
+            log.debug(response.getStatusLine().toString() + " - connManager stats: " +
+                    connManager.getTotalStats().toString());
             log.debug("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
@@ -247,8 +247,6 @@ public class HttpHelper {
     public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
             String serverURL, String... headerNames) throws IOException {
         log.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
-
-
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;
@@ -263,7 +261,8 @@ public class HttpHelper {
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             log.debug("------------------------------------------------");
-            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
+            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
+                    " - connManager stats: " + connManager.getTotalStats().toString());
             log.debug("------------------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
@@ -284,7 +283,6 @@ public class HttpHelper {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         } finally {
-            log.debug("sendData - connManager stats: " + connManager.getTotalStats().toString());
             try {
                 if(response != null) response.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
@@ -321,7 +319,8 @@ public class HttpHelper {
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             log.debug("----------------------------------------");
-            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
+            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
+                    " - connManager stats: " + connManager.getTotalStats().toString());
             log.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);

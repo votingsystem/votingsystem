@@ -23,9 +23,7 @@ import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-
 import java.io.File;
-
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
@@ -75,7 +73,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         getChildren().addAll(progressBox, buttonHBox);
         runningTask = new BackupValidationTask(decompressedBackupBaseDir);
         File backupDir = new File(decompressedBackupBaseDir);
-        numFilesToProcess = backupDir.listFiles().length;
+        numFilesToProcess = metaInf.getNumFilesToProcess().intValue();
     }
 
     private void init() {
@@ -179,7 +177,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
             stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             stage.setScene(new Scene(validatorPane));
-            stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
+            stage.setTitle(ContextVS.getMessage("checkBackupCaption"));
             stage.centerOnScreen();
             stage.show();
         });

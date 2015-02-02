@@ -3,10 +3,7 @@ package org.votingsystem.client.model;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.FieldEventVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
@@ -199,17 +196,14 @@ public class MetaInf {
         result.append("</html>");
         return result.toString();
     }
-    
+
+    public Long getNumFilesToProcess() {
+        return numAccessRequest + numVotes + representativesData.getNumRepresented() +
+                representativesData.getNumRepresentedWithAccessRequest();
+    }
+
     public String getEventURL() {
-        if(serverURL == null) return null;
-        if(TypeVS.VOTING_EVENT == type) {
-            return serverURL + "/eventVSElection/" + id;
-        } else if (TypeVS.CLAIM_EVENT == type) {
-            return serverURL + "/eventVSClaim/" + id;
-        } else {
-            log.error("Unknown server type: " + type);
-            return null;
-        }
+        return EventVS.getURL(type, serverURL, id);
     }
         
     public String getRepresentativesHTML() {

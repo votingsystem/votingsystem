@@ -1,9 +1,11 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtils
+import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
@@ -14,6 +16,7 @@ import java.security.cert.X509Certificate
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@Transactional
 class SubscriptionVSService {
 
     static transactional = true
@@ -95,57 +98,42 @@ class SubscriptionVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:device)
     }
 
-    ResponseVS checkControlCenter(String serverURL) {
+    ResponseVS checkControlCenter(String serverURL) throws ExceptionVS {
         log.debug "checkControlCenter - serverURL: ${serverURL}"
-        String msg = null
         CertificateVS controlCenterCert = null
-        X509Certificate x509controlCenterCertDB = null
         serverURL = StringUtils.checkURL(serverURL)
         ControlCenterVS controlCenterDB = ControlCenterVS.findWhere(serverURL:serverURL)
         if(controlCenterDB) {
             controlCenterCert = CertificateVS.findWhere(actorVS:controlCenterDB, state:CertificateVS.State.OK)
-            if(controlCenterCert) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
+            if(controlCenterCert) return new ResponseVS(statusCode:ResponseVS.SC_OK,
                     data:[controlCenterVS:controlCenterDB, certificateVS:controlCenterCert ])
         }
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON)
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             ActorVS actorVS = ActorVS.parse(JSON.parse(responseVS.message))
-            if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) {
-                msg = messageSource.getMessage('actorNotControlCenterMsg', [actorVS.serverURL].toArray(), locale)
-                log.error("checkControlCenter - ERROR - ${msg}")
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)
-            }
+            if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
+                    messageSource.getMessage('actorNotControlCenterMsg', [actorVS.serverURL].toArray(), locale))
             if(!actorVS.getServerURL().equals(serverURL)) {
-                msg = messageSource.getMessage('serverURLMismatch', [serverURL, actorVS.getServerURL()].toArray(), locale)
+                String msg = messageSource.getMessage('serverURLMismatch', [serverURL, actorVS.getServerURL()].toArray(), locale)
                 log.debug("checkControlCenter - WARNING!!! - ${msg}")
-                //return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)
                 actorVS.setServerURL(serverURL)
             }
-            if(!controlCenterDB) {
-                controlCenterDB = new ControlCenterVS(actorVS)
-                controlCenterDB.setState(ActorVS.State.OK)
-                ControlCenterVS.withTransaction {controlCenterDB.save()}
-                log.debug("checkControlCenter - SAVED NEW CONTROL CENTER id: '${controlCenterDB.id}'")
-            }
-            // _ TODO _ validate control center cert
-            controlCenterDB.certChainPEM = actorVS.certChainPEM
             X509Certificate x509controlCenterCert = CertUtils.fromPEMToX509CertCollection(
                     actorVS.certChainPEM.getBytes()).iterator().next()
+            if(!controlCenterDB) controlCenterDB = new ControlCenterVS(actorVS).setX509Certificate(
+                    x509controlCenterCert).setState(ActorVS.State.OK).save()
+            controlCenterDB.certChainPEM = actorVS.certChainPEM
+            ((SignatureVSService)grailsApplication.mainContext.getBean("signatureVSService")).verifyCertificate(
+                    x509controlCenterCert)
             controlCenterCert = new CertificateVS(actorVS:controlCenterDB, certChainPEM:actorVS.certChainPEM.getBytes(),
                     content:x509controlCenterCert?.getEncoded(),state:CertificateVS.State.OK,
                     serialNumber:x509controlCenterCert?.getSerialNumber()?.longValue(),
                     validFrom:x509controlCenterCert?.getNotBefore(), type:CertificateVS.Type.ACTOR_VS,
-                    validTo:x509controlCenterCert?.getNotAfter())
-            controlCenterCert.save();
-            log.debug("checkControlCenter - added CertificateVS  ${controlCenterCert.id}")
-            controlCenterDB.x509Certificate = x509controlCenterCert
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
-                    data:[controlCenterVS:controlCenterDB, certificateVS:controlCenterCert])
-        } else {
-            msg = messageSource.getMessage('controlCenterConnectionError', null, locale)
-            log.error("checkControlCenter - ERROR CONECTANDO CONTROL CENTER - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)
-        }
+                    validTo:x509controlCenterCert?.getNotAfter()).save();
+            log.debug("checkControlCenter - added CertificateVS  ${controlCenterCert.id} - serverURL: $serverURL")
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[controlCenterVS:controlCenterDB,
+                     certificateVS:controlCenterCert])
+        } else throw new ExceptionVS(messageSource.getMessage('controlCenterConnectionError', null, locale))
     }
 
     public ResponseVS associateControlCenter (MessageSMIME messageSMIMEReq) {
