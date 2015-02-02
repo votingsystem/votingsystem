@@ -1,9 +1,6 @@
 package org.votingsystem.util;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -12,6 +9,7 @@ import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.*;
+import org.apache.http.conn.HttpConnectionFactory;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -61,11 +59,10 @@ public class HttpHelper {
     
     private static Logger log = Logger.getLogger(HttpHelper.class);
 
-    private static final int REQUEST_TIME_OUT = 30000; //30 seconds
+    private static final int REQUEST_TIME_OUT = 60000; //60 seconds
 
     private PoolingHttpClientConnectionManager connManager;
     private IdleConnectionEvictor connEvictor;
-    private RequestConfig requestConfig;
     private SSLConnectionSocketFactory sslSocketFactory;
     private CloseableHttpClient httpClient;
     public static HttpHelper INSTANCE = new HttpHelper();
@@ -137,14 +134,17 @@ public class HttpHelper {
             //connManager.setDefaultSocketConfig(socketConfig);
             connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);
             connManager.setMaxTotal(200);
-            connManager.setDefaultMaxPerRoute(20);
+            connManager.setDefaultMaxPerRoute(50);
             connEvictor = new IdleConnectionEvictor(connManager);
             connEvictor.start();
-            requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
+            //HttpRoute httpRouteVS = new HttpRoute( new HttpHost("www.sistemavotacion.org", 80));
+            //connManager.setMaxPerRoute(httpRouteVS, 100);
+            /* timeouts with large simulations ->
+            RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
                     .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
-            //connManager.setMaxPerRoute(new HttpRoute(new HttpHost("www.sistemavotacion.org/TimestampServer", 80)), 100);
             httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
-                    requestConfig).build();
+                    requestConfig).build();*/
+            httpClient = HttpClients.custom().setConnectionManager(connManager).build();
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
     }
 
@@ -247,6 +247,8 @@ public class HttpHelper {
     public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
             String serverURL, String... headerNames) throws IOException {
         log.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
+
+
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;
@@ -282,6 +284,7 @@ public class HttpHelper {
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         } finally {
+            log.debug("sendData - connManager stats: " + connManager.getTotalStats().toString());
             try {
                 if(response != null) response.close();
             } catch (Exception ex) { log.error(ex.getMessage(), ex);}
