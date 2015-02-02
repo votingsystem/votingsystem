@@ -134,11 +134,11 @@ public class HttpHelper {
             //connManager.setDefaultSocketConfig(socketConfig);
             connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);
             connManager.setMaxTotal(200);
-            connManager.setDefaultMaxPerRoute(50);
+            connManager.setDefaultMaxPerRoute(100);
             connEvictor = new IdleConnectionEvictor(connManager);
             connEvictor.start();
-            //HttpRoute httpRouteVS = new HttpRoute( new HttpHost("www.sistemavotacion.org", 80));
-            //connManager.setMaxPerRoute(httpRouteVS, 100);
+            HttpRoute httpRouteVS = new HttpRoute( new HttpHost("www.sistemavotacion.org", 80));
+            connManager.setMaxPerRoute(httpRouteVS, 200);
             /* timeouts with large simulations ->
             RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(REQUEST_TIME_OUT)
                     .setConnectionRequestTimeout(REQUEST_TIME_OUT).setSocketTimeout(REQUEST_TIME_OUT).build();
