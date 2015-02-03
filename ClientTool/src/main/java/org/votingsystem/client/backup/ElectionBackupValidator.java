@@ -18,7 +18,6 @@ import java.io.File;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

@@ -69,8 +69,10 @@ public class WebSocketService extends Service<ResponseVS> {
     }
 
     public static WebSocketService getInstance() {
-        if(instance == null) instance =  new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
-                ContextVS.getInstance().getCooinServer());
+        try {
+            if(instance == null) instance =  new WebSocketService(ContextVS.getInstance().getVotingSystemSSLCerts(),
+                    ContextVS.getInstance().getCooinServer());
+        } catch(Exception ex) { log.error(ex.getMessage(), ex);}
         return instance;
     }
 

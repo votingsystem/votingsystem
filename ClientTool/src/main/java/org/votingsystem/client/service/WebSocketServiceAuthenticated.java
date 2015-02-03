@@ -77,8 +77,10 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     }
 
     public static WebSocketServiceAuthenticated getInstance() {
-        if(instance == null) instance =  new WebSocketServiceAuthenticated(ContextVS.getInstance().
-                getVotingSystemSSLCerts(), ContextVS.getInstance().getCooinServer());
+        try {
+            if(instance == null) instance =  new WebSocketServiceAuthenticated(ContextVS.getInstance().
+                    getVotingSystemSSLCerts(), ContextVS.getInstance().getCooinServer());
+        } catch (Exception ex) { log.error(ex.getMessage(), ex);}
         return instance;
     }
 

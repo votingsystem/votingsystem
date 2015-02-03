@@ -192,33 +192,31 @@ public class BrowserVS extends Region implements WebKitHost {
                 });
         }
         final WebHistory history = webView.getEngine().getHistory();
-        history.getEntries().addListener(new ListChangeListener<WebHistory.Entry>(){
-            @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
+        history.getEntries().addListener(new ListChangeListener<WebHistory.Entry>() {
+            @Override
+            public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
-                if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
+                if (history.getCurrentIndex() > 0) prevButton.setDisable(false);
                 //log.debug("currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
                 String params = "";
-                if(locationField.getText().contains("?")) {
+                if (locationField.getText().contains("?")) {
                     params = locationField.getText().substring(locationField.getText().indexOf("?"),
                             locationField.getText().length());
                 }
                 WebHistory.Entry selectedEntry = history.getEntries().get(history.getEntries().size() - 1);
                 log.debug("history change - selectedEntry: " + selectedEntry);
                 String newURL = selectedEntry.getUrl();
-                if(!newURL.contains("?")) newURL = newURL + params;
-                if(history.getEntries().size() > 1 && selectedEntry.getTitle() != null) tabPane.getSelectionModel().
+                if (!newURL.contains("?")) newURL = newURL + params;
+                if (history.getEntries().size() > 1 && selectedEntry.getTitle() != null) tabPane.getSelectionModel().
                         getSelectedItem().setText(selectedEntry.getTitle());
                 locationField.setText(newURL);
             }
         });
-        webView.getEngine().setOnError(event ->  log.error(event.getMessage(), event.getException()));
+        webView.getEngine().setOnError(event -> log.error(event.getMessage(), event.getException()));
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().locationProperty().addListener((observable, oldValue, newValue) ->
                 locationField.setText(newValue));
         webView.getEngine().setCreatePopupHandler(config -> {//handle popup windows
-            //WebView newView = new WebView();
-            //newView.setFontScale(0.8);
-            //new BrowserVS(newView).show(700, 700, false);
             return newTab(null, null, null).getEngine();
         });
         webView.getEngine().getLoadWorker().stateProperty().addListener(

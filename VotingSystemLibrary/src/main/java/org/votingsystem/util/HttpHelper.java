@@ -39,7 +39,12 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.CertUtils;
+
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -47,6 +52,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -109,25 +115,56 @@ public class HttpHelper {
 
     };
 
+    // Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    try {
+                        return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
+                    } catch (Exception ex) {log.error(ex.getMessage(), ex);}
+                    return null;
+                }
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    log.debug("trustAllCerts - checkClientTrusted");
+                }
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
+                    log.debug("trustAllCerts - checkServerTrusted");
+                    try {
+                        CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
+                                Arrays.asList(certs));
+                    } catch(Exception ex) {
+                        throw new CertificateException(ex.getMessage());
+                    }
+                }
+            }
+    };
+
     private HttpHelper() {
         try {
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
             SSLContext sslcontext = null;
+            SSLConnectionSocketFactory sslsf = null;
             if(ContextVS.getInstance().getVotingSystemSSLCerts() != null) {
-                log.debug("loading SSLContext with app certifcates");
+                log.debug("loading SSLContext with app certificates");
                 X509Certificate sslServerCert = ContextVS.getInstance().getVotingSystemSSLCerts().iterator().next();
                 trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
                 sslcontext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+                sslsf = new SSLConnectionSocketFactory(sslcontext,  new String[] { "TLSv1" }, null,
+                        SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+                //this is for BrowserVS
+                /*SSLContext sslContext1 = SSLContext.getInstance("SSL");
+                sslContext1.init(null, trustAllCerts, new java.security.SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sslContext1.getSocketFactory());*/
             } else {
                 sslcontext = SSLContexts.createSystemDefault();
+                sslsf = new SSLConnectionSocketFactory(sslcontext);
                 log.debug("loading default SSLContext");
             }
             // Create a registry of custom connection socket factories for supported protocol schemes.
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("http", PlainConnectionSocketFactory.INSTANCE)
-                    .register("https", new SSLConnectionSocketFactory(sslcontext))
-                    .build();
+                    .register("https", sslsf).build();
             //Create socket configuration
             //SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
             //Configure the connection manager to use socket configuration either by default or for a specific host.

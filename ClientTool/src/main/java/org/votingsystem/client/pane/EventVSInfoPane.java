@@ -18,8 +18,6 @@ import org.votingsystem.util.DateUtils;
 
 import java.io.File;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

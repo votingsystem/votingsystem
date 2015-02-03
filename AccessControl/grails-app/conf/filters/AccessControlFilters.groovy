@@ -7,6 +7,8 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
+
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
@@ -38,7 +40,7 @@ class AccessControlFilters {
                     log.debug "request.contentType: " + request.contentType
                     log.debug "getRemoteHost: " + request.getRemoteHost()
                     log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
-                    log.debug "User agent: " + request.getHeader("User-Agent")
+                    log.debug "User agent: " + request.getHeader("User-Agent") + " - Accept-Language: " + request.getHeader("Accept-Language")
                     log.debug "-----------------------------------------------------------------------------------"
                 }
                 if(!params.int("max")) params.max = 20

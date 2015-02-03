@@ -20,10 +20,11 @@ dependencies {
         exclude module: 'hibernate-core'
         exclude module: 'commons-cli'
         exclude module: 'groovy-all'
+        exclude module: 'itextpdf'
     }
 
-	compile ('org.apache.httpcomponents:httpmime:4.3.6',
-		'org.apache.httpcomponents:httpclient:4.3.6',
+	compile ('org.apache.httpcomponents:httpmime:4.4-beta1',
+		'org.apache.httpcomponents:httpclient:4.4-beta1',
 		'net.sf.json-lib:json-lib:2.4:jdk15',
 		'org.bouncycastle:bcprov-jdk16:1.46',
 		'org.bouncycastle:bcmail-jdk16:1.46',
@@ -55,6 +56,11 @@ project.ext {
     mainClass = "ClientTool"
 }
 
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+    }
+}
 
 distZip {
     archiveName "${rootProject.clientToolName}.zip"

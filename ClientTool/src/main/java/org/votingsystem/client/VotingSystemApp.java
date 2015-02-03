@@ -29,17 +29,14 @@ import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.HttpHelper;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -65,39 +62,21 @@ public class VotingSystemApp extends Application {
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
     private Long deviceId;
 
-    static {
-        //Without this WebView always send requests with 'en-us,en;q=0.5'
-        URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
-            public URLStreamHandler createURLStreamHandler(String protocol) {
-                if (protocol.toLowerCase().contains("http") || protocol.toLowerCase().contains("https")) {
-                    return new URLStreamHandler() {
-                        protected URLConnection openConnection(URL url) throws IOException {
-                            URLConnection reConnection = new sun.net.www.protocol.http.HttpURLConnection(url, null);
-                            reConnection.setRequestProperty("Accept-Language", Locale.getDefault().getLanguage());
-                            reConnection.addRequestProperty("Accept-Language", Locale.getDefault().getLanguage());
-                            return reConnection;
-                        }
-                    };
-                }
-                // Don't handle a non-http protocol, so just return null and let
-                // the system return the default one.
-                return null;
-            }
-        });
-
-    }
-
     // Create a trust manager that does not validate certificate chains
-    TrustManager[] trustAllCerts = new TrustManager[] {
+    private static TrustManager[] trustAllCerts = new TrustManager[] {
         new X509TrustManager() {
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
+                System.out.print("trustAllCerts - getAcceptedIssuers");
+                try {
+                    return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
+                } catch (Exception ex) { log.error(ex.getMessage(), ex);}
+                return null;
             }
             public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                log.debug("trustAllCerts - checkClientTrusted");
+                System.out.print("trustAllCerts - checkClientTrusted");
             }
             public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
-                log.debug("trustAllCerts - checkServerTrusted");
+                System.out.print("trustAllCerts - checkServerTrusted");
                 try {
                     CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
                             Arrays.asList(certs));
@@ -163,6 +142,7 @@ public class VotingSystemApp extends Application {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+
                 } catch (GeneralSecurityException ex) {
                     log.error(ex.getMessage(), ex);
                 }
@@ -178,6 +158,12 @@ public class VotingSystemApp extends Application {
                 }
                 ResponseVS responseVS = null;
                 try {
+                    CookieManager cookieManager = new CookieManager();
+                    Map<String, List<String>> headers = new LinkedHashMap<String, List<String>>();
+                    headers.put("Set-Cookie", Arrays.asList("Accept-Language=" + Locale.getDefault().getLanguage()));
+                    cookieManager.put(new URI(accessControlServerURL), headers);
+                    cookieManager.put(new URI(cooinsServerURL), headers);
+                    CookieHandler.setDefault(cookieManager);
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         setVotingSystemAvailable(true, primaryStage);
@@ -320,7 +306,6 @@ public class VotingSystemApp extends Application {
         });
     }
 
-
     private void setVotingSystemAvailable(final boolean available, Stage primaryStage) {
         PlatformImpl.runLater(() -> {
             if(available) mainBox.getChildren().add(1, votingSystemOptionsBox);
@@ -390,8 +375,6 @@ public class VotingSystemApp extends Application {
     }
 
     class Delta { double x, y; }
-
-
 
     public static void main(String[] args) {
         ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);

@@ -3,7 +3,10 @@ package org.votingsystem.client.model;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
+import org.votingsystem.model.FieldEventVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 

@@ -21,7 +21,9 @@ import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
 import java.io.File;
+
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
@@ -69,7 +71,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
             });
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         buttonHBox.getChildren().addAll(errorsButton, Utils.getSpacer(), cancelButton);
-        setMargin(buttonHBox, new Insets(30, 20, 20, 20));
+        setMargin(buttonHBox, new Insets(0, 20, 20, 20));
         progressBox.getChildren().addAll(progressMessageText, progressMessageCounter, progressBar);
         getChildren().addAll(progressBox, buttonHBox);
         runningTask = new BackupValidationTask(decompressedBackupBaseDir);

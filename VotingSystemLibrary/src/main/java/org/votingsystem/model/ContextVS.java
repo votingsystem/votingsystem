@@ -1,6 +1,5 @@
 package org.votingsystem.model;
 
-import com.itextpdf.text.pdf.PdfName;
 import groovy.util.ConfigObject;
 import groovy.util.ConfigSlurper;
 import iaik.pkcs.pkcs11.Mechanism;
@@ -64,7 +63,6 @@ public class ContextVS {
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
-    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
 
     public static String APPDIR;
     public static String WEBVIEWDIR;
@@ -214,14 +212,6 @@ public class ContextVS {
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                         providedProperties));
             }
-            votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
-                    FileUtils.getBytesFromInputStream(Thread.currentThread().
-                            getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
-            votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
-            for(X509Certificate certificate: votingSystemSSLCerts) {
-                TrustAnchor anchor = new TrustAnchor(certificate, null);
-                votingSystemSSLTrustAnchors.add(anchor);
-            }
             Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdown(); } });
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -230,11 +220,22 @@ public class ContextVS {
         }
     }
 
-    public Collection<X509Certificate> getVotingSystemSSLCerts() {
+    public Collection<X509Certificate> getVotingSystemSSLCerts() throws Exception {
+        if(votingSystemSSLCerts == null) {
+            votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
+                    FileUtils.getBytesFromInputStream(Thread.currentThread().
+                            getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
+            votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: votingSystemSSLCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                votingSystemSSLTrustAnchors.add(anchor);
+            }
+        }
         return votingSystemSSLCerts;
     }
 
-    public Set<TrustAnchor> getVotingSystemSSLTrustAnchors() {
+    public Set<TrustAnchor> getVotingSystemSSLTrustAnchors() throws Exception {
+        if (votingSystemSSLTrustAnchors == null) getVotingSystemSSLCerts();
         return votingSystemSSLTrustAnchors;
     }
 

@@ -84,7 +84,8 @@ class SystemService {
             if(ResponseVS.SC_OK == responseVS.statusCode) {
                 log.debug("$methodName - There are '${controlCenters.size()}' with state 'OK' - fetching Control Center " +
                         "with url: '${controlCenterVS.serverURL}' ")
-                return responseVS.data.controlCenterVS
+                controlCenter = responseVS.data?.controlCenterVS
+                return controlCenter
             } else throw new ExceptionVS(responseVS.getMessage())
         }
         log.error("Missing Control Center!!!!")

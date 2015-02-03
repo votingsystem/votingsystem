@@ -17,6 +17,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -47,7 +48,6 @@ public class DecompressBackupPane extends VBox {
         VBox progressBox = new VBox();
         progressBox.setAlignment(Pos.CENTER);
         progressBox.setPrefWidth(300);
-        progressBox.setPrefHeight(150);
         Text progressMessageText = new Text();
         progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #555;");
         ProgressBar progressBar = new ProgressBar();
@@ -61,7 +61,8 @@ public class DecompressBackupPane extends VBox {
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonBox = new HBox();
         footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
-        progressBox.setMargin(footerButtonBox, new Insets(30, 30, 0, 20));
+        progressBox.setMargin(footerButtonBox, new Insets(30, 20, 0, 10));
+        progressBox.setMargin(progressMessageText, new Insets(0, 0, 10, 0));
         progressBox.getChildren().addAll(progressMessageText, progressBar, footerButtonBox);
         runningTask = new DecompressBackupTask(zipFilePath, outputFolder);
         progressMessageText.textProperty().bind(runningTask.messageProperty());

@@ -47,6 +47,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     
     private static Logger log = Logger.getLogger(PDFSignedSender.class);
 
+    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
+
     private String urlToSendDocument;
     private String timeStampServerURL;
     private String location;
@@ -98,7 +100,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         //sap.setSignDate(cal);
         //sap.setContact("This is the Contact");
         sap.setAcro6Layers(true);
-        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  ContextVS.PDF_SIGNATURE_NAME);
+        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  PDF_SIGNATURE_NAME);
         //dic.setDate(new PdfDate(sap.getSignDate()));
         dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).getField("CN"));
         log.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(
