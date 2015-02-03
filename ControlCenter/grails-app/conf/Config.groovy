@@ -93,7 +93,7 @@ environments {
     development {
         if(Metadata.current.isWarDeployed()) {
             grails.logging.jul.usebridge = false
-            grails.serverURL = "http://www.sistemavotacion.org/ControlCenter"
+            grails.serverURL = "https://www.sistemavotacion.org/ControlCenter"
         } else {
             grails.logging.jul.usebridge = true
             grails.resources.debug = true// -> rendering problems
@@ -102,7 +102,7 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://www.sistemavotacion.org/ControlCenter"
+        grails.serverURL = "https://www.sistemavotacion.org/ControlCenter"
     }
     test {
         grails.logging.jul.usebridge = true
