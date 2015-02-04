@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-bolt.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
     <title><g:message code="serverNameLbl"/></title>
     <asset:stylesheet src="votingSystem.css"/>
     <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>

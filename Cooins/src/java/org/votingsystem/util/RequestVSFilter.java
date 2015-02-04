@@ -1,4 +1,4 @@
-package org.votingsystem.cooin.util;
+package org.votingsystem.util;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;

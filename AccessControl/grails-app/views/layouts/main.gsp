@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-pie-chart.png')}" type="image/x-icon">
     <meta name="HandheldFriendly" content="true" />
     <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" />
-
+    <meta name="mobile-web-app-capable" content="yes">
     <title><g:message code="appTitle"/></title>
     <asset:stylesheet src="votingSystem.css"/>
     <vs:webcss dir="font-awesome/css" file="font-awesome.min.css"/>
