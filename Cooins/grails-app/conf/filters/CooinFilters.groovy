@@ -57,16 +57,14 @@ class CooinFilters {
                 Map fileMap = ((MultipartHttpServletRequest)request)?.getFileMap();
                 Set<String> fileNames = fileMap.keySet()
                 for(String key : fileNames) {
-                    //String key = fileMap.keySet().iterator().next()
                     if(key.contains(":")) {
                         String[] keySplitted = key.split(":")
                         String fileName = keySplitted[0]
                         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
                         log.debug "filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
                         if(contentTypeVS == null) {
-                            return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                                    messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
-                                            request.getLocale())))
+                            return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST, messageSource.
+                                    getMessage('unknownContentType', [keySplitted[1]].toArray(), request.getLocale())))
                         }
                         ResponseVS responseVS = null
                         SMIMEMessage smimeMessageReq = null
@@ -114,13 +112,11 @@ class CooinFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty() || "element".equals(params.controller)) return
+                if("GET".equals(request.method) || !request.contentTypeVS?.isPKCS7() || "assets".equals(
+                        params.controller) || params.isEmpty() || "element".equals(params.controller)) return
                 ResponseVS responseVS = null
                 try {
-                    request.contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-                    if(!request.contentTypeVS?.isPKCS7()) return;
                     byte[] requestBytes = org.apache.commons.io.IOUtils.toByteArray(request.getInputStream())
-                    //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(request.contentTypeVS) {
@@ -149,9 +145,8 @@ class CooinFilters {
                         return printOutput(response,responseVS)
                 } catch(Exception ex) {
                     return printOutput(response, ResponseVS.getExceptionResponse(params.controller, params.action,
-                            ex, StackTraceUtils.extractRootCause(ex)).save())
+                            ex, StackTraceUtils.extractRootCause(ex)))
                 }
-
             }
 
             after = { model ->

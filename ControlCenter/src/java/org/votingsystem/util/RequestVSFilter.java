@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.ContentTypeVS;
+
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,8 @@ public class RequestVSFilter implements Filter {
 
     public class RequestVSWrapper extends HttpServletRequestWrapper {
 
+        private ContentTypeVS contentTypeVS;
+
         public RequestVSWrapper(HttpServletRequest request) {
             super(request);
             if(request.getCookies() != null) {
@@ -36,12 +40,21 @@ public class RequestVSFilter implements Filter {
                         headerMap.put(LANGUAGE_HEADER, cookie.getValue());
                 }
             }
+            contentTypeVS = ContentTypeVS.getByName(request.getContentType());
         }
 
         private Map<String, String> headerMap = new HashMap<String, String>();
 
         public void addHeader(String name, String value) {
             headerMap.put(name, value);
+        }
+
+        public ContentTypeVS getContentTypeVS() {
+            return contentTypeVS;
+        }
+
+        public void setContentTypeVS(ContentTypeVS contentTypeVS) {
+            this.contentTypeVS = contentTypeVS;
         }
 
         @Override public String getHeader(String name) {
@@ -69,4 +82,5 @@ public class RequestVSFilter implements Filter {
         }
 
     }
+
 }

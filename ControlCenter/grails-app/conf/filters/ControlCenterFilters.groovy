@@ -52,14 +52,11 @@ class ControlCenterFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty() || "element".equals(params.controller)) return
+                if("GET".equals(request.method) || !request.contentTypeVS?.isPKCS7() || "assets".equals(
+                        params.controller) || params.isEmpty() || "element".equals(params.controller)) return
                 ResponseVS responseVS = null
-                byte[] requestBytes = null
                 try {
-                    request.contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-                    if(!request.contentTypeVS?.isPKCS7()) return;
-                    requestBytes = getBytesFromInputStream(request.getInputStream())
-                    //log.debug "before  - requestBytes: ${new String(requestBytes)}"
+                    byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(request.contentTypeVS) {
@@ -91,7 +88,6 @@ class ControlCenterFilters {
                     return printOutput(response, ResponseVS.getExceptionResponse(params.controller, params.action,
                             ex, StackTraceUtils.extractRootCause(ex)).save())
                 }
-
             }
 
             after = { model ->

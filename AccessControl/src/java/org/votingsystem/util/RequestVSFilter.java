@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.ContentTypeVS;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -20,6 +22,7 @@ public class RequestVSFilter implements Filter {
 
     public static final String LANGUAGE_HEADER = "Accept-Language";
 
+
     @Override public void init(FilterConfig filterConfig) throws ServletException { }
 
     @Override
@@ -31,7 +34,10 @@ public class RequestVSFilter implements Filter {
 
     @Override public void destroy() { }
 
+
     public class RequestVSWrapper extends HttpServletRequestWrapper {
+
+        private ContentTypeVS contentTypeVS;
 
         public RequestVSWrapper(HttpServletRequest request) {
             super(request);
@@ -41,12 +47,21 @@ public class RequestVSFilter implements Filter {
                         headerMap.put(LANGUAGE_HEADER, cookie.getValue());
                 }
             }
+            contentTypeVS = ContentTypeVS.getByName(request.getContentType());
         }
 
         private Map<String, String> headerMap = new HashMap<String, String>();
 
         public void addHeader(String name, String value) {
             headerMap.put(name, value);
+        }
+
+        public ContentTypeVS getContentTypeVS() {
+            return contentTypeVS;
+        }
+
+        public void setContentTypeVS(ContentTypeVS contentTypeVS) {
+            this.contentTypeVS = contentTypeVS;
         }
 
         @Override public String getHeader(String name) {

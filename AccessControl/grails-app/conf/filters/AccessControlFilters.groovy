@@ -61,7 +61,6 @@ class AccessControlFilters {
                     Map fileMap = ((MultipartHttpServletRequest)request)?.getFileMap();
                     Set<String> fileNames = fileMap.keySet()
                     for(String key : fileNames) {
-                        //String key = fileMap.keySet().iterator().next()
                         if(key.contains(":")) {
                             String[] keySplitted = key.split(":")
                             String fileName = keySplitted[0]
@@ -97,9 +96,6 @@ class AccessControlFilters {
                                                 messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                                     }
                                     break;
-                                case ContentTypeVS.JSON_SIGNED:
-                                    smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(fileMap.get(key).getBytes()));
-                                    break;
                                 case ContentTypeVS.JSON:
                                 case ContentTypeVS.TEXT:
                                     params[fileName] = fileMap.get(key).getBytes()
@@ -127,14 +123,11 @@ class AccessControlFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty() || "element".equals(params.controller)) return
+                if("GET".equals(request.method) || !request.contentTypeVS?.isPKCS7() || "assets".equals(
+                        params.controller) || params.isEmpty() || "element".equals(params.controller)) return
                 ResponseVS responseVS = null
                 try {
-                    request.contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-                    if(!request.contentTypeVS?.isPKCS7()) return;
-                    //"${request.getInputStream()}".getBytes() -> problems with pdf requests
                     byte[] requestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-                    //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(request.contentTypeVS) {
@@ -203,7 +196,7 @@ class AccessControlFilters {
                             return printOutputStream(response, encryptResponse)
                         } else {
                             messageSMIME.metaInf = encryptResponse.message
-                            messageSMIME.save()
+                            MessageSMIME.withTransaction { messageSMIME.save() }
                             return printOutput(response, encryptResponse)
                         }
                     case ContentTypeVS.VOTE:
@@ -294,12 +287,13 @@ class AccessControlFilters {
                         " - message: ${certValidationResponse.message}"
                 return certValidationResponse
             } else {
-                messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
-                        anonymousSigner:certValidationResponse.data?.anonymousSigner,
-                        userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
-                        eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
-                        base64ContentDigest:smimeMessageReq.getContentDigestStr())
-                MessageSMIME.withTransaction {messageSMIME.save()}
+                MessageSMIME.withTransaction {
+                    messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
+                            anonymousSigner:certValidationResponse.data?.anonymousSigner,
+                            userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
+                            eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
+                            base64ContentDigest:smimeMessageReq.getContentDigestStr()).save()
+                }
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME: messageSMIME)
         } else if(smimeMessageReq) {
