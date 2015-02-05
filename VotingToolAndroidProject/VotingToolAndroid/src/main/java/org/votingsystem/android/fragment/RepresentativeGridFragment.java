@@ -19,6 +19,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,16 +78,6 @@ public class RepresentativeGridFragment extends Fragment
         } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
-        }
-    };
-
-    /**
-     * Perform alphabetical comparison of application entry objects.
-     */
-    public static final Comparator<UserVS> ALPHA_COMPARATOR = new Comparator<UserVS>() {
-        private final Collator sCollator = Collator.getInstance();
-        @Override public int compare(UserVS object1, UserVS object2) {
-            return sCollator.compare(object1.getName(), object2.getName());
         }
     };
 
@@ -195,11 +187,17 @@ public class RepresentativeGridFragment extends Fragment
         getActivity().startService(startIntent);
     }
 
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.representative_grid, menu);
+    }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
+            case R.id.update:
+                fetchItems(offset);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

@@ -8,6 +8,11 @@
           android:icon="@android:drawable/ic_menu_search"
           android:actionViewClass="android.support.v7.widget.SearchView" />
 
+    <item android:id="@+id/update"
+        android:orderInCategory="1"
+        votingSystem:showAsAction="never"
+        android:title="@string/update_lbl"/>
+
 
     <group android:id="@+id/general_items">
         <item android:id="@+id/publish_document"

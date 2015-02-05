@@ -96,7 +96,7 @@ environments {
         if(Metadata.current.isWarDeployed()) {
             grails.logging.jul.usebridge = false
             grails.serverURL = "https://www.sistemavotacion.org/Cooins"
-            webSocketURL="wss://cooins:8443/Cooins/websocket/service"
+            webSocketURL="wss://www.sistemavotacion.org/Cooins/websocket/service"
         } else {
             grails.resources.debug = true
             grails.serverURL = "http://cooins:8086/Cooins"
@@ -107,7 +107,7 @@ environments {
     production {
         grails.logging.jul.usebridge = false
         grails.serverURL = "https://www.sistemavotacion.org/Cooins"
-        webSocketURL="wss://cooins:8443/Cooins/websocket/service"
+        webSocketURL="wss://www.sistemavotacion.org/Cooins/websocket/service"
     }
 
 }

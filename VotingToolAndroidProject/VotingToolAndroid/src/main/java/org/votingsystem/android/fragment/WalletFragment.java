@@ -95,16 +95,6 @@ public class WalletFragment extends Fragment {
         }
     };
 
-    /**
-     * Perform alphabetical comparison of application entry objects.
-     */
-    public static final Comparator<UserVS> ALPHA_COMPARATOR = new Comparator<UserVS>() {
-        private final Collator sCollator = Collator.getInstance();
-        @Override public int compare(UserVS object1, UserVS object2) {
-            return sCollator.compare(object1.getName(), object2.getName());
-        }
-    };
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         ((ActionBarActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));

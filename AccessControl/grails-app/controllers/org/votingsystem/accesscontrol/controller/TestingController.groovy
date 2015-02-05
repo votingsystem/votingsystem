@@ -22,14 +22,7 @@ class TestingController {
     def eventVSElectionService
     def representativeService
 
-
     def index() {
-        ResponseVS responseVS = HttpHelper.getInstance().getData("https://www.sistemavotacion.org/AccessControl/serverInfo", null)
-        render responseVS.getMessage()
-        return false
-    }
-
-    def index1() {
         EventVSElection eventVS = null;
         EventVSElection.withTransaction {eventVS = EventVSElection.get(15L)}
         //representativeService.getAccreditationsBackupForEvent(eventVS)

@@ -54,8 +54,8 @@ grails.project.dependency.resolution = {
         compile(
                 'org.votingsystem:votingsystemlibrary:0.2.0',
                 'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
-                'org.apache.httpcomponents:httpmime:4.4-beta1',
-                'org.apache.httpcomponents:httpclient:4.4-beta1',
+                'org.apache.httpcomponents:httpmime:4.4',
+                'org.apache.httpcomponents:httpclient:4.4',
                 'org.bouncycastle:bcprov-jdk16:1.46',
                 'org.bouncycastle:bcmail-jdk16:1.46',
                 'org.bouncycastle:bcpg-jdk16:1.46',

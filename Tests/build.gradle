@@ -25,8 +25,8 @@ dependencies {
     }*/
 
     compile ('org.votingsystem:votingsystemlibrary:0.2.0',
-            'org.apache.httpcomponents:httpmime:4.4-beta1',
-            'org.apache.httpcomponents:httpclient:4.4-beta1',
+            'org.apache.httpcomponents:httpmime:4.4',
+            'org.apache.httpcomponents:httpclient:4.4',
             'net.sf.json-lib:json-lib:2.4:jdk15',
             'org.bouncycastle:bcprov-jdk16:1.46',
             'org.bouncycastle:bcmail-jdk16:1.46',

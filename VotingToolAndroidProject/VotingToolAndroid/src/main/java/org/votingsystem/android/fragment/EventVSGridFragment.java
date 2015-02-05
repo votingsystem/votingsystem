@@ -77,18 +77,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         }
     };
 
-    /**
-     *
-     *
-     * Perform alphabetical comparison of application entry objects.
-     */
-    public static final Comparator<EventVS> ALPHA_COMPARATOR = new Comparator<EventVS>() {
-        private final Collator sCollator = Collator.getInstance();
-        @Override public int compare(EventVS object1, EventVS object2) {
-            return sCollator.compare(object1.getSubject(), object2.getSubject());
-        }
-    };
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
@@ -204,13 +192,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         LOGD(TAG +  ".onOptionsItemSelected(..)", " - Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId() + " - eventState: " + eventState);
         switch (item.getItemId()) {
-            /*case R.id.reload:
+            case R.id.update:
                 fetchItems(offset);
-                //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                //gridView.invalidateViews();
-                //getLoaderManager().restartLoader(loaderId, null, this);
-                //((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
-                return true;*/
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

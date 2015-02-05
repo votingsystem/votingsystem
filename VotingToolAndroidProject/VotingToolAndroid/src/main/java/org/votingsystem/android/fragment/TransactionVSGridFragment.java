@@ -104,16 +104,6 @@ public class TransactionVSGridFragment extends Fragment
         }
     }
 
-    /**
-     * Perform alphabetical comparison of application entry objects.
-     */
-    public static final Comparator<UserVS> ALPHA_COMPARATOR = new Comparator<UserVS>() {
-        private final Collator sCollator = Collator.getInstance();
-        @Override public int compare(UserVS object1, UserVS object2) {
-            return sCollator.compare(object1.getName(), object2.getName());
-        }
-    };
-
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();

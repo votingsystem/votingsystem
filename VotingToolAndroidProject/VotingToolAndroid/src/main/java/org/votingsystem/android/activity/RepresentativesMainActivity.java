@@ -103,11 +103,6 @@ public class RepresentativesMainActivity extends ActivityBase {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         AlertDialog.Builder builder = null;
         switch (item.getItemId()) {
-                /*case R.id.reload:
-                fetchItems(offset);
-                rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                getLoaderManager().restartLoader(loaderId, null, this);
-                return true;*/
             case R.id.cancel_anonymouys_representation:
                 builder = UIUtils.getMessageDialogBuilder(
                         getString(R.string.cancel_anonymouys_representation_lbl),
