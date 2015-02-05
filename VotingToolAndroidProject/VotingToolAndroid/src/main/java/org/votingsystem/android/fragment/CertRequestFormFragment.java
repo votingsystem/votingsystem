@@ -77,9 +77,9 @@ public class CertRequestFormFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        String pin = intent.getStringExtra(PIN_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(pin != null) launchUserCertRequestService(pin);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchUserCertRequestService(
+                (String) responseVS.getData());
         else {
             showProgress(false, true);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

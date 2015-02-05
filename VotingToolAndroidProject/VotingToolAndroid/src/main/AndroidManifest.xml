@@ -25,7 +25,8 @@
         <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.CertResponseActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.CertResponseActivity" android:noHistory="true"
+            android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.ConfirmImageActivity"
             android:theme="@style/ThemeVS"/>

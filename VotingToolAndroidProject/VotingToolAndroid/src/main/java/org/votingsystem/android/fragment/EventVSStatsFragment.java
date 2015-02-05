@@ -17,16 +17,17 @@
 package org.votingsystem.android.fragment;
 
 import android.database.Cursor;
+import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -36,7 +37,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
@@ -121,12 +121,20 @@ public class EventVSStatsFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 setProgressDialogVisible(false);
             }
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error){
+                handler.proceed();//for SSL self-signed certs
+            }
         });
         webview.loadUrl(serverURL);
     }
 
     private void loadHTMLContent(String baseURL, String htmlContent) {
         WebView webview = (WebView) rootView.findViewById(R.id.webview);
+        webview.setWebViewClient(new WebViewClient() {
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error){
+                handler.proceed();//for SSL self-signed certs
+            }
+        });
         webview.getSettings().setJavaScriptEnabled(true);
         webview.loadDataWithBaseURL(baseURL, htmlContent, "text/html", "UTF-8", "");
     }

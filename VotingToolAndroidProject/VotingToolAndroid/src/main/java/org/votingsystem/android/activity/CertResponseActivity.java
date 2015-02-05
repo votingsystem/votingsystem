@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -75,7 +74,8 @@ public class CertResponseActivity extends ActionBarActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore(intent.getStringExtra(PIN_KEY));
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore((String) responseVS.getData());
         }
     };
 
@@ -159,20 +159,21 @@ public class CertResponseActivity extends ActionBarActivity {
                         " - certificates.size(): " + certificates.size());
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
-
+                LOGD(TAG + ".updateKeyStore", "===== FIX THIS!!!");
+                /*
                 String walletBase64 = PrefUtils.getWallet(contextVS);
                 JSONArray wallet = null;
                 if(walletBase64 != null) {
                     byte[] walletBytes = contextVS.decryptMessage(walletBase64.getBytes());
                     wallet = new JSONArray(new String(walletBytes, "UTF-8"));
-                }
+                }*/
                 keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, null, certsArray);
                 PrefUtils.putAppCertState(contextVS.getAccessControl().getServerURL(),
                         State.WITH_CERTIFICATE, user.getNif(), contextVS);
                 PrefUtils.putPin(Integer.valueOf(pin), contextVS);
-                if(wallet != null) {
+                /*if(wallet != null) {
                     Wallet.saveWallet(wallet, pin, contextVS);
-                }
+                }*/
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(user, this);
                 insertPinButton.setVisibility(View.GONE);

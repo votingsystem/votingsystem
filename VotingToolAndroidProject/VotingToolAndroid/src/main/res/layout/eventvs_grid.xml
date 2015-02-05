@@ -50,8 +50,8 @@
                     android:columnWidth="250dp"
                     android:numColumns="auto_fit"
                     android:layout_margin="5dp"
-                    android:verticalSpacing="4dp"
-                    android:horizontalSpacing="4dp"
+                    android:verticalSpacing="7dp"
+                    android:horizontalSpacing="7dp"
                     android:stretchMode="columnWidth"
                     android:gravity="center"
                     android:drawSelectorOnTop="false"/>
