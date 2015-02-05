@@ -32,7 +32,7 @@
                     android:singleLine="true"
                     android:ellipsize="end" />
                 <LinearLayout android:id="@+id/connection_status_box"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/bkg_vs"
                     android:paddingTop="3dp"
@@ -47,6 +47,7 @@
                         android:textSize="@dimen/text_size_medium"
                         android:textColor="@color/body_text_1_inverse"
                         android:maxLines="1"
+                        android:text="email@eweq"
                         android:singleLine="true"
                         android:ellipsize="end" />
                     <ImageView android:id="@+id/connection_status_img"
@@ -60,7 +61,6 @@
                     <TextView android:id="@+id/connection_status_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:textStyle="bold|italic"
                         android:textSize="10dp"
                         android:textColor="#ffbe00"
