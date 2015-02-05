@@ -93,7 +93,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             try {
                 log.debug("WebSocketTask - Connecting to " + targetServer.getWebSocketURL() + " ...");
                 client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
+                    @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
                                 consumeMessage(message);

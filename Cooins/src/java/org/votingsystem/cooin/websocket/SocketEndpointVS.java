@@ -13,8 +13,7 @@ import java.nio.ByteBuffer;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-//@ServerEndpoint(value = "/websocket/service", configurator = SocketConfigurator.class)
-@ServerEndpoint(value = "/websocket/service")
+@ServerEndpoint(value = "/websocket/service", configurator = SocketConfigurator.class)
 public class SocketEndpointVS {
 
     private static Logger log = Logger.getLogger(SocketEndpointVS.class);

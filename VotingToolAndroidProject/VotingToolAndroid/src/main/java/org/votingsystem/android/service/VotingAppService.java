@@ -17,8 +17,8 @@ import org.votingsystem.model.OperationVS;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.URI_KEY;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

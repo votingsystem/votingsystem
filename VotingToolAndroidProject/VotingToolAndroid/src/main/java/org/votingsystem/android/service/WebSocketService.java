@@ -31,9 +31,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.net.URI;
@@ -161,7 +159,6 @@ public class WebSocketService extends Service {
                     X509Certificate serverCert = contextVS.getSSLServerCert();
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
                     byte[] p12KeyStoreBytes = KeyStoreUtils.getBytes(p12Store, "".toCharArray());
-                    // Grizzly ssl configuration
                     SSLContextConfigurator sslContext = new SSLContextConfigurator();
                     sslContext.setTrustStoreType("PKCS12");
                     sslContext.setTrustStoreBytes(p12KeyStoreBytes);
