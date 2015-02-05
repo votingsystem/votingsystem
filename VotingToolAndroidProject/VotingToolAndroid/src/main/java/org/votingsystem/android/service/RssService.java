@@ -36,7 +36,7 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * from https://android.googlesource.com/platform/development/+/master/samples/RSSReader/

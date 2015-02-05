@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.makeLogTag;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.STATE_KEY;

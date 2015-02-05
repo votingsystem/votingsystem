@@ -30,7 +30,7 @@ import org.votingsystem.util.ResponseVS;
 
 import java.lang.ref.WeakReference;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

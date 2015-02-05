@@ -22,10 +22,10 @@ import android.os.AsyncTask;
 
 import java.lang.ref.WeakReference;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGE;
-import static org.votingsystem.android.util.LogUtils.LOGW;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
+import static org.votingsystem.util.LogUtils.LOGW;
+import static org.votingsystem.util.LogUtils.makeLogTag;
 
 
 /**

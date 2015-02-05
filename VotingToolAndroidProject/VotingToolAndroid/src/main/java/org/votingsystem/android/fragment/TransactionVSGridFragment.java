@@ -48,7 +48,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {

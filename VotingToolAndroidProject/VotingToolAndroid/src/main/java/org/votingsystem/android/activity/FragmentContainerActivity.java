@@ -26,7 +26,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

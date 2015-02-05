@@ -40,7 +40,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

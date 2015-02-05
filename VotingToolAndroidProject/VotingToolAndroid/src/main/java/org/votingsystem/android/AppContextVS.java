@@ -29,10 +29,12 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.AESParams;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
@@ -45,13 +47,14 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGE;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -82,7 +85,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private String cooinServerURL;
     private UserVS userVS;
     private Long deviceId;
-
+    private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private AtomicInteger notificationId = new AtomicInteger(1);
 
@@ -109,10 +112,18 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             PrefUtils.registerPreferenceChangeListener(this, this);
             state = PrefUtils.getAppCertState(this, accessControlURL);
             userVS = PrefUtils.getSessionUserVS(this);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+            byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
+                    "VotingSystemSSLCert.pem"));
+            Collection<X509Certificate> votingSystemSSLCerts =
+                    CertUtils.fromPEMToX509CertCollection(certBytes);
+            sslServerCert = votingSystemSSLCerts.iterator().next();
+            HttpHelper.init(sslServerCert);
+        } catch(Exception ex) { ex.printStackTrace(); }
 	}
+
+    public X509Certificate getSSLServerCert() {
+        return sslServerCert;
+    }
 
     public Long getDeviceId() {
         return deviceId;
@@ -132,6 +143,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public void finish() {
         stopService(new Intent(getApplicationContext(), WebSocketService.class));
+        HttpHelper.shutdown();
         UIUtils.killApp(true);
     }
 

@@ -31,7 +31,7 @@ import android.text.TextUtils;
 
 import java.io.File;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 // Content Provider for RSS feed information. Each row describes a single
 // RSS feed. See the public static constants at the end of this class

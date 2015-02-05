@@ -2,7 +2,6 @@ package org.votingsystem.android.service;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -25,7 +24,6 @@ import org.votingsystem.model.Cooin;
 import org.votingsystem.model.CooinAccountsInfo;
 import org.votingsystem.model.CooinBatch;
 import org.votingsystem.model.CooinServer;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -47,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

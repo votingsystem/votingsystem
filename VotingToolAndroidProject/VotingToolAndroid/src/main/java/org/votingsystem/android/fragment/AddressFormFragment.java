@@ -24,7 +24,7 @@ import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.Country;
 import org.votingsystem.util.ResponseVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

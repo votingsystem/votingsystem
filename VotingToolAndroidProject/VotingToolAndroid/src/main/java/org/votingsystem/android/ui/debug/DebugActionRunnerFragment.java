@@ -21,7 +21,7 @@ import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
 import org.votingsystem.android.ui.debug.actions.PrefsAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 
 public class DebugActionRunnerFragment extends Fragment {

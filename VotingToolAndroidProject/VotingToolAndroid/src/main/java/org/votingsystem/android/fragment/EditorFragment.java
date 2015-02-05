@@ -21,7 +21,7 @@ import org.votingsystem.util.ResponseVS;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

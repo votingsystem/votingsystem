@@ -34,7 +34,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
-import org.votingsystem.android.util.BuildConfig;
+import org.votingsystem.util.BuildConfig;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
@@ -48,7 +48,7 @@ import org.votingsystem.util.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 
 public abstract class ActivityBase extends ActionBarActivity {

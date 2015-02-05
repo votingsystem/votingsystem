@@ -52,8 +52,8 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGE;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * @author jgzornoza
@@ -158,11 +158,7 @@ public class WebSocketService extends Service {
                 try {
                     KeyStore p12Store = KeyStore.getInstance("PKCS12");
                     p12Store.load(null, null);
-                    byte[] certBytes = FileUtils.getBytesFromInputStream(
-                            getAssets().open("VotingSystemSSLCert.pem"));
-                    Collection<X509Certificate> votingSystemSSLCerts =
-                            CertUtils.fromPEMToX509CertCollection(certBytes);
-                    X509Certificate serverCert = votingSystemSSLCerts.iterator().next();
+                    X509Certificate serverCert = contextVS.getSSLServerCert();
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
                     byte[] p12KeyStoreBytes = KeyStoreUtils.getBytes(p12Store, "".toCharArray());
                     // Grizzly ssl configuration

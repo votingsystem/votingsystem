@@ -20,7 +20,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

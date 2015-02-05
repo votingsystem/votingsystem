@@ -31,7 +31,7 @@ import org.votingsystem.model.AddressVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class SettingsActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {

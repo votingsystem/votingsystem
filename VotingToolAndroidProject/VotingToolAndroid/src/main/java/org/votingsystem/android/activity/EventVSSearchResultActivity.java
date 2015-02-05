@@ -28,7 +28,7 @@ import org.votingsystem.util.ResponseVS;
 
 import java.util.List;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 /**

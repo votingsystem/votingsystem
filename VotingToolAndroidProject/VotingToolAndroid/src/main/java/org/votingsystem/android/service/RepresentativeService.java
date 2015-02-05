@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

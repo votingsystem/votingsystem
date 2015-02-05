@@ -1,20 +1,13 @@
 package filters
 
 import grails.converters.JSON
-import org.apache.http.HttpResponse
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
-import org.votingsystem.signature.smime.ValidationResult
-import org.votingsystem.util.FileUtils
 import javax.servlet.http.HttpServletResponse
-import java.security.cert.X509Certificate;
-import org.votingsystem.model.TypeVS
 import org.springframework.web.multipart.MultipartHttpServletRequest
-import javax.servlet.http.HttpServletRequest
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.*
-import org.springframework.web.servlet.support.RequestContextUtils
 
 /**
  * @author jgzornoza

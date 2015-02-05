@@ -11,7 +11,7 @@ import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.ui.debug.DebugAction;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class BrowserVSAction implements DebugAction {
     private static final String TAG = BrowserVSAction.class.getSimpleName();

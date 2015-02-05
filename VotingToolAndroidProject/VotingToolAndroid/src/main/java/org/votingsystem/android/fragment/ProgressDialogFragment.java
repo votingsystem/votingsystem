@@ -29,7 +29,7 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class ProgressDialogFragment extends DialogFragment {
 

@@ -22,7 +22,7 @@ import java.io.FileDescriptor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

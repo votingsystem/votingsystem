@@ -14,7 +14,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CooinAccountsFragment;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

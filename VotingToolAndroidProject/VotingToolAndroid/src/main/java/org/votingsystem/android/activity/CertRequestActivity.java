@@ -16,7 +16,7 @@ import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 /**

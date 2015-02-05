@@ -44,7 +44,7 @@ import org.votingsystem.model.TypeVS;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

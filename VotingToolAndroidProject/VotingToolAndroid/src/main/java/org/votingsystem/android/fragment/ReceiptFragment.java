@@ -50,7 +50,7 @@ import org.votingsystem.util.ResponseVS;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

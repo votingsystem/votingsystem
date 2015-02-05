@@ -36,7 +36,7 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.util.Date;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class ReceiptGridFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{

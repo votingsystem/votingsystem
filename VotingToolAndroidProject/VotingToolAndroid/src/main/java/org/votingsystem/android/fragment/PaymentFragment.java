@@ -45,7 +45,7 @@ import org.votingsystem.util.ResponseVS;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
 import static org.votingsystem.model.ContextVS.JSON_DATA_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;

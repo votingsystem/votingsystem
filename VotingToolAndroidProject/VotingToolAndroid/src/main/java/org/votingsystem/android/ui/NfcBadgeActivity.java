@@ -11,10 +11,10 @@ import android.os.Bundle;
 
 import java.util.Arrays;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGI;
-import static org.votingsystem.android.util.LogUtils.LOGW;
-import static org.votingsystem.android.util.LogUtils.makeLogTag;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGI;
+import static org.votingsystem.util.LogUtils.LOGW;
+import static org.votingsystem.util.LogUtils.makeLogTag;
 
 
 public class NfcBadgeActivity extends Activity {

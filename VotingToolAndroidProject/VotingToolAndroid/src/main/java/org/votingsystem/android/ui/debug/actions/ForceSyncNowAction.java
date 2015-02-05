@@ -8,7 +8,7 @@ import android.os.Bundle;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.ui.debug.DebugAction;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class ForceSyncNowAction implements DebugAction {
 

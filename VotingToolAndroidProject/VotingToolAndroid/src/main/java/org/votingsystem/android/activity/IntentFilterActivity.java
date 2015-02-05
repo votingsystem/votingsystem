@@ -27,7 +27,7 @@ import org.votingsystem.util.ResponseVS;
 
 import java.util.Properties;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 
 /**

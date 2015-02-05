@@ -63,7 +63,7 @@ public class TimeStampResponseGenerator {
         } catch (Exception ex) {throw new ExceptionVS("request null");}
         this.statusStrings = new ASN1EncodableVector();
         serialNumber = KeyGeneratorVS.INSTANCE.getSerno();
-        log.debug("getTimeStampResponse - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
+        log.debug("getTimeStampResponse - serialNumber: " + serialNumber + " - CertReq: " + timeStampRequest.getCertReq());
         JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
                 new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
         tokenGenerator = new TimeStampTokenGenerator(infoGeneratorBuilder.build(

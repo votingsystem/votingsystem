@@ -16,7 +16,7 @@ import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.model.ContextVS;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

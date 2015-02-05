@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -28,14 +27,16 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.model.ContentTypeVS;
-
 import java.io.File;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.model.ContextVS.SIGNED_FILE_NAME;
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -44,29 +45,42 @@ public class HttpHelper {
     
 	public static final String TAG = HttpHelper.class.getSimpleName();
     
-    private static final DefaultHttpClient httpclient;
-    private static final ThreadSafeClientConnManager cm;
-    
-    static {
-       HttpParams params = new BasicHttpParams();
-       params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-       params.setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, HTTP.UTF_8);
-       params.setParameter(CoreProtocolPNames.USER_AGENT, "Apache-HttpClient/Android");
-       params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15000);
-       params.setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
-       SchemeRegistry schemeRegistry = new SchemeRegistry();
-       schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-       schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-       cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-       httpclient = new DefaultHttpClient(cm, params);
+    private static DefaultHttpClient httpclient;
+    private static ThreadSafeClientConnManager cm;
+    private static HttpHelper INSTANCE;
+
+    private HttpHelper(X509Certificate trustedSSLServerCert) {
+        try {
+            HttpParams params = new BasicHttpParams();
+            params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+            params.setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, HTTP.UTF_8);
+            params.setParameter(CoreProtocolPNames.USER_AGENT, "Apache-HttpClient/Android");
+            params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15000);
+            params.setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+            SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+            KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+            trustStore.setCertificateEntry(trustedSSLServerCert.getSubjectDN().toString(),
+                    trustedSSLServerCert);
+            SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+            //schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+            schemeRegistry.register(new Scheme("https", socketFactory, 443));
+            LOGD(TAG, "Added Scheme https with port 443 to Apache httpclient");
+            cm = new ThreadSafeClientConnManager(params, schemeRegistry);
+            httpclient = new DefaultHttpClient(cm, params);
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public static void init(X509Certificate trustedSSLServerCert) {
+        INSTANCE = new HttpHelper(trustedSSLServerCert);
     }
     
-    
-    public void shutdown () {
-        try { httpclient.getConnectionManager().shutdown(); } 
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    public static void shutdown () {
+        Log.d(TAG, "shutdown");
+        try {
+            httpclient.getConnectionManager().shutdown();
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
     
     public static ResponseVS getData (String serverURL, ContentTypeVS contentType) {
@@ -80,9 +94,7 @@ public class HttpHelper {
             response = httpclient.execute(httpget);
             Log.d(TAG + ".getData" ,"----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
-            for (int i = 0; i < headers.length; i++) {
-            System.out.println(headers[i]);
-            }*/
+            for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             Log.d(TAG + ".getData" ,"Connections in pool: " + cm.getConnectionsInPool());
@@ -105,7 +117,6 @@ public class HttpHelper {
         }
         return responseVS;
     }
-
 
     public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
               String serverURL, String... headerNames) {
@@ -216,7 +227,6 @@ public class HttpHelper {
              byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
              responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes,
                      responseContentType);
-             //EntityUtils.consume(response.getEntity());
          } catch(ConnectTimeoutException ex) {
              responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
          }  catch(Exception ex) {

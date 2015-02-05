@@ -10,7 +10,7 @@ import org.votingsystem.android.fragment.ReceiptGridFragment;
 
 import java.lang.ref.WeakReference;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

@@ -152,10 +152,6 @@ public class HttpHelper {
                 sslcontext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
                 sslsf = new SSLConnectionSocketFactory(sslcontext,  new String[] { "TLSv1" }, null,
                         SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-                //this is for BrowserVS
-                /*SSLContext sslContext1 = SSLContext.getInstance("SSL");
-                sslContext1.init(null, trustAllCerts, new java.security.SecureRandom());
-                HttpsURLConnection.setDefaultSSLSocketFactory(sslContext1.getSocketFactory());*/
             } else {
                 sslcontext = SSLContexts.createSystemDefault();
                 sslsf = new SSLConnectionSocketFactory(sslcontext);

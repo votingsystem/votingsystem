@@ -5,12 +5,8 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.util.MetaInfMsg
-
 import javax.servlet.http.HttpServletResponse
-
-import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
-import org.springframework.web.multipart.MultipartHttpServletRequest
 import javax.servlet.http.HttpServletRequest
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.*

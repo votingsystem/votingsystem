@@ -10,7 +10,7 @@ import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ObjectUtils;
 
-import static org.votingsystem.android.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza
