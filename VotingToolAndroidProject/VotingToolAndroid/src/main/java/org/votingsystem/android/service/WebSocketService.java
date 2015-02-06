@@ -1,6 +1,5 @@
 package org.votingsystem.android.service;
 
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -37,8 +36,10 @@ import org.votingsystem.util.ResponseVS;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -47,6 +48,7 @@ import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
+import javax.websocket.HandshakeResponse;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
@@ -165,6 +167,7 @@ public class WebSocketService extends Service {
                     sslContext.setTrustStorePass("");
                     SSLEngineConfigurator sslEngineConfigurator =
                             new SSLEngineConfigurator(sslContext, true, false, false);
+                    //BUG with Android 5.0 and Tyrus client!!! Not WSS secured connections for now
                     client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -176,10 +179,24 @@ public class WebSocketService extends Service {
             try {
                 if(latch.getCount() == 0) latch = new CountDownLatch(1);
                 LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
-                // sets the incoming buffer size to 1000000 bytes ~ 900K
+                //sets the incoming buffer size to 1000000 bytes ~ 900K
                 //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
+                //BUG with Android 5.0 and Tyrus client!!! Not WSS secured connections for now
+                final ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().
+                    configurator(new ClientEndpointConfig.Configurator() {
+                        @Override
+                        public void beforeRequest(Map<String, List<String>> headers) {
+                            //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
+                            headers.put("Origin", Arrays.asList(contextVS.getCooinServerURL()));
+                        }
+
+                        @Override
+                        public void afterResponse(HandshakeResponse handshakeResponse) {
+                            //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
+                        }
+                    }).build();
                 client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
+                    @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
                                 sendWebSocketBroadcast(new WebSocketMessage(message));
@@ -191,8 +208,7 @@ public class WebSocketService extends Service {
                         sendWebSocketBroadcast(new WebSocketMessage(
                                 ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                     }
-                }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
-
+                }, clientEndpointConfig, URI.create(serviceURL));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
