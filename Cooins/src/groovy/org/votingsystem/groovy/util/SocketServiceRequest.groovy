@@ -1,6 +1,6 @@
 package org.votingsystem.groovy.util
 
-import org.apache.coyote.http11.upgrade.NioServletOutputStream
+import org.apache.coyote.http11.upgrade.AbstractServletOutputStream
 import org.apache.log4j.Logger
 import org.apache.tomcat.websocket.WsRemoteEndpointAsync
 import org.apache.tomcat.websocket.WsSession
@@ -32,12 +32,11 @@ class SocketServiceRequest {
     Locale locale
     TypeVS operation
     SMIMEMessage smimeMessage;
-    InetSocketAddress remoteAddress
+    String remoteAddress
 
     public SocketServiceRequest(Session session, String msg, boolean last) {
-        this.remoteAddress = ((InetSocketAddress)((NioServletOutputStream)((WsRemoteEndpointImplServer)(
-                (WsRemoteEndpointAsync) ((WsSession)session).remoteEndpointAsync).base).sos).
-                socketWrapper.socket.sc.remoteAddress);
+        this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
+                ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());
         this.session = session;
         messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
         deviceFromId = messageJSON.deviceFromId
@@ -52,7 +51,7 @@ class SocketServiceRequest {
         }
         sessionVS = SessionVSManager.getInstance().getAuthenticatedSession(session)
         log.debug("session id: ${session.getId()} - operation : ${messageJSON?.operation} - " +
-                "remoteIp: ${remoteAddress.address} - last: ${last}")
+                "remoteIp: ${remoteAddress} - last: ${last}")
     }
 
     JSONObject getResponse(Integer statusCode, String message){

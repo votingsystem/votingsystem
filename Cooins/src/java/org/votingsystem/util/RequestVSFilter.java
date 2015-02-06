@@ -1,7 +1,7 @@
 package org.votingsystem.util;
 
+import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
-
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class RequestVSFilter implements Filter {
 
-    public static final String LANGUAGE_HEADER = "Accept-Language";
+    private static Logger log = Logger.getLogger(RequestVSFilter.class);
 
     @Override public void init(FilterConfig filterConfig) throws ServletException { }
 
@@ -36,10 +36,14 @@ public class RequestVSFilter implements Filter {
             super(request);
             if(request.getCookies() != null) {
                 for(Cookie cookie: request.getCookies()) {
-                    if(cookie.getName().equals(LANGUAGE_HEADER))
-                        headerMap.put(LANGUAGE_HEADER, cookie.getValue());
+                    headerMap.put(cookie.getName(), cookie.getValue());
                 }
             }
+            /*Enumeration<String> headers = request.getHeaderNames();
+            while(headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                log.debug("header - " + header + " - value:" + request.getHeader(header));
+            }*/
             contentTypeVS = ContentTypeVS.getByName(request.getContentType());
         }
 

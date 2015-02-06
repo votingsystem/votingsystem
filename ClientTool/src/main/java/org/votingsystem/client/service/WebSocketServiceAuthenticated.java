@@ -24,13 +24,11 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.HttpHelper;
 
 import javax.websocket.*;
+import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
@@ -84,6 +82,36 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         return instance;
     }
 
+    public static class EndpointConfigurator extends ClientEndpointConfig.Configurator {
+
+        @Override public void beforeRequest(Map<String, List<String>> headers) {
+            //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
+            headers.put("Origin", Arrays.asList(ContextVS.getInstance().getCooinServer().getServerURL()));
+        }
+
+        @Override public void afterResponse(HandshakeResponse handshakeResponse) {
+            //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
+        }
+    }
+
+    @ClientEndpoint(configurator = EndpointConfigurator.class)
+    public class WSEndpoint {
+
+        @OnOpen public void onOpen(Session session) throws IOException {
+            session.getBasicRemote().sendText(connectionMessage);
+            WebSocketServiceAuthenticated.this.session = session;
+        }
+
+        @OnClose public void onClose(Session session, CloseReason closeReason) {
+            broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+            SessionService.getInstance().setIsConnected(false);
+        }
+
+        @OnMessage public void onMessage(String message) {
+            consumeMessage(message);
+        }
+    }
+
     @Override protected Task<ResponseVS> createTask() {
         return new WebSocketTask();
     }
@@ -92,30 +120,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         @Override protected ResponseVS call() throws Exception {
             try {
                 log.debug("WebSocketTask - Connecting to " + targetServer.getWebSocketURL() + " ...");
-                client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
-                        session.addMessageHandler(new MessageHandler.Whole<String>() {
-                            @Override public void onMessage(String message) {
-                                consumeMessage(message);
-                            }
-                        });
-                        try {
-                            session.getBasicRemote().sendText(connectionMessage);
-                        } catch(Exception ex) {
-                            log.error(ex.getMessage(), ex);
-                        }
-                        WebSocketServiceAuthenticated.this.session = session;
-                    }
-
-                    @Override public void onClose(Session session, CloseReason closeReason) {
-                        broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        SessionService.getInstance().setIsConnected(false);
-                    }
-
-                    @Override public void onError(Session session, Throwable thr) {
-                        log.error("WebSocketTask.onError(...) - " + thr.getMessage(), thr);
-                    }
-                }, ClientEndpointConfig.Builder.create().build(), URI.create(targetServer.getWebSocketURL()));
+                client.connectToServer(new WSEndpoint(), URI.create(targetServer.getWebSocketURL()));
             }catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
             }

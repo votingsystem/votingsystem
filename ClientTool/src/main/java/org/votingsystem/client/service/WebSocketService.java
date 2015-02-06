@@ -22,7 +22,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.votingsystem.client.VotingSystemApp.showMessage;
 
@@ -80,35 +83,43 @@ public class WebSocketService extends Service<ResponseVS> {
     @Override protected Task<ResponseVS> createTask() {
         return new WebSocketTask();
     }
+
+    public static class EndpointConfigurator extends ClientEndpointConfig.Configurator {
+
+        @Override public void beforeRequest(Map<String, List<String>> headers) {
+            //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
+            headers.put("Origin", Arrays.asList(ContextVS.getInstance().getCooinServer().getServerURL()));
+        }
+
+        @Override public void afterResponse(HandshakeResponse handshakeResponse) {
+            //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
+        }
+    }
+
+    @ClientEndpoint(configurator = EndpointConfigurator.class)
+    public class WSEndpoint {
+
+        @OnOpen public void onOpen(Session session) throws IOException {
+            session.getBasicRemote().sendText(connectionMessage);
+            WebSocketService.this.session = session;
+        }
+
+        @OnClose public void onClose(Session session, CloseReason closeReason) {
+            broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+            SessionService.getInstance().setIsConnected(false);
+        }
+
+        @OnMessage public void onMessage(String message) {
+            consumeMessage(message);
+        }
+    }
+
     class WebSocketTask extends Task<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             try {
                 log.debug("WebSocketTask - Connecting to " + targetServer.getWebSocketURL() + " ...");
-                client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
-                        session.addMessageHandler(new MessageHandler.Whole<String>() {
-                            @Override public void onMessage(String message) {
-                                consumeMessage(message);
-                            }
-                        });
-                        try {
-                            session.getBasicRemote().sendText(connectionMessage);
-                        } catch(Exception ex) {
-                            log.error(ex.getMessage(), ex);
-                        }
-                        WebSocketService.this.session = session;
-                    }
-
-                    @Override public void onClose(Session session, CloseReason closeReason) {
-                        broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        SessionService.getInstance().setIsConnected(false);
-                    }
-
-                    @Override public void onError(Session session, Throwable thr) {
-                        log.error("WebSocketTask.onError(...) - " + thr.getMessage(), thr);
-                    }
-                }, ClientEndpointConfig.Builder.create().build(), URI.create(targetServer.getWebSocketURL()));
+                client.connectToServer(new WSEndpoint(), URI.create(targetServer.getWebSocketURL()));
             }catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
             }
