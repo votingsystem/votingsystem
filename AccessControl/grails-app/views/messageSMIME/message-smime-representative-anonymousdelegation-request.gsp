@@ -19,11 +19,11 @@
                 color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
             }
         </style>
-        <div layout vertical style="margin: 10px auto; max-width:1000px;">
+        <div layout vertical style="margin: 10px auto;">
             <div  layout horizontal center center-justified>
                 <div flex></div>
                 <div class="pageHeader"><h3><g:message code="anonymousdelegationRequest"/></h3></div>
-                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
+                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; display: block; min-width: 150px;">
                     <template if="{{isClientToolConnected}}">
                         <paper-button raised on-click="{{checkReceipt}}">
                             <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>

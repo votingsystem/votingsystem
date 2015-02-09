@@ -277,7 +277,7 @@ hr {
 }
 
 .eventVSActive .eventSubjectDiv{
-    background-color:#388746;
+    color:#388746;
 }
 
 .eventVSActive .eventStateDiv{
@@ -289,7 +289,7 @@ hr {
 }
 
 .eventVSPending .eventSubjectDiv{
-    background-color:#fba131;
+    color:#fba131;
 }
 
 .eventVSPending .eventStateDiv{
@@ -301,7 +301,7 @@ hr {
 }
 
 .eventVSFinished .eventSubjectDiv{
-    background-color:#cc1606;
+    color:#cc1606;
 }
 
 .eventVSFinished .eventStateDiv{
@@ -623,4 +623,9 @@ textarea.form-control {
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
+}
+
+paper-button {
+    font-size: 0.8em;
+    color: #6c0404;
 }

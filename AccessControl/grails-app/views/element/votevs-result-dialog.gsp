@@ -7,13 +7,13 @@
 
 <polymer-element name="votevs-result-dialog" attributes="opened url">
     <template>
-        <paper-dialog id="xDialog" layered backdrop class="voteResultDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="voteResultDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .voteResultDialog {
                 top: 150px;
                 box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px; overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
+                overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
                 width: 500px;
@@ -42,7 +42,7 @@
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <paper-button raised on-click="{{checkReceipt}}">
-                                    <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
+                                    <i class="fa fa-certificate"></i>{{checkSignatureButtonMsg}}
                                 </paper-button>
                             </div>
                             <div flex></div>
@@ -80,6 +80,7 @@
             appMessageJSON:null,
             callerCallback:null,
             voteVSCancellationReceipt:null,
+            checkSignatureButtonMsg:'<g:message code="checkVoteLbl"/>',
             ready: function() {},
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
@@ -101,6 +102,7 @@
                     this.hashCertVSHex = appMessageJSON.hashCertVSHex
                     this.votevsReceipt = appMessageJSON.voteVSReceipt
                     this.hashCertVSBase64 = appMessageJSON.hashCertVSBase64
+                    this.checkSignatureButtonMsg = '<g:message code="checkVoteLbl"/>'
                 } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
                     this.caption = '<g:message code="voteERRORCaption"/>'
                     var msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
@@ -113,6 +115,7 @@
                 this.opened = true
             },
             cancelVote: function() {
+                this.checkSignatureButtonMsg = '<g:message code="checkReceiptLbl"/>'
                 this.callerCallback = Math.random().toString(36).substring(7)
                 showMessageVS('<g:message code="cancelVoteConfirmMsg"/>', '<g:message code="cancelVoteLbl"/>', this.callerCallback, true)
                 this.opened = false
@@ -145,15 +148,18 @@
                 webAppMessage.message = this.hashCertVSBase64
                 webAppMessage.serviceURL = "${createLink(controller:'voteVSCanceller', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="cancelVoteLbl"/>"
+                this.statusCode = appMessageJSON.statusCode
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("vote cancellation callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    this.statusCode = appMessageJSON.statusCode
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         this.messageType = "VOTE_CANCELLATION_RESULT"
-                        this.voteVSCancellationReceipt = window.btoa(appMessageJSON.message);
+                        this.voteVSCancellationReceipt = appMessageJSON.message;
                         this.message = "<g:message code="voteVSCancellationOKMsg"/>"
                         this.caption =  "<g:message code="voteVSCancellationCaption"/>"
+                        this.checkSignatureButtonMsg = '<g:message code="checkReceiptLbl"/>'
+
+                        this.opened = true
                     } else  showMessageVS(appMessageJSON.message, '<g:message code="voteVSCancellationErrorCaption"/>')
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

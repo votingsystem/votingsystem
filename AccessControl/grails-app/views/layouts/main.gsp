@@ -24,7 +24,7 @@
     <vs:webresource dir="vs-innerpage-signal" file="vs-innerpage-signal.html"/>
     <vs:webcomponent path="/element/alert-dialog"/>
 
-   <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
 <body id="voting_system_page" style="margin:0px auto 0px auto;">

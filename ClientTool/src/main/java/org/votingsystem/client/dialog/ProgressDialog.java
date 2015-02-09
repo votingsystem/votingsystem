@@ -36,7 +36,7 @@ public class ProgressDialog extends VBox {
         progressBar.setLayoutY(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> {
-            progressTask.cancel();
+            progressTask.cancel(true);
             getScene().getWindow().hide();
         });
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
@@ -62,9 +62,9 @@ public class ProgressDialog extends VBox {
             stage.initOwner(VotingSystemApp.getInstance().getScene().getWindow());
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
             stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
-            ProgressDialog decompressBackupPane = new ProgressDialog(progressTask);
-            decompressBackupPane.getStyleClass().add("modal-dialog");
-            stage.setScene(new Scene(decompressBackupPane));
+            ProgressDialog progressDialog = new ProgressDialog(progressTask);
+            progressDialog.getStyleClass().add("modal-dialog");
+            stage.setScene(new Scene(progressDialog));
             stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
             stage.setTitle(caption);
             stage.show();

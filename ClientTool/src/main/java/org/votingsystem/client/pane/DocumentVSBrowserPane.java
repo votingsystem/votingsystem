@@ -4,6 +4,7 @@ import com.sun.javafx.application.PlatformImpl;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -113,6 +114,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
             SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
             SMIMEPane SMIMEPane = new SMIMEPane(signedFile);
             getChildren().add(1, SMIMEPane);
+            VBox.setVgrow(SMIMEPane, Priority.ALWAYS);
             saveButton.setVisible(true);
             this.caption = SMIMEPane.getCaption();
         } catch (Exception ex) {

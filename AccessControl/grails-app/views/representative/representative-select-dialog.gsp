@@ -6,7 +6,7 @@
 
 <polymer-element name="representative-select-dialog">
     <template>
-        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
             .dialog {

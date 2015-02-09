@@ -24,13 +24,11 @@
             }
         </style>
         <div class="pageContentDiv">
-            <template if="{{'user' == menuType}}">
-                <div horizontal layout center-justified style="font-size: 0.9em;">
-                    <paper-button raised on-click="{{selectRepresentative}}">
-                        <i class="fa fa-hand-o-right"></i> <g:message code="saveAsRepresentativeLbl"/>
-                    </paper-button>
-                </div>
-            </template>
+            <div hidden?="{{'user' !== menuType}}" horizontal layout center-justified style="font-size: 0.9em;">
+                <paper-button raised on-click="{{selectRepresentative}}">
+                    <i class="fa fa-hand-o-right"></i> <g:message code="saveAsRepresentativeLbl"/>
+                </paper-button>
+            </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
                 <div layout horizontal center center-justified style="width:100%;">
                     <div>

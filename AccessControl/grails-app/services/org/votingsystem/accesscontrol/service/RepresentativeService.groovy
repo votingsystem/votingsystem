@@ -524,7 +524,8 @@ class RepresentativeService {
 			"${grailsApplication.config.grails.serverURL}/messageSMIME/${representativeDocument.activationSMIME?.id}"
 		String imageURL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}/image"
 		String URL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}"
-		def numRepresentations = UserVS.countByRepresentative(representative) + 1//plus the representative itself
+		def numRepresentations = RepresentationDocumentVS.countByRepresentativeAndState(
+                representative, RepresentationDocumentVS.State.OK) + 1//plus the representative itself
 		def representativeMap = [id: representative.id, nif:representative.nif, type:representative.type.toString(),
              URL:URL, representativeMessageURL:representativeMessageURL,
 			 imageURL:imageURL, numRepresentations:numRepresentations,

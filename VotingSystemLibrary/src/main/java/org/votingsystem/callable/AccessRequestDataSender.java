@@ -69,7 +69,6 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                 certificationRequest.initSigner(responseVS.getMessageBytes());
                 responseVS.setData(certificationRequest);
             } else {
-                responseVS.setStatus(new StatusVS() {});
                 responseVS.setData(null);
             }
         }

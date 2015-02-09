@@ -71,15 +71,15 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
         timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(timeStampToken));
         setMargin(timeStampButton, new Insets(5, 0, 5, 0));
-
-        VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);
-        VBox.setVgrow(this, Priority.ALWAYS);
         add(timeStampButton, 0, 0);
         Region signedFileRegion = getSignedFileRegion();
         setMargin(signedFileRegion, new Insets(5, 10, 5, 0));
         add(signedFileRegion, 1, 0);
         add(openSignatureInfoButton, 2, 0);
         add(signatureContentWebView, 0, 1);
+        RowConstraints row1 = new RowConstraints();
+        row1.setVgrow(Priority.ALWAYS);
+        getRowConstraints().addAll(new RowConstraints(), row1);
         setColumnSpan(signatureContentWebView, 3);
         //add(contentWithoutFormatCheckBox, 0, 2);
         JSONObject signedContentJSON = null;

@@ -28,11 +28,10 @@ class AccessRequestVSService {
 		UserVS signerVS = messageSMIMEReq.getUserVS()
         AccessRequest request = new AccessRequest(messageSMIMEReq.getSMIME().getSignedContent(),
                 signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime())
-		String msg
         AccessRequestVS accessRequestVS = AccessRequestVS.findWhere(
                 userVS:signerVS, eventVSElection:request.eventVS, state:TypeVS.OK)
         if (accessRequestVS){
-            msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
+            String msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
             log.error("$methodName - ACCESS REQUEST_REPEATED - ${msg}")
             return new ResponseVS(data:accessRequestVS, type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
                     eventVS:request.eventVS, statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,

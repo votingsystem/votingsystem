@@ -49,7 +49,8 @@
                         <g:message code="cancelAnonymousRepresentationMsg"/>
                     </paper-button>
                     <div flex></div>
-                    <div style="display:{{isConfirmMessage?'block':'none'}};">
+
+                    <div hidden?="{{!isConfirmMessage}}">
                         <paper-button raised on-click="{{accept}}">
                             <i class="fa fa-check"></i> <g:message code="acceptLbl"/>
                         </paper-button>
@@ -76,9 +77,7 @@
                     } else this.$.representativeInfo.display = 'none'
                     if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
                         this.$.delegationTimeInfoDiv.style.display = 'block'
-                        if(this.representationState.isWithAnonymousDelegation) {
-                            this.$.cancellationButton.style.display = 'block'
-                        }
+                        this.$.cancellationButton.style.display = 'block'
                     }
                 }
             },

@@ -281,7 +281,11 @@ public class SignatureService extends Service<ResponseVS> {
             documentToSignMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             operationVS.setDocumentToSignMap(documentToSignMap);
-            return sendSMIME(operationVS);
+            ResponseVS responseVS = sendSMIME(operationVS);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                responseVS.setMessage(Base64.getEncoder().encodeToString(responseVS.getSMIME().getBytes()));
+            }
+            return responseVS;
         }
 
         //we know this is done in a background thread

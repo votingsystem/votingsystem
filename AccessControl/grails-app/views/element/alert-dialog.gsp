@@ -7,12 +7,12 @@
 <polymer-element name="alert-dialog">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <paper-dialog id="xDialog" layered backdrop class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .votingsystemMessageDialog {
                 top: 150px;
                 box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px; overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
+                overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
             }

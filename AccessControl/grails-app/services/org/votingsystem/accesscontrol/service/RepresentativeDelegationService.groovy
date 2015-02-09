@@ -83,8 +83,8 @@ class RepresentativeDelegationService {
     private ResponseVS checkUserDelegationStatus(UserVS userVS) {
         String msg = null
         if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-            msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
+                    message:messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale))
         }
         int statusCode = ResponseVS.SC_OK
         String userDelegationURL = null
@@ -103,11 +103,9 @@ class RepresentativeDelegationService {
         AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
                 status:AnonymousDelegation.Status.OK)
         if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
-            anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED)
-            anonymousDelegation.save()
+            anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED).save()
             return null
-        }
-        return anonymousDelegation
+        } else return anonymousDelegation
     }
 
     @Transactional public Map checkRepresentationState(String nifToCheck) {
