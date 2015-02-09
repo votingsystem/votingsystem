@@ -41,15 +41,11 @@ import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.util.encoders.Base64;
-import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -67,14 +63,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
 import static org.votingsystem.model.ContextVS.PROVIDER;
 
 /**
@@ -353,12 +347,6 @@ public class CMSUtils {
         MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
         byte[] resultDigest =  sha.digest(originStr.getBytes());
         return new String(Base64.encode(resultDigest));
-    }
-
-    public static String getBase64ToHexStr(String base64Str) throws UnsupportedEncodingException {
-        if (base64Str == null) return null;
-        byte[] hexBytes = Hex.encode(base64Str.getBytes());
-        return new String(hexBytes, ContextVS.UTF_8);
     }
 
     public static AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId) {

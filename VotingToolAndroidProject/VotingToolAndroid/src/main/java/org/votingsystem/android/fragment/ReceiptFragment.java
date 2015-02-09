@@ -46,6 +46,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -453,7 +454,7 @@ public class ReceiptFragment extends Fragment {
         @Override protected ResponseVS doInBackground(String... params) {
             ResponseVS responseVS = null;
             try {
-                String hashHex = CMSUtils.getBase64ToHexStr(params[0]);
+                String hashHex = StringUtils.toHex(params[0]);
                 responseVS = HttpHelper.getData(contextVS.getAccessControl().
                         getVoteVSCheckServiceURL(hashHex), ContentTypeVS.JSON);
             } catch(Exception ex) {

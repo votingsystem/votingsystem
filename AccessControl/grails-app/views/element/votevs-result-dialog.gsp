@@ -7,19 +7,13 @@
 
 <polymer-element name="votevs-result-dialog" attributes="opened url">
     <template>
-        <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop class="voteResultDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
             <style no-shim>
-            .dialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
+            .voteResultDialog {
+                top: 150px;
+                box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px; overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
                 width: 500px;
@@ -65,7 +59,7 @@
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-certificate"></i>  <g:message code="checkSignatureLbl"/>
+                                    <i class="fa fa-certificate"></i>  <g:message code="checkVoteLbl"/>
                                 </paper-button>
                             </div>
                             <div flex></div>

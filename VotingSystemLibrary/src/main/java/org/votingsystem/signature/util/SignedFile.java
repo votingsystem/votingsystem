@@ -5,6 +5,8 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.FileUtils;
@@ -64,6 +66,24 @@ public class SignedFile {
         return smimeMessage;
     }
     
+    public String getCaption( ){
+        TypeVS operation = getTypeVS();
+        if(operation == null) return null;
+        switch (operation) {
+            case SEND_SMIME_VOTE:
+                return ContextVS.getMessage("voteLbl");
+            default: return ContextVS.getMessage("signedDocumentCaption");
+        }
+    }
+
+    public TypeVS getTypeVS() {
+        JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
+        if(contentJSON.has("operation")) {
+            return TypeVS.valueOf(contentJSON.getString("operation"));
+        }
+        return null;
+    }
+
     public JSONObject getContent() throws Exception {
         JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         return contentJSON;

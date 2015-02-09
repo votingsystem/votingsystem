@@ -19,8 +19,9 @@
             options: {
                 chart: {
                     plotBackgroundColor: null,
-                    spacingTop: 0,
+                    spacingTop: 10,
                     spacingBottom: 30,
+                    spacingRight: 30,
                     plotBorderWidth: 0
                 },
                 title: {

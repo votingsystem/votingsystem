@@ -8,6 +8,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -136,7 +137,13 @@ public class StringUtils {
         transformer.transform(domSource, result);
         return writer.toString();
     }
-    
+
+    public static String toHex(String paramsStr) {
+        if (paramsStr == null) return null;
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(paramsStr.getBytes());
+    }
+
     public static String getNormalized (String cadena) {
         if(cadena == null) return null;
         else return cadena.replaceAll("[\\/:.]", ""); 

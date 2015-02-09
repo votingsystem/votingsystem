@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.util.Log;
-
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
@@ -11,7 +10,7 @@ import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
-
+import org.votingsystem.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -125,11 +124,11 @@ public class VoteVS extends ReceiptContainer {
             }
             if(getHashCertVSBase64() != null) {
                 resultMap.put("hashCertVSBase64", getHashCertVSBase64());
-                resultMap.put("hashCertVoteHex", CMSUtils.getBase64ToHexStr(getHashCertVSBase64()));
+                resultMap.put("hashCertVoteHex", StringUtils.toHex(getHashCertVSBase64()));
             }
             if(getHashAccessRequestBase64() != null) {
                 resultMap.put("hashAccessRequestBase64", getHashAccessRequestBase64());
-                resultMap.put("hashSolicitudAccesoHex", CMSUtils.getBase64ToHexStr(getHashAccessRequestBase64()));
+                resultMap.put("hashSolicitudAccesoHex", StringUtils.toHex(getHashAccessRequestBase64()));
             }
 
             if (eventVS != null) resultMap.put("eventId", eventVS.getId());

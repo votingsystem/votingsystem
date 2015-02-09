@@ -107,6 +107,9 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/voteVSCanceller";
     }
 
+    public String getVoteStateServiceURL(String voteHashHex) {
+        return getServerURL() + "/voteVS/hash/" + voteHashHex;
+    }
     public String getVoteServiceURL() {
         return getServerURL() + "/voteVS";
     }

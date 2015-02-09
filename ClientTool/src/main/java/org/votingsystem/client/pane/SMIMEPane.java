@@ -1,27 +1,29 @@
 package org.votingsystem.client.pane;
 
+import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.DateUtils;
-
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.StringUtils;
 import java.io.File;
+import java.security.cert.X509Certificate;
+import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -41,7 +43,6 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         Button openSignatureInfoButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignatureInfoButton.setOnAction(actionEvent -> SMIMESignersPane.showDialog(signedFile));
         openSignatureInfoButton.setPrefWidth(150);
-
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setHgrow(Priority.ALWAYS);
         ColumnConstraints column2 = new ColumnConstraints();
@@ -74,9 +75,12 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);
         VBox.setVgrow(this, Priority.ALWAYS);
         add(timeStampButton, 0, 0);
-        add(openSignatureInfoButton, 1, 0);
+        Region signedFileRegion = getSignedFileRegion();
+        setMargin(signedFileRegion, new Insets(5, 10, 5, 0));
+        add(signedFileRegion, 1, 0);
+        add(openSignatureInfoButton, 2, 0);
         add(signatureContentWebView, 0, 1);
-        setColumnSpan(signatureContentWebView, 2);
+        setColumnSpan(signatureContentWebView, 3);
         //add(contentWithoutFormatCheckBox, 0, 2);
         JSONObject signedContentJSON = null;
         if(signedFile.getSMIME().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
@@ -95,6 +99,21 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         }
     }
 
+    private Region getSignedFileRegion() {
+        TypeVS operation = signedFile.getTypeVS();
+        if(operation == null) return Utils.getSpacer();
+        switch(operation) {
+            case SEND_SMIME_VOTE:
+                HBox result = new HBox();
+                Button checkVoteButton = new Button(ContextVS.getMessage("checkVoteLbl"));
+                checkVoteButton.setOnAction(actionEvent -> ProgressDialog.showDialog(new CheckVoteTask(
+                        signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl")));
+                result.getChildren().add(checkVoteButton);
+                return result;
+            default: return Utils.getSpacer();
+        }
+    }
+
     private void initComponents() {
         if(signedFile == null) {
             log.debug("### NULL signedFile");
@@ -103,7 +122,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
     }
 
     public String getCaption() {
-        return ContextVS.getMessage("signedDocumentCaption");
+        return (signedFile != null)? signedFile.getCaption() : null;
     }
 
     public SignedFile getSignedFile () {
@@ -117,4 +136,44 @@ public class SMIMEPane extends GridPane implements DocumentVS {
     @Override public ContentTypeVS getContentTypeVS() {
         return ContentTypeVS.SIGNED;
     }
+
+    public class CheckVoteTask extends Task<ResponseVS> {
+
+        X509Certificate x509AnonymousCert;
+
+        public CheckVoteTask(X509Certificate x509AnonymousCert) {
+            this.x509AnonymousCert = x509AnonymousCert;
+        }
+
+        @Override protected ResponseVS call() throws Exception {
+            updateMessage(ContextVS.getMessage("checkVoteLbl"));
+            JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VOTE_OID);
+            String hashCertVS = certExtensionData.getString("hashCertVS");
+            String voteStateServiceURL = ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(
+                    StringUtils.toHex(hashCertVS));
+            ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                //[state:voteVS.state.toString(), value:voteVS.optionSelected.content]
+                JSONObject responseJSON = (JSONObject) responseVS.getMessageJSON();
+                VoteVS.State voteState = VoteVS.State.valueOf(responseJSON.getString("state"));
+                StringBuilder sb = new StringBuilder();
+                switch (voteState) {
+                    case OK:
+                        sb.append(ContextVS.getMessage("voteStateOKMsg"));
+                        break;
+                    case CANCELLED:
+                        sb.append(ContextVS.getMessage("voteStateCANCELLEDMsg"));
+                        break;
+                    case ERROR:
+                        sb.append(ContextVS.getMessage("voteStateERRORMsg"));
+                        break;
+                }
+                sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " +
+                        responseJSON.getString("value"));
+                showMessage(sb.toString(), ContextVS.getMessage("checkVoteLbl"));
+            } else showMessage(responseVS);
+            return responseVS;
+        }
+    }
+
 }

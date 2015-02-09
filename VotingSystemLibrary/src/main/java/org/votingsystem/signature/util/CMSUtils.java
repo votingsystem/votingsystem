@@ -223,12 +223,6 @@ public class CMSUtils {
         return DatatypeConverter.printBase64Binary(resultDigest);
     }
 
-    public static String getBase64ToHexStr(String base64Str) {
-        if (base64Str == null) return null;
-        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        return hexConverter.marshal(base64Str.getBytes());
-    }
-
     public static DERObject getSingleValuedSignedAttribute(AttributeTable signedAttrTable, DERObjectIdentifier attrOID,
             String printableName) throws CMSException {
         if (signedAttrTable == null) return null;

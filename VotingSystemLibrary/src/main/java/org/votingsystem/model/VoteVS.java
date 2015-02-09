@@ -9,14 +9,13 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
-
+import org.votingsystem.util.StringUtils;
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.*;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -316,11 +315,11 @@ public class VoteVS implements Serializable {
         }
         if(hashCertVSBase64 != null) {
             resultMap.put("hashCertVSBase64", hashCertVSBase64);
-            resultMap.put("hashCertVoteHex", CMSUtils.getBase64ToHexStr(hashCertVSBase64));
+            resultMap.put("hashCertVoteHex", StringUtils.toHex(hashCertVSBase64));
         }
         if(hashAccessRequestBase64 != null) {
             resultMap.put("hashAccessRequestBase64", hashAccessRequestBase64);
-            resultMap.put("hashSolicitudAccesoHex", CMSUtils.getBase64ToHexStr(hashAccessRequestBase64));
+            resultMap.put("hashSolicitudAccesoHex", StringUtils.toHex(hashAccessRequestBase64));
         }
 
         if (eventVS != null) resultMap.put("eventId", eventVS.getId());

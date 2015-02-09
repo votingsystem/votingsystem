@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.util.Log;
 
+import org.bouncycastle2.util.encoders.Hex;
 import org.votingsystem.model.ContextVS;
 
 import java.io.BufferedReader;
@@ -91,6 +92,12 @@ public class StringUtils {
             is.close();
         }
         return writer.toString();
+    }
+
+    public static String toHex(String base64Str) throws UnsupportedEncodingException {
+        if (base64Str == null) return null;
+        byte[] hexBytes = Hex.encode(base64Str.getBytes());
+        return new String(hexBytes, ContextVS.UTF_8);
     }
 
 }

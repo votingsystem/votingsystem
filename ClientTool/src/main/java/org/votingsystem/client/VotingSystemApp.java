@@ -92,6 +92,10 @@ public class VotingSystemApp extends Application {
         else return smimeMessageMap.get(smimeMessageURL);
     }
 
+    public Scene getScene() {
+        return mainBox.getScene();
+    }
+
     public void setSMIME(String smimeMessageURL, String smimeMessageStr) {
         if(smimeMessageMap ==  null) {
             smimeMessageMap = new HashMap<String, String>();

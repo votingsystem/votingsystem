@@ -107,8 +107,8 @@ class VoteVSService {
 		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVSBase64?.getBytes());
 		Map voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.certificateVS.hashCertVSBase64,
-			fieldEventVSId:voteVS.getFieldEventVS.id, eventVSElectionId:voteVS.eventVSElection.id,
-			eventVSElectionURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${voteVS.eventVSElection?.id}",
+			fieldEventVSId:voteVS.optionSelected.id, eventVSElectionId:voteVS.eventVS.id,
+			eventVSElectionURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${voteVS.eventVS?.id}",
 			state:voteVS?.state?.toString(),
 			certificateURL:"${grailsApplication.config.grails.serverURL}/certificateVS/voteVS/hashHex/${hashHex}",
 			voteVSSMIMEURL:"${grailsApplication.config.grails.serverURL}/messageSMIME/${voteVS.messageSMIME.id}"]
