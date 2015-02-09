@@ -31,19 +31,16 @@ import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.math.BigDecimal;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 public class WalletFragment extends Fragment {
 

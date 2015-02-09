@@ -53,8 +53,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.LOGE;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -65,6 +63,8 @@ import static org.votingsystem.model.ContextVS.STATE_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.USER_KEY;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * @author jgzornoza

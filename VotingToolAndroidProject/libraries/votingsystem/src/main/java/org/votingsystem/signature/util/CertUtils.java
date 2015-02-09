@@ -26,6 +26,8 @@ import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ExceptionVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,14 +45,20 @@ import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathBuilderResult;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorResult;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.mail.MessagingException;
@@ -183,61 +191,38 @@ public class CertUtils {
         }
         
     }
-    
-        /**
-     * Verifies the validity of the given certificate, checking its signature
-     * against the issuer's certificate.
-     * 
-     * @param cert
-     *            the certificate to validate
-     * @param store
-     *            other certificates that can be used to create a chain of trust
-     *            to a known trusted certificate.
-     * @param trustedStore
-     *            list of trusted (usually self-signed) certificates.
-     * 
-     * @return true if the certificate's signature is valid and can be validated
-     *         using a trustedCertificated, false otherwise.
-     */
-    public static CertPath verifyCertificate(
-            X509Certificate cert, CertStore store, Set<TrustAnchor> trustAnchors) 
-        throws InvalidAlgorithmParameterException, KeyStoreException, MessagingException, CertPathBuilderException {
-         
-        if (cert == null || store == null || trustAnchors == null) 
-            throw new IllegalArgumentException("cert == "+cert+", store == "+store+", trustAnchors == "+trustAnchors);
 
-        CertPathBuilder pathBuilder;
 
-        // I create the CertPathBuilder object. It will be used to find a
-        // certification path that starts from the signer's certificate and
-        // leads to a trusted root certificate.
+    public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
+                  boolean checkCRL, List<X509Certificate> certs) throws ExceptionVS {
+        return verifyCertificate(anchors, checkCRL, certs, Calendar.getInstance().getTime());
+    }
+
+    public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
+          boolean checkCRL, List<X509Certificate> certs, Date signingDate) throws ExceptionVS {
         try {
-            pathBuilder = CertPathBuilder.getInstance("PKIX", "BC");
-        } catch (Exception e) {
-            throw new MessagingException("Error during the creation of the certpathbuilder.", e);
+            PKIXParameters pkixParameters = new PKIXParameters(anchors);
+            pkixParameters.setDate(signingDate);
+            CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
+            pkixParameters.addCertPathChecker(checker);
+            pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
+            CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
+            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+            CertPath certPath = certFact.generateCertPath(certs);
+            CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
+            // Get the CA used to validate this path
+            //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
+            //TrustAnchor ta = pkixResult.getTrustAnchor();
+            //X509Certificate certCaResult = ta.getTrustedCert();
+            //log.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
+            //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
+            return new CertValidatorResultVS(checker, (PKIXCertPathValidatorResult)result);
+        } catch(Exception ex) {
+            String msg = "Empty cert list";
+            if(certs != null && !certs.isEmpty()) msg = ex.getMessage() + " - cert: " +
+                    certs.iterator().next().getSubjectDN();
+            throw new ExceptionVS(msg, ex);
         }
-
-        X509CertSelector xcs = new X509CertSelector();
-        xcs.setCertificate(cert);
-        //PKIXBuilderParameters(Set<TrustAnchor> trustAnchors, CertSelector targetConstraints) 
-        PKIXBuilderParameters params = new PKIXBuilderParameters(trustAnchors, xcs);
-        params.addCertStore(store);
-        params.setRevocationEnabled(false);
-        try {
-            CertPathBuilderResult result = pathBuilder.build(params);
-            CertPath path = result.getCertPath();
-            return path;
-        } catch (CertPathBuilderException e) {
-        	Log.e("CertUtil.verifyCertificate", e.getMessage(), e);
-            // A certification path is not found, so null is returned.
-            return null;
-        } catch (InvalidAlgorithmParameterException e) {
-        	Log.e("CertUtil.verifyCertificate", e.getMessage(), e);
-            // If this exception is thrown an error has occured during
-            // certification path search. 
-            throw new MessagingException("Error during the certification path search.", e);
-        }
-        
     }
 
     public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
@@ -303,4 +288,16 @@ public class CertUtils {
         return DIS.readObject();
     }
 
+    public static class CertValidatorResultVS {
+        CertExtensionCheckerVS checker;
+        PKIXCertPathValidatorResult result;
+
+        public CertValidatorResultVS(CertExtensionCheckerVS checker, PKIXCertPathValidatorResult result) {
+            this.checker = checker;
+            this.result = result;
+        }
+
+        public CertExtensionCheckerVS getChecker() {return checker;}
+        public PKIXCertPathValidatorResult getResult() {return result;}
+    }
 }

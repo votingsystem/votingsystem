@@ -99,7 +99,7 @@ public class X509CertificateObject
 
         if (date.getTime() < this.getNotBefore().getTime())
         {
-            throw new CertificateNotYetValidException("certificate not valid till " + c.getStartDate().getTime());
+            throw new CertificateNotYetValidException("certificate not yet valid. Cert valid from " + c.getStartDate().getTime());
         }
     }
 

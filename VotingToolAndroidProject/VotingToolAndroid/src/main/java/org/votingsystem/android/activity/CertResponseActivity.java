@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import org.json.JSONArray;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -26,7 +26,6 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.android.util.Wallet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -43,13 +42,13 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

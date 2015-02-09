@@ -185,18 +185,18 @@ public class WebSocketService extends Service {
                 //BUG with Android 5.0 and Tyrus client!!! Not WSS secured connections for now
                 //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
                 final ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().
-                    configurator(new ClientEndpointConfig.Configurator() {
-                        @Override
-                        public void beforeRequest(Map<String, List<String>> headers) {
-                            //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
-                            headers.put("Origin", Arrays.asList(contextVS.getCooinServerURL()));
-                        }
+                        configurator(new ClientEndpointConfig.Configurator() {
+                            @Override
+                            public void beforeRequest(Map<String, List<String>> headers) {
+                                //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
+                                headers.put("Origin", Arrays.asList(contextVS.getCooinServerURL()));
+                            }
 
-                        @Override
-                        public void afterResponse(HandshakeResponse handshakeResponse) {
-                            //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
-                        }
-                    }).build();
+                            @Override
+                            public void afterResponse(HandshakeResponse handshakeResponse) {
+                                //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
+                            }
+                        }).build();
                 client.connectToServer(new Endpoint() {
                     @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
@@ -291,7 +291,7 @@ public class WebSocketService extends Service {
         private ResponseVS responseData = null;
 
         public MessageProccessor(TypeVS typeVS, OperationVS operationVS, ResponseVS responseVS,
-                 String messageToSend, String serviceCaller) {
+                                 String messageToSend, String serviceCaller) {
             this.messageToSend = messageToSend;
             this.typeVS = typeVS;
             this.operationVS = operationVS;

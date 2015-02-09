@@ -38,13 +38,10 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 
-import java.text.Collator;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 

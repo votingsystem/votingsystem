@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.VOTE_SIGN_MECHANISM;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

@@ -27,13 +27,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.makeLogTag;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.STATE_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
+import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.makeLogTag;
 
 public class PrefUtils {
 

@@ -28,6 +28,7 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -37,6 +38,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 

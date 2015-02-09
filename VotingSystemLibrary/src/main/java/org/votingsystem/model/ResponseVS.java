@@ -27,6 +27,11 @@ public class ResponseVS<T> implements Serializable {
     public static final long serialVersionUID = 1L;
     
 	private static Logger log = Logger.getLogger(ResponseVS.class);
+
+
+    public enum Status {
+        OK, ERROR
+    }
     
     public static final int SC_OK                       = 200;
     public static final int SC_OK_WITHOUT_BODY          = 204;
@@ -292,6 +297,15 @@ public class ResponseVS<T> implements Serializable {
         this.metaInf = metaInf;
         return this;
     }
+
+    public static ResponseVS ERROR(String message) {
+        return new ResponseVS(ResponseVS.SC_ERROR, message);
+    }
+
+    public static ResponseVS OK(byte[] messageBytes) {
+        return new ResponseVS(ResponseVS.SC_OK, messageBytes);
+    }
+
 
     public String getUrl() {
         return url;

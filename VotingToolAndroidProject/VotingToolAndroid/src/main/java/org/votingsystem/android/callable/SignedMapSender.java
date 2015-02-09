@@ -14,9 +14,9 @@ import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

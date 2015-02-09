@@ -40,7 +40,6 @@ import java.text.Normalizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
@@ -49,6 +48,7 @@ import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza

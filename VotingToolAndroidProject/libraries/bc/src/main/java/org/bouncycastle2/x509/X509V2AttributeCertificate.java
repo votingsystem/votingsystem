@@ -143,7 +143,7 @@ public class X509V2AttributeCertificate
 
         if (date.before(this.getNotBefore()))
         {
-            throw new CertificateNotYetValidException("certificate not valid till " + this.getNotBefore());
+            throw new CertificateNotYetValidException("certificate not yet valid. Cert valid from " + this.getNotBefore());
         }
     }
     

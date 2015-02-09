@@ -49,9 +49,8 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
 
-    dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided'
-
+    dependencies {// specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
+        provided 'javax.servlet:javax.servlet-api:3.1.0'
         compile(
                 'org.votingsystem:votingsystemlibrary:0.2.0',
                 'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',

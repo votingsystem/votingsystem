@@ -148,7 +148,7 @@ public class VotingSystemApp extends Application {
                 }
                 String accessControlServerURL = null;
                 String cooinsServerURL = null;
-                if(!loadedFromJar) {
+                if(loadedFromJar) {
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
                     cooinsServerURL = ContextVS.getMessage("prodCooinsServerURL");
                 } else {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.Cooin;
 import org.votingsystem.model.EventVS;

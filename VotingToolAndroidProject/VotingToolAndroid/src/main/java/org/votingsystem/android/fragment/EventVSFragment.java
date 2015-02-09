@@ -47,9 +47,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza
