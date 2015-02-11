@@ -10,9 +10,9 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 
 /**
-* @author jgzornoza
-* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 @Entity @Table(name="RepresentationDocumentVS")
 public class RepresentationDocumentVS implements Serializable {
 
@@ -20,8 +20,8 @@ public class RepresentationDocumentVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-	public enum State {OK, CANCELLED, CANCELLED_BY_REPRESENTATIVE, ERROR}
-    
+    public enum State {OK, CANCELLED, CANCELLED_BY_REPRESENTATIVE, ERROR}
+
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
     private Long id;
@@ -29,97 +29,97 @@ public class RepresentationDocumentVS implements Serializable {
     @Column(name="state", nullable=false) private State state;
     @OneToOne
     @JoinColumn(name="activationSMIME") private MessageSMIME activationSMIME;
-	
+
     @OneToOne
     @JoinColumn(name="cancellationSMIME") private MessageSMIME cancellationSMIME;
-    
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
-	
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCanceled", length=23) private Date dateCanceled;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Date getDateCanceled() {
-		return dateCanceled;
-	}
+    public Date getDateCanceled() {
+        return dateCanceled;
+    }
 
-	public RepresentationDocumentVS setDateCanceled(Date dateCanceled) {
-		this.dateCanceled = dateCanceled;
-		return this;
-	}
-
-	public Date getDateCreated() {
-		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
-
-	public Date getLastUpdated() {
-		return lastUpdated;
-	}
-
-	public void setLastUpdated(Date lastUpdated) {
-		this.lastUpdated = lastUpdated;
-	}
-
-	public MessageSMIME getActivationSMIME() {
-		return activationSMIME;
-	}
-
-	public void setActivationSMIME(MessageSMIME activationSMIME) {
-		this.activationSMIME = activationSMIME;
-	}
-
-	public MessageSMIME getCancellationSMIME() {
-		return cancellationSMIME;
-	}
-
-	public RepresentationDocumentVS setCancellationSMIME(MessageSMIME cancellationSMIME) {
-		this.cancellationSMIME = cancellationSMIME;
+    public RepresentationDocumentVS setDateCanceled(Date dateCanceled) {
+        this.dateCanceled = dateCanceled;
         return this;
-	}
+    }
 
-	public UserVS getRepresentative() {
-		return representative;
-	}
+    public Date getDateCreated() {
+        return dateCreated;
+    }
 
-	public void setRepresentative(UserVS representative) {
-		this.representative = representative;
-	}
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 
-	public State getState() {
-		return state;
-	}
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
 
-	public RepresentationDocumentVS setState(State state) {
-		this.state = state;
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public MessageSMIME getActivationSMIME() {
+        return activationSMIME;
+    }
+
+    public void setActivationSMIME(MessageSMIME activationSMIME) {
+        this.activationSMIME = activationSMIME;
+    }
+
+    public MessageSMIME getCancellationSMIME() {
+        return cancellationSMIME;
+    }
+
+    public RepresentationDocumentVS setCancellationSMIME(MessageSMIME cancellationSMIME) {
+        this.cancellationSMIME = cancellationSMIME;
         return this;
-	}
+    }
 
-	public UserVS getUserVS() {
-		return userVS;
-	}
+    public UserVS getRepresentative() {
+        return representative;
+    }
 
-	public void setUserVS(UserVS user) {
-		this.userVS = user;
-	}
+    public void setRepresentative(UserVS representative) {
+        this.representative = representative;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public RepresentationDocumentVS setState(State state) {
+        this.state = state;
+        return this;
+    }
+
+    public UserVS getUserVS() {
+        return userVS;
+    }
+
+    public void setUserVS(UserVS user) {
+        this.userVS = user;
+    }
 }

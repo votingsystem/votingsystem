@@ -12,6 +12,11 @@ body {
 
 paper-button i {padding: 0px 0px 0px 5px; }
 
+paper-button {
+    font-size: 0.8em;
+    color: #6c0404;
+}
+
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;

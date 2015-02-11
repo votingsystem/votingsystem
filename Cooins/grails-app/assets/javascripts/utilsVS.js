@@ -92,6 +92,13 @@ Date.prototype.formatWithTime = function() {
             ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 };
 
+Date.prototype.urlFormatWithTime = function() {//YYYYMMDD_HHmm
+    var curr_date = pad(this.getDate(), 2);
+    var curr_month = pad(this.getMonth() + 1, 2); //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + curr_month + curr_date + "_" + ('0' + this.getHours()).slice(-2) + ('0' + this.getMinutes()).slice(-2)
+};
+
 Date.prototype.format = function() {
 	var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based

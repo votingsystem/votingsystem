@@ -19,32 +19,28 @@
         <core-ajax id="ajax" url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
         <div vertical layout center>
-            <template if="{{modeSearch}}">
-                <div horizontal layout>
-                    <div layout horizontal center center-justified style="margin:0px auto 0px auto;width: 100%;">
-                        <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
-                               placeholder="<g:message code="userSearchLbl"/>" on-keypress="{{searchInputKeyPress}}">
-                        <paper-button raised on-click="{{processSearch}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-search"></i> <g:message code="userSearchLbl"/>
-                        </paper-button>
-                    </div>
-                    <div layout horizontal center center-justified style="width: 200px;">
-                        <paper-button raised on-click="{{toggleContactsView}}" style="margin: 0px 10px 0px 5px;" data-button="contacts">
-                            <i class="fa fa-users"></i> <g:message code="contactsLbl"/>
-                        </paper-button>
-                    </div>
+            <div hidden?="{{!modeSearch}}" horizontal layout>
+                <div layout horizontal center center-justified style="margin:0px auto 0px auto;width: 100%;">
+                    <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
+                           placeholder="<g:message code="userSearchLbl"/>" on-keypress="{{searchInputKeyPress}}">
+                    <paper-button raised on-click="{{processSearch}}" style="margin: 0px 0px 0px 5px;">
+                        <i class="fa fa-search"></i> <g:message code="userSearchLbl"/>
+                    </paper-button>
                 </div>
-            </template>
-            <template if="{{!modeSearch}}">
-                <div horizontal layout center center-justified style="width: 100%;">
-                    <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;"><g:message code="contactsLbl"/></div>
-                    <div>
-                        <paper-button raised on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
-                            <i class="fa fa-search"></i> <g:message code="userSearchLbl"/>
-                        </paper-button>
-                    </div>
+                <div layout horizontal center center-justified style="width: 200px;">
+                    <paper-button raised on-click="{{toggleContactsView}}" style="margin: 0px 10px 0px 5px;" data-button="contacts">
+                        <i class="fa fa-users"></i> <g:message code="contactsLbl"/>
+                    </paper-button>
                 </div>
-            </template>
+            </div>
+            <div hidden?="{{modeSearch}}" horizontal layout center center-justified style="width: 100%;">
+                <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;"><g:message code="storeContactsLbl"/></div>
+                <div>
+                    <paper-button raised on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
+                        <i class="fa fa-search"></i> <g:message code="userSearchLbl"/>
+                    </paper-button>
+                </div>
+            </div>
             <div style="display: {{userVSList.length == 0? 'none':'block'}};">
                 <div layout flex horizontal wrap around-justified>
                     <template repeat="{{uservs in userVSList}}">
@@ -65,8 +61,7 @@
                     </template>
                 </div>
             </div>
-            <div class="center" id="emptySearchMsg" style="font-size: 1em; font-weight: bold;
-                    display: {{responseData.userVSList.length == 0? 'block':'none'}};">
+            <div hidden?="{{responseData.userVSList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 <g:message code="emptyUserSearchResultMsg"/>
             </div>
             <core-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"

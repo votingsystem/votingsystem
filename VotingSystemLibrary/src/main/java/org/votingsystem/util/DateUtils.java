@@ -348,13 +348,13 @@ public class DateUtils {
         }
 
         public Map getMap() throws JSONException {
-            return getMap("dd MMM yyyy' 'HH:mm");
+            return getMap(null);
         }
 
         public Map getMap(String dateFormat) throws JSONException {
             Map dataMap = new HashMap();
-            dataMap.put("dateFrom", DateUtils.getDateStr(dateFrom, dateFormat));
-            dataMap.put("dateTo", DateUtils.getDateStr(dateTo, dateFormat));
+            dataMap.put("dateFrom", dateFormat != null ? dateFrom : DateUtils.getDateStr(dateFrom, dateFormat));
+            dataMap.put("dateTo", dateFormat != null ? dateTo : DateUtils.getDateStr(dateTo, dateFormat));
             return dataMap;
         }
 

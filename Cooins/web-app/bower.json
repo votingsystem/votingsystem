@@ -19,6 +19,7 @@
     "tests"
   ],
   "dependencies":{
+      "app-router":"app-router#~2.4.0",
       "jsoneditor":"jsoneditor#~3.1.2",
       "juicy-jsoneditor":"juicy-jsoneditor#~0.0.3",
       "highcharts":"highcharts#~4.0.4",

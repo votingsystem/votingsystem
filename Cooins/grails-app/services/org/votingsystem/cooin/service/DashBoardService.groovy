@@ -9,7 +9,7 @@ class DashBoardService {
 
 
     @Transactional public Map getUserVSInfo(DateUtils.TimePeriod timePeriod) {
-        Map result = [timePeriod:timePeriod.getMap("yyyy/MM/dd' 'HH:mm:ss")]
+        Map result = [timePeriod:timePeriod.getMap()]
         result.numTransFromBankVS = TransactionVS.countByToUserVSIsNotNullAndTypeAndDateCreatedBetween(
                 TransactionVS.Type.FROM_BANKVS, timePeriod.getDateFrom(), timePeriod.getDateTo())
         result.numTransFromUserVS = TransactionVS.countByTypeAndDateCreatedBetween(

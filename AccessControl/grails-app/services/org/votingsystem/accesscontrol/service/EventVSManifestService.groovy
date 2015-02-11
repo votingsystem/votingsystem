@@ -14,7 +14,7 @@ import java.text.DecimalFormat
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 class EventVSManifestService {
-		
+
     static transactional = true
 
     def signatureVSService

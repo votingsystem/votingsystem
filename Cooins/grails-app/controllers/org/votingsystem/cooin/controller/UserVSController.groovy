@@ -64,7 +64,7 @@ class UserVSController {
                     view = 'userVS'
                 }
             } else {
-                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)]
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_NOT_FOUND, message:msg)]
             }
             if(request.contentType?.contains("json")) render resultMap?.values()?.iterator().next() as JSON
             else render(view:view, model: resultMap)

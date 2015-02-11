@@ -3,7 +3,6 @@
 <vs:webresource dir="paper-dropdown-menu" file="paper-dropdown-menu.html"/>
 <vs:webresource dir="paper-dropdown" file="paper-dropdown.html"/>
 <vs:webresource dir="core-menu" file="core-menu.html"/>
-<vs:webresource dir="vs-date" file="vs-date.html"/>
 
 <polymer-element name="uservs-dashboard" attributes="dataMap">
     <template>
@@ -31,7 +30,6 @@
                 </paper-dropdown>
             </paper-dropdown-menu>
         </div>
-        <vs-date id="dateVS"></vs-date>
         <div layout flex horizontal wrap around-justified>
             <div id="FROM_BANKVS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{transactionVSData.numTransFromBankVS}}</div>
@@ -100,8 +98,8 @@
             console.log(this.tagName + " - dataMapChanged:" + JSON.stringify(this.dataMap))
             if(!this.dataMap) return;
             this.transactionVSData = this.dataMap.transactionVSData
-            this.dateFrom = this.$.dateVS.parseDayWeekDate(this.dataMap.transactionVSData.timePeriod.dateFrom)
-            this.dateTo = this.$.dateVS.parseDayWeekDate(this.dataMap.transactionVSData.timePeriod.dateTo)
+            this.dateFrom = new Date(this.dataMap.transactionVSData.timePeriod.dateFrom)
+            this.dateTo = new Date(this.dataMap.transactionVSData.timePeriod.dateTo)
         },
         selectAction: function(e, details) {
             if(!this.initialized) {
@@ -121,7 +119,7 @@
         },
         transBlockSelected: function(e) {
             var targetURL = "${createLink( controller:'transactionVS', action:"from", absolute:true)}/" +
-                    this.$.dateVS.formatURLParam(this.dateFrom) + "/to/" + this.$.dateVS.formatURLParam(this.dateTo) +
+                    this.dateFrom.urlFormatWithTime() + "/to/" + this.dateTo.urlFormatWithTime() +
                     "?transactionvsType=" + e.target.parentNode.id
             console.log(this.tagName + " - showTransBlock - targetURL: " + targetURL)
             loadURL_VS(targetURL)
