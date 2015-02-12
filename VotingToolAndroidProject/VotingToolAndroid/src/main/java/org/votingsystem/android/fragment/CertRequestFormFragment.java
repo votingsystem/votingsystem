@@ -218,14 +218,14 @@ public class CertRequestFormFragment extends Fragment {
                     getString(R.string.givenname_missing_msg));
     		return false;
     	} else {
-            givenname = StringUtils.normalize(givenname).toUpperCase();
+            givenname = StringUtils.normalize(givennameText.getText().toString()).toUpperCase();
         }
     	if(TextUtils.isEmpty(surnameText.getText().toString())){
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.surname_missing_msg));
     		return false;
     	} else {
-            surname = StringUtils.normalize(surname).toUpperCase();
+            surname = StringUtils.normalize(surnameText.getText().toString()).toUpperCase();
         }
         if(TextUtils.isEmpty(phoneText.getText().toString())){
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
@@ -239,7 +239,7 @@ public class CertRequestFormFragment extends Fragment {
                     getString(R.string.mail_missing_msg));
             return false;
         } else {
-            email =  StringUtils.normalize(email).toUpperCase();
+            email =  StringUtils.normalize(mailText.getText().toString()).toUpperCase();
         }
     	TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(
                 Context.TELEPHONY_SERVICE);

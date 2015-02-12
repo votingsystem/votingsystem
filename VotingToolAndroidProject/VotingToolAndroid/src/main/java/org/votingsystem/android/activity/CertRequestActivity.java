@@ -51,6 +51,7 @@ public class CertRequestActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                 intent.putExtra(FRAGMENT_KEY, CertRequestFormFragment.class.getName());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
             }
         });
