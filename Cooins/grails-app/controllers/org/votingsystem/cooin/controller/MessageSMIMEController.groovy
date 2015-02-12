@@ -93,6 +93,7 @@ class MessageSMIMEController {
                     break;
                 case TypeVS.FROM_BANKVS:
                     viewer = "message-smime-transactionvs-from-bankvs"
+                    break;
                 case TypeVS.COOIN_REQUEST:
                     viewer = "message-smime-transactionvs-cooin-request"
                     break;
@@ -114,7 +115,7 @@ class MessageSMIMEController {
             } catch(Exception ex) { log.error(ex.getMessage(), ex)}
         }*/
         Map model = [operation:params.operation, smimeMessage:smimeMessageStr,
-               viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:DateUtils.getDateStr(timeStampDate)]
+               viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:DateUtils.getISODateStr(timeStampDate)]
         if(request.contentType?.contains("json")) {
             render model as JSON
         } else render(view:'contentViewer', model:model)

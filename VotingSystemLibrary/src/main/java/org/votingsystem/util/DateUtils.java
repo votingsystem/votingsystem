@@ -19,6 +19,7 @@ public class DateUtils {
     private static Logger log = Logger.getLogger(DateUtils.class);
 
     private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
+    private static final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
 
     public static Calendar addDays(Date date, int days){
         Calendar cal = Calendar.getInstance();
@@ -75,6 +76,10 @@ public class DateUtils {
     public static Date getDateFromString (String dateString, String format) throws ParseException {
         DateFormat formatter = new SimpleDateFormat(format);
         return formatter.parse(dateString);
+    }
+
+    public static String getISODateStr (Date date) {
+        return isoDateFormat.format(date);
     }
 
     public static String getDateStr (Date date) {
@@ -353,8 +358,8 @@ public class DateUtils {
 
         public Map getMap(String dateFormat) throws JSONException {
             Map dataMap = new HashMap();
-            dataMap.put("dateFrom", dateFormat != null ? dateFrom : DateUtils.getDateStr(dateFrom, dateFormat));
-            dataMap.put("dateTo", dateFormat != null ? dateTo : DateUtils.getDateStr(dateTo, dateFormat));
+            dataMap.put("dateFrom", dateFormat == null ? dateFrom : DateUtils.getDateStr(dateFrom, dateFormat));
+            dataMap.put("dateTo", dateFormat == null ? dateTo : DateUtils.getDateStr(dateTo, dateFormat));
             return dataMap;
         }
 

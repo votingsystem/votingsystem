@@ -38,8 +38,10 @@
                     </div>
                 </div>
 
-                <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
-                    <b><g:message code="dateLbl"/>: </b>{{timeStampDate}}
+                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                    <b><g:message code="dateLbl"/>: </b>
+                    <time is="local-time" datetime="{{timeStampDate}}"
+                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
                 </div>
 
                 <div style="display:{{messageToUser? 'block':'none'}}">

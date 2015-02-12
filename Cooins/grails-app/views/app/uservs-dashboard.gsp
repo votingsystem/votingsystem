@@ -23,9 +23,9 @@
             <paper-dropdown-menu id="dropDownMenu" halign="right" on-core-select="{{selectAction}}">
                 <paper-dropdown class="dropdown colored" transition="">
                     <core-menu selected="0">
-                        <paper-item><g:message code="lastHourEventsLbl"/></paper-item>
-                        <paper-item><g:message code="last12HourEventsLbl"/></paper-item>
-                        <paper-item><g:message code="last24HourEventsLbl"/></paper-item>
+                        <paper-item><g:message code="lastHourMovementsLbl"/></paper-item>
+                        <paper-item><g:message code="last12HourMovementsLbl"/></paper-item>
+                        <paper-item><g:message code="last24HourMovementsLbl"/></paper-item>
                     </core-menu>
                 </paper-dropdown>
             </paper-dropdown-menu>
@@ -108,9 +108,9 @@
             }
             if(details.isSelected) {
                 var numHours
-                if("<g:message code="lastHourEventsLbl"/>" === details.item.innerHTML) numHours = 1
-                if("<g:message code="last12HourEventsLbl"/>" === details.item.innerHTML) numHours = 12
-                if("<g:message code="last24HourEventsLbl"/>" === details.item.innerHTML) numHours = 24
+                if("<g:message code="lastHourMovementsLbl"/>" === details.item.innerHTML) numHours = 1
+                if("<g:message code="last12HourMovementsLbl"/>" === details.item.innerHTML) numHours = 12
+                if("<g:message code="last24HourMovementsLbl"/>" === details.item.innerHTML) numHours = 24
                 var targetURL = "${createLink( controller:'app', action:"userVS", absolute:true)}/" + numHours
                 console.log(this.tagName + " - targetURL: " + targetURL)
                 this.$.ajax.url = targetURL

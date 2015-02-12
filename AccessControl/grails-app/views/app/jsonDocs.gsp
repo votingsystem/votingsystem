@@ -58,7 +58,7 @@
     }
 
     var validateCertEditor = new JSONEditor(document.querySelector("#validateCert"));
-    var jsonValidateCert = {operation:"CONTROL_CENTER_ASSOCIATION",
+    var jsonValidateCert = {
         receiverName:"${grailsApplication.config.vs.serverName}",
         signedMessageSubject:"<g:message code="validateCertLbl"/>",
         signedContent:{nif:"", deviceId: ""},

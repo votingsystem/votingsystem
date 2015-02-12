@@ -153,6 +153,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 break;
         }
         getStage().show();
+        SessionService.getInstance().checkCSRRequest();
     }
 
     private void selectKeystoreFile() {

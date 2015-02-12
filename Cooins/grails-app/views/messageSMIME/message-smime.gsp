@@ -28,18 +28,17 @@
                     </template>
                 </div>
             </div>
-            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
-                <b><g:message code="dateLbl"/>: </b>{{timeStampDate}}
+            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                <b><g:message code="dateLbl"/>: </b>
+                <time is="local-time" datetime="{{timeStampDate}}" day="numeric" month="short" year="numeric"
+                      hour="numeric" minute="numeric"/>
             </div>
-            <div style="display:{{messageToUser? 'block':'none'}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                <div>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
+                <paper-shadow z="1"></paper-shadow>
             </div>
-
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
             <div style=""><b><g:message code="subjectLbl"/>: </b>{{signedDocument.subject}}</div>
             <div horizontal layout>

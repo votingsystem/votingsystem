@@ -10,6 +10,7 @@
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <vs:webcomponent path="/element/alert-dialog"/>
+    <vs:webcomponent path="/element/time-elements"/>
     <vs:webcomponent path="/messageSMIME/${viewer}"/>
     <g:include view="/include/styles.gsp"/>
 </head>

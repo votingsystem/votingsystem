@@ -65,36 +65,29 @@
         <i id="searchPanelCloseIcon" on-click="{{toogleSearchPanel}}" class="fa fa-times text-right vs-navbar-icon"
            style="margin:0px 0px 0px 15px; display:inline;vertical-align: middle;"></i>
     </div>
-    <paper-dialog id="userSelectorDialog" heading="<g:message code="selectUserVSLbl"/>" style="max-width: 400px;
-            padding: 0px 0 0 0;">
-            <div horizontal layout center center-justified>
-                <template if="{{userVSList.length >0}}">
-                    <paper-radio-group id="userSelector" selected="{{lastSessionNif}}">
-                        <template repeat="{{user in userVSList}}">
-                            <paper-radio-button name="{{user.nif}}" label="{{user.nif}}" style="margin:0 0 10px 0;"></paper-radio-button><br/>
-                        </template>
-                    </paper-radio-group>
-                </template>
-                <template if="{{userVSList == null || userVSList.length === 0}}">
-                    <div style="margin: 20px"><g:message code="certNeededMsg"/></div>
-                </template>
+    <paper-dialog id="userSelectorDialog" heading="<g:message code="selectUserVSLbl"/>"
+                  style="max-width: 400px; padding: 0px 0 0 0;box-shadow: 0 4px 16px rgba(0,0,0,0.2)">
+            <div hidden?="{{userVSList.length === 0}}" horizontal layout center center-justified>
+                <paper-radio-group id="userSelector" selected="{{lastSessionNif}}">
+                    <template repeat="{{user in userVSList}}">
+                        <paper-radio-button name="{{user.nif}}" label="{{user.nif}}" style="margin:0 0 10px 0;"></paper-radio-button><br/>
+                    </template>
+                </paper-radio-group>
+                <div hidden?="{{userVSList.length > 0}}" style="margin: 20px"><g:message code="certNeededMsg"/></div>
             </div>
         <div horizontal layout style="font-size: 0.9em; padding: 3px">
-            <paper-button raised label="<g:message code="addCertUserVSLbl"/>" affirmative autofocus
-                          on-click="{{selectCertificate}}" style="color: #008000; margin:0 20px 0 0;">
-                <i class="fa fa-certificate"></i>
+            <paper-button raised affirmative autofocus on-click="{{selectCertificate}}" style="color: #008000; margin:0 20px 0 0;">
+                <i class="fa fa-certificate"></i> <g:message code="importCertLbl"/>
             </paper-button>
-            <paper-button raised label="<g:message code="requestCertLbl"/>" affirmative autofocus
-                          on-click="{{requestCert}}" style="color: #008000; margin:0 20px 0 0;">
-                <i class="fa fa-download"></i>
+            <paper-button raised affirmative autofocus on-click="{{requestCert}}" style="color: #008000; margin:0 20px 0 0;">
+                <i class="fa fa-download"></i> <g:message code="requestCertLbl"/>
             </paper-button>
             <div flex></div>
-            <template if="{{userVSList.length > 0}}">
-                <paper-button raised label="<g:message code="acceptLbl"/>" affirmative autofocus
-                              on-click="{{connect}}" style="color: #008000; margin:0 0 0 30px;">
-                    <i class="fa fa-check" style="margin:0px 10px 0px 0px;"></i>
+            <div hidden?="{{!userVSList || userVSList.length === 0}}">
+                <paper-button raised affirmative autofocus on-click="{{connect}}" style="color: #008000; margin:0 0 0 30px;">
+                    <i class="fa fa-check" style="margin:0px 10px 0px 0px;"></i> <g:message code="acceptLbl"/>
                 </paper-button>
-            </template>
+            </div>
         </div>
     </paper-dialog>
 </template>

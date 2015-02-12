@@ -1,3 +1,5 @@
+<vs:webcomponent path="/element/time-elements"/>
+
 <polymer-element name="transactionvs-card">
     <template>
         <g:include view="/include/styles.gsp"/>
@@ -25,7 +27,10 @@
         <div vertical on-click="{{showTransactionDetails}}" class="card {{getClass(transaction)}}">
             <div horizontal layout>
                 <div flex horizontal layout center-justified class="transactionDescription">{{transaction| transactionDescription}}</div>
-                <div class="date">{{transaction.dateCreated}}</div>
+                <div class="date">
+                    <time is="local-time" datetime="{{transaction.dateCreated}}"
+                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                </div>
             </div>
             <div id="subjectDiv" horizontal layout center-justified class="subject">{{transaction | getSubject}}</div>
             <div horizontal layout>
