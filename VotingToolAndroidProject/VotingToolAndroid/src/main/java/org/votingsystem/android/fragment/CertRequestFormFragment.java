@@ -35,6 +35,7 @@ import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 
 import java.text.Normalizer;
 import java.util.UUID;
@@ -217,18 +218,14 @@ public class CertRequestFormFragment extends Fragment {
                     getString(R.string.givenname_missing_msg));
     		return false;
     	} else {
-            givenname = Normalizer.normalize(givennameText.getText().toString().toUpperCase(),
-                    Normalizer.Form.NFD);
-            givenname  = givenname.replaceAll("[^\\p{ASCII}]", "");
+            givenname = StringUtils.normalize(givenname).toUpperCase();
         }
     	if(TextUtils.isEmpty(surnameText.getText().toString())){
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.surname_missing_msg));
     		return false;
     	} else {
-            surname = Normalizer.normalize(surnameText.getText().toString().toUpperCase(),
-                    Normalizer.Form.NFD);
-            surname = surname.replaceAll("[^\\p{ASCII}]", "");
+            surname = StringUtils.normalize(surname).toUpperCase();
         }
         if(TextUtils.isEmpty(phoneText.getText().toString())){
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
@@ -242,7 +239,7 @@ public class CertRequestFormFragment extends Fragment {
                     getString(R.string.mail_missing_msg));
             return false;
         } else {
-            email = Normalizer.normalize(mailText.getText().toString(), Normalizer.Form.NFD);
+            email =  StringUtils.normalize(email).toUpperCase();
         }
     	TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(
                 Context.TELEPHONY_SERVICE);

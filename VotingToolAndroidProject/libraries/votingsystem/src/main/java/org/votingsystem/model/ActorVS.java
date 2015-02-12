@@ -99,8 +99,6 @@ public class ActorVS implements java.io.Serializable {
     public String getName() {
         return name;
     }
-    
-    public String getNameNormalized () { return name.replaceAll("[\\/:.]", ""); }
 
     public void setName(String name) {
         this.name = name;

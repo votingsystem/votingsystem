@@ -25,6 +25,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
+import org.votingsystem.util.StringUtils;
 
 import javax.mail.Header;
 import javax.mail.Message;
@@ -323,10 +324,8 @@ public class DNIeContentSigner implements ContentSigner {
         if (ContextVS.getInstance().getSessionUser() != null) userNIF =
                 ContextVS.getInstance().getSessionUser().getNif();
         if(userNIF != null) smimeMessage.setFrom(new InternetAddress(userNIF));
-        if(toUser != null) {
-            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
-        }
+        toUser = StringUtils.getNormalized(toUser);
+        if(toUser != null) smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         smimeMessage.setSubject(subject, "UTF-8");
         return smimeMessage;
     }

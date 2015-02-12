@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.text.Normalizer;
 import java.util.Random;
 
 /**
@@ -61,7 +62,16 @@ public class StringUtils {
 		}
     	return result;
     }
-    
+
+    public static String normalize (String string) {
+        StringBuilder sb = new StringBuilder(string.length());
+        string = Normalizer.normalize(string, Normalizer.Form.NFD);
+        for (char c : string.toCharArray()) {
+            if (c <= '\u007F') sb.append(c);
+        }
+        return sb.toString();
+    }
+
 	public static String getNormalized(String cadena) {
         return cadena.replaceAll("[\\/:.]", ""); 
 	}

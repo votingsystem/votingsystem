@@ -57,7 +57,7 @@ public class VoteService extends IntentService {
             switch(operation) {
                 case VOTING_PUBLISHING:
                     String textToSign = arguments.getString(ContextVS.MESSAGE_KEY);
-                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                             textToSign, getString(R.string.publish_election_msg_subject));
                     responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                             ContentTypeVS.JSON_SIGNED, contextVS.getAccessControl().
@@ -94,7 +94,7 @@ public class VoteService extends IntentService {
                     break;
                 case CANCEL_VOTE:
                     JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+                    responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                             cancelDataJSON.toString(), getString(R.string.cancel_vote_msg_subject));
                     responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                             ContentTypeVS.JSON_SIGNED,

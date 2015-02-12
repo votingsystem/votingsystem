@@ -22,7 +22,7 @@ UserVS fromUserVS = superUserSignatureService.getUserVS()
 
 String messageSubject = "TEST_ADD_BANKVS";
 SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.nif,
-        cooinServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
+        cooinServer.getName() JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
         cooinServer.getSaveBankServiceURL())
 log.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())

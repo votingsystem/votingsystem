@@ -7,6 +7,7 @@ import org.springframework.dao.DataAccessException
 import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TagVS
+import org.votingsystem.util.StringUtils
 
 import java.text.Normalizer
 
@@ -30,10 +31,7 @@ class TagVSController {
             } else  {
                 TagVS tag = systemService.getTag(requestJSON.tag)
                 if(!tag) {
-                    String tagName = requestJSON.tag
-                    tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
-                            "\\p{InCombiningDiacriticalMarks}+", "");
-                    tag = new TagVS(name:tagName).save()
+                    tag = new TagVS(name:StringUtils.normalize(requestJSON.tag)).save()
                     new CooinAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
                             userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:tag).save()
                 }

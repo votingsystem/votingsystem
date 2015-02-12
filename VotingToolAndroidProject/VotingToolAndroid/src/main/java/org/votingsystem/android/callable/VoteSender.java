@@ -50,7 +50,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String subject = contextVS.getString(R.string.request_msg_subject,
                     vote.getEventVS().getEventVSId());
             JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
-            responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+            responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                     accessRequestJSON.toString(), subject, contextVS.getTimeStampServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             //send access request to fetch the anonymous certificate that signs the vote
@@ -70,7 +70,7 @@ public class VoteSender implements Callable<ResponseVS> {
             certificationRequest.initSigner(responseVS.getMessageBytes());
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
             SMIMEMessage signedVote = certificationRequest.getSMIME(
-                    vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
+                    vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getName(),
                     voteJSON.toString(), contextVS.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, contextVS);
             responseVS = timeStamper.call();
@@ -118,7 +118,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String subject = contextVS.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
             JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-            ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+            ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                     cancelDataJSON.toString(), subject, contextVS.getTimeStampServiceURL());
             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                     ContentTypeVS.JSON_SIGNED, serviceURL);

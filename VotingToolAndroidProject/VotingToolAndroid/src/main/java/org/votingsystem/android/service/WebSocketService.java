@@ -313,7 +313,7 @@ public class WebSocketService extends Service {
                         mapToSend.put("UUID", randomUUID);
                         String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
                         JSONObject requestJSON = new JSONObject(mapToSend);
-                        responseVS = contextVS.signMessage(cooinServer.getNameNormalized(),
+                        responseVS = contextVS.signMessage(cooinServer.getName(),
                                 requestJSON.toString(), msgSubject, contextVS.getCooinServer().getTimeStampServiceURL());
                         SMIMEMessage smimeMessage = responseVS.getSMIME();
                         session.getBasicRemote().sendText(WebSocketMessage.getMessageJSON(TypeVS.

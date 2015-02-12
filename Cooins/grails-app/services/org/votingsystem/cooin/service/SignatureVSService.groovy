@@ -192,18 +192,13 @@ class  SignatureVSService {
 
 	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header header) {
 		log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header);
 	}
 
     public ResponseVS getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
             Header... headers) {
         log.debug "getSMIMETimeStamped - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(
-                fromUser, toUser, textToSign, subject, headers)
+        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${grailsApplication.config.vs.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();

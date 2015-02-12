@@ -154,7 +154,7 @@ public class RepresentativeService extends IntentService {
         Map contentToSignMap = new HashMap();
         contentToSignMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
         contentToSignMap.put("UUID", UUID.randomUUID().toString());
-        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                 new JSONObject(contentToSignMap).toString(),
                 getString(R.string.revoke_representative_msg_subject));
         try {
@@ -266,7 +266,7 @@ public class RepresentativeService extends IntentService {
             signatureDataMap.put("representativeNif", representative.getNif());
             signatureDataMap.put("representativeName", representative.getName());
             JSONObject signatureContent = new JSONObject(signatureDataMap);
-            responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+            responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                     signatureContent.toString(), messageSubject);
             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                     ContentTypeVS.JSON_SIGNED, serviceURL);
@@ -317,7 +317,7 @@ public class RepresentativeService extends IntentService {
             AnonymousDelegation anonymousDelegation) throws Exception {
         LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
         JSONObject requestJSON = anonymousDelegation.getCancellationRequest();
-        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+        ResponseVS responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                 requestJSON.toString(), getString(R.string.anonymous_delegation_cancellation_lbl));
         responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(), ContentTypeVS.JSON_SIGNED,
                 contextVS.getAccessControl().getCancelAnonymousDelegationServiceURL());
@@ -352,7 +352,7 @@ public class RepresentativeService extends IntentService {
                     getCertificationRequest().getCsrPEM());
             //request signed with user certificate (data signed without representative data)
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    contextVS.getAccessControl().getNameNormalized(),
+                    contextVS.getAccessControl().getName(),
                     anonymousDelegation.getRequest().toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
                     representativeDataFileName, (AppContextVS)getApplicationContext());
@@ -361,7 +361,7 @@ public class RepresentativeService extends IntentService {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
-                String toUser = contextVS.getAccessControl().getNameNormalized();
+                String toUser = contextVS.getAccessControl().getName();
                 //delegation signed with anonymous certificate (with delegation data)
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, anonymousDelegation.getDelegation(representative.getNif(),
@@ -416,7 +416,7 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("base64ImageHash", base64ResultDigest);
             contentToSignMap.put("representativeInfo", editorContent);
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
-            responseVS = contextVS.signMessage(contextVS.getAccessControl().getNameNormalized(),
+            responseVS = contextVS.signMessage(contextVS.getAccessControl().getName(),
                     new JSONObject(contentToSignMap).toString(), messageSubject);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +

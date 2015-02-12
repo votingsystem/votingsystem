@@ -132,10 +132,7 @@ class SignatureService {
     public SMIMEMessage getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
                        Header... headers) {
         log.debug "getSMIMETimeStamped - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(
-                fromUser, toUser, textToSign, subject, headers)
+        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${ContextVS.getInstance().config.urlTimeStampServer}/timeStamp")
         ResponseVS responseVS = timeStamper.call();
@@ -145,18 +142,13 @@ class SignatureService {
 		
 	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
 		log.debug "getSMIME - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessage mimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers)
-		return mimeMessage
+		return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers);
 	}
 		
 	public synchronized SMIMEMessage getSMIMEMultiSigned (
 		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
 		log.debug("getSMIMEMultiSigned - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-		SMIMEMessage multiSignedMessage = getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser,
-                smimeMessage, subject);
-		return multiSignedMessage
+		return getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject);
 	}
 
 
@@ -228,7 +220,7 @@ class SignatureService {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
             KeyStore mockDnie = generateKeyStore(userNif);
-            String toUser = cooinServer.getNameNormalized();
+            String toUser = cooinServer.getName();
             String subject = "subscribeToGroupMsg - subscribeToGroupMsg"
             subscriptionData.put("UUID", UUID.randomUUID().toString())
             SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
@@ -280,8 +272,8 @@ class SignatureService {
         String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS"
         UserVS userVS = UserVS.getUserVS(certSigner)
         for(JSONObject request:requests) {
-            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.nif,
-                    cooinServer.getNameNormalized(), request.toString(), messageSubject)
+            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.nif, cooinServer.getName(), request.toString(),
+                    messageSubject)
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     cooinServer.getGroupVSUsersActivationServiceURL())
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage())

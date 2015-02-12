@@ -287,7 +287,7 @@ public class TransactionVSService extends IntentService {
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
                     cooinCSRList.toString().getBytes());
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    cooinServer.getNameNormalized(), requestBatch.getRequestDataToSignJSON().toString(),
+                    cooinServer.getName(), requestBatch.getRequestDataToSignJSON().toString(),
                     mapToSend, messageSubject, null, cooinServer.getCooinRequestServiceURL(),
                     requestDataFileName, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();

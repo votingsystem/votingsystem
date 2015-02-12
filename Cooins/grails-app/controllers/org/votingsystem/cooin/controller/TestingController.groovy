@@ -35,6 +35,9 @@ class TestingController {
 
     def spa() {}
 
+    def appRouter() {
+    }
+
     def index() {
         balanceService.initWeekPeriod(Calendar.getInstance())
         render "initWeekPeriod - OK"

@@ -21,7 +21,7 @@ SignatureService representativeSignatureService = SignatureService.getUserVSSign
 UserVS fromUserVS = representativeSignatureService.getUserVS()
 String messageSubject = "TEST_ADD_GROUPVS";
 SMIMEMessage smimeMessage = representativeSignatureService.getSMIMETimeStamped(fromUserVS.nif,
-        cooinServer.getNameNormalized(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
+        cooinServer.getName(), JSONSerializer.toJSON(requestDataMap).toString(), messageSubject)
 ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
         cooinServer.getSaveGroupVSServiceURL())
 log.debug("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage())

@@ -29,7 +29,7 @@ String messageSubject = "TEST_COOIN_REQUEST_DATA_MSG_SUBJECT";
 Map<String, Object> mapToSend = new HashMap<String, Object>();
 mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(), cooinBatch.getCooinCSRRequest().toString().getBytes());
 SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.nif,
-        cooinServer.getNameNormalized(), cooinBatch.getRequestDataToSignJSON().toString(), messageSubject)
+        cooinServer.getName(), cooinBatch.getRequestDataToSignJSON().toString(), messageSubject)
 mapToSend.put(ContextVS.COOIN_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
         smimeMessage.getBytes());
 ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, cooinServer.getCooinRequestServiceURL());

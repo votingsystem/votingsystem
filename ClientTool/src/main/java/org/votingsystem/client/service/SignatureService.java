@@ -220,7 +220,7 @@ public class SignatureService extends Service<ResponseVS> {
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
             EventVS eventVS = operationVS.getEventVS();
             eventVS.getVoteVS().genVote();
-            String toUser =  eventVS.getAccessControlVS().getNameNormalized();
+            String toUser = eventVS.getAccessControlVS().getName();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, jsonObject.toString(),
@@ -236,7 +236,6 @@ public class SignatureService extends Service<ResponseVS> {
             jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getVoteDataMap());
             String textToSign = jsonObject.toString();
             fromUser = eventVS.getVoteVS().getHashCertVSBase64();
-            toUser = StringUtils.getNormalized(eventVS.getControlCenterVS().getName());
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
             String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
@@ -304,9 +303,8 @@ public class SignatureService extends Service<ResponseVS> {
                 //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
                 //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
                 JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-                SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null,
-                        operationVS.getNormalizedReceiverName(), documentToSignJSON.toString(),
-                        password, operationVS.getSignedMessageSubject(), null);
+                SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
+                        documentToSignJSON.toString(), password, operationVS.getSignedMessageSubject(), null);
                 RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME,
                         operationVS.getFile(), operationVS.getServiceURL());
                 ResponseVS responseVS = dataSender.call();
@@ -325,9 +323,8 @@ public class SignatureService extends Service<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
                     cooinBatch.getCooinCSRRequest().toString().getBytes());
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null,
-                    operationVS.getNormalizedReceiverName(), cooinBatch.getRequestDataToSignJSON().toString(),
-                    password, operationVS.getSignedMessageSubject(), null);
+            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
+                    cooinBatch.getRequestDataToSignJSON().toString(), password, operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     operationVS.getTargetServer().getTimeStampServiceURL());
             ResponseVS responseVS = timeStamper.call();
@@ -394,7 +391,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                     ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
-                    operationVS.getNormalizedReceiverName(), delegation.getCancellationRequest().toString(),
+                    operationVS.getReceiverName(), delegation.getCancellationRequest().toString(),
                     password, operationVS.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
                     operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
@@ -425,7 +422,7 @@ public class SignatureService extends Service<ResponseVS> {
                     ContextVS.getInstance().getAccessControl().getServerURL());
             try {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
-                        getNameNormalized(), anonymousDelegation.getRequest().toString(), password,
+                        getName(), anonymousDelegation.getRequest().toString(), password,
                         operationVS.getSignedMessageSubject(), null);
                 TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
                 ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
@@ -457,7 +454,7 @@ public class SignatureService extends Service<ResponseVS> {
                 updateProgress(60, 100);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(anonymousDelegation.getHashCertVS(),
-                        ContextVS.getInstance().getAccessControl().getNameNormalized(),
+                        ContextVS.getInstance().getAccessControl().getName(),
                         anonymousDelegation.getDelegation().toString(),
                         operationVS.getSignedMessageSubject(), null);
                 SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
@@ -489,7 +486,7 @@ public class SignatureService extends Service<ResponseVS> {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
                 documentToSignStr = documentToSignJSON.toString();
             }
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getNormalizedReceiverName(),
+            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSignStr, password, operationVS.getSignedMessageSubject(), null);
             updateMessage(operationVS.getSignedMessageSubject());
             if(operationVS.getAsciiDoc() != null) {

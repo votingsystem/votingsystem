@@ -178,6 +178,10 @@
                     this.loading = false
                     showMessageVS('<g:message code="errorLoadingResourceMsg"/>' , '<g:message code="errorLbl"/>')
                     return
+                } else if(404 === xhr.status) {
+                    this.loading = false
+                    showMessageVS('<g:message code="errorLoadingResourceMsg"/>' , '<g:message code="error404Msg"/>')
+                    return
                 }
                 if(!ajaxDocument) return
                 var links = ajaxDocument.querySelectorAll('link')

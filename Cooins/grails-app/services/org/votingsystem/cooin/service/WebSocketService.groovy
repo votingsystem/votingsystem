@@ -51,7 +51,7 @@ class WebSocketService {
         switch(request.operation) {
             case TypeVS.LISTEN_TRANSACTIONS:
                 TransactionVSService transactionVSService = grailsApplication.mainContext.getBean("transactionVSService")
-                transactionVSService.addTransactionListener(request.messageJSON.userId)
+                transactionVSService.addTransactionListener(request.messageJSON.sessionId)
                 break;
             case TypeVS.MESSAGEVS_TO_DEVICE:
                 if(SessionVSManager.getInstance().sendMessageToDevice(

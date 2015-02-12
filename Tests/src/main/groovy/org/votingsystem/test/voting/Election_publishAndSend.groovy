@@ -114,7 +114,7 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()));
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
     SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
-            ContextVS.getInstance().getAccessControl().getNameNormalized(),
+            ContextVS.getInstance().getAccessControl().getName(),
             JSONSerializer.toJSON(eventVS.getDataMap()).toString(), smimeMessageSubject)
     SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
             ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
@@ -144,9 +144,8 @@ private void changeEventState(String publisherNIF) throws Exception {
             TestUtils.simulationData.getEventStateWhenFinished());
     String smimeMessageSubject = "cancelEventMsgSubject"
     SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
-            ContextVS.getInstance().getAccessControl().getNameNormalized(),
-            JSONSerializer.toJSON(cancelDataMap).toString(), smimeMessageSubject)
+    SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().
+            getName(), JSONSerializer.toJSON(cancelDataMap).toString(), smimeMessageSubject)
     SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
             ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
             ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -190,8 +189,7 @@ private void cancelVote(VoteVS voteVS, String nif) {
     cancelDataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
     cancelDataMap.put("UUID", UUID.randomUUID().toString());
     SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER)
-    SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
-            ContextVS.getInstance().getAccessControl().getNameNormalized(),
+    SMIMEMessage smimeMessage = signatureService.getSMIME(nif, ContextVS.getInstance().getAccessControl().getName(),
             JSONSerializer.toJSON(cancelDataMap).toString(), "cancelVote")
     SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
             ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL(),

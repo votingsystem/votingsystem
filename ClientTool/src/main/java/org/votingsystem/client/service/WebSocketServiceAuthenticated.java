@@ -272,7 +272,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getNameNormalized(),
+                SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getName(),
                         documentToSignJSON.toString(), password, ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();

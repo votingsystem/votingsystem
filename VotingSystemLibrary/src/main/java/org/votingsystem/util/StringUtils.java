@@ -17,6 +17,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.Base64;
 import java.util.List;
 import java.util.Random;
@@ -144,9 +145,18 @@ public class StringUtils {
         return hexConverter.marshal(paramsStr.getBytes());
     }
 
-    public static String getNormalized (String cadena) {
-        if(cadena == null) return null;
-        else return cadena.replaceAll("[\\/:.]", ""); 
+    public static String getNormalized (String string) {
+        if(string == null) return null;
+        else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+    }
+
+    public static String normalize (String string) {
+        StringBuilder sb = new StringBuilder(string.length());
+        string = Normalizer.normalize(string, Normalizer.Form.NFD);
+        for (char c : string.toCharArray()) {
+            if (c <= '\u007F') sb.append(c);
+        }
+        return sb.toString();
     }
 
     public static String getRandomAlphaNumeric(int count) {

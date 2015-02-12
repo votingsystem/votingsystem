@@ -100,10 +100,6 @@ public class ActorVS implements Serializable {
         return name;
     }
 
-    public String getNameNormalized () {
-        return name.replaceAll("[\\/:.]", "");
-    }
-
     public void setName(String name) {
         this.name = name;
     }

@@ -77,8 +77,8 @@ public class TransactionVSPlan {
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     transactionVS.fromUserVS.nif, UserVS.Type.BANKVS)
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.fromUserVS.nif,
-                    cooinServer.getNameNormalized(), JSONSerializer.toJSON(
-                    TransactionVSUtils.getBankVSTransactionVS(transactionVS)).toString(), smimeMessageSubject)
+                    cooinServer.getName(), JSONSerializer.toJSON(TransactionVSUtils.getBankVSTransactionVS(
+                    transactionVS)).toString(), smimeMessageSubject)
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     cooinServer.getTransactionVSServiceURL())
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())
@@ -94,9 +94,8 @@ public class TransactionVSPlan {
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     representative.nif, UserVS.Type.USER)
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.nif,
-                    cooinServer.getNameNormalized(), JSONSerializer.toJSON(
-                    TransactionVSUtils.getGroupVSTransactionVS(transactionVS, transactionVS.fromUserVS)).toString(),
-                    smimeMessageSubject)
+                    cooinServer.getName(), JSONSerializer.toJSON(TransactionVSUtils.getGroupVSTransactionVS(
+                    transactionVS, transactionVS.fromUserVS)).toString(), smimeMessageSubject)
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     cooinServer.getTransactionVSServiceURL())
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(responseVS.getMessage())

@@ -30,8 +30,7 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         String subject = "claimMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif)
-        SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
-                ContextVS.getInstance().getAccessControl().getNameNormalized(),
+        SMIMEMessage smimeMessage = signatureService.getSMIME(nif, ContextVS.getInstance().getAccessControl().getName(),
                 getRequestJSON(eventId).toString(), subject)
 
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();

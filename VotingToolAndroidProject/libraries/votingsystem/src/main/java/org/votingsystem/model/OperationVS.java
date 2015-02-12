@@ -252,16 +252,10 @@ public class OperationVS implements Parcelable {
     public String getReceiverName() {
         return receiverName;
     }
-    
-    public String getNormalizedReceiverName() {
-        if(receiverName == null) return null;
-        return StringUtils.getNormalized(receiverName);
-    }
 
     public void setReceiverName(String receiverName) {
         this.receiverName = receiverName;
     }
-
 
     public static OperationVS parse (JSONObject operationJSON) throws JSONException, ParseException {
         OperationVS operation = new OperationVS();

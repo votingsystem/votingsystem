@@ -154,13 +154,9 @@ public class OperationVS {
     }
 
     public String getReceiverName() {
-        return receiverName;
-    }
-    
-    public String getNormalizedReceiverName() {
-        if(receiverName == null && targetServer == null) return null;
-        if(receiverName == null) return targetServer.getNameNormalized();
-        return StringUtils.getNormalized(receiverName);
+        if(receiverName != null) return receiverName;
+        if(targetServer != null) return targetServer.getName();
+        return null;
     }
 
     public void setReceiverName(String receiverName) {

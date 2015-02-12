@@ -13,6 +13,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.StringUtils;
 
 import javax.mail.Header;
 import javax.mail.Message;
@@ -109,22 +110,18 @@ public class SMIMESignedGeneratorVS {
         smimeSignedGenerator.addCertificates(certs);
     }
 
-    public SMIMEMessage getSMIME(String fromUser, String toUser,
-            String textToSign, String subject, Header... headers) throws Exception {
+    public SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign, String subject,
+             Header... headers) throws Exception {
         if (subject == null) throw new IllegalArgumentException("Subject null");
         if (textToSign == null) throw new IllegalArgumentException("Content null");
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,ContextVS.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
-        if(fromUser != null) {
-            fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-            smimeMessage.setFrom(new InternetAddress(fromUser));
-        }
-        if(toUser != null) {
-            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
-        }
+        fromUser = StringUtils.getNormalized(fromUser);
+        toUser = StringUtils.getNormalized(toUser);
+        if(fromUser != null) smimeMessage.setFrom(new InternetAddress(fromUser));
+        if(toUser != null) smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         smimeMessage.setSubject(subject);
         return smimeMessage;
     }
@@ -146,14 +143,10 @@ public class SMIMESignedGeneratorVS {
          mimeMultipart = smimeSignedGenerator.generate(bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
          smimeMessage = new SMIMEMessage(mimeMultipart);
          if(subject != null) smimeMessage.setSubject(subject);
-         if(fromUser != null) {
-             fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-             smimeMessage.setFrom(new InternetAddress(fromUser));
-         }
-         if(toUser != null) {
-             toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-             smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
-         }
+         fromUser = StringUtils.getNormalized(fromUser);
+         toUser = StringUtils.getNormalized(toUser);
+         if(fromUser != null) smimeMessage.setFrom(new InternetAddress(fromUser));
+         if(toUser != null) smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
          return smimeMessage;
     }
     

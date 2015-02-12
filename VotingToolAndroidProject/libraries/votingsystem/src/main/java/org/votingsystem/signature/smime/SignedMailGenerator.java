@@ -11,6 +11,7 @@ import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.StringUtils;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -96,14 +97,10 @@ public class SignedMailGenerator {
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
                 ContextVS.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
-        if(fromUser != null) {
-            fromUser = fromUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-            smimeMessage.setFrom(new InternetAddress(fromUser));
-        }
-        if(toUser != null) {
-            toUser = toUser.replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-            smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
-        }
+        fromUser = StringUtils.getNormalized(fromUser);
+        toUser = StringUtils.getNormalized(toUser);
+        if(fromUser != null) smimeMessage.setFrom(new InternetAddress(fromUser));
+        if(toUser != null) smimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toUser));
         smimeMessage.setSubject(subject);
         return smimeMessage;
     }

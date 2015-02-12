@@ -40,7 +40,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         byte[] resultDigest =  messageDigest.digest(imageBytes);
         SignatureService signatureService = SignatureService.genUserVSSignatureService(representativeNIF)
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representativeNIF,
-                ContextVS.getInstance().getAccessControl().getNameNormalized(),
+                ContextVS.getInstance().getAccessControl().getName(),
                 getRequestJSON(representativeNIF, Base64.getEncoder().encodeToString(resultDigest)).toString(), subject)
         RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage,
                 FileUtils.getFileFromBytes(imageBytes), ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
