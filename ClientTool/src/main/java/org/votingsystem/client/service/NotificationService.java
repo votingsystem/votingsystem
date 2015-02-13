@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

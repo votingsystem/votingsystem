@@ -2,7 +2,7 @@
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
 <g:include view="/include/balanceVSUtils_js.gsp"/>
 
-<polymer-element name="transactionvs-list-balance" attributes="transactionList caption">
+<polymer-element name="transactionvs-list-balance" attributes="transactionList caption captionVisible">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -16,9 +16,12 @@
         </style>
         <div layout vertical justified style="display: block; height: 100%;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
-                <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
-                <div flex></div>
-                <div style="font-size: 0.8em;color:#888; margin:0 0 0 10px;">{{numMovements}}</div>
+                <div hidden?="{{!captionVisible}}" flex>
+                    <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
+                    <div flex></div>
+                </div>
+                <div style="font-size: 0.9em;color:#888; font-weight: bold; margin:5px 0 0 10px;
+                    text-decoration: underline;">{{numMovements}}</div>
             </div>
             <div>
                 <template repeat="{{transaction in transactionList}}">
@@ -58,6 +61,7 @@
     <script>
         Polymer('transactionvs-list-balance', {
             caption:"<g:message code="expensesLbl"/>",
+            captionVisible:true,
             numMovements:0 + " <g:message code="movementsLbl"/>",
             publish: {
                 balances: {value: {}},

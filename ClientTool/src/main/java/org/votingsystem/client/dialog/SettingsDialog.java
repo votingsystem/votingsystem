@@ -4,12 +4,10 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -27,7 +25,7 @@ import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza
@@ -51,7 +49,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     public SettingsDialog() {
         super(new GridPane());
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        gridPane = (GridPane) getRootNode();
+        gridPane = (GridPane) getParent();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
@@ -113,7 +111,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         gridPane.add(signWithKeystoreRb,0,5);
         gridPane.add(footerButtonsBox,0,7);
         gridPane.getStyleClass().add("modal-dialog");
-        getStage().setScene(new Scene(gridPane, Color.TRANSPARENT));
         getStage().getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         gridPane.setMinWidth(600);
     }
@@ -154,6 +151,13 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         }
         getStage().show();
         SessionService.getInstance().checkCSRRequest();
+    }
+
+    public static void showDialog() {
+        Platform.runLater(() -> {
+            SettingsDialog settingsDialog = new SettingsDialog();
+            settingsDialog.show();
+        });
     }
 
     private void selectKeystoreFile() {

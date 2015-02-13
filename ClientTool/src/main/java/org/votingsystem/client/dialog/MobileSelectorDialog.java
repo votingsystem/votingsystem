@@ -23,7 +23,7 @@ import org.votingsystem.util.NifUtils;
 
 import java.io.IOException;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

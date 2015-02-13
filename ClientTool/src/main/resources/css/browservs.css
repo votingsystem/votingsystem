@@ -4,9 +4,22 @@
 }
 
 .tab-header-area {
-    -fx-padding: 0 0 0 35;
+    -fx-padding: 0 0 0 2;
 }
 
-.newtab-button {
-    -fx-padding: 4 6 4 6;
+.toolbar-button {
+    -fx-font-size: 20;
+}
+
+.close-button{
+    -fx-focus-color: transparent;
+    -fx-background-insets: 0, 0, 1, 2;
+}
+
+.main-dialog {
+    -fx-border-color: #6c0404;
+    -fx-border-width: 1;
+    -fx-border-insets: 0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 6;
 }

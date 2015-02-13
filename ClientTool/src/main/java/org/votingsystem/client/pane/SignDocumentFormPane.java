@@ -29,7 +29,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

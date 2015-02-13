@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

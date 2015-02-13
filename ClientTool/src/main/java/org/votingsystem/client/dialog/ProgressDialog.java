@@ -10,10 +10,13 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -59,7 +62,7 @@ public class ProgressDialog extends VBox {
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(VotingSystemApp.getInstance().getScene().getWindow());
+            stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
             stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             ProgressDialog progressDialog = new ProgressDialog(progressTask);

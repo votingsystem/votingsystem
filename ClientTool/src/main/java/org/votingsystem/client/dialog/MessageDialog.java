@@ -1,7 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -63,22 +61,7 @@ public class MessageDialog extends VBox {
         getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(this, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        // allow the dialog to be dragged around.
-        final Node root = stage.getScene().getRoot();
-        final Delta dragDelta = new Delta();
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                // record a delta distance for the drag and drop operation.
-                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-            }
-        });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
-                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
-            }
-        });
+        Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
 
@@ -142,7 +125,5 @@ public class MessageDialog extends VBox {
         stage.show();
         stage.toFront();
     }
-
-    class Delta { double x, y; }
 
 }

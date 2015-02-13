@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.*;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

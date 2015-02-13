@@ -7,26 +7,33 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import net.sf.json.JSON;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
+import org.votingsystem.client.pane.MainOptionsPane;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
+import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebKitHost;
 import org.votingsystem.model.ContentTypeVS;
@@ -41,7 +48,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
 
 /**
  * @author jgzornoza
@@ -58,18 +64,29 @@ public class BrowserVS extends Region implements WebKitHost {
     private Stage browserStage;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private TextField locationField = new TextField("");
-    private final BrowserVSPane browserHelper;
+    private BrowserVSPane browserHelper;
+    private MainOptionsPane mainOptionsPane;
     private HBox toolBar;
     private TabPane tabPane;
     private Button prevButton;
-    private static final BrowserVS INSTANCE = new BrowserVS();
+    private static BrowserVS INSTANCE;
+
+    public static BrowserVS init(Stage browserStage) {
+        INSTANCE = new BrowserVS(browserStage);
+        return INSTANCE;
+    }
 
     public static BrowserVS getInstance() {
         return INSTANCE;
     }
 
-    private BrowserVS() {
+    public void open() {
+        newTab(mainOptionsPane, ContextVS.getMessage("operationsLbl"));
+    }
+
+    private BrowserVS(Stage browserStage) {
         browserHelper = new BrowserVSPane();
+        mainOptionsPane = new MainOptionsPane();
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(event -> {
             log.debug("signatureService - OnSucceeded");
@@ -90,13 +107,13 @@ public class BrowserVS extends Region implements WebKitHost {
         browserHelper.getSignatureService().setOnRunning(event -> log.debug("signatureService - OnRunning"));
         browserHelper.getSignatureService().setOnCancelled(event -> log.debug("signatureService - OnCancelled"));
         browserHelper.getSignatureService().setOnFailed(event -> log.debug("signatureService - OnFailed"));
-        initComponents();
+        initComponents(browserStage);
     }
 
-    private void initComponents() {
+    private void initComponents(Stage browserStage) {
         log.debug("initComponents");
-        browserStage = new Stage();
-        browserStage.initModality(Modality.WINDOW_MODAL);
+        this.browserStage = browserStage;
+        //browserStage.initModality(Modality.WINDOW_MODAL);
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         browserStage.setResizable(true);
         browserStage.setOnCloseRequest(event -> {
@@ -110,13 +127,17 @@ public class BrowserVS extends Region implements WebKitHost {
         final Button forwardButton = new Button();
         final Button reloadButton = new Button();
         forwardButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));
+        forwardButton.getStyleClass().add("toolbar-button");
         forwardButton.setOnAction((event) -> {
             try {
-                ((WebView)tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
+                ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(1);
                 prevButton.setDisable(false);
-            } catch(Exception ex) { forwardButton.setDisable(true); }
+            } catch (Exception ex) {
+                forwardButton.setDisable(true);
+            }
         });
         prevButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
+        prevButton.getStyleClass().add("toolbar-button");
         prevButton.setOnAction(event -> {
             try {
                 ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).getEngine().getHistory().go(-1);
@@ -126,10 +147,16 @@ public class BrowserVS extends Region implements WebKitHost {
             }
         });
         reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+        reloadButton.getStyleClass().add("toolbar-button");
         reloadButton.setOnAction(event -> ((WebView) tabPane.getSelectionModel().getSelectedItem().getContent()).
                 getEngine().load(locationField.getText()));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
+        final Button newTabButton = new Button();
+        newTabButton.setGraphic(Utils.getImage(FontAwesome.Glyph.PLUS));
+        newTabButton.getStyleClass().add("toolbar-button");
+        newTabButton.setOnAction(event -> newTab(null, null, null));
+
         locationField.setPrefWidth(400);
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.setOnKeyPressed(event -> {
@@ -140,18 +167,38 @@ public class BrowserVS extends Region implements WebKitHost {
                         targetURL = locationField.getText().trim();
                     } else targetURL = "http://" + locationField.getText().trim();
                     Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
-                    if(content instanceof  WebView) ((WebView) content).getEngine().load(targetURL);
+                    if (content instanceof WebView) ((WebView) content).getEngine().load(targetURL);
                     else newTab(targetURL, null, null);
                 }
             }
         });
         toolBar = new HBox();
+        toolBar.setSpacing(10);
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
         NotificationService.getInstance().setNotificationsButton(new Button());
         InboxService.getInstance().setInboxButton(new Button());
-        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer(),
-                NotificationService.getInstance().getNotificationsButton(), InboxService.getInstance().getInboxButton());
+        Button menuButton = new Button();
+        menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
+        menuButton.getStyleClass().add("toolbar-button");
+        Button closeButton = new Button();
+        closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES));
+        closeButton.getStyleClass().addAll("toolbar-button", "close-button");
+        closeButton.setOnAction(actionEvent -> VotingSystemApp.getInstance().stop());
+
+        toolBar.getChildren().addAll(newTabButton, prevButton, forwardButton, locationField, reloadButton, Utils.createSpacer(),
+                NotificationService.getInstance().getNotificationsButton(), InboxService.getInstance().getInboxButton(), menuButton, closeButton);
+        toolBar.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent mouseEvent) {
+                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                    if(mouseEvent.getClickCount() == 2){
+                        browserStage.setFullScreenExitHint("");
+                        browserStage.setFullScreen(!browserStage.isFullScreen());
+                    }
+                }
+            }
+        });
+
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -159,28 +206,28 @@ public class BrowserVS extends Region implements WebKitHost {
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
         final AnchorPane tabPainContainer = new AnchorPane();
-        final Button addButton = new Button("+");
-        addButton.getStyleClass().add("newtab-button");
         AnchorPane.setTopAnchor(tabPane, 0.0);
         AnchorPane.setLeftAnchor(tabPane, 0.0);
         AnchorPane.setRightAnchor(tabPane, 0.0);
         AnchorPane.setBottomAnchor(tabPane, 0.0);
-        AnchorPane.setTopAnchor(addButton, 1.0);
-        AnchorPane.setLeftAnchor(addButton, 5.0);
-        addButton.setOnAction(event -> newTab(null, null, null));
-        tabPainContainer.getChildren().addAll(tabPane, addButton);
+        tabPainContainer.getChildren().addAll(tabPane);
         VBox.setVgrow(tabPainContainer, Priority.ALWAYS);
+        mainVBox.setMargin(toolBar, new Insets(6, 6, 6, 6));
         mainVBox.getChildren().addAll(toolBar, tabPainContainer);
         mainVBox.getStylesheets().add(Utils.getResource("/css/browservs.css"));
+        mainVBox.getStyleClass().add("main-dialog");
         browserHelper.getChildren().add(0, mainVBox);
         browserStage.setScene(new Scene(browserHelper));
         browserStage.setWidth(BROWSER_WIDTH);
         browserStage.setHeight(BROWSER_HEIGHT);
         browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        browserStage.initStyle(StageStyle.UNDECORATED);
         locationField.setOnMouseClicked(event -> {
-                Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
-                if(content instanceof WebView) createHistoryMenu((WebView)content).show(locationField, Side.BOTTOM, 0, 0);
-            });
+            Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
+            if (content instanceof WebView) createHistoryMenu((WebView) content).show(locationField, Side.BOTTOM, 0, 0);
+        });
+        Utils.addMouseDragSupport(browserStage);
+        ResizeHelper.addResizeListener(browserStage);
     }
 
     public WebView newTab(String URL, String tabCaption, String jsCommand) {
@@ -316,6 +363,28 @@ public class BrowserVS extends Region implements WebKitHost {
         return historyMenu;
     }
 
+    public static void showMessage(ResponseVS responseVS) {
+        String message = responseVS.getMessage() == null? "":responseVS.getMessage();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) message = responseVS.getMessage();
+        else message = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
+        showMessage(responseVS.getStatusCode(), message);
+    }
+
+    public static void showMessage(Integer statusCode, String message) {
+        PlatformImpl.runLater(() -> {
+            MessageDialog messageDialog = new MessageDialog();
+            messageDialog.showMessage(statusCode, message);
+        });
+    }
+
+    public static void showMessage(final String message, final Button optionButton) {
+        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, optionButton));
+    }
+
+    public static void showMessage(final String message, final String caption) {
+        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, caption));
+    }
+
     public void showDocumentVS(final String signedDocumentStr, File fileParam, Map operationDocument) {
         PlatformImpl.runLater(() -> {
             DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
@@ -359,6 +428,14 @@ public class BrowserVS extends Region implements WebKitHost {
                 webView.getEngine().executeScript(jsCommand);
             }
         });
+    }
+
+    public void setCooinServerAvailable(boolean available) {
+        mainOptionsPane.setCooinServerAvailable(available);
+    }
+
+    public void setVotingSystemAvailable(boolean available) {
+        mainOptionsPane.setVotingSystemAvailable(available);
     }
 
     public void execCommandJSCurrentView(String jsCommand) {

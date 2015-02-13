@@ -36,7 +36,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

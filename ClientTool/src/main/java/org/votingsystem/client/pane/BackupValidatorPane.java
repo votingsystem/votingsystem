@@ -24,7 +24,7 @@ import org.votingsystem.model.ResponseVS;
 
 import java.io.File;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

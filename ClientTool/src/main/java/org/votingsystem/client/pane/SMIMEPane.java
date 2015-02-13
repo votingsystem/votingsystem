@@ -21,9 +21,11 @@ import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+
 import java.io.File;
 import java.security.cert.X509Certificate;
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

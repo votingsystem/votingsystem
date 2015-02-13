@@ -1,12 +1,10 @@
 package org.votingsystem.client.dialog;
 
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -77,22 +75,7 @@ public class JSONFormDialog {
         mainBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(mainBox));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        // allow the dialog to be dragged around.
-        final Node root = stage.getScene().getRoot();
-        final Delta dragDelta = new Delta();
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                // record a delta distance for the drag and drop operation.
-                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-            }
-        });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
-                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
-            }
-        });
+        Utils.addMouseDragSupport(stage);
     }
 
     public void showMessage(String title,JSONObject form, Listener listener) {
@@ -103,7 +86,5 @@ public class JSONFormDialog {
         stage.show();
         stage.toFront();
     }
-
-    class Delta { double x, y; }
 
 }

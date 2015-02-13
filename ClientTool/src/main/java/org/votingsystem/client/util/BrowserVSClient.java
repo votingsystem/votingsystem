@@ -22,7 +22,7 @@ import org.votingsystem.util.Wallet;
 import java.util.Base64;
 import java.util.Date;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 /**
  * JavaScript interface object
  * @author jgzornoza

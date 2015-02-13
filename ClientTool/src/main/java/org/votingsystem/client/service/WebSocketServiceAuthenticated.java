@@ -30,7 +30,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

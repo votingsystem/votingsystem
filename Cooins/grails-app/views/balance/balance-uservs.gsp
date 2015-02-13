@@ -9,6 +9,8 @@
 <vs:webcomponent path="/balance/balance-uservs-chart-donut"/>
 <vs:webcomponent path="/transactionVS/transactionvs-data"/>
 <vs:webcomponent path="/transactionVS/transactionvs-list-balance"/>
+<vs:webresource dir="core-media-query" file="core-media-query.html"/>
+<vs:webresource dir="paper-tabs" file="paper-tabs.html"/>
 <vs:webcomponent path="/element/time-elements"/>
 <g:include view="/include/balanceVSUtils_js.gsp"/>
 
@@ -26,7 +28,18 @@
         }
         .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
             margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
+        .tabContent { margin:0px auto 0px auto; width:auto; }
+        paper-tabs.transparent-teal { padding: 0px; background-color: #ffeeee; color:#ba0011;
+            box-shadow: none; cursor: pointer; height: 35px;
+        }
+        paper-tabs.transparent-teal /deep/ #selectionBar {
+            background-color: #ba0011;
+        }
+        paper-tabs.transparent-teal paper-tab /deep/ #ink {
+            color: #ba0011;
+        }
         </style>
+        <core-media-query query="max-width: 1200px" queryMatches="{{smallScreen}}"></core-media-query>
         <div layout vertical style="padding: 0 20px;">
             <div horizontal layout center center-justified>
                 <div flex></div>
@@ -42,16 +55,13 @@
                 <div><time is="local-time" datetime="{{balance.timePeriod.dateTo}}"
                            day="numeric" month="short" year="numeric"></time></div>
             </div>
+            <div hidden?="{{!status}}" class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
+                <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                    <div id="messageToUser">{{message}}</div>
+                    <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{message.status == 200?'#388746':'#ba0011'}};"></core-icon></div>
 
-            <template if="{{status}}">
-                <div class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
-                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                        <div id="messageToUser">{{message}}</div>
-                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{message.status == 200?'#388746':'#ba0011'}};"></core-icon></div>
-
-                    <paper-shadow z="1"></paper-shadow>
-                </div>
-            </template>
+                <paper-shadow z="1"></paper-shadow>
+            </div>
             <div>
                 <div layout horizontal style="width: 100%; border-bottom: 2px solid #6c0404; padding: 10px 0 10px 0;">
                     <div style="min-width: 300px; margin: 0 0 0 20px;">
@@ -87,23 +97,32 @@
                         </template>
                     </div>
                 </div>
+                <div hidden?="{{!smallScreen}}">
+                    <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
+                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                        <paper-tab name="incomesTab" style="width: 400px"><g:message code="incomesLbl"/></paper-tab>
+                        <paper-tab name="expensesTab"><g:message code="expensesLbl"/></paper-tab>
+                    </paper-tabs>
+                </div>
                 <div layout horizontal>
-                    <div flex style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
-                        <transactionvs-list-balance caption="<g:message code="incomesLbl"/>" transactionList="{{balance.transactionToList}}"
-                                                    balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                    <div flex hidden?="{{smallScreen?(selectedTab !== 'incomesTab'):false}}"
+                         style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
+                        <transactionvs-list-balance caption="<g:message code="incomesLbl"/>" captionVisible={{!smallScreen}}
+                                transactionList="{{balance.transactionToList}}"
+                                balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                     </div>
-                    <div flex>
-                        <transactionvs-list-balance id="balanceFromItem"  transactionList="{{balance.transactionFromList}}"
-                                                    balances="{{balance.balancesFrom}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                    <div  hidden?="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
+                    <div hidden?="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex>
+                        <transactionvs-list-balance id="balanceFromItem" captionVisible={{!smallScreen}}
+                                transactionList="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
+                                on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                     </div>
                 </div>
             </div>
         </div>
-
         <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display:block;">
             <balance-uservs-chart-donut id="donutChart"></balance-uservs-chart-donut>
         </div>
-
         </div>
     </template>
     <script>
@@ -114,6 +133,7 @@
             transactionFromTotal:null,
             status:null,
             message:null,
+            selectedTab:'incomesTab',
             publish: {
                 balance: {value: {}}
             },

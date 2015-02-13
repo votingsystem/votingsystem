@@ -3,14 +3,12 @@ package org.votingsystem.client.dialog;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -112,27 +110,8 @@ public class PasswordDialog {
         dialogVBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-
         dialogVBox.getStyleClass().add("message-lbl-bold");
-
-        // allow the dialog to be dragged around.
-        final Node root = stage.getScene().getRoot();
-        final Delta dragDelta = new Delta();
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                // record a delta distance for the drag and drop operation.
-                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
-                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
-            }
-        });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
-                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
-            }
-        });
+        Utils.addMouseDragSupport(stage);
         dialogVBox.setPrefWidth(350);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
@@ -232,7 +211,5 @@ public class PasswordDialog {
         else dialogVBox.getChildren().removeAll(capsLockPressedMessageLabel);
         stage.sizeToScene();
     }
-
-    class Delta { double x, y; }
 
 }

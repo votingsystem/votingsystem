@@ -47,7 +47,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static org.votingsystem.client.VotingSystemApp.showMessage;
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza
@@ -407,10 +407,25 @@ public class Utils {
 
     }
 
+    // allow the dialog to be dragged around.
+    public static void addMouseDragSupport(Stage stage) {
+        final Node root = stage.getScene().getRoot();
+        final Delta dragDelta = new Delta();
+        root.setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
+            dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+            dragDelta.y = stage.getY() - mouseEvent.getScreenY();
+        });
+        root.setOnMouseDragged(mouseEvent -> {
+            stage.setX(mouseEvent.getScreenX() + dragDelta.x);
+            stage.setY(mouseEvent.getScreenY() + dragDelta.y);
+        });
+    }
+
     public static void showWalletNotFoundMessage() {
         Button optionButton = new Button(ContextVS.getMessage("newWalletButton"));
         optionButton.setOnAction(event -> createNewWallet());
         showMessage(ContextVS.getMessage("walletNotFoundMessage"), optionButton);
     }
 
+    static class Delta { double x, y; }
 }
