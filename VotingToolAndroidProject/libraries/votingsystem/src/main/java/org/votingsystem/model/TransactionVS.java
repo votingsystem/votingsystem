@@ -421,9 +421,9 @@ public class TransactionVS  implements Serializable {
         }
         transactionVS.setSubject(jsonData.getString("subject"));
         transactionVS.setCurrencyCode(jsonData.getString("currency"));
-        transactionVS.setDateCreated(DateUtils.getDayWeekDate(jsonData.getString("dateCreated")));
+        transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
         if(jsonData.has("validTo")) transactionVS.setValidTo(
-                DateUtils.getDayWeekDate(jsonData.getString("validTo")));
+                DateUtils.getDateFromString(jsonData.getString("validTo")));
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));

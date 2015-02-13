@@ -11,7 +11,9 @@
         <template repeat="{{transaction in transactionRecords}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
-        <div hidden?="{{transactionRecords.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;"> Sin movimientos</div>
+        <div hidden?="{{transactionRecords.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
+            <g:message code="withoutMovementsLbl"/>
+        </div>
     </div>
 </template>
 <script>

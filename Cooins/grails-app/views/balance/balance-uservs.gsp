@@ -9,7 +9,7 @@
 <vs:webcomponent path="/balance/balance-uservs-chart-donut"/>
 <vs:webcomponent path="/transactionVS/transactionvs-data"/>
 <vs:webcomponent path="/transactionVS/transactionvs-list-balance"/>
-
+<vs:webcomponent path="/element/time-elements"/>
 <g:include view="/include/balanceVSUtils_js.gsp"/>
 
 
@@ -35,10 +35,12 @@
                     {{description}}
                 </div>
             </div>
-            <div horizontal layout center style="position: relative; display: block;">
-                <div flex style="text-align: center; font-weight: bold; color: #888; margin:0 0 8px 0;">
-                    <g:message code="periodLbl"/>: {{balance.timePeriod.dateFrom}} - {{balance.timePeriod.dateTo}}
-                </div>
+            <div horizontal layout center center-justified style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
+                <g:message code="periodLbl"/>:
+                <div><time is="local-time" datetime="{{balance.timePeriod.dateFrom}}"
+                           day="numeric" month="short" year="numeric"></time> - </div>
+                <div><time is="local-time" datetime="{{balance.timePeriod.dateTo}}"
+                           day="numeric" month="short" year="numeric"></time></div>
             </div>
 
             <template if="{{status}}">

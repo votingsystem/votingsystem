@@ -41,25 +41,23 @@
                     </paper-button>
                 </div>
             </div>
-            <div style="display: {{userVSList.length == 0? 'none':'block'}};">
-                <div layout flex horizontal wrap around-justified>
-                    <template repeat="{{uservs in userVSList}}">
-                        <div horizontal layout  class="card" on-click="{{showUserDetails}}">
-                            <div layout flex vertical center-justified>
-                                <div class="name">{{uservs.name}}</div>
-                                <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
-                            </div>
-                            <div>
-                                <div style="display:{{uservs|isContactButtonVisible}}">
-                                    <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
-                                        {{modeSearch? '<g:message code="addContactLbl"/>':'<g:message code="removeContactLbl"/>'}}
-                                    </paper-button>
-                                </div>
-                                <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
-                            </div>
+            <div hidden="{{{userVSList.length === 0}}" layout flex horizontal wrap around-justified>
+                <template repeat="{{uservs in userVSList}}">
+                    <div horizontal layout  class="card" on-click="{{showUserDetails}}">
+                        <div layout flex vertical center-justified>
+                            <div class="name">{{uservs.name}}</div>
+                            <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
                         </div>
-                    </template>
-                </div>
+                        <div>
+                            <div style="display:{{uservs|isContactButtonVisible}}">
+                                <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
+                                    {{modeSearch? '<g:message code="addContactLbl"/>':'<g:message code="removeContactLbl"/>'}}
+                                </paper-button>
+                            </div>
+                            <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
+                        </div>
+                    </div>
+                </template>
             </div>
             <div hidden?="{{responseData.userVSList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 <g:message code="emptyUserSearchResultMsg"/>

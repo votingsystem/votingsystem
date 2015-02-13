@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -18,6 +19,14 @@ import java.util.TimeZone;
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class DateUtils {
+
+    private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final DateFormat isoDateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+    static {
+        isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
 
     public static boolean inRange(Date initDate, Date lapsedDate, long timeRange) {
@@ -43,12 +52,8 @@ public class DateUtils {
     }
 
     public static Date getDateFromString (String dateString) throws ParseException {
-        DateFormat formatter = null;
-        if(dateString.endsWith("Z")) {
-            formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        } else formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        return formatter.parse(dateString);
+        if(dateString.endsWith("Z")) return isoDateFormat.parse(dateString);
+        else return dateFormat.parse(dateString);
     }
 
     public static Date getDateFromString (String dateString, String format) throws ParseException {
@@ -56,9 +61,12 @@ public class DateUtils {
         return formatter.parse(dateString);
     }
 
+    public static String getISODateStr (Date date) {
+        return isoDateFormat.format(date);
+    }
+
     public static String getDateStr (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        return formatter.format(date);
+        return dateFormat.format(date);
     }
 
     public static String getDateStr (Date date, String format) {
@@ -269,8 +277,8 @@ public class DateUtils {
         }
 
         public static TimePeriod parse(JSONObject jsonData) throws ParseException, JSONException {
-            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"), "dd MMM yyyy' 'HH:mm");
-            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"), "dd MMM yyyy' 'HH:mm");
+            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"));
+            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"));
             return new TimePeriod(dateFrom, dateTo);
         }
 

@@ -20,6 +20,9 @@ public class DateUtils {
 
     private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
     private static final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+    static {
+        isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public static Calendar addDays(Date date, int days){
         Calendar cal = Calendar.getInstance();
@@ -53,13 +56,11 @@ public class DateUtils {
     }
 
     public static Date getDateFromString (String dateString) throws ParseException {
-        DateFormat formatter = null;
-        if(dateString.endsWith("Z")) {
-            formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
-            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        if(dateString.endsWith("Z")) return isoDateFormat.parse(dateString);
+        else {
+            DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            return formatter.parse(dateString);
         }
-        else formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        return formatter.parse(dateString);
     }
 
     public static Date getDateFromString (String dateString, Locale locale) throws ParseException {
@@ -340,8 +341,8 @@ public class DateUtils {
         }
 
         public static TimePeriod parse(JSONObject jsonData) throws ParseException, JSONException {
-            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"), "dd MMM yyyy' 'HH:mm");
-            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"), "dd MMM yyyy' 'HH:mm");
+            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"));
+            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"));
             return new TimePeriod(dateFrom, dateTo);
         }
 

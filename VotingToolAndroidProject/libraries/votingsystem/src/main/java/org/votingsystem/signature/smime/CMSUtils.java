@@ -188,12 +188,6 @@ public class CMSUtils {
         return octGen.getOctetOutputStream();
     }
 
-    public static String getTimeStampDateStr(TimeStampToken timeStampToken) {
-        TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
-        String certificateInfo = null;
-        return DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
-    }
-
     static TBSCertificateStructure getTBSCertificateStructure(
         X509Certificate cert) throws CertificateEncodingException {
         try {

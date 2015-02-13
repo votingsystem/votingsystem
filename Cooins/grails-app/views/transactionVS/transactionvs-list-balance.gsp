@@ -7,7 +7,7 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         .transactionvsRow { cursor: pointer;}
-        .dateCreated {font-size: 0.8em; color:#888; width: 120px; margin: 0 7px 0 0;}
+        .dateCreated {font-size: 0.8em; color:#888; width: 140px; margin: 0 7px 0 0;}
         .subjectColumn {
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.8em;
         }
@@ -23,19 +23,20 @@
             <div>
                 <template repeat="{{transaction in transactionList}}">
                     <div class="transactionvsRow" layout horizontal on-click="{{viewTransaction}}">
-                        <div class="dateCreated" style="">{{transaction.dateCreated}}</div>
+                        <div class="dateCreated" style="">
+                            <time is="local-time" datetime="{{transaction.dateCreated}}"
+                                  day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"></time>
+                        </div>
                        <core-tooltip large label="{{transaction.subject}}" position="top">
                            <div class="subjectColumn" style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
                        </core-tooltip>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div layout horizontal center center-justified class="tagColumn">
                             <div flex horizontal layout center center-justified>{{transaction.tags[0]}}</div>
-                            <div style="margin:0 0 0 5px; width: 10px;">
-                                <div style="display:{{ isTimeLimited(transaction) ? 'block':'none'}}">
-                                    <core-tooltip large label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
-                                        <i class="fa fa-clock-o"></i>
-                                    </core-tooltip>
-                                </div>
+                            <div hidden?="{{!isTimeLimited(transaction)}}" style="margin:0 0 0 5px; width: 10px;">
+                                <core-tooltip large label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
+                                    <i class="fa fa-clock-o"></i>
+                                </core-tooltip>
                             </div>
                         </div>
                     </div>

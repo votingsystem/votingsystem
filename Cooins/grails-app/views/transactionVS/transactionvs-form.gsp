@@ -38,19 +38,15 @@
                     </div>
                 </div>
             </div>
-
-            <div style="display:{{messageToUser?'block':'none'}};">
-                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
-                    <div class="messageToUser">
-                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                            <div id="messageToUser">{{messageToUser}}</div>
-                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
-                        </div>
-                        <paper-shadow z="1"></paper-shadow>
+            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+                <div class="messageToUser">
+                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <div id="messageToUser">{{messageToUser}}</div>
+                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
                     </div>
+                    <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div>
                     <div horizontal layout center center-justified>
@@ -104,21 +100,18 @@
                         </div>
                     </div>
                 </div>
-                <div style="display:{{isWithUserSelector?'block':'none'}}">
-                    <div>
-                        <paper-button raised on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
-                            <i class="fa fa-user"></i> {{selectReceptorMsg}}
-                        </paper-button>
-                        <div style="margin:10px 0 0 0;">
-                            <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
-                        </div>
+                <div hidden?="{{!isWithUserSelector}}">
+                    <paper-button raised on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                        <i class="fa fa-user"></i> {{selectReceptorMsg}}
+                    </paper-button>
+                    <div style="margin:10px 0 0 0;">
+                        <vs-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></vs-user-box>
                     </div>
                 </div>
-                <template if="{{!isWithUserSelector}}">
-                    <div style="margin:10px 0 0 0; text-align: center; font-weight: bold; color:#6c0404;">{{selectReceptorMsg}}</div>
-                </template>
-                <div flex>
+                <div hidden?="{{isWithUserSelector}}" style="margin:10px 0 0 0; text-align: center; font-weight: bold; color:#6c0404;">
+                    {{selectReceptorMsg}}
                 </div>
+                <div flex></div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
                     <paper-button raised on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">

@@ -203,6 +203,7 @@ public class ReceiptFragment extends Fragment {
             JSONObject dataJSON = null;
             BigDecimal totalAmount = null;
             String currency = null;
+            String dateStr = null;
             selectedReceiptSMIME = receiptContainer.getReceipt();
             String receiptSubjectStr = selectedReceiptSMIME == null? null :
                     selectedReceiptSMIME.getSubject();
@@ -228,8 +229,9 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case VOTEVS:
                     VoteVS voteVS = (VoteVS)receiptContainer;
-                    contentFormatted = getString(R.string.votevs_info_formatted,
-                            CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
+                    dateStr = DateUtils.getDayWeekDateStr(selectedReceiptSMIME.getSigner().
+                            getTimeStampToken().getTimeStampInfo().getGenTime());
+                    contentFormatted = getString(R.string.votevs_info_formatted, dateStr,
                             voteVS.getEventVS().getSubject(), voteVS.getOptionSelected().getContent(),
                             receiptContainer.getReceipt().getSignedContent());
                     break;
@@ -243,8 +245,9 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case ACCESS_REQUEST:
                     dataJSON = new JSONObject(selectedReceiptSMIME.getSignedContent());
-                    contentFormatted = getString(R.string.access_request_info_formatted,
-                            CMSUtils.getTimeStampDateStr(selectedReceiptSMIME.getSigner().getTimeStampToken()),
+                    dateStr = DateUtils.getDayWeekDateStr(selectedReceiptSMIME.getSigner().
+                            getTimeStampToken().getTimeStampInfo().getGenTime());
+                    contentFormatted = getString(R.string.access_request_info_formatted, dateStr,
                             dataJSON.getString("eventURL"));
                     receiptSubjectStr = getString(org.votingsystem.android.lib.R.string.access_request_lbl);
                     break;
