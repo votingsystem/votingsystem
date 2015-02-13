@@ -32,8 +32,8 @@ class ShopExampleController {
     def index() {
         TransactionRequest transactionRequest = new TransactionRequest(type: TypeVS.PAYMENT_REQUEST,
                 userToType: UserVS.Type.GROUP, subject: "shop example payment - ${Calendar.getInstance().getTime()}",
-                toUserName:"cooin shop example", amount: new BigDecimal(10), currencyCode: "EUR", tagVS:TagVS.WILDTAG,
-                date:Calendar.getInstance().getTime(), IBAN: "ES6278788989450000000005",
+                toUserName:"cooin shop example", amount: new BigDecimal(1), currencyCode: "EUR", tagVS:TagVS.WILDTAG,
+                date:Calendar.getInstance().getTime(), IBAN: "ES0878788989450000000007",
                 UUID:java.util.UUID.randomUUID().toString())
         transactionRequest.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
                 Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.CASH_SEND))

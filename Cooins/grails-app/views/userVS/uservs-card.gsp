@@ -1,3 +1,5 @@
+<vs:webcomponent path="/element/time-elements"/>
+
 <polymer-element name="uservs-card">
     <template>
         <g:include view="/include/styles.gsp"/>
@@ -30,7 +32,10 @@
             <div flex horizontal layout center-justified class="userVSname">{{uservs.uservs.name}}</div>
             <div horizontal layout>
                 <div flex class="stateInfo">{{uservs.state | userState}}</div>
-                <div class="date">{{uservs.dateCreated}}</div>
+                <div class="date">
+                    <time is="local-time" datetime="{{uservs.dateCreated}}"
+                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                </div>
             </div>
         </div>
     </template>

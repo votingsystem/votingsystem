@@ -125,8 +125,11 @@ class CooinService {
                 cooinBatch.getCurrencyCode()].toArray(), locale) + " " + systemService.getTagMessage(cooinBatch.getTag())
 
         Map resultMap = [statusCode: ResponseVS.SC_OK, message:message, issuedCooins:cooinBatch.getIssuedCooinListPEM()]
+        SMIMEMessage receipt = signatureVSService.getSMIMEMultiSigned(systemService.getSystemUser().getName(),
+            fromUserVS.nif, cooinBatch.messageSMIME.getSMIME(), null)
+        cooinBatch.messageSMIME.setSMIME(receipt)
         return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultMap,
-                type:TypeVS.COOIN_REQUEST);
+                type:TypeVS.COOIN_REQUEST, messageSMIME: cooinBatch.messageSMIME);
     }
 
     public ResponseVS checkBundleState(List hashCertVSList) {

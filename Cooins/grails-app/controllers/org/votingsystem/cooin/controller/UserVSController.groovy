@@ -264,7 +264,7 @@ class UserVSController {
 
         Calendar calendar = RequestUtils.getCalendar(params);
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
+        Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod, params.boolean("withCheck", true))
         return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
                 contentType: ContentTypeVS.JSON, type: TypeVS.COOIN_USER_INFO)]
     }

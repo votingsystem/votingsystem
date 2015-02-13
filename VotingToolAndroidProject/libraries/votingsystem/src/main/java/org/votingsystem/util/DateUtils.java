@@ -284,8 +284,8 @@ public class DateUtils {
 
         public JSONObject toJSON() throws JSONException {
             JSONObject jsonData = new JSONObject();
-            jsonData.put("dateFrom", DateUtils.getDateStr(dateFrom, "dd MMM yyyy' 'HH:mm"));
-            jsonData.put("dateTo", DateUtils.getDateStr(dateTo, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("dateFrom", DateUtils.getISODateStr(dateFrom));
+            jsonData.put("dateTo", DateUtils.getISODateStr(dateTo));
             return jsonData;
         }
 

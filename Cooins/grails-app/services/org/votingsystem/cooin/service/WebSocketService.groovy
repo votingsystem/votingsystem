@@ -88,6 +88,7 @@ class WebSocketService {
                     if(userVS.getDeviceVS()) {
                         SessionVSManager.getInstance().putAuthenticatedDevice(request.session, userVS)
                         processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null, userVS.deviceVS.id))
+                        responseVS.messageSMIME.setType(TypeVS.WEB_SOCKET_INIT).save()
                     } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
                             messageSource.getMessage("certWithoutDeviceVSInfoErrorMsg", null, locale), null))
                 } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,

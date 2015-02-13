@@ -117,7 +117,7 @@ class UserVSService {
     }
 
     @Transactional
-    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
+    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod, boolean withResultCheck){
         Map resultMap = [timePeriod:timePeriod.getMap()]
         resultMap.userVS = getUserVSDataMap(userVS, false)
 
@@ -133,8 +133,13 @@ class UserVSService {
 
         resultMap.balancesCash = TransactionVSUtils.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
-        if(UserVS.Type.SYSTEM != userVS.type && timePeriod.isCurrentWeekPeriod())
+        if(withResultCheck && UserVS.Type.SYSTEM != userVS.type && timePeriod.isCurrentWeekPeriod())
             cooinAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         return resultMap
     }
+
+    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
+        getDataWithBalancesMap(userVS, timePeriod, true)
+    }
+
 }

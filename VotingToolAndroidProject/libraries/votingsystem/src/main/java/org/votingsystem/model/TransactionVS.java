@@ -339,7 +339,6 @@ public class TransactionVS  implements Serializable {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     public List<Cooin> getCooins() {
@@ -463,9 +462,9 @@ public class TransactionVS  implements Serializable {
         jsonData.put("subject", subject);
         jsonData.put("currency", currencyCode);
         if(dateCreated != null)
-            jsonData.put("dateCreated", DateUtils.getDateStr(dateCreated, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("dateCreated", DateUtils.getISODateStr(dateCreated));
         if(validTo != null)
-            jsonData.put("validTo", DateUtils.getDateStr(validTo, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("validTo", DateUtils.getISODateStr(validTo));
         if(type != null) jsonData.put("type", type.toString());
         if(amount != null) jsonData.put("amount", amount.toString());
         jsonData.put("messageSMIMEURL", messageSMIMEURL);

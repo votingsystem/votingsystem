@@ -27,16 +27,16 @@ public class StringUtils {
 	
 	public static final String TAG = "StringUtils";
  
-    public static String getStringFromInputStream(InputStream entrada) throws IOException {
-    	ByteArrayOutputStream salida = new ByteArrayOutputStream();
+    public static String getStringFromInputStream(InputStream input) throws IOException {
+    	ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buf =new byte[4096];
         int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
+        while((len = input.read(buf)) > 0){
+            output.write(buf,0,len);
         }
-        salida.close();
-        entrada.close();
-        return new String(salida.toByteArray());
+        output.close();
+        input.close();
+        return new String(output.toByteArray());
     }
     
     public static String randomLowerString(long seed, int size) {
@@ -72,8 +72,9 @@ public class StringUtils {
         return sb.toString();
     }
 
-	public static String getNormalized(String cadena) {
-        return cadena.replaceAll("[\\/:.]", ""); 
+	public static String getNormalized(String string) {
+            if(string == null) return null;
+            else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");
 	}
 
     public static String checkURL(String url) {
