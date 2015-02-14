@@ -115,7 +115,8 @@ public class VotingSystemApp extends Application {
                         toString().contains("jar:file")) {
                     loadedFromJar = true;
                 }
-                log.debug("start - loadedFromJar: " + loadedFromJar);
+                log.debug("start - loadedFromJar: " + loadedFromJar + " - JavaFX version: " +
+                        com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
                 try {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());

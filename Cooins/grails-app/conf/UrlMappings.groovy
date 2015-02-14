@@ -2,11 +2,7 @@ class UrlMappings {
 
     static mappings = {
 
-        "/$controller/$action?/$id?(.${format})?"{
-            constraints {
-                // apply constraints here
-            }
-        }
+        "/$controller/$action?/$id?(.${format})?"{ constraints { } }
 
         "/"(controller:"/app")
         "500"(view:'/error')
@@ -224,16 +220,6 @@ class UrlMappings {
         "/shop/listenTransactionChanges/$shopSessionID"{
             controller = "shopExample"
             action = "listenTransactionChanges"
-        }
-
-        "/testing/$year/$month/$day" {
-            controller = "testing"
-            action = "index"
-            constraints {
-                year(matches:/\d*/)
-                month(matches:/\d*/)
-                day(matches:/\d*/)
-            }
         }
 
         "/transactionVS/$id"{

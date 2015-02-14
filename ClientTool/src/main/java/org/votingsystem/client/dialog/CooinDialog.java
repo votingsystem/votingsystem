@@ -6,20 +6,16 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -37,19 +33,17 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
-
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
-
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
+public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(CooinDialog.class);
 
@@ -67,20 +61,22 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
 
     private Cooin cooin;
     private CooinServer cooinServer;
-    @FXML private GridPane mainPane;
-    @FXML private Label cooinServerLbl;
+    private static Stage stage;
+
+    @FXML private MenuButton menuButton;
+    @FXML private Button closeButton;
+    @FXML private Label serverLbl;
+    @FXML private VBox mainPane;
+    @FXML private VBox content;
     @FXML private Label cooinHashLbl;
     @FXML private Label cooinValueLbl;
     @FXML private Label cooinTagLbl;
     @FXML private Label dateInfoLbl;
     @FXML private Label currencyLbl;
     @FXML private Label cooinStatusLbl;
-    @FXML private ContextMenu contextMenu;
     @FXML private HBox progressBox;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLbl;
-    @FXML private Label operationsLbl;
-    private MessageDialog messageDialog;
 
     private MenuItem sendMenuItem;
     private MenuItem changeWalletMenuItem;
@@ -97,18 +93,14 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         sendMenuItem.setText(responseVS.getMessage());
                         sendMenuItem.setVisible(true);
-                        contextMenu.getItems().removeAll(deleteMenuItem);
                     } else {
                         mainPane.getStyleClass().add("cooin-error");
                         cooinStatusLbl.setText(ContextVS.getMessage("invalidCooin"));
                         sendMenuItem.setVisible(false);
                         showMessage(ResponseVS.SC_ERROR, responseVS.getMessage());
                     }
-
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) { e.printStackTrace(); }
         }
     };
 
@@ -123,41 +115,35 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
         NotificationService.getInstance().registerToEventBus(new EventBusDeleteCooinListener());
+        closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");
-        sendMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         sendMenuItem.setOnAction(actionEvent -> showForm(new Cooin.TransactionVSData("", "", "", true).getJSON()));
         deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
         deleteMenuItem.setOnAction(actionEvent -> {
-                System.out.println("deleteMenuItem");
                 OperationVS operationVS = new OperationVS(TypeVS.COOIN_DELETE);
                 operationVS.setMessage(cooin.getHashCertVS());
                 BrowserVS.getInstance().processOperationVS(operationVS, null);
+                stage.setY(100);
             });
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
         saveMenuItem.setOnAction(actionEvent -> System.out.println("saveMenuItem"));
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
                 "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this));
-        contextMenu.getItems().addAll(sendMenuItem, changeWalletMenuItem, deleteMenuItem, saveMenuItem);
-        contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
         setProgressVisible(false, true);
         PlatformImpl.runLater(statusChecker);
-        cooinServerLbl.setText(cooin.getCooinServerURL());
+        serverLbl.setText(cooin.getCooinServerURL().split("//")[1]);
         cooinHashLbl.setText(cooin.getHashCertVS());
         cooinValueLbl.setText(cooin.getAmount().toPlainString());
         currencyLbl.setText(cooin.getCurrencyCode());
         cooinTagLbl.setText(Utils.getTagDescription(cooin.getCertTagVS()));
-        operationsLbl.setText(ContextVS.getMessage("operationsLbl"));
-        operationsLbl.setGraphic(Utils.getImage(FontAwesome.Glyph.COGS, Utils.COLOR_RED));
+        menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
         String cooinDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
                 DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                 DateUtils.getDateStr(cooin.getValidTo(), "dd MMM yyyy' 'HH:mm"));
         dateInfoLbl.setText(cooinDateInfoLbl);
-        operationsLbl.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override public void handle(MouseEvent event) {
-                    contextMenu.show(cooinValueLbl, Side.BOTTOM, 0, 0);
-                }
-            });
+        menuButton.getItems().addAll(sendMenuItem, deleteMenuItem, changeWalletMenuItem);
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCooinServer().getTrustAnchors(), false, Arrays.asList(
@@ -198,22 +184,27 @@ public class CooinDialog implements DocumentVS,  JSONFormDialog.Listener, UserDe
             @Override public void run() {
                 try {
                     CooinDialog cooinDialog = new CooinDialog(cooin);
-                    Stage stage = new Stage();
-                    stage.centerOnScreen();
+                    if(stage == null) {
+                        stage = new Stage(StageStyle.TRANSPARENT);
+                        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+                        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+                    }
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Cooin.fxml"));
                     fxmlLoader.setController(cooinDialog);
-                        stage.setScene(new Scene(fxmlLoader.load()));
-                    stage.setTitle("Cooin - " + cooin.getAmount().toPlainString() + " " + cooin.getCurrencyCode() +
-                            " " + Utils.getTagForDescription(cooin.getCertTagVS()));
-                    stage.initModality(Modality.WINDOW_MODAL);
-                    //stage.initOwner(((Node)event.getSource()).getScene().getWindow() );
-                    stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+                    stage.setScene(new Scene(fxmlLoader.load()));
+                    Utils.addMouseDragSupport(stage);
+                    stage.centerOnScreen();
+                    stage.toFront();
                     stage.show();
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
             }
         });
+    }
+
+    @FXML public void closeDialog(ActionEvent event) {
+
     }
 
     private void setProgressVisible(final boolean isProgressVisible, final boolean isSendItemVisible) {

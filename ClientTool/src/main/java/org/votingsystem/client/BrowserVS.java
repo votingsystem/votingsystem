@@ -3,17 +3,20 @@ package org.votingsystem.client;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSON;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
+import org.votingsystem.client.pane.BrowserVSToolbar;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.ContentTypeVS;
@@ -35,6 +38,7 @@ public class BrowserVS extends VBox implements WebKitHost {
     private static Logger log = Logger.getLogger(BrowserVS.class);
 
     private Stage browserStage;
+    private FullScreenHelper fullScreenHelper;
     private BrowserVSToolbar toolBar;
     private BrowserVSPane browserHelper;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
@@ -58,6 +62,7 @@ public class BrowserVS extends VBox implements WebKitHost {
         getStylesheets().add(Utils.getResource("/css/browservs.css"));
         getStyleClass().add("main-dialog");
         this.browserStage = browserStage;
+        fullScreenHelper = new FullScreenHelper(this.browserStage);
         browserHelper = new BrowserVSPane();
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(event -> {
@@ -118,9 +123,10 @@ public class BrowserVS extends VBox implements WebKitHost {
                 (String)signalData.get("caption"));
     }
 
+
+
     public void toggleFullScreen() {
-        browserStage.setFullScreenExitHint("");
-        browserStage.setFullScreen(!browserStage.isFullScreen());
+        fullScreenHelper.toggleFullScreen();
     }
 
     public void openCooinURL(final String URL, final String caption) {

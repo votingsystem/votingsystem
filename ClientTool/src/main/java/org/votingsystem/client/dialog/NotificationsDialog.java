@@ -80,6 +80,7 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
             switch (notification.getState()) {
                 case PROCESSED:
                     notificationMap.remove(notification);
+                    NotificationService.getInstance().removeNotification(notification);
                     refreshView();
                     break;
             }

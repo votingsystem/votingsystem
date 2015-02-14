@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.beans.value.ChangeListener;
@@ -13,6 +13,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
@@ -24,6 +25,9 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.util.BrowserVSClient;
+import org.votingsystem.client.util.BrowserVSMenuButton;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.w3c.dom.Document;
@@ -37,7 +41,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSToolbar extends HBox{
+public class BrowserVSToolbar extends HBox {
 
     private static Logger log = Logger.getLogger(BrowserVSToolbar.class);
 
@@ -99,7 +103,7 @@ public class BrowserVSToolbar extends HBox{
         menuButton = new BrowserVSMenuButton();
         menuButton.getStyleClass().add("toolbar-button");
 
-        Button closeButton =  Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.TIMES, "#ba0011"));
+        Button closeButton =  Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> VotingSystemApp.getInstance().stop());
 
         HBox navButtonBox = new HBox();
@@ -107,7 +111,13 @@ public class BrowserVSToolbar extends HBox{
         getChildren().addAll(newTabButton, navButtonBox, locationField, reloadButton, Utils.createSpacer(),
                 NotificationService.getInstance().getNotificationsButton(), InboxService.getInstance().getInboxButton(),
                 menuButton, closeButton);
-        setOnMouseClicked(mouseEvent -> BrowserVS.getInstance().toggleFullScreen());
+        setOnMouseClicked(mouseEvent -> {
+                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                    if(mouseEvent.getClickCount() == 2){
+                        BrowserVS.getInstance().toggleFullScreen();
+                    }
+                }
+            });
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);

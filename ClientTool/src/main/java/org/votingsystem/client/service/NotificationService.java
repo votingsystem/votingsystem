@@ -76,9 +76,7 @@ public class NotificationService {
 
     public void setNotificationsButton(Button notificationsButton) {
         this.notificationsButton = notificationsButton;
-        notificationsButton.setOnAction((event) -> {
-            NotificationsDialog.showDialog();
-        });
+        notificationsButton.setOnAction(event -> NotificationsDialog.showDialog());
         if(notificationList.size() > 0) notificationsButton.setVisible(true);
         else notificationsButton.setVisible(false);
     }

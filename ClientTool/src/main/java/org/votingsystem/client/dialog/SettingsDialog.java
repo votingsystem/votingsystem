@@ -110,8 +110,8 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         gridPane.add(signWithDNIeRb,0,3);
         gridPane.add(signWithKeystoreRb,0,5);
         gridPane.add(footerButtonsBox,0,7);
-        gridPane.getStyleClass().add("modal-dialog");
         getStage().getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
+        gridPane.getStyleClass().add("modal-dialog");
         gridPane.setMinWidth(600);
     }
 
