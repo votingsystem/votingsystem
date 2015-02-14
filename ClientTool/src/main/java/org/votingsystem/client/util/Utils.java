@@ -7,6 +7,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
@@ -14,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -141,6 +144,13 @@ public class Utils {
         newTab.setText(caption);
         newTab.setContent(content);
         return newTab;
+    }
+
+    public static Button getToolBarButton(Glyph image) {
+        Button toolBarButton = new Button();
+        toolBarButton.setGraphic(image);
+        toolBarButton.getStyleClass().add("toolbar-button");
+        return toolBarButton;
     }
 
     public static void browserVSLinkListener(WebView webView) {
@@ -405,6 +415,24 @@ public class Utils {
             }
         });
 
+    }
+
+    public static ContextMenu createHistoryMenu(WebView webView) { // a menu of history items.
+        final ContextMenu historyMenu = new ContextMenu();
+        WebHistory history = webView.getEngine().getHistory();
+        // determine an appropriate subset range of the history list to display.
+        int minIdx = Math.max(0, history.getCurrentIndex() - 8); // min range (inclusive) of history items to show.
+        int maxIdx = Math.min(history.getEntries().size(), history.getCurrentIndex() + 6); // min range (exclusive) of history items to show.
+        // add menu items to the history list.
+        for (int i = maxIdx - 1; i >= minIdx; i--) {
+            final MenuItem nextMenuItem = new MenuItem(history.getEntries().get(i).getUrl());
+            nextMenuItem.setOnAction(actionEvent -> webView.getEngine().load(nextMenuItem.getText()));
+            historyMenu.getItems().add(nextMenuItem);
+            if (i == history.getCurrentIndex()) {
+                nextMenuItem.getStyleClass().add("current-menu");
+            }
+        }
+        return historyMenu;
     }
 
     // allow the dialog to be dragged around.

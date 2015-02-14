@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import org.votingsystem.util.StringUtils;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -43,7 +45,7 @@ public class CooinServer extends ActorVS implements Serializable {
     }
 
     public String getCooinStateServiceURL(String hashCertVS) {
-        return getServerURL() + "/cooin/state/" +DatatypeConverter.printHexBinary(hashCertVS.getBytes());
+        return getServerURL() + "/cooin/" + StringUtils.toHex(hashCertVS) + "/state";
     }
 
     public String getCooinBundleStateServiceURL() {

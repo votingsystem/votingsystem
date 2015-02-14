@@ -5,7 +5,6 @@ import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.Utils;
@@ -45,6 +44,7 @@ public class InboxService {
     private Button inboxButton;
     private PasswordDialog passwordDialog;
     private AtomicBoolean isPasswordVisible = new AtomicBoolean(false);
+
     public static InboxService getInstance() {
         return INSTANCE;
     }
@@ -70,7 +70,6 @@ public class InboxService {
     }
 
     public void setInboxButton(Button inboxButton) {
-        inboxButton.setGraphic(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
         this.inboxButton = inboxButton;
         inboxButton.setOnAction((event) -> {
             if(!encryptedSocketMsgList.isEmpty()) {

@@ -7,7 +7,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.NotificationsDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.Notification;
@@ -76,7 +75,6 @@ public class NotificationService {
     }
 
     public void setNotificationsButton(Button notificationsButton) {
-        notificationsButton.setGraphic(Utils.getImage(FontAwesome.Glyph.INFO_CIRCLE, Utils.COLOR_YELLOW_ALERT));
         this.notificationsButton = notificationsButton;
         notificationsButton.setOnAction((event) -> {
             NotificationsDialog.showDialog();

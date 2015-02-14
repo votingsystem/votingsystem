@@ -94,8 +94,7 @@ class AccessRequestVSController {
                 contentType:ContentTypeVS.TEXT_STREAM, messageBytes:accessRequestVS.content)]
             else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'accessRequestNotFound',args:[params.hashHex]))]
-        }
-        return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrors', args:[]))]
     }
 	

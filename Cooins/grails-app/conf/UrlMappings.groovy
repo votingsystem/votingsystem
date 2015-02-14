@@ -1,6 +1,7 @@
 class UrlMappings {
 
     static mappings = {
+
         "/$controller/$action?/$id?(.${format})?"{
             constraints {
                 // apply constraints here
@@ -65,7 +66,6 @@ class UrlMappings {
             }
         }
 
-
         "/certificateVS/cert/$serialNumber"{
             controller = "certificateVS"
             action = "cert"
@@ -74,17 +74,22 @@ class UrlMappings {
             }
         }
 
-        "/certificateVS/model/hashHex/$hashHex" {
-            controller = "certificateVS"
-            action = "voteVS"
-        }
-
         "/certificateVS/userVS/$userId" {
             controller = "certificateVS"
             action = "userVS"
             constraints {
                 userId(matches:/\d*/)
             }
+        }
+
+        "/cooin/request" {
+            controller = "cooin"
+            action = [POST:"processRequestFileMap", GET:"request"]
+        }
+
+        "/cooin/$hashCertVSHex/state" {
+            controller = "cooin"
+            action = "state"
         }
 
         "/deviceVS/$nif/list" {
@@ -221,7 +226,6 @@ class UrlMappings {
             action = "listenTransactionChanges"
         }
 
-
         "/testing/$year/$month/$day" {
             controller = "testing"
             action = "index"
@@ -288,8 +292,6 @@ class UrlMappings {
             action = "index"
         }
 
-
-
         "/userVS/$id/balance"{
             controller = "cooinAccount"
             action = "balance"
@@ -304,16 +306,6 @@ class UrlMappings {
             constraints {
                 id(matches:/\d*/)
             }
-        }
-
-        "/cooin/request" {
-            controller = "cooin"
-            action = [POST:"processRequestFileMap", GET:"request"]
-        }
-
-        "/cooin/state/$hashCertVSHex" {
-            controller = "cooin"
-            action = "status"
         }
 
     }

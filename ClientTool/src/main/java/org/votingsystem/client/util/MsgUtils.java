@@ -33,4 +33,9 @@ public class MsgUtils {
         return ContextVS.getMessage("plain_wallet_not_empty_msg", amountInfo.toString());
     }
 
+    public static String truncateLog(String message) {
+        if(message == null) return null;
+        else return message.length() > 300 ? message.substring(0, 300) + "..." : message;
+    }
+
 }

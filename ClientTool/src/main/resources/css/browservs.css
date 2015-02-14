@@ -1,6 +1,6 @@
 .tab {
     -fx-background-radius: 5 5 0 0, 4 4 0 0, 3 3 0 0;
-    -fx-min-width: 200;
+    -fx-min-width: 200px;
 }
 
 .tab-header-area {
@@ -8,12 +8,13 @@
 }
 
 .toolbar-button {
-    -fx-font-size: 20;
+    -fx-font-size: 19;
 }
 
-.close-button{
-    -fx-focus-color: transparent;
-    -fx-background-insets: 0, 0, 1, 2;
+.location-text {
+    -fx-font-size: 15px;
+    -fx-pref-width: 450px;
+    -fx-padding: 7, 7;
 }
 
 .main-dialog {
@@ -22,4 +23,6 @@
     -fx-border-insets: 0;
     -fx-border-radius: 4;
     -fx-background-radius: 6;
+    -fx-pref-width: 1200px;
+    -fx-pref-height: 1000px;
 }

@@ -10,7 +10,6 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -100,9 +99,9 @@ public class Wallet {
     }
 
     public static void saveWallet(Object walletJSON, String pin) throws Exception {
-        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
-        WalletFile walletFile = encryptedWalletList.getWallet(pinHash);
+        WalletFile walletFile = encryptedWalletList.getWallet(pinHashHex);
         if(walletFile == null || encryptedWalletList.size() == 0)
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
@@ -110,17 +109,18 @@ public class Wallet {
     }
 
     public static void createWallet(Object walletJSON, String pin) throws Exception {
-        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-        String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHash + ContextVS.WALLET_FILE_EXTENSION;
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
+        String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
+        walletFile.getParentFile().mkdirs();
         walletFile.createNewFile();
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile);
     }
 
     public static JSONArray getWallet(String pin) throws Exception {
-        String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-        String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHash + ContextVS.WALLET_FILE_EXTENSION;
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
+        String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
         if(!walletFile.exists()) {
             EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
@@ -142,14 +142,14 @@ public class Wallet {
 
     public static void changePin(String newPin, String oldPin) throws Exception {
         JSONArray walletJSON = getWallet(oldPin);
-        String oldPinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
-        String newPinHash = CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST);
-        String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHash + ContextVS.WALLET_FILE_EXTENSION;
+        String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST));
+        String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST));
+        String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File newWalletFile = new File(ContextVS.APPDIR + File.separator + newWalletFileName);
         if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(newPin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), newWalletFile);
-        String oldWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + oldPinHash + ContextVS.WALLET_FILE_EXTENSION;
+        String oldWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + oldPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File oldWalletFile = new File(ContextVS.APPDIR + File.separator + oldWalletFileName);
         oldWalletFile.delete();
     }

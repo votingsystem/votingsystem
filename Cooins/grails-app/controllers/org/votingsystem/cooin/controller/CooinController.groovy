@@ -66,39 +66,36 @@ class CooinController {
     def wallet() {}
 
     def state() {
-        String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(params.hashCertVSHex))
-        Cooin cooin
-        Cooin.withTransaction {
-            cooin = Cooin.findWhere(hashCertVS:hashCertVSBase64)
-        }
-        int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
-        String msg = null
-        if(!cooin) {
-            statusCode = ResponseVS.SC_NOT_FOUND
-            msg = message(code:'cooinNotFoundErrorMsg')
-        }
-        else {
-            switch(cooin.state) {
-                case Cooin.State.EXPENDED:
-                    msg = message(code:'cooinExpendedShortErrorMsg')
-                    break;
-                case Cooin.State.OK:
-                    if(cooin.validTo.after(Calendar.getInstance().getTime())) {
-                        statusCode = ResponseVS.SC_OK
-                        msg = message(code:'cooinOKMsg')
+        log.debug("========= $params")
+        if (params.hashCertVSHex) {
+            HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+            String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashCertVSHex))
+            Cooin cooin
+            Cooin.withTransaction {  cooin = Cooin.findWhere(hashCertVS:hashCertVSBase64)  }
+            int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
+            String msg = null
+            if(!cooin) {
+                statusCode = ResponseVS.SC_NOT_FOUND
+                msg = message(code:'cooinNotFoundErrorMsg')
+            } else {
+                switch(cooin.state) {
+                    case Cooin.State.EXPENDED:
+                        msg = message(code:'cooinExpendedShortErrorMsg')
                         break;
-                    } else {
-                        cooin.state = Cooin.State.LAPSED
-                        Cooin.withTransaction { cooin.save()}
-                    }
-                case Cooin.State.LAPSED:
-                    msg = message(code:'cooinLapsedShortErrorMsg')
-                    break;
+                    case Cooin.State.OK:
+                        if(cooin.validTo.after(Calendar.getInstance().getTime())) {
+                            statusCode = ResponseVS.SC_OK
+                            msg = message(code:'cooinOKMsg')
+                        } else Cooin.withTransaction { cooin.setState(Cooin.State.LAPSED).save()}
+                        break;
+                    case Cooin.State.LAPSED:
+                        msg = message(code:'cooinLapsedShortErrorMsg')
+                        break;
+                }
             }
-        }
-        response.status = statusCode
-        render msg
-        return false
+            return [responseVS:new ResponseVS(statusCode: statusCode, message:msg)]
+        } else  return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                 message: message(code: 'requestWithErrors', args:[]))]
     }
 
     def bundleState() {

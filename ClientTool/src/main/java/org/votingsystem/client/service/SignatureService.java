@@ -20,6 +20,7 @@ import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
@@ -164,7 +165,9 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS openFileFromURL(final OperationVS operationVS) throws Exception {
             ResponseVS responseVS = HttpHelper.getInstance().getData(operationVS.getDocumentURL(), null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                BrowserVS.getInstance().showDocumentVS(null, FileUtils.getFileFromBytes(responseVS.getMessageBytes()), null);
+                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
+                        FileUtils.getFileFromBytes(responseVS.getMessageBytes()), null);
+                BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                 return new ResponseVS(ResponseVS.SC_OK);
             }
             return responseVS;
@@ -185,11 +188,11 @@ public class SignatureService extends Service<ResponseVS> {
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_INITIALIZED);
                 operationVS.setMessage(responseVS.getMessage());
-                PlatformImpl.runLater(new Runnable() {
-                    @Override public void run() {
-                        BrowserVS.getInstance().showDocumentVS(operationVS.getMessage(), null, operationVS.getDocument());
-                    }
-                });
+                PlatformImpl.runLater(() -> {
+                        DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(),
+                                null, operationVS.getDocument());
+                        BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                    });
             }
             return responseVS;
         }

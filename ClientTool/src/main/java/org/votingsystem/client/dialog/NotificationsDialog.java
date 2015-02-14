@@ -55,7 +55,7 @@ public class NotificationsDialog extends DialogVS implements NotificationRow.Lis
             if(notificationMap.size() > 0) {
                 messageListPanel.getChildren().addAll(notificationMap.values());
                 message.setText(ContextVS.getMessage("numNotificationsMsg", notificationMap.size()));
-                scrollPane.getScene().getWindow().sizeToScene();
+                NotificationsDialog.this.getStage().sizeToScene();
             } else hide();
         });
     }

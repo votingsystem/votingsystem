@@ -3,7 +3,6 @@ package org.votingsystem.client;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketSession;
@@ -110,22 +109,18 @@ public class VotingSystemApp extends Application {
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         BrowserVS browserVS = BrowserVS.init(primaryStage);
-        new Thread(new Runnable() {
-            @Override public void run() {
+        new Thread(() -> {
                 boolean loadedFromJar = false;
-                if(VotingSystemApp.class.getResource(VotingSystemApp.this.getClass().getSimpleName() +
-                        ".class").toString().contains("jar:file")) {
+                if(VotingSystemApp.class.getResource(VotingSystemApp.this.getClass().getSimpleName() + ".class").
+                        toString().contains("jar:file")) {
                     loadedFromJar = true;
                 }
-                log.debug("ServerLoaderTask - loadedFromJar: " + loadedFromJar);
+                log.debug("start - loadedFromJar: " + loadedFromJar);
                 try {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-
-                } catch (GeneralSecurityException ex) {
-                    log.error(ex.getMessage(), ex);
-                }
+                } catch (GeneralSecurityException ex) { log.error(ex.getMessage(), ex); }
                 String accessControlServerURL = null;
                 String cooinsServerURL = null;
                 if(loadedFromJar) {
@@ -155,13 +150,13 @@ public class VotingSystemApp extends Application {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         browserVS.setCooinServerAvailable(true);
                         ContextVS.getInstance().setCooinServer((CooinServer) responseVS.getData());
-                    }
+                    } else browserVS.setCooinServerAvailable(false);
+                } catch(Exception ex) {
+                    log.error(ex.getMessage());
+                    browserVS.setCooinServerAvailable(false);
                 }
-                catch(Exception ex) {log.error(ex.getMessage(), ex);}
-            }
         }).start();
-        browserVS.open();
-        NotificationService.getInstance().showIfPendingNotifications();
+        browserVS.show();
     }
 
     public Long getDeviceId() {
