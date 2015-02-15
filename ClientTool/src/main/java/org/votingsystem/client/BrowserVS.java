@@ -2,7 +2,6 @@ package org.votingsystem.client;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -14,6 +13,7 @@ import net.sf.json.JSON;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
+import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.*;
@@ -26,7 +26,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -38,6 +37,7 @@ public class BrowserVS extends VBox implements WebKitHost {
     private Stage browserStage;
     private FullScreenHelper fullScreenHelper;
     private BrowserVSToolbar toolBar;
+    private BrowserVSTabPane tabPaneVS;
     private BrowserVSPane browserHelper;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
     private static BrowserVS INSTANCE;
@@ -62,6 +62,8 @@ public class BrowserVS extends VBox implements WebKitHost {
         this.browserStage = browserStage;
         fullScreenHelper = new FullScreenHelper(this.browserStage);
         browserHelper = new BrowserVSPane();
+        toolBar = new BrowserVSToolbar();
+        tabPaneVS = new BrowserVSTabPane(toolBar);
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(event -> {
             log.debug("signatureService - OnSucceeded");
@@ -91,9 +93,12 @@ public class BrowserVS extends VBox implements WebKitHost {
         browserStage.getScene().setFill(null);
         Utils.addMouseDragSupport(browserStage);
         ResizeHelper.addResizeListener(browserStage);
-        toolBar = new BrowserVSToolbar();
-        getChildren().addAll(toolBar, toolBar.getTabPainContainer());
+        getChildren().addAll(toolBar, tabPaneVS);
         NotificationService.getInstance().showIfPendingNotifications();
+    }
+
+    public WebView newTab(String URL, String tabCaption, String jsCommand) {
+        return tabPaneVS.newTab(URL, tabCaption, jsCommand);
     }
 
     @Override public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
@@ -117,7 +122,7 @@ public class BrowserVS extends VBox implements WebKitHost {
 
     @Override public void processSignalVS(Map signalData) {//{title:, url:}
         log.debug("processSignalVS - caption: " + signalData.get("caption"));
-        if(signalData.containsKey("caption")) toolBar.getTabPane().getSelectionModel().getSelectedItem().setText(
+        if(signalData.containsKey("caption")) tabPaneVS.getSelectionModel().getSelectedItem().setText(
                 (String)signalData.get("caption"));
     }
 
@@ -129,14 +134,14 @@ public class BrowserVS extends VBox implements WebKitHost {
         log.debug("openCooinURL: " + URL);
         if(ContextVS.getInstance().getCooinServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
-        } else Platform.runLater(() -> toolBar.newTab(URL, caption, null));
+        } else Platform.runLater(() -> tabPaneVS.newTab(URL, caption, null));
     }
 
     public void openVotingSystemURL(final String URL, final String caption) {
         log.debug("openVotingSystemURL: " + URL);
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
-        } else Platform.runLater(() -> toolBar.newTab(URL, caption, null));
+        } else Platform.runLater(() -> tabPaneVS.newTab(URL, caption, null));
     }
 
     public static void showMessage(ResponseVS responseVS) {
@@ -159,13 +164,10 @@ public class BrowserVS extends VBox implements WebKitHost {
         PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, caption));
     }
 
-    public void newTab(String URL, String tabCaption, String jsCommand) {
-        toolBar.newTab(URL, tabCaption, jsCommand);
-    }
 
     public void newTab(final Pane tabContent, final String caption){
         PlatformImpl.runLater(() -> {
-            toolBar.newTab(tabContent, caption);
+            tabPaneVS.newTab(tabContent, caption);
             show();
         });
     }
@@ -188,7 +190,7 @@ public class BrowserVS extends VBox implements WebKitHost {
 
     public void execCommandJSCurrentView(String jsCommand) {
         PlatformImpl.runLater(() -> {
-            ((WebView)toolBar.getTabPane().getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
+            ((WebView)tabPaneVS.getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
         });
     }
 
