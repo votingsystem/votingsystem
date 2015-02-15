@@ -7,6 +7,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketService;
@@ -15,6 +16,7 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
@@ -91,6 +93,21 @@ public class BrowserVSClient {
                     break;
                 case WALLET_OPEN:
                     BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("walletPinMsg"));
+                    break;
+                case WALLET_SAVE:
+                    PasswordDialog passwordDialog = new PasswordDialog();
+                    passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
+                    String password = passwordDialog.getPassword();
+                    if(password != null) {
+                        try {
+                            Wallet.importPlainWallet(password);
+                        } catch (WalletException wex) {
+                            Utils.showWalletNotFoundMessage();
+                        } catch (Exception ex) {
+                            log.error(ex.getMessage(), ex);
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    }
                     break;
                 case MESSAGEVS:
                     if(operationVS.getDocumentToSignMap() != null) BrowserVS.getInstance().processOperationVS(

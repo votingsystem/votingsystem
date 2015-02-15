@@ -48,6 +48,9 @@ public class BrowserVSPane extends StackPane {
 
     public BrowserVSPane() {
         this.signatureService = new SignatureService();
+        getStylesheets().add(Utils.getResource("/css/browservsPane.css"));
+        getStyleClass().add("glassBox");
+
         signatureService.setOnRunning(event -> log.debug("signatureService - OnRunning"));
         signatureService.setOnCancelled(event -> log.debug("signatureService - OnCancelled"));
         signatureService.setOnFailed(event -> log.debug("signatureService - OnFailed"));
@@ -111,10 +114,7 @@ public class BrowserVSPane extends StackPane {
         password2Text.setStyle("-fx-spacing: 50;");
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
-        passwordVBox.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        passwordVBox.getStyleClass().add("message-lbl-bold");
-        passwordVBox.getStyleClass().add("modal-dialog");
-        passwordVBox.setStyle("-fx-background-color: #f9f9f9; -fx-max-height:280px;-fx-max-width:350px;");
+        passwordVBox.getStyleClass().add("password-dialog");
         passwordVBox.autosize();
         setPasswordDialogVisible(false, null);
         getChildren().addAll(progressRegion, progressBox, passwordRegion, passwordVBox);

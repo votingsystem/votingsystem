@@ -118,6 +118,10 @@ public class CooinTransactionBatch extends BatchRequest implements Serializable 
 
     public CooinTransactionBatch() {}
 
+    public CooinTransactionBatch(List<Cooin> cooinList) {
+        this.cooinList = cooinList;
+    }
+
     public void addCooin(Cooin cooin) {
         if(cooinList == null) cooinList = new ArrayList<Cooin>();
         cooinList.add(cooin);

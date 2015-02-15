@@ -67,6 +67,7 @@ public class NotificationService {
             }
             List<Cooin> cooinList = Wallet.getCooinListFromPlainWallet();
             if(cooinList.size() > 0) {
+                log.debug("found cooins in not secured wallet");
                 addNotification(Notification.getPlainWalletNotEmptyNotification(cooinList));
             }
         } catch (Exception ex) {

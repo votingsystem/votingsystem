@@ -10,10 +10,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
@@ -57,12 +54,12 @@ public class ProgressDialog extends VBox {
         new Thread(progressTask).start();
     }
 
-    public static void showDialog(Task<ResponseVS> progressTask, String caption) {
+    public static void showDialog(Task<ResponseVS> progressTask, String caption, Window owner) {
         log.debug("showDialog");
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+            stage.initOwner(owner);
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
             stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
             ProgressDialog progressDialog = new ProgressDialog(progressTask);
@@ -70,6 +67,7 @@ public class ProgressDialog extends VBox {
             stage.setScene(new Scene(progressDialog));
             stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
             stage.setTitle(caption);
+            stage.toFront();
             stage.show();
         });
     }

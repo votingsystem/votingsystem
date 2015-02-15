@@ -3,13 +3,11 @@ package org.votingsystem.client;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSON;
@@ -89,11 +87,11 @@ public class BrowserVS extends VBox implements WebKitHost {
         browserHelper.getChildren().add(0, this);
         browserStage.setScene(new Scene(browserHelper));
         browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
-        browserStage.initStyle(StageStyle.UNDECORATED);
+        browserStage.initStyle(StageStyle.TRANSPARENT);
+        browserStage.getScene().setFill(null);
         Utils.addMouseDragSupport(browserStage);
         ResizeHelper.addResizeListener(browserStage);
         toolBar = new BrowserVSToolbar();
-        setMargin(toolBar, new Insets(6, 6, 6, 6));
         getChildren().addAll(toolBar, toolBar.getTabPainContainer());
         NotificationService.getInstance().showIfPendingNotifications();
     }
@@ -122,8 +120,6 @@ public class BrowserVS extends VBox implements WebKitHost {
         if(signalData.containsKey("caption")) toolBar.getTabPane().getSelectionModel().getSelectedItem().setText(
                 (String)signalData.get("caption"));
     }
-
-
 
     public void toggleFullScreen() {
         fullScreenHelper.toggleFullScreen();

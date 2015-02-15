@@ -11,6 +11,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
@@ -109,7 +110,8 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                 HBox result = new HBox();
                 Button checkVoteButton = new Button(ContextVS.getMessage("checkVoteLbl"));
                 checkVoteButton.setOnAction(actionEvent -> ProgressDialog.showDialog(new CheckVoteTask(
-                        signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl")));
+                        signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl"),
+                        BrowserVS.getInstance().getScene().getWindow()));
                 result.getChildren().add(checkVoteButton);
                 return result;
             default: return Utils.getSpacer();

@@ -110,7 +110,6 @@ public class PasswordDialog {
         dialogVBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        dialogVBox.getStyleClass().add("message-lbl-bold");
         Utils.addMouseDragSupport(stage);
         dialogVBox.setPrefWidth(350);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));

@@ -52,7 +52,6 @@ public class BrowserVSToolbar extends HBox {
     private Button reloadButton;
     private Button prevButton;
     private BrowserVSMenuButton menuButton;
-    private AnchorPane tabPainContainer;
 
     public BrowserVSToolbar() {
         setSpacing(10);
@@ -124,21 +123,14 @@ public class BrowserVSToolbar extends HBox {
         tabPane.setSide(Side.TOP);
         HBox.setHgrow(tabPane, Priority.ALWAYS);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
-        tabPainContainer = new AnchorPane();
-        AnchorPane.setTopAnchor(tabPane, 0.0);
-        AnchorPane.setLeftAnchor(tabPane, 0.0);
-        AnchorPane.setRightAnchor(tabPane, 0.0);
-        AnchorPane.setBottomAnchor(tabPane, 0.0);
-        tabPainContainer.getChildren().addAll(tabPane);
-        VBox.setVgrow(tabPainContainer, Priority.ALWAYS);
         locationField.setOnMouseClicked(event -> {
             Object content = tabPane.getSelectionModel().getSelectedItem().getContent();
             if (content instanceof WebView) Utils.createHistoryMenu((WebView) content).show(locationField, Side.BOTTOM, 0, 0);
         });
     }
 
-    public AnchorPane getTabPainContainer() {
-        return tabPainContainer;
+    public TabPane getTabPainContainer() {
+        return tabPane;
     }
 
     public void newTab(final Pane tabContent, final String caption){
@@ -188,7 +180,7 @@ public class BrowserVSToolbar extends HBox {
             new ChangeListener<Worker.State>() {
                 @Override public void changed(ObservableValue<? extends Worker.State> ov,
                                               Worker.State oldState, Worker.State newState) {
-                    //log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
+                    log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
                             reloadButton.setGraphic(Utils.getImage(FontAwesome.Glyph.COG));

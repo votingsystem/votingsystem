@@ -13,7 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
@@ -33,10 +33,12 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
+
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
+
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
@@ -71,12 +73,10 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
     @FXML private Label cooinHashLbl;
     @FXML private Label cooinValueLbl;
     @FXML private Label cooinTagLbl;
-    @FXML private Label dateInfoLbl;
+    @FXML private Label validFromLbl;
+    @FXML private Label validToLbl;
     @FXML private Label currencyLbl;
     @FXML private Label cooinStatusLbl;
-    @FXML private HBox progressBox;
-    @FXML private ProgressBar progressBar;
-    @FXML private Label progressLbl;
 
     private MenuItem sendMenuItem;
     private MenuItem changeWalletMenuItem;
@@ -118,7 +118,8 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");
-        sendMenuItem.setOnAction(actionEvent -> showForm(new Cooin.TransactionVSData("", "", "", true).getJSON()));
+        sendMenuItem.setOnAction(actionEvent -> JSONFormDialog.show(
+                new Cooin.TransactionVSData("", "", "", true).getJSON(), CooinDialog.this));
         deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
         deleteMenuItem.setOnAction(actionEvent -> {
                 OperationVS operationVS = new OperationVS(TypeVS.COOIN_DELETE);
@@ -131,7 +132,6 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
                 "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this));
-        setProgressVisible(false, true);
         PlatformImpl.runLater(statusChecker);
         serverLbl.setText(cooin.getCooinServerURL().split("//")[1]);
         cooinHashLbl.setText(cooin.getHashCertVS());
@@ -139,10 +139,10 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         currencyLbl.setText(cooin.getCurrencyCode());
         cooinTagLbl.setText(Utils.getTagDescription(cooin.getCertTagVS()));
         menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
-        String cooinDateInfoLbl = ContextVS.getMessage("dateInfoLbl",
-                DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
+        validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
+                DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
+        validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +
                 DateUtils.getDateStr(cooin.getValidTo(), "dd MMM yyyy' 'HH:mm"));
-        dateInfoLbl.setText(cooinDateInfoLbl);
         menuButton.getItems().addAll(sendMenuItem, deleteMenuItem, changeWalletMenuItem);
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
@@ -170,15 +170,6 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         }
     }
 
-    public void showForm(JSONObject formData) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                JSONFormDialog formDialog = new JSONFormDialog();
-                formDialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, CooinDialog.this);
-            }
-        });
-    }
-
     public static void show(final Cooin cooin) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
@@ -192,6 +183,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Cooin.fxml"));
                     fxmlLoader.setController(cooinDialog);
                     stage.setScene(new Scene(fxmlLoader.load()));
+                    stage.getScene().setFill(Color.TRANSPARENT);
                     Utils.addMouseDragSupport(stage);
                     stage.centerOnScreen();
                     stage.toFront();
@@ -200,18 +192,6 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                     log.error(ex.getMessage(), ex);
                 }
             }
-        });
-    }
-
-    @FXML public void closeDialog(ActionEvent event) {
-
-    }
-
-    private void setProgressVisible(final boolean isProgressVisible, final boolean isSendItemVisible) {
-        PlatformImpl.runLater(new Runnable() { @Override public void run() {
-            progressBox.setVisible(isProgressVisible);
-            sendMenuItem.setVisible(isSendItemVisible);
-        }
         });
     }
 
@@ -225,45 +205,44 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     @Override public void processJSONForm(JSONObject jsonForm) {
         log.debug("processJSONForm: " + jsonForm.toString());
-        Cooin.TransactionVSData transactionData = new Cooin.TransactionVSData(jsonForm);
-        CooinTransactionBatch transactionBatch = new CooinTransactionBatch();
-        transactionBatch.addCooin(cooin);
-        try {
-            setProgressVisible(true, false);
-            Task transactionTask =  new Task() {
-                @Override protected Object call() throws Exception {
-                    updateProgress(1, 10);
-                    updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-                    JSONObject requestJSON =  transactionBatch.getTransactionVSRequest(TypeVS.COOIN_SEND,
-                            Payment.ANONYMOUS_SIGNED_TRANSACTION, transactionData.getSubject(),
-                            transactionData.getToUserIBAN(), cooin.getAmount(), cooin.getCurrencyCode(),
-                            cooin.getTag().getName(), false, cooinServer.getTimeStampServiceURL());
-                    updateProgress(3, 10);
-                    ResponseVS responseVS = HttpHelper.getInstance().sendData(requestJSON.toString().getBytes(),
-                            ContentTypeVS.JSON, cooinServer.getCooinTransactionServiceURL());
-                    updateProgress(8, 10);
-                    log.debug("Cooin Transaction result: " + responseVS.getStatusCode());
-                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-                    JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
-                    transactionBatch.validateTransactionVSResponse(responseJSON, cooinServer.getTrustAnchors());
-                    Thread.sleep(3000);
-                    setProgressVisible(false, false);
-                    showMessage(ResponseVS.SC_OK, responseJSON.getString("message"));
-                    return true;
-                }
-            };
-            progressBar.progressProperty().unbind();
-            progressBar.progressProperty().bind(transactionTask.progressProperty());
-            transactionTask.messageProperty().addListener(new ChangeListener<String>() {
-                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                    PlatformImpl.runLater(new Runnable() { @Override public void run() { progressLbl.setText(newValue);}});
-                }
-            });
-            new Thread(transactionTask).start();
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-            setProgressVisible(false, true);
+        ProgressDialog.showDialog(new ProcessFormTask(new Cooin.TransactionVSData(jsonForm), cooin,cooinServer),
+                ContextVS.getMessage("sendingMoneyLbl"), stage);
+    }
+
+    public static class ProcessFormTask extends Task<ResponseVS> {
+
+        private Cooin.TransactionVSData transactionData;
+        private CooinTransactionBatch transactionBatch;
+        private Cooin cooin;
+        private CooinServer cooinServer;
+
+        public ProcessFormTask(Cooin.TransactionVSData transactionData, Cooin cooin, CooinServer cooinServer) {
+            this.cooin = cooin;
+            this.cooinServer = cooinServer;
+            this.transactionData = transactionData;
+            this.transactionBatch = new CooinTransactionBatch(Arrays.asList(cooin));
+        }
+
+        @Override protected ResponseVS call() throws Exception {
+            updateProgress(1, 10);
+            updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
+            JSONObject requestJSON =  transactionBatch.getTransactionVSRequest(TypeVS.COOIN_SEND,
+                    Payment.ANONYMOUS_SIGNED_TRANSACTION, transactionData.getSubject(),
+                    transactionData.getToUserIBAN(), cooin.getAmount(), cooin.getCurrencyCode(),
+                    cooin.getTag().getName(), false, cooinServer.getTimeStampServiceURL());
+            updateProgress(3, 10);
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(requestJSON.toString().getBytes(),
+                    ContentTypeVS.JSON, cooinServer.getCooinTransactionServiceURL());
+            updateProgress(8, 10);
+            log.debug("transaction result: " + responseVS.getStatusCode());
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                showMessage(responseVS);
+            } else {
+                JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
+                transactionBatch.validateTransactionVSResponse(responseJSON, cooinServer.getTrustAnchors());
+                showMessage(ResponseVS.SC_OK, responseJSON.getString("message"));
+            }
+            return responseVS;
         }
     }
 }

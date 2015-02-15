@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,6 +17,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
@@ -23,7 +25,7 @@ import org.votingsystem.model.ContextVS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class JSONFormDialog {
+public class JSONFormDialog extends VBox {
 
     private static Logger log = Logger.getLogger(JSONFormDialog.class);
 
@@ -35,19 +37,14 @@ public class JSONFormDialog {
     private TextArea textArea;
     private Listener listener;
     private Label messageLabel;
+    private static JSONFormDialog dialog;
 
     public JSONFormDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setResizable(true);
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override public void handle(WindowEvent event) {
-                log.debug("browserStage.setOnCloseRequest");
-            }
-        });
-        //stage.initOwner(window);
+        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-        VBox mainBox = new VBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         textArea = new TextArea();
@@ -71,9 +68,9 @@ public class JSONFormDialog {
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
 
-        mainBox.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
-        mainBox.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(mainBox));
+        getChildren().addAll(messageLabel, textArea, footerButtonsBox);
+        getStyleClass().add("modal-dialog");
+        stage.setScene(new Scene(this));
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         Utils.addMouseDragSupport(stage);
     }
@@ -85,6 +82,13 @@ public class JSONFormDialog {
         stage.centerOnScreen();
         stage.show();
         stage.toFront();
+    }
+
+    public static void show(JSONObject formData, Listener listener) {
+        PlatformImpl.runLater(() -> {
+            if(dialog == null) dialog = new JSONFormDialog();
+            dialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, listener);
+        });
     }
 
 }

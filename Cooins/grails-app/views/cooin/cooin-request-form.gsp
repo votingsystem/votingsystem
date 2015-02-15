@@ -1,5 +1,4 @@
 <vs:webresource dir="polymer" file="polymer.html"/>
-<vs:webresource dir="paper-slider" file="paper-slider.html"/>
 <vs:webresource dir="paper-fab" file="paper-fab.html"/>
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
 <vs:webresource dir="paper-radio-button" file="paper-radio-button.html"/>
@@ -8,17 +7,12 @@
 <vs:webresource dir="vs-currency-selector" file="vs-currency-selector.html"/>
 <vs:webcomponent path="/tagVS/tagvs-select-dialog"/>
 <vs:webcomponent path="/cooin/cooin-request-result-dialog"/>
-
+<vs:webresource dir="paper-input" file="paper-input.html"/>
 
 <polymer-element name="cooin-request-form">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            .green-slider paper-slider::shadow #sliderKnobInner,
-            .green-slider paper-slider::shadow #sliderKnobInner::before,
-            .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
-                background-color: #0f9d58;
-            }
             .messageToUser {
                 font-weight: bold;
                 margin:10px auto 30px auto;
@@ -78,14 +72,17 @@
                 </div>
             </div>
 
-            <div horizontal layout style="margin:0 auto; width: 600px;">
-                <div class="green-slider">
-                    <div style="font-size: 1.2em; margin:0 0 25px 0; text-align: center;"><g:message code="selectAmountLbl"/></div>
-                    <paper-slider id="amount" pin snaps value="{{value}}" max="10" step="1" value="10" style="width: 400px;"></paper-slider>
+            <div style="margin:0 auto; width: 600px;">
+                <div horizontal layout center-justified style="font-size: 1.3em;color: #6c0404;">
+                    <g:message code="selectAmountLbl"/>
                 </div>
                 <div layout horizontal center center-justified style="max-width: 600px; margin:0 auto;">
                     <div layout horizontal center center-justified>
-                        <div style="font-size: 2.2em; width: 50px;">{{amountValue}}</div>
+                        <paper-input-decorator label="<g:message code="amountLbl"/>" floatingLabel
+                                               error="<g:message code="onlyNumbersErrorMsg"/>"
+                                               isInvalid="{{!$.inputAmount.validity.valid}}">
+                            <input id="inputAmount" value="{{amountValue}}" is="core-input" pattern="\d*">
+                        </paper-input-decorator>
 
                         <vs-currency-selector id="currencySelector" style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;"></vs-currency-selector>
                     </div>
@@ -121,9 +118,6 @@
                     this.selectedTags = e.detail
                 }.bind(this))
             },
-            valueChanged:function() {
-                this.amountValue = this.value * 10;
-            },
             showTagDialog: function() {
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
@@ -139,11 +133,15 @@
                 }
             },
             submit:function() {
-                console.log("submit")
+                console.log("submit - amountValue: " + this.amountValue + " " + this.$.currencySelector.getSelected())
                 this.messageToUser = null
                 if(this.amountValue == 0) {
                     this.messageToUser = "<g:message code='amountTooLowMsg'/>"
                     return
+                }
+                if(!this.$.inputAmount.validity.valid) {
+                    showMessageVS('<g:message code="onlyNumbersErrorMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+                    return false
                 }
                 var tagList = []
                 if(this.selectedTags.length > 0) {
@@ -156,7 +154,7 @@
                 var webAppMessage = new WebAppMessage(Operation.COOIN_REQUEST)
                 webAppMessage.serviceURL = "${createLink( controller:'cooin', action:"request", absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code='cooinRequestLbl'/>"
-                webAppMessage.signedContent = {operation:Operation.COOIN_REQUEST, totalAmount:this.amountValue,
+                webAppMessage.signedContent = {operation:Operation.COOIN_REQUEST, totalAmount:new Number(this.amountValue),
                     isTimeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),
                     tag:tagList[0]}
                 webAppMessage.setCallback(function(appMessage) {
