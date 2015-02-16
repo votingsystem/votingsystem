@@ -9,6 +9,7 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
+import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
@@ -77,7 +78,8 @@ public class BrowserVSClient {
                     break;
                 case OPEN_COOIN:
                     CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((
-                            (String) operationVS.getDocument().get("object")).getBytes()));
+                            (String) operationVS.getDocument().get("object")).getBytes()),
+                            BrowserVS.getInstance().getScene().getWindow());
                     break;
                 case OPEN_SMIME_FROM_URL:
                     BrowserVS.getInstance().processOperationVS(null, operationVS);
@@ -92,7 +94,7 @@ public class BrowserVSClient {
                     BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                     break;
                 case WALLET_OPEN:
-                    BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("walletPinMsg"));
+                    WalletPane.showDialog(BrowserVS.getInstance().getScene().getWindow());
                     break;
                 case WALLET_SAVE:
                     PasswordDialog passwordDialog = new PasswordDialog();

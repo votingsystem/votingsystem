@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
@@ -29,7 +30,7 @@ public class BrowserVSToolbar extends HBox {
     private Button forwardButton;
     private BrowserVSMenuButton menuButton;
 
-    public BrowserVSToolbar() {
+    public BrowserVSToolbar(Stage stage) {
         setSpacing(10);
         setAlignment(Pos.CENTER);
         getStyleClass().add("browser-toolbar");
@@ -67,6 +68,15 @@ public class BrowserVSToolbar extends HBox {
                     }
                 }
             });
+        final Delta dragDelta = new Delta();
+        setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
+            dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+            dragDelta.y = stage.getY() - mouseEvent.getScreenY();
+        });
+        setOnMouseDragged(mouseEvent -> {
+            stage.setX(mouseEvent.getScreenX() + dragDelta.x);
+            stage.setY(mouseEvent.getScreenY() + dragDelta.y);
+        });
     }
 
     public Button getPrevButton() {
@@ -93,4 +103,5 @@ public class BrowserVSToolbar extends HBox {
         menuButton.setVotingSystemAvailable(available);
     }
 
+    static class Delta { double x, y; }
 }

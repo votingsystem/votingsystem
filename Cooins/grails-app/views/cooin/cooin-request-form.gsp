@@ -122,7 +122,7 @@
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
             showWallet: function() {
-                loadURL_VS("${createLink( controller:'cooin', action:"wallet")}")
+                VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.WALLET_OPEN));
             },
             removeTag: function(e) {
                 var tagToDelete = e.target.templateInstance.model.tag

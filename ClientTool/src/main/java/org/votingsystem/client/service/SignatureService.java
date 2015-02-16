@@ -134,9 +134,6 @@ public class SignatureService extends Service<ResponseVS> {
                         case COOIN_REQUEST:
                             responseVS = sendCooinRequest(operationVS);
                             break;
-                        case WALLET_OPEN:
-                            responseVS = openWallet(operationVS);
-                            break;
                         case COOIN_DELETE:
                             responseVS = deleteCooin(operationVS);
                             break;
@@ -349,20 +346,6 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
             }
             return responseVS;
-        }
-
-        private ResponseVS openWallet(OperationVS operationVS) throws Exception {
-            log.debug("openWallet");
-            try {
-                JSONObject responseJSON = new JSONObject();
-                responseJSON.put("statusCode", ResponseVS.SC_OK);
-                JSON walletJSON = Wallet.getWallet(password);
-                responseJSON.put("message", walletJSON);
-                return ResponseVS.getJSONResponse(ResponseVS.SC_OK, responseJSON);
-            } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
         }
 
         private ResponseVS deleteCooin(OperationVS operationVS) throws Exception {

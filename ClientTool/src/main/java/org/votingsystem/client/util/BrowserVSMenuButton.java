@@ -5,21 +5,30 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
+import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.Wallet;
+
+import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class BrowserVSMenuButton extends MenuButton {
+
+    private static Logger log = Logger.getLogger(BrowserVSMenuButton.class);
 
     private MenuItem voteMenuItem;
     private MenuItem selectRepresentativeMenuItem;
@@ -63,17 +72,7 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
         walletMenuItem.setVisible(false);
         walletMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
-        walletMenuItem.setOnAction(event -> {
-            if(Wallet.getWallet() != null) {
-
-            } else {
-                BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getWalletURL(),
-                        ContextVS.getMessage("walletLbl"));
-                BrowserVS.getInstance().processOperationVS(new OperationVS(TypeVS.WALLET_OPEN),
-                        ContextVS.getMessage("walletPinMsg"));
-            }
-        });
-
+        walletMenuItem.setOnAction(event -> WalletPane.showDialog(BrowserVS.getInstance().getScene().getWindow()));
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
@@ -89,8 +88,8 @@ public class BrowserVSMenuButton extends MenuButton {
         adminsMenu.getItems().addAll(cooinAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                cooinUsersProceduresMenuItem, walletMenuItem, new SeparatorMenuItem(),
-                openFileMenuItem, signDocumentMenuItem, new SeparatorMenuItem(),
+                walletMenuItem, cooinUsersProceduresMenuItem, new SeparatorMenuItem(),
+                signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
 

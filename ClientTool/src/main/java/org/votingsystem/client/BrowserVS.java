@@ -22,6 +22,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 
+import java.awt.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class BrowserVS extends VBox implements WebKitHost {
         this.browserStage = browserStage;
         fullScreenHelper = new FullScreenHelper(this.browserStage);
         browserHelper = new BrowserVSPane();
-        toolBar = new BrowserVSToolbar();
+        toolBar = new BrowserVSToolbar(this.browserStage);
         tabPaneVS = new BrowserVSTabPane(toolBar);
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(event -> {
@@ -91,7 +92,6 @@ public class BrowserVS extends VBox implements WebKitHost {
         browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
         browserStage.initStyle(StageStyle.TRANSPARENT);
         browserStage.getScene().setFill(null);
-        Utils.addMouseDragSupport(browserStage);
         ResizeHelper.addResizeListener(browserStage);
         getChildren().addAll(toolBar, tabPaneVS);
         NotificationService.getInstance().showIfPendingNotifications();

@@ -1,0 +1,46 @@
+.main-pane {
+    -fx-pref-width: 450px;
+    -fx-background-color: #fff;
+    -fx-padding: 10;
+}
+
+.currency {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+}
+
+.tag {
+    -fx-font-size: 1.1em;
+    -fx-text-fill: #888;
+    -fx-font-weight: bold;
+}
+
+.amount {
+    -fx-text-fill: #888;
+    -fx-font-size: 1.1em;
+}
+
+.cooinPane {
+    -fx-pref-width: 100px;
+    -fx-padding: 5;
+    -fx-spacing: 10;
+    -fx-alignment: center;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-border-color: #61a753;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-color: #f9f9f9;
+}
+
+.cooinPane:hover {
+    -fx-cursor: hand;
+    -fx-background-color: #ccc;
+    -fx-background-radius: 4;
+    -fx-text-fill: #f9f9f9;
+}
+
+.cooinValue {
+    -fx-text-fill: #61a753;
+    -fx-font-size: 1em;
+}

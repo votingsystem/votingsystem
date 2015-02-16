@@ -14,6 +14,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -159,7 +160,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                     errorMsg =  ContextVS.getMessage("cooinLapsedErrorLbl");
                 } else errorMsg =  ContextVS.getMessage("cooinErrorLbl");
                 String amountStr = cooin.getAmount() + " " + cooin.getCurrencyCode() + " " +
-                        Utils.getTagForDescription(cooin.getTag().getName());
+                        Utils.getTagForDescription(cooin.getCertTagVS());
                 msg = ContextVS.getMessage("cooinInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
                         DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(cooin.getValidTo()), "dd MMM yyyy' 'HH:mm");
@@ -168,14 +169,14 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         }
     }
 
-    public static void show(final Cooin cooin) {
+    public static void show(final Cooin cooin, Window owner) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
                     CooinDialog cooinDialog = new CooinDialog(cooin);
                     if(stage == null) {
                         stage = new Stage(StageStyle.TRANSPARENT);
-                        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+                        stage.initOwner(owner);
                         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
                     }
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Cooin.fxml"));

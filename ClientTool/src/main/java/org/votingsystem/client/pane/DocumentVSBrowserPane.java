@@ -12,6 +12,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.DocumentVS;
@@ -79,7 +80,8 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                     return;
                 }
                 if(backup.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
-                    CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)));
+                    CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
+                            BrowserVS.getInstance().getScene().getWindow());
                 } else {
                     openFile(backup, operationDocument);
                 }
