@@ -38,7 +38,8 @@ public class BrowserVSToolbar extends HBox {
         reloadButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.REFRESH));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
-        final Button  newTabButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.PLUS));
+        Button  newTabButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.PLUS));
+        newTabButton.getStyleClass().add("toolbar-button");
         newTabButton.setOnAction(event -> BrowserVS.getInstance().newTab(null, null, null));
 
         HBox.setHgrow(locationField, Priority.ALWAYS);

@@ -394,7 +394,7 @@ public class WebSocketMessage implements Parcelable {
     //Base64.DEFAULT -> problems with Java 8 with
     public static JSONObject getCooinWalletChangeRequest(DeviceVS deviceVS,
             List<Cooin> cooinList, AppContextVS contextVS) throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null,
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, cooinList,
                 TypeVS.COOIN_WALLET_CHANGE, contextVS);
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
@@ -444,13 +444,15 @@ public class WebSocketMessage implements Parcelable {
         return new JSONObject(messageToDevice);
     }
 
-    private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS,
-            AppContextVS contextVS) throws NoSuchAlgorithmException {
+    private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data,
+            TypeVS typeVS, AppContextVS contextVS) throws NoSuchAlgorithmException {
         WebSocketSession socketSession = contextVS.getWSSession(deviceVS.getId());
         if(socketSession == null) {
             String randomUUID = java.util.UUID.randomUUID().toString();
             AESParams aesParams = new AESParams();
-            contextVS.putWSSession(randomUUID, new WebSocketSession(aesParams, deviceVS, null, null));
+            socketSession =  new WebSocketSession(aesParams, deviceVS, null, null);
+            socketSession.setData(data);
+            contextVS.putWSSession(randomUUID,socketSession);
         }
         socketSession.setData(data);
         socketSession.setTypeVS(typeVS);

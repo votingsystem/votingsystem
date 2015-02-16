@@ -1,6 +1,7 @@
 package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -70,17 +71,18 @@ public class BrowserVSMenuButton extends MenuButton {
         MenuItem cooinAdminMenuItem = new MenuItem(ContextVS.getMessage("cooinAdminLbl"));
         cooinAdminMenuItem.setOnAction(actionEvent ->  BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getAdminDashBoardURL(),
                 ContextVS.getMessage("cooinAdminLbl")));
-        cooinAdminMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.USERS));
         MenuItem votingSystemAdminMenuItem = new MenuItem(ContextVS.getMessage("votingSystemProceduresLbl"));
         votingSystemAdminMenuItem.setOnAction(actionEvent -> BrowserVS.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getDashBoardURL(),
                 ContextVS.getMessage("votingSystemProceduresLbl")));
-        votingSystemAdminMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.USERS));
+
+        Menu adminsMenu = new Menu(ContextVS.getMessage("adminsMenuLbl"));
+        adminsMenu.setGraphic(Utils.getImage(FontAwesome.Glyph.USERS));
+        adminsMenu.getItems().addAll(cooinAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
                 cooinUsersProceduresMenuItem, walletMenuItem, new SeparatorMenuItem(),
                 openFileMenuItem, signDocumentMenuItem, new SeparatorMenuItem(),
-                cooinAdminMenuItem, votingSystemAdminMenuItem, new SeparatorMenuItem(),
-                settingsMenuItem);
+                settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
 
     public void setVotingSystemAvailable(boolean available) {

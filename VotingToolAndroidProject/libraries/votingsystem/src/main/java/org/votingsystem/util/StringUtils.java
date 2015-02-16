@@ -25,7 +25,7 @@ import java.util.Random;
 */
 public class StringUtils {
 	
-	public static final String TAG = "StringUtils";
+	public static final String TAG = StringUtils.class.getSimpleName();
  
     public static String getStringFromInputStream(InputStream input) throws IOException {
     	ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -58,7 +58,7 @@ public class StringUtils {
         try {
         	result = URLDecoder.decode(string, ContextVS.UTF_8.name());
 		} catch (UnsupportedEncodingException ex) {
-			Log.e(TAG + ".decodeString()", ex.getMessage(), ex);
+			Log.e(TAG, ex.getMessage(), ex);
 		}
     	return result;
     }

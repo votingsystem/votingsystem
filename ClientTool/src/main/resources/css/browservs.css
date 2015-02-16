@@ -1,5 +1,5 @@
 .browser-toolbar {
-    -fx-padding:2 2;
+    -fx-padding:2 2 1 2;
 }
 
 .tab {
@@ -16,13 +16,13 @@
 }
 
 .toolbar-button {
-    -fx-font-size: 19;
+    -fx-font-size: 17;
 }
 
 .location-text {
     -fx-font-size: 15px;
     -fx-pref-width: 450px;
-    -fx-padding: 7, 7;
+    -fx-padding: 6, 6;
 }
 
 .main-dialog {

@@ -27,9 +27,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import java.io.File;
-
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
@@ -134,33 +132,33 @@ public class BrowserVSTabPane extends TabPane {
             return newTab(null, null, null).getEngine();
         });
         webView.getEngine().getLoadWorker().stateProperty().addListener(
-                new ChangeListener<Worker.State>() {
-                    @Override public void changed(ObservableValue<? extends Worker.State> ov,
-                                                  Worker.State oldState, Worker.State newState) {
-                        log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
-                        switch (newState) {
-                            case SCHEDULED:
-                                toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
-                                break;
-                            case SUCCEEDED:
-                                toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
-                                break;
-                        }
-                        if (newState == Worker.State.SUCCEEDED) {
-                            Document doc = webView.getEngine().getDocument();
-                            Element element = doc.getElementById("voting_system_page");
-                            if(element != null) {
-                                JSObject win = (JSObject) webView.getEngine().executeScript("window");
-                                win.setMember("clientTool", new BrowserVSClient(webView));
-                                webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                        SessionService.getInstance().getBrowserSessionData()));
-                            }
-                        } else if (newState.equals(Worker.State.FAILED)) {
-                            showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
-                        } else if (newState.equals(Worker.State.SCHEDULED)) { }
-                        if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {  }
+            new ChangeListener<Worker.State>() {
+                @Override public void changed(ObservableValue<? extends Worker.State> ov,
+                                              Worker.State oldState, Worker.State newState) {
+                    log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
+                    switch (newState) {
+                        case SCHEDULED:
+                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
+                            break;
+                        case SUCCEEDED:
+                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+                            break;
                     }
+                    if (newState == Worker.State.SUCCEEDED) {
+                        Document doc = webView.getEngine().getDocument();
+                        Element element = doc.getElementById("voting_system_page");
+                        if(element != null) {
+                            JSObject win = (JSObject) webView.getEngine().executeScript("window");
+                            win.setMember("clientTool", new BrowserVSClient(webView));
+                            webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
+                                    SessionService.getInstance().getBrowserSessionData()));
+                        }
+                    } else if (newState.equals(Worker.State.FAILED)) {
+                        showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
+                    } else if (newState.equals(Worker.State.SCHEDULED)) { }
+                    if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {  }
                 }
+            }
         );
         VBox.setVgrow(webView, Priority.ALWAYS);
         Tab newTab = new Tab();

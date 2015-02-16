@@ -48,6 +48,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
         log.debug("setSelectedDevice - deviceDataJSON: " + deviceDataJSON.toString());
+
     }
 
     class EventBusDeleteCooinListener {
