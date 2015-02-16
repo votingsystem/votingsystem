@@ -24,6 +24,7 @@ public class Wallet {
 
     private static Logger log = Logger.getLogger(Wallet.class);
 
+    private static JSONArray wallet;
 
     public static void saveCooinsToDir(Collection<Cooin> cooinCollection, String walletPath) throws Exception {
         for(Cooin cooin : cooinCollection) {
@@ -98,7 +99,7 @@ public class Wallet {
         saveWallet(cooinsToSaveArray, pin);
     }
 
-    public static void saveWallet(Object walletJSON, String pin) throws Exception {
+    public static JSONArray saveWallet(Object walletJSON, String pin) throws Exception {
         String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
         WalletFile walletFile = encryptedWalletList.getWallet(pinHashHex);
@@ -106,6 +107,8 @@ public class Wallet {
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile.file);
+        wallet = (JSONArray) walletJSON;
+        return wallet;
     }
 
     public static void createWallet(Object walletJSON, String pin) throws Exception {
@@ -116,6 +119,11 @@ public class Wallet {
         walletFile.createNewFile();
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile);
+        wallet = (JSONArray) walletJSON;
+    }
+
+    public static JSONArray getWallet() {
+        return wallet;
     }
 
     public static JSONArray getWallet(String pin) throws Exception {
@@ -130,7 +138,14 @@ public class Wallet {
         JSONObject bundleJSON = (JSONObject) JSONSerializer.toJSON( FileUtils.getStringFromFile(walletFile));
         Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(bundleJSON);
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
-        return (JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8"));
+        wallet = (JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8"));
+        JSONArray plainWallet = getPlainWallet();
+        if(plainWallet.size() > 0) {
+            wallet.addAll(plainWallet);
+            saveWallet(wallet, pin);
+            savePlainWallet(new JSONArray());
+        }
+        return wallet;
     }
 
     public static void importPlainWallet(String password) throws Exception {

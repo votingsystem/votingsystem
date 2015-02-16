@@ -11,6 +11,9 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.Wallet;
 
 /**
  * @author jgzornoza
@@ -61,8 +64,14 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem.setVisible(false);
         walletMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         walletMenuItem.setOnAction(event -> {
-            BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getWalletURL(),
-                    ContextVS.getMessage("walletLbl"));
+            if(Wallet.getWallet() != null) {
+
+            } else {
+                BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getWalletURL(),
+                        ContextVS.getMessage("walletLbl"));
+                BrowserVS.getInstance().processOperationVS(new OperationVS(TypeVS.WALLET_OPEN),
+                        ContextVS.getMessage("walletPinMsg"));
+            }
         });
 
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));

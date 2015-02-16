@@ -448,14 +448,13 @@ public class WebSocketMessage implements Parcelable {
             TypeVS typeVS, AppContextVS contextVS) throws NoSuchAlgorithmException {
         WebSocketSession socketSession = contextVS.getWSSession(deviceVS.getId());
         if(socketSession == null) {
-            String randomUUID = java.util.UUID.randomUUID().toString();
             AESParams aesParams = new AESParams();
-            socketSession =  new WebSocketSession(aesParams, deviceVS, null, null);
+            socketSession =  new WebSocketSession(aesParams, deviceVS, data, typeVS);
+            contextVS.putWSSession(java.util.UUID.randomUUID().toString(), socketSession);
+        } else {
             socketSession.setData(data);
-            contextVS.putWSSession(randomUUID,socketSession);
+            socketSession.setTypeVS(typeVS);
         }
-        socketSession.setData(data);
-        socketSession.setTypeVS(typeVS);
         return socketSession;
     }
 

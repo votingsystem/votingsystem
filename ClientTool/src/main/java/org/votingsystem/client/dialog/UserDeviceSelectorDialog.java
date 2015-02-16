@@ -71,32 +71,32 @@ public class UserDeviceSelectorDialog extends DialogVS {
     }
 
     private void updateDeviceList(JSONArray deviceArray) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
-                if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
-                        deviceListBox.getChildren());
-                deviceToggleGroup = new ToggleGroup();
-                deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-                    public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
-                        if (deviceToggleGroup.getSelectedToggle() != null) {
-                            if(!footerBox.getChildren().contains(acceptButton))
-                                footerBox.getChildren().add(2, acceptButton);
-                        } else footerBox.getChildren().remove(acceptButton);
-                    }
-                });
-                if(deviceArray == null || deviceArray.isEmpty()) {
-                    messageLbl.setText(ContextVS.getMessage("cia"));
+        PlatformImpl.runLater(() -> {
+            if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
+            if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
+                    deviceListBox.getChildren());
+            deviceToggleGroup = new ToggleGroup();
+            deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+                public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
+                    if (deviceToggleGroup.getSelectedToggle() != null) {
+                        if(!footerBox.getChildren().contains(acceptButton))
+                            footerBox.getChildren().add(2, acceptButton);
+                    } else footerBox.getChildren().remove(acceptButton);
                 }
-                for(int i = 0; i < deviceArray.size() ; i++) {
-                    JSONObject deviceData = (JSONObject) deviceArray.get(i);
+            });
+            if(deviceArray == null || deviceArray.isEmpty()) {
+                messageLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
+            }
+            for(int i = 0; i < deviceArray.size() ; i++) {
+                JSONObject deviceData = (JSONObject) deviceArray.get(i);
+                if(!SessionService.getInstance().getDeviceId().equals(deviceData.getString("deviceId"))) {
                     RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
                     radioButton.setUserData(deviceData);
                     radioButton.setToggleGroup(deviceToggleGroup);
                     deviceListBox.getChildren().add(radioButton);
                 }
-                mainPane.getScene().getWindow().sizeToScene();
             }
+            mainPane.getScene().getWindow().sizeToScene();
         });
     }
 
