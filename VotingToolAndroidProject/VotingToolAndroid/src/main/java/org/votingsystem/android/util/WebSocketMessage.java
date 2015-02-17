@@ -65,7 +65,6 @@ public class WebSocketMessage implements Parcelable {
     public WebSocketMessage() {}
 
     public WebSocketMessage(JSONObject decryptedJSON) throws Exception {
-        this.decryptedJSON = decryptedJSON;
         loadDecryptedJSON(decryptedJSON);
     }
 
@@ -193,7 +192,6 @@ public class WebSocketMessage implements Parcelable {
                         return false;
                     default: return true;
                 }
-
         }
     }
 
@@ -214,19 +212,17 @@ public class WebSocketMessage implements Parcelable {
             if(messageJSON.has("sessionId")) setSessionId(messageJSON.getString("sessionId"));
             if(messageJSON.has("message")) setMessage(messageJSON.getString("message"));
             if(messageJSON.has("URL")) setUrl(messageJSON.getString("URL"));
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch(Exception ex) { ex.printStackTrace(); }
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
         this.aesParams = aesParams;
-        decryptedJSON = new JSONObject(Encryptor.decryptAES(
-                messageJSON.getString("encryptedMessage"), aesParams));
-        loadDecryptedJSON(decryptedJSON);
+        loadDecryptedJSON(new JSONObject(Encryptor.decryptAES(
+                messageJSON.getString("encryptedMessage"), aesParams)));
     }
 
     private void loadDecryptedJSON(JSONObject decryptedJSON) throws Exception {
+        this.decryptedJSON = decryptedJSON;
         this.operationVS =  OperationVS.parse(decryptedJSON).setSessionId(
                 getSessionId()).setUUID(UUID);
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
@@ -241,7 +237,7 @@ public class WebSocketMessage implements Parcelable {
         if(decryptedJSON.has("cooinList")) {
             try {
                 cooinList = Wallet.getCooinListFromJSONArray(decryptedJSON.getJSONArray("cooinList"));
-            }catch(Exception ex) { ex.printStackTrace();}
+            }catch(Exception ex) { ex.printStackTrace(); }
         }
     }
 

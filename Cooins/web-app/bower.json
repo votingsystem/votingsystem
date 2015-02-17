@@ -22,7 +22,7 @@
       "app-router":"app-router#~2.4.0",
       "jsoneditor":"jsoneditor#~3.1.2",
       "juicy-jsoneditor":"juicy-jsoneditor#~0.0.3",
-      "highcharts":"highcharts#~4.0.4",
+      "highcharts":"highcharts#~4.1.1",
       "font-awesome":"font-awesome#~4.3.0",
       "ckeditor":"ckeditor#~4.4.6",
 	  "polymer": "Polymer/polymer",

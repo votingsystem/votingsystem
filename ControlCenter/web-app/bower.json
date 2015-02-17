@@ -20,7 +20,7 @@
     ],
     "dependencies":{
         "jsoneditor":"jsoneditor#~3.1.2",
-        "highcharts":"highcharts#~4.0.4",
+        "highcharts":"highcharts#~4.1.1",
         "font-awesome":"font-awesome#~4.3.0",
         "polymer": "Polymer/polymer",
         "core-ajax":"Polymer/core-ajax",

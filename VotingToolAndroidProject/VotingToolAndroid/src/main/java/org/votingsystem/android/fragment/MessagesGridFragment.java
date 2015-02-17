@@ -182,7 +182,7 @@ public class MessagesGridFragment extends Fragment implements
                             colorFilter = Color.parseColor("#ba0011");
                             break;
                         case READED:
-                            colorFilter = Color.parseColor("#888");
+                            colorFilter = Color.parseColor("#888888");
                             break;
                     }
                     ((ImageView) view.findViewById(R.id.message_icon)).setColorFilter(colorFilter);

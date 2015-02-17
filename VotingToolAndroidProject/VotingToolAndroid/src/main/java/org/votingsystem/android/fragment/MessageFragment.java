@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,10 +37,9 @@ public class MessageFragment extends Fragment {
 
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
+    private Long messageId;
     private String broadCastId;
-    private Menu menu;
-    TextView receipt_content;
-    TextView receiptSubject;
+    TextView message_content;
 
     public static Fragment newInstance(int cursorPosition) {
         MessageFragment fragment = new MessageFragment();
@@ -68,22 +68,9 @@ public class MessageFragment extends Fragment {
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        broadCastId = MessageFragment.class.getSimpleName() + "_" + cursorPosition;
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
-        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
-                " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
-        receipt_content = (TextView)rootView.findViewById(R.id.message_content);
-        receiptSubject = (TextView)rootView.findViewById(R.id.message_subject);
-        setHasOptionsMenu(true);
-        return rootView;
-    }
-
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Integer cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        message_content = (TextView)rootView.findViewById(R.id.message_content);
+        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         Cursor cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
@@ -91,20 +78,33 @@ public class MessageFragment extends Fragment {
             JSONObject decryptedJSON = new JSONObject(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.JSON_COL)));
             socketMessage = new WebSocketMessage(decryptedJSON);
+            messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
             TypeVS typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
                     MessageContentProvider.TYPE_COL)));
-            MessageContentProvider.State state =  MessageContentProvider.State.valueOf(cursor.getString(
-                    cursor.getColumnIndex(MessageContentProvider.STATE_COL)));
             switch (typeVS) {
                 case MESSAGEVS:
-                    receiptSubject.setText(getString(R.string.message_lbl));
-                    receipt_content.setText(socketMessage.getMessage());
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.message_lbl));
+                    message_content.setText(socketMessage.getMessage());
                     break;
                 case COOIN_WALLET_CHANGE:
-                    receiptSubject.setText(getString(R.string.wallet_change_lbl));
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_change_lbl));
                     break;
             }
+            MessageContentProvider.State state =  MessageContentProvider.State.valueOf(cursor.getString(
+                    cursor.getColumnIndex(MessageContentProvider.STATE_COL)));
+            if(state == MessageContentProvider.State.NOT_READED) {
+                getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
+                        messageId), MessageContentProvider.getContentValues(socketMessage,
+                        MessageContentProvider.State.READED), null, null);
+            }
         } catch(Exception ex) { ex.printStackTrace(); }
+        broadCastId = MessageFragment.class.getSimpleName() + "_" + cursorPosition;
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
+                " - arguments: " + getArguments());
+        setHasOptionsMenu(true);
+        return rootView;
     }
 
     @Override public void onPause() {
@@ -119,10 +119,9 @@ public class MessageFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" + socketMessage.getTypeVS());
-        this.menu = menu;
+        LOGD(TAG + ".onCreateOptionsMenu", " selected message type:" + socketMessage.getTypeVS());
         menuInflater.inflate(R.menu.message_fragment, menu);
-        switch (socketMessage.getTypeVS()) {
+        switch (socketMessage.getOperation()) {
             case MESSAGEVS:
                 menu.setGroupVisible(R.id.message_items, true);
                 break;
@@ -134,13 +133,15 @@ public class MessageFragment extends Fragment {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
-        AlertDialog dialog = null;
         switch (item.getItemId()) {
             case android.R.id.home:
                 break;
             case R.id.delete_message:
-                break;
-            case R.id.check_receipt:
+                getActivity().getContentResolver().delete(MessageContentProvider.getMessageURI(
+                        messageId), null, null);
+                getActivity().onBackPressed();
+                return true;
+            case R.id.save_to_wallet:
                 break;
         }
         return super.onOptionsItemSelected(item);

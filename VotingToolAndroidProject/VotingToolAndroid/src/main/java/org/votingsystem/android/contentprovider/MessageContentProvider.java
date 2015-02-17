@@ -60,8 +60,8 @@ public class MessageContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getMessageURI(Long receipt) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + receipt);
+    public static Uri getMessageURI(Long messageId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + messageId);
     }
 
     @Override public boolean onCreate() {

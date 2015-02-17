@@ -7,7 +7,7 @@
     </group>
 
     <group android:id="@+id/cooin_change_items" android:visible="false">
-        <item android:id="@+id/check_receipt"
+        <item android:id="@+id/save_to_wallet"
             android:orderInCategory="2"
             android:title="@string/save_to_wallet_lbl"/>
     </group>
