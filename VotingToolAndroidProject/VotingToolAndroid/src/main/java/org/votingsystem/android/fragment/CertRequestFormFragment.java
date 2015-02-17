@@ -37,7 +37,6 @@ import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 
-import java.text.Normalizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 

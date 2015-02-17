@@ -244,7 +244,7 @@ public class ContactFragment extends Fragment {
                                 }
                             }).setNegativeButton(getString(R.string.cancel_lbl), null);
                     UIUtils.showMessageDialog(builder);
-                } else MessageVSInputDialogFragment.showDialog(getString(R.string.messagevs_caption),
+                } else MessageVSInputDialogFragment.showDialog(getString(R.string.message_lbl),
                         broadCastId, TypeVS.MESSAGEVS, getFragmentManager());
                 return true;
             case R.id.send_money:

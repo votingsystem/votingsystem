@@ -1,5 +1,4 @@
 <vs:webresource dir="polymer" file="polymer.html"/>
-<vs:webresource dir="paper-slider" file="paper-slider.html"/>
 <vs:webresource dir="core-tooltip" file="core-tooltip.html"/>
 <vs:webcomponent path="/cooin/cooin-wallet-tag-group"/>
 
@@ -8,34 +7,25 @@
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
-            .green-slider paper-slider::shadow #sliderKnobInner,
-            .green-slider paper-slider::shadow #sliderKnobInner::before,
-            .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
-                background-color: #0f9d58;
-            }
             .messageToUser {font-weight: bold;margin:10px auto 30px auto;
                 background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;
             }
         </style>
         <div vertical layout>
-            <template if="{{messageToUser}}">
-                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
-                    <div class="messageToUser">
-                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                        <paper-shadow z="1"></paper-shadow>
+            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+                <div class="messageToUser">
+                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                        <div id="messageToUser">{{messageToUser}}</div>
                     </div>
+                    <paper-shadow z="1"></paper-shadow>
                 </div>
-            </template>
-            <template if="{{!walletLoaded}}">
-                <div horizontal layout center center-justified style="font-size: 0.9em; ">
-                    <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
-                        <i class="fa fa-money"></i> <g:message code="accessToWalletMsg"/>
-                    </paper-button>
-                </div>
-            </template>
+            </div>
+            <div hidden?="{{walletLoaded}}" horizontal layout center center-justified style="font-size: 0.9em; ">
+                <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
+                    <i class="fa fa-money"></i> <g:message code="accessToWalletMsg"/>
+                </paper-button>
+            </div>
         </div>
         <div  layout horizontal center-justified>
             <template repeat="{{tag in plainWalletTagArray}}">

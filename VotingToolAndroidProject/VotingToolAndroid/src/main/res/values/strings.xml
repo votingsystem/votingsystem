@@ -493,7 +493,7 @@
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
-    <string name="messagevs_caption">mensaje cifrado</string>
+    <string name="message_lbl">mensaje</string>
     <string name="contacts_lbl">contactos</string>
     <string name="contact_lbl">contacto</string>
     <string name="send_money_lbl">hacer ingreso</string>
@@ -528,4 +528,7 @@
     <string name="updated_cooins_with_error_msg">se han eliminido de su monedero</string>
     <string name="cooin_expended_msg">\'%1$s\' para \'%2$s\' que ya habían sido consumidos</string>
     <string name="cooin_lapsed_msg">\'%1$s\' para \'%2$s\' que ya habían caducado</string>
+    <string name="messages_lbl">mensajes</string>
+    <string name="wallet_change_lbl">intercambio de dinero</string>
+    <string name="save_to_wallet_lbl">guardar en monedero</string>
 </resources>

@@ -342,6 +342,7 @@ public class WebSocketMessage {
         messageToDevice.put("UUID", socketSession.getUUID());
         Map encryptedDataMap =  new HashMap<>();
         encryptedDataMap.put("operation", TypeVS.MESSAGEVS.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_OK);
         encryptedDataMap.put("from", SessionService.getInstance().getUserVS().getName());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());

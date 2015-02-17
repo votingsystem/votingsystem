@@ -8,19 +8,11 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.Wallet;
-
-import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
  * @author jgzornoza

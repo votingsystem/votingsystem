@@ -27,7 +27,9 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import java.io.File;
+
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**

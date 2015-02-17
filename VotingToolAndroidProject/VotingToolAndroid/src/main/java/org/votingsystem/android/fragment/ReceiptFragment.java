@@ -40,7 +40,6 @@ import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;

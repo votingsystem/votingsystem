@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.SMIMESignerActivity;
+import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
@@ -258,8 +259,9 @@ public class WebSocketService extends Service {
                 case MESSAGEVS:
                     if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
-                        responseVS.setCaption(getString(R.string.messagevs_caption)).
+                        responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
+                        MessageContentProvider.insert(getContentResolver(), socketMsg);
                         contextVS.showNotification(responseVS);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
@@ -273,9 +275,13 @@ public class WebSocketService extends Service {
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case COOIN_WALLET_CHANGE:
-                    if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
-                        Wallet.removeCooinList((Collection<Cooin>) socketSession.getData(), contextVS);
-                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    if(socketMsg.getTypeVS() == TypeVS.MESSAGEVS_FROM_DEVICE) {
+                        if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
+                            Wallet.removeCooinList((Collection<Cooin>) socketSession.getData(), contextVS);
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        }
+                    } else if(socketMsg.getTypeVS() == TypeVS.MESSAGEVS_TO_DEVICE) {
+
                     }
                     break;
             }

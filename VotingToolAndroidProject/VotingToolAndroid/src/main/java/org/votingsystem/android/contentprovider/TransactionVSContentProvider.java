@@ -268,7 +268,7 @@ public class TransactionVSContentProvider extends ContentProvider {
 
     public static Uri addTransaction(Context context, TransactionVS transactionVS,
               String weekLapse) {
-        ContentValues values = populateTransactionContentValues(transactionVS);
+        ContentValues values = getContentValues(transactionVS);
         values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapse);
         Uri uri = context.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
         LOGD(TAG + ".addTransaction() ", "added uri: " + uri.toString());
@@ -276,12 +276,12 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
     public static int updateTransaction(Context context, TransactionVS transactionVS) {
-        ContentValues values = populateTransactionContentValues(transactionVS);
+        ContentValues values = getContentValues(transactionVS);
         return context.getContentResolver().update(TransactionVSContentProvider.
                 getTransactionVSURI(transactionVS.getLocalId()), values, null, null);
     }
 
-    private static ContentValues populateTransactionContentValues(TransactionVS transactionVS) {
+    public static ContentValues getContentValues(TransactionVS transactionVS) {
         ContentValues values = new ContentValues();
         values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
         values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());

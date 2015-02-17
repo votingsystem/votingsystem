@@ -41,6 +41,7 @@ public class WebSocketMessage implements Parcelable {
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
     public static final int TRUNCATED_MSG_SIZE = 80; //chars
 
+    private TypeVS typeVS;
     private TypeVS operation;
     private Integer statusCode = ResponseVS.SC_PROCESSING;
     private Long deviceId;
@@ -58,8 +59,15 @@ public class WebSocketMessage implements Parcelable {
     private String serviceCaller = ContextVS.WEB_SOCKET_BROADCAST_ID;
     private OperationVS operationVS;
     private JSONObject messageJSON;
+    private JSONObject decryptedJSON;
+    private List<Cooin> cooinList;
 
     public WebSocketMessage() {}
+
+    public WebSocketMessage(JSONObject decryptedJSON) throws Exception {
+        this.decryptedJSON = decryptedJSON;
+        loadDecryptedJSON(decryptedJSON);
+    }
 
     public WebSocketMessage(Integer statusCode, String message, TypeVS operation) {
         this.statusCode = statusCode;
@@ -84,6 +92,7 @@ public class WebSocketMessage implements Parcelable {
     public WebSocketMessage(Parcel source) {
         // Must read values in the same order as they were placed in. The
         // generic 'readValues' instead of the typed vesions are for the null values
+        typeVS = (TypeVS) source.readSerializable();
         operation = (TypeVS) source.readSerializable();
         operationVS = (OperationVS) source.readParcelable(OperationVS.class.getClassLoader());
         statusCode = (Integer) source.readValue(Integer.class.getClassLoader());
@@ -110,6 +119,7 @@ public class WebSocketMessage implements Parcelable {
     }
 
     @Override public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeSerializable(typeVS);
         parcel.writeSerializable(operation);
         parcel.writeParcelable(operationVS, flags);
         parcel.writeValue(statusCode);
@@ -127,6 +137,10 @@ public class WebSocketMessage implements Parcelable {
             if(aesParams != null) parcel.writeValue(aesParams.toJSON().toString());
             else parcel.writeValue(null);
         } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public TypeVS getTypeVS() {
+        return typeVS;
     }
 
     public static WebSocketMessage load(ResponseVS responseVS) {
@@ -156,6 +170,11 @@ public class WebSocketMessage implements Parcelable {
     public JSONObject getMessageJSON() {
         return messageJSON;
     }
+
+    public JSONObject getDecryptedJSON() {
+        return decryptedJSON;
+    }
+
 
     public void setMessageJSON(JSONObject messageJSON) {
         this.messageJSON = messageJSON;
@@ -188,6 +207,7 @@ public class WebSocketMessage implements Parcelable {
             if(messageJSON.has("UUID")) UUID = messageJSON.getString("UUID");
             if(messageJSON.has("operation")) operation = TypeVS.valueOf(
                     messageJSON.getString("operation"));
+            typeVS = operation;
             if(messageJSON.has("statusCode")) setStatusCode(messageJSON.getInt("statusCode"));
             if(messageJSON.has("deviceId") && !messageJSON.isNull("deviceId"))
                 deviceId = messageJSON.getLong("deviceId");
@@ -201,8 +221,12 @@ public class WebSocketMessage implements Parcelable {
 
     public void decryptMessage(AESParams aesParams) throws Exception {
         this.aesParams = aesParams;
-        JSONObject decryptedJSON = new JSONObject(Encryptor.decryptAES(
+        decryptedJSON = new JSONObject(Encryptor.decryptAES(
                 messageJSON.getString("encryptedMessage"), aesParams));
+        loadDecryptedJSON(decryptedJSON);
+    }
+
+    private void loadDecryptedJSON(JSONObject decryptedJSON) throws Exception {
         this.operationVS =  OperationVS.parse(decryptedJSON).setSessionId(
                 getSessionId()).setUUID(UUID);
         if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
@@ -213,6 +237,11 @@ public class WebSocketMessage implements Parcelable {
         if(decryptedJSON.has("smimeMessage")) {
             byte[] smimeMessageBytes = Base64.decode(decryptedJSON.getString("smimeMessage").getBytes());
             setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes)));
+        }
+        if(decryptedJSON.has("cooinList")) {
+            try {
+                cooinList = Wallet.getCooinListFromJSONArray(decryptedJSON.getJSONArray("cooinList"));
+            }catch(Exception ex) { ex.printStackTrace();}
         }
     }
 
@@ -326,7 +355,6 @@ public class WebSocketMessage implements Parcelable {
         }
         return responseVS;
     }
-
 
     public static JSONObject getMessageJSON(TypeVS operation, String message, Map data,
             SMIMEMessage smimeMessage, String UUID, Context context) throws IOException,

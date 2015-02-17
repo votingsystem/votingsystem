@@ -79,6 +79,7 @@ public abstract class ActivityBase extends ActionBarActivity {
     protected static final int NAVDRAWER_ITEM_QR_CODES          = 5;
     protected static final int NAVDRAWER_ITEM_SETTINGS          = 6;
     protected static final int NAVDRAWER_ITEM_CONTACTS          = 7;
+    protected static final int NAVDRAWER_ITEM_MESSAGES          = 8;
     protected static final int NAVDRAWER_ITEM_INVALID           = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR         = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
@@ -92,7 +93,8 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.string.wallet_lbl,
             R.string.qr_codes_lbl,
             R.string.navdrawer_item_settings,
-            R.string.contacts_lbl
+            R.string.contacts_lbl,
+            R.string.messages_lbl
     };
 
     // icons for navdrawer items (indices must correspond to above array)
@@ -104,7 +106,8 @@ public abstract class ActivityBase extends ActionBarActivity {
             R.drawable.fa_money_32,
             R.drawable.fa_qrcode_32,
             R.drawable.ic_drawer_settings,
-            R.drawable.fa_user_32
+            R.drawable.fa_user_32,
+            R.drawable.fa_comments_32,
     };
 
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
@@ -260,6 +263,7 @@ public abstract class ActivityBase extends ActionBarActivity {
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR_SPECIAL);
         mNavDrawerItems.add(NAVDRAWER_ITEM_QR_CODES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_RECEIPTS);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_MESSAGES);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
         createNavDrawerItems();
@@ -405,6 +409,11 @@ public abstract class ActivityBase extends ActionBarActivity {
                 break;
             case NAVDRAWER_ITEM_RECEIPTS:
                 intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case NAVDRAWER_ITEM_MESSAGES:
+                intent = new Intent(getBaseContext(), MessagesMainActivity.class);
                 startActivity(intent);
                 finish();
                 break;

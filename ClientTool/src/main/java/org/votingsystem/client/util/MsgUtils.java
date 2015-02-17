@@ -3,6 +3,7 @@ package org.votingsystem.client.util;
 import org.apache.log4j.Logger;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TagVS;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -38,4 +39,10 @@ public class MsgUtils {
         else return message.length() > 300 ? message.substring(0, 300) + "..." : message;
     }
 
+
+    public static String getTagDescription(String tagName) {
+        if(TagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
+        else return tagName;
+
+    }
 }

@@ -23,6 +23,7 @@
 
     <color name="bkg_vs">#ba0011</color>
     <color name="frg_vs">#fefefe</color>
+    <color name="white">#fff</color>
     <color name="bkg_screen_vs">#eeeeee</color>
     <color name="msg_content_vs">#888</color>
     <color name="theme_accent_2">#e91e63</color>

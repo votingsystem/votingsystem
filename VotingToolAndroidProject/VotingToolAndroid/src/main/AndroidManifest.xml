@@ -118,22 +118,21 @@
 
         <activity android:name=".activity.RepresentativesMainActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.RepresentativePagerActivity"
-            android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.RepresentativePagerActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.ReceiptsMainActivity"
-            android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.ReceiptsMainActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.ReceiptPagerActivity"
-            android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.MessagesMainActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.SettingsActivity"
-            android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.MessagesPagerActivity" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.ReceiptPagerActivity" android:theme="@style/ThemeVS"/>
+
+        <activity android:name=".activity.SettingsActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name=".activity.SMIMESignerActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name=".activity.TransactionVSPagerActivity"
-            android:theme="@style/ThemeVS"/>
+        <activity android:name=".activity.TransactionVSPagerActivity" android:theme="@style/ThemeVS"/>
 
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
@@ -151,6 +150,9 @@
 
         <provider android:name=".contentprovider.ReceiptContentProvider"
             android:exported="false" android:authorities="votingsystem.org.receipt"/>
+
+        <provider android:name=".contentprovider.MessageContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.messagevs"/>
 
         <provider android:name=".contentprovider.TransactionVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.transactionVS"/>

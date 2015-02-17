@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,10 +10,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;

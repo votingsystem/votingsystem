@@ -1,5 +1,5 @@
 .main-pane {
-    -fx-pref-width: 450px;
+    -fx-pref-width: 600px;
     -fx-background-color: #fff;
     -fx-padding: 10;
 }
@@ -9,23 +9,31 @@
     -fx-font-weight: bold;
 }
 
+.currency-pane {
+    -fx-border-color: #888;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-padding: 10;
+}
+
 .tag {
     -fx-font-size: 1.1em;
-    -fx-text-fill: #888;
+    -fx-text-fill: #151;
     -fx-font-weight: bold;
 }
 
 .amount {
-    -fx-text-fill: #888;
+    -fx-text-fill: #151;
     -fx-font-size: 1.1em;
 }
 
 .cooinPane {
     -fx-pref-width: 100px;
-    -fx-padding: 5;
+
+    -fx-padding: 4;
     -fx-spacing: 10;
     -fx-alignment: center;
-    -fx-font-size: 16;
+    -fx-font-size: 15;
     -fx-font-weight: bold;
     -fx-border-color: #61a753;
     -fx-border-width: 1;

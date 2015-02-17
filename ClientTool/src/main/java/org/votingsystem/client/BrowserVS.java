@@ -22,7 +22,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 
-import java.awt.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;

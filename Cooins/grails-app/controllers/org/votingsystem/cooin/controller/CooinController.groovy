@@ -66,7 +66,6 @@ class CooinController {
     def wallet() {}
 
     def state() {
-        log.debug("========= $params")
         if (params.hashCertVSHex) {
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashCertVSHex))

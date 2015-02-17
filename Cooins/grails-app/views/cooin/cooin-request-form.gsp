@@ -90,14 +90,6 @@
             </div>
 
             <div horizontal layout style="margin: 20px auto;width: 600px;">
-                <div>
-                    <div style="color: #ff0000; font-size: 2.5em;"></div>
-
-                    <div class="linkVS" on-click="{{showWallet}}" style=" font-size: 1.2em;">
-                        <i class="fa fa-money"></i> <g:message code="cooinWalletLbl"/>
-                    </div>
-                </div>
-
                 <div flex></div>
                 <paper-fab mini icon="done" class="green" on-click="{{submit}}"></paper-fab>
             </div>

@@ -345,9 +345,12 @@ public class ContactsGridFragment extends Fragment
     public class ContactsFetcher extends AsyncTask<String, String, ResponseVS> {
 
         private String phone, email;
+
         public ContactsFetcher(UserVS userVS) {
-            this.phone = userVS.getPhone();
-            this.email = userVS.getEmail();
+            if(userVS != null) {
+                this.phone = userVS.getPhone();
+                this.email = userVS.getEmail();
+            }
         }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }

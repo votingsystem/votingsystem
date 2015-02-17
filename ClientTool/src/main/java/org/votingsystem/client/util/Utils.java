@@ -233,14 +233,8 @@ public class Utils {
         return outputZip;
     }
 
-    public static String getTagDescription(String tagName) {
-        if(TagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
-        else return tagName;
-
-    }
-
     public static String getTagForDescription(String tagName) {
-        return ContextVS.getMessage("forLbl") + " " + getTagDescription(tagName);
+        return ContextVS.getMessage("forLbl") + " " + MsgUtils.getTagDescription(tagName);
     }
 
     public static void saveReceiptAnonymousDelegation(OperationVS operation, WebKitHost webKitHost) throws Exception{

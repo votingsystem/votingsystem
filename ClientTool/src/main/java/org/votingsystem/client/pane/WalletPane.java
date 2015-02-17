@@ -1,13 +1,11 @@
 package org.votingsystem.client.pane;
 
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -18,10 +16,10 @@ import javafx.stage.Window;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.util.ResizeHelper;
+import org.votingsystem.client.dialog.UserDeviceSelectorDialog;
+import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
@@ -30,7 +28,6 @@ import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.Wallet;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
@@ -39,11 +36,12 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletPane extends VBox {
+public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(WalletPane.class);
 
     private static Stage stage;
+    private MenuButton menuButton;
     private Map<String, Set<JSONObject>> currencyMap;
 
     public WalletPane(JSONArray walletJSON) {
@@ -51,6 +49,11 @@ public class WalletPane extends VBox {
         getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
         currencyMap = new HashMap<>();
+        menuButton = new MenuButton();
+        MenuItem changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
+        changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
+                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), WalletPane.this));;
+
         for(int i = 0; i < walletJSON.size(); i++) {
             JSONObject cooin = (JSONObject) walletJSON.get(i);
             String currencyCode = cooin.getString("currencyCode");
@@ -70,12 +73,13 @@ public class WalletPane extends VBox {
                 if(tagMap.containsKey(tag)) tagMap.get(tag).add(cooin);
                 else tagMap.put(tag, new HashSet<>(Arrays.asList(cooin)));
             }
+            currencyPane.getChildren().add(currencyLbl);
             for(String tag: tagMap.keySet()) {
                 Set<JSONObject> cooinTagSet = tagMap.get(tag);
                 Integer tagAmount = cooinTagSet.stream().mapToInt(cooin -> cooin.getInt("cooinValue")).sum();
                 Label tagLbl = new Label();
                 tagLbl.getStyleClass().add("tag");
-                tagLbl.setText(tag);
+                tagLbl.setText(MsgUtils.getTagDescription(tag));
                 Label amountLbl = new Label();
                 amountLbl.getStyleClass().add("amount");
                 amountLbl.setText(tagAmount.toString() + " " + currencyCode);
@@ -86,6 +90,7 @@ public class WalletPane extends VBox {
                 FlowPane tagFlowPane = new FlowPane();
                 tagFlowPane.setHgap(10);
                 tagFlowPane.setVgap(10);
+                tagFlowPane.setAlignment(Pos.CENTER);
                 for(JSONObject cooin: cooinTagSet) {
                     HBox cooinHBox = new HBox();
                     cooinHBox.setOnMouseClicked(mouseEvent -> CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((
@@ -97,11 +102,12 @@ public class WalletPane extends VBox {
                     cooinHBox.getChildren().add(cooinValueLbl);
                     tagFlowPane.getChildren().add(cooinHBox);
                 }
-                currencyPane.getChildren().addAll(currencyLbl, tagInfoBox, tagFlowPane);
-                getChildren().add(currencyPane);
+                currencyPane.getChildren().addAll(tagInfoBox, tagFlowPane);
             }
+            getChildren().add(currencyPane);
         }
     }
+
 
     public static void showDialog(Window owner) {
         Platform.runLater(new Runnable() {
@@ -121,7 +127,7 @@ public class WalletPane extends VBox {
                                 log.error(ex.getMessage(), ex);
                                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                             }
-                        }
+                        } else return;
                     }
                     WalletPane walletPane = new WalletPane(walletJSON);
                     if (stage == null) {
@@ -142,4 +148,7 @@ public class WalletPane extends VBox {
         });
     }
 
+    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
+
+    }
 }

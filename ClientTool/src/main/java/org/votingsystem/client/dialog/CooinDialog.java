@@ -22,6 +22,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.util.DocumentVS;
+import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
@@ -136,7 +137,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         cooinHashLbl.setText(cooin.getHashCertVS());
         cooinValueLbl.setText(cooin.getAmount().toPlainString());
         currencyLbl.setText(cooin.getCurrencyCode());
-        cooinTagLbl.setText(Utils.getTagDescription(cooin.getCertTagVS()));
+        cooinTagLbl.setText(MsgUtils.getTagDescription(cooin.getCertTagVS()));
         menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"));

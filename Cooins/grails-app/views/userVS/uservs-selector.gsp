@@ -9,7 +9,7 @@
         <g:include view="/include/styles.gsp"/>
         <style>
             .card {
-                position: relative; display: inline-block; width: 280px; vertical-align: top;
+                position: relative; display:inline-block; width: 300px; vertical-align: top;
                 background-color: #f9f9f9; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
                 border: 1px solid rgba(0, 0, 0, 0.24); margin: 10px; color: #667; cursor: pointer; padding: 5px;
             }
@@ -41,23 +41,25 @@
                     </paper-button>
                 </div>
             </div>
-            <div hidden="{{{userVSList.length === 0}}" layout flex horizontal wrap around-justified>
-                <template repeat="{{uservs in userVSList}}">
-                    <div horizontal layout  class="card" on-click="{{showUserDetails}}">
-                        <div layout flex vertical center-justified>
-                            <div class="name">{{uservs.name}}</div>
-                            <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
-                        </div>
-                        <div>
-                            <div style="display:{{uservs|isContactButtonVisible}}">
-                                <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
-                                    {{modeSearch? '<g:message code="addContactLbl"/>':'<g:message code="removeContactLbl"/>'}}
-                                </paper-button>
+            <div hidden?="{{userVSList.length === 0}}" style="display: block;">
+                <div layout flex horizontal wrap around-justified >
+                    <template repeat="{{uservs in userVSList}}">
+                        <div horizontal layout  class="card" on-click="{{showUserDetails}}">
+                            <div layout flex vertical center-justified>
+                                <div class="name">{{uservs.name}}</div>
+                                <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
                             </div>
-                            <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
+                            <div>
+                                <div style="display:{{uservs|isContactButtonVisible}}">
+                                    <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
+                                        {{modeSearch? '<g:message code="addContactLbl"/>':'<g:message code="removeContactLbl"/>'}}
+                                    </paper-button>
+                                </div>
+                                <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
             <div hidden?="{{responseData.userVSList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 <g:message code="emptyUserSearchResultMsg"/>

@@ -79,8 +79,8 @@ class TransactionVSUtils {
             result = result.add(new BigDecimal(balancesTo[currencyCode][tagName].timeLimited))
         if(balancesFrom[currencyCode] && balancesFrom[currencyCode][tagName])
             result = result.subtract(new BigDecimal(balancesFrom[currencyCode][tagName]))
-        if(result.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Negative period balance for tag '$tagName' " +
-                "'$currencyCode': ${result.toString()} ")
+        if(result.compareTo(BigDecimal.ZERO) < 0 && !TagVS.WILDTAG.equals(tagName)) throw new ExceptionVS(
+                "Negative period balance for tag '$tagName' '$currencyCode': ${result.toString()} ")
         return result;
     }
 }

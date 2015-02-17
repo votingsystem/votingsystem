@@ -11,6 +11,7 @@ import org.votingsystem.cooin.util.WebViewWrapper
 import org.votingsystem.cooin.websocket.SessionVSManager
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 
 /**
@@ -36,6 +37,15 @@ class TestingController {
     def spa() {}
 
     def appRouter() {
+    }
+
+    def initWeek() {
+        UserVS userVS
+        UserVS.withTransaction {
+            userVS = UserVS.get(2L)
+        }
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()))
+        balanceService.initUserVSWeekPeriod(userVS, timePeriod, "TestingController")
     }
 
     def index() {
