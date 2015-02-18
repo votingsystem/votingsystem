@@ -166,7 +166,7 @@ public class MessagesGridFragment extends Fragment implements
                     switch(typeVS) {
                         case MESSAGEVS:
                             logoId = R.drawable.fa_comment_32;
-                            messageSubject = getString(R.string.message_lbl);
+                            messageSubject = socketMessage.getFrom();
                             break;
                         case COOIN_WALLET_CHANGE:
                             logoId = R.drawable.fa_money_32;

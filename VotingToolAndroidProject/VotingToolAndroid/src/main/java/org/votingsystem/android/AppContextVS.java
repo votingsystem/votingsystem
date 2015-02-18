@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.json.JSONObject;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.activity.MessagesMainActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;
@@ -88,6 +89,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private AtomicInteger notificationId = new AtomicInteger(1);
+    Integer NEW_MESSAGE_NOTIFICATION_ID = 1000000000;
 
     @Override public void onCreate() {
         try {
@@ -142,6 +144,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public void finish() {
+        LOGD(TAG, "finish");
         stopService(new Intent(getApplicationContext(), WebSocketService.class));
         HttpHelper.shutdown();
         UIUtils.killApp(true);
@@ -356,6 +359,20 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             builder.setSmallIcon(R.drawable.fa_check_32);
         else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
         mgr.notify(notificationId.getAndIncrement(), builder.build());
+    }
+
+    public void showNewMessageNotification(){
+        final NotificationManager mgr = (NotificationManager)this.getSystemService(NOTIFICATION_SERVICE);
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Intent clickIntent = new Intent(this, MessagesMainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                notificationId.getAndIncrement(), clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
+                .setAutoCancel(true).setContentTitle(getString(R.string.message_lbl))
+                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
+                .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
+        mgr.notify(NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
     public void broadcastResponse(ResponseVS responseVS, ArgVS... args ) {

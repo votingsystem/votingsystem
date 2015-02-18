@@ -1,6 +1,5 @@
 package org.votingsystem.android.fragment;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,14 +16,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
+import java.util.Date;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -37,6 +42,7 @@ public class MessageFragment extends Fragment {
 
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
+    private MessageContentProvider.State messageState;
     private Long messageId;
     private String broadCastId;
     TextView message_content;
@@ -74,6 +80,10 @@ public class MessageFragment extends Fragment {
         Cursor cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
+        Long createdMillis = cursor.getLong(cursor.getColumnIndex(
+                MessageContentProvider.TIMESTAMP_CREATED_COL));
+        String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
+        ((TextView)rootView.findViewById(R.id.date)).setText(dateInfoStr);
         try {
             JSONObject decryptedJSON = new JSONObject(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.JSON_COL)));
@@ -83,20 +93,16 @@ public class MessageFragment extends Fragment {
                     MessageContentProvider.TYPE_COL)));
             switch (typeVS) {
                 case MESSAGEVS:
-                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.message_lbl));
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.message_lbl) +
+                            " - " + socketMessage.getFrom());
                     message_content.setText(socketMessage.getMessage());
                     break;
                 case COOIN_WALLET_CHANGE:
                     ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_change_lbl));
                     break;
             }
-            MessageContentProvider.State state =  MessageContentProvider.State.valueOf(cursor.getString(
+            messageState =  MessageContentProvider.State.valueOf(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.STATE_COL)));
-            if(state == MessageContentProvider.State.NOT_READED) {
-                getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
-                        messageId), MessageContentProvider.getContentValues(socketMessage,
-                        MessageContentProvider.State.READED), null, null);
-            }
         } catch(Exception ex) { ex.printStackTrace(); }
         broadCastId = MessageFragment.class.getSimpleName() + "_" + cursorPosition;
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
@@ -105,6 +111,19 @@ public class MessageFragment extends Fragment {
                 " - arguments: " + getArguments());
         setHasOptionsMenu(true);
         return rootView;
+    }
+
+    @Override public void setUserVisibleHint(boolean isVisibleToUser) {
+        LOGD(TAG + ".setUserVisibleHint", "setUserVisibleHint: " + isVisibleToUser);
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            if(messageState == MessageContentProvider.State.NOT_READED) {
+                PrefUtils.addNumMessagesNotReaded(contextVS, -1);
+                getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
+                        messageId), MessageContentProvider.getContentValues(socketMessage,
+                        MessageContentProvider.State.READED), null, null);
+            }
+        }
     }
 
     @Override public void onPause() {

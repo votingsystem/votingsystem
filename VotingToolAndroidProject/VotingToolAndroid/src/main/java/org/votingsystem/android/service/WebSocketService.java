@@ -262,7 +262,8 @@ public class WebSocketService extends Service {
                         responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        contextVS.showNotification(responseVS);
+                        PrefUtils.addNumMessagesNotReaded(contextVS, 1);
+                        contextVS.showNewMessageNotification();
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:

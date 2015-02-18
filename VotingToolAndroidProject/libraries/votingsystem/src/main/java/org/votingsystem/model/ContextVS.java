@@ -75,6 +75,7 @@ public class ContextVS {
     public static final String COOIN_SERVER_URL = "COOIN_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String NUM_MESSAGES_KEY = "NUM_MESSAGES_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
     public static final String HASH_VALIDATION_KEY = "HASH_VALIDATION_KEY";

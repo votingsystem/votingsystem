@@ -15,7 +15,7 @@
                     <div layout horizontal center center-justified>
                         <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                             <div style="text-align: center;">
-                                <g:message code="sendEncryptedMessageSubject"/>
+                                <g:message code="sendMessageLbl"/>
                             </div>
                         </div>
                         <div style="position: absolute; top: 0px; right: 0px;">

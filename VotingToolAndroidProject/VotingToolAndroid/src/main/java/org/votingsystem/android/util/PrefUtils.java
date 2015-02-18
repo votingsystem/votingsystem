@@ -43,6 +43,7 @@ public class PrefUtils {
         return TimeZone.getDefault();
     }
 
+    private static Integer numMessagesNotReaded;
     private static Representation representation;
     private static AnonymousDelegation anonymousDelegation;
 
@@ -275,6 +276,27 @@ public class PrefUtils {
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
+
+    public static Integer getNumMessagesNotReaded(Context context) {
+        if(numMessagesNotReaded != null) return numMessagesNotReaded;
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        numMessagesNotReaded = settings.getInt(ContextVS.NUM_MESSAGES_KEY, 0);
+        if(numMessagesNotReaded < 0) numMessagesNotReaded = 0;
+        return numMessagesNotReaded;
+    }
+
+    public static void addNumMessagesNotReaded(Context context, Integer amount) {
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        try {
+            numMessagesNotReaded = numMessagesNotReaded + amount;
+            editor.putInt(ContextVS.NUM_MESSAGES_KEY, numMessagesNotReaded);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
 
     public static AddressVS getAddressVS(Context context) throws JSONException, ParseException {
         SharedPreferences settings = context.getSharedPreferences(

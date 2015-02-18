@@ -56,6 +56,12 @@ public class MsgUtils {
         return null;
     }
 
+    public static String getMessagesDrawerItemMessage(Context context) {
+        Integer numMessagesNotreaded = PrefUtils.getNumMessagesNotReaded(context);
+        String prefix = numMessagesNotreaded == 0 ? "": numMessagesNotreaded + "  ";
+        return prefix + context.getString(R.string.messages_lbl);
+    }
+
     public static String getTagVSMessage(String tag, Context context) {
         if(TagVS.WILDTAG.equals(tag)) return context.getString(R.string.wildtag_lbl);
         else return tag;

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.ui.debug.DebugActionRunnerFragment;
+import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
@@ -51,7 +53,8 @@ import java.util.ArrayList;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
-public abstract class ActivityBase extends ActionBarActivity {
+public abstract class ActivityBase extends ActionBarActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = ActivityBase.class.getSimpleName();
 
@@ -112,7 +115,7 @@ public abstract class ActivityBase extends ActionBarActivity {
 
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<Integer>();
     private View[] mNavDrawerItemViews = null;
-
+    private TextView messageDrawerItemTextView;
 
     Thread mDataBootstrapThread = null;
 
@@ -451,9 +454,9 @@ public abstract class ActivityBase extends ActionBarActivity {
         }
     }
 
-
     @Override protected void onResume() {
         super.onResume();
+        PrefUtils.registerPreferenceChangeListener(this, this);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -466,6 +469,7 @@ public abstract class ActivityBase extends ActionBarActivity {
 
     @Override protected void onPause() {
         super.onPause();
+        PrefUtils.unregisterPreferenceChangeListener(this, this);
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
@@ -542,7 +546,10 @@ public abstract class ActivityBase extends ActionBarActivity {
                 NAVDRAWER_TITLE_RES_ID[itemId] : 0;
         iconView.setVisibility(iconId > 0 ? View.VISIBLE : View.GONE);
         if (iconId > 0)  iconView.setImageResource(iconId);
-        titleView.setText(getString(titleId));
+        if (itemId == NAVDRAWER_ITEM_MESSAGES) {
+            messageDrawerItemTextView = titleView;
+            titleView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+        } else  titleView.setText(getString(titleId));
         formatNavDrawerItem(view, itemId, selected);
         view.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -624,4 +631,10 @@ public abstract class ActivityBase extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(ContextVS.NUM_MESSAGES_KEY.equals(key)) {
+            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+        }
+    }
 }
