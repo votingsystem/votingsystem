@@ -21,6 +21,9 @@
     <color name="pending_vs">#fba131</color>
     <color name="link_vs">#00b0ff</color>
 
+    <color name="cooin_value">#388746</color>
+    <color name="cooin_date_info">#61a753</color>
+
     <color name="bkg_vs">#ba0011</color>
     <color name="frg_vs">#fefefe</color>
     <color name="white">#fff</color>

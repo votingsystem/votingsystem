@@ -2,6 +2,7 @@ package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -31,7 +32,6 @@ class VoteVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
-		String msg
         VoteVS voteVS = messageSMIMEReq.getSMIME().getVoteVS()
         FieldEventVS optionSelected = FieldEventVS.findWhere(eventVS:eventVS,
                 accessControlFieldEventId:voteVS.getOptionSelected().getId())
@@ -50,16 +50,13 @@ class VoteVSService {
         String fromUser = grailsApplication.config.vs.serverName
         String toUser = eventVS.accessControlVS.name
         String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
-        messageSMIMEReq.getSMIME().setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
-
         SMIMEMessage smimeVoteValidation = signatureVSService.getSMIMEMultiSigned(
                 fromUser, toUser, messageSMIMEReq.getSMIME(), subject)
-        messageSMIMEReq.setType(TypeVS.CONTROL_CENTER_VALIDATED_VOTE).setSMIME(smimeVoteValidation).save()
         //byte[] encryptResponseBytes = encryptResponse.messageBytes
         //String encryptResponseStr = new String(encryptResponseBytes)
         //log.debug(" - encryptResponseStr: ${encryptResponseStr}")
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageSMIMEReq.content,
-                ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeVoteValidation.getBytes(), ContentTypeVS.VOTE,
+                eventVS.accessControlVS.getVoteServiceURL())
         if (ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS(messageSource.getMessage(
                 'accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale))
         //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIME(responseVS.messageBytes)
@@ -77,20 +74,19 @@ class VoteVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS, message:responseVS.message)
         }
+        smimeMessageResp.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
         messageSMIMEReq.setSMIME(smimeMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).save()
-
         new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
                 certificateVS:certificateVS, messageSMIME:messageSMIMEReq).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
                 eventVS:eventVS, contentType: ContentTypeVS.VOTE, messageSMIME: messageSMIMEReq,
-                url:"${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${messageSMIMEReq.id}" )
+                url:smimeMessageResp.getMessageID() )
 	}
 	
 	public synchronized ResponseVS processCancel (MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug(methodName);
 		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSMIME()
-        def cancelDataJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        JSONObject cancelDataJSON = JSON.parse(smimeMessageReq.getSignedContent())
         def originHashCertVote = cancelDataJSON.originHashCertVote
         def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
         def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST)

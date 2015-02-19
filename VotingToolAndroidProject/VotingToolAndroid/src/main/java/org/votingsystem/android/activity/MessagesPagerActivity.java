@@ -19,7 +19,7 @@ import org.votingsystem.model.ContextVS;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
- * @author jgzornoza
+ * @author jgzornozahttps://www.google.es/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=...%20sabeis%20que%20si%20hacen%20eso%20es%20porque%20no%20tienen%20absolutamente%20nada%20que%20merezca%20la%20pena
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class MessagesPagerActivity extends ActionBarActivity {

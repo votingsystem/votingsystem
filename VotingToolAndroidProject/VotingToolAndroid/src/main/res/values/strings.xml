@@ -407,7 +407,7 @@
     <string name="cooin_accounts_lbl">cuentas</string>
     <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
-    <string name="cooin_date_info">válido desde \'%1$s\' hasta \'%2$s\'</string>
+    <string name="cooin_date_info">emitido: \'%1$s\'   caduca: \'%2$s\'</string>
     <string name="cancelled_lbl">cancelado</string>
     <string name="expended_lbl">consumido</string>
     <string name="lapsed_lbl">caducado</string>

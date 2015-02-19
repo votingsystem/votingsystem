@@ -45,7 +45,8 @@ public class MessageFragment extends Fragment {
     private MessageContentProvider.State messageState;
     private Long messageId;
     private String broadCastId;
-    TextView message_content;
+    private boolean isVisibleToUser = false;
+    private Cursor cursor;
 
     public static Fragment newInstance(int cursorPosition) {
         MessageFragment fragment = new MessageFragment();
@@ -75,9 +76,9 @@ public class MessageFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
-        message_content = (TextView)rootView.findViewById(R.id.message_content);
+        TextView message_content = (TextView)rootView.findViewById(R.id.message_content);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        Cursor cursor = getActivity().getContentResolver().query(
+        cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         Long createdMillis = cursor.getLong(cursor.getColumnIndex(
@@ -108,26 +109,29 @@ public class MessageFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
-                " - arguments: " + getArguments());
+                " - arguments: " + getArguments() + " - isVisibleToUser: " + isVisibleToUser);
+        if (isVisibleToUser) {
+            if(messageState == MessageContentProvider.State.NOT_READED) {
+                getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
+                        messageId), MessageContentProvider.getContentValues(socketMessage,
+                        MessageContentProvider.State.READED), null, null);
+                PrefUtils.addNumMessagesNotReaded(contextVS, -1);
+            }
+        }
         setHasOptionsMenu(true);
         return rootView;
     }
 
     @Override public void setUserVisibleHint(boolean isVisibleToUser) {
-        LOGD(TAG + ".setUserVisibleHint", "setUserVisibleHint: " + isVisibleToUser);
+        LOGD(TAG + ".setUserVisibleHint", "setUserVisibleHint: " + isVisibleToUser +
+                " - messageState: " + messageState);
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            if(messageState == MessageContentProvider.State.NOT_READED) {
-                PrefUtils.addNumMessagesNotReaded(contextVS, -1);
-                getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
-                        messageId), MessageContentProvider.getContentValues(socketMessage,
-                        MessageContentProvider.State.READED), null, null);
-            }
-        }
+        this.isVisibleToUser = isVisibleToUser;
     }
 
     @Override public void onPause() {
         super.onPause();
+        if(cursor != null && !cursor.isClosed()) cursor.close();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 

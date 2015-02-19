@@ -75,7 +75,14 @@ class SubscriptionVSService {
                 } else deviceVS.updateCertInfo(deviceData).save()
             }
             log.debug "$methodName - new certificate with id: '${certificate.id}'"
-        } else if(deviceData?.deviceId) deviceVS = DeviceVS.findWhere(deviceId:deviceData.deviceId)
+        } else if(deviceData?.deviceId) {
+            deviceVS = DeviceVS.findWhere(deviceId:deviceData.deviceId)
+            if(!deviceVS) {
+                deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
+                        phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
+                log.debug "$methodName - new device with id '${deviceVS.id}'"
+            }
+        }
         userVS.setCertificateVS(certificate)
         userVS.setDeviceVS(deviceVS)
         return certificate

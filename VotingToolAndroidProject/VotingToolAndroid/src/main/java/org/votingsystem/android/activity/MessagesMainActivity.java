@@ -1,5 +1,6 @@
 package org.votingsystem.android.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -7,6 +8,8 @@ import android.view.MenuItem;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessagesGridFragment;
+import org.votingsystem.android.util.MsgUtils;
+import org.votingsystem.model.ContextVS;
 
 import java.lang.ref.WeakReference;
 

@@ -360,11 +360,12 @@ public class Utils {
                         SessionService.getInstance().setUserVS(userVS, false);
                         JSONObject userDataJSON = userVS.toJSON();
                         userDataJSON.put("statusCode", ResponseVS.SC_OK);
-                        webKitHost.sendMessageToBrowser(userDataJSON, operationVS.getCallerCallback());
+                        if(operationVS != null) webKitHost.sendMessageToBrowser(
+                                userDataJSON, operationVS.getCallerCallback());
                     } catch(Exception ex) {
                         log.error(ex.getMessage(), ex);
-                        webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
-                                operationVS.getCallerCallback());
+                        if(operationVS != null) webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR,
+                                ex.getMessage()), operationVS.getCallerCallback());
                     }
 
                 }

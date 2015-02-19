@@ -6,8 +6,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.*;
@@ -27,11 +29,13 @@ public class ProgressDialog extends VBox {
 
     public ProgressDialog(Task<ResponseVS> progressTask) {
         setAlignment(Pos.CENTER);
-        setPrefWidth(300);
-        Text progressMessageText = new Text();
-        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #555;");
+        Label progressMessageLbl = new Label();
+        progressMessageLbl.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #888;-fx-wrap-text: true;");
+        progressMessageLbl.setWrapText(true);
+        VBox.setVgrow(progressMessageLbl, Priority.ALWAYS);
         ProgressBar progressBar = new ProgressBar();
-        progressBar.setPrefWidth(200);
+        progressBar.setPrefWidth(350);
+        setPrefHeight(200);
         progressBar.setLayoutY(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> {
@@ -41,10 +45,10 @@ public class ProgressDialog extends VBox {
         cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonBox = new HBox();
         footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
-        setMargin(footerButtonBox, new Insets(30, 20, 0, 10));
-        setMargin(progressMessageText, new Insets(0, 0, 10, 0));
-        getChildren().addAll(progressMessageText, progressBar, footerButtonBox);
-        progressMessageText.textProperty().bind(progressTask.messageProperty());
+        setMargin(footerButtonBox, new Insets(20, 20, 0, 10));
+        setMargin(progressMessageLbl, new Insets(0, 0, 10, 0));
+        getChildren().addAll(progressMessageLbl, progressBar, footerButtonBox);
+        progressMessageLbl.textProperty().bind(progressTask.messageProperty());
         progressBar.progressProperty().bind(progressTask.progressProperty());
         this.visibleProperty().bind(progressTask.runningProperty());
         progressTask.setOnSucceeded(workerStateEvent -> ProgressDialog.this.getScene().getWindow().hide());

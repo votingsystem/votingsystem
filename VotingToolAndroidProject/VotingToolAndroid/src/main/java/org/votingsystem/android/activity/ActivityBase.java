@@ -631,10 +631,14 @@ public abstract class ActivityBase extends ActionBarActivity implements
         }
     }
 
+    public void updateMessageDrawerDrawerItemText() {
+        messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(ContextVS.NUM_MESSAGES_KEY.equals(key)) {
-            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(contextVS));
         }
     }
 }

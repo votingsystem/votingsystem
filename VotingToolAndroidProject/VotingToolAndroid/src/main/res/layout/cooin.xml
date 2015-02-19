@@ -29,13 +29,13 @@
                 <TextView android:id="@+id/cooin_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/event_subject"
+                    android:textColor="@color/cooin_value"
                     android:textStyle="bold"
                     android:textSize="28sp"/>
                 <TextView android:id="@+id/cooin_currency"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/event_subject"
+                    android:textColor="@color/cooin_value"
                     android:paddingLeft="10dp"
                     android:textStyle="bold"
                     android:textSize="28sp"/>
@@ -44,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/dialog_caption"
+                android:textColor="@color/cooin_value"
                 android:paddingTop="5dp"
                 android:paddingBottom="15dp"
                 android:text="para gastos libres"
@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/event_subject"
+                android:textColor="@color/cooin_date_info"
                 android:text="valido desde 11 nov 2192 12:12 hasta 23 dic 2133 13:34"
                 android:textSize="12sp"/>
         </LinearLayout>

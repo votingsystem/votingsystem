@@ -30,10 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
@@ -357,6 +354,13 @@ public class SessionService {
             }
         }
 
+    }
+
+    public Map getConnectDataMap() {
+        if(getUserVS() == null) return null;
+        Map<String, String> result = new HashMap<>();
+        result.put("nif", getUserVS().getNif());
+        return result;
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,

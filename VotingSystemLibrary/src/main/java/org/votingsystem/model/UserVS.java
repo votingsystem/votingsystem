@@ -405,6 +405,11 @@ public class UserVS implements Serializable {
         this.deviceVS = deviceVS;
     }
 
+    public String getFullName() {
+        if(firstName == null) return name;
+        else return name + " " + firstName;
+    }
+
     public static UserVS getUserVS (String subjectDN) {
         UserVS userVS = new UserVS();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);

@@ -22,6 +22,7 @@
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="fill_parent"
+            android:padding="4dp"
             android:layout_marginLeft="2dp"
             android:orientation="horizontal">
             <TextView

@@ -80,7 +80,6 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     private MenuItem sendMenuItem;
     private MenuItem changeWalletMenuItem;
-    private MenuItem deleteMenuItem;
 
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
@@ -120,13 +119,6 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         sendMenuItem = new MenuItem("");
         sendMenuItem.setOnAction(actionEvent -> JSONFormDialog.show(
                 new Cooin.TransactionVSData("", "", "", true).getJSON(), CooinDialog.this));
-        deleteMenuItem = new MenuItem(ContextVS.getMessage("deleteLbl"));
-        deleteMenuItem.setOnAction(actionEvent -> {
-                OperationVS operationVS = new OperationVS(TypeVS.COOIN_DELETE);
-                operationVS.setMessage(cooin.getHashCertVS());
-                BrowserVS.getInstance().processOperationVS(operationVS, null);
-                stage.setY(100);
-            });
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
         saveMenuItem.setOnAction(actionEvent -> System.out.println("saveMenuItem"));
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
@@ -143,7 +135,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                 DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +
                 DateUtils.getDateStr(cooin.getValidTo(), "dd MMM yyyy' 'HH:mm"));
-        menuButton.getItems().addAll(sendMenuItem, deleteMenuItem, changeWalletMenuItem);
+        menuButton.getItems().addAll(sendMenuItem, changeWalletMenuItem);
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCooinServer().getTrustAnchors(), false, Arrays.asList(

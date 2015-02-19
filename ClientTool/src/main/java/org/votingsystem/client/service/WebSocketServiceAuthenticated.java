@@ -14,7 +14,9 @@ import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.*;
@@ -105,6 +107,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
             SessionService.getInstance().setIsConnected(false);
+            NotificationService.getInstance().postToEventBus(new ResponseVS(TypeVS.DISCONNECT));
         }
 
         @OnMessage public void onMessage(String message) {
@@ -128,7 +131,16 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         }
     }
 
+    private void connect(Map connectionDataMap, String password) {
+        ProgressDialog.showDialog(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
+                password, targetServer), ContextVS.getMessage("connectLbl"), BrowserVS.getInstance().getScene().getWindow());
+    }
+
     public void setConnectionEnabled(boolean isConnectionEnabled, Map connectionDataMap){
+        if(SessionService.getInstance().getUserVS() == null) {
+            CertNotFoundDialog.show(BrowserVS.getInstance().getScene().getWindow());
+            return;
+        }
         if(isConnectionEnabled) {
             Platform.runLater(() -> {
                 if(CryptoTokenVS.MOBILE != SessionService.getCryptoTokenType()) {
@@ -139,13 +151,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                     password = passwordDialog.getPassword();
                     if(password == null) {
                         broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
-                        return;
-                    } else new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
-                            password, targetServer)).start();
+                    } else connect(connectionDataMap, password);
                 } else if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
-                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
-                    new Thread(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
-                            null, targetServer)).start();
+                    connect(connectionDataMap, null);
                 }
             });
         }
@@ -220,6 +228,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                         switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
                                 SessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
+                                NotificationService.getInstance().postToEventBus(new ResponseVS(TypeVS.INIT_VALIDATED_SESSION));
                                 break;
                             default:
                                 log.error("MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
@@ -272,6 +281,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
+                if(SessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
+                    updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
+                } else updateMessage(ContextVS.getMessage("connectionMsg"));
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getName(),
                         documentToSignJSON.toString(), password, ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
@@ -280,6 +292,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 smimeMessage = timeStamper.getSMIME();
                 connectionMessage = WebSocketMessage.getAuthenticationRequest(smimeMessage, randomUUID).toString();
                 PlatformImpl.runLater(() -> WebSocketServiceAuthenticated.this.restart());
+            } catch(InterruptedException ex) {
+                log.error(ex.getMessage(), ex);
+                broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
                 broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);

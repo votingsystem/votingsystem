@@ -85,7 +85,8 @@ public class UserDeviceSelectorDialog extends DialogVS {
                 }
             });
             if(deviceArray == null || deviceArray.isEmpty()) {
-                messageLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
+                captionLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
+                mainPane.getChildren().remove(messageLbl);
             }
             for(int i = 0; i < deviceArray.size() ; i++) {
                 JSONObject deviceData = (JSONObject) deviceArray.get(i);

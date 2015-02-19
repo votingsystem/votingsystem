@@ -1,5 +1,6 @@
 package org.votingsystem.client.util;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
@@ -12,7 +13,14 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
+import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -26,8 +34,21 @@ public class BrowserVSMenuButton extends MenuButton {
     private MenuItem selectRepresentativeMenuItem;
     private MenuItem cooinUsersProceduresMenuItem;
     private MenuItem walletMenuItem;
+    private MenuItem connectMenuItem;
+
+    class EventBusConnectionListener {
+        @Subscribe public void responseVSChange(ResponseVS responseVS) {
+            log.debug("EventBusConnectionListener - response type: " + responseVS.getType());
+            AtomicBoolean isConnected = new AtomicBoolean(false);
+            if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
+                isConnected.set(true);
+            } else if(TypeVS.DISCONNECT == responseVS.getType()) { }
+            PlatformImpl.runLater(() -> connectMenuItem.setVisible(!isConnected.get()));
+        }
+    }
 
     public BrowserVSMenuButton () {
+        NotificationService.getInstance().registerToEventBus(new EventBusConnectionListener());
         setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
         openFileMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.FOLDER_OPEN));
@@ -65,6 +86,13 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem.setVisible(false);
         walletMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.MONEY));
         walletMenuItem.setOnAction(event -> WalletPane.showDialog(BrowserVS.getInstance().getScene().getWindow()));
+
+        connectMenuItem  = new MenuItem(ContextVS.getMessage("connectLbl"));
+        connectMenuItem.setVisible(false);
+        connectMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.FLASH));
+        connectMenuItem.setOnAction(event -> WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(
+                true, SessionService.getInstance().getConnectDataMap()));
+
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
@@ -80,7 +108,7 @@ public class BrowserVSMenuButton extends MenuButton {
         adminsMenu.getItems().addAll(cooinAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                walletMenuItem, cooinUsersProceduresMenuItem, new SeparatorMenuItem(),
+                connectMenuItem, walletMenuItem, cooinUsersProceduresMenuItem, new SeparatorMenuItem(),
                 signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
@@ -96,6 +124,7 @@ public class BrowserVSMenuButton extends MenuButton {
         PlatformImpl.runLater(() -> {
             cooinUsersProceduresMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
+            connectMenuItem.setVisible(available);
         });
     }
 
