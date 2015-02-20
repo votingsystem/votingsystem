@@ -15,6 +15,7 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -29,11 +30,15 @@ public class MessageDialog extends VBox {
 
     private static Logger log = Logger.getLogger(MessageDialog.class);
 
+    private static String webViewContent = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
+            "font-family:arial, helvetica, sans-serif;border-radius: 5px;padding: 5px;'>%s</html>";
+
     private Stage stage;
     private HBox footerButtonsBox;
     private Label messageLabel;
     private Label captionLabel;
     private WebView messageWebView;
+    private Button acceptButton;
 
     public MessageDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
@@ -45,12 +50,12 @@ public class MessageDialog extends VBox {
         messageLabel.setWrapText(true);
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-        messageWebView.setPrefHeight(270);
-        //messageWebView.setPrefWidth(600);
+        messageWebView.setPrefHeight(200);
+        setPrefWidth(500);
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");
-        Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
+        acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> stage.hide());
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
 
@@ -58,9 +63,10 @@ public class MessageDialog extends VBox {
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
 
         getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
-        getStyleClass().add("modal-dialog");
+        setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;-fx-font-size: 16;" +
+                "-fx-font-weight: bold;");
         stage.setScene(new Scene(this, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
+        stage.setScene(new Scene(new DecoratedPane(null, null, this, stage)));
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
@@ -82,9 +88,7 @@ public class MessageDialog extends VBox {
     }
 
     public void showHtmlMessage(String htmlMessage, String caption) {
-        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
-                "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
-        messageWebView.getEngine().loadContent(finalHTML);
+        messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
         isHTMLView(true);
         if(caption != null) {
             if(!getChildren().contains(captionLabel)) getChildren().add(0, captionLabel);
@@ -95,13 +99,12 @@ public class MessageDialog extends VBox {
 
     public void showHtmlMessage(String htmlMessage, Button optionButton) {
         if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
-        String finalHTML = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
-                "font-family:arial, helvetica, sans-serif;'>" + htmlMessage + "</html>";
         if(optionButton != null) {
+            acceptButton.setVisible(false);
             footerButtonsBox.getChildren().add(0, optionButton);
             optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> stage.hide());
         }
-        messageWebView.getEngine().loadContent(finalHTML);
+        messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
         isHTMLView(true);
         show();
     }

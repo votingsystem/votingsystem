@@ -45,16 +45,18 @@ public class DecoratedPane extends VBox {
         toolBar.setSpacing(10);
         toolBar.setStyle("-fx-padding: 3, 20;");
         toolBar.setAlignment(Pos.TOP_RIGHT);
-        HBox captionBox = new HBox();
-        captionBox.setAlignment(Pos.CENTER);
-        HBox.setHgrow(captionBox, Priority.ALWAYS);
-        captionLbl = new Label(caption);
-        captionLbl.setStyle("-fx-font-size: 1.1em; -fx-font-weight: bold; -fx-text-fill: #888;");
-        captionBox.getChildren().add(captionLbl);
+        if(caption != null) {
+            HBox captionBox = new HBox();
+            captionBox.setAlignment(Pos.CENTER);
+            HBox.setHgrow(captionBox, Priority.ALWAYS);
+            captionLbl = new Label(caption);
+            captionLbl.setStyle("-fx-font-size: 1.1em; -fx-font-weight: bold; -fx-text-fill: #888;");
+            captionBox.getChildren().add(captionLbl);
+            toolBar.getChildren().add(captionBox);
+        }
         closeButton = new Button();
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
-        toolBar.getChildren().add(captionBox);
         if(menuButton != null) {
             menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
             toolBar.getChildren().add(menuButton);

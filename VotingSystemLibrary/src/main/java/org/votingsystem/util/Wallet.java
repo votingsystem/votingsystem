@@ -36,13 +36,27 @@ public class Wallet {
         }
     }
 
-    public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)
+    public static List<Map> getCooinSerialized(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<>();
         for(Cooin cooin : cooinCollection) {
             Map cooinDataMap = cooin.getCertSubject().getDataMap();
             cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
             cooinDataMap.put("object", ObjectUtils.serializeObjectToString(cooin));
+            result.add(cooinDataMap);
+        }
+        return result;
+    }
+
+    public static List<Map> getCooinRequestSerialized(Collection<Cooin> cooinCollection)
+            throws UnsupportedEncodingException {
+        List<Map> result = new ArrayList<Map>();
+        for(Cooin cooin : cooinCollection) {
+            Map cooinDataMap = cooin.getCertSubject().getDataMap();
+            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(
+                    cooin.getCertificationRequest());
+            cooinDataMap.put("certificationRequest",
+                    new String(serializedCertificationRequest, "UTF-8"));
             result.add(cooinDataMap);
         }
         return result;
@@ -55,10 +69,10 @@ public class Wallet {
     }
 
     public static List<Cooin> getCooinListFromPlainWallet() throws Exception {
-        return getCooinListFromJSONArray(getPlainWallet());
+        return getCooinList(getPlainWallet());
     }
 
-    public static List<Cooin> getCooinListFromJSONArray(JSONArray jsonArray) throws Exception {
+    public static List<Cooin> getCooinList(JSONArray jsonArray) throws Exception {
         List<Cooin> cooinList = new ArrayList<Cooin>();
         for(int i = 0; i < jsonArray.size(); i++) {
             byte[] serializedCooin = jsonArray.getJSONObject(i).getString("object").getBytes();
@@ -80,7 +94,7 @@ public class Wallet {
     }
 
     public static void saveToWallet(Collection<Cooin> cooinCollection, String pin) throws Exception {
-        List<Map> serializedCooinList = getSerializedCooinList(cooinCollection);
+        List<Map> serializedCooinList = getCooinSerialized(cooinCollection);
         saveToWallet(serializedCooinList, pin);
     }
 

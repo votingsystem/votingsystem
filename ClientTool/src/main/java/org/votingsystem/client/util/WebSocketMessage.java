@@ -60,6 +60,7 @@ public class WebSocketMessage {
     private AESParams aesParams;
     private SMIMEMessage smimeMessage;
     private Date date;
+    private WebSocketSession webSocketSession;
 
 
     public WebSocketMessage(JSONObject socketMsgJSON) throws ParseException, NoSuchAlgorithmException {
@@ -95,9 +96,18 @@ public class WebSocketMessage {
         }
         if(socketMsgJSON.has("cooinList")) {
             try {
-                cooinList = Wallet.getCooinListFromJSONArray(socketMsgJSON.getJSONArray("cooinList"));
+                cooinList = Wallet.getCooinList(socketMsgJSON.getJSONArray("cooinList"));
             }catch(Exception ex) {log.error(ex.getMessage(), ex);}
         }
+    }
+
+
+    public void setWebSocketSession(WebSocketSession webSocketSession) {
+        this.webSocketSession = webSocketSession;
+    }
+
+    public WebSocketSession getWebSocketSession() {
+        return webSocketSession;
     }
 
     public boolean isEncrypted() {
@@ -357,6 +367,31 @@ public class WebSocketMessage {
         return (JSONObject) JSONSerializer.toJSON(messageToDevice);
     }
 
+    public static JSONObject getCooinWalletChangeRequest(DeviceVS deviceVS, List<Cooin> cooinList) throws Exception {
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, cooinList, TypeVS.COOIN_WALLET_CHANGE);
+        Map messageToDevice = new HashMap<>();
+        messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
+        messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
+        messageToDevice.put("timeLimited", true);
+        messageToDevice.put("UUID", socketSession.getUUID());
+        messageToDevice.put("deviceToId", deviceVS.getId());
+        messageToDevice.put("deviceToName", deviceVS.getDeviceName());
+        Map encryptedDataMap =  new HashMap<>();
+        encryptedDataMap.put("operation", TypeVS.COOIN_WALLET_CHANGE.toString());
+        encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
+        encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
+        encryptedDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+        //the serialized request is with CertificationRequestVS instead of Cooins
+        List<Map> serializedCooinList = Wallet.getCooinRequestSerialized(cooinList);
+        encryptedDataMap.put("cooinList", serializedCooinList);
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+        messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
+                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
+        return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+    }
+
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("aesParams").getBytes(), privateKey);
         this.aesParams = AESParams.load((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes)));
@@ -379,12 +414,12 @@ public class WebSocketMessage {
         }
         if(decryptedJSON.has("cooinList")) {
             JSONArray cooinArray = decryptedJSON.getJSONArray("cooinList");
-            setCooinList(new ArrayList<Cooin>());
+            this.cooinList = new ArrayList<Cooin>();
             for(int i = 0; i < cooinArray.size(); i ++) {
                 JSONObject cooinJSON = (JSONObject) cooinArray.get(i);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
                         ((String) cooinJSON.get("certificationRequest")).getBytes());
-                getCooinList().add(Cooin.load(certificationRequest));
+                this.cooinList.add(Cooin.load(certificationRequest));
             }
         }
         this.isEncrypted = false;
@@ -445,7 +480,7 @@ public class WebSocketMessage {
             if(isEncrypted != null) result.put("isEncrypted", isEncrypted);
             if(cooinList != null) {
                 try {
-                    List<Map> serializedCooinList = Wallet.getSerializedCooinList(cooinList);
+                    List<Map> serializedCooinList = Wallet.getCooinSerialized(cooinList);
                     result.put("cooinList", serializedCooinList);
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }

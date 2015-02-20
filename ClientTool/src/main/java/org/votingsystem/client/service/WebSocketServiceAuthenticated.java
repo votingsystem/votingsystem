@@ -217,6 +217,8 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             if(socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
+            socketMsg.setWebSocketSession(socketSession);
+            ResponseVS responseVS = null;
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
@@ -228,12 +230,15 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                         switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
                                 SessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
-                                NotificationService.getInstance().postToEventBus(new ResponseVS(TypeVS.INIT_VALIDATED_SESSION));
                                 break;
                             default:
                                 log.error("MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
+                        responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
                     }
+                    break;
+                case MESSAGEVS_FROM_DEVICE:
+                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     SessionService.setSignResponse(socketMsg);
@@ -241,6 +246,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 default:
                     log.debug("unprocessed socketMsg: " + socketMsg.getOperation());
             }
+            if(responseVS != null) NotificationService.getInstance().postToEventBus(responseVS);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

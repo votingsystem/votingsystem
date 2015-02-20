@@ -99,7 +99,7 @@
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content></content>
         </vs-navbar>
-        <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
+        <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>
         <content id="content"></content>
@@ -126,7 +126,6 @@
             },
             sessionDataSignal:function(e, detail, sender) {
                 console.log("sessionDataSignal")
-                this.$._navbar.updateSession(null, detail)
             },
             websocketSignal:function(e, detail, sender) {
                 if("OPEN" === detail.socketStatus && "INIT_VALIDATED_SESSION" === detail.operation) {

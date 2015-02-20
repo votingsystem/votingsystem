@@ -13,6 +13,7 @@ import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -66,16 +67,17 @@ public class Wallet {
     public static List<Cooin> getCooinList(String pin, AppContextVS context) throws Exception {
         JSONArray storedWalletJSON = getWallet(pin, context);
         if(storedWalletJSON == null) cooinList = new ArrayList<Cooin>();
-        else cooinList = getCooinListFromJSONArray(storedWalletJSON);
+        else cooinList = getCooinList(storedWalletJSON);
         return new ArrayList<Cooin>(cooinList);
     }
 
-    public static List<Cooin> getCooinListFromJSONArray(JSONArray jsonArray) throws Exception {
+    public static List<Cooin> getCooinList(JSONArray jsonArray) throws Exception {
         List<Cooin> cooinList = new ArrayList<Cooin>();
         for(int i = 0; i < jsonArray.length(); i++) {
             JSONObject cooinJSON = jsonArray.getJSONObject(i);
-            byte[] serializedCooin = ((JSONObject)cooinJSON).getString("object").getBytes();
-            cooinList.add((Cooin) ObjectUtils.deSerializeObject(serializedCooin));
+            CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
+                    ((String) cooinJSON.get("certificationRequest")).getBytes());
+            cooinList.add(Cooin.load(certificationRequest));
         }
         return cooinList;
     }
@@ -86,12 +88,12 @@ public class Wallet {
         JSONArray storedWalletJSON = null;
         if(wallet == null) storedWalletJSON = new JSONArray();
         else storedWalletJSON = (JSONArray) wallet;
-        List<Map> serializedCooinList = getSerializedCooinList(newCooinList);
+        List<Map> serializedCooinList = getCooinSerialized(newCooinList);
         for(Map cooin : serializedCooinList) {
             storedWalletJSON.put(new JSONObject(cooin));
         }
         Wallet.saveWallet(storedWalletJSON, pin, context);
-        cooinList = getCooinListFromJSONArray(storedWalletJSON);
+        cooinList = getCooinList(storedWalletJSON);
     }
 
     public static void removeCooinList(
@@ -105,7 +107,7 @@ public class Wallet {
                     "removed cooin: " + cooin.getHashCertVS());
         }
         cooinList = new ArrayList<>(cooinMap.values());
-        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
+        Wallet.saveWallet(new JSONArray(getCooinSerialized(cooinList)), null, context);
     }
 
 
@@ -118,7 +120,7 @@ public class Wallet {
         if((expendedCooin = cooinMap.remove(hashCertVS)) != null)  LOGD(TAG +  ".removeCooinList",
                 "removed cooin: " + hashCertVS);
         cooinList = new ArrayList<>(cooinMap.values());
-        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, context);
+        Wallet.saveWallet(new JSONArray(getCooinSerialized(cooinList)), null, context);
         return expendedCooin;
     }
 
@@ -137,7 +139,7 @@ public class Wallet {
             }
         }
         cooinList = new ArrayList<>(cooinMap.values());
-        Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, contextVS);
+        Wallet.saveWallet(new JSONArray(getCooinSerialized(cooinList)), null, contextVS);
         return errorList;
     }
 
@@ -173,44 +175,28 @@ public class Wallet {
         return result;
     }
 
-    public static List<Map> getSerializedCooinList(Collection<Cooin> cooinCollection)
+    public static List<Map> getCooinSerialized(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<Map>();
         for(Cooin cooin : cooinCollection) {
             Map cooinDataMap = cooin.getCertSubject().getDataMap();
             cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
-            byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
-            cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
+            cooinDataMap.put("object", ObjectUtils.serializeObjectToString(cooin));
             result.add(cooinDataMap);
         }
         return result;
     }
 
-    public static List<Map> getSerializedCertificationRequestList(Collection<Cooin> cooinCollection)
+    public static List<Map> getCertificationRequestSerialized(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<Map>();
         for(Cooin cooin : cooinCollection) {
             Map cooinDataMap = cooin.getCertSubject().getDataMap();
-            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(
-                    cooin.getCertificationRequest());
-            cooinDataMap.put("certificationRequest",
-                    new String(serializedCertificationRequest, "UTF-8"));
+            cooinDataMap.put("certificationRequest",ObjectUtils.serializeObjectToString(
+                    cooin.getCertificationRequest()));
             result.add(cooinDataMap);
         }
         return result;
-    }
-
-    public static JSONArray getSerializedCooinArray(Collection<Cooin> cooinCollection)
-            throws UnsupportedEncodingException {
-        JSONArray jsonArray = new JSONArray();
-        for(Cooin cooin : cooinCollection) {
-            Map cooinDataMap = cooin.getCertSubject().getDataMap();
-            cooinDataMap.put("isTimeLimited", cooin.getIsTimeLimited());
-            byte[] cooinSerialized =  ObjectUtils.serializeObject(cooin);
-            cooinDataMap.put("object", new String(cooinSerialized, "UTF-8"));
-            jsonArray.put(new JSONObject(cooinDataMap));
-        }
-        return jsonArray;
     }
 
     public static JSONArray getWallet(String pin, AppContextVS context) throws Exception {
@@ -458,7 +444,7 @@ public class Wallet {
             List<Cooin> cooinToRemove = getCooinList();
             removeCooinList(cooinToRemove, contextVS);
             if(leftOverCooin != null) cooinList.add(leftOverCooin);
-            Wallet.saveWallet(new JSONArray(getSerializedCooinList(cooinList)), null, contextVS);
+            Wallet.saveWallet(new JSONArray(getCooinSerialized(cooinList)), null, contextVS);
         }
     }
 

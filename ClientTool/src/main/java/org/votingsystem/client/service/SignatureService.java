@@ -337,7 +337,7 @@ public class SignatureService extends Service<ResponseVS> {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
                         new String(responseVS.getMessageBytes(), "UTF-8"));
                 cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
-                Wallet.saveToPlainWallet(Wallet.getSerializedCooinList(cooinBatch.getCooinsMap().values()));
+                Wallet.saveToPlainWallet(Wallet.getCooinRequestSerialized(cooinBatch.getCooinsMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));
@@ -365,9 +365,6 @@ public class SignatureService extends Service<ResponseVS> {
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
-
-        //we know this is done in a background thread
-
 
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {

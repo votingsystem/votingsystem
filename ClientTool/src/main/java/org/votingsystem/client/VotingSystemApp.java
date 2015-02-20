@@ -35,7 +35,6 @@ public class VotingSystemApp extends Application {
 
     private static Logger log = Logger.getLogger(VotingSystemApp.class);
 
-    public static String locale = "es";
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
@@ -169,7 +168,8 @@ public class VotingSystemApp extends Application {
     }
 
     public static void main(String[] args) {
-        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
+        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties",
+                Locale.getDefault().getLanguage());
         if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
     }

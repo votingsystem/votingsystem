@@ -347,6 +347,7 @@ public class Encryptor {
         pbbc.doFinal(output, bytesWrittenOut);
         int i = output.length - 1; //remove padding
         while (i >= 0 && output[i] == 0) { --i; }
-        return new String(Arrays.copyOf(output, i + 1), "UTF-8");
+        byte[] result = Arrays.copyOf(output, i + 1);
+        return new String(result);
     }
 }

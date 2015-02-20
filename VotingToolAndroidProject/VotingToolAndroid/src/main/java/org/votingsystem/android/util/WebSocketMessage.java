@@ -236,7 +236,7 @@ public class WebSocketMessage implements Parcelable {
         }
         if(decryptedJSON.has("cooinList")) {
             try {
-                cooinList = Wallet.getCooinListFromJSONArray(decryptedJSON.getJSONArray("cooinList"));
+                cooinList = Wallet.getCooinList(decryptedJSON.getJSONArray("cooinList"));
             }catch(Exception ex) { ex.printStackTrace(); }
         }
     }
@@ -432,7 +432,8 @@ public class WebSocketMessage implements Parcelable {
         encryptedDataMap.put("deviceFromName", DeviceUtils.getDeviceName());
         encryptedDataMap.put("deviceFromId", contextVS.getDeviceId());
         encryptedDataMap.put("locale", contextVS.getResources().getConfiguration().locale.getLanguage());
-        List<Map> serializedCooinList = Wallet.getSerializedCertificationRequestList(cooinList);
+        //the serialized request is with CertificationRequestVS instead of Cooins
+        List<Map> serializedCooinList = Wallet.getCertificationRequestSerialized(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());

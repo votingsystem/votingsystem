@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author jgzornoza
@@ -34,6 +35,11 @@ public class ObjectUtils {
             ex.printStackTrace();
         }
         return base64EncodedSerializedObject;
+    }
+
+    public static String serializeObjectToString(Serializable serializable) {
+        byte[] serializedBytes = serializeObject(serializable);
+        return new String(serializedBytes);
     }
 
     public static Serializable deSerializeObject(byte[] base64SerializedObject) {

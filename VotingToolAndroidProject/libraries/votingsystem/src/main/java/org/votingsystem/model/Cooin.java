@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.content.Context;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
@@ -11,7 +10,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -62,6 +60,8 @@ public class Cooin extends ReceiptContainer {
     private String toUserIBAN;
     private String toUserName;
 
+    public Cooin() {}
+
     public Cooin(String cooinServerURL, BigDecimal amount, String currencyCode, String tagVS,
               TypeVS typeVS) {
         this.amount = amount;
@@ -89,10 +89,18 @@ public class Cooin extends ReceiptContainer {
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {
-        load(certificationRequest.initSigner(csrBytes));
+        setCertificationRequest(certificationRequest.initSigner(csrBytes));
     }
 
-    private void load(CertificationRequestVS certificationRequest) throws IOException, JSONException, ExceptionVS {
+    public static Cooin load(CertificationRequestVS certificationRequest) throws Exception {
+        Cooin cooin = new Cooin();
+        cooin.setCertificationRequest(certificationRequest);
+        return cooin;
+    }
+
+    public void setCertificationRequest(CertificationRequestVS certificationRequest)
+            throws IOException, JSONException, ExceptionVS {
+        this.certificationRequest = certificationRequest;
         x509AnonymousCert = certificationRequest.getCertificate();
         if(x509AnonymousCert != null) {
             validFrom = x509AnonymousCert.getNotBefore();
@@ -215,7 +223,6 @@ public class Cooin extends ReceiptContainer {
     public Boolean getIsTimeLimited() {
         return isTimeLimited;
     }
-
 
     public void setReceiptBytes(byte[] receiptBytes) {
         this.state = State.EXPENDED;

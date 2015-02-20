@@ -47,9 +47,11 @@ public class BrowserVSTabPane extends TabPane {
     public BrowserVSTabPane(BrowserVSToolbar toolbar) {
         this.toolbar = toolbar;
         this.toolbar.getLocationField().setOnMouseClicked(event -> {
-            Object content = getSelectionModel().getSelectedItem().getContent();
-            if (content instanceof WebView) Utils.createHistoryMenu((WebView) content).show(
-                    toolbar.getLocationField(), Side.BOTTOM, 0, 0);
+            if(getSelectionModel().getSelectedItem() != null) {
+                Object content = getSelectionModel().getSelectedItem().getContent();
+                if (content instanceof WebView) Utils.createHistoryMenu((WebView) content).show(
+                        toolbar.getLocationField(), Side.BOTTOM, 0, 0);
+            }
         });
         this.toolbar.getLocationField().setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
@@ -59,7 +61,9 @@ public class BrowserVSTabPane extends TabPane {
                             this.toolbar.getLocationField().getText().startsWith("https://")) {
                         targetURL = this.toolbar.getLocationField().getText().trim();
                     } else targetURL = "http://" + this.toolbar.getLocationField().getText().trim();
-                    Object content = getSelectionModel().getSelectedItem().getContent();
+                    Object content = null;
+                    if(getSelectionModel().getSelectedItem() != null) content =
+                            getSelectionModel().getSelectedItem().getContent();
                     if (content instanceof WebView) ((WebView) content).getEngine().load(targetURL);
                     else newTab(targetURL, null, null);
                 }

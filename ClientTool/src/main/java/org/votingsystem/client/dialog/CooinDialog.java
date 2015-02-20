@@ -20,10 +20,10 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.NotificationService;
-import org.votingsystem.client.util.DocumentVS;
-import org.votingsystem.client.util.MsgUtils;
-import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.service.WebSocketServiceAuthenticated;
+import org.votingsystem.client.util.*;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
 import org.votingsystem.cooin.model.Payment;
@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 
@@ -48,15 +50,13 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     private static Logger log = Logger.getLogger(CooinDialog.class);
 
-    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
-        log.debug("setSelectedDevice - deviceDataJSON: " + deviceDataJSON.toString());
-
-    }
-
-    class EventBusDeleteCooinListener {
+    class EventBusCooinListener {
         @Subscribe public void responseVSChange(ResponseVS responseVS) {
-            if(TypeVS.COOIN_DELETE == responseVS.getType()) {
-                log.debug("EventBusDeleteCooinListener - COOIN_DELETE");
+            switch(responseVS.getType()) {
+                case COOIN_WALLET_CHANGE:
+                case MESSAGEVS_FROM_VS:
+                    if(walletChangeTask != null) walletChangeTask.update(responseVS);
+                    break;
             }
         }
     }
@@ -80,6 +80,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     private MenuItem sendMenuItem;
     private MenuItem changeWalletMenuItem;
+    private WalletChangeTask walletChangeTask;
 
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
@@ -113,7 +114,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        NotificationService.getInstance().registerToEventBus(new EventBusDeleteCooinListener());
+        NotificationService.getInstance().registerToEventBus(new EventBusCooinListener());
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");
@@ -199,6 +200,42 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         log.debug("processJSONForm: " + jsonForm.toString());
         ProgressDialog.showDialog(new ProcessFormTask(new Cooin.TransactionVSData(jsonForm), cooin,cooinServer),
                 ContextVS.getMessage("sendingMoneyLbl"), stage);
+    }
+
+    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
+        log.debug("setSelectedDevice - deviceDataJSON: " + deviceDataJSON.toString());
+        walletChangeTask = new WalletChangeTask(deviceDataJSON);
+        ProgressDialog.showDialog(walletChangeTask, ContextVS.getMessage("changeWalletLbl"), stage);
+    }
+
+    public  class WalletChangeTask extends Task<ResponseVS> {
+
+        private JSONObject deviceDataJSON;
+        private AtomicBoolean isCancelled = new AtomicBoolean();
+        private CountDownLatch countDownLatch;
+
+        public WalletChangeTask(JSONObject deviceDataJSON) {
+            this.deviceDataJSON = deviceDataJSON;
+        }
+
+        @Override protected ResponseVS call() throws Exception {
+            updateMessage(ContextVS.getMessage("sendingDataLbl"));
+            updateProgress(1, 10);
+            try {
+                countDownLatch = new CountDownLatch(1);
+                DeviceVS deviceVS = DeviceVS.parse(deviceDataJSON);
+                WebSocketServiceAuthenticated.getInstance().sendMessage(WebSocketMessage.getCooinWalletChangeRequest(
+                        deviceVS, Arrays.asList(cooin)).toString());
+                countDownLatch.await();
+                WebSocketSession webSocketSession = VotingSystemApp.getInstance().getWSSession(deviceVS.getId());
+            } catch(Exception ex) { log.error(ex.getMessage(), ex);}
+            return null;
+        }
+
+        public void update(ResponseVS responseVS) {
+            log.debug("WalletChangeTask - update");
+            countDownLatch.countDown();
+        }
     }
 
     public static class ProcessFormTask extends Task<ResponseVS> {

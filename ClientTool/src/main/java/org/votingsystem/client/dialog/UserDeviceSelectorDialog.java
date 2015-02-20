@@ -84,18 +84,20 @@ public class UserDeviceSelectorDialog extends DialogVS {
                     } else footerBox.getChildren().remove(acceptButton);
                 }
             });
-            if(deviceArray == null || deviceArray.isEmpty()) {
-                captionLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
-                mainPane.getChildren().remove(messageLbl);
-            }
+            boolean deviceFound = false;
             for(int i = 0; i < deviceArray.size() ; i++) {
                 JSONObject deviceData = (JSONObject) deviceArray.get(i);
                 if(!SessionService.getInstance().getDeviceId().equals(deviceData.getString("deviceId"))) {
+                    deviceFound = true;
                     RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
                     radioButton.setUserData(deviceData);
                     radioButton.setToggleGroup(deviceToggleGroup);
                     deviceListBox.getChildren().add(radioButton);
                 }
+            }
+            if(!deviceFound) {
+                captionLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
+                mainPane.getChildren().remove(messageLbl);
             }
             mainPane.getScene().getWindow().sizeToScene();
         });
