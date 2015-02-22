@@ -67,8 +67,20 @@ public class FileUtils {
         out.close();
     }
 
-    public static File copyStreamToFile(InputStream inputStream, File outputFile)
-            throws Exception {
+    public static File copyStreamToFile(InputStream inputStream, File outputFile) throws Exception {
+        OutputStream outputStream = new FileOutputStream(outputFile);
+        byte[] buf =new byte[BUFFER_SIZE];
+        int len;
+        while((len = inputStream.read(buf)) > 0){
+            outputStream.write(buf,0,len);
+        }
+        outputStream.close();
+        inputStream.close();
+        return outputFile;
+    }
+
+    public static File copyBytesToFile(byte[] bytes, File outputFile) throws Exception {
+        InputStream inputStream = new ByteArrayInputStream(bytes);
         OutputStream outputStream = new FileOutputStream(outputFile);
         byte[] buf =new byte[BUFFER_SIZE];
         int len;

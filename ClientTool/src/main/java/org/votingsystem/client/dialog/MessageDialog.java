@@ -36,9 +36,8 @@ public class MessageDialog extends VBox {
     private Stage stage;
     private HBox footerButtonsBox;
     private Label messageLabel;
-    private Label captionLabel;
+    private DecoratedPane decoratedPane;
     private WebView messageWebView;
-    private Button acceptButton;
 
     public MessageDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
@@ -46,7 +45,6 @@ public class MessageDialog extends VBox {
         //stage.initOwner(window);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         messageLabel = new Label();
-        captionLabel = new Label();
         messageLabel.setWrapText(true);
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
@@ -55,18 +53,13 @@ public class MessageDialog extends VBox {
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");
-        acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(actionEvent -> stage.hide());
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
-
         footerButtonsBox = new HBox(10);
-        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
-
         getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
         setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;-fx-font-size: 16;" +
                 "-fx-font-weight: bold;");
         stage.setScene(new Scene(this, Color.TRANSPARENT));
-        stage.setScene(new Scene(new DecoratedPane(null, null, this, stage)));
+        decoratedPane = new DecoratedPane(null, null, this, stage);
+        stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
     }
@@ -90,17 +83,12 @@ public class MessageDialog extends VBox {
     public void showHtmlMessage(String htmlMessage, String caption) {
         messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
         isHTMLView(true);
-        if(caption != null) {
-            if(!getChildren().contains(captionLabel)) getChildren().add(0, captionLabel);
-            captionLabel.setText(caption);
-        } else if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
+        if(caption != null) decoratedPane.setCaption(caption);
         show();
     }
 
     public void showHtmlMessage(String htmlMessage, Button optionButton) {
-        if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
         if(optionButton != null) {
-            acceptButton.setVisible(false);
             footerButtonsBox.getChildren().add(0, optionButton);
             optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> stage.hide());
         }
@@ -111,8 +99,8 @@ public class MessageDialog extends VBox {
 
 
     public void showMessage(Integer statusCode, String message) {
-        if(getChildren().contains(captionLabel)) getChildren().remove(captionLabel);
         messageLabel.setText(message);
+        decoratedPane.setCaption(ContextVS.getMessage("errorLbl"));
         isHTMLView(false);
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {

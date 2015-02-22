@@ -337,7 +337,7 @@ public class SignatureService extends Service<ResponseVS> {
                 JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
                         new String(responseVS.getMessageBytes(), "UTF-8"));
                 cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
-                Wallet.saveToPlainWallet(Wallet.getCooinRequestSerialized(cooinBatch.getCooinsMap().values()));
+                Wallet.saveToPlainWallet(Wallet.getCertificationRequestSerialized(cooinBatch.getCooinsMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", responseJSON.getString("message"));

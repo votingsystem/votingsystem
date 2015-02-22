@@ -244,7 +244,7 @@ public class Utils {
             ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
             if (responseVS == null) {
                 log.error("Missing receipt data for hash: " + operation.getMessage());
-                webKitHost.sendMessageToBrowser(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
                         operation.getCallerCallback());
             } else {
                 File fileToSave = null;
@@ -259,9 +259,9 @@ public class Utils {
                     File file = fileChooser.showSaveDialog(new Stage());
                     if (file != null) {
                         FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                        webKitHost.sendMessageToBrowser(Utils.getMessageToBrowser(ResponseVS.SC_OK, null),
+                        webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_OK, null),
                                 operation.getCallerCallback());
-                    } else webKitHost.sendMessageToBrowser(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                    } else webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
                             operation.getCallerCallback());
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
@@ -299,16 +299,16 @@ public class Utils {
                     log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
                         log.debug(" - MAX_FILE_SIZE exceeded ");
-                        webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR,
+                        webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                         ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB)),
                                 operationVS.getCallerCallback());
-                    } else webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_OK,
+                    } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK,
                             selectedImage.getAbsolutePath()), operationVS.getCallerCallback());
-                } else webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                         operationVS.getCallerCallback());
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
-                webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
+                webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
                         operationVS.getCallerCallback());
             }
         });
@@ -328,7 +328,7 @@ public class Utils {
                     if(file != null){
                         operationVS.setFile(file);
                         webKitHost.processOperationVS(operationVS, null);
-                    } else webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                    } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                             operationVS.getCallerCallback());
                 });
                 break;
@@ -360,11 +360,11 @@ public class Utils {
                         SessionService.getInstance().setUserVS(userVS, false);
                         JSONObject userDataJSON = userVS.toJSON();
                         userDataJSON.put("statusCode", ResponseVS.SC_OK);
-                        if(operationVS != null) webKitHost.sendMessageToBrowser(
+                        if(operationVS != null) webKitHost.invokeBrowserCallback(
                                 userDataJSON, operationVS.getCallerCallback());
                     } catch(Exception ex) {
                         log.error(ex.getMessage(), ex);
-                        if(operationVS != null) webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR,
+                        if(operationVS != null) webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                 ex.getMessage()), operationVS.getCallerCallback());
                     }
 
@@ -386,8 +386,8 @@ public class Utils {
         File file = fileChooser.showSaveDialog(new Stage());
         if(file != null){
             FileUtils.copyStringToFile(operation.getMessage(), file);
-            webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_OK, null), operation.getCallerCallback());
-        } else webKitHost.sendMessageToBrowser(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+            webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK, null), operation.getCallerCallback());
+        } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                 operation.getCallerCallback());
     }
 

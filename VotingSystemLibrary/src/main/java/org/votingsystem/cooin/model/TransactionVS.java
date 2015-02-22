@@ -294,10 +294,10 @@ public class TransactionVS  implements Serializable {
         transactionVS.setSubject(jsonData.getString("subject"));
         if(jsonData.has("currencyCode")) transactionVS.setCurrencyCode(jsonData.getString("currencyCode"));
         else transactionVS.setCurrencyCode(jsonData.getString("currency"));
-        if(jsonData.has("dateCreatedValue")) transactionVS.setDateCreated(
-                DateUtils.getDateFromString(jsonData.getString("dateCreatedValue")));
-        if(jsonData.has("validToValue") && !JSONNull.getInstance().equals(jsonData.getString("validToValue")))
-                transactionVS.setValidTo(DateUtils.getDateFromString(jsonData.getString("validToValue")));
+        if(jsonData.has("dateCreated")) transactionVS.setDateCreated(
+                DateUtils.getDateFromString(jsonData.getString("dateCreated")));
+        if(jsonData.has("validTo") && !JSONNull.getInstance().equals(jsonData.getString("validTo")))
+                transactionVS.setValidTo(DateUtils.getDateFromString(jsonData.getString("validTo")));
         if(jsonData.has("type")) transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         return transactionVS;

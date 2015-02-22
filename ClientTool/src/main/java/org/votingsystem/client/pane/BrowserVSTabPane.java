@@ -41,6 +41,7 @@ public class BrowserVSTabPane extends TabPane {
     private static Logger log = Logger.getLogger(BrowserVSTabPane.class);
 
     private static final int MAX_CHARACTERS_TAB_CAPTION = 35;
+    private static final String TAB_CAPTION_EMPTY = "                ";
 
     private BrowserVSToolbar toolbar;
 
@@ -62,7 +63,7 @@ public class BrowserVSTabPane extends TabPane {
                         targetURL = this.toolbar.getLocationField().getText().trim();
                     } else targetURL = "http://" + this.toolbar.getLocationField().getText().trim();
                     Object content = null;
-                    if(getSelectionModel().getSelectedItem() != null) content =
+                    if (getSelectionModel().getSelectedItem() != null) content =
                             getSelectionModel().getSelectedItem().getContent();
                     if (content instanceof WebView) ((WebView) content).getEngine().load(targetURL);
                     else newTab(targetURL, null, null);
@@ -85,8 +86,12 @@ public class BrowserVSTabPane extends TabPane {
                 toolbar.getPrevButton().setDisable(true);
             }
         });
-        this.toolbar.getReloadButton().setOnAction(event -> ((WebView) getSelectionModel().getSelectedItem().getContent()).
-                getEngine().load(this.toolbar.getLocationField().getText()));
+        this.toolbar.getReloadButton().setOnAction(event -> {
+            if(getSelectionModel().getSelectedItem() != null) {
+                ((WebView) getSelectionModel().getSelectedItem().getContent()).
+                        getEngine().load(this.toolbar.getLocationField().getText());
+            }
+        });
         setRotateGraphic(false);
         setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         setSide(Side.TOP);
@@ -137,6 +142,8 @@ public class BrowserVSTabPane extends TabPane {
         webView.getEngine().setCreatePopupHandler(config -> {//handle popup windows
             return newTab(null, null, null).getEngine();
         });
+        VBox.setVgrow(webView, Priority.ALWAYS);
+        Tab newTab = new Tab();
         webView.getEngine().getLoadWorker().stateProperty().addListener(
             new ChangeListener<Worker.State>() {
                 @Override public void changed(ObservableValue<? extends Worker.State> ov,
@@ -147,27 +154,25 @@ public class BrowserVSTabPane extends TabPane {
                             toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
                             break;
                         case SUCCEEDED:
+                            if(tabCaption == null && URL != null) newTab.setText(TAB_CAPTION_EMPTY);
                             toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+                            Document doc = webView.getEngine().getDocument();
+                            Element element = doc.getElementById("voting_system_page");
+                            if(element != null) {
+                                JSObject win = (JSObject) webView.getEngine().executeScript("window");
+                                win.setMember("clientTool", new BrowserVSClient(webView));
+                                webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
+                                        SessionService.getInstance().getBrowserSessionData()));
+                            }
+                            break;
+                        case FAILED:
+                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+                            showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
                             break;
                     }
-                    if (newState == Worker.State.SUCCEEDED) {
-                        Document doc = webView.getEngine().getDocument();
-                        Element element = doc.getElementById("voting_system_page");
-                        if(element != null) {
-                            JSObject win = (JSObject) webView.getEngine().executeScript("window");
-                            win.setMember("clientTool", new BrowserVSClient(webView));
-                            webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                    SessionService.getInstance().getBrowserSessionData()));
-                        }
-                    } else if (newState.equals(Worker.State.FAILED)) {
-                        showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
-                    } else if (newState.equals(Worker.State.SCHEDULED)) { }
-                    if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {  }
                 }
             }
         );
-        VBox.setVgrow(webView, Priority.ALWAYS);
-        Tab newTab = new Tab();
         newTab.setOnSelectionChanged(event -> {
             log.debug("selectedIdx - EventType: " + event.getEventType());
             int selectedIdx = getSelectionModel().getSelectedIndex();
@@ -183,7 +188,7 @@ public class BrowserVSTabPane extends TabPane {
         if(tabCaption != null) newTab.setText(tabCaption.length() > MAX_CHARACTERS_TAB_CAPTION ?
                 tabCaption.substring(0, MAX_CHARACTERS_TAB_CAPTION) + "...":tabCaption);
         else if(URL != null) newTab.setText(ContextVS.getMessage("loadingLbl") + " ...");
-        else newTab.setText("                ");
+        else newTab.setText(TAB_CAPTION_EMPTY);
         newTab.setContent(webView);
         getTabs().add(newTab);
         getSelectionModel().select(newTab);

@@ -139,10 +139,8 @@ public class NotificationService {
         log.debug("flush");
         try {
             JSONArray messageArray = new JSONArray();
-            for(Notification notification: notificationList) {
-                messageArray.add(notification.toJSON());
-            }
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), notificationsFile);
+            messageArray.addAll(notificationList);
+            FileUtils.copyBytesToFile(messageArray.toString().getBytes(), notificationsFile);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

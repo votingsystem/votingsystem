@@ -382,7 +382,7 @@ public class WebSocketMessage {
         encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
         encryptedDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         //the serialized request is with CertificationRequestVS instead of Cooins
-        List<Map> serializedCooinList = Wallet.getCooinRequestSerialized(cooinList);
+        List<Map> serializedCooinList = Wallet.getCertificationRequestSerialized(cooinList);
         encryptedDataMap.put("cooinList", serializedCooinList);
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());

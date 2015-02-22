@@ -45,15 +45,14 @@ public class DecoratedPane extends VBox {
         toolBar.setSpacing(10);
         toolBar.setStyle("-fx-padding: 3, 20;");
         toolBar.setAlignment(Pos.TOP_RIGHT);
-        if(caption != null) {
-            HBox captionBox = new HBox();
-            captionBox.setAlignment(Pos.CENTER);
-            HBox.setHgrow(captionBox, Priority.ALWAYS);
-            captionLbl = new Label(caption);
-            captionLbl.setStyle("-fx-font-size: 1.1em; -fx-font-weight: bold; -fx-text-fill: #888;");
-            captionBox.getChildren().add(captionLbl);
-            toolBar.getChildren().add(captionBox);
-        }
+        HBox captionBox = new HBox();
+        captionBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(captionBox, Priority.ALWAYS);
+        captionLbl = new Label();
+        captionLbl.setStyle("-fx-font-size: 1.3em; -fx-font-weight: bold; -fx-text-fill: #888;");
+        captionBox.getChildren().add(captionLbl);
+        toolBar.getChildren().add(captionBox);
+        if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
@@ -80,6 +79,10 @@ public class DecoratedPane extends VBox {
                 }
             }
         });
+    }
+
+    public void setCaption(String caption) {
+        captionLbl.setText(caption);
     }
 
     public void addResizeListener() {//must be called after Scene has been set

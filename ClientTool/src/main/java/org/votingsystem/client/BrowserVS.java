@@ -73,9 +73,9 @@ public class BrowserVS extends VBox implements WebKitHost {
             } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                 log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
             } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                sendMessageToBrowser(responseVS.getMessageJSON(),
+                invokeBrowserCallback(responseVS.getMessageJSON(),
                         browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-            } else sendMessageToBrowser(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
+            } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
                     browserHelper.getSignatureService().getOperationVS().getCallerCallback());
         });
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -100,9 +100,9 @@ public class BrowserVS extends VBox implements WebKitHost {
         return tabPaneVS.newTab(URL, tabCaption, jsCommand);
     }
 
-    @Override public void sendMessageToBrowser(JSON messageJSON, String callerCallback) {
+    @Override public void invokeBrowserCallback(JSON messageJSON, String callerCallback) {
         String message = messageJSON.toString();
-        log.debug("sendMessageToBrowser - messageJSON: " + MsgUtils.truncateLog(message));
+        log.debug("invokeBrowserCallback - messageJSON: " + MsgUtils.truncateLog(message));
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
@@ -145,14 +145,11 @@ public class BrowserVS extends VBox implements WebKitHost {
 
     public static void showMessage(ResponseVS responseVS) {
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-        else showMessage(responseVS.getStatusCode(), ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage());
+        else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
     public static void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(() -> {
-            MessageDialog messageDialog = new MessageDialog();
-            messageDialog.showMessage(statusCode, message);
-        });
+        PlatformImpl.runLater(() ->  new MessageDialog().showMessage(statusCode, message));
     }
 
     public static void showMessage(final String message, final Button optionButton) {

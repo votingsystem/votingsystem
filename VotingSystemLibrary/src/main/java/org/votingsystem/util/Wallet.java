@@ -48,15 +48,13 @@ public class Wallet {
         return result;
     }
 
-    public static List<Map> getCooinRequestSerialized(Collection<Cooin> cooinCollection)
+    public static List<Map> getCertificationRequestSerialized(Collection<Cooin> cooinCollection)
             throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<Map>();
         for(Cooin cooin : cooinCollection) {
             Map cooinDataMap = cooin.getCertSubject().getDataMap();
-            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(
-                    cooin.getCertificationRequest());
-            cooinDataMap.put("certificationRequest",
-                    new String(serializedCertificationRequest, "UTF-8"));
+            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(cooin.getCertificationRequest());
+            cooinDataMap.put("certificationRequest", new String(serializedCertificationRequest, "UTF-8"));
             result.add(cooinDataMap);
         }
         return result;

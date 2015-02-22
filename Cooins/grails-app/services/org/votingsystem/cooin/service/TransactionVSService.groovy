@@ -83,34 +83,30 @@ class TransactionVSService {
                 transactionVS.subject, transactionVS.transactionParent?true:false)
     }
 
-    public void alert(ResponseVS responseVS) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.error("${methodName} - " + responseVS.getMetaInf());
-        responseVS.save()
-    }
-
     private CooinAccount updateUserVSAccountTo(TransactionVS transactionVS) {
         if(!transactionVS.toUserIBAN) throw new ExceptionVS("transactionVS without toUserIBAN")
         CooinAccount accountTo = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
                 currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
-        BigDecimal wildTagExpensesForTag = checkWildTagExpensesForTag(transactionVS.toUserVS, transactionVS.tag,
-                transactionVS.currencyCode)
         BigDecimal resultAmount =  transactionVS.amount
-        if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
-            resultAmount = resultAmount.subtract(wildTagExpensesForTag)
-            CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
-                    currencyCode: transactionVS.currencyCode, tag:systemService.getTag(TagVS.WILDTAG))
-            if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
-                wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag)).save()
-            } else {
-                wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag.subtract(resultAmount))).save()
-                resultAmount = BigDecimal.ZERO
+        if(!TagVS.WILDTAG.equals(transactionVS.tag.getName())) {
+            BigDecimal wildTagExpensesForTag = checkWildTagExpensesForTag(transactionVS.toUserVS, transactionVS.tag,
+                    transactionVS.currencyCode)
+            if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
+                resultAmount = resultAmount.subtract(wildTagExpensesForTag)
+                CooinAccount wildTagAccount = CooinAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                        currencyCode: transactionVS.currencyCode, tag:systemService.getTag(TagVS.WILDTAG))
+                if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag)).save()
+                } else {
+                    wildTagAccount.setBalance(wildTagAccount.balance.add(wildTagExpensesForTag.subtract(resultAmount))).save()
+                    resultAmount = BigDecimal.ZERO
+                }
             }
         }
         if(!accountTo) {//new user account for tag
             accountTo = new CooinAccount(IBAN:transactionVS.toUserIBAN, balance:resultAmount,
                     currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
-            log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
+            log.debug("New CooinAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
                     "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
         } else accountTo.setBalance(accountTo.balance.add(resultAmount)).save()
         return accountTo
@@ -126,7 +122,7 @@ class TransactionVSService {
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
-            boolean isLoggable = true
+            boolean isParentTransaction = (transactionVS.transactionParent == null)
             switch(transactionVS.type) {
                 case TransactionVS.Type.COOIN_INIT_PERIOD:
                     break;
@@ -157,10 +153,9 @@ class TransactionVSService {
                     }
                     break;
                 default:
-                    if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
+                    if(isParentTransaction) {//Parent transaction, to system before trigger to receptors
                         if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS)
                         systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
-                        isLoggable = false
                     } else {
                         updateUserVSAccountTo(transactionVS)
                         systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
@@ -169,7 +164,7 @@ class TransactionVSService {
                                 "tag '${transactionVS.tag?.name}'")
                     }
             }
-            if(isLoggable)notifyListeners(transactionVS)
+            if(!isParentTransaction) notifyListeners(transactionVS)
         } else log.error("TransactionVS '${transactionVS.id}' with state ${transactionVS.state}")
     }
 
@@ -264,23 +259,17 @@ class TransactionVSService {
                       IBAN:transaction.toUserVS.IBAN, type:transaction.toUserVS.type.toString()]
         }
         transactionMap.dateCreated = transaction.dateCreated
-        transactionMap.dateCreatedValue = DateUtils.getDateStr(transaction.dateCreated)
-        if(transaction.validTo) {
-            transactionMap.validTo =  transaction.validTo
-            transactionMap.validToValue =  DateUtils.getDateStr(transaction.validTo)
-        }
+        if(transaction.validTo) transactionMap.validTo =  transaction.validTo
         transactionMap.id = transaction.id
         transactionMap.description = getTransactionTypeDescription(transaction.getType().toString())
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount.setScale(2, RoundingMode.FLOOR).toString()
         transactionMap.currency = transaction.currencyCode
-
         if(transaction.messageSMIME) {
-            String messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.messageSMIME?.id}"
-            transactionMap.messageSMIMEURL = messageSMIMEURL
+            transactionMap.messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/" +
+                    "${transaction.messageSMIME?.id}"
         }
-
         if(transaction.type  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             TransactionVS transactionParent = (transaction.transactionParent == null)?transaction:transaction.transactionParent;
             transactionMap.numChildTransactions = TransactionVS.countByTransactionParent(transactionParent)
@@ -293,7 +282,7 @@ class TransactionVSService {
         return transactionMap
     }
 
-
+    //Check the amount from WILDTAG account expended for the param tag
     public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         Map balancesFrom = BalanceUtils.getBalances(getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM)

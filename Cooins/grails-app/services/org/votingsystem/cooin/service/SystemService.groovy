@@ -13,7 +13,6 @@ import org.votingsystem.throwable.ExceptionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
-
 import java.security.cert.X509Certificate
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale
@@ -37,8 +36,7 @@ class SystemService {
         if(!systemUser) {
             systemUser = new UserVS(nif:grailsApplication.config.vs.systemNIF, type:UserVS.Type.SYSTEM,
                     name:grailsApplication.config.vs.serverName).save()
-            systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
-            systemUser.save()
+            systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id)).save()
             TagVS wildTag = new TagVS(name:TagVS.WILDTAG).save()
             String[] defaultTags = grailsApplication.mainContext.getResource(
                     grailsApplication.config.vs.defaulTagsFilePath).getFile()?.text.split(",")
@@ -148,8 +146,7 @@ class SystemService {
         CooinAccount tagAccount = CooinAccount.findWhere(userVS:getSystemUser(), tag:tag, currencyCode:currencyCode,
                 state: CooinAccount.State.ACTIVE)
         if(!tagAccount) throw new Exception("THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG '${tag.name}' and currency '${currencyCode}'")
-        tagAccount.balance = tagAccount.balance.add(amount)
-        tagAccount.save()
+        tagAccount.setBalance(tagAccount.balance.add(amount)).save()
     }
 
     public UserVS getSystemUser() {

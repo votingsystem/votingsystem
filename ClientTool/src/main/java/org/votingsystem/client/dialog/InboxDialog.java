@@ -132,9 +132,8 @@ public class InboxDialog extends DialogVS {
                     " - state: " + socketMsg.getState());
             switch (socketMsg.getState()) {
                 case PROCESSED:
-                    messageListView.getItems().stream().filter(socketMessage -> {if(socketMsg.getDate().getTime()
-                            != socketMsg.getDate().getTime()) return true;
-                            else return false; });
+                    messageListView.getItems().stream().filter(socketMessage ->
+                        socketMsg.getDate().getTime() != socketMsg.getDate().getTime());
                     break;
             }
         }
