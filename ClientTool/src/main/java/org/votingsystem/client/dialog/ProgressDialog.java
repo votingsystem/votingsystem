@@ -11,7 +11,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;

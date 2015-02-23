@@ -169,7 +169,7 @@ class RepresentativeService {
 				numRepresentations: numRepresented,
 				numVotesRepresented:numVotesRepresentedByRepresentative]
 			representativesMap[representative.nif] = representativeMap
-			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
 				System.currentTimeMillis() - representativeBegin)
 			/*File reportFile = mapFiles.reportFile
 			reportFile.write("")

@@ -75,9 +75,12 @@ public class Wallet {
         List<Cooin> cooinList = new ArrayList<Cooin>();
         for(int i = 0; i < jsonArray.length(); i++) {
             JSONObject cooinJSON = jsonArray.getJSONObject(i);
-            CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
+            Cooin cooin = (Cooin) ObjectUtils.deSerializeObject(
+                    ((String) cooinJSON.get("object")).getBytes());
+            cooinList.add(cooin);
+            /*CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
                     ((String) cooinJSON.get("certificationRequest")).getBytes());
-            cooinList.add(Cooin.load(certificationRequest));
+            cooinList.add(Cooin.load(certificationRequest));*/
         }
         return cooinList;
     }

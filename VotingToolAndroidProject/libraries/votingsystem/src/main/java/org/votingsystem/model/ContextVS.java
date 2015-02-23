@@ -114,6 +114,7 @@ public class ContextVS {
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
             "PENDING_OPERATIONS_LAST_CHECKED_KEY";
 
+
     //Pages size
     //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
@@ -121,8 +122,10 @@ public class ContextVS {
     public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;
 
     //Notifications IDs
-    public static final int RSS_SERVICE_NOTIFICATION_ID            = 1;
-    public static final int VOTE_SERVICE_NOTIFICATION_ID           = 2;
+    public static int NEW_MESSAGE_NOTIFICATION_ID            = 1000000000;
+    public static final int RSS_SERVICE_NOTIFICATION_ID      = 1000000001;
+    public static final int VOTE_SERVICE_NOTIFICATION_ID     = 1000000002;
+    public static final int ACCOUNTS_UPDATED_NOTIFICATION_ID = 1000000003;
 
     public static final int NUM_MIN_OPTIONS = 2;
 

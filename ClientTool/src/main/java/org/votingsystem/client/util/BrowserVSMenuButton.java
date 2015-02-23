@@ -13,7 +13,7 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
-import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.model.ContextVS;
@@ -48,7 +48,7 @@ public class BrowserVSMenuButton extends MenuButton {
     }
 
     public BrowserVSMenuButton () {
-        NotificationService.getInstance().registerToEventBus(new EventBusConnectionListener());
+        EventBusService.getInstance().registerToEventBus(new EventBusConnectionListener());
         setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
         openFileMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.FOLDER_OPEN));

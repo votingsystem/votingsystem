@@ -34,9 +34,6 @@ public class WebSocketMessage {
 
     private static Logger log = Logger.getLogger(WebSocketMessage.class);
 
-    public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
-    public static final int TRUNCATED_MSG_SIZE = 80; //chars
-
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
@@ -163,11 +160,6 @@ public class WebSocketMessage {
 
     public String getMessage() {
         return message;
-    }
-
-    public String getFormattedMessage() {
-        return "<html><span style='font-style: italic;'>" + DateUtils.getDayWeekDateStr(date) + " - " +
-                ContextVS.getMessage("messageFrom") + " <b>" + from + ":</b></span><br/><br/>" + message + "</html>";
     }
 
     public void setMessage(String message) {
@@ -427,12 +419,6 @@ public class WebSocketMessage {
                 aesParams, new DeviceVS(deviceFromId, deviceFromName), null, operation));
     }
 
-    public String getMessageTruncated() {
-        if(message != null && message.length() > TRUNCATED_MSG_SIZE)
-            return message.substring(0, TRUNCATED_MSG_SIZE) + "...";
-        else return message;
-    }
-
     public static String getWebSocketCoreSignalJSCommand(JSONObject messageJSON, ConnectionStatus status) {
         JSONObject coreSignal = new JSONObject();
         if(messageJSON == null) messageJSON = new JSONObject();
@@ -471,7 +457,7 @@ public class WebSocketMessage {
             result.put("locale", locale);
             result.put("from", from);
             result.put("UUID", UUID);
-            if(date != null) result.put("date", DateUtils.getDayWeekDateStr(date));
+            if(date != null) result.put("date", DateUtils.getISODateStr(date));
             if(smimeMessage != null) {
                 try {
                     result.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
@@ -485,7 +471,7 @@ public class WebSocketMessage {
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }
         } else result = messageJSON;
-        if(date != null) messageJSON.put("date", DateUtils.getDayWeekDateStr(date));
+        if(date != null) messageJSON.put("date", DateUtils.getISODateStr(date));
         return result;
     }
 

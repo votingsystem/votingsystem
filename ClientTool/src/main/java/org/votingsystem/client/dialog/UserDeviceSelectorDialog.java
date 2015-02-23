@@ -35,9 +35,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
     private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class);
 
     @FXML private VBox mainPane;
-    @FXML private Label captionLbl;
     @FXML private Button acceptButton;
-    @FXML private Button cancelButton;
     @FXML private Label messageLbl;
     @FXML private ProgressBar progressBar;
     @FXML private VBox deviceListBox;
@@ -46,9 +44,8 @@ public class UserDeviceSelectorDialog extends DialogVS {
     private ToggleGroup deviceToggleGroup;
 
     private UserDeviceSelectorDialog(String caption, String message, Listener listener) throws IOException {
-        super("/fxml/UserDeviceSelectorDialog.fxml");
+        super("/fxml/UserDeviceSelectorDialog.fxml", caption);
         this.listener = listener;
-        captionLbl.setText(caption);
         messageLbl.setText(message);
         new Thread(new Runnable() {
             @Override public void run() {
@@ -65,8 +62,6 @@ public class UserDeviceSelectorDialog extends DialogVS {
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setText(ContextVS.getMessage("cancelLbl"));
         footerBox.getChildren().remove(acceptButton);
     }
 
@@ -79,8 +74,10 @@ public class UserDeviceSelectorDialog extends DialogVS {
             deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
                 public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
                     if (deviceToggleGroup.getSelectedToggle() != null) {
-                        if(!footerBox.getChildren().contains(acceptButton))
-                            footerBox.getChildren().add(2, acceptButton);
+                        if(!footerBox.getChildren().contains(acceptButton)) {
+                            footerBox.getChildren().add(acceptButton);
+                            getStage().sizeToScene();
+                        }
                     } else footerBox.getChildren().remove(acceptButton);
                 }
             });
@@ -96,7 +93,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
                 }
             }
             if(!deviceFound) {
-                captionLbl.setText(ContextVS.getMessage("deviceListEmptyMsg"));
+                setCaption(ContextVS.getMessage("deviceListEmptyMsg"));
                 mainPane.getChildren().remove(messageLbl);
             }
             mainPane.getScene().getWindow().sizeToScene();
@@ -106,11 +103,6 @@ public class UserDeviceSelectorDialog extends DialogVS {
     public void acceptButton(ActionEvent actionEvent) {
         if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
             listener.setSelectedDevice((JSONObject) deviceToggleGroup.getSelectedToggle().getUserData());
-        hide();
-    }
-
-
-    public void cancelButton(ActionEvent actionEvent) {
         hide();
     }
 

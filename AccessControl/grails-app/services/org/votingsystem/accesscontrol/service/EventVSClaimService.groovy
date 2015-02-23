@@ -127,8 +127,7 @@ class EventVSClaimService {
 				File smimeFile = new File("${baseDir}/${fileNamePrefix}_${formatted.format(eventSigantures.getRowNumber())}.p7m")
 				smimeFile.setBytes(messageSMIME.content)
 				if((eventSigantures.getRowNumber() % 100) == 0) {
-					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-						System.currentTimeMillis() - begin)
+					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - begin)
 					log.debug(" - accessRequest ${eventSigantures.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()

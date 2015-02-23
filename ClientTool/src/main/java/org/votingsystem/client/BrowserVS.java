@@ -15,7 +15,7 @@ import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
-import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -69,7 +69,7 @@ public class BrowserVS extends VBox implements WebKitHost {
             log.debug("signatureService - OnSucceeded");
             ResponseVS responseVS = browserHelper.getSignatureService().getValue();
             if(responseVS.getStatus() != null) {
-                NotificationService.getInstance().postToEventBus(responseVS);
+                EventBusService.getInstance().postToEventBus(responseVS);
             } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                 log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
             } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
@@ -93,7 +93,6 @@ public class BrowserVS extends VBox implements WebKitHost {
         browserStage.getScene().setFill(null);
         ResizeHelper.addResizeListener(browserStage);
         getChildren().addAll(toolBar, tabPaneVS);
-        NotificationService.getInstance().showIfPendingNotifications();
     }
 
     public WebView newTab(String URL, String tabCaption, String jsCommand) {

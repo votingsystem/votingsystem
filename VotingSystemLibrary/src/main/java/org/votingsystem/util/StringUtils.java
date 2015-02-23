@@ -168,4 +168,10 @@ public class StringUtils {
         return builder.toString();
     }
 
+    public static String truncateMessage(String message, int TRUNCATED_MSG_SIZE) {
+        if(message != null && message.length() > TRUNCATED_MSG_SIZE)
+            return message.substring(0, TRUNCATED_MSG_SIZE) + "...";
+        else return message;
+    }
+
 }

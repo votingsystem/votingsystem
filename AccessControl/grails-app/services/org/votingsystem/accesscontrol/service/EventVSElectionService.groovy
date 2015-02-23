@@ -196,7 +196,7 @@ class EventVSElectionService {
             MessageSMIME messageSMIME = voteVS.messageSMIME
             smimeFile.setBytes(messageSMIME.content)
             if((votes.getRowNumber() % 100) == 0) {
-                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
                         System.currentTimeMillis() - begin)
                 log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
                 sessionFactory.currentSession.flush()
@@ -219,7 +219,7 @@ class EventVSElectionService {
             File smimeFile = new File("${accessRequestBaseDir}/accessRequest_${accessRequest.userVS.nif}.p7m")
             smimeFile.setBytes(messageSMIME.content)
             if((accessRequests.getRowNumber() % 100) == 0) {
-                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
                         System.currentTimeMillis() - begin)
                 log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
                 sessionFactory.currentSession.flush()

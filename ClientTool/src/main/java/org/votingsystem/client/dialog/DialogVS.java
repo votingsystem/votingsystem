@@ -8,6 +8,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 
 import java.io.IOException;
@@ -19,20 +21,29 @@ import java.io.IOException;
 public class DialogVS {
 
     private Stage stage;
+    private DecoratedPane decoratedPane;
 
-    public DialogVS(String fxmlFilePath) throws IOException {
+    public DialogVS(String fxmlFilePath, String caption) throws IOException {
         this(fxmlFilePath, StageStyle.TRANSPARENT);
+        if(caption != null) setCaption(caption);
     }
 
     public DialogVS(String fxmlFilePath, StageStyle stageStyle) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
         stage = new Stage(stageStyle);
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
         fxmlLoader.setController(this);
         stage.centerOnScreen();
-        stage.setScene(new Scene(fxmlLoader.load()));
+        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
+        stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+    }
+
+    public void setCaption(String caption) {
+        if(decoratedPane != null) decoratedPane.setCaption(caption);
+        else stage.setTitle(caption);
     }
 
     public DialogVS(Pane pane) {
@@ -51,7 +62,6 @@ public class DialogVS {
     public Stage getStage() {
         return stage;
     }
-
 
 
     public void show() {

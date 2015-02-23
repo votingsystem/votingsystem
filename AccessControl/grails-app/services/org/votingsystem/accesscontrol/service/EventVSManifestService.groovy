@@ -103,7 +103,7 @@ class EventVSManifestService {
 				File pdfFile = new File("${baseDir}/${fileNamePrefix}_${String.format('%08d', signaturesCollected.getRowNumber())}.pdf")
 				pdfFile.setBytes(firma.pdf)
 				if((signaturesCollected.getRowNumber() % 100) == 0) {
-					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
 						System.currentTimeMillis() - begin)
 					log.debug(" - accessRequest ${signaturesCollected.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
 					sessionFactory.currentSession.flush()

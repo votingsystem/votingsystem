@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.client.service.NotificationService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.client.util.BrowserVSMenuButton;
 import org.votingsystem.client.util.Utils;
@@ -53,7 +53,7 @@ public class BrowserVSToolbar extends HBox {
         }
     }
     public BrowserVSToolbar(Stage stage) {
-        NotificationService.getInstance().registerToEventBus(new EventBusConnectionListener());
+        EventBusService.getInstance().registerToEventBus(new EventBusConnectionListener());
         setSpacing(10);
         setAlignment(Pos.CENTER);
         getStyleClass().add("browser-toolbar");
@@ -63,7 +63,7 @@ public class BrowserVSToolbar extends HBox {
         connectionButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.FLASH));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
-        Button  newTabButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.PLUS));
+        Button newTabButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.PLUS));
         newTabButton.getStyleClass().add("toolbar-button");
         newTabButton.setOnAction(event -> BrowserVS.getInstance().newTab(null, null, null));
         connectionButton.setVisible(false);
@@ -75,10 +75,8 @@ public class BrowserVSToolbar extends HBox {
 
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.getStyleClass().add("location-text");
-        NotificationService.getInstance().setNotificationsButton(
-                Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.INFO_CIRCLE, Utils.COLOR_YELLOW_ALERT)));
-        InboxService.getInstance().setInboxButton(Utils.getToolBarButton(
-                Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK)));
+        Button msgButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
+        InboxService.getInstance().setInboxButton(msgButton);
 
         menuButton = new BrowserVSMenuButton();
         menuButton.getStyleClass().add("toolbar-button");
@@ -89,8 +87,7 @@ public class BrowserVSToolbar extends HBox {
         HBox navButtonBox = new HBox();
         navButtonBox.getChildren().addAll(prevButton, forwardButton);
         getChildren().addAll(newTabButton, navButtonBox, locationField, reloadButton, Utils.createSpacer(), connectionButton,
-                NotificationService.getInstance().getNotificationsButton(), InboxService.getInstance().getInboxButton(),
-                menuButton, closeButton);
+                msgButton, menuButton, closeButton);
         setOnMouseClicked(mouseEvent -> {
                 if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     if(mouseEvent.getClickCount() == 2){

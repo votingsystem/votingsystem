@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
@@ -60,6 +61,17 @@ public class Wallet {
         return result;
     }
 
+    public static List<Cooin> getCooinListFromCertificationRequest(JSONArray jsonArray) throws Exception {
+        List<Cooin> cooinList = new ArrayList<Cooin>();
+        for(int i = 0; i < jsonArray.size(); i++) {
+            byte[] serializedCertificationRequest = jsonArray.getJSONObject(i).getString("certificationRequest").getBytes();
+            CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
+                    serializedCertificationRequest);
+            cooinList.add(Cooin.load(certificationRequest));
+        }
+        return cooinList;
+    }
+
     public static JSONArray getPlainWallet() throws Exception {
         File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         if(!walletFile.exists()) return new JSONArray();
@@ -67,7 +79,7 @@ public class Wallet {
     }
 
     public static List<Cooin> getCooinListFromPlainWallet() throws Exception {
-        return getCooinList(getPlainWallet());
+        return getCooinListFromCertificationRequest(getPlainWallet());
     }
 
     public static List<Cooin> getCooinList(JSONArray jsonArray) throws Exception {

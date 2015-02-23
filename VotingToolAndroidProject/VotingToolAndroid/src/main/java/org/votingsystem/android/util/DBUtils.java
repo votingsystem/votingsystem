@@ -64,7 +64,7 @@ public class DBUtils {
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            Utils.closeQuietly(cursor);
+            if (cursor != null) cursor.close();
         }
         return null;
     }

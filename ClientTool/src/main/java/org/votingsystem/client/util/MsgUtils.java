@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -45,4 +46,10 @@ public class MsgUtils {
         else return tagName;
 
     }
+
+    public static String getWebSocketFormattedMessage(InboxMessage msg) {
+        return "<html><span style='font-style: italic;color:#888;'>" + DateUtils.getDayWeekDateStr(msg.getDate()) +
+                " - <b>" + msg.getFrom() + "</b></span><br/><br/>" + msg.getMessage() + "</html>";
+    }
+
 }

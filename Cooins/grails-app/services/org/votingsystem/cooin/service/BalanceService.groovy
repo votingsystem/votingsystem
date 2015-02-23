@@ -5,6 +5,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.hibernate.ScrollableResults
 import org.votingsystem.cooin.model.CooinAccount
 import org.votingsystem.cooin.model.TransactionVS
+import org.votingsystem.cooin.util.LoggerVS
 import org.votingsystem.groovy.util.ReportFiles
 import org.votingsystem.groovy.util.TransactionVSUtils
 import org.votingsystem.model.*
@@ -40,7 +41,7 @@ class BalanceService {
             }
         }
         log.debug("$methodName - $transactionMsgSubject - numTotalUsers: '$numTotalUsers' - $timePeriod")
-        File errorsFile = ReportFiles.getReportErrorsFile(timePeriod, "$grailsApplication.config.vs.weekReportsPath");
+        File errorsFile = ReportFiles.getReportErrorsFile(timePeriod, grailsApplication.config.vs.weekReportsPath);
         ScrollableResults scrollableResults = UserVS.createCriteria().scroll {//init week only with active users
             or {
                 isNull("dateCancelled")
@@ -54,9 +55,8 @@ class BalanceService {
                 userVS = (UserVS) scrollableResults.get(0);
                 if(!initUserVSWeekPeriod(userVS, timePeriod, transactionMsgSubject)) continue
                 if((scrollableResults.getRowNumber() % 100) == 0) {
-                    String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                            System.currentTimeMillis() - beginCalc)
-                    log.debug("${methodName} - ${scrollableResults.getRowNumber()} of ${numTotalUsers} - ${elapsedTimeStr}");
+                    String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc)
+                    log.debug("${methodName} - ${scrollableResults.getRowNumber()} of ${numTotalUsers} - ${elapsedTime}");
                     sessionFactory.currentSession.flush()
                     sessionFactory.currentSession.clear()
                 }
@@ -66,7 +66,7 @@ class BalanceService {
                 }
             } catch(Exception ex) {
                 log.error("userVS: ${userVS.id} - ERROR - ${ex.getMessage()}");
-                errorsFile.append("userVS: ${userVS.id} - ${StackTraceUtils.extractRootCause(ex)} ${System.getProperty("line.separator")}")
+                errorsFile.append("\nuserVS: ${userVS.id} - ${StackTraceUtils.extractRootCause(ex)}")
             }
         }
         signPeriodResult(timePeriod)
@@ -89,13 +89,13 @@ class BalanceService {
             return false
         }
         ReportFiles reportFiles = new ReportFiles(timePeriod, grailsApplication.config.vs.weekReportsPath, userSubPath)
-        log.debug("$methodName - week report for UserVS '$userVS.id' - dir: '$reportFiles.baseDir.absolutePath'")
+        log.debug("$methodName - UserVS '$userVS.id' - dir: '$reportFiles.baseDir.absolutePath'")
         Map<String, Map> currencyMap = balanceMap.balancesCash
         for(String currency: currencyMap.keySet()) {
             for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap[currency].entrySet()) {
                 TagVS currentTagVS = systemService.getTag(tagVSEntry.key)
                 Integer numInitPeriodTransaction = TransactionVS.createCriteria().count {
-                    ge("dateCreated", timePeriod.getDateFrom())
+                    ge("dateCreated", timePeriod.getDateTo())
                     eq("type", TransactionVS.Type.COOIN_INIT_PERIOD)
                     eq("state", TransactionVS.State.OK)
                     eq("tag", currentTagVS)
@@ -145,7 +145,15 @@ class BalanceService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("$methodName - timePeriod: ${timePeriod.toString()}")
         long beginCalc = System.currentTimeMillis()
-        int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
+        Integer numTotalUsers = UserVS.createCriteria().count {
+            or {
+                isNull("dateCancelled")
+                ge("dateCancelled", timePeriod.getDateFrom())
+            }
+            and {
+                inList("type", [UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS])
+            }
+        }
         ReportFiles reportFiles = new ReportFiles(timePeriod, grailsApplication.config.vs.weekReportsPath, null)
         List groupVSBalanceList = []
         List userVSBalanceList = []
@@ -167,9 +175,8 @@ class BalanceService {
             else userVSBalanceList.add(userVSService.getDataWithBalancesMap(userVS, timePeriod))
 
             if((scrollableResults.getRowNumber() % 100) == 0) {
-                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                        System.currentTimeMillis() - beginCalc)
-                log.debug("userVS ${scrollableResults.getRowNumber()} of ${numTotalUsers} - elapsedTime: '$elapsedTimeStr'");
+                String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc)
+                log.debug("userVS ${scrollableResults.getRowNumber()} of ${numTotalUsers} - elapsedTime: '$elapsedTime'");
                 sessionFactory.currentSession.flush()
                 sessionFactory.currentSession.clear()
             }
@@ -182,19 +189,17 @@ class BalanceService {
         Map systemBalance = systemService.genBalanceForSystem(timePeriod)
         Map userBalances = [systemBalance:systemBalance, groupVSBalanceList:groupVSBalanceList,
                         userVSBalanceList:userVSBalanceList, bankVSBalanceList:bankVSBalanceList]
-        Map resultMap = [timePeriod:timePeriod.toJSON(),userBalances:userBalances]
-        //transactionslog.info(new JSON(dataMap) + ",");
-        JSON userBalancesJSON = new JSON(resultMap)
-        reportFiles.jsonFile.write(userBalancesJSON.toString())
+        Map resultMap = [timePeriod:timePeriod.getMap(null), userBalances:userBalances]
+        JSON resultBalance = new JSON(resultMap).toString()
+        reportFiles.jsonFile.write(resultBalance)
         String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
                 ["[${DateUtils.getDateStr(timePeriod.getDateFrom())} - ${DateUtils.getDateStr(timePeriod.getDateTo())}]"].
                 toArray(), locale)
         ResponseVS responseVS = signatureVSService.getSMIMETimeStamped (systemService.getSystemUser().name, null,
-                userBalancesJSON.toString(), subject)
+                resultBalance, subject)
         responseVS.getSMIME().writeTo(new FileOutputStream(reportFiles.receiptFile))
-        String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                System.currentTimeMillis() - beginCalc)
-        log.debug("$methodName - numTotalUsers: '${numTotalUsers}' - finished in '${elapsedTimeStr}'")
+        String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc)
+        log.debug("$methodName - numTotalUsers: '${numTotalUsers}' - finished in '${elapsedTime}'")
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.OK, data:resultMap, contentType: ContentTypeVS.JSON,
                 metaInf:MetaInfMsg.getOKMsg(methodName, timePeriod.toString()))

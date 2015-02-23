@@ -136,7 +136,7 @@ public class DateUtils {
      *  elapsed time in hours/minutes/seconds/milliseconds
      * @return String
      */
-    public static String getElapsedTimeHoursMinutesMillisFromMilliseconds(long milliseconds) {
+    public static String getElapsedTimeHoursMinutesMillis(long milliseconds) {
         String format = String.format("%%0%dd", 2);
         String millisecondsFormat = String.format("%%0%dd", 3);
         long elapsedTime = milliseconds / 1000;

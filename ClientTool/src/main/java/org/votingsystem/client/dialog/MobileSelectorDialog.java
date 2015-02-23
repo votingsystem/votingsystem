@@ -38,9 +38,7 @@ public class MobileSelectorDialog extends DialogVS {
     private static Logger log = Logger.getLogger(MobileSelectorDialog.class);
 
     @FXML private VBox mainPane;
-    @FXML private Label captionLbl;
     @FXML private Button acceptButton;
-    @FXML private Button cancelButton;
     @FXML private Button searchDeviceButton;
     @FXML private Label messageLbl;
     @FXML private TextField nifTextField;
@@ -51,9 +49,8 @@ public class MobileSelectorDialog extends DialogVS {
     private ToggleGroup deviceToggleGroup;
 
     private MobileSelectorDialog(String caption, String message, Listener listener) throws IOException {
-        super("/fxml/MobileSelectorDialog.fxml");
+        super("/fxml/MobileSelectorDialog.fxml", caption);
         this.listener = listener;
-        captionLbl.setText(caption);
         messageLbl.setText(message);
     }
 
@@ -61,8 +58,6 @@ public class MobileSelectorDialog extends DialogVS {
         mainPane.getChildren().removeAll(progressBar);
         acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setText(ContextVS.getMessage("cancelLbl"));
         nifTextField.setPromptText(ContextVS.getMessage("nifLbl"));
         searchDeviceButton.setText(ContextVS.getMessage("searchDevicesLbl"));
         searchDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SEARCH));
@@ -122,10 +117,6 @@ public class MobileSelectorDialog extends DialogVS {
     public void acceptButton(ActionEvent actionEvent) {
         if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
             listener.setSelectedDevice((JSONObject) deviceToggleGroup.getSelectedToggle().getUserData());
-        hide();
-    }
-
-    public void cancelButton(ActionEvent actionEvent) {
         hide();
     }
 

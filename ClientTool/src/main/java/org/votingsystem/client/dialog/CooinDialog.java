@@ -19,9 +19,8 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
-import org.votingsystem.client.service.NotificationService;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketServiceAuthenticated;
 import org.votingsystem.client.util.*;
 import org.votingsystem.cooin.model.Cooin;
@@ -114,7 +113,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        NotificationService.getInstance().registerToEventBus(new EventBusCooinListener());
+        EventBusService.getInstance().registerToEventBus(new EventBusCooinListener());
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");

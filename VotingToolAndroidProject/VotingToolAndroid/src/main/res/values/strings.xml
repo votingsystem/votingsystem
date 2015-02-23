@@ -393,7 +393,7 @@
     <string name="signing_document_lbl">firmando documento</string>
     <string name="reject_sign_request_lbl">rechazar solicitud</string>
     <string name="reject_websocket_request_msg">el dispositivo \'%1$s\' ha rechazado su solicitud</string>
-    <string name="user_info_updated">cuentas actualizadas</string>
+    <string name="cooin_accounts_updated">cuentas actualizadas</string>
     <string name="time_limited_checkbox_msg">gastar antes del domingo a las 24:00</string>
     <string name="add_tag_lbl">añadir etiqueta</string>
     <string name="selected_tag_lbl">para gastar en \'%1$s\'</string>

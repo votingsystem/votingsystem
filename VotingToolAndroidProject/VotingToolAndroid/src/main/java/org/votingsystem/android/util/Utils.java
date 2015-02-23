@@ -1,20 +1,27 @@
 package org.votingsystem.android.util;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.CooinAccountsMainActivity;
+import org.votingsystem.android.activity.MessagesMainActivity;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
@@ -23,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Enumeration;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -102,10 +110,34 @@ public class Utils {
         contextVS.startService(startIntent);
     }
 
-    public static void closeQuietly(final Cursor cursor) {
-        if (cursor != null) {
-            cursor.close();
-        }
+    public static void showAccountsUpdatedNotification(Context context){
+        final NotificationManager mgr = (NotificationManager)context.getSystemService(
+                Context.NOTIFICATION_SERVICE);
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Intent clickIntent = new Intent(context, CooinAccountsMainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+                ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
+                .setAutoCancel(true).setContentTitle(context.getString(R.string.cooin_accounts_updated))
+                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
+                .setSound(soundUri).setSmallIcon(R.drawable.fa_money_32);
+        mgr.notify(ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, builder.build());
+    }
+
+    public static void showNewMessageNotification(Context context){
+        final NotificationManager mgr = (NotificationManager)context.getSystemService(
+                Context.NOTIFICATION_SERVICE);
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Intent clickIntent = new Intent(context, MessagesMainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+                ContextVS.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
+                .setAutoCancel(true).setContentTitle(context.getString(R.string.message_lbl))
+                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
+                .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
+        mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
 }

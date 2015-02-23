@@ -10,6 +10,7 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ActorVS;
@@ -161,7 +162,7 @@ public class WebSocketService extends Service<ResponseVS> {
                             socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                     break;
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().addMessage(socketMsg);
+                    InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     SessionService.setSignResponse(socketMsg);

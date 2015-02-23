@@ -110,7 +110,7 @@ public class TransactionVSService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
+            contextVS.broadcastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
                     ResponseVS.getExceptionResponse(ex, this), this));
         }
     }
@@ -150,7 +150,7 @@ public class TransactionVSService extends IntentService {
             }
         } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                 getString(R.string.payment_session_expired_msg));
-        broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS,
+        contextVS.broadcastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS,
                 contextVS));
     }
 
@@ -269,7 +269,7 @@ public class TransactionVSService extends IntentService {
                         currencyCode, subject, toUserName);
             }
             responseVS.setCaption(caption).setNotificationMessage(message);
-            broadCastResponse(responseVS);
+            contextVS.broadcastResponse(responseVS);
         }
     }
 
@@ -392,9 +392,10 @@ public class TransactionVSService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(ex, this);
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                responseVS.setNotificationMessage(getString(R.string.user_info_updated));
+                responseVS.setNotificationMessage(getString(R.string.cooin_accounts_updated));
             responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_ACCOUNTS_INFO);
-            broadCastResponse(responseVS);
+            contextVS.broadcastResponse(responseVS);
+            Utils.showAccountsUpdatedNotification(contextVS);
         }
     }
 
@@ -434,11 +435,6 @@ public class TransactionVSService extends IntentService {
                 }
             }
         } catch(Exception ex) {  ex.printStackTrace(); }
-    }
-
-    private void broadCastResponse(ResponseVS responseVS) {
-        contextVS.showNotification(responseVS);
-        contextVS.broadcastResponse(responseVS);
     }
 
 }

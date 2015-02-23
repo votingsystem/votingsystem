@@ -20,6 +20,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.android.util.WebSocketSession;
@@ -263,7 +264,7 @@ public class WebSocketService extends Service {
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
                         PrefUtils.addNumMessagesNotReaded(contextVS, 1);
-                        contextVS.showNewMessageNotification();
+                        Utils.showNewMessageNotification(contextVS);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:

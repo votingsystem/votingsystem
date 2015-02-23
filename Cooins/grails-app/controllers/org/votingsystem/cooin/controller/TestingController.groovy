@@ -1,6 +1,7 @@
 package org.votingsystem.cooin.controller
 
 import grails.converters.JSON
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.iban4j.CountryCode
@@ -33,6 +34,14 @@ class TestingController {
     def systemService
     def groupVSService
     def bankVSService
+
+    def timeLog() {
+        DateUtils.TimePeriod tp = DateUtils.getCurrentWeekPeriod()
+        Map resultMap = [timePeriod:tp.getMap(null)]
+        JSON userBalancesJSON = new JSON(resultMap)
+        render userBalancesJSON.toString()
+        return false;
+    }
 
     def spa() {}
 

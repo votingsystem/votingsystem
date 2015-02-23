@@ -17,6 +17,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
+import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.*;
@@ -107,7 +108,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
             SessionService.getInstance().setIsConnected(false);
-            NotificationService.getInstance().postToEventBus(new ResponseVS(TypeVS.DISCONNECT));
+            EventBusService.getInstance().postToEventBus(new ResponseVS(TypeVS.DISCONNECT));
         }
 
         @OnMessage public void onMessage(String message) {
@@ -222,7 +223,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().addMessage(socketMsg);
+                    InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
@@ -246,7 +247,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 default:
                     log.debug("unprocessed socketMsg: " + socketMsg.getOperation());
             }
-            if(responseVS != null) NotificationService.getInstance().postToEventBus(responseVS);
+            if(responseVS != null) EventBusService.getInstance().postToEventBus(responseVS);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

@@ -4,28 +4,23 @@ import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
-import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.client.service.NotificationService;
-import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
-import java.security.PrivateKey;
-import java.util.*;
-
-import static org.votingsystem.client.BrowserVS.showMessage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author jgzornoza
@@ -35,39 +30,27 @@ public class InboxDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(InboxDialog.class);
 
+    static final Comparator<InboxMessage> msgComparator = new Comparator<InboxMessage>() {
+        public int compare(InboxMessage msg1, InboxMessage msg2) {
+            return msg2.getDate().compareTo(msg1.getDate());
+        }
+    };
+
     @FXML private VBox mainPane;
-    @FXML private Label message;
-    @FXML private ProgressBar progressBar;
-    @FXML private Label closeAdviceMsg;
-    @FXML private ListView<WebSocketMessage> messageListView;
+    @FXML private ListView<InboxMessage> messageListView;
     private static InboxDialog dialog;
 
-    static final Comparator<WebSocketMessage> msgComparator = new Comparator<WebSocketMessage>() {
-            public int compare(WebSocketMessage msg1, WebSocketMessage msg2) {
-                return msg2.getDate().compareTo(msg1.getDate());
-            }
-        };
 
     private InboxDialog() throws IOException {
-        super("/fxml/Inbox.fxml", StageStyle.DECORATED);
-        getStage().setTitle(ContextVS.getMessage("messageVSInboxCaption"));
-        NotificationService.getInstance().registerToEventBus(new EventBusMessageListener());
+        super("/fxml/Inbox.fxml", ContextVS.getMessage("messageVSInboxCaption"));
+        EventBusService.getInstance().registerToEventBus(new EventBusMessageListener());
     }
 
-    private void load(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
-        Task<ObservableList<WebSocketMessage>> task = new WebSocketMessageLoader(privateKey, timeLimitedWebSocketMessage);
-        progressBar.progressProperty().bind(task.progressProperty());
-        progressBar.visibleProperty().bind(task.runningProperty());
-        task.setOnSucceeded(event -> { if(mainPane.getChildren().contains(progressBar))
-            mainPane.getChildren().remove(progressBar);});
-        new Thread(task).start();
-    }
+    static class MessageCell extends ListCell<InboxMessage> {
 
-    static class SocketMessageCell extends ListCell<WebSocketMessage> {
+        public MessageCell() { super(); }
 
-        public SocketMessageCell() { super(); }
-
-        @Override protected void updateItem(WebSocketMessage item, boolean empty) {
+        @Override protected void updateItem(InboxMessage item, boolean empty) {
             super.updateItem(item, empty);
             setText(null);  // No text in label of super class
             if (empty) {
@@ -82,94 +65,67 @@ public class InboxDialog extends DialogVS {
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        messageListView.setCellFactory(new Callback<ListView<WebSocketMessage>, ListCell<WebSocketMessage>>() {
-            @Override public ListCell<WebSocketMessage> call(ListView<WebSocketMessage> param) {
-                return new SocketMessageCell();
+        messageListView.setCellFactory(new Callback<ListView<InboxMessage>, ListCell<InboxMessage>>() {
+            @Override public ListCell<InboxMessage> call(ListView<InboxMessage> param) {
+                return new MessageCell();
             }
         });
     }
 
-    public static void show(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
+    public static void showDialog() {
         PlatformImpl.runLater(() -> {
             try {
                 if(dialog == null) dialog = new InboxDialog();
-                dialog.load(privateKey, timeLimitedWebSocketMessage);
-                dialog.show();
+                dialog.showMessages();
             } catch (Exception ex) { log.error(ex.getMessage(), ex); }
         });
+    }
+
+    private void showMessages() {
+        ObservableList<InboxMessage> messages = FXCollections.observableArrayList(
+                InboxService.getInstance().getMessageList());
+        Collections.sort(messages, msgComparator);
+        messageListView.setItems(messages);
+        dialog.show();
     }
 
     public static InboxDialog getInstance() {
         try {
             if(dialog == null) dialog = new InboxDialog();
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+        } catch(Exception ex) { log.error(ex.getMessage(), ex); }
         return dialog;
     }
 
-   public void processMessage(WebSocketMessage socketMsg) {
-        log.debug("processMessage - operation: " + socketMsg.getOperation() + " - state: " + socketMsg.getState() +
+   public void processMessage(InboxMessage inboxMessage) {
+        log.debug("processMessage - type: " + inboxMessage.getTypeVS() + " - state: " + inboxMessage.getState() +
             " - num. messages: " + messageListView.getItems().size());
-       switch(socketMsg.getState()) {
+       switch(inboxMessage.getState()) {
            case REMOVED:
-               List<WebSocketMessage> removedItems = new ArrayList<>();
+               List<InboxMessage> removedItems = new ArrayList<>();
                messageListView.getItems().stream().forEach(m -> {
-                   if(m.getDate().getTime() == socketMsg.getDate().getTime()) {
-                       log.debug("deleted: " + socketMsg.getDate().getTime());
+                   if(m.getDate().getTime() == inboxMessage.getDate().getTime()) {
+                       log.debug("deleted: " + inboxMessage.getDate().getTime());
                        removedItems.add(m);
                    }});
-               messageListView.getItems().removeAll(removedItems);
+               PlatformImpl.runLater(() -> messageListView.getItems().removeAll(removedItems));
                break;
            default: log.debug("message not processed");
        }
-        InboxService.getInstance().processMessage(socketMsg);
+       InboxService.getInstance().processMessage(inboxMessage);
     }
 
     class EventBusMessageListener {
-        @Subscribe public void notificationChanged(WebSocketMessage socketMsg) {
-            log.debug("EventBusMessageListener - notification: " + socketMsg.getOperation() +
-                    " - state: " + socketMsg.getState());
-            switch (socketMsg.getState()) {
+        @Subscribe public void notificationChanged(InboxMessage inboxMessage) {
+            log.debug("EventBusMessageListener - notification: " + inboxMessage.getTypeVS() +
+                    " - state: " + inboxMessage.getState());
+            switch (inboxMessage.getState()) {
                 case PROCESSED:
                     messageListView.getItems().stream().filter(socketMessage ->
-                        socketMsg.getDate().getTime() != socketMsg.getDate().getTime());
+                        inboxMessage.getDate().getTime() != inboxMessage.getDate().getTime());
                     break;
             }
         }
     }
 
-    public class WebSocketMessageLoader extends Task<ObservableList<WebSocketMessage>> {
-
-        PrivateKey privateKey;
-        private WebSocketMessage timeLimitedWebSocketMessage;
-        public WebSocketMessageLoader(PrivateKey privateKey, WebSocketMessage timeLimitedWebSocketMessage) {
-            this.privateKey = privateKey;
-            this.timeLimitedWebSocketMessage = timeLimitedWebSocketMessage;
-        }
-
-        @Override protected ObservableList<WebSocketMessage> call() throws Exception {
-            List<WebSocketMessage> messageList = null;
-            if(timeLimitedWebSocketMessage == null) messageList = InboxService.getInstance().getMessageList();
-            else messageList = Arrays.asList(timeLimitedWebSocketMessage);
-            ObservableList<WebSocketMessage> socketMessages = FXCollections.observableArrayList();
-            try {
-                int i = 0;
-                for(WebSocketMessage socketMsg : messageList) {
-                    updateProgress(i++, messageList.size());
-                    if(socketMsg.isEncrypted() && privateKey != null) {
-                        socketMsg.decryptMessage(privateKey);
-                    }
-                    socketMessages.add(socketMsg);
-                }
-                Collections.sort(socketMessages, msgComparator);
-                PlatformImpl.runLater(() -> messageListView.setItems(socketMessages));
-            } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
-                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-            return null;
-        }
-    }
 
 }

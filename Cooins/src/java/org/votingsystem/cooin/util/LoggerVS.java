@@ -1,10 +1,14 @@
 package org.votingsystem.cooin.util;
 
 import net.sf.json.JSONSerializer;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.DateUtils;
+import org.apache.log4j.Level;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Calendar;
@@ -72,6 +76,15 @@ public class LoggerVS {
         dataMap.put("dateCreated", DateUtils.getDayWeekDateStr(dateCreated));
         dataMap.put("validTo", DateUtils.getDayWeekDateStr(validTo));
         cooinsIssuedlog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
+    }
+
+    public static Logger getLogger(String fileName) throws IOException {
+        Logger result = Logger.getLogger(LoggerVS.class);
+        SimpleLayout layout = new SimpleLayout();
+        FileAppender appender = new FileAppender(layout, fileName, false);
+        result.addAppender(appender);
+        result.setLevel((Level) Level.DEBUG);
+        return result;
     }
 
 }
