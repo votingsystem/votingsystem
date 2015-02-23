@@ -11,15 +11,15 @@ public class EventBusService {
 
     private static Logger log = Logger.getLogger(EventBusService.class);
 
-    private static final String EVENT_BUS_IDENTIFIER = "NotificationManager_EVENT_BUS";
+    private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
     private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
     private static final EventBusService INSTANCE = new EventBusService();
 
-    public void registerToEventBus(Object eventBusListener) {
+    public void register(Object eventBusListener) {
         eventBus.register(eventBusListener);
     }
 
-    public void postToEventBus(Object eventData) {
+    public void post(Object eventData) {
         eventBus.post(eventData);
     }
 

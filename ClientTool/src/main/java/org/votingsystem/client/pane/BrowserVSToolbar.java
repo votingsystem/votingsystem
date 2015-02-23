@@ -53,7 +53,7 @@ public class BrowserVSToolbar extends HBox {
         }
     }
     public BrowserVSToolbar(Stage stage) {
-        EventBusService.getInstance().registerToEventBus(new EventBusConnectionListener());
+        EventBusService.getInstance().register(new EventBusConnectionListener());
         setSpacing(10);
         setAlignment(Pos.CENTER);
         getStyleClass().add("browser-toolbar");

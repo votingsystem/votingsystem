@@ -48,7 +48,7 @@ public class BrowserVSMenuButton extends MenuButton {
     }
 
     public BrowserVSMenuButton () {
-        EventBusService.getInstance().registerToEventBus(new EventBusConnectionListener());
+        EventBusService.getInstance().register(new EventBusConnectionListener());
         setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
         openFileMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.FOLDER_OPEN));

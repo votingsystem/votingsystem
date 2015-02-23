@@ -113,7 +113,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
-        EventBusService.getInstance().registerToEventBus(new EventBusCooinListener());
+        EventBusService.getInstance().register(new EventBusCooinListener());
         closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");

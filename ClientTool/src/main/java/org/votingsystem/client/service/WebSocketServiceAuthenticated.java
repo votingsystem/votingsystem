@@ -108,7 +108,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
             SessionService.getInstance().setIsConnected(false);
-            EventBusService.getInstance().postToEventBus(new ResponseVS(TypeVS.DISCONNECT));
+            EventBusService.getInstance().post(new ResponseVS(TypeVS.DISCONNECT));
         }
 
         @OnMessage public void onMessage(String message) {
@@ -247,7 +247,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 default:
                     log.debug("unprocessed socketMsg: " + socketMsg.getOperation());
             }
-            if(responseVS != null) EventBusService.getInstance().postToEventBus(responseVS);
+            if(responseVS != null) EventBusService.getInstance().post(responseVS);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
         }

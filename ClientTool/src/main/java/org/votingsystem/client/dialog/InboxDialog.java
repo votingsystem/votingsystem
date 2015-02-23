@@ -43,7 +43,7 @@ public class InboxDialog extends DialogVS {
 
     private InboxDialog() throws IOException {
         super("/fxml/Inbox.fxml", ContextVS.getMessage("messageVSInboxCaption"));
-        EventBusService.getInstance().registerToEventBus(new EventBusMessageListener());
+        EventBusService.getInstance().register(new EventBusMessageListener());
     }
 
     static class MessageCell extends ListCell<InboxMessage> {

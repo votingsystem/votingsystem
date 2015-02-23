@@ -174,7 +174,7 @@ public class InboxService {
                 if(password != null) {
                     try {
                         Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCooinList(), password);
-                        EventBusService.getInstance().postToEventBus(
+                        EventBusService.getInstance().post(
                                 inboxMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(inboxMessage);
                         WebSocketServiceAuthenticated.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
@@ -198,7 +198,7 @@ public class InboxService {
                 if(password != null) {
                     try {
                         Wallet.importPlainWallet(password);
-                        EventBusService.getInstance().postToEventBus(inboxMessage.setState(InboxMessage.State.PROCESSED));
+                        EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {

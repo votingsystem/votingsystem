@@ -69,7 +69,7 @@ public class BrowserVS extends VBox implements WebKitHost {
             log.debug("signatureService - OnSucceeded");
             ResponseVS responseVS = browserHelper.getSignatureService().getValue();
             if(responseVS.getStatus() != null) {
-                EventBusService.getInstance().postToEventBus(responseVS);
+                EventBusService.getInstance().post(responseVS);
             } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                 log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
             } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
