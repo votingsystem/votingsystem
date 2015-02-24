@@ -3,6 +3,7 @@ package org.votingsystem.client.util;
 import javafx.concurrent.Task;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.service.InboxService;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
 import java.security.PrivateKey;
@@ -28,6 +29,7 @@ public class InboxDecryptTask extends Task<ResponseVS> {
     }
 
     @Override protected ResponseVS call() throws Exception {
+        updateMessage(ContextVS.getMessage("decryptingMessagesMsg"));
         List<InboxMessage> messageList = null;
         if(timeLimitedInboxMessage == null) messageList = InboxService.getInstance().getEncryptedMessageList();
         else messageList = Arrays.asList(timeLimitedInboxMessage);

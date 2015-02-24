@@ -93,6 +93,8 @@ public class ContactFragment extends Fragment {
                     MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(
                             R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
                             getFragmentManager());
+                    isConnected = false;
+                    setContactButtonState(isDBUserVS);
                     break;
                 case ResponseVS.SC_WS_MESSAGE_SEND_OK:
                     MessageDialogFragment.showDialog(socketMsg.getStatusCode(), getString(

@@ -3,7 +3,6 @@ package org.votingsystem.client;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketSession;
@@ -108,7 +107,6 @@ public class VotingSystemApp extends Application {
 
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
-        EventBusService.getInstance();
         BrowserVS browserVS = BrowserVS.init(primaryStage);
         new Thread(() -> {
                 boolean loadedFromJar = false;

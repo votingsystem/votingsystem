@@ -21,6 +21,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Wallet;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
@@ -28,6 +29,7 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import static java.util.stream.Collectors.toList;
 import static org.votingsystem.client.BrowserVS.showMessage;
 
@@ -63,7 +65,9 @@ public class InboxService {
                 flush();
             } else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
             for(int i = 0; i < messageArray.size(); i++) {
-                messageList.add(new InboxMessage((net.sf.json.JSONObject) messageArray.get(i)));
+                InboxMessage inboxMessage = new InboxMessage((net.sf.json.JSONObject) messageArray.get(i));
+                if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
+                else messageList.add(inboxMessage);
             }
             List<Cooin> cooinList = Wallet.getCooinListFromPlainWallet();
             if(cooinList.size() > 0) {
@@ -85,7 +89,7 @@ public class InboxService {
                 showPasswordDialog(ContextVS.getMessage("inboxPinDialogMsg"), false);
             } else InboxDialog.showDialog();
         });
-        if(messageList.size() > 0) inboxButton.setVisible(true);
+        if(messageList.size() > 0 || encryptedMessageList.size() > 0) inboxButton.setVisible(true);
         else inboxButton.setVisible(false);
     }
 
@@ -115,7 +119,7 @@ public class InboxService {
                         log.error(ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
                     }
-                }
+                } else InboxDialog.showDialog();
                 timeLimitedInboxMessage = null;
             } else showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
                     " - " + ContextVS.getMessage("jksRequiredMsg")));
@@ -146,9 +150,9 @@ public class InboxService {
     }
 
     public void removeMessage(InboxMessage inboxMessage) {
-        messageList = messageList.stream().filter(m ->  !m.getUUID().equals(inboxMessage.getUUID())).
+        messageList = messageList.stream().filter(m ->  !m.getMessageID().equals(inboxMessage.getMessageID())).
                 collect(toList());
-        encryptedMessageList = encryptedMessageList.stream().filter(m ->  !m.getUUID().equals(inboxMessage.getUUID())).
+        encryptedMessageList = encryptedMessageList.stream().filter(m ->  !m.getMessageID().equals(inboxMessage.getMessageID())).
                 collect(toList());
         if(messageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
         else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
@@ -156,6 +160,7 @@ public class InboxService {
     }
 
     public void processMessage(InboxMessage inboxMessage) {
+        log.debug("processMessage - type: " + inboxMessage.getTypeVS() + " - state: " + inboxMessage.getState());
         PasswordDialog passwordDialog = null;
         String password = null;
         switch(inboxMessage.getState()) {
@@ -206,6 +211,9 @@ public class InboxService {
                         showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                 }
+                break;
+            case MESSAGEVS_TO_DEVICE:
+                showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());
                 break;
             default:log.debug(inboxMessage.getTypeVS() + " not processed");
         }

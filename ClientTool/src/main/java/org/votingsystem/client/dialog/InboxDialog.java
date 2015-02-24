@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jgzornoza
@@ -85,6 +88,7 @@ public class InboxDialog extends DialogVS {
         ObservableList<InboxMessage> messages = FXCollections.observableArrayList(
                 InboxService.getInstance().getMessageList());
         Collections.sort(messages, msgComparator);
+        messageListView.setItems(null);//to force refresh
         messageListView.setItems(messages);
         dialog.show();
     }
@@ -101,12 +105,8 @@ public class InboxDialog extends DialogVS {
             " - num. messages: " + messageListView.getItems().size());
        switch(inboxMessage.getState()) {
            case REMOVED:
-               List<InboxMessage> removedItems = new ArrayList<>();
-               messageListView.getItems().stream().forEach(m -> {
-                   if(m.getDate().getTime() == inboxMessage.getDate().getTime()) {
-                       log.debug("deleted: " + inboxMessage.getDate().getTime());
-                       removedItems.add(m);
-                   }});
+               List<InboxMessage> removedItems = messageListView.getItems().stream().filter(m ->
+                       m.getMessageID().equals(inboxMessage.getMessageID())).collect(toList());
                PlatformImpl.runLater(() -> messageListView.getItems().removeAll(removedItems));
                break;
            default: log.debug("message not processed");

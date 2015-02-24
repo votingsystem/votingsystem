@@ -182,9 +182,11 @@ public class WebSocketMessage implements Parcelable {
     public boolean isEncrypted() {
         if(isEncrypted != null) return isEncrypted;
         switch (statusCode) {
-            case ResponseVS.SC_WS_CONNECTION_INIT_ERROR: return false;
-            case ResponseVS.SC_WS_CONNECTION_INIT_OK: return false;
-            case ResponseVS.SC_WS_MESSAGE_SEND_OK: return false;
+            case ResponseVS.SC_WS_CONNECTION_INIT_ERROR:
+            case ResponseVS.SC_WS_CONNECTION_INIT_OK:
+            case ResponseVS.SC_WS_MESSAGE_SEND_OK:
+            case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
+                return false;
             default:
                 switch(operation) {
                     case WEB_SOCKET_CLOSE:

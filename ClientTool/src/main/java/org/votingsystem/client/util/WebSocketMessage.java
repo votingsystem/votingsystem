@@ -73,7 +73,7 @@ public class WebSocketMessage {
         if(socketMsgJSON.has("deviceFromName")) this.deviceFromName = socketMsgJSON.getString("deviceFromName");
         if(socketMsgJSON.has("deviceFromId")) this.deviceFromId = socketMsgJSON.getLong("deviceFromId");
         if(socketMsgJSON.has("UUID")) this.setUUID(socketMsgJSON.getString("UUID"));
-        if(socketMsgJSON.has("date")) this.date = DateUtils.getDayWeekDate(socketMsgJSON.getString("date"));
+        if(socketMsgJSON.has("date")) this.date = DateUtils.getDateFromString(socketMsgJSON.getString("date"));
         if(socketMsgJSON.has("isEncrypted")) this.isEncrypted = socketMsgJSON.getBoolean("isEncrypted");
         if(socketMsgJSON.has("message")) {
             Object messageObject = socketMsgJSON.get("message");

@@ -27,14 +27,19 @@ public class InboxMessage<T> {
     private Date date;
     private State state = State.PENDING;
     private String UUID;
+    private String messageID = java.util.UUID.randomUUID().toString();
     private T data;
     private Boolean isEncrypted = false;
     private Boolean isTimeLimited = false;
 
-    public InboxMessage() {}
+    public InboxMessage() { }
 
     public InboxMessage(WebSocketMessage webSocketMessage) {
         load(webSocketMessage);
+    }
+
+    public String getMessageID() {
+        return messageID;
     }
 
     private void load(WebSocketMessage webSocketMessage) {
@@ -53,10 +58,11 @@ public class InboxMessage<T> {
         if(jsonObject.has("typeVS")) typeVS = TypeVS.valueOf(jsonObject.getString("typeVS"));
         if(jsonObject.has("operation")) typeVS = TypeVS.valueOf(jsonObject.getString("operation"));
         if(jsonObject.has("date")) date = DateUtils.getDateFromString(jsonObject.getString("date"));
+        if(jsonObject.has("messageID")) messageID = jsonObject.getString("messageID");
         try {
             load(new WebSocketMessage(jsonObject.getJSONObject("webSocketMessage")));
         } catch(Exception ex) { log.error(ex.getMessage(), ex);}
-        message = jsonObject.getString("message");
+        if(jsonObject.has("message")) message = jsonObject.getString("message");
         UUID = jsonObject.getString("UUID");
     }
 
@@ -149,6 +155,7 @@ public class InboxMessage<T> {
         result.put("message", message);
         result.put("typeVS", typeVS.toString());
         if(webSocketMessage != null) result.put("webSocketMessage", webSocketMessage.getMessageJSON());
+        result.put("messageID", messageID);
         result.put("UUID", getUUID());
         return result;
     }

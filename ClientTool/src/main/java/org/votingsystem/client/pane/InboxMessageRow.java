@@ -84,6 +84,11 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
                 messageButton.setText(ContextVS.getMessage("importToWalletLbl"));
                 descriptionLbl.setText(inboxMessage.getMessage());
                 break;
+            case MESSAGEVS_TO_DEVICE:
+                dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate()));
+                messageButton.setText(ContextVS.getMessage("decryptMsgLbl"));
+                descriptionLbl.setVisible(false);
+                break;
             default:
                 descriptionLbl.setText(inboxMessage.getTypeVS().toString());
                 messageButton.setText(inboxMessage.getTypeVS().toString());
