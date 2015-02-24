@@ -30,7 +30,8 @@ public class BrowserVSAction implements DebugAction {
                 LOGD(TAG, "doInBackground");
                 Intent intent = new Intent(appContext, BrowserVSActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(ContextVS.URL_KEY, appContext.getCooinServer().getServerURL());
+                //intent.putExtra(ContextVS.URL_KEY, appContext.getCooinServer().getServerURL());
+                intent.putExtra(ContextVS.URL_KEY,"http://cooins:8086/Cooins/testing/testSocket");
                 appContext.startActivity(intent);
                 return null;
             }

@@ -155,7 +155,7 @@ public class WalletFragment extends Fragment {
                             currency);
                 }
                 contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
-                        "<p style='text-align:center; margin:0px;font-size:0.9em;'>" +
+                        "<p style='text-align:center; margin:0px;font-size:1.1em;color:#005b92;'>" +
                         contentFormatted + "</p></body></html>";
                 ((WebView)tagData.findViewById(R.id.tag_info)).loadData(
                         contentFormatted, "text/html; charset=UTF-8", null);

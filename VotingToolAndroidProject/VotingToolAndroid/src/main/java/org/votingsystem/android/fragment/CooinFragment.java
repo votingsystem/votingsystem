@@ -53,7 +53,7 @@ public class CooinFragment extends Fragment {
 
     private AppContextVS contextVS;
     private Cooin cooin;
-    private TextView cooin_amount, cooin_state, cooin_currency, date_info;
+    private TextView cooin_amount, cooin_state, cooin_currency, date_info, hash_cert;
     private SMIMEMessage cooinSMIME;
     private String broadCastId = null;
 
@@ -143,6 +143,7 @@ public class CooinFragment extends Fragment {
         cooin_state = (TextView)rootView.findViewById(R.id.cooin_state);
         cooin_currency = (TextView)rootView.findViewById(R.id.cooin_currency);
         date_info = (TextView)rootView.findViewById(R.id.date_info);
+        hash_cert = (TextView)rootView.findViewById(R.id.hash_cert);
         initCooinScreen(cooin);
         setHasOptionsMenu(true);
         return rootView;
@@ -150,6 +151,7 @@ public class CooinFragment extends Fragment {
 
     private void initCooinScreen(Cooin cooin) {
         try {
+            hash_cert.setText(cooin.getHashCertVS());
             cooin_amount.setText(cooin.getAmount().toPlainString());
             cooin_currency.setText(cooin.getCurrencyCode());
             cooinSMIME = cooin.getReceipt();

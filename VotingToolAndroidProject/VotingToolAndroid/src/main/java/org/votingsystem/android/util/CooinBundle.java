@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author jgzornoza
@@ -54,8 +55,8 @@ public class CooinBundle {
         Collections.sort(this.tagCooinList, cooinComparator);
     }
 
-    public List<Cooin> getCooinList() {
-        List<Cooin> result = new ArrayList<>(tagCooinList);
+    public Set<Cooin> getCooinSet() {
+        Set<Cooin> result = new HashSet<>(tagCooinList);
         if(wildTagCooinList != null) result.addAll(wildTagCooinList);
         return result;
     }
@@ -166,7 +167,7 @@ public class CooinBundle {
     }
 
     public void updateWallet(Cooin leftOverCooin, AppContextVS contextVS) throws Exception {
-        List<Cooin> cooinListToRemove = getCooinList();
+        Set<Cooin> cooinListToRemove = getCooinSet();
         Wallet.removeCooinList(cooinListToRemove, contextVS);
         if(leftOverCooin != null) Wallet.updateWallet(
                 new HashSet<Cooin>(Arrays.asList(leftOverCooin)),contextVS);

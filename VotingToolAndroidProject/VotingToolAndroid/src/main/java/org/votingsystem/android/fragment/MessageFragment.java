@@ -1,7 +1,9 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -21,13 +23,20 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.util.CooinBundle;
+import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.android.util.Utils;
+import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
 import java.util.Date;
+import java.util.List;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -40,6 +49,7 @@ public class MessageFragment extends Fragment {
 
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
+    private TypeVS typeVS;
     private CooinBundle cooinBundle;
     private MessageContentProvider.State messageState;
     private Long messageId;
@@ -61,11 +71,19 @@ public class MessageFragment extends Fragment {
         TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            switch(typeVS) {
+            switch(responseVS.getTypeVS()) {
+                case COOIN:
+                    try {
+                        List<Cooin> cooinList = Wallet.getCooinList((String) responseVS.getData(),
+                                (AppContextVS) getActivity().getApplicationContext());
+                        if(cooinList != null) updateWallet();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                    }
+                    break;
             }
-        } else {
-            setProgressDialogVisible(null, null, false);
-            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
         }
     };
@@ -89,16 +107,18 @@ public class MessageFragment extends Fragment {
                     cursor.getColumnIndex(MessageContentProvider.JSON_COL)));
             socketMessage = new WebSocketMessage(decryptedJSON);
             messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
-            TypeVS typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
+            typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
                     MessageContentProvider.TYPE_COL)));
             switch (typeVS) {
                 case MESSAGEVS:
-                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.message_lbl) +
+                     if(isVisibleToUser) ((ActionBarActivity)getActivity()).getSupportActionBar().
+                             setTitle(getString(R.string.message_lbl) +
                             " - " + socketMessage.getFrom());
                     message_content.setText(socketMessage.getMessage());
                     break;
                 case COOIN_WALLET_CHANGE:
-                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
+                    if(isVisibleToUser) ((ActionBarActivity)getActivity()).getSupportActionBar().
+                            setTitle(getString(R.string.wallet_lbl));
                     cooinBundle = CooinBundle.load(socketMessage.getCooinList());
                     message_content.setText(cooinBundle.getAmount().toPlainString() + " " +
                             cooinBundle.getCurrencyCode());
@@ -129,6 +149,18 @@ public class MessageFragment extends Fragment {
                 " - messageState: " + messageState);
         super.setUserVisibleHint(isVisibleToUser);
         this.isVisibleToUser = isVisibleToUser;
+        if(isVisibleToUser && typeVS != null) {
+            switch (typeVS) {//to avoid problems with the pager
+                case MESSAGEVS:
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                            R.string.message_lbl) + " - " + socketMessage.getFrom());
+                    break;
+                case COOIN_WALLET_CHANGE:
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                            R.string.wallet_lbl));
+                    break;
+            }
+        }
     }
 
     @Override public void onPause() {
@@ -167,10 +199,40 @@ public class MessageFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.save_to_wallet:
-
+                updateWallet();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateWallet() {
+        LOGD(TAG + ".updateWallet", "updateWallet");
+        if(Wallet.getCooinList() == null) {
+            PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
+                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
+        } else {
+            try {
+                ResponseVS responseVS = Wallet.updateWallet(cooinBundle.getCooinSet(), contextVS);
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.error_lbl), responseVS.getMessage(),
+                            getFragmentManager());
+                } else {
+                    String msg = getString(R.string.save_to_wallet_ok_msg, cooinBundle.getAmount().toString() + " " +
+                            cooinBundle.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
+                            MsgUtils.getTagVSMessage(cooinBundle.getTagVS(), contextVS);
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            getString(R.string.save_to_wallet_lbl), msg, getActivity());
+                    builder.setPositiveButton(getString(R.string.accept_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    getActivity().onBackPressed();
+                                }
+                            });
+                    UIUtils.showMessageDialog(builder);
+                }
+            } catch (Exception ex) { ex.printStackTrace(); }
+        }
     }
 
 }

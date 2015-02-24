@@ -13,6 +13,7 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -235,9 +236,20 @@ public class Wallet {
 
     }
 
-    public static void updateWallet(Set<Cooin> cooinSet, AppContextVS contextVS) throws Exception {
-        cooinList.addAll(cooinSet);
-        Wallet.saveWallet(new JSONArray(Wallet.getCooinSerialized(cooinList)), null, contextVS);
+    public static ResponseVS updateWallet(Set<Cooin> cooinSet, AppContextVS contextVS) throws Exception {
+        Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
+        for(Cooin cooin : cooinList) {
+            cooinMap.put(cooin.getHashCertVS(), cooin);
+        }
+        for(Cooin cooin : cooinSet) {
+            if(cooinMap.containsKey(cooin.getHashCertVS())) return new ResponseVS(ResponseVS.SC_ERROR,
+                    contextVS.getString(R.string.cooin_repeated_wallet_error_msg, cooin.getAmount().toString() +
+                    " " + cooin.getCurrencyCode()));
+            else cooinMap.put(cooin.getHashCertVS(), cooin);
+        }
+        Wallet.saveWallet(new JSONArray(Wallet.getCooinSerialized(cooinMap.values())), null, contextVS);
+        cooinList = new ArrayList<>(cooinMap.values());
+        return new ResponseVS(ResponseVS.SC_OK);
     }
 
     public static BigDecimal getAvailableForTagVS(String currencyCode, String tagVS) {

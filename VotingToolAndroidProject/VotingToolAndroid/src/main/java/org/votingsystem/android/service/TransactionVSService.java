@@ -354,7 +354,7 @@ public class TransactionVSService extends IntentService {
                 SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
                         Base64.decode(responseJSON.getString("receipt"))));
                 transactionRequest.setAnonymousSignedTransactionReceipt(receipt,
-                        cooinBundle.getCooinList());
+                        cooinBundle.getCooinSet());
                 cooinBundle.updateWallet(leftOverCooin, contextVS);
                 responseVS.setSMIME(receipt);
             } else if(ResponseVS.SC_COOIN_EXPENDED == responseVS.getStatusCode()) {

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -326,7 +327,7 @@ public class TransactionRequest {
     }
 
     public void setAnonymousSignedTransactionReceipt(SMIMEMessage smimeMessage,
-            List<Cooin> cooinList) throws JSONException, ExceptionVS {
+            Collection<Cooin> cooinList) throws JSONException, ExceptionVS {
         JSONObject messageJSON = new  JSONObject(smimeMessage.getSignedContent());
         if(TypeVS.valueOf(messageJSON.getString("operation")) != TypeVS.COOIN_SEND) throw
                 new ExceptionVS("Expected operation: " + TypeVS.COOIN_SEND + " - found: " +

@@ -332,6 +332,7 @@
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
     <string name="cooin_expended_send_error_msg">los cooins ya habían sido consumidos</string>
     <string name="cooin_repeated_error_msg">en la operación se han mezclado cooins usados, por favor, vuelva a intentarlo</string>
+    <string name="cooin_repeated_wallet_error_msg">ha intentado añadir al monedero un billete de %1$s que ya estaba guardado</string>
     <string name="browswevs_lbl">sistema de votación</string>
     <string name="test_lbl">test</string>
     <string name="enter_signature_pin_msg">introduzca el pin de su dispositivo de firma</string>
@@ -531,4 +532,5 @@
     <string name="messages_lbl">mensajes</string>
     <string name="wallet_change_lbl">cambio de monedero</string>
     <string name="save_to_wallet_lbl">guardar en monedero</string>
+    <string name="save_to_wallet_ok_msg">los \'%1$s\' se encuentran ahora en su monedero</string>
 </resources>

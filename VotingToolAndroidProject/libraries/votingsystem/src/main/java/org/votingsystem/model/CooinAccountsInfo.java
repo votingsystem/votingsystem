@@ -103,21 +103,23 @@ public class CooinAccountsInfo {
         }
     }
 
-    private void processBalances() throws ExceptionVS {
+    private void checkBalances() throws ExceptionVS {
         balancesInfo = new HashMap<String, Map<String, TagVSInfo>>();
         Set<String> currencySet = balancesToMap.keySet();
+        BigDecimal wildTagExpendedInTags = BigDecimal.ZERO;
         for(String currency : currencySet) {
             Map<String, TagVSInfo> currencyInfoMap = new HashMap<String, TagVSInfo>();
             Map<String, TagVS> currencyMap = balancesToMap.get(currency);
             for(TagVS tagVS: currencyMap.values()) {
                 TagVSInfo tagVSInfo = new TagVSInfo(tagVS.getName(), currency);
-                tagVSInfo.setTotal(tagVS.getTotal());
+                tagVSInfo.setTotal(balancesCashMap.get(currency).get(tagVS.getName()).getTotal());
                 tagVSInfo.setTimeLimited(tagVS.getTimeLimited());
+                /*tagVSInfo.setTotal(tagVS.getTotal());
                 if(balancesFromMap != null && balancesFromMap.get(currency) != null &&
                         balancesFromMap.get(currency).get(tagVS.getName()) != null) {
                     tagVSInfo.setFrom(balancesFromMap.get(currency).get(tagVS.getName()).getTotal());
                 }
-                tagVSInfo.checkResult(balancesCashMap.get(currency).get(tagVS.getName()).getTotal());
+                tagVSInfo.checkResult(balancesCashMap.get(currency).get(tagVS.getName()).getTotal());*/
                 currencyInfoMap.put(tagVS.getName(), tagVSInfo);
             }
             balancesInfo.put(currency, currencyInfoMap);
@@ -139,7 +141,7 @@ public class CooinAccountsInfo {
                 parseBalanceMap(jsonData.getJSONObject("balancesTo")));
         if(jsonData.has("balancesCash")) result.setBalancesCashMap(
                 parseBalanceMap(jsonData.getJSONObject("balancesCash")));
-        result.processBalances();
+        result.checkBalances();
         return result;
     }
 
