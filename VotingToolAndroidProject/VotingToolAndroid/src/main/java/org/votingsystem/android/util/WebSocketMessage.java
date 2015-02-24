@@ -238,9 +238,13 @@ public class WebSocketMessage implements Parcelable {
         }
         if(decryptedJSON.has("cooinList")) {
             try {
-                cooinList = Wallet.getCooinList(decryptedJSON.getJSONArray("cooinList"));
+                cooinList = Wallet.getCooinListFromCertificationRequest(decryptedJSON.getJSONArray("cooinList"));
             }catch(Exception ex) { ex.printStackTrace(); }
         }
+    }
+
+    public List<Cooin> getCooinList() {
+        return cooinList;
     }
 
     public byte[] getEncryptedAESParams() throws JSONException {

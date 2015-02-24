@@ -16,20 +16,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
+import org.votingsystem.android.util.CooinBundle;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.util.Date;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -42,6 +40,7 @@ public class MessageFragment extends Fragment {
 
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
+    private CooinBundle cooinBundle;
     private MessageContentProvider.State messageState;
     private Long messageId;
     private String broadCastId;
@@ -99,7 +98,10 @@ public class MessageFragment extends Fragment {
                     message_content.setText(socketMessage.getMessage());
                     break;
                 case COOIN_WALLET_CHANGE:
-                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_change_lbl));
+                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
+                    cooinBundle = CooinBundle.load(socketMessage.getCooinList());
+                    message_content.setText(cooinBundle.getAmount().toPlainString() + " " +
+                            cooinBundle.getCurrencyCode());
                     break;
             }
             messageState =  MessageContentProvider.State.valueOf(cursor.getString(
@@ -165,6 +167,7 @@ public class MessageFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.save_to_wallet:
+
                 break;
         }
         return super.onOptionsItemSelected(item);

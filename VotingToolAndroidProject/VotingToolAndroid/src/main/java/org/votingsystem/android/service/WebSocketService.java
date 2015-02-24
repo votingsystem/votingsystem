@@ -235,6 +235,8 @@ public class WebSocketService extends Service {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
+            LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
+                    " - type: " + socketMsg.getOperation() + " - serviceCaller: " + socketMsg.getServiceCaller());
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
@@ -283,7 +285,9 @@ public class WebSocketService extends Service {
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                         }
                     } else if(socketMsg.getTypeVS() == TypeVS.MESSAGEVS_TO_DEVICE) {
-
+                        MessageContentProvider.insert(getContentResolver(), socketMsg);
+                        PrefUtils.addNumMessagesNotReaded(contextVS, 1);
+                        Utils.showNewMessageNotification(contextVS);
                     }
                     break;
             }

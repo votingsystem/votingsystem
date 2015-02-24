@@ -30,6 +30,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
+                android:singleLine="true"
                 android:layout_weight="1"
                 android:text="try"/>
             <TextView android:id="@+id/message_state"

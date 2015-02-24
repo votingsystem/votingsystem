@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessagesPagerActivity;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
+import org.votingsystem.android.util.CooinBundle;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
@@ -169,8 +170,11 @@ public class MessagesGridFragment extends Fragment implements
                             messageSubject = socketMessage.getFrom();
                             break;
                         case COOIN_WALLET_CHANGE:
-                            logoId = R.drawable.fa_money_32;
-                            messageSubject = getString(R.string.wallet_change_lbl);
+                            CooinBundle cooinBundle = CooinBundle.load(socketMessage.getCooinList());
+                            logoId = R.drawable.fa_money_24;
+                            messageSubject = getString(R.string.wallet_lbl) + " - " +
+                                    cooinBundle.getAmount().toPlainString() + " " +
+                                    cooinBundle.getCurrencyCode();
                             break;
                     }
                     ((ImageView) view.findViewById(R.id.message_icon)).setImageResource(logoId);

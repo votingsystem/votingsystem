@@ -456,6 +456,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
 
     @Override protected void onResume() {
         super.onResume();
+        messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(contextVS));
         PrefUtils.registerPreferenceChangeListener(this, this);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));

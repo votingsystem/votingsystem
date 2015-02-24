@@ -13,7 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.json.JSONObject;
 import org.votingsystem.android.activity.MessageActivity;
-import org.votingsystem.android.activity.MessagesMainActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.service.BootStrapService;
 import org.votingsystem.android.service.WebSocketService;

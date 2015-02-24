@@ -529,6 +529,6 @@
     <string name="cooin_expended_msg">\'%1$s\' para \'%2$s\' que ya habían sido consumidos</string>
     <string name="cooin_lapsed_msg">\'%1$s\' para \'%2$s\' que ya habían caducado</string>
     <string name="messages_lbl">mensajes</string>
-    <string name="wallet_change_lbl">intercambio de dinero</string>
+    <string name="wallet_change_lbl">cambio de monedero</string>
     <string name="save_to_wallet_lbl">guardar en monedero</string>
 </resources>

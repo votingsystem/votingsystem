@@ -14,6 +14,7 @@ import org.votingsystem.android.activity.WalletActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.android.util.CooinBundle;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Utils;
@@ -333,7 +334,7 @@ public class TransactionVSService extends IntentService {
         ResponseVS responseVS = null;
         try {
             CooinServer cooinServer = contextVS.getCooinServer();
-            Wallet.CooinBundle cooinBundle = Wallet.getCooinBundleForTransaction(
+            CooinBundle cooinBundle = Wallet.getCooinBundleForTransaction(
                     transactionRequest.getAmount(), transactionRequest.getCurrencyCode(),
                     transactionRequest.getTagVS());
             Map requestMap = new HashMap();
