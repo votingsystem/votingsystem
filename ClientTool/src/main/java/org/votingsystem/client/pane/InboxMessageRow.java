@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.CooinStatusChecker;
 import org.votingsystem.client.util.InboxMessage;
@@ -53,7 +52,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
         messageButton.setWrapText(true);
         removeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) ->
-                InboxDialog.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED)));
+                InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED)));
         if(inboxMessage.isTimeLimited()) {
             Task task = new Task() {
                 @Override protected Object call() throws Exception {
@@ -64,7 +63,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
                                         InboxService.TIME_LIMITED_MESSAGE_LIVE - secondsOpened.getAndIncrement())));
                         Thread.sleep(1000);
                     }
-                    InboxDialog.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
+                    InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
                     return null;
                 }
             };
@@ -99,12 +98,12 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
     @Override public void processCooinStatus(Cooin cooin, Integer statusCode) {
         if(ResponseVS.SC_OK != statusCode) {
             log.debug("Cooin '" + cooin.getHashCertVS() + "' - statusCode: " + statusCode);
-            InboxDialog.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
+            InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
         }
     }
 
     public void onClickMessageButton(ActionEvent actionEvent) {
-        InboxDialog.getInstance().processMessage(inboxMessage);
+        InboxService.getInstance().processMessage(inboxMessage);
     }
 
     public HBox getMainPane() {

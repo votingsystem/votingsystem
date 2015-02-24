@@ -156,6 +156,7 @@ public class InboxService {
                 collect(toList());
         if(messageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
         else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
+        InboxDialog.getInstance().removeMessage(inboxMessage);
         flush();
     }
 
