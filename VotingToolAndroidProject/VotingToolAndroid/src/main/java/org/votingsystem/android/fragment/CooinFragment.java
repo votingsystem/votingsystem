@@ -58,7 +58,7 @@ public class CooinFragment extends Fragment {
             date_info.setText(getString(R.string.cooin_date_info,
                     DateUtils.getDateStr(cooin.getDateFrom(), "dd MMM yyyy' 'HH:mm"),
                     DateUtils.getDateStr(cooin.getDateTo(), "dd MMM yyyy' 'HH:mm")));
-            if(Cooin.State.OK != cooin.getState()) {
+            if(cooin.getState() != null && Cooin.State.OK != cooin.getState()) {
                 cooin_state.setText(MsgUtils.getCooinStateMessage(cooin, getActivity()));
                 cooin_state.setVisibility(View.VISIBLE);
             }

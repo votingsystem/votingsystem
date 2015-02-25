@@ -19,11 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
+import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.CooinBundle;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
@@ -35,9 +35,10 @@ import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -50,12 +51,16 @@ public class MessageFragment extends Fragment {
 
     public static final String TAG = MessageFragment.class.getSimpleName();
 
+    private static final int CONTENT_VIEW_ID = 1000000;
+
     private WeakReference<CooinFragment> cooinRef;
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
     private TypeVS typeVS;
-    private CooinBundle cooinBundle;
+    private Cooin  cooin;
     private MessageContentProvider.State messageState;
+    private TextView message_content;
+    private LinearLayout fragment_container;
     private Long messageId;
     private String broadCastId;
     private boolean isVisibleToUser = false;
@@ -97,8 +102,8 @@ public class MessageFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
-        LinearLayout message_data_container = (LinearLayout)rootView.findViewById(R.id.message_data_container);
-        TextView message_content = (TextView)rootView.findViewById(R.id.message_content);
+        fragment_container = (LinearLayout)rootView.findViewById(R.id.fragment_container);
+        message_content = (TextView)rootView.findViewById(R.id.message_content);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, null, null, null);
@@ -122,18 +127,7 @@ public class MessageFragment extends Fragment {
                     message_content.setText(socketMessage.getMessage());
                     break;
                 case COOIN_WALLET_CHANGE:
-                    if(isVisibleToUser) ((ActionBarActivity)getActivity()).getSupportActionBar().
-                            setTitle(getString(R.string.wallet_lbl));
-                    cooinRef = new WeakReference<CooinFragment>(new CooinFragment());
-                    Bundle args = new Bundle();
-                    args.putSerializable(ContextVS.COOIN_KEY, socketMessage.getCooinList().iterator().next());
-                    cooinRef.get().setArguments(args);
-                    message_data_container.setVisibility(View.GONE);
-                    getFragmentManager().beginTransaction().add(R.id.fragment_container, cooinRef.get(),
-                            CooinFragment.class.getSimpleName()).commit();
-                    /*cooinBundle = CooinBundle.load(socketMessage.getCooinList());
-                    message_content.setText(cooinBundle.getAmount().toPlainString() + " " +
-                            cooinBundle.getCurrencyCode());*/
+                    loadCooinWalletChangeData();
                     break;
             }
             messageState =  MessageContentProvider.State.valueOf(cursor.getString(
@@ -168,9 +162,30 @@ public class MessageFragment extends Fragment {
                             R.string.message_lbl) + " - " + socketMessage.getFrom());
                     break;
                 case COOIN_WALLET_CHANGE:
-                    ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
-                            R.string.wallet_lbl));
+                    loadCooinWalletChangeData();
                     break;
+            }
+        }
+    }
+
+    private void loadCooinWalletChangeData() {
+        if(isVisibleToUser) {
+            cooin = socketMessage.getCooinList().iterator().next();
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                    R.string.wallet_change_lbl));
+            String fragmentTag = CooinFragment.class.getSimpleName() + messageId;
+            message_content.setVisibility(View.GONE);
+            if(cooinRef == null || cooinRef.get() == null) {
+                fragment_container.removeAllViews();
+                LinearLayout tempView = new LinearLayout(getActivity());
+                tempView.setId(CONTENT_VIEW_ID + messageId.intValue());
+                fragment_container.addView(tempView);
+                cooinRef = new WeakReference<CooinFragment>(new CooinFragment());
+                Bundle args = new Bundle();
+                args.putSerializable(ContextVS.COOIN_KEY, cooin);
+                cooinRef.get().setArguments(args);
+                getFragmentManager().beginTransaction().add(tempView.getId(),
+                        cooinRef.get(), fragmentTag).commit();
             }
         }
     }
@@ -206,8 +221,7 @@ public class MessageFragment extends Fragment {
             case android.R.id.home:
                 break;
             case R.id.delete_message:
-                getActivity().getContentResolver().delete(MessageContentProvider.getMessageURI(
-                        messageId), null, null);
+                MessageContentProvider.deleteById(messageId, getActivity());
                 getActivity().onBackPressed();
                 return true;
             case R.id.save_to_wallet:
@@ -224,15 +238,18 @@ public class MessageFragment extends Fragment {
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.COOIN);
         } else {
             try {
-                ResponseVS responseVS = Wallet.updateWallet(cooinBundle.getCooinSet(), contextVS);
+                ResponseVS responseVS = Wallet.updateWallet(new HashSet(Arrays.asList(cooin)), contextVS);
+                JSONObject responseJSON = null;
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                             getString(R.string.error_lbl), responseVS.getMessage(),
                             getFragmentManager());
+                    responseJSON = socketMessage.getResponse(ResponseVS.SC_ERROR, responseVS.getMessage(),
+                            TypeVS.COOIN_WALLET_CHANGE, contextVS);
                 } else {
-                    String msg = getString(R.string.save_to_wallet_ok_msg, cooinBundle.getAmount().toString() + " " +
-                            cooinBundle.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
-                            MsgUtils.getTagVSMessage(cooinBundle.getTagVS(), contextVS);
+                    String msg = getString(R.string.save_to_wallet_ok_msg, cooin.getAmount().toString() + " " +
+                            cooin.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
+                            MsgUtils.getTagVSMessage(cooin.getSignedTagVS(), contextVS);
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.save_to_wallet_lbl), msg, getActivity());
                     builder.setPositiveButton(getString(R.string.accept_lbl),
@@ -242,7 +259,17 @@ public class MessageFragment extends Fragment {
                                 }
                             });
                     UIUtils.showMessageDialog(builder);
+                    responseJSON = socketMessage.getResponse(ResponseVS.SC_OK, cooin.getHashCertVS(),
+                            TypeVS.COOIN_WALLET_CHANGE, contextVS);
                 }
+                if(responseJSON != null) {
+                    Intent startIntent = new Intent(getActivity(), WebSocketService.class);
+                    startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_RESPONSE);
+                    startIntent.putExtra(ContextVS.MESSAGE_KEY, responseJSON.toString());
+                    startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                    getActivity().startService(startIntent);
+                }
+                MessageContentProvider.deleteById(messageId, getActivity());
             } catch (Exception ex) { ex.printStackTrace(); }
         }
     }

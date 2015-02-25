@@ -174,6 +174,11 @@ public class MessageContentProvider extends ContentProvider {
         return rowCount;
     }
 
+    public static void deleteById(Long messageId, Context context) {
+        context.getContentResolver().delete(MessageContentProvider.getMessageURI(
+                messageId), null, null);
+    }
+
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
 

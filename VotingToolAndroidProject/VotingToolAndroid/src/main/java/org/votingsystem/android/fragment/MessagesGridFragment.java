@@ -173,7 +173,7 @@ public class MessagesGridFragment extends Fragment implements
                         case COOIN_WALLET_CHANGE:
                             CooinBundle cooinBundle = CooinBundle.load(socketMessage.getCooinList());
                             logoId = R.drawable.fa_money_24;
-                            messageSubject = getString(R.string.wallet_lbl) + " - " +
+                            messageSubject = getString(R.string.wallet_change_lbl) + " - " +
                                     cooinBundle.getAmount().toPlainString() + " " +
                                     cooinBundle.getCurrencyCode();
                             break;

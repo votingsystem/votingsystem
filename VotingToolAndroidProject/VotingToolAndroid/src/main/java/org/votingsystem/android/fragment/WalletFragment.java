@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -134,16 +136,13 @@ public class WalletFragment extends Fragment {
         adapter.setItemList(cooinList);
         adapter.notifyDataSetChanged();
         if(menu != null) menu.removeItem(R.id.open_wallet);
-        LinearLayout summary = (LinearLayout) rootView.findViewById(R.id.summary);
         Map<String, Map<String, Map>> currencyMap = Wallet.getCurrencyMap();
+        ((LinearLayout)rootView.findViewById(R.id.summary)).removeAllViews();
         for(String currency : currencyMap.keySet()) {
             LinearLayout currencyData = (LinearLayout) getActivity().getLayoutInflater().inflate(
                     R.layout.wallet_currency_summary, null);
-            ((LinearLayout)rootView.findViewById(R.id.summary)).addView(currencyData);
             Map<String, Map> tagInfoMap = currencyMap.get(currency);
             for(String tag : tagInfoMap.keySet()) {
-                LinearLayout tagData = (LinearLayout) getActivity().getLayoutInflater().inflate(
-                        R.layout.wallet_tag_summary, null);
                 String contentFormatted = getString(R.string.tag_info,
                         ((BigDecimal)tagInfoMap.get(tag).get("total")).toPlainString(), currency,
                         MsgUtils.getTagVSMessage(tag, getActivity()));
@@ -152,13 +151,14 @@ public class WalletFragment extends Fragment {
                             ((BigDecimal)tagInfoMap.get(tag).get("timeLimited")).toPlainString(),
                             currency);
                 }
-                contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
-                        "<p style='text-align:center; margin:0px;font-size:1.1em;color:#005b92;'>" +
-                        contentFormatted + "</p></body></html>";
-                ((WebView)tagData.findViewById(R.id.tag_info)).loadData(
-                        contentFormatted, "text/html; charset=UTF-8", null);
-                ((LinearLayout)currencyData.findViewById(R.id.tag_info)).addView(tagData);
+                contentFormatted = "<div style='text-align:center; margin:0px;font-size:1.1em;color:#005b92;'>" +
+                        contentFormatted + "</div>";
+                TextView tagDataTextView = new TextView(getActivity());
+                tagDataTextView.setGravity(Gravity.CENTER);
+                tagDataTextView.setText(Html.fromHtml(contentFormatted));
+                ((LinearLayout)currencyData.findViewById(R.id.tag_info)).addView(tagDataTextView);
             }
+            ((LinearLayout)rootView.findViewById(R.id.summary)).addView(currencyData);
         }
     }
 

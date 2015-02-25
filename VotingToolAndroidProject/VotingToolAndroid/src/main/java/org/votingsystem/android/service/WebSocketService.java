@@ -358,6 +358,8 @@ public class WebSocketService extends Service {
                             }
                         }
                         break;
+                    case WEB_SOCKET_RESPONSE:
+                        break;
                     default:
                         LOGD(TAG + ".onStartCommand() ", "unknown operation: " + typeVS.toString());
                 }

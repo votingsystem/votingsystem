@@ -36,8 +36,10 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

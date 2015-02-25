@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.mail.MessagingException;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 
 /**
  * @author jgzornoza
@@ -377,6 +379,10 @@ public class WebSocketMessage implements Parcelable {
     public JSONObject getResponse(Integer statusCode, String message, TypeVS typeVS,
             AppContextVS contextVS) throws Exception {
         WebSocketSession socketSession = contextVS.getWSSession(UUID);
+        if(socketSession == null) {
+            LOGD(TAG + ".getResponse", "socketSession not found message lost");
+            return null;
+        }
         socketSession.setTypeVS(typeVS);
         Map result = new HashMap();
         result.put("sessionId", sessionId);
