@@ -29,7 +29,7 @@ public class ProgressDialog extends VBox {
     public ProgressDialog(Task<ResponseVS> progressTask) {
         setAlignment(Pos.CENTER);
         Label progressMessageLbl = new Label();
-        progressMessageLbl.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #888;-fx-wrap-text: true;");
+        progressMessageLbl.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-text-fill: #888;-fx-wrap-text: true;");
         progressMessageLbl.setWrapText(true);
         VBox.setVgrow(progressMessageLbl, Priority.ALWAYS);
         ProgressBar progressBar = new ProgressBar();

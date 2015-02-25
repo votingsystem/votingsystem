@@ -15,7 +15,7 @@ import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.SessionService;
-import org.votingsystem.client.service.WebSocketServiceAuthenticated;
+import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -90,7 +90,7 @@ public class BrowserVSMenuButton extends MenuButton {
         connectMenuItem  = new MenuItem(ContextVS.getMessage("connectLbl"));
         connectMenuItem.setVisible(false);
         connectMenuItem.setGraphic(Utils.getImage(FontAwesome.Glyph.FLASH));
-        connectMenuItem.setOnAction(event -> WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(
+        connectMenuItem.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(
                 true, SessionService.getInstance().getConnectDataMap()));
 
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));

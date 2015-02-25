@@ -39,13 +39,13 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
+public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(WebSocketServiceAuthenticated.class);
+    private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class);
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
-    private static WebSocketServiceAuthenticated instance;
+    private static WebSocketAuthenticatedService instance;
     private final ClientManager client = ClientManager.createClient();
     private final String keyStorePassw = "";
     private ActorVS targetServer;
@@ -53,7 +53,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
     private UserVS userVS;
     private String connectionMessage = null;
 
-    private WebSocketServiceAuthenticated(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
+    private WebSocketAuthenticatedService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
         if(targetServer.getWebSocketURL().startsWith("wss")) {
             log.debug("settings for SECURE connetion");
@@ -77,9 +77,9 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
         } else log.debug("settings for INSECURE connection");
     }
 
-    public static WebSocketServiceAuthenticated getInstance() {
+    public static WebSocketAuthenticatedService getInstance() {
         try {
-            if(instance == null) instance =  new WebSocketServiceAuthenticated(ContextVS.getInstance().
+            if(instance == null) instance =  new WebSocketAuthenticatedService(ContextVS.getInstance().
                     getVotingSystemSSLCerts(), ContextVS.getInstance().getCooinServer());
         } catch (Exception ex) { log.error(ex.getMessage(), ex);}
         return instance;
@@ -102,7 +102,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
 
         @OnOpen public void onOpen(Session session) throws IOException {
             session.getBasicRemote().sendText(connectionMessage);
-            WebSocketServiceAuthenticated.this.session = session;
+            WebSocketAuthenticatedService.this.session = session;
         }
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
@@ -298,7 +298,7 @@ public class WebSocketServiceAuthenticated extends Service<ResponseVS> {
                 responseVS = timeStamper.call();
                 smimeMessage = timeStamper.getSMIME();
                 connectionMessage = WebSocketMessage.getAuthenticationRequest(smimeMessage, randomUUID).toString();
-                PlatformImpl.runLater(() -> WebSocketServiceAuthenticated.this.restart());
+                PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
             } catch(InterruptedException ex) {
                 log.error(ex.getMessage(), ex);
                 broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);

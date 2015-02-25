@@ -15,7 +15,7 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.client.service.WebSocketServiceAuthenticated;
+import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.BrowserVSMenuButton;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -69,7 +69,7 @@ public class BrowserVSToolbar extends HBox {
         connectionButton.setVisible(false);
         connectionButton.setOnAction(event -> {
             Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
-            optionButton.setOnAction(event1 -> WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(false, null));
+            optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false, null));
             showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
         });
 

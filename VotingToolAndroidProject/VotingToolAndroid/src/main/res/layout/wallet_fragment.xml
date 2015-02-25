@@ -8,7 +8,7 @@
 
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         android:textColor="@color/drawer_list_item"
         android:gravity="center_vertical|center_horizontal"
@@ -23,7 +23,7 @@
             android:textColor="@color/wallet_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
             android:orientation="horizontal"></LinearLayout>
         <FrameLayout android:id="@+id/gridContainer"
             android:paddingBottom="20dp"

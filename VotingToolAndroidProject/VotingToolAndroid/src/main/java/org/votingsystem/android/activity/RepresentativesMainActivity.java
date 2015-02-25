@@ -42,7 +42,7 @@ public class RepresentativesMainActivity extends ActivityBase {
 
     private AppContextVS contextVS = null;
     private String broadCastId = RepresentativesMainActivity.class.getSimpleName();
-    private WeakReference<RepresentativeGridFragment> weakRefToFragment;
+    private WeakReference<RepresentativeGridFragment> representativeGridRef;
 
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -193,7 +193,7 @@ public class RepresentativesMainActivity extends ActivityBase {
 
     @Override public void requestDataRefresh() {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
-        RepresentativeGridFragment fragment = weakRefToFragment.get();
+        RepresentativeGridFragment fragment = representativeGridRef.get();
         fragment.fetchItems(fragment.getOffset());
     }
 

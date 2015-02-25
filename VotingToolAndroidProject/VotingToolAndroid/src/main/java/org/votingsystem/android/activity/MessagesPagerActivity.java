@@ -67,6 +67,11 @@ public class MessagesPagerActivity extends ActionBarActivity {
         }
     }
 
+    @Override public void onPause() {
+        super.onPause();
+        if(cursor != null && !cursor.isClosed()) cursor.close();
+    }
+
     class MessagePagerAdapter extends FragmentStatePagerAdapter {
 
         private Cursor cursor;

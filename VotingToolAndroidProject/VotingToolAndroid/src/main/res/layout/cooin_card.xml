@@ -23,7 +23,7 @@
                 <TextView android:id="@+id/amount"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textSize="17sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:gravity="center" />
                 <TextView android:id="@+id/currencyCode"
@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
                     android:gravity="center"
-                    android:textSize="17sp"
+                    android:textSize="18sp"
                     android:singleLine="true"
                     android:ellipsize="marquee"/>
             </LinearLayout>
@@ -48,7 +48,7 @@
                 <TextView android:id="@+id/cooin_state"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     android:singleLine="true"
                     android:layout_weight="1"

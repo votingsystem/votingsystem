@@ -20,7 +20,7 @@ public class WalletActivity extends ActivityBase {
 
     public static final String TAG = WalletActivity.class.getSimpleName();
 
-    WeakReference<WalletFragment> weakRefToFragment;
+    WeakReference<WalletFragment> walletRef;
     private AppContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class WalletActivity extends ActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         WalletFragment fragment = new WalletFragment();
-        weakRefToFragment = new WeakReference<WalletFragment>(fragment);
+        walletRef = new WeakReference<WalletFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object)fragment).getClass().getSimpleName()).commit();

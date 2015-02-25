@@ -445,18 +445,21 @@ public abstract class ActivityBase extends ActionBarActivity implements
     }
 
     private void setConnectionStatusUI() {
-        if(contextVS.hasWebSocketConnection()) {
-            connectionStatusText.setText(getString(R.string.connected_lbl));
-            connectionStatusView.setVisibility(View.VISIBLE);
-        } else {
-            connectionStatusText.setText(getString(R.string.disconnected_lbl));
-            connectionStatusView.setVisibility(View.GONE);
+        if(connectionStatusText != null && connectionStatusView != null) {
+            if(contextVS.hasWebSocketConnection()) {
+                connectionStatusText.setText(getString(R.string.connected_lbl));
+                connectionStatusView.setVisibility(View.VISIBLE);
+            } else {
+                connectionStatusText.setText(getString(R.string.disconnected_lbl));
+                connectionStatusView.setVisibility(View.GONE);
+            }
         }
     }
 
     @Override protected void onResume() {
         super.onResume();
-        messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(contextVS));
+        if(messageDrawerItemTextView != null) messageDrawerItemTextView.setText(
+                MsgUtils.getMessagesDrawerItemMessage(contextVS));
         PrefUtils.registerPreferenceChangeListener(this, this);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));

@@ -11,6 +11,8 @@ import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.google.common.eventbus.EventBus;
+
 import org.json.JSONObject;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
@@ -74,6 +76,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public static final String TAG = AppContextVS.class.getSimpleName();
 
+    private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
+    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
+
     private State state = State.WITHOUT_CSR;
     private boolean hasWebSocketConnection;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
@@ -121,6 +126,18 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             HttpHelper.init(sslServerCert);
         } catch(Exception ex) { ex.printStackTrace(); }
 	}
+
+    public void registerToEventBus(Object eventBusListener) {
+        eventBus.register(eventBusListener);
+    }
+
+    public void unregisterFromEventBus(Object eventBusListener) {
+        eventBus.unregister(eventBusListener);
+    }
+
+    public void postToEventBus(Object eventData) {
+        eventBus.post(eventData);
+    }
 
     public X509Certificate getSSLServerCert() {
         return sslServerCert;
@@ -299,13 +316,13 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
               String timeStampServiceURL) {
         ResponseVS responseVS = null;
         try {
-            String userVS = getUserVS().getNif();
+            String userNIF = getUserVS().getNif();
             LOGD(TAG + ".signMessage", "subject: " + subject);
             KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     (X509Certificate) keyEntry.getCertificateChain()[0],
                     SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userVS, toUser,
+            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNIF, toUser,
                     textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     timeStampServiceURL , this);

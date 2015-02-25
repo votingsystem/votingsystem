@@ -54,7 +54,7 @@ public class EventVSMainActivity extends ActivityBase {
 
 	public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
-    WeakReference<EventVSGridFragment> weakRefToFragment;
+    WeakReference<EventVSGridFragment> eventVSGridRef;
     private boolean mSpinnerConfigured = false;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +66,7 @@ public class EventVSMainActivity extends ActivityBase {
         setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
-        weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
+        eventVSGridRef = new WeakReference<EventVSGridFragment>(fragment);
         if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
         fragment.setArguments(args);
@@ -139,7 +139,7 @@ public class EventVSMainActivity extends ActivityBase {
 
     @Override public void requestDataRefresh() {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
-        EventVSGridFragment fragment = weakRefToFragment.get();
+        EventVSGridFragment fragment = eventVSGridRef.get();
         fragment.fetchItems(fragment.getOffset());
     }
 
@@ -151,7 +151,7 @@ public class EventVSMainActivity extends ActivityBase {
     }
     public void requestDataRefresh(EventVS.State eventState) {
         LOGD(TAG + ".requestDataRefresh", "eventState: " + eventState.toString());
-        EventVSGridFragment fragment = weakRefToFragment.get();
+        EventVSGridFragment fragment = eventVSGridRef.get();
         fragment.fetchItems(eventState);
     }
 
@@ -188,7 +188,7 @@ public class EventVSMainActivity extends ActivityBase {
 
     @Override public boolean onSearchRequested() {
         Bundle appData = new Bundle();
-        EventVSGridFragment fragment = weakRefToFragment.get();
+        EventVSGridFragment fragment = eventVSGridRef.get();
         appData.putSerializable(ContextVS.STATE_KEY, fragment.getState());
         startSearch(null, false, appData, false);
         return true;

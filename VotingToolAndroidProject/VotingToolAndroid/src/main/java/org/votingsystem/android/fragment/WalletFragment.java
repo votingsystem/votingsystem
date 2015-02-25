@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.FragmentContainerActivity;
+import org.votingsystem.android.activity.CooinActivity;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 public class WalletFragment extends Fragment {
@@ -65,7 +64,7 @@ public class WalletFragment extends Fragment {
                         try {
                             cooinList = Wallet.getCooinList((String) responseVS.getData(),
                                     (AppContextVS) getActivity().getApplicationContext());
-                            Utils.launchCooinStatusCheck(broadCastId, getActivity());
+                            Utils.launchCooinStatusCheck(broadCastId, null, getActivity());
                             printSummary();
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -77,9 +76,9 @@ public class WalletFragment extends Fragment {
             } else {
                 switch(responseVS.getTypeVS()) {
                     case COOIN_CHECK:
+                        cooinList = Wallet.getCooinList();
+                        printSummary();
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                            cooinList = Wallet.getCooinList();
-                            printSummary();
                             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                                     getString(R.string.error_lbl), responseVS.getMessage(),
                                     getFragmentManager());
@@ -104,8 +103,7 @@ public class WalletFragment extends Fragment {
         });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(FRAGMENT_KEY, CooinFragment.class.getName());
+                Intent intent = new Intent(getActivity(), CooinActivity.class);
                 intent.putExtra(ContextVS.COOIN_KEY, cooinList.get(position));
                 startActivity(intent);
             }

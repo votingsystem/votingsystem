@@ -42,7 +42,7 @@ public class ContactsActivity extends ActivityBase {
 
 	public static final String TAG = ContactsActivity.class.getSimpleName();
 
-    private WeakReference<ContactsGridFragment> weakRefToFragment;
+    private WeakReference<ContactsGridFragment> contactsGridRef;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -53,7 +53,7 @@ public class ContactsActivity extends ActivityBase {
         setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         ContactsGridFragment fragment = new ContactsGridFragment();
-        weakRefToFragment = new WeakReference<ContactsGridFragment>(fragment);
+        contactsGridRef = new WeakReference<ContactsGridFragment>(fragment);
         if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
         fragment.setArguments(args);

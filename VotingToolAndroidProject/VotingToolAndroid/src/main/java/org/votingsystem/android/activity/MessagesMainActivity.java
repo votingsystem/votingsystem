@@ -20,7 +20,7 @@ public class MessagesMainActivity extends ActivityBase {
 
     public static final String TAG = MessagesMainActivity.class.getSimpleName();
 
-    WeakReference<MessagesGridFragment> weakRefToFragment;
+    WeakReference<MessagesGridFragment> messagesGridRef;
     private AppContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class MessagesMainActivity extends ActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         MessagesGridFragment fragment = new MessagesGridFragment();
-        weakRefToFragment = new WeakReference<MessagesGridFragment>(fragment);
+        messagesGridRef = new WeakReference<MessagesGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object)fragment).getClass().getSimpleName()).commit();

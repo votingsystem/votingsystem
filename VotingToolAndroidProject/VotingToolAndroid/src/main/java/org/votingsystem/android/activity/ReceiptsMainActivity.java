@@ -20,7 +20,7 @@ public class ReceiptsMainActivity extends ActivityBase {
 
     public static final String TAG = ReceiptsMainActivity.class.getSimpleName();
 
-    WeakReference<ReceiptGridFragment> weakRefToFragment;
+    WeakReference<ReceiptGridFragment> receiptGridRef;
     private AppContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class ReceiptsMainActivity extends ActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         ReceiptGridFragment fragment = new ReceiptGridFragment();
-        weakRefToFragment = new WeakReference<ReceiptGridFragment>(fragment);
+        receiptGridRef = new WeakReference<ReceiptGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object)fragment).getClass().getSimpleName()).commit();

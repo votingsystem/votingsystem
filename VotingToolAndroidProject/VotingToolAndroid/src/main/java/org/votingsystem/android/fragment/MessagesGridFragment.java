@@ -46,6 +46,7 @@ public class MessagesGridFragment extends Fragment implements
     private MessageGridAdapter adapter = null;
     private int menuItemSelected;
     private GridView gridView;
+    private Cursor cursor;
     private static final int loaderId = 0;
 
     CharSequence[] gridItemMenuOptions;
@@ -75,7 +76,7 @@ public class MessagesGridFragment extends Fragment implements
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
-        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(),MessagesPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
@@ -87,7 +88,7 @@ public class MessagesGridFragment extends Fragment implements
         builder.setItems(gridItemMenuOptions, new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int position) {
                 //gridItemMenuOptions[position]
-                Cursor cursor = adapter.getCursor();
+                cursor = adapter.getCursor();
                 cursor.moveToPosition(position);
                 Long messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
                 LOGD(TAG + ".onLongListItemClick", "position: " + position + " - messageId: " +
@@ -106,7 +107,7 @@ public class MessagesGridFragment extends Fragment implements
             selection = MessageContentProvider.TYPE_COL + "=? ";
             selectionArgs = new String[]{messageType.toString()};
         }
-        Cursor cursor = getActivity().getContentResolver().query(
+        cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
         getLoaderManager().getLoader(loaderId).deliverResult(cursor);
     }
@@ -207,6 +208,10 @@ public class MessagesGridFragment extends Fragment implements
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
+    }
+
+    @Override public void onPause() {
+        super.onPause();
     }
 
 }

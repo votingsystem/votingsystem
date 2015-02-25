@@ -48,8 +48,8 @@ public class MessageDialog extends VBox {
         messageLabel.setWrapText(true);
         messageWebView = new WebView();
         messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-        messageWebView.setPrefHeight(200);
-        setPrefWidth(500);
+        messageWebView.setPrefHeight(150);
+        setPrefWidth(450);
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);
         messageWebView.setStyle("-fx-word-wrap:break-word;");

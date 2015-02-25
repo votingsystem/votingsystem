@@ -17,7 +17,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -26,7 +28,6 @@ import org.votingsystem.android.util.CooinBundle;
 import org.votingsystem.android.util.MsgUtils;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
-import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketMessage;
 import org.votingsystem.model.ContextVS;
@@ -34,6 +35,8 @@ import org.votingsystem.model.Cooin;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ResponseVS;
+
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +50,7 @@ public class MessageFragment extends Fragment {
 
     public static final String TAG = MessageFragment.class.getSimpleName();
 
+    private WeakReference<CooinFragment> cooinRef;
     private AppContextVS contextVS;
     private WebSocketMessage socketMessage;
     private TypeVS typeVS;
@@ -93,6 +97,7 @@ public class MessageFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
+        LinearLayout message_data_container = (LinearLayout)rootView.findViewById(R.id.message_data_container);
         TextView message_content = (TextView)rootView.findViewById(R.id.message_content);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         cursor = getActivity().getContentResolver().query(
@@ -119,9 +124,16 @@ public class MessageFragment extends Fragment {
                 case COOIN_WALLET_CHANGE:
                     if(isVisibleToUser) ((ActionBarActivity)getActivity()).getSupportActionBar().
                             setTitle(getString(R.string.wallet_lbl));
-                    cooinBundle = CooinBundle.load(socketMessage.getCooinList());
+                    cooinRef = new WeakReference<CooinFragment>(new CooinFragment());
+                    Bundle args = new Bundle();
+                    args.putSerializable(ContextVS.COOIN_KEY, socketMessage.getCooinList().iterator().next());
+                    cooinRef.get().setArguments(args);
+                    message_data_container.setVisibility(View.GONE);
+                    getFragmentManager().beginTransaction().add(R.id.fragment_container, cooinRef.get(),
+                            CooinFragment.class.getSimpleName()).commit();
+                    /*cooinBundle = CooinBundle.load(socketMessage.getCooinList());
                     message_content.setText(cooinBundle.getAmount().toPlainString() + " " +
-                            cooinBundle.getCurrencyCode());
+                            cooinBundle.getCurrencyCode());*/
                     break;
             }
             messageState =  MessageContentProvider.State.valueOf(cursor.getString(

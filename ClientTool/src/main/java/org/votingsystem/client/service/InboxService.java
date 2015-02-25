@@ -183,7 +183,7 @@ public class InboxService {
                         EventBusService.getInstance().post(
                                 inboxMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(inboxMessage);
-                        WebSocketServiceAuthenticated.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
+                        WebSocketAuthenticatedService.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
                                 getResponse(ResponseVS.SC_OK, null).toString());
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();

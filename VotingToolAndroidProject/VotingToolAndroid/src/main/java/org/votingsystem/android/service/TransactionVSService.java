@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -75,6 +76,7 @@ public class TransactionVSService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         String pin = arguments.getString(ContextVS.PIN_KEY);
+        String hashCertVS = arguments.getString(ContextVS.HASH_CERTVS_KEY);
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         TransactionRequest transactionRequest = null;
         if(arguments.getString(ContextVS.JSON_DATA_KEY) != null) {
@@ -90,7 +92,7 @@ public class TransactionVSService extends IntentService {
                     updateUserInfo(serviceCaller);
                     break;
                 case COOIN_CHECK:
-                    checkCooins(serviceCaller);
+                    checkCooins(serviceCaller, hashCertVS);
                     break;
                 case COOIN_REQUEST:
                     cooinRequest(serviceCaller, CooinBatch.getRequestBatch(transactionVS,
@@ -400,11 +402,13 @@ public class TransactionVSService extends IntentService {
         }
     }
 
-    private void checkCooins(String serviceCaller) {
+    private void checkCooins(String serviceCaller, String hashCertVS) {
         LOGD(TAG + ".checkCooins", "checkCooins");
         ResponseVS responseVS = null;
         try {
-            List<String> hashCertVSList = Wallet.getHashCertVSList();
+            List<String> hashCertVSList = null;
+            if(hashCertVS != null) hashCertVSList = Arrays.asList(hashCertVS);
+            else hashCertVSList = Wallet.getHashCertVSList();
             if(hashCertVSList == null) {
                 LOGD(TAG + ".checkCooins", "empty hashCertVSList");
                 return;
@@ -414,25 +418,33 @@ public class TransactionVSService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONArray result = new JSONArray(responseVS.getMessage());
                 List<String> cooinWithErrorList = new ArrayList<>();
-                List<Cooin> cooinWithErrors = null;
+                List<String> cooinOKList = new ArrayList<>();
+                List<Cooin> cooinFromWalletWithErrors = null;
                 for(int i = 0; i < result.length(); i++) {
                     JSONObject cooinData = result.getJSONObject(i);
-                    if(Cooin.State.OK != Cooin.State.valueOf(cooinData.getString("state"))) {
+                    if(Cooin.State.OK == Cooin.State.valueOf(cooinData.getString("state"))) {
+                        cooinOKList.add(cooinData.getString("hashCertVS"));
+                    } else {
                         cooinWithErrorList.add(cooinData.getString("hashCertVS"));
                     }
-                    if(cooinWithErrorList.size() > 0) {
-                        cooinWithErrors = Wallet.updateCooinWithErrors(cooinWithErrorList, contextVS);
-                    }
                 }
-                if(cooinWithErrors != null && !cooinWithErrors.isEmpty()) {
+                if(cooinWithErrorList.size() > 0) {
+                    cooinFromWalletWithErrors = Wallet.updateCooinWithErrors(cooinWithErrorList, contextVS);
+                }
+                if(cooinFromWalletWithErrors != null && !cooinFromWalletWithErrors.isEmpty()) {
                     responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCooinsWithErrorMsg(
-                            cooinWithErrors, contextVS));
+                            cooinFromWalletWithErrors, contextVS));
                     responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
                             serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
                     Intent intent = new Intent(this, WalletActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                     startActivity(intent);
+                } else if(!cooinOKList.isEmpty()) {
+                    Wallet.updateCooinOK(cooinOKList, contextVS);
+                    responseVS = new ResponseVS(ResponseVS.SC_OK);
+                    responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.COOIN_CHECK);
+                    contextVS.broadcastResponse(responseVS);
                 }
             }
         } catch(Exception ex) {  ex.printStackTrace(); }

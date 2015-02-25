@@ -62,6 +62,7 @@ public class ContextVS {
     public static final String JS_COMMAND_KEY = "JS_COMMAND_KEY";
     public static final String FORM_DATA_KEY = "FORM_DATA";
     public static final String JSON_DATA_KEY = "JSON_DATA";
+    public static final String HASH_CERTVS_KEY = "HASH_CERTVS_KEY";
     public static final String NIF_KEY = "NIF";
     public static final String USER_KEY = "USER_KEY";
     public static final String EMAIL_KEY = "EMAIL_KEY";

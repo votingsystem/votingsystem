@@ -121,18 +121,39 @@ public class Wallet {
         return expendedCooin;
     }
 
-    public static List<Cooin> updateCooinWithErrors(List<String> cooinListToRemove,
-            AppContextVS contextVS) throws Exception {
-        List<Cooin> errorList = new ArrayList<>();
+    public static Map<String, Cooin> getCooinMap() {
         Map<String, Cooin> cooinMap = new HashMap<String, Cooin>();
         for(Cooin cooin:cooinList) {
             cooinMap.put(cooin.getHashCertVS(), cooin);
         }
+        return cooinMap;
+    }
+
+    public static List<Cooin> updateCooinWithErrors(List<String> cooinListToRemove,
+            AppContextVS contextVS) throws Exception {
+        List<Cooin> errorList = new ArrayList<>();
+        Map<String, Cooin> cooinMap = getCooinMap();
         for(String hashCertVS : cooinListToRemove) {
             Cooin removedCooin = cooinMap.remove(hashCertVS);
             if(removedCooin != null)  {
                 LOGD(TAG +  ".updateCooinWithErrors", "removed cooin: " + hashCertVS);
                 errorList.add(removedCooin);
+            }
+        }
+        cooinList = new ArrayList<>(cooinMap.values());
+        Wallet.saveWallet(new JSONArray(getCooinSerialized(cooinList)), null, contextVS);
+        return errorList;
+    }
+
+    public static List<Cooin> updateCooinOK(List<String> cooinListOK,
+                AppContextVS contextVS) throws Exception {
+        List<Cooin> errorList = new ArrayList<>();
+        Map<String, Cooin> cooinMap = getCooinMap();
+        for(String hashCertVS : cooinListOK) {
+            Cooin cooin = cooinMap.get(hashCertVS);
+            if(cooin != null)  {
+                LOGD(TAG +  ".updateCooinOK", "cooin OK: " + hashCertVS);
+                cooin.setState(Cooin.State.OK);
             }
         }
         cooinList = new ArrayList<>(cooinMap.values());

@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.model.Cooin;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionRequest;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessage;

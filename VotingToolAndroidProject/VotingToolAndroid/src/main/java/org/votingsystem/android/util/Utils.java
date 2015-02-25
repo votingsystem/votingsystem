@@ -93,10 +93,11 @@ public class Utils {
         return arguments;
     }
 
-    public static void launchCooinStatusCheck(String broadCastId, Context context) {
+    public static void launchCooinStatusCheck(String broadCastId, String hashCertVS, Context context) {
         Intent startIntent = new Intent(context, TransactionVSService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.COOIN_CHECK);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.HASH_CERTVS_KEY, hashCertVS);
         context.startService(startIntent);
     }
 

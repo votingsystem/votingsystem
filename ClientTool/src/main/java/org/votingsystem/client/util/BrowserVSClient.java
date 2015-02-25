@@ -12,7 +12,7 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketService;
-import org.votingsystem.client.service.WebSocketServiceAuthenticated;
+import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -51,11 +51,11 @@ public class BrowserVSClient {
             BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
-                    WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(
+                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(
                             true, operationVS.getDocument());
                     break;
                 case DISCONNECT:
-                    WebSocketServiceAuthenticated.getInstance().setConnectionEnabled(false, null);
+                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false, null);
                     break;
                 case FILE_FROM_URL:
                     BrowserVS.getInstance().processOperationVS(null, operationVS);

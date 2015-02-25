@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
-import org.votingsystem.client.service.WebSocketServiceAuthenticated;
+import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinTransactionBatch;
@@ -223,7 +223,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
             try {
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = DeviceVS.parse(deviceDataJSON);
-                WebSocketServiceAuthenticated.getInstance().sendMessage(WebSocketMessage.getCooinWalletChangeRequest(
+                WebSocketAuthenticatedService.getInstance().sendMessage(WebSocketMessage.getCooinWalletChangeRequest(
                         deviceVS, Arrays.asList(cooin)).toString());
                 countDownLatch.await();
                 WebSocketSession webSocketSession = VotingSystemApp.getInstance().getWSSession(deviceVS.getId());

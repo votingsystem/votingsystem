@@ -122,7 +122,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = publishSMIME(operationVS);
                             break;
                         case MESSAGEVS:
-                            responseVS = WebSocketServiceAuthenticated.getInstance().sendMessageVS(operationVS);
+                            responseVS = WebSocketAuthenticatedService.getInstance().sendMessageVS(operationVS);
                             break;
                         case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
