@@ -194,6 +194,8 @@ public class Cooin implements Serializable  {
     public void initSigner(byte[] csrBytes) throws Exception {
         certificationRequest.initSigner(csrBytes);
         x509AnonymousCert = certificationRequest.getCertificate();
+        validFrom = x509AnonymousCert.getNotBefore();
+        validTo = x509AnonymousCert.getNotAfter();
         JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.COOIN_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
         certSubject.addDateInfo(x509AnonymousCert);

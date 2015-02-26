@@ -10,8 +10,10 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CooinServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
+
 import java.util.HashSet;
 import java.util.Set;
+
 import static java.util.stream.Collectors.toSet;
 
 /**

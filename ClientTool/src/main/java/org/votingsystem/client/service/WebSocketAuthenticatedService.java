@@ -171,6 +171,14 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         else return false;
     }
 
+    public boolean isConnectedWithAlert() {
+        if(isConnected()) return true;
+        else {
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage(""));
+            return false;
+        }
+    }
+
     public void sendMessage(String message) {
         try {
             session.getBasicRemote().sendText(message);

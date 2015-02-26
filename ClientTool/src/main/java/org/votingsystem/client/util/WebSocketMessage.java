@@ -10,11 +10,9 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSONUtils;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.Wallet;
 
 import javax.mail.Header;

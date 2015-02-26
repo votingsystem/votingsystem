@@ -561,8 +561,8 @@ public class ContextVS {
     public static String getMessage(String key, Object... arguments) {
         try {
             String pattern = appProperties.getProperty(key);
-            if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-            else return pattern;
+            if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes("ISO-8859-1"), "UTF-8");
+            else return new String(pattern.getBytes("ISO-8859-1"), "UTF-8");
         } catch(Exception ex) {
             log.error("### Value not found for key: " + key);
             return "---" + key + "---";
