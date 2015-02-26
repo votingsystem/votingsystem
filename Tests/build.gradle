@@ -42,7 +42,7 @@ dependencies {
     testCompile 'junit:junit:4.11'
 
     def javaFXPath = "${System.getenv()['JAVA_HOME']}/jre/lib/ext/jfxrt.jar"
-    if(!file(javaFXPath).exists()) println ("=== Java 8 runtime missing ===")
+    if(!file(javaFXPath).exists()) println ("=== Java 8 runtime missing - $javaFXPath not found ===")
     compile files(javaFXPath)
 }
 

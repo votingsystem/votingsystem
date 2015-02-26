@@ -167,7 +167,9 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     }
 
     @Override public void processCooinStatus(CooinCheckResponse response) {
-        log.debug("======= processCooinStatus: "  + response.getStatusCode());
+        if(ResponseVS.SC_OK == response.getStatusCode()) {
+            showMessage(ResponseVS.SC_OK, ContextVS.getMessage("walletCheckResultOKMsg"));
+        } else showMessage(ResponseVS.SC_ERROR, response.getMessage());
     }
 
 }

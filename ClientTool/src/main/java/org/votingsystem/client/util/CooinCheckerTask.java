@@ -38,8 +38,9 @@ public class CooinCheckerTask extends Task<CooinCheckResponse> {
         try {
             updateMessage(ContextVS.getMessage("checkingCooinsMsg"));
             ResponseVS responseVS = Utils.checkServer(cooinSet.iterator().next().getCooinServerURL());
+            CooinCheckResponse response;
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                CooinCheckResponse response =  CooinCheckResponse.load(responseVS);
+                response =  CooinCheckResponse.load(responseVS);
                 if(listener != null) listener.processCooinStatus(response);
                 return response;
             }
@@ -60,8 +61,10 @@ public class CooinCheckerTask extends Task<CooinCheckResponse> {
                     } else errorSet.add(cooinData.getString("hashCertVS"));
                 }
                 Integer statusCode = errorSet.size() > 0? ResponseVS.SC_ERROR : ResponseVS.SC_OK;
-                return new CooinCheckResponse(statusCode, null, OKSet, errorSet);
-            } else return CooinCheckResponse.load(responseVS);
+                response = new CooinCheckResponse(statusCode, null, OKSet, errorSet);
+            } else response = CooinCheckResponse.load(responseVS);
+            if(listener != null) listener.processCooinStatus(response);
+            return response;
         } catch (Exception ex) {
             ex.printStackTrace();
             return CooinCheckResponse.load(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage()));

@@ -165,7 +165,7 @@ public class ResponseVS<T> implements Serializable {
     public JSON getMessageJSON() {
         if(messageJSON != null) return messageJSON;
         String message = getMessage();
-        if(message != null) return JSONSerializer.toJSON(message);
+        if(message != null) return JSONSerializer.toJSON(message.trim());
         return null;
     }
 

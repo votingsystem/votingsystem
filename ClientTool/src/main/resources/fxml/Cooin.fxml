@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <VBox fx:id="mainPane" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="glassBox" stylesheets="@../css/cooin-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox styleClass="main-dialog">
@@ -28,11 +31,7 @@
             </HBox>
             <VBox fx:id="content" alignment="CENTER" styleClass="cooin-content">
                <children>
-                  <Label fx:id="cooinHashLbl" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" styleClass="cooinHash" text="cooinHash" textAlignment="CENTER">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
+                  <TextField fx:id="cooinHashText" alignment="CENTER" editable="false" styleClass="cooinHash" text="cooinHash" />
                   <HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
                      <children>
                         <HBox alignment="CENTER">

@@ -104,8 +104,12 @@ public class MessageDialog extends VBox {
         isHTMLView(false);
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {
+                decoratedPane.setCaption(null);
                 messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
-            } else messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+            } else {
+                decoratedPane.setCaption(ContextVS.getMessage("errorLbl"));
+                messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+            }
             messageLabel.setGraphicTextGap(15);
         }
         show();
