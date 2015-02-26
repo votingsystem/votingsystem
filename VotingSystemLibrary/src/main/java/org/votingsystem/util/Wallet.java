@@ -25,7 +25,8 @@ public class Wallet {
 
     private static Logger log = Logger.getLogger(Wallet.class);
 
-    private static JSONArray wallet;
+    private static Set<Cooin> wallet;
+
 
     public static void saveCooinsToDir(Collection<Cooin> cooinCollection, String walletPath) throws Exception {
         for(Cooin cooin : cooinCollection) {
@@ -61,15 +62,15 @@ public class Wallet {
         return result;
     }
 
-    public static List<Cooin> getCooinListFromCertificationRequest(JSONArray jsonArray) throws Exception {
-        List<Cooin> cooinList = new ArrayList<Cooin>();
+    public static Set<Cooin> getCooinSetFromCertificationRequest(JSONArray jsonArray) throws Exception {
+        Set<Cooin> cooinSet = new HashSet<>();
         for(int i = 0; i < jsonArray.size(); i++) {
             byte[] serializedCertificationRequest = jsonArray.getJSONObject(i).getString("certificationRequest").getBytes();
             CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
                     serializedCertificationRequest);
-            cooinList.add(Cooin.load(certificationRequest));
+            cooinSet.add(Cooin.load(certificationRequest));
         }
-        return cooinList;
+        return cooinSet;
     }
 
     public static JSONArray getPlainWallet() throws Exception {
@@ -78,17 +79,29 @@ public class Wallet {
         return (JSONArray) JSONSerializer.toJSON(new String(FileUtils.getBytesFromFile(walletFile), "UTF-8"));
     }
 
-    public static List<Cooin> getCooinListFromPlainWallet() throws Exception {
-        return getCooinListFromCertificationRequest(getPlainWallet());
+    public static Set<Cooin> getCooinSetFromPlainWallet() throws Exception {
+        return getCooinSetFromCertificationRequest(getPlainWallet());
     }
 
-    public static List<Cooin> getCooinList(JSONArray jsonArray) throws Exception {
-        List<Cooin> cooinList = new ArrayList<Cooin>();
+    public static Set<Cooin> getCooinSet(JSONArray jsonArray) throws Exception {
+        Set<Cooin> cooinSet = new HashSet<>();
         for(int i = 0; i < jsonArray.size(); i++) {
-            byte[] serializedCooin = jsonArray.getJSONObject(i).getString("object").getBytes();
-            cooinList.add((Cooin) ObjectUtils.deSerializeObject(serializedCooin));
+            JSONObject cooinJSON = jsonArray.getJSONObject(i);
+            if(cooinJSON.has("object")) {
+                cooinSet.add((Cooin) ObjectUtils.deSerializeObject(cooinJSON.getString("object").getBytes()));
+            } else if(cooinJSON.has("certificationRequest")) {
+                CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
+                        cooinJSON.getString("certificationRequest").getBytes());
+                cooinSet.add(Cooin.load(certificationRequest));
+            } else log.error("cooin not serialized inside wallet");
         }
-        return cooinList;
+        return cooinSet;
+    }
+
+    public static JSONArray getCooinArray(Set<Cooin> cooinSet) throws Exception {
+        JSONArray cooinsArray = new JSONArray();
+        cooinsArray.addAll(getCooinSerialized(cooinSet));
+        return cooinsArray;
     }
 
     public static void savePlainWallet(JSONArray walletJSON) throws Exception {
@@ -109,7 +122,8 @@ public class Wallet {
     }
 
     public static void saveToWallet(List<Map> serializedCooinList, String pin) throws Exception {
-        JSONArray storedWalletJSON = getWallet(pin);
+        Set<Cooin> storedWallet = getWallet(pin);
+        JSONArray storedWalletJSON = getCooinArray(storedWallet);
         storedWalletJSON.addAll(serializedCooinList);
         List<String> cooinHashList = new ArrayList<>();
         JSONArray cooinsToSaveArray = new JSONArray();
@@ -123,7 +137,11 @@ public class Wallet {
         saveWallet(cooinsToSaveArray, pin);
     }
 
-    public static JSONArray saveWallet(Object walletJSON, String pin) throws Exception {
+    public static Set<Cooin> saveWallet(Set wallet, String pin) throws Exception {
+        return saveWallet(getCooinArray(wallet), pin);
+    }
+
+    public static Set<Cooin> saveWallet(Object walletJSON, String pin) throws Exception {
         String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
         WalletFile walletFile = encryptedWalletList.getWallet(pinHashHex);
@@ -131,7 +149,7 @@ public class Wallet {
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile.file);
-        wallet = (JSONArray) walletJSON;
+        wallet = getCooinSet((JSONArray) walletJSON);
         return wallet;
     }
 
@@ -143,14 +161,14 @@ public class Wallet {
         walletFile.createNewFile();
         Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletJSON.toString().getBytes());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toJSON().toString().getBytes("UTF-8")), walletFile);
-        wallet = (JSONArray) walletJSON;
+        wallet = getCooinSet((JSONArray) walletJSON);
     }
 
-    public static JSONArray getWallet() {
+    public static Set<Cooin> getWallet() {
         return wallet;
     }
 
-    public static JSONArray getWallet(String pin) throws Exception {
+    public static Set<Cooin> getWallet(String pin) throws Exception {
         String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
@@ -162,7 +180,7 @@ public class Wallet {
         JSONObject bundleJSON = (JSONObject) JSONSerializer.toJSON( FileUtils.getStringFromFile(walletFile));
         Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(bundleJSON);
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
-        wallet = (JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8"));
+        wallet = getCooinSet((JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8")));
         JSONArray plainWallet = getPlainWallet();
         if(plainWallet.size() > 0) {
             wallet.addAll(plainWallet);
@@ -173,14 +191,16 @@ public class Wallet {
     }
 
     public static void importPlainWallet(String password) throws Exception {
-        JSONArray walletJSON = getWallet(password);
+        Set<Cooin> wallet = getWallet(password);
+        JSONArray walletJSON = getCooinArray(wallet);
         walletJSON.addAll(getPlainWallet());
         saveWallet(walletJSON, password);
         savePlainWallet(new JSONArray());
     }
 
     public static void changePin(String newPin, String oldPin) throws Exception {
-        JSONArray walletJSON = getWallet(oldPin);
+        Set<Cooin> wallet = getWallet(oldPin);
+        JSONArray walletJSON = getCooinArray(wallet);
         String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST));
         String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST));
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;

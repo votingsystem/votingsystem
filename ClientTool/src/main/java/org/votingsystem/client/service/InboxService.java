@@ -28,6 +28,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.stream.Collectors.toList;
@@ -69,7 +70,7 @@ public class InboxService {
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
                 else messageList.add(inboxMessage);
             }
-            List<Cooin> cooinList = Wallet.getCooinListFromPlainWallet();
+            Set<Cooin> cooinList = Wallet.getCooinSetFromPlainWallet();
             if(cooinList.size() > 0) {
                 log.debug("found cooins in not secured wallet");
                 InboxMessage inboxMessage = new InboxMessage();
@@ -179,9 +180,8 @@ public class InboxService {
                 password = passwordDialog.getPassword();
                 if(password != null) {
                     try {
-                        Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCooinList(), password);
-                        EventBusService.getInstance().post(
-                                inboxMessage.setState(InboxMessage.State.PROCESSED));
+                        Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCooinSet(), password);
+                        EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(inboxMessage);
                         WebSocketAuthenticatedService.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
                                 getResponse(ResponseVS.SC_OK, null).toString());

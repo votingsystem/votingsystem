@@ -158,7 +158,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                         DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(cooin.getValidTo()), "dd MMM yyyy' 'HH:mm");
             }
-            showMessage(ResponseVS.SC_ERROR, msg);
+            showMessage(msg, ContextVS.getMessage("errorLbl"));
         }
     }
 

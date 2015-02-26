@@ -128,13 +128,8 @@ public class TimeStampPane extends GridPane {
                 add(certsVBox, 0, 5, 2, 1);
             }
         }
-        //GenTimeAccuracy accuracy = tsInfo.getGenTimeAccuracy();
-        //assertEquals(3, accuracy.getSeconds());
-        //assertEquals(1, accuracy.getMillis());
-        //assertEquals(2, accuracy.getMicros());
         //AttributeTable  table = timeStampToken.getSignedAttributes();
         HBox buttonsHBox = new HBox();
-
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
         certValidationButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
         certValidationButton.setOnAction(actionEvent -> TimeStampCertValidationPane.showDialog(timeStampToken));

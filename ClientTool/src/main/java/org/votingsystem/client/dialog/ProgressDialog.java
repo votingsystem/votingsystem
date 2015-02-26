@@ -56,7 +56,7 @@ public class ProgressDialog extends VBox {
         new Thread(progressTask).start();
     }
 
-    public static void showDialog(Task<ResponseVS> progressTask, String caption, Window owner) {
+    public static void showDialog(Task progressTask, String caption, Window owner) {
         log.debug("showDialog");
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);

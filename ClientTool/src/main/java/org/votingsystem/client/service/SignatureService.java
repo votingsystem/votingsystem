@@ -21,6 +21,7 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -37,6 +38,7 @@ import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
+import static java.util.stream.Collectors.toSet;
 import static org.votingsystem.model.ContextVS.*;
 
 /**
@@ -350,15 +352,14 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS deleteCooin(OperationVS operationVS) throws Exception {
             log.debug("deleteCooin");
             try {
-                JSONArray walletJSON = (JSONArray) Wallet.getWallet(password);
-                for(int i = 0; i < walletJSON.size(); i++) {
-                    JSONObject cooinJSON = (JSONObject) walletJSON.get(i);
-                    if(cooinJSON.getString("hashCertVS").equals(operationVS.getMessage())) {
-                        walletJSON.remove(i);
+                Set<Cooin> wallet = Wallet.getWallet(password);
+                wallet = wallet.stream().filter(cooin -> {
+                    if (cooin.getHashCertVS().equals(operationVS.getMessage())) {
                         log.debug("deleted cooin with hashCertVS: " + operationVS.getMessage());
-                    }
-                }
-                Wallet.saveWallet(walletJSON, password);
+                        return false;
+                    } else return true;
+                }).collect(toSet());
+                Wallet.saveWallet(wallet, password);
                 return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.COOIN_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);

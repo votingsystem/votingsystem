@@ -18,7 +18,7 @@ public class MsgUtils {
     private static Logger log = Logger.getLogger(MsgUtils.class);
 
     public static String getCooinChangeWalletMsg(WebSocketMessage webSocketMessage) {
-        Map<String, BigDecimal> currencyMap = Cooin.getCurrencyMap(webSocketMessage.getCooinList());
+        Map<String, BigDecimal> currencyMap = Cooin.getCurrencyMap(webSocketMessage.getCooinSet());
         StringBuilder amountInfo = new StringBuilder();
         for(String currencyCode: currencyMap.keySet()) {
             amountInfo.append(" - " + currencyMap.get(currencyCode) + " " + currencyCode);

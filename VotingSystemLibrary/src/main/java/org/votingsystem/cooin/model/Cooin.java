@@ -552,7 +552,7 @@ public class Cooin implements Serializable  {
         return result;
     }
 
-    public static Map<String, BigDecimal> getCurrencyMap(List<Cooin> cooinList) {
+    public static Map<String, BigDecimal> getCurrencyMap(Collection<Cooin> cooinList) {
         Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
         for(Cooin cooin : cooinList){
             if(currencyMap.containsKey(cooin.getCurrencyCode())) currencyMap.put(cooin.getCurrencyCode(),

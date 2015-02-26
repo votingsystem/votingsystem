@@ -11,10 +11,7 @@ import javafx.scene.layout.HBox;
 import org.apache.log4j.Logger;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.client.util.CooinStatusChecker;
-import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.client.util.MsgUtils;
-import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.util.*;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -28,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxMessageRow implements CooinStatusChecker.Listener {
+public class InboxMessageRow implements CooinCheckerTask.Listener {
 
     private static Logger log = Logger.getLogger(InboxMessageRow.class);
 
@@ -73,7 +70,7 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
             case COOIN_WALLET_CHANGE:
                 messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
                 descriptionLbl.setText(MsgUtils.getCooinChangeWalletMsg(inboxMessage.getWebSocketMessage()));
-                new Thread(new CooinStatusChecker(inboxMessage.getWebSocketMessage().getCooinList(), this)).start();
+                new Thread(new CooinCheckerTask(inboxMessage.getWebSocketMessage().getCooinSet(), this)).start();
                 break;
             case MESSAGEVS:
                 messageButton.setText(ContextVS.getMessage("messageLbl"));
@@ -95,9 +92,9 @@ public class InboxMessageRow implements CooinStatusChecker.Listener {
 
     }
 
-    @Override public void processCooinStatus(Cooin cooin, Integer statusCode) {
-        if(ResponseVS.SC_OK != statusCode) {
-            log.debug("Cooin '" + cooin.getHashCertVS() + "' - statusCode: " + statusCode);
+    @Override public void processCooinStatus(CooinCheckResponse response) {
+        if(ResponseVS.SC_OK != response.getStatusCode()) {
+            log.debug("message with cooin with errors - statusCode: " + response.getStatusCode());
             InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
         }
     }

@@ -53,7 +53,7 @@ public class WebSocketMessage {
     private Integer statusCode;
     private TypeVS operation;
     private JSONObject messageJSON;
-    private List<Cooin> cooinList;
+    private Set<Cooin> cooinSet;
     private AESParams aesParams;
     private SMIMEMessage smimeMessage;
     private Date date;
@@ -93,7 +93,7 @@ public class WebSocketMessage {
         }
         if(socketMsgJSON.has("cooinList")) {
             try {
-                cooinList = Wallet.getCooinList(socketMsgJSON.getJSONArray("cooinList"));
+                cooinSet = Wallet.getCooinSet(socketMsgJSON.getJSONArray("cooinList"));
             }catch(Exception ex) {log.error(ex.getMessage(), ex);}
         }
     }
@@ -182,12 +182,12 @@ public class WebSocketMessage {
         this.date = date;
     }
 
-    public List<Cooin> getCooinList() {
-        return cooinList;
+    public Set<Cooin> getCooinSet() {
+        return cooinSet;
     }
 
-    public void setCooinList(List<Cooin> cooinList) {
-        this.cooinList = cooinList;
+    public void setCooinSet(Set<Cooin> cooinSet) {
+        this.cooinSet = cooinSet;
     }
 
     public State getState() {
@@ -405,14 +405,7 @@ public class WebSocketMessage {
             smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
         }
         if(decryptedJSON.has("cooinList")) {
-            JSONArray cooinArray = decryptedJSON.getJSONArray("cooinList");
-            this.cooinList = new ArrayList<Cooin>();
-            for(int i = 0; i < cooinArray.size(); i ++) {
-                JSONObject cooinJSON = (JSONObject) cooinArray.get(i);
-                CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
-                        ((String) cooinJSON.get("certificationRequest")).getBytes());
-                this.cooinList.add(Cooin.load(certificationRequest));
-            }
+            this.cooinSet = Wallet.getCooinSetFromCertificationRequest(decryptedJSON.getJSONArray("cooinList"));
         }
         this.isEncrypted = false;
         VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
@@ -464,9 +457,9 @@ public class WebSocketMessage {
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }
             if(isEncrypted != null) result.put("isEncrypted", isEncrypted);
-            if(cooinList != null) {
+            if(cooinSet != null) {
                 try {
-                    List<Map> serializedCooinList = Wallet.getCooinSerialized(cooinList);
+                    List<Map> serializedCooinList = Wallet.getCooinSerialized(cooinSet);
                     result.put("cooinList", serializedCooinList);
                 } catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }
