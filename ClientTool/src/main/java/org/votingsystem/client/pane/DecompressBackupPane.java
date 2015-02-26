@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -12,7 +13,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -58,7 +58,7 @@ public class DecompressBackupPane extends VBox {
             runningTask.cancel();
             getScene().getWindow().hide();
         });
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonBox = new HBox();
         footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
         progressBox.setMargin(footerButtonBox, new Insets(30, 20, 0, 10));
@@ -83,7 +83,7 @@ public class DecompressBackupPane extends VBox {
             stage.initModality(Modality.WINDOW_MODAL);
             //stage.initOwner(window);
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-            stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+            stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
             File file = fileToOpen;
             if(file == null) {
                 FileChooser fileChooser = new FileChooser();

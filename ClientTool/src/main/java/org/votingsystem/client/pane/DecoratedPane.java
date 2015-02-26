@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,7 +12,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;
@@ -54,10 +54,10 @@ public class DecoratedPane extends VBox {
         toolBar.getChildren().add(captionBox);
         if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();
-        closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        closeButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         if(menuButton != null) {
-            menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
+            menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
             toolBar.getChildren().add(menuButton);
         }
         toolBar.getChildren().add(closeButton);

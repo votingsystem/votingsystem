@@ -2,6 +2,7 @@ package org.votingsystem.client.dialog;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -15,7 +16,6 @@ import javafx.stage.Window;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
@@ -111,7 +111,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.debug("initialize");
         EventBusService.getInstance().register(new EventBusCooinListener());
-        closeButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        closeButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");
         sendMenuItem.setOnAction(actionEvent -> JSONFormDialog.show(
@@ -119,15 +119,19 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
         MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
         saveMenuItem.setOnAction(actionEvent -> System.out.println("saveMenuItem"));
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
-        changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
-                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this));
+        changeWalletMenuItem.setOnAction(actionEvent -> {
+            if(WebSocketAuthenticatedService.getInstance().isConnectedWithAlert()) {
+                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
+                        ContextVS.getMessage("selectDeviceToTransferCooinMsg"), CooinDialog.this);
+            }
+        });
         PlatformImpl.runLater(statusChecker);
         serverLbl.setText(cooin.getCooinServerURL().split("//")[1]);
         cooinHashText.setText(cooin.getHashCertVS());
         cooinValueLbl.setText(cooin.getAmount().toPlainString());
         currencyLbl.setText(cooin.getCurrencyCode());
         cooinTagLbl.setText(MsgUtils.getTagDescription(cooin.getCertTagVS()));
-        menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
+        menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(cooin.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +
@@ -167,7 +171,7 @@ public class CooinDialog implements DocumentVS, JSONFormDialog.Listener, UserDev
                     if(stage == null) {
                         stage = new Stage(StageStyle.TRANSPARENT);
                         stage.initOwner(owner);
-                        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+                        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
                     }
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Cooin.fxml"));
                     fxmlLoader.setController(cooinDialog);

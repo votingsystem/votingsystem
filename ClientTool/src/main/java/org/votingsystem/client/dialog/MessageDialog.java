@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,7 +15,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -61,7 +61,7 @@ public class MessageDialog extends VBox {
         decoratedPane = new DecoratedPane(null, null, this, stage);
         stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
-        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
     }
 
     private void isHTMLView(boolean isHTMLView) {
@@ -105,10 +105,10 @@ public class MessageDialog extends VBox {
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {
                 decoratedPane.setCaption(null);
-                messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK, 32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK, 32));
             } else {
                 decoratedPane.setCaption(ContextVS.getMessage("errorLbl"));
-                messageLabel.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK, 32));
             }
             messageLabel.setGraphicTextGap(15);
         }

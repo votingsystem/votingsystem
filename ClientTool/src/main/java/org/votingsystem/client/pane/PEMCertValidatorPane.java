@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -12,7 +13,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -46,11 +46,11 @@ public class PEMCertValidatorPane extends GridPane {
         textArea.setWrapText(true);
         add(textArea, 0, 1);
         acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CHECK)));
+        acceptButton.setGraphic((Utils.getIcon(FontAwesomeIconName.CHECK)));
         acceptButton.setOnAction(actionEvent -> validatePublicKey());
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic((Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK)));
+        cancelButton.setGraphic((Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK)));
         cancelButton.setOnAction(actionEvent -> PEMCertValidatorPane.this.getScene().getWindow().hide());
         buttonsBox.getChildren().addAll(acceptButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));

@@ -174,7 +174,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
     public boolean isConnectedWithAlert() {
         if(isConnected()) return true;
         else {
-            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage(""));
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionRequiredForServiceErrorMsg"));
             return false;
         }
     }

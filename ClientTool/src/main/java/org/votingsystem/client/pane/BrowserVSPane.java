@@ -1,6 +1,7 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -15,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
@@ -92,10 +92,10 @@ public class BrowserVSPane extends StackPane {
         password2Field = new PasswordField();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(event -> setPasswordDialogVisible(false, null));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if ((event.getCode() == KeyCode.ENTER)) acceptButton.fire();
             setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(

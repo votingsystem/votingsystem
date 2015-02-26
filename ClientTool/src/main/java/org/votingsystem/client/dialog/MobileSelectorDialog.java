@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,7 +13,6 @@ import javafx.scene.layout.VBox;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
@@ -56,11 +56,11 @@ public class MobileSelectorDialog extends DialogVS {
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         mainPane.getChildren().removeAll(progressBar);
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
         nifTextField.setPromptText(ContextVS.getMessage("nifLbl"));
         searchDeviceButton.setText(ContextVS.getMessage("searchDevicesLbl"));
-        searchDeviceButton.setGraphic(Utils.getImage(FontAwesome.Glyph.SEARCH));
+        searchDeviceButton.setGraphic(Utils.getIcon(FontAwesomeIconName.SEARCH));
         footerBox.getChildren().remove(acceptButton);
     }
 

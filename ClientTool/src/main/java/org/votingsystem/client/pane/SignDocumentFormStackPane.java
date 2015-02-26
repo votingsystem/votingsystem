@@ -1,6 +1,7 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -19,7 +20,6 @@ import javafx.scene.text.TextAlignment;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
@@ -108,11 +108,11 @@ public class SignDocumentFormStackPane extends StackPane {
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(actionEvent -> setPasswordDialogVisible(false));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> checkPasswords());
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
                 if ((event.getCode() == KeyCode.ENTER)) {

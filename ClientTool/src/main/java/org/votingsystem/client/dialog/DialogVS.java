@@ -38,7 +38,7 @@ public class DialogVS {
         decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
-        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
     }
 
     public void setCaption(String caption) {

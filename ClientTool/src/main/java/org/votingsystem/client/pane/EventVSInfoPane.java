@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,7 +9,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
@@ -58,13 +58,13 @@ public class EventVSInfoPane extends VBox {
                 BrowserVS.getInstance().newTab(new HTMLPane(metaInf.getRepresentativesHTML()),
                         ContextVS.getMessage("representativesDetailsLbl"));
             });
-            representativesButton.setGraphic(Utils.getImage(FontAwesome.Glyph.GROUP));
+            representativesButton.setGraphic(Utils.getIcon(FontAwesomeIconName.GROUP));
             dateBeginHBox.getChildren().addAll(Utils.getSpacer(), representativesButton);
         }
         validateBackupButton = new Button(ContextVS.getMessage("validateBackupLbl"));
         validateBackupButton.setOnAction(actionEvent -> BackupValidatorPane.validateBackup(decompressedBackupBaseDir,
                 metaInf, getScene().getWindow()));
-        validateBackupButton.setGraphic(Utils.getImage(FontAwesome.Glyph.FILE_TEXT_ALT));
+        validateBackupButton.setGraphic(Utils.getIcon(FontAwesomeIconName.FILE_TEXT_ALT));
         HBox.setMargin(validateBackupButton, new Insets(0, 0, 0, 10));
         dateBeginHBox.getChildren().add(validateBackupButton);
         this.getChildren().addAll(subjectHBox, dateBeginHBox, webView);

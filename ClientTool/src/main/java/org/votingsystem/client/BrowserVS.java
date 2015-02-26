@@ -88,7 +88,7 @@ public class BrowserVS extends VBox implements WebKitHost {
         });
         browserHelper.getChildren().add(0, this);
         browserStage.setScene(new Scene(browserHelper));
-        browserStage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        browserStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         browserStage.initStyle(StageStyle.TRANSPARENT);
         browserStage.getScene().setFill(null);
         ResizeHelper.addResizeListener(browserStage);

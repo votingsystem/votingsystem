@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,7 +16,6 @@ import javafx.stage.WindowEvent;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
@@ -59,10 +59,10 @@ public class JSONFormDialog extends VBox {
             else log.debug("No listeners to send JSON form");
             stage.hide();
         });
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> stage.hide());
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
 
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);

@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -15,7 +16,6 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.backup.*;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
@@ -69,7 +69,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                 runningTask.cancelValidation();
                 getScene().getWindow().hide();
             });
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         buttonHBox.getChildren().addAll(errorsButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonHBox, new Insets(0, 20, 20, 20));
         progressBox.getChildren().addAll(progressMessageText, progressMessageCounter, progressBar);
@@ -183,7 +183,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
             stage.initModality(Modality.WINDOW_MODAL);
             //stage.initOwner(window);
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-            stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+            stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
             stage.setScene(new Scene(validatorPane));
             stage.setTitle(ContextVS.getMessage("checkBackupCaption"));
             stage.centerOnScreen();

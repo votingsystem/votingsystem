@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -19,7 +20,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
@@ -67,12 +67,12 @@ public class PasswordDialog {
         password2Field = new PasswordField();
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(event -> stage.close());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {
@@ -112,7 +112,7 @@ public class PasswordDialog {
         stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         Utils.addMouseDragSupport(stage);
         dialogVBox.setPrefWidth(350);
-        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
     }
 
     private void setCapsLockState (boolean pressed) {

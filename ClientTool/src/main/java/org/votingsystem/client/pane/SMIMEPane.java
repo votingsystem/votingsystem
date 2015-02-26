@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -10,7 +11,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
@@ -54,10 +54,10 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         WebView signatureContentWebView = new WebView();
         signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         if (signedFile.isValidSignature()) {
-            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureOKLbl"));
         } else {
-            openSignatureInfoButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureERRORLbl"));
         }
         String contentStr = null;
@@ -71,7 +71,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         signatureContentWebView.getEngine().loadContent(contentStr);
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
-        timeStampButton.setGraphic((Utils.getImage(FontAwesome.Glyph.CLOCK_ALT)));
+        timeStampButton.setGraphic((Utils.getIcon(FontAwesomeIconName.CLOCK_ALT)));
         timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(timeStampToken));
         setMargin(timeStampButton, new Insets(5, 0, 5, 0));
         add(timeStampButton, 0, 0);

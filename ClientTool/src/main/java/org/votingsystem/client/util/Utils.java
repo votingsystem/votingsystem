@@ -1,6 +1,9 @@
 package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -16,6 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -24,9 +28,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.controlsfx.glyphfont.GlyphFont;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -41,7 +42,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,31 +72,30 @@ public class Utils {
 
     private static Logger log = Logger.getLogger(Utils.class);
 
-    private static GlyphFont fontAwesome = new GlyphFont("FontAwesome", 16,
-           Utils.class.getResourceAsStream("/css/fontawesome-webfont.ttf"));
-
-
-    public static Glyph getImage(FontAwesome.Glyph font) {
-        return fontAwesome.create(font).color(Color.web(COLOR_BUTTON_OK));
+    public static Text getIcon(FontAwesomeIconName icon) {
+        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
+        text.setFill(Color.web(COLOR_BUTTON_OK));
+        return text;
     }
 
-    public static Glyph getImage(String unicode) {
-        return fontAwesome.create(unicode).color(Color.web(COLOR_BUTTON_OK));
+    public static Text getIcon(FontAwesomeIconName icon, String color, double size) {
+        Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
+        text.setFill(Color.web(color));
+        return text;
     }
 
-    public static Glyph getImage(FontAwesome.Glyph font, double size) {
-        return fontAwesome.create(font).color(Color.web(COLOR_BUTTON_OK)).size(size);
+    public static Text getIcon(FontAwesomeIconName icon, double size) {
+        Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
+        return text;
     }
 
-    public static Glyph getImage(FontAwesome.Glyph font, String color) {
-        return fontAwesome.create(font).color(Color.web(color));
+    public static Text getIcon(FontAwesomeIconName icon, String color) {
+        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
+        text.setFill(Color.web(color));
+        return text;
     }
 
-    public static Glyph getImage(FontAwesome.Glyph font, String color, double size) {
-        return fontAwesome.create(font).color(Color.web(color)).size(size);
-    }
-
-    public static Image getImage(Object baseObject, String key) {
+    public static Image getIcon(Object baseObject, String key) {
         String iconPath = null;
         String iconName = null;
         Image image = null;
@@ -123,7 +122,7 @@ public class Utils {
         return VotingSystemApp.class.getResource(path).toExternalForm();
     }
 
-    public static Image getImageFromResources(String imageFilename) {
+    public static Image getIconFromResources(String imageFilename) {
         return new Image(getResource("/images/" + imageFilename));
     }
 
@@ -146,9 +145,9 @@ public class Utils {
         return newTab;
     }
 
-    public static Button getToolBarButton(Glyph image) {
+    public static Button getToolBarButton(Text icon) {
         Button toolBarButton = new Button();
-        toolBarButton.setGraphic(image);
+        toolBarButton.setGraphic(icon);
         toolBarButton.getStyleClass().add("toolbar-button");
         return toolBarButton;
     }

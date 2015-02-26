@@ -1,12 +1,12 @@
 package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.control.Button;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -323,7 +323,7 @@ public class SessionService {
                         passwd = passwordDialog.getPassword();
                         if(passwd == null) {
                             Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
-                            optionButton.setGraphic(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+                            optionButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
                             optionButton.setOnAction(event -> deleteCSR());
                             showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;

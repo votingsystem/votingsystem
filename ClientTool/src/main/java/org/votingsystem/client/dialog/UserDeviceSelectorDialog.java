@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,7 +13,6 @@ import javafx.scene.layout.VBox;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
@@ -60,7 +60,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
-        acceptButton.setGraphic(Utils.getImage(FontAwesome.Glyph.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
         footerBox.getChildren().remove(acceptButton);
     }

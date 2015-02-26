@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,7 +17,6 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
@@ -54,7 +54,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         VBox.setVgrow(this, Priority.ALWAYS);
         currencyMap = new HashMap<>();
         menuButton = new MenuButton();
-        menuButton.setGraphic(Utils.getImage(FontAwesome.Glyph.BARS));
+        menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
         checkCooinsMenuItem =  new MenuItem(ContextVS.getMessage("checkCooinsMenuItemLbl"));
         checkCooinsMenuItem.setOnAction(actionEvent -> {
             ProgressDialog.showDialog(new CooinCheckerTask(wallet, this),
@@ -144,7 +144,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                     if (stage == null) {
                         stage = new Stage(StageStyle.TRANSPARENT);
                         stage.initOwner(owner);
-                        stage.getIcons().add(Utils.getImageFromResources(Utils.APPLICATION_ICON));
+                        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
                     }
                     stage.setScene(new Scene(new DecoratedPane(ContextVS.getMessage("walletLbl"),
                             walletPane.getMenuButton(), walletPane, stage)));

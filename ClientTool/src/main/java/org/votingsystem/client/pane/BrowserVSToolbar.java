@@ -2,6 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -10,7 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
@@ -57,13 +57,13 @@ public class BrowserVSToolbar extends HBox {
         setSpacing(10);
         setAlignment(Pos.CENTER);
         getStyleClass().add("browser-toolbar");
-        forwardButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.CHEVRON_RIGHT));;
-        prevButton =  Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.CHEVRON_LEFT));
-        reloadButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.REFRESH));
-        connectionButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.FLASH));
+        forwardButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.CHEVRON_RIGHT));;
+        prevButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.CHEVRON_LEFT));
+        reloadButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.REFRESH));
+        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.FLASH));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
-        Button newTabButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.PLUS));
+        Button newTabButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.PLUS));
         newTabButton.getStyleClass().add("toolbar-button");
         newTabButton.setOnAction(event -> BrowserVS.getInstance().newTab(null, null, null));
         connectionButton.setVisible(false);
@@ -75,13 +75,13 @@ public class BrowserVSToolbar extends HBox {
 
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.getStyleClass().add("location-text");
-        Button msgButton = Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.ENVELOPE, Utils.COLOR_RED_DARK));
+        Button msgButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.ENVELOPE, Utils.COLOR_RED_DARK));
         InboxService.getInstance().setInboxButton(msgButton);
 
         menuButton = new BrowserVSMenuButton();
         menuButton.getStyleClass().add("toolbar-button");
 
-        Button closeButton =  Utils.getToolBarButton(Utils.getImage(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+        Button closeButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> VotingSystemApp.getInstance().stop());
 
         HBox navButtonBox = new HBox();

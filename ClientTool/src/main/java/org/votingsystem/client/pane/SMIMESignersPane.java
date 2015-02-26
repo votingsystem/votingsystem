@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
@@ -12,7 +13,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -37,7 +37,7 @@ public class SMIMESignersPane extends GridPane {
         setStyle("-fx-max-width: 900px;");
 
         Button closeButton = new Button(ContextVS.getMessage("closeLbl"));
-                closeButton.setGraphic((Utils.getImage(FontAwesome.Glyph.SAVE)));
+                closeButton.setGraphic((Utils.getIcon(FontAwesomeIconName.SAVE)));
         closeButton.setOnAction(actionEvent -> SMIMESignersPane.this.setVisible(false));
         Tab newTab = null;
         try {

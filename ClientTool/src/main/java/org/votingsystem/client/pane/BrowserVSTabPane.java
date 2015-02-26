@@ -1,6 +1,7 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -18,7 +19,6 @@ import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
@@ -151,11 +151,11 @@ public class BrowserVSTabPane extends TabPane {
                     log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
-                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.COG));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.COG));
                             break;
                         case SUCCEEDED:
                             if(tabCaption == null && URL != null) newTab.setText(TAB_CAPTION_EMPTY);
-                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.REFRESH));
                             Document doc = webView.getEngine().getDocument();
                             Element element = doc.getElementById("voting_system_page");
                             if(element != null) {
@@ -166,7 +166,7 @@ public class BrowserVSTabPane extends TabPane {
                             }
                             break;
                         case FAILED:
-                            toolbar.getReloadButton().setGraphic(Utils.getImage(FontAwesome.Glyph.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.REFRESH));
                             showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
                             break;
                     }
