@@ -3,6 +3,7 @@
 <vs:webresource dir="vs-html-echo" file="vs-html-echo.html"/>
 <vs:webresource dir="paper-dialog" file="paper-dialog.html"/>
 <vs:webresource dir="paper-dialog" file="paper-dialog-transition.html"/>
+<vs:webresource dir="core-signals" file="core-signals.html"/>
 
 <polymer-element name="cooin-request-result-dialog">
     <template>
@@ -17,6 +18,7 @@
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
             }
             </style>
+            <core-signals on-core-signal-vs-wallet-save="{{walletSaved}}"></core-signals>
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -29,7 +31,7 @@
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div hidden?="{{isStoredInWallet}}" layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
                     <div>
                         <paper-button raised on-click="{{saveToSecureWallet}}">
@@ -42,7 +44,11 @@
     </template>
     <script>
         Polymer('cooin-request-result-dialog', {
+            isStoredInWallet:false,
             ready: function() { },
+            walletSaved: function() {
+                this.isStoredInWallet = true;
+            },
             saveToSecureWallet: function() {
                 var webAppMessage = new WebAppMessage(Operation.WALLET_SAVE)
                 webAppMessage.setCallback(function(appMessage) {
@@ -59,6 +65,7 @@
             showMessage:function(caption, message) {
                 this.caption = caption;
                 this.message = message;
+                this.isStoredInWallet = false
                 this.$.xDialog.opened = true
             },
             close: function() {

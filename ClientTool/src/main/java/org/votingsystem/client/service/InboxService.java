@@ -27,6 +27,7 @@ import java.io.File;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,12 +71,13 @@ public class InboxService {
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
                 else messageList.add(inboxMessage);
             }
-            Set<Cooin> cooinList = Wallet.getCooinSetFromPlainWallet();
-            if(cooinList.size() > 0) {
+            Set<Cooin> cooinSet = Wallet.getCooinSetFromPlainWallet();
+            if(cooinSet.size() > 0) {
                 log.debug("found cooins in not secured wallet");
-                InboxMessage inboxMessage = new InboxMessage();
+                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),
+                        Calendar.getInstance().getTime());
                 inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
-                        cooinList))).setTypeVS(TypeVS.COOIN_IMPORT);
+                        cooinSet))).setTypeVS(TypeVS.COOIN_IMPORT);
                 newMessage(inboxMessage);
             }
         } catch (Exception ex) {
@@ -127,13 +129,20 @@ public class InboxService {
         });
     }
 
-    public void newMessage(InboxMessage inboxMessage) {
+    public void newMessage(InboxMessage inboxMessage, boolean openInboxDialog) {
         switch(inboxMessage.getTypeVS()) {
+            case COOIN_IMPORT:
+                messageList.add(inboxMessage);
+                PlatformImpl.runLater(() -> {
+                    inboxButton.setVisible(true);
+                    if(openInboxDialog) InboxDialog.showDialog();
+                });
+                break;
             case MESSAGEVS://message comes decrypted with session keys
                 messageList.add(inboxMessage);
                 PlatformImpl.runLater(() -> {
                     inboxButton.setVisible(true);
-                    InboxDialog.showDialog();
+                    if(openInboxDialog) InboxDialog.showDialog();
                 });
                 flush();
                 break;
@@ -148,6 +157,19 @@ public class InboxService {
             default:
                 log.error("newMessage - unprocessed message: " + inboxMessage.getTypeVS());
         }
+    }
+
+    public void newMessage(InboxMessage inboxMessage) {
+        newMessage(inboxMessage, true);
+    }
+
+    public void removeMessagesByType(TypeVS typeToRemove) {
+        messageList = messageList.stream().filter(m ->  m.getTypeVS() != typeToRemove).collect(toList());
+        encryptedMessageList = encryptedMessageList.stream().filter(m ->  m.getTypeVS() != typeToRemove).collect(toList());
+        if(messageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
+        else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
+        InboxDialog.getInstance().removeMessagesByType(typeToRemove);
+        flush();
     }
 
     public void removeMessage(InboxMessage inboxMessage) {
@@ -203,8 +225,8 @@ public class InboxService {
                 password = passwordDialog.getPassword();
                 if(password != null) {
                     try {
-                        Wallet.importPlainWallet(password);
-                        EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
+                        Wallet.getWallet(password);
+                        removeMessage(inboxMessage);
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {

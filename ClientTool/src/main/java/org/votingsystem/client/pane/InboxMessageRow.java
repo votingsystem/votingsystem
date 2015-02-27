@@ -78,6 +78,7 @@ public class InboxMessageRow implements CooinCheckerTask.Listener {
             case COOIN_IMPORT:
                 messageButton.setText(ContextVS.getMessage("importToWalletLbl"));
                 descriptionLbl.setText(inboxMessage.getMessage());
+                removeButton.setVisible(false);
                 break;
             case MESSAGEVS_TO_DEVICE:
                 dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate()));

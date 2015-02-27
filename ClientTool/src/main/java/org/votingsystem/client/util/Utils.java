@@ -269,19 +269,6 @@ public class Utils {
         });
     }
 
-    public static String getSessionCoreSignalJSCommand(JSONObject sessionDataJSON) {
-        JSONObject coreSignal = new JSONObject();
-        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
-        coreSignal.put("name", "vs-session-data");
-        coreSignal.put("data", sessionDataJSON);
-        String jsCommand = null;
-        try {
-            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
-                    coreSignal.toString().getBytes("UTF-8")) + "')";
-        } catch (UnsupportedEncodingException ex) { log.error(ex.getMessage(), ex); }
-        return jsCommand;
-    }
-
     public static void selectImage(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
         PlatformImpl.runLater(() -> {
             try {

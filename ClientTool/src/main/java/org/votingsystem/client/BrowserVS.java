@@ -10,6 +10,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSON;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
@@ -22,6 +23,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -191,6 +193,21 @@ public class BrowserVS extends VBox implements WebKitHost {
 
     public void registerCallerCallbackView(String callerCallback, WebView webView) {
         webViewMap.put(callerCallback, webView);
+    }
+
+    public void fireCoreSignal(String name, JSONObject data, boolean fireToAllTabs) {
+        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
+        JSONObject coreSignal = new JSONObject();
+        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
+        coreSignal.put("name", name);
+        coreSignal.put("data", data);
+        String jsCommand = null;
+        try {
+            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
+                    coreSignal.toString().getBytes("UTF-8")) + "')";
+            if(fireToAllTabs) execCommandJS(jsCommand);
+            else execCommandJSCurrentView(jsCommand);
+        } catch (UnsupportedEncodingException ex) { log.error(ex.getMessage(), ex); }
     }
 
 }

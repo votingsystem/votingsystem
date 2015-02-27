@@ -34,6 +34,12 @@ public class InboxMessage<T> {
 
     public InboxMessage() { }
 
+    public InboxMessage(String from, Date date) {
+        this.from = from;
+        this.date = date;
+        this.UUID = java.util.UUID.randomUUID().toString();
+    }
+
     public InboxMessage(WebSocketMessage webSocketMessage) {
         load(webSocketMessage);
     }

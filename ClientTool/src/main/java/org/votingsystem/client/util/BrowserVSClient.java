@@ -10,6 +10,7 @@ import org.votingsystem.client.dialog.CooinDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
+import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.service.WebSocketService;
@@ -17,6 +18,7 @@ import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -102,7 +104,9 @@ public class BrowserVSClient {
                     String password = passwordDialog.getPassword();
                     if(password != null) {
                         try {
-                            Wallet.importPlainWallet(password);
+                            Wallet.getWallet(password);
+                            BrowserVS.getInstance().fireCoreSignal("vs-wallet-save", null, false);
+                            InboxService.getInstance().removeMessagesByType(TypeVS.COOIN_IMPORT);
                         } catch (WalletException wex) {
                             Utils.showWalletNotFoundMessage();
                         } catch (Exception ex) {

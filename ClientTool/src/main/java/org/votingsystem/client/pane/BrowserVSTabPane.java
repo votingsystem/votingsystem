@@ -161,8 +161,8 @@ public class BrowserVSTabPane extends TabPane {
                             if(element != null) {
                                 JSObject win = (JSObject) webView.getEngine().executeScript("window");
                                 win.setMember("clientTool", new BrowserVSClient(webView));
-                                webView.getEngine().executeScript(Utils.getSessionCoreSignalJSCommand(
-                                        SessionService.getInstance().getBrowserSessionData()));
+                                BrowserVS.getInstance().fireCoreSignal("vs-session-data",
+                                        SessionService.getInstance().getBrowserSessionData(), true);
                             }
                             break;
                         case FAILED:

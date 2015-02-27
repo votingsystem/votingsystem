@@ -13,6 +13,7 @@ import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -82,6 +83,12 @@ public class InboxDialog extends DialogVS {
             return msg2.getDate().compareTo(msg1.getDate());
         }
     };
+
+    public void removeMessagesByType(TypeVS typeToRemove) {
+        List<InboxMessage> removedItems = messageListView.getItems().stream().filter(m ->
+                m.getTypeVS() == typeToRemove).collect(toList());
+        PlatformImpl.runLater(() -> messageListView.getItems().removeAll(removedItems));
+    }
 
     static class MessageCell extends ListCell<InboxMessage> {
 

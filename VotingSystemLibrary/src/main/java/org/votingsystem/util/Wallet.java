@@ -17,6 +17,8 @@ import java.io.FilenameFilter;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static java.util.stream.Collectors.toSet;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -125,19 +127,25 @@ public class Wallet {
         Set<Cooin> storedWallet = getWallet(pin);
         JSONArray storedWalletJSON = getCooinArray(storedWallet);
         storedWalletJSON.addAll(serializedCooinList);
-        List<String> cooinHashList = new ArrayList<>();
+        Set<String> hashSet = new HashSet<>();
         JSONArray cooinsToSaveArray = new JSONArray();
         storedWalletJSON.stream().forEach(cooin -> {
-            if (!cooinHashList.contains(((JSONObject) cooin).getString("hashCertVS"))) {
+            if(hashSet.add(((JSONObject) cooin).getString("hashCertVS"))) {
                 cooinsToSaveArray.add(cooin);
-                cooinHashList.add(((JSONObject) cooin).getString("hashCertVS"));
-            } else log.debug("repeated cooin: " + ((JSONObject) cooin).getString("hashCertVS"));
+            } else log.error("repeated cooin!!!: " + ((JSONObject) cooin).getString("hashCertVS"));
         });
         log.debug("saving " + cooinsToSaveArray.size() + " cooins");
         saveWallet(cooinsToSaveArray, pin);
     }
 
-    public static Set<Cooin> saveWallet(Set wallet, String pin) throws Exception {
+    public static Set<Cooin> saveWallet(Set<Cooin> wallet, String pin) throws Exception {
+        Set<String> hashSet = new HashSet<>();
+        wallet = wallet.stream().filter(cooin -> {
+            if (!hashSet.add(cooin.getHashCertVS())) {
+                log.error("removing repeated cooin!!!: " + cooin.getHashCertVS());
+                return false;
+            } else return true;
+        }).collect(toSet());
         return saveWallet(getCooinArray(wallet), pin);
     }
 
@@ -181,21 +189,13 @@ public class Wallet {
         Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(bundleJSON);
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
         wallet = getCooinSet((JSONArray) JSONSerializer.toJSON(new String(decryptedWalletBytes, "UTF-8")));
-        JSONArray plainWallet = getPlainWallet();
+        Set<Cooin> plainWallet = getCooinSetFromPlainWallet();
         if(plainWallet.size() > 0) {
             wallet.addAll(plainWallet);
             saveWallet(wallet, pin);
             savePlainWallet(new JSONArray());
         }
         return wallet;
-    }
-
-    public static void importPlainWallet(String password) throws Exception {
-        Set<Cooin> wallet = getWallet(password);
-        JSONArray walletJSON = getCooinArray(wallet);
-        walletJSON.addAll(getPlainWallet());
-        saveWallet(walletJSON, password);
-        savePlainWallet(new JSONArray());
     }
 
     public static void changePin(String newPin, String oldPin) throws Exception {

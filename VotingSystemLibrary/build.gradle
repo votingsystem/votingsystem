@@ -35,7 +35,7 @@ dependencies {
             'org.bouncycastle:bcmail-jdk16:1.46',
             'org.bouncycastle:bctsp-jdk16:1.46',
             'javax.mail:mail:1.4.1',
-            'log4j:log4j:1.2.12')
+            'log4j:log4j:1.2.17')
 
 }
 

@@ -19,6 +19,8 @@ import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
+import org.votingsystem.client.util.InboxMessage;
+import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.cooin.model.Cooin;
 import org.votingsystem.cooin.model.CooinRequestBatch;
@@ -344,6 +346,11 @@ public class SignatureService extends Service<ResponseVS> {
                 responseMap.put("message", responseJSON.getString("message"));
                 responseVS.setContentType(ContentTypeVS.JSON);
                 responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
+                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),
+                        Calendar.getInstance().getTime());
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
+                        cooinBatch.getCooinsMap().values()))).setTypeVS(TypeVS.COOIN_IMPORT);
+                InboxService.getInstance().newMessage(inboxMessage, false);
             }
             return responseVS;
         }
