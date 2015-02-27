@@ -158,7 +158,7 @@ public class WebSocketService extends Service<ResponseVS> {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
-                    BrowserVS.getInstance().execCommandJS(
+                    BrowserVS.getInstance().runJSCommand(
                             socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                     break;
                 case MESSAGEVS_TO_DEVICE:
@@ -185,11 +185,11 @@ public class WebSocketService extends Service<ResponseVS> {
         else log.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.OPEN));
                 break;
         }

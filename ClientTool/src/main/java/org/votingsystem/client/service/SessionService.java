@@ -188,7 +188,7 @@ public class SessionService {
                 browserSessionDataJSON.put("isConnected", true);
                 flush();
                 VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
-                BrowserVS.getInstance().execCommandJS(
+                BrowserVS.getInstance().runJSCommand(
                         socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());

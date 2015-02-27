@@ -169,7 +169,7 @@ public class BrowserVS extends VBox implements WebKitHost {
         });
     }
 
-    public void execCommandJS(String jsCommand) {
+    public void runJSCommand(String jsCommand) {
         PlatformImpl.runLater(() -> {
             for(WebView webView : webViewMap.values()) {
                 webView.getEngine().executeScript(jsCommand);
@@ -185,9 +185,12 @@ public class BrowserVS extends VBox implements WebKitHost {
         toolBar.setVotingSystemAvailable(available);
     }
 
-    public void execCommandJSCurrentView(String jsCommand) {
+    public void runJSCommandCurrentView(String jsCommand) {
         PlatformImpl.runLater(() -> {
-            ((WebView)tabPaneVS.getSelectionModel().getSelectedItem().getContent()).getEngine().executeScript(jsCommand);
+            Object currentContent = tabPaneVS.getSelectionModel().getSelectedItem().getContent();
+            if(currentContent instanceof WebView) {
+                ((WebView)currentContent).getEngine().executeScript(jsCommand);
+            } else log.error("current content is not instance of WebView: " + currentContent.getClass());
         });
     }
 
@@ -203,8 +206,8 @@ public class BrowserVS extends VBox implements WebKitHost {
             coreSignal.put("data", data);
             String jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
                     coreSignal.toString().getBytes("UTF-8")) + "')";
-            if(fireToAllTabs) execCommandJS(jsCommand);
-            else execCommandJSCurrentView(jsCommand);
+            if(fireToAllTabs) runJSCommand(jsCommand);
+            else runJSCommandCurrentView(jsCommand);
         } catch (UnsupportedEncodingException ex) { log.error(ex.getMessage(), ex); }
     }
 

@@ -266,11 +266,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         else log.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                BrowserVS.getInstance().execCommandJS(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.OPEN));
                 break;
         }
