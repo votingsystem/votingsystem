@@ -91,12 +91,6 @@
                             <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
                                 <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
-                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
-                                <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
-                                <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
-                            </paper-item>-->
                         </g:else>
                     </core-selector>
                 </core-menu>
@@ -104,7 +98,7 @@
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content id="content"></content>
         </vs-navbar>
-        <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
+        <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>
         <content id="content"></content>
@@ -166,8 +160,12 @@
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
             },
-            ajaxResponse: function(xhrResponse, xhr) {
-                var ajaxDocument = xhrResponse
+            ajaxResponse: function(ajaxDocument, xhr) {
+                if(400 === xhr.status || 404 === xhr.status) {
+                    this.loading = false
+                    alert(ajaxDocument.body.innerHTML)
+                    return
+                }
                 var links = ajaxDocument.querySelectorAll('link')
                 var numImports = 0
                 for (var i = 0; i < links.length; i++) {
@@ -175,9 +173,7 @@
                     if('import' == links[i].rel) {
                         ++numImports
                         if(i == (links.length - 1)) {
-                            links[i].onload = function() {
-                                document.querySelector('#navBar').loading = false;
-                            };
+                            links[i].onload = function() { this.loading = false; }.bind(this);
                         }
                         document.head.appendChild(links[i]);
                     }

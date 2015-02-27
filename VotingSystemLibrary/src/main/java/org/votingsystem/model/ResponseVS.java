@@ -76,7 +76,7 @@ public class ResponseVS<T> implements Serializable {
     @Transient private SMIMEMessage smimeMessage;
     @Transient private EventVS eventVS;
     @Transient private T data;
-    @Transient private ContentTypeVS contentType = ContentTypeVS.TEXT;
+    @Transient private ContentTypeVS contentType = ContentTypeVS.HTML;
     @Transient private File file;
     @Transient private List<String> errorList;
         

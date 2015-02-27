@@ -197,13 +197,11 @@ public class BrowserVS extends VBox implements WebKitHost {
 
     public void fireCoreSignal(String name, JSONObject data, boolean fireToAllTabs) {
         //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
-        JSONObject coreSignal = new JSONObject();
-        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
-        coreSignal.put("name", name);
-        coreSignal.put("data", data);
-        String jsCommand = null;
         try {
-            jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
+            JSONObject coreSignal = new JSONObject();
+            coreSignal.put("name", name);
+            coreSignal.put("data", data);
+            String jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
                     coreSignal.toString().getBytes("UTF-8")) + "')";
             if(fireToAllTabs) execCommandJS(jsCommand);
             else execCommandJSCurrentView(jsCommand);

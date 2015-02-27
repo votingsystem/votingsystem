@@ -173,13 +173,9 @@
             },
             ajaxResponse: function(ajaxDocument, xhr) {
                 console.log("ajaxResponse")
-                if(400 === xhr.status) {//missing method to access response text from errors
+                if(400 === xhr.status || 404 === xhr.status) {
                     this.loading = false
-                    showMessageVS('<g:message code="errorLoadingResourceMsg"/>' , '<g:message code="errorLbl"/>')
-                    return
-                } else if(404 === xhr.status) {
-                    this.loading = false
-                    showMessageVS('<g:message code="errorLoadingResourceMsg"/>' , '<g:message code="error404Msg"/>')
+                    alert(ajaxDocument.body.innerHTML)
                     return
                 }
                 if(!ajaxDocument) return
@@ -190,9 +186,7 @@
                     if('import' == links[i].rel) {
                         ++numImports
                         if(i == (links.length - 1)) {
-                            links[i].onload = function() {
-                                document.querySelector('#navBar').loading = false;
-                            };
+                            links[i].onload = function() { this.loading = false; }.bind(this);
                         }
                         document.head.appendChild(links[i]);
                     }
