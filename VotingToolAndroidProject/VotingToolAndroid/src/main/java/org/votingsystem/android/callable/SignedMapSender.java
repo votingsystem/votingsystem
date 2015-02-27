@@ -69,11 +69,11 @@ public class SignedMapSender implements Callable<ResponseVS> {
             responseVS = HttpHelper.sendObjectMap(mapToSend, serviceURL);
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            responseVS = ResponseVS.EXCEPTION(contextVS.getString(R.string.exception_lbl),
                     contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
+            responseVS = ResponseVS.EXCEPTION(ex, contextVS);
         } finally {return responseVS;}
     }
 

@@ -126,7 +126,7 @@ public class VoteService extends IntentService {
             argVSList.add(new ArgVS(ContextVS.VOTE_KEY, vote));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
             contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));

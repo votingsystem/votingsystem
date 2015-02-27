@@ -51,7 +51,7 @@ class EncryptorController {
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS: ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
 
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
@@ -67,7 +67,7 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		SMIMEMessage smimeMessage = messageSMIME.getSMIME()
 		UserVS userVS = messageSMIME.getUserVS()
@@ -91,7 +91,7 @@ class EncryptorController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 

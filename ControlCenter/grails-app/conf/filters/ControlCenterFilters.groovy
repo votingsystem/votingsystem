@@ -81,7 +81,7 @@ class ControlCenterFilters {
                     if(responseVS != null && ResponseVS.SC_OK !=responseVS.statusCode)
                         return printOutput(response,responseVS)
                 } catch(Exception ex) {
-                    return printOutput(response, ResponseVS.getExceptionResponse(params.controller, params.action,
+                    return printOutput(response, ResponseVS.EXCEPTION(params.controller, params.action,
                             ex, StackTraceUtils.extractRootCause(ex)).save())
                 }
             }

@@ -38,7 +38,7 @@ class SubscriptionVSController {
 	 */
 	def index() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
 		SMIMEMessage smimeMessageReq = messageSMIME.getSMIME()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 		if (messageJSON.serverURL) {
@@ -120,7 +120,7 @@ class SubscriptionVSController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 

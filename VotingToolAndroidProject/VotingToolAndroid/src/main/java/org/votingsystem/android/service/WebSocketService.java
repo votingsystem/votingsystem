@@ -367,7 +367,7 @@ public class WebSocketService extends Service {
                 ex.printStackTrace();
                 Intent intent =  new Intent(serviceCaller);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY,
-                        ResponseVS.getExceptionResponse(ex, WebSocketService.this));
+                        ResponseVS.EXCEPTION(ex, WebSocketService.this));
                 LocalBroadcastManager.getInstance(WebSocketService.this).sendBroadcast(intent);
             }
         }

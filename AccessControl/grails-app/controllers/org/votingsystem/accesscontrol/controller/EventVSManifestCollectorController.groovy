@@ -47,7 +47,7 @@ class EventVSManifestCollectorController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 }

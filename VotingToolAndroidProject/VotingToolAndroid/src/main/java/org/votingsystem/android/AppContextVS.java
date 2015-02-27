@@ -334,7 +334,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             responseVS = new ResponseVS(ResponseVS.SC_OK, timeStamper.getSMIME());
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             return responseVS;
         }

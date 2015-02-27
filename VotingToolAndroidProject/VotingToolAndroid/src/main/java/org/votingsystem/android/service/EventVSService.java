@@ -122,7 +122,7 @@ public class EventVSService extends IntentService {
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    responseVS = ResponseVS.getExceptionResponse(ex, this);
+                    responseVS = ResponseVS.EXCEPTION(ex, this);
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
             contextVS.broadcastResponse(responseVS);

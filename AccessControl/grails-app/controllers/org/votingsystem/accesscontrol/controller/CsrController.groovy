@@ -42,7 +42,7 @@ class CsrController {
 
     def validate() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS:csrService.signCertUserVS(messageSMIME)]
     }
 	
@@ -55,7 +55,7 @@ class CsrController {
 	 */
 	def request() {
 		String csrRequest = "${request.getInputStream()}"
-		if (!csrRequest) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+		if (!csrRequest) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
 		else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes())]
 	}
 	
@@ -100,7 +100,7 @@ class CsrController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 

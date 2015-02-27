@@ -141,7 +141,7 @@ class TransactionVSController {
      */
     def post() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS:transactionVSService.processTransactionVS(messageSMIME)]
     }
 
@@ -149,12 +149,12 @@ class TransactionVSController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 
     def daoExceptionHandler(final DataAccessException exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 

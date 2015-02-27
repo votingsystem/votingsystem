@@ -157,11 +157,6 @@ public class ResponseVS<T> implements Serializable {
         return message;
     }
 
-    public String getAlertMessage() {
-        return ((metaInf ==null)?" ":metaInf) + "###" + ((message == null)?" ":message) + "###" +
-                ((reason == null)?" ":reason);
-    }
-
     public JSON getMessageJSON() {
         if(messageJSON != null) return messageJSON;
         String message = getMessage();
@@ -171,11 +166,6 @@ public class ResponseVS<T> implements Serializable {
 
     public void setMessageJSON(JSON jsonObject) {
         this.messageJSON = jsonObject;
-    }
-
-    public JSON getSignedJSON() throws Exception {
-        if(smimeMessage == null) return null;
-        else return JSONSerializer.toJSON(smimeMessage.getSignedContent());
     }
 
     public void setMessage(String message) {
@@ -308,14 +298,14 @@ public class ResponseVS<T> implements Serializable {
         return this;
     }
 
-    public static ResponseVS ERROR(String message) {
-        return new ResponseVS(ResponseVS.SC_ERROR, message);
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
     }
 
-    public static ResponseVS OK(byte[] messageBytes) {
-        return new ResponseVS(ResponseVS.SC_OK, messageBytes);
+    public ResponseVS setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
+        return this;
     }
-
 
     public String getUrl() {
         return url;
@@ -335,8 +325,26 @@ public class ResponseVS<T> implements Serializable {
         return messageSMIME;
     }
 
-    public static ResponseVS getExceptionResponse(String controller, Map actionMap, Exception exception,
-          Throwable rootCause) {
+    public static ResponseVS OK(byte[] messageBytes) {
+        return new ResponseVS(ResponseVS.SC_OK, messageBytes);
+    }
+
+    public static ResponseVS ERROR(String message) {
+        return new ResponseVS(ResponseVS.SC_ERROR, message);
+    }
+
+    public static ResponseVS ERROR_REQUEST(String message) {
+        return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message);
+    }
+
+    public static ResponseVS ALERT(String message, String metaInf) {
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message);
+        responseVS.setMetaInf(metaInf);
+        responseVS.setType(TypeVS.ALERT);
+        return responseVS;
+    }
+
+    public static ResponseVS EXCEPTION(String controller, Map actionMap, Exception exception, Throwable rootCause) {
         String action = (actionMap == null)?null:(String) actionMap.values().iterator().next();
         String metaInf = "EXCEPTION_" + controller + "Controller_" + action + "Action_" +
                 rootCause.getClass().getSimpleName();
@@ -351,46 +359,10 @@ public class ResponseVS<T> implements Serializable {
         return responseVS;
     }
 
-    public static ResponseVS getExceptionResponse(String controller, String action, Exception exception,
-            Throwable rootCause) {
+    public static ResponseVS EXCEPTION(String controller, String action, Exception exception, Throwable rootCause) {
         Map actionMap = new HashMap<>();
         actionMap.put("", action);
-        return getExceptionResponse(controller, actionMap, exception, rootCause);
-    }
-
-    public static ResponseVS getErrorRequestResponse(String message) {
-        return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message);
-    }
-
-    public static ResponseVS getJSONResponse(Integer statusCode, JSON messageJSON) {
-        ResponseVS responseVS = new ResponseVS(statusCode, ContentTypeVS.JSON);
-        responseVS.setMessageJSON(messageJSON);
-        return responseVS;
-    }
-
-    public static ResponseVS getJSONResponse(Integer statusCode, String message) {
-        ResponseVS responseVS = new ResponseVS(statusCode, ContentTypeVS.JSON);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("statusCode", statusCode);
-        jsonObject.put("message", message);
-        responseVS.setMessageJSON(jsonObject);
-        return responseVS;
-    }
-
-    public static ResponseVS getAlert(String message, String metaInf) {
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message);
-        responseVS.setMetaInf(metaInf);
-        responseVS.setType(TypeVS.ALERT);
-        return responseVS;
-    }
-
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
-    }
-
-    public ResponseVS setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
-        return this;
+        return EXCEPTION(controller, actionMap, exception, rootCause);
     }
 
 }

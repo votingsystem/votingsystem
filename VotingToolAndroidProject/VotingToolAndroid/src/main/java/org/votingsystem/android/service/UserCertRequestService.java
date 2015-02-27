@@ -71,7 +71,7 @@ public class UserCertRequestService extends IntentService {
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         } catch (Exception ex){
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             contextVS.broadcastResponse(responseVS);

@@ -144,7 +144,7 @@ public class RepresentativeService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             return responseVS;
         }
@@ -166,7 +166,7 @@ public class RepresentativeService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) updateRepresentationState();
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_REVOKE);
         contextVS.broadcastResponse(responseVS);
@@ -195,7 +195,7 @@ public class RepresentativeService extends IntentService {
                 responseVS = new ResponseVS(ResponseVS.SC_OK);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.getExceptionResponse(ex, this);
+                responseVS = ResponseVS.EXCEPTION(ex, this);
             }
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEMS_REQUEST);
@@ -215,7 +215,7 @@ public class RepresentativeService extends IntentService {
                 requestRepresentative(representativeId, serviceCaller);
             } catch(Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.getExceptionResponse(ex, this);
+                responseVS = ResponseVS.EXCEPTION(ex, this);
             }
         }
         responseVS.setTypeVS(TypeVS.ITEM_REQUEST).setServiceCaller(serviceCaller);
@@ -247,7 +247,7 @@ public class RepresentativeService extends IntentService {
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEM_REQUEST);
         contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
@@ -280,7 +280,7 @@ public class RepresentativeService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_SELECTION);
             contextVS.broadcastResponse(responseVS);
@@ -305,7 +305,7 @@ public class RepresentativeService extends IntentService {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
@@ -392,7 +392,7 @@ public class RepresentativeService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
@@ -435,7 +435,7 @@ public class RepresentativeService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setTypeVS(TypeVS.NEW_REPRESENTATIVE).setServiceCaller(serviceCaller);
         contextVS.broadcastResponse(responseVS);

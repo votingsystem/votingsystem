@@ -179,7 +179,7 @@ public class CertResponseActivity extends ActionBarActivity {
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                MessageDialogFragment.showDialog(ResponseVS.getExceptionResponse(ex, this),
+                MessageDialogFragment.showDialog(ResponseVS.EXCEPTION(ex, this),
                         getSupportFragmentManager());
             }
         }

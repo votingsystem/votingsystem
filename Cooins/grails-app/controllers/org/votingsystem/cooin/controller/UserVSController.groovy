@@ -232,7 +232,7 @@ class UserVSController {
      */
     def userInfoTest() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         SMIMEMessage smimeMessage = messageSMIME.getSMIME()
         JSONObject messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIME.getUserVS()
@@ -287,7 +287,7 @@ class UserVSController {
         return [responseVS:signatureVSService.addCertificateAuthority("${request.getInputStream()}".getBytes())]*/
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIME = request.messageSMIMEReq
-            if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+            if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
             return [responseVS:userVSService.saveUser(messageSMIME)]
         } else render(view:'newUser')
     }
@@ -305,7 +305,7 @@ class UserVSController {
         ResponseVS responseVS = null
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIME = request.messageSMIMEReq
-            if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+            if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
             return [responseVS:bankVSService.saveBankVS(messageSMIME)]
         }
     }
@@ -319,12 +319,12 @@ class UserVSController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 
     def daoExceptionHandler(final DataAccessException exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 }

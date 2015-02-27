@@ -145,7 +145,7 @@ class RepresentativeController {
 	 */
 	def revoke() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS : representativeService.processRevoke(messageSMIME)]
 	}
 	
@@ -159,7 +159,7 @@ class RepresentativeController {
      */
 	def accreditations() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS : representativeService.processAccreditationsRequest(messageSMIME)]
 	}
 	
@@ -173,7 +173,7 @@ class RepresentativeController {
 	 */
 	def history() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS : representativeService.processVotingHistoryRequest(messageSMIME)]
 	}
 	
@@ -188,7 +188,7 @@ class RepresentativeController {
 	 */
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
 		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME)
 		if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
@@ -289,7 +289,7 @@ class RepresentativeController {
      */
     def anonymousDelegation() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         //return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSMIME()?.getSigner()?.certificate]
         return [responseVS : representativeDelegationService.saveAnonymousDelegation(messageSMIME)]
     }
@@ -335,7 +335,7 @@ class RepresentativeController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 

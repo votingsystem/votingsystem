@@ -131,7 +131,7 @@ public class CooinAccount implements Serializable {
 
     public void afterInsert() {
         if(balance.compareTo(BigDecimal.ZERO) < 0) {
-            ContextVS.getInstance().alert(ResponseVS.getAlert(null, "UserVSAccount_id_" + this.id + "_negativeBalance_" +
+            ContextVS.getInstance().alert(ResponseVS.ALERT(null, "UserVSAccount_id_" + this.id + "_negativeBalance_" +
                     this.balance.toString()));
         }
     }

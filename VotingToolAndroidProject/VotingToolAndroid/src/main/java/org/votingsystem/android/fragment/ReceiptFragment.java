@@ -460,7 +460,7 @@ public class ReceiptFragment extends Fragment {
                 responseVS = HttpHelper.getData(contextVS.getAccessControl().
                         getVoteVSCheckServiceURL(hashHex), ContentTypeVS.JSON);
             } catch(Exception ex) {
-                responseVS = ResponseVS.getExceptionResponse(ex, getActivity());
+                responseVS = ResponseVS.EXCEPTION(ex, getActivity());
             } finally {return responseVS;}
         }
     }

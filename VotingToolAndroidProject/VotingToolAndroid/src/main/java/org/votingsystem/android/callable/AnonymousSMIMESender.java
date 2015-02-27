@@ -83,7 +83,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             } else return responseVS;
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
+            responseVS = ResponseVS.EXCEPTION(ex, contextVS);
         } finally { return responseVS; }
     }
 

@@ -104,11 +104,11 @@ public class VoteSender implements Callable<ResponseVS> {
             }
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            responseVS = ResponseVS.EXCEPTION(contextVS.getString(R.string.exception_lbl),
                     contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, contextVS);
+            responseVS = ResponseVS.EXCEPTION(ex, contextVS);
         } finally { return responseVS;}
     }
 
@@ -125,7 +125,7 @@ public class VoteSender implements Callable<ResponseVS> {
             return responseVS;
         } catch(Exception ex) {
             ex.printStackTrace();
-            return ResponseVS.getExceptionResponse(ex.getMessage(),
+            return ResponseVS.EXCEPTION(ex.getMessage(),
                     contextVS.getString(R.string.exception_lbl));
         }
     }

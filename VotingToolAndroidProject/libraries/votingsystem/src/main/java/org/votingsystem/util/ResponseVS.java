@@ -169,17 +169,17 @@ public class ResponseVS<T> implements Parcelable {
         return result;
     }
 
-    public static ResponseVS getExceptionResponse(String caption, String message) {
+    public static ResponseVS EXCEPTION(String caption, String message) {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         responseVS.setCaption(caption);
         responseVS.setNotificationMessage(message);
         return responseVS;
     }
 
-    public static ResponseVS getExceptionResponse(Exception ex, Context context) {
+    public static ResponseVS EXCEPTION(Exception ex, Context context) {
         String message = ex.getMessage();
         if(message == null || message.isEmpty()) message = context.getString(R.string.exception_lbl);
-        return getExceptionResponse(context.getString(R.string.exception_lbl), message);
+        return EXCEPTION(context.getString(R.string.exception_lbl), message);
     }
 
     public String getMessage() {

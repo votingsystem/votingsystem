@@ -88,7 +88,7 @@ class GroupVSController {
     def newGroup (){
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIME = request.messageSMIMEReq
-            if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+            if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
             return [responseVS:groupVSService.saveGroup(messageSMIME)]
         }
     }
@@ -248,13 +248,13 @@ class GroupVSController {
 
     def activateUser () {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS: ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS:subscriptionVSService.activateUser(messageSMIME)]
     }
 
     def deActivateUser () {
         MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) return [responseVS: ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+        if(!messageSMIME) return [responseVS: ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
         return [responseVS:subscriptionVSService.deActivateUser(messageSMIME)]
     }
 
@@ -262,12 +262,12 @@ class GroupVSController {
      * Invoked if any method in this controller throws an Exception.
      */
     def exceptionHandler(final Exception exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 
     def daoExceptionHandler(final DataAccessException exception) {
-        return [responseVS:ResponseVS.getExceptionResponse(params.controller, params.action, exception,
+        return [responseVS:ResponseVS.EXCEPTION(params.controller, params.action, exception,
                 StackTraceUtils.extractRootCause(exception))]
     }
 }

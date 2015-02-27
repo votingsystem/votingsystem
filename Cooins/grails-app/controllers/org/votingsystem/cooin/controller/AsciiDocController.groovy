@@ -33,7 +33,7 @@ class AsciiDocController {
         if("POST".equals(request.method)) {
             if(request.contentTypeVS && ContentTypeVS.JSON_SIGNED == request.contentTypeVS) {
                 MessageSMIME messageSMIME = request.messageSMIMEReq
-                if(!messageSMIME) return [responseVS:ResponseVS.getErrorRequestResponse(message(code:'requestWithoutFile'))]
+                if(!messageSMIME) return [responseVS:ResponseVS.ERROR_REQUEST(message(code:'requestWithoutFile'))]
                 String asciiDocStr = messageSMIME.getSMIME()?.getSignedContent()
                 render loadAsciiDoc(asciiDocStr)
                 return false

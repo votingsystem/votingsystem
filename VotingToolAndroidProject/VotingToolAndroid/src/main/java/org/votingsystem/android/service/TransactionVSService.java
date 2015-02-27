@@ -114,7 +114,7 @@ public class TransactionVSService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             contextVS.broadcastResponse(Utils.getBroadcastResponse(operation, serviceCaller,
-                    ResponseVS.getExceptionResponse(ex, this), this));
+                    ResponseVS.EXCEPTION(ex, this), this));
         }
     }
 
@@ -149,7 +149,7 @@ public class TransactionVSService extends IntentService {
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.getExceptionResponse(ex, this);
+                responseVS = ResponseVS.EXCEPTION(ex, this);
             }
         } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                 getString(R.string.payment_session_expired_msg));
@@ -240,7 +240,7 @@ public class TransactionVSService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             //TODO reingresar cooins en cuenta
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
@@ -255,7 +255,7 @@ public class TransactionVSService extends IntentService {
                     repeatedCooin.setState(Cooin.State.EXPENDED);
                 } catch(Exception ex) {
                     ex.printStackTrace();
-                    responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
+                    responseVS = ResponseVS.EXCEPTION(getString(R.string.exception_lbl),
                             ex.getMessage());
                 }
                 caption = getString(R.string.cooin_send_error_caption);
@@ -306,7 +306,7 @@ public class TransactionVSService extends IntentService {
                     R.string.cooin_request_error_caption));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             contextVS.broadcastResponse(
                     responseVS.setTypeVS(TypeVS.COOIN_REQUEST).setServiceCaller(serviceCaller));
@@ -325,7 +325,7 @@ public class TransactionVSService extends IntentService {
                     ContentTypeVS.JSON_SIGNED, cooinServer.getTransactionVSServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             return responseVS;
         }
@@ -366,7 +366,7 @@ public class TransactionVSService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             return responseVS;
         }
@@ -392,7 +392,7 @@ public class TransactionVSService extends IntentService {
             } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex, this);
+            responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.cooin_accounts_updated));
