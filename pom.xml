@@ -12,8 +12,8 @@
     <modules>
         <module>VotingSystemAPI</module>
         <module>VotingSystemWebAPI</module>
-        <module>KarafJavaFXClient</module>
-        <module>KarafShellCommands</module>
+        <module>AccessControl</module>
+        <module>ControlCenter</module>
         <module>TimeStampServer</module>
         <module>CurrencyServer</module>
         <module>TestsApp</module>
