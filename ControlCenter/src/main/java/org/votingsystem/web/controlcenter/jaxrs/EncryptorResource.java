@@ -7,7 +7,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.controlcenter.ejb.MessagesBean;
+import org.votingsystem.web.controlcenter.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 

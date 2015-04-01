@@ -7,7 +7,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.controlcenter.ejb.MessagesBean;
+import org.votingsystem.web.controlcenter.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;

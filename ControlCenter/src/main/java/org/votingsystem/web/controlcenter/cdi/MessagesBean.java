@@ -1,6 +1,6 @@
-package org.votingsystem.web.controlcenter.ejb;
+package org.votingsystem.web.controlcenter.cdi;
 
-import javax.ejb.Stateful;
+import javax.enterprise.context.RequestScoped;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Stateful
+@RequestScoped
 public class MessagesBean {
 
     private static final Logger log = Logger.getLogger(MessagesBean.class.getSimpleName());

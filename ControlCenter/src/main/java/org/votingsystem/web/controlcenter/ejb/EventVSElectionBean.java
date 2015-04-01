@@ -12,6 +12,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.controlcenter.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -20,7 +21,6 @@ import org.votingsystem.web.ejb.TimeStampBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Level;
@@ -33,7 +33,8 @@ public class EventVSElectionBean {
     private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
 
     @Inject EventVSBean eventVSBean;
-    @Inject MessagesBean messages;
+    @Inject
+    MessagesBean messages;
     @Inject ConfigVS config;
     @Inject TagVSBean tagVSBean;
     @Inject DAOBean dao;

@@ -2,7 +2,7 @@ package org.votingsystem.web.controlcenter.filter;
 
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.controlcenter.ejb.MessagesBean;
+import org.votingsystem.web.controlcenter.cdi.MessagesBean;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -28,7 +28,7 @@ public class FilterVS implements Filter {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         // To see this log message at run time, check out the terminal window where you started WildFly.
-        servletContext.log("------- FilterVS initialized -------");
+        servletContext.log("=------- FilterVS initialized -------");
     }
 
 
@@ -37,7 +37,6 @@ public class FilterVS implements Filter {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         messages.setLocale(req.getLocale());
         if(!"HEAD".equals(requestMethod)) {
-            req.setAttribute("config", config);
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
                     " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());

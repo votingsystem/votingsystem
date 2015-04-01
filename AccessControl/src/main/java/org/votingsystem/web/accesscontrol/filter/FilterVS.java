@@ -35,7 +35,6 @@ public class FilterVS implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         if(!"HEAD".equals(requestMethod)) {
-            req.setAttribute("config", config);
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
                     " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
