@@ -1,1 +1,0 @@
-include "VotingToolAndroid" , ":libraries:bc", ":libraries:votingsystem"

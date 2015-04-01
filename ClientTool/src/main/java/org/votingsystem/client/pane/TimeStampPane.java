@@ -13,7 +13,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.SignerId;
@@ -22,8 +24,8 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigInteger;
@@ -39,17 +41,17 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class TimeStampPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampPane.class);
+    private static Logger log = Logger.getLogger(TimeStampPane.class.getSimpleName());
 
     public TimeStampPane(final TimeStampToken timeStampToken) {
         setPadding(new Insets(10, 10 , 10, 10));
 
         TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
-        log.debug ("timeStampToken.getAttributeCertificates().toString(): " +
+        log.info("timeStampToken.getAttributeCertificates().toString(): " +
                 timeStampToken.getAttributeCertificates().getMatches(null).size());
 
         SignerId signerId = timeStampToken.getSID();
-        log.debug ("signerId.toString(): " + signerId.toString());
+        log.info("signerId.toString(): " + signerId.toString());
         BigInteger cert_serial_number = signerId.getSerialNumber();
 
         Label timeStampDateLabel = new Label(ContextVS.getMessage("dateGeneratedLbl") + ":");
@@ -92,27 +94,27 @@ public class TimeStampPane extends GridPane {
 
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
         Collection<X509CertificateHolder> matches = store.getMatches(null);
-        log.debug ("matches.size(): " + matches.size());
+        log.info("matches.size(): " + matches.size());
 
         if(matches.size() > 0) {
             boolean validationOk = false;
             for(X509CertificateHolder certificateHolder : matches) {
                 boolean isSigner = false;
-                log.debug ("cert_serial_number: '" + cert_serial_number +
+                log.info("cert_serial_number: '" + cert_serial_number +
                         "' - serial number: '" + certificateHolder.getSerialNumber() + "'");
                 VBox certsVBox = new VBox();
                 if(certificateHolder.getSerialNumber().compareTo(cert_serial_number) == 0) {
                     try {
-                        log.debug ("certificateHolder.getSubject(): "
+                        log.info("certificateHolder.getSubject(): "
                                 + certificateHolder.getSubject() +
                                 " - serial number" + certificateHolder.getSerialNumber());
                         timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().
                                 setProvider(ContextVS.PROVIDER).build(certificateHolder));
-                        log.debug ("Validation OK");
+                        log.info("Validation OK");
                         validationOk = true;
                         isSigner = true;
                     } catch (Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 }
                 try {
@@ -120,7 +122,7 @@ public class TimeStampPane extends GridPane {
                     TimeStampCertPane timeStampCertPanel = new TimeStampCertPane(certificate, isSigner);
                     certsVBox.getChildren().add(timeStampCertPanel);
                 } catch (CertificateException ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 if(!validationOk) {
                     showMessage(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
@@ -142,7 +144,7 @@ public class TimeStampPane extends GridPane {
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {
-        log.debug("validateBackup");
+        log.info("validateBackup");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

@@ -1,5 +1,9 @@
 package org.votingsystem.client.dialog;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.Scene;
@@ -13,12 +17,15 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ContextVS;
 
 /**
  * @author jgzornoza
@@ -26,10 +33,10 @@ import org.votingsystem.model.ContextVS;
  */
 public class JSONFormDialog extends VBox {
 
-    private static Logger log = Logger.getLogger(JSONFormDialog.class);
+    private static Logger log = Logger.getLogger(JSONFormDialog.class.getSimpleName());
 
     public interface Listener {
-        public void processJSONForm(JSONObject jsonForm);
+        public void processJSONForm(Map jsonForm);
     }
 
     private final Stage stage;
@@ -55,9 +62,16 @@ public class JSONFormDialog extends VBox {
 
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
-            if(listener != null) listener.processJSONForm((JSONObject) JSONSerializer.toJSON(textArea.getText()));
-            else log.debug("No listeners to send JSON form");
-            stage.hide();
+            try {
+                Map<String, Object> dataMap = new ObjectMapper().readValue(textArea.getText(),
+                        new TypeReference<HashMap<String, Object>>() {});
+                if(listener != null) listener.processJSONForm(dataMap);
+                else log.info("No listeners to send JSON form");
+                stage.hide();
+            } catch (IOException ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+
         });
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
@@ -74,19 +88,23 @@ public class JSONFormDialog extends VBox {
         Utils.addMouseDragSupport(stage);
     }
 
-    public void showMessage(String title,JSONObject form, Listener listener) {
+    public void showMessage(String title, Map dataMap, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
-        textArea.setText(form.toString(3));
+        textArea.setText(new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap));
         stage.centerOnScreen();
         stage.show();
         stage.toFront();
     }
 
-    public static void show(JSONObject formData, Listener listener) {
+    public static void show(Map formData, Listener listener) {
         PlatformImpl.runLater(() -> {
-            if(dialog == null) dialog = new JSONFormDialog();
-            dialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, listener);
+            try {
+                if(dialog == null) dialog = new JSONFormDialog();
+                dialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, listener);
+            } catch (JsonProcessingException ex) {
+               log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         });
     }
 

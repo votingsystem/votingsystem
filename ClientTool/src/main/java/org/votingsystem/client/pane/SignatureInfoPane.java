@@ -8,12 +8,12 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
@@ -24,7 +24,7 @@ import java.io.File;
  */
 public class SignatureInfoPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SignatureInfoPane.class);
+    private static Logger log = Logger.getLogger(SignatureInfoPane.class.getSimpleName());
 
     private UserVS signer;
     private String signatureAlgorithmValue = null;

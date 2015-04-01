@@ -8,12 +8,14 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -28,7 +30,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class InboxDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(InboxDialog.class);
+    private static Logger log = Logger.getLogger(InboxDialog.class.getSimpleName());
 
     @FXML private VBox mainPane;
     @FXML private ListView<InboxMessage> messageListView;
@@ -39,7 +41,7 @@ public class InboxDialog extends DialogVS {
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
-        log.debug("initialize");
+        log.info("initialize");
         messageListView.setCellFactory(new Callback<ListView<InboxMessage>, ListCell<InboxMessage>>() {
             @Override public ListCell<InboxMessage> call(ListView<InboxMessage> param) {
                 return new MessageCell();
@@ -52,7 +54,7 @@ public class InboxDialog extends DialogVS {
             try {
                 if(dialog == null) dialog = new InboxDialog();
                 dialog.showMessages();
-            } catch (Exception ex) { log.error(ex.getMessage(), ex); }
+            } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
         });
     }
 
@@ -68,7 +70,7 @@ public class InboxDialog extends DialogVS {
     public static InboxDialog getInstance() {
         try {
             if(dialog == null) dialog = new InboxDialog();
-        } catch(Exception ex) { log.error(ex.getMessage(), ex); }
+        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
         return dialog;
     }
 
@@ -102,7 +104,7 @@ public class InboxDialog extends DialogVS {
             } else {
                 try {
                     setGraphic(new InboxMessageRow(item).getMainPane());
-                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                } catch(Exception ex) {log.log(Level.SEVERE, ex.getMessage(), ex);}
             }
         }
     }

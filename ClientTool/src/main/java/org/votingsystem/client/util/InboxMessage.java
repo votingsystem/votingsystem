@@ -1,13 +1,13 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-import org.votingsystem.model.TypeVS;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.util.DateUtils;
-
+import org.votingsystem.util.TypeVS;
 import java.security.PrivateKey;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -16,7 +16,7 @@ import java.util.Date;
  */
 public class InboxMessage<T> {
 
-    private static Logger log = Logger.getLogger(InboxMessage.class);
+    private static Logger log = Logger.getLogger(InboxMessage.class.getSimpleName());
 
     public enum State {LAPSED, PENDING, PROCESSED, REMOVED}
 
@@ -55,21 +55,21 @@ public class InboxMessage<T> {
         this.from = webSocketMessage.getFrom();
         this.isEncrypted = webSocketMessage.isEncrypted();
         this.isTimeLimited = webSocketMessage.isTimeLimited();
-        if(webSocketMessage.getDate() == null) webSocketMessage.setDate(Calendar.getInstance().getTime());
+        if(webSocketMessage.getDate() == null) webSocketMessage.setDate(new Date());
         this.date = webSocketMessage.getDate();
         this.UUID = webSocketMessage.getUUID();
     }
 
-    public InboxMessage(JSONObject jsonObject) throws ParseException {
-        if(jsonObject.has("typeVS")) typeVS = TypeVS.valueOf(jsonObject.getString("typeVS"));
-        if(jsonObject.has("operation")) typeVS = TypeVS.valueOf(jsonObject.getString("operation"));
-        if(jsonObject.has("date")) date = DateUtils.getDateFromString(jsonObject.getString("date"));
-        if(jsonObject.has("messageID")) messageID = jsonObject.getString("messageID");
+    public InboxMessage(Map dataMap) throws ParseException {
+        if(dataMap.containsKey("typeVS")) typeVS = TypeVS.valueOf((String) dataMap.get("typeVS"));
+        if(dataMap.containsKey("operation")) typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
+        if(dataMap.containsKey("date")) date = DateUtils.getDateFromString((String) dataMap.get("date"));
+        if(dataMap.containsKey("messageID")) messageID = (String) dataMap.get("messageID");
         try {
-            load(new WebSocketMessage(jsonObject.getJSONObject("webSocketMessage")));
-        } catch(Exception ex) { log.error(ex.getMessage(), ex);}
-        if(jsonObject.has("message")) message = jsonObject.getString("message");
-        UUID = jsonObject.getString("UUID");
+            load(new WebSocketMessage((Map) dataMap.get("webSocketMessage")));
+        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
+        if(dataMap.containsKey("message")) message = (String) dataMap.get("message");
+        UUID = (String) dataMap.get("UUID");
     }
 
     public Date getDate() {
@@ -154,8 +154,8 @@ public class InboxMessage<T> {
         this.data = data;
     }
 
-    public JSONObject toJSON() {
-        JSONObject result = new JSONObject();
+    public Map toMap() {
+        Map result = new HashMap<>();
         result.put("from", from);
         result.put("date", DateUtils.getISODateStr(date));
         result.put("message", message);

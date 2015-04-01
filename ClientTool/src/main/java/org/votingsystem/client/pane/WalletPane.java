@@ -15,20 +15,21 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-import org.votingsystem.client.dialog.CooinDialog;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.dialog.UserDeviceSelectorDialog;
-import org.votingsystem.client.util.CooinCheckResponse;
-import org.votingsystem.client.util.CooinCheckerTask;
+import org.votingsystem.client.util.CurrencyCheckResponse;
+import org.votingsystem.client.util.CurrencyCheckerTask;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Wallet;
 
 import java.util.*;
@@ -39,52 +40,52 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CooinCheckerTask.Listener {
+public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyCheckerTask.Listener {
 
-    private static Logger log = Logger.getLogger(WalletPane.class);
+    private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
 
     private static Stage stage;
     private MenuButton menuButton;
-    private MenuItem checkCooinsMenuItem;
-    private Map<String, Set<Cooin>> currencyMap;
+    private MenuItem checkCurrencyMenuItem;
+    private Map<String, Set<Currency>> currencyMap;
 
-    public WalletPane(Set<Cooin> wallet) {
+    public WalletPane(Set<Currency> wallet) {
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
         getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
         currencyMap = new HashMap<>();
         menuButton = new MenuButton();
         menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
-        checkCooinsMenuItem =  new MenuItem(ContextVS.getMessage("checkCooinsMenuItemLbl"));
-        checkCooinsMenuItem.setOnAction(actionEvent -> {
-            ProgressDialog.showDialog(new CooinCheckerTask(wallet, this),
-                    ContextVS.getMessage("checkingCooinsMsg"), stage);
+        checkCurrencyMenuItem =  new MenuItem(ContextVS.getMessage("checkCurrencyMenuItemLbl"));
+        checkCurrencyMenuItem.setOnAction(actionEvent -> {
+            ProgressDialog.showDialog(new CurrencyCheckerTask(wallet, this),
+                    ContextVS.getMessage("checkingCurrencyMsg"), stage);
         });
-        menuButton.getItems().addAll(checkCooinsMenuItem);
+        menuButton.getItems().addAll(checkCurrencyMenuItem);
         MenuItem changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
-                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCooinMsg"), WalletPane.this));;
+                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), WalletPane.this));;
 
-        for(Cooin cooin : wallet) {
-            if(currencyMap.containsKey(cooin.getCurrencyCode())) currencyMap.get(cooin.getCurrencyCode()).add(cooin);
-            else currencyMap.put(cooin.getCurrencyCode(), new HashSet<>(Arrays.asList(cooin)));
+        for(Currency currency : wallet) {
+            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
+            else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
         }
         for(String currencyCode : currencyMap.keySet()) {
-            Set<Cooin> cooinSet = currencyMap.get(currencyCode);
+            Set<Currency> currencySet = currencyMap.get(currencyCode);
             VBox currencyPane = new VBox();
             currencyPane.getStyleClass().add("currency-pane");
             Label currencyLbl = new Label();
             currencyLbl.getStyleClass().add("currency");
             currencyLbl.setText(currencyCode);
-            Map<String, Set<Cooin>> tagMap = new HashMap<>();
-            for(Cooin cooin: cooinSet) {
-                if(tagMap.containsKey(cooin.getCertTagVS())) tagMap.get(cooin.getCertTagVS()).add(cooin);
-                else tagMap.put(cooin.getCertTagVS(), new HashSet<>(Arrays.asList(cooin)));
+            Map<String, Set<Currency>> tagMap = new HashMap<>();
+            for(Currency currency : currencySet) {
+                if(tagMap.containsKey(currency.getCertTagVS())) tagMap.get(currency.getCertTagVS()).add(currency);
+                else tagMap.put(currency.getCertTagVS(), new HashSet<>(Arrays.asList(currency)));
             }
             currencyPane.getChildren().add(currencyLbl);
             for(String tag: tagMap.keySet()) {
-                Set<Cooin> cooinTagSet = tagMap.get(tag);
-                Integer tagAmount = cooinTagSet.stream().mapToInt(cooin -> cooin.getAmount().intValue()).sum();
+                Set<Currency> currencyTagSet = tagMap.get(tag);
+                Integer tagAmount = currencyTagSet.stream().mapToInt(currency -> currency.getAmount().intValue()).sum();
                 Label tagLbl = new Label();
                 tagLbl.getStyleClass().add("tag");
                 tagLbl.setText(MsgUtils.getTagDescription(tag));
@@ -100,15 +101,15 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                 tagFlowPane.setHgap(10);
                 tagFlowPane.setVgap(10);
                 tagFlowPane.setAlignment(Pos.CENTER);
-                for(Cooin cooin: cooinTagSet) {
-                    HBox cooinHBox = new HBox();
-                    cooinHBox.setOnMouseClicked(mouseEvent -> CooinDialog.show(cooin, getScene().getWindow()));
-                    cooinHBox.getStyleClass().add("cooinPane");
-                    Label cooinValueLbl = new Label();
-                    cooinValueLbl.getStyleClass().add("cooinValue");
-                    cooinValueLbl.setText(cooin.getAmount().toPlainString() + " " + currencyCode);
-                    cooinHBox.getChildren().add(cooinValueLbl);
-                    tagFlowPane.getChildren().add(cooinHBox);
+                for(Currency currency : currencyTagSet) {
+                    HBox currencyHBox = new HBox();
+                    currencyHBox.setOnMouseClicked(mouseEvent -> CurrencyDialog.show(currency, getScene().getWindow()));
+                    currencyHBox.getStyleClass().add("currencyPane");
+                    Label currencyValueLbl = new Label();
+                    currencyValueLbl.getStyleClass().add("currencyValue");
+                    currencyValueLbl.setText(currency.getAmount().toPlainString() + " " + currencyCode);
+                    currencyHBox.getChildren().add(currencyValueLbl);
+                    tagFlowPane.getChildren().add(currencyHBox);
                 }
                 currencyPane.getChildren().addAll(tagInfoBox, tagFlowPane);
             }
@@ -124,7 +125,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
-                    Set<Cooin> walletJSON = Wallet.getWallet();
+                    Set<Currency> walletJSON = Wallet.getWallet();
                     if(walletJSON == null) {
                         PasswordDialog passwordDialog = new PasswordDialog();
                         passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
@@ -135,7 +136,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                             } catch (WalletException wex) {
                                 Utils.showWalletNotFoundMessage();
                             } catch (Exception ex) {
-                                log.error(ex.getMessage(), ex);
+                                log.log(Level.SEVERE, ex.getMessage(), ex);
                                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                             }
                         } else return;
@@ -154,17 +155,17 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                     stage.toFront();
                     stage.show();
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });
     }
 
-    @Override public void setSelectedDevice(JSONObject deviceDataJSON) {
+    @Override public void setSelectedDevice(Map deviceDataMap) {
 
     }
 
-    @Override public void processCooinStatus(CooinCheckResponse response) {
+    @Override public void processCurrencyStatus(CurrencyCheckResponse response) {
         if(ResponseVS.SC_OK == response.getStatusCode()) {
             showMessage(ResponseVS.SC_OK, ContextVS.getMessage("walletCheckResultOKMsg"));
         } else showMessage(ResponseVS.SC_ERROR, response.getMessage());

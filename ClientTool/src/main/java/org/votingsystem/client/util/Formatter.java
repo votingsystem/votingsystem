@@ -1,12 +1,17 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.util.DateUtils;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import iaik.pkcs.pkcs11.parameters.MacGeneralParameters;
+import org.votingsystem.model.EventVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.OperationVS;
 import java.security.cert.X509Certificate;
 
 /**
@@ -15,7 +20,7 @@ import java.security.cert.X509Certificate;
 */
 public class Formatter {
     
-    private static Logger log = Logger.getLogger(Formatter.class);
+    private static Logger log = Logger.getLogger(Formatter.class.getSimpleName());
 
     private static final int INDENT_FACTOR = 7;
 
@@ -38,72 +43,76 @@ public class Formatter {
                 DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
     }
 
-    public static String format(JSONObject jsonObject) {
+    public static String format(Map dataMap) {
         String result = null;
         try {
-            OperationVS operation = OperationVS.parse(jsonObject);
+            OperationVS operation = OperationVS.parse(dataMap);
             switch(operation.getType()) {
                 case SEND_SMIME_VOTE:
-                    result = formatVote(jsonObject);
+                    result = formatVote(dataMap);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:
-                    result = formatTransactionVSFromGroupToAllMembers(jsonObject);
+                    result = formatTransactionVSFromGroupToAllMembers(dataMap);
                     break;
                 default:
-                    log.debug("Formatter not found for "  + operation.getType());
-                    result = jsonObject.toString(INDENT_FACTOR);
+                    log.info("Formatter not found for " + operation.getType());
+                    result =new ObjectMapper().configure(
+                            SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap);
             }
 
         } catch(Exception ex) {
-            log.error("format - jsonObject: " + jsonObject + " - " + ex.getMessage(), ex);
+            log.log(Level.SEVERE, "format - dataMap: " + dataMap + " - " + ex.getMessage(), ex);
         }
         return result;
     }
     
-    private static String formatVote(JSONObject jsonObject){
+    private static String formatVote(Map dataMap) throws JsonProcessingException {
         StringBuilder result = new StringBuilder("<html>");
         result.append("<b><u><big>" + ContextVS.getMessage("voteLbl") +"</big></u></b><br/>");
         result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
-        result.append("<a href='" + jsonObject.get("eventURL") + "'>" + jsonObject.get("eventURL") +"</a><br/>");
-        JSONObject optionSelectedJSON = (JSONObject) jsonObject.get("optionSelected");
+        result.append("<a href='" + dataMap.get("eventURL") + "'>" + dataMap.get("eventURL") +"</a><br/>");
+        Map optionSelectedJSON = (Map) dataMap.get("optionSelected");
         result.append("<b>" + ContextVS.getMessage("optionSelectedLbl") +": </b>" + optionSelectedJSON.get("content"));
         result.append("</html>");
-        return result.toString();
+        return new ObjectMapper().writeValueAsString(result);
     }
 
-    private static String formatTransactionVSFromGroupToAllMembers(JSONObject jsonObject){
-        StringBuilder result = new StringBuilder("<html>");
-        return result.toString();
+    private static String formatTransactionVSFromGroupToAllMembers(Map dataMap){
+        return dataMap.toString();
     }
 
 
 
-    public static String getEvent (EventVS evento) {
-        log.debug("getEvento - evento: " + evento.getId());
-        if (evento == null) return null;
+    public static String getEvent (EventVS eventVS) {
+        log.info("getEvent - eventVS: " + eventVS.getId());
+        if (eventVS == null) return null;
         StringBuilder result = new StringBuilder("<html>");
-        if(evento.getAccessControlVS() != null) {
+        String dateBegin = null;
+        String dateFinish = null;
+        if(eventVS.getDateBegin() != null) dateBegin = DateUtils.getDateStr(eventVS.getDateBegin());
+        if(eventVS.getDateFinish() != null) dateFinish = DateUtils.getDateStr(eventVS.getDateFinish());
+
+
+        if(eventVS.getAccessControlVS() != null) {
             result.append("<b>" + accessControlLbl + "</b>:").append(
-                evento.getAccessControlVS().getName()).append("<br/>");
+                eventVS.getAccessControlVS().getName()).append("<br/>");
         }
-        if(evento.getSubject() != null) result.append("<b>" + subjectLabel + "</b>: ").
-                append(evento.getSubject() + "<br/>");
-        if(evento.getContent() != null) result.append("<b>" + contentLabel + "</b>: ").
-                append(evento.getContent() + "<br/>");
-        if(evento.getDateBeginStr() != null) result.append("<b>" + dateBeginLabel + "</b>: ").
-                append(evento.getDateBeginStr() + "<br/>");
-        if(evento.getDateFinishStr() != null) result.append("<b>" + dateFinishLabel + "</b>: ").
-                append(evento.getDateFinishStr() + "<br/>");
-        if(evento.getUrl() != null) result.append("<b>" + urlLabel + "</b>: ").
-                append(evento.getUrl() + "<br/>");
-        if(evento.getVoteVS() != null) {
-            if(evento.getVoteVS().getAccessRequestHashBase64() != null) result.append("<b>" +
+        if(eventVS.getSubject() != null) result.append("<b>" + subjectLabel + "</b>: ").
+                append(eventVS.getSubject() + "<br/>");
+        if(eventVS.getContent() != null) result.append("<b>" + contentLabel + "</b>: ").
+                append(eventVS.getContent() + "<br/>");
+        if(dateBegin != null) result.append("<b>" + dateBeginLabel + "</b>: ").append(dateBegin + "<br/>");
+        if(dateFinish!= null) result.append("<b>" + dateFinishLabel + "</b>: ").append(dateFinish + "<br/>");
+        if(eventVS.getUrl() != null) result.append("<b>" + urlLabel + "</b>: ").
+                append(eventVS.getUrl() + "<br/>");
+        if(eventVS.getVoteVS() != null) {
+            if(eventVS.getVoteVS().getAccessRequestHashBase64() != null) result.append("<b>" +
                     hashAccessRequestBase64Label + "</b>: ").append(
-                    evento.getVoteVS().getAccessRequestHashBase64() + "<br/>");
-            if(evento.getVoteVS().getOptionSelected() != null) {
+                    eventVS.getVoteVS().getAccessRequestHashBase64() + "<br/>");
+            if(eventVS.getVoteVS().getOptionSelected() != null) {
                 result.append("<b>" +
                         optionSelectedContentLabel + "</b>: ").append(
-                        evento.getVoteVS().getOptionSelected().getContent() + "<br/>");
+                        eventVS.getVoteVS().getOptionSelected().getContent() + "<br/>");
             }
         }
         return result.toString();

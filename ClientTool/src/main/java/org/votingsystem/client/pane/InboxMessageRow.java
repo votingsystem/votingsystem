@@ -9,11 +9,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.*;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxMessageRow implements CooinCheckerTask.Listener {
+public class InboxMessageRow implements CurrencyCheckerTask.Listener {
 
-    private static Logger log = Logger.getLogger(InboxMessageRow.class);
+    private static Logger log = Logger.getLogger(InboxMessageRow.class.getSimpleName());
 
     public static final int TRUNCATED_MSG_SIZE = 80; //chars
 
@@ -66,16 +66,16 @@ public class InboxMessageRow implements CooinCheckerTask.Listener {
             new Thread(task).start();
         } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate()) + " - " + inboxMessage.getFrom());
         switch(inboxMessage.getTypeVS()) {
-            case COOIN_WALLET_CHANGE:
-                messageButton.setText(ContextVS.getMessage("cooin_wallet_change_button"));
-                descriptionLbl.setText(MsgUtils.getCooinChangeWalletMsg(inboxMessage.getWebSocketMessage()));
-                new Thread(new CooinCheckerTask(inboxMessage.getWebSocketMessage().getCooinSet(), this)).start();
+            case CURRENCY_WALLET_CHANGE:
+                messageButton.setText(ContextVS.getMessage("currency_wallet_change_button"));
+                descriptionLbl.setText(MsgUtils.getCurrencyChangeWalletMsg(inboxMessage.getWebSocketMessage()));
+                new Thread(new CurrencyCheckerTask(inboxMessage.getWebSocketMessage().getCurrencySet(), this)).start();
                 break;
             case MESSAGEVS:
                 messageButton.setText(ContextVS.getMessage("messageLbl"));
                 descriptionLbl.setText(StringUtils.truncateMessage(inboxMessage.getMessage(), TRUNCATED_MSG_SIZE));
                 break;
-            case COOIN_IMPORT:
+            case CURRENCY_IMPORT:
                 messageButton.setText(ContextVS.getMessage("importToWalletLbl"));
                 descriptionLbl.setText(inboxMessage.getMessage());
                 removeButton.setVisible(false);
@@ -92,9 +92,9 @@ public class InboxMessageRow implements CooinCheckerTask.Listener {
 
     }
 
-    @Override public void processCooinStatus(CooinCheckResponse response) {
+    @Override public void processCurrencyStatus(CurrencyCheckResponse response) {
         if(ResponseVS.SC_OK != response.getStatusCode()) {
-            log.debug("message with cooin with errors - statusCode: " + response.getStatusCode());
+            log.info("message with currency with errors - statusCode: " + response.getStatusCode());
             InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED));
         }
     }

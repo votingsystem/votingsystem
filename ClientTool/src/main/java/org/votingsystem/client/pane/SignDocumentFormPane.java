@@ -19,12 +19,14 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,7 +39,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class SignDocumentFormPane extends GridPane implements SignDocumentFormStackPane.OperationListener {
 
-    private static Logger log = Logger.getLogger(SignDocumentFormPane.class);
+    private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getSimpleName());
 
     private Stage stage;
     private TextArea textArea;
@@ -158,7 +160,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
             fos.write(smimeMessage.getBytes());
             fos.close();
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -168,7 +170,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
     }
 
     public static void showDialog() {
-        log.debug("validateBackup");
+        log.info("validateBackup");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 SignDocumentFormPane signDocumentFormPane = new SignDocumentFormPane();
@@ -179,7 +181,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
 
     @Override public void processResult(SignDocumentFormStackPane.Operation operation, ResponseVS responseVS) {
-        log.debug("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
+        log.info("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
         switch(operation) {
             case SIGN_SMIME:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

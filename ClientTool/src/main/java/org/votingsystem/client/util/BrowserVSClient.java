@@ -1,12 +1,15 @@
 package org.votingsystem.client.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.CooinDialog;
+import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
@@ -14,21 +17,14 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.service.WebSocketService;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.Wallet;
-
+import org.votingsystem.util.*;
 import java.util.Base64;
 import java.util.Date;
-
 import static org.votingsystem.client.BrowserVS.showMessage;
+
 /**
  * JavaScript interface object
  * @author jgzornoza
@@ -36,7 +32,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class BrowserVSClient {
 
-    private static Logger log = Logger.getLogger(BrowserVSClient.class);
+    private static Logger log = Logger.getLogger(BrowserVSClient.class.getSimpleName());
 
     private WebView webView;
 
@@ -47,9 +43,10 @@ public class BrowserVSClient {
         try {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
-            log.debug("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
-            OperationVS operationVS = OperationVS.parse(jsonObject);
+            log.info("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
+            Map<String, Object> dataMap = new ObjectMapper().readValue(
+                    jsonStr, new TypeReference<HashMap<String, Object>>() {});
+            OperationVS operationVS = OperationVS.parse(dataMap);
             BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
@@ -78,9 +75,9 @@ public class BrowserVSClient {
                             smimeMessageStr, null, operationVS.getDocument());
                     BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                     break;
-                case OPEN_COOIN:
-                    CooinDialog.show((Cooin) ObjectUtils.deSerializeObject((
-                            (String) operationVS.getDocument().get("object")).getBytes()),
+                case OPEN_CURRENCY:
+                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((
+                                    (String) operationVS.getDocument().get("object")).getBytes()),
                             BrowserVS.getInstance().getScene().getWindow());
                     break;
                 case OPEN_SMIME_FROM_URL:
@@ -106,11 +103,11 @@ public class BrowserVSClient {
                         try {
                             Wallet.getWallet(password);
                             BrowserVS.getInstance().fireCoreSignal("vs-wallet-save", null, false);
-                            InboxService.getInstance().removeMessagesByType(TypeVS.COOIN_IMPORT);
+                            InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
                         } catch (WalletException wex) {
                             Utils.showWalletNotFoundMessage();
                         } catch (Exception ex) {
-                            log.error(ex.getMessage(), ex);
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
                             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                         }
                     }
@@ -124,7 +121,7 @@ public class BrowserVSClient {
                     BrowserVS.getInstance().processOperationVS(operationVS, null);
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             showMessage(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage()));
         }
     }
@@ -133,15 +130,15 @@ public class BrowserVSClient {
         String result = null;
         try {
             String jsonStr = StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
-            OperationVS operationVS = OperationVS.parse(jsonObject);
+            Map<String, Object> dataMap = new ObjectMapper().readValue(
+                    jsonStr, new TypeReference<HashMap<String, Object>>() {});
+            OperationVS operationVS = OperationVS.parse(dataMap);
             switch (operationVS.getType()) {
                 case FORMAT_DATE:
                     Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
                             (String) operationVS.getDocument().get("dateFormat"));
                     String stringFormat = null;
-                    if (operationVS.getDocument().get("stringFormat") != null && !JSONNull.getInstance().equals(
-                            operationVS.getDocument().get("stringFormat"))) {
+                    if (operationVS.getDocument().get("stringFormat") != null) {
                         stringFormat = (String) operationVS.getDocument().get("stringFormat");
                     }
                     if (stringFormat != null) result = DateUtils.getDateStr(dateToFormat,
@@ -161,7 +158,7 @@ public class BrowserVSClient {
                     result = "Unknown operation: '" + operationVS.getType() + "'";
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             result = ex.getMessage();
         } finally {
             if(result == null) return result;

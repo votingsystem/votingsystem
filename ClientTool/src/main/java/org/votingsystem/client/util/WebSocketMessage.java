@@ -1,19 +1,20 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.SessionService;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.*;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSONUtils;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.util.*;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
@@ -30,7 +31,7 @@ import java.util.*;
  */
 public class WebSocketMessage {
 
-    private static Logger log = Logger.getLogger(WebSocketMessage.class);
+    private static Logger log = Logger.getLogger(WebSocketMessage.class.getSimpleName());
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
@@ -50,49 +51,49 @@ public class WebSocketMessage {
     private UserVS userVS;
     private Integer statusCode;
     private TypeVS operation;
-    private JSONObject messageJSON;
-    private Set<Cooin> cooinSet;
+    private Map messageMap;
+    private Set<Currency> currencySet;
     private AESParams aesParams;
     private SMIMEMessage smimeMessage;
     private Date date;
     private WebSocketSession webSocketSession;
 
 
-    public WebSocketMessage(JSONObject socketMsgJSON) throws ParseException, NoSuchAlgorithmException {
-        this.messageJSON = socketMsgJSON;
-        if(socketMsgJSON.has("sessionId")) this.sessionId = socketMsgJSON.getString("sessionId");
-        if(socketMsgJSON.has("operation")) this.operation = TypeVS.valueOf(socketMsgJSON.getString("operation"));
-        if(socketMsgJSON.has("timeLimited")) this.timeLimited = socketMsgJSON.getBoolean("timeLimited");
-        if(socketMsgJSON.has("statusCode")) this.statusCode = socketMsgJSON.getInt("statusCode");
-        if(!JSONUtils.isEmpty("deviceId", socketMsgJSON)) this.deviceId = socketMsgJSON.getLong("deviceId");
-        if(socketMsgJSON.has("URL")) this.URL = socketMsgJSON.getString("URL");
-        if(socketMsgJSON.has("locale")) this.locale = socketMsgJSON.getString("locale");
-        if(socketMsgJSON.has("from")) this.from = socketMsgJSON.getString("from");
-        if(socketMsgJSON.has("deviceFromName")) this.deviceFromName = socketMsgJSON.getString("deviceFromName");
-        if(socketMsgJSON.has("deviceFromId")) this.deviceFromId = socketMsgJSON.getLong("deviceFromId");
-        if(socketMsgJSON.has("UUID")) this.setUUID(socketMsgJSON.getString("UUID"));
-        if(socketMsgJSON.has("date")) this.date = DateUtils.getDateFromString(socketMsgJSON.getString("date"));
-        if(socketMsgJSON.has("isEncrypted")) this.isEncrypted = socketMsgJSON.getBoolean("isEncrypted");
-        if(socketMsgJSON.has("message")) {
+    public WebSocketMessage(Map socketMsgJSON) throws ParseException, NoSuchAlgorithmException {
+        this.messageMap = socketMsgJSON;
+        if(socketMsgJSON.containsKey("sessionId")) this.sessionId = (String) socketMsgJSON.get("sessionId");
+        if(socketMsgJSON.containsKey("operation")) this.operation = TypeVS.valueOf((String) socketMsgJSON.get("operation"));
+        if(socketMsgJSON.containsKey("timeLimited")) this.timeLimited = (boolean) socketMsgJSON.get("timeLimited");
+        if(socketMsgJSON.containsKey("statusCode")) this.statusCode = ((Number) socketMsgJSON.get("statusCode")).intValue();
+        if(socketMsgJSON.containsKey("deviceId")) this.deviceId = ((Number)socketMsgJSON.get("deviceId")).longValue();
+        if(socketMsgJSON.containsKey("URL")) this.URL = (String) socketMsgJSON.get("URL");
+        if(socketMsgJSON.containsKey("locale")) this.locale = (String) socketMsgJSON.get("locale");
+        if(socketMsgJSON.containsKey("from")) this.from = (String) socketMsgJSON.get("from");
+        if(socketMsgJSON.containsKey("deviceFromName")) this.deviceFromName = (String) socketMsgJSON.get("deviceFromName");
+        if(socketMsgJSON.containsKey("deviceFromId")) this.deviceFromId = ((Number)socketMsgJSON.get("deviceFromId")).longValue();
+        if(socketMsgJSON.containsKey("UUID")) this.setUUID((String) socketMsgJSON.get("UUID"));
+        if(socketMsgJSON.containsKey("date")) this.date = DateUtils.getDateFromString((String) socketMsgJSON.get("date"));
+        if(socketMsgJSON.containsKey("isEncrypted")) this.isEncrypted = (Boolean) socketMsgJSON.get("isEncrypted");
+        if(socketMsgJSON.containsKey("message")) {
             Object messageObject = socketMsgJSON.get("message");
-            if(messageObject instanceof  JSONObject) {
-                JSONObject messageJSON = socketMsgJSON.getJSONObject("message");
-                this.statusCode = messageJSON.getInt("statusCode");
-                this.operation = TypeVS.valueOf(messageJSON.getString("operation"));
-                if(messageJSON.has("message")) this.message = messageJSON.getString("message");
-                if(messageJSON.has("URL")) this.URL = messageJSON.getString("URL");
-            } else this.message = socketMsgJSON.getString("message");
+            if(messageObject instanceof  Map) {
+                Map messageMap = (Map) socketMsgJSON.get("message");
+                this.statusCode = ((Number) messageMap.get("statusCode")).intValue();
+                this.operation = TypeVS.valueOf((String) messageMap.get("operation"));
+                if(messageMap.containsKey("message")) this.message = (String) messageMap.get("message");
+                if(messageMap.containsKey("URL")) this.URL = (String) messageMap.get("URL");
+            } else this.message = (String) socketMsgJSON.get("message");
         }
-        if(socketMsgJSON.has("smimeMessage")) {
+        if(socketMsgJSON.containsKey("smimeMessage")) {
             try {
-                byte[] smimeMessageBytes = Base64.getDecoder().decode(socketMsgJSON.getString("smimeMessage").getBytes());
+                byte[] smimeMessageBytes = Base64.getDecoder().decode(((String)socketMsgJSON.get("smimeMessage")).getBytes());
                 smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
-            }catch(Exception ex) {log.error(ex.getMessage(), ex);}
+            }catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
         }
-        if(socketMsgJSON.has("cooinList")) {
+        if(socketMsgJSON.containsKey("currencyList")) {
             try {
-                cooinSet = Wallet.getCooinSet(socketMsgJSON.getJSONArray("cooinList"));
-            }catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                currencySet = Wallet.getCurrencySet((List<Map>) socketMsgJSON.get("currencyList"));
+            }catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
         }
     }
 
@@ -149,11 +150,11 @@ public class WebSocketMessage {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
-        if(messageJSON != null) messageJSON.put("operation", operation);
+        if(messageMap != null) messageMap.put("operation", operation);
     }
 
     public String getWebSocketCoreSignalJSCommand(ConnectionStatus status) {
-        return getWebSocketCoreSignalJSCommand(messageJSON, status);
+        return getWebSocketCoreSignalJSCommand(messageMap, status);
     }
 
     public String getMessage() {
@@ -180,12 +181,12 @@ public class WebSocketMessage {
         this.date = date;
     }
 
-    public Set<Cooin> getCooinSet() {
-        return cooinSet;
+    public Set<Currency> getCurrencySet() {
+        return currencySet;
     }
 
-    public void setCooinSet(Set<Cooin> cooinSet) {
-        this.cooinSet = cooinSet;
+    public void setCurrencySet(Set<Currency> currencySet) {
+        this.currencySet = currencySet;
     }
 
     public State getState() {
@@ -249,7 +250,7 @@ public class WebSocketMessage {
         this.deviceFromId = deviceFromId;
     }
 
-    public JSONObject getResponse(Integer statusCode, String message) throws Exception {
+    public Map getResponse(Integer statusCode, String message) throws Exception {
         Map result = new HashMap();
         result.put("sessionId", sessionId);
         result.put("operation", TypeVS.MESSAGEVS_FROM_DEVICE.toString());
@@ -260,17 +261,17 @@ public class WebSocketMessage {
             dataToEncrypt.put("statusCode", statusCode);
             dataToEncrypt.put("message", message);
             dataToEncrypt.put("operation", operation.toString());
-            result.put("encryptedMessage", Encryptor.encryptAES(
-                    JSONSerializer.toJSON(dataToEncrypt).toString(), aesParams));
+            String dataToEncryptStr = new ObjectMapper().writeValueAsString(dataToEncrypt);
+            result.put("encryptedMessage", Encryptor.encryptAES(dataToEncryptStr, aesParams));
         } else {
             result.put("operation", operation.toString());
             result.put("statusCode", statusCode);
             result.put("message", message);
         }
-        return (JSONObject) JSONSerializer.toJSON(result);
+        return result;
     }
 
-    public static JSONObject getAuthenticationRequest(SMIMEMessage smimeMessage, String UUID) throws Exception {
+    public static Map getAuthenticationRequest(SMIMEMessage smimeMessage, String UUID) throws Exception {
         Map messageToServiceMap = new HashMap<>();
         messageToServiceMap.put("operation", TypeVS.INIT_VALIDATED_SESSION);
         messageToServiceMap.put("deviceFromId", SessionService.getInstance().getDeviceId());
@@ -279,10 +280,10 @@ public class WebSocketMessage {
         messageToServiceMap.put("UUID", UUID);
         VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 null, null, null, TypeVS.INIT_VALIDATED_SESSION));
-        return (JSONObject) JSONSerializer.toJSON(messageToServiceMap);
+        return messageToServiceMap;
     }
 
-    public static JSONObject getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject ,
+    public static Map getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject ,
             Header... headers) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
         Map messageToDevice = new HashMap<>();
@@ -299,23 +300,23 @@ public class WebSocketMessage {
         encryptedDataMap.put("subject", subject);
         encryptedDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         if(headers != null) {
-            JSONArray headersArray = new JSONArray();
+            List headersList = new ArrayList<>();
             for(Header header : headers) {
                 if (header != null) {
-                    JSONObject headerJSON = new JSONObject();
-                    headerJSON.put("name", header.getName());
-                    headerJSON.put("value", header.getValue());
-                    headersArray.add(headerJSON);
+                    Map headerMap = new HashMap<>();
+                    headerMap.put("name", header.getName());
+                    headerMap.put("value", header.getValue());
+                    headersList.add(headerMap);
                 }
             }
-            encryptedDataMap.put("headers", headersArray);
+            encryptedDataMap.put("headers", headersList);
         }
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
-                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
-        return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
+        return messageToDevice;
     }
 
     private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)
@@ -332,7 +333,7 @@ public class WebSocketMessage {
         return webSocketSession;
     }
 
-    public static JSONObject getMessageVSToDevice(DeviceVS deviceVS, String toUser, String textToEncrypt) throws Exception {
+    public static Map getMessageVSToDevice(DeviceVS deviceVS, String toUser, String textToEncrypt) throws Exception {
         Map messageToDevice = new HashMap<>();
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS);
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
@@ -350,15 +351,15 @@ public class WebSocketMessage {
         encryptedDataMap.put("message", textToEncrypt);
         messageToDevice.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
-                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
-        return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
+        return messageToDevice;
     }
 
-    public static JSONObject getCooinWalletChangeRequest(DeviceVS deviceVS, List<Cooin> cooinList) throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, cooinList, TypeVS.COOIN_WALLET_CHANGE);
+    public static Map getCurrencyWalletChangeRequest(DeviceVS deviceVS, List<Currency> currencyList) throws Exception {
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         Map messageToDevice = new HashMap<>();
         messageToDevice.put("operation", TypeVS.MESSAGEVS_TO_DEVICE.toString());
         messageToDevice.put("statusCode", ResponseVS.SC_PROCESSING);
@@ -367,61 +368,63 @@ public class WebSocketMessage {
         messageToDevice.put("deviceToId", deviceVS.getId());
         messageToDevice.put("deviceToName", deviceVS.getDeviceName());
         Map encryptedDataMap =  new HashMap<>();
-        encryptedDataMap.put("operation", TypeVS.COOIN_WALLET_CHANGE.toString());
+        encryptedDataMap.put("operation", TypeVS.CURRENCY_WALLET_CHANGE.toString());
         encryptedDataMap.put("deviceFromName", InetAddress.getLocalHost().getHostName());
         encryptedDataMap.put("deviceFromId", VotingSystemApp.getInstance().getDeviceId());
         encryptedDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-        //the serialized request is with CertificationRequestVS instead of Cooins
-        List<Map> serializedCooinList = Wallet.getCertificationRequestSerialized(cooinList);
-        encryptedDataMap.put("cooinList", serializedCooinList);
+        //the serialized request is with CertificationRequestVS instead of Currency
+        List<Map> serializedCurrencyList = Wallet.getCertificationRequestSerialized(currencyList);
+        encryptedDataMap.put("currencyList", serializedCurrencyList);
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toJSON().toString().getBytes(), deviceVS.getX509Certificate());
+                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(
-                JSONSerializer.toJSON(encryptedDataMap).toString(), socketSession.getAESParams()));
-        return (JSONObject) JSONSerializer.toJSON(messageToDevice);
+        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        
+        messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
+        return messageToDevice;
     }
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
-        byte[] decryptedBytes = Encryptor.decryptCMS(messageJSON.getString("aesParams").getBytes(), privateKey);
-        this.aesParams = AESParams.load((JSONObject) JSONSerializer.toJSON(new String(decryptedBytes)));
+        byte[] decryptedBytes = Encryptor.decryptCMS(((String)messageMap.get("aesParams")).getBytes(), privateKey);
+        this.aesParams = AESParams.load(new ObjectMapper().readValue(new String(decryptedBytes) , 
+                new TypeReference<HashMap<String, Object>>() {}));
         decryptMessage(this.aesParams);
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
-        JSONObject decryptedJSON = (JSONObject) JSONSerializer.toJSON(Encryptor.decryptAES(
-                messageJSON.getString("encryptedMessage"), aesParams));
-        if(decryptedJSON.has("operation")) operation = TypeVS.valueOf(decryptedJSON.getString("operation"));
-        if(decryptedJSON.has("statusCode")) statusCode = decryptedJSON.getInt("statusCode");
-        if(decryptedJSON.has("message")) message = decryptedJSON.getString("message");
-        if(decryptedJSON.has("deviceFromName")) deviceFromName = decryptedJSON.getString("deviceFromName");
-        if(decryptedJSON.has("deviceFromId")) deviceFromId = decryptedJSON.getLong("deviceFromId");
-        if(decryptedJSON.has("locale")) this.locale = decryptedJSON.getString("locale");
-        if(decryptedJSON.has("from")) this.from = decryptedJSON.getString("from");
-        if(decryptedJSON.has("smimeMessage")) {
-            byte[] smimeMessageBytes = Base64.getDecoder().decode(decryptedJSON.getString("smimeMessage").getBytes());
+        Map<String, Object> decryptedMap = new ObjectMapper().readValue(Encryptor.decryptAES(
+                (String) messageMap.get("encryptedMessage"), aesParams), new TypeReference<HashMap<String, Object>>() {});
+        if(decryptedMap.containsKey("operation")) operation = TypeVS.valueOf((String) decryptedMap.get("operation"));
+        if(decryptedMap.containsKey("statusCode")) statusCode = ((Number) decryptedMap.get("statusCode")).intValue();
+        if(decryptedMap.containsKey("message")) message = (String) decryptedMap.get("message");
+        if(decryptedMap.containsKey("deviceFromName")) deviceFromName = (String) decryptedMap.get("deviceFromName");
+        if(decryptedMap.containsKey("deviceFromId")) deviceFromId = ((Number)decryptedMap.get("deviceFromId")).longValue();
+        if(decryptedMap.containsKey("locale")) this.locale = (String) decryptedMap.get("locale");
+        if(decryptedMap.containsKey("from")) this.from = (String) decryptedMap.get("from");
+        if(decryptedMap.containsKey("smimeMessage")) {
+            byte[] smimeMessageBytes = Base64.getDecoder().decode(((String)decryptedMap.get("smimeMessage")).getBytes());
             smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
         }
-        if(decryptedJSON.has("cooinList")) {
-            this.cooinSet = Wallet.getCooinSetFromCertificationRequest(decryptedJSON.getJSONArray("cooinList"));
+        if(decryptedMap.containsKey("currencyList")) {
+            this.currencySet = Wallet.getCurrencySetFromCertificationRequest((List) decryptedMap.get("currencyList"));
         }
         this.isEncrypted = false;
         VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 aesParams, new DeviceVS(deviceFromId, deviceFromName), null, operation));
     }
 
-    public static String getWebSocketCoreSignalJSCommand(JSONObject messageJSON, ConnectionStatus status) {
-        JSONObject coreSignal = new JSONObject();
-        if(messageJSON == null) messageJSON = new JSONObject();
-        messageJSON.put("socketStatus", status.toString());
-        //this.fire('core-signal', {name: "vs-websocket-message", data: messageJSON});
+    public static String getWebSocketCoreSignalJSCommand(Map messageMap, ConnectionStatus status) {
+        Map coreSignal = new HashMap<>();
+        if(messageMap == null) messageMap = new HashMap();
+        messageMap.put("socketStatus", status.toString());
+        //this.fire('core-signal', {name: "vs-websocket-message", data: messageMap});
         coreSignal.put("name", "vs-websocket-message");
-        coreSignal.put("data", messageJSON);
+        coreSignal.put("data", messageMap);
         String jsCommand = null;
         try {
             jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
                     coreSignal.toString().getBytes("UTF-8")) + "')";
-        } catch (UnsupportedEncodingException ex) { log.error(ex.getMessage(), ex); }
+        } catch (UnsupportedEncodingException ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
         return jsCommand;
     }
 
@@ -433,10 +436,10 @@ public class WebSocketMessage {
         this.deviceFromName = deviceFromName;
     }
 
-    public JSONObject getMessageJSON() {
-        JSONObject result = null;
+    public Map getMessageJSON() {
+        Map result = null;
         if(isEncrypted != null && !isEncrypted) {
-            result = new JSONObject();
+            result = new HashMap<>();
             if(operation != null) result.put("operation", operation.toString());
             result.put("statusCode", statusCode);
             result.put("timeLimited", timeLimited);
@@ -452,22 +455,22 @@ public class WebSocketMessage {
             if(smimeMessage != null) {
                 try {
                     result.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
-                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                } catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
             }
             if(isEncrypted != null) result.put("isEncrypted", isEncrypted);
-            if(cooinSet != null) {
+            if(currencySet != null) {
                 try {
-                    List<Map> serializedCooinList = Wallet.getCooinSerialized(cooinSet);
-                    result.put("cooinList", serializedCooinList);
-                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                    List<Map> serializedCurrencyList = Wallet.getCurrencySerialized(currencySet);
+                    result.put("currencyList", serializedCurrencyList);
+                } catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
             }
-        } else result = messageJSON;
-        if(date != null) messageJSON.put("date", DateUtils.getISODateStr(date));
+        } else result = messageMap;
+        if(date != null) messageMap.put("date", DateUtils.getISODateStr(date));
         return result;
     }
 
-    public void setMessageJSON(JSONObject messageJSON) {
-        this.messageJSON = messageJSON;
+    public void setMessageJSON(Map messageMap) {
+        this.messageMap = messageMap;
     }
 
 }

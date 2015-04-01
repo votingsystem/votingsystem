@@ -15,13 +15,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.OperationVS;
 
 
 /**
@@ -30,7 +30,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
  */
 public class BrowserVSPane extends StackPane {
 
-    private static Logger log = Logger.getLogger(BrowserVSPane.class);
+    private static Logger log = Logger.getLogger(BrowserVSPane.class.getSimpleName());
 
     private Text messageText;
     private boolean isCapsLockPressed = false;
@@ -51,9 +51,9 @@ public class BrowserVSPane extends StackPane {
         getStylesheets().add(Utils.getResource("/css/browservsPane.css"));
         getStyleClass().add("glassBox");
 
-        signatureService.setOnRunning(event -> log.debug("signatureService - OnRunning"));
-        signatureService.setOnCancelled(event -> log.debug("signatureService - OnCancelled"));
-        signatureService.setOnFailed(event -> log.debug("signatureService - OnFailed"));
+        signatureService.setOnRunning(event -> log.info("signatureService - OnRunning"));
+        signatureService.setOnCancelled(event -> log.info("signatureService - OnCancelled"));
+        signatureService.setOnFailed(event -> log.info("signatureService - OnFailed"));
         Region progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
         progressRegion.setPrefSize(240, 160);
@@ -170,7 +170,7 @@ public class BrowserVSPane extends StackPane {
     }
 
     private void checkPasswords() {
-        log.debug("checkPasswords");
+        log.info("checkPasswords");
         PlatformImpl.runLater(() -> {
             String password1 = new String(password1Field.getText());
             String password2 = null;

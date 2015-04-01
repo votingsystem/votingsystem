@@ -1,10 +1,13 @@
 package org.votingsystem.client.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -13,25 +16,19 @@ import org.votingsystem.client.util.InboxDecryptTask;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Wallet;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import static java.util.stream.Collectors.toList;
 import static org.votingsystem.client.BrowserVS.showMessage;
 
@@ -41,7 +38,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class InboxService {
 
-    private static Logger log = Logger.getLogger(InboxService.class);
+    private static Logger log = Logger.getLogger(InboxService.class.getSimpleName());
 
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
 
@@ -59,29 +56,29 @@ public class InboxService {
     }
 
     private InboxService() {
-        JSONArray messageArray = null;
+        List messageList = null;
         try {
             messagesFile = new File(ContextVS.APPDIR + File.separator + ContextVS.INBOX_FILE);
             if(messagesFile.createNewFile()) {
-                messageArray = new JSONArray();
+                messageList = new ArrayList<>();
                 flush();
-            } else messageArray = (JSONArray) JSONSerializer.toJSON(FileUtils.getStringFromFile(messagesFile));
-            for(int i = 0; i < messageArray.size(); i++) {
-                InboxMessage inboxMessage = new InboxMessage((net.sf.json.JSONObject) messageArray.get(i));
+            } else messageList =  new ObjectMapper().readValue(messagesFile, new TypeReference<List>() {});
+            for(int i = 0; i < messageList.size(); i++) {
+                InboxMessage inboxMessage = new InboxMessage((Map) messageList.get(i));
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
                 else messageList.add(inboxMessage);
             }
-            Set<Cooin> cooinSet = Wallet.getCooinSetFromPlainWallet();
-            if(cooinSet.size() > 0) {
-                log.debug("found cooins in not secured wallet");
+            Set<Currency> currencySet = Wallet.getCurrencySetFromPlainWallet();
+            if(currencySet.size() > 0) {
+                log.info("found currency in not secured wallet");
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),
-                        Calendar.getInstance().getTime());
-                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
-                        cooinSet))).setTypeVS(TypeVS.COOIN_IMPORT);
+                        new Date());
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Currency.getCurrencyMap(
+                        currencySet))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 newMessage(inboxMessage);
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -113,13 +110,13 @@ public class InboxService {
                 isPasswordVisible.set(false);
                 if (password != null) {
                     try {
-                        KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
+                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
                         PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                                 password.toCharArray());
                         ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage), 
                                 ContextVS.getMessage("decryptingMessagesMsg"), BrowserVS.getInstance().getScene().getWindow());
                     } catch (Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
                     }
                 } else InboxDialog.showDialog();
@@ -131,7 +128,7 @@ public class InboxService {
 
     public void newMessage(InboxMessage inboxMessage, boolean openInboxDialog) {
         switch(inboxMessage.getTypeVS()) {
-            case COOIN_IMPORT:
+            case CURRENCY_IMPORT:
                 messageList.add(inboxMessage);
                 PlatformImpl.runLater(() -> {
                     inboxButton.setVisible(true);
@@ -155,7 +152,7 @@ public class InboxService {
                 showPasswordDialog(null, inboxMessage.isTimeLimited());
                 break;
             default:
-                log.error("newMessage - unprocessed message: " + inboxMessage.getTypeVS());
+                log.log(Level.SEVERE, "newMessage - unprocessed message: " + inboxMessage.getTypeVS());
         }
     }
 
@@ -184,25 +181,25 @@ public class InboxService {
     }
 
     public void processMessage(InboxMessage inboxMessage) {
-        log.debug("processMessage - type: " + inboxMessage.getTypeVS() + " - state: " + inboxMessage.getState());
+        log.info("processMessage - type: " + inboxMessage.getTypeVS() + " - state: " + inboxMessage.getState());
         PasswordDialog passwordDialog = null;
         String password = null;
         switch(inboxMessage.getState()) {
             case LAPSED:
-                log.debug("discarding LAPSED message");
+                log.info("discarding LAPSED message");
                 return;
             case REMOVED:
                 removeMessage(inboxMessage);
                 return;
         }
         switch(inboxMessage.getTypeVS()) {
-            case COOIN_WALLET_CHANGE:
+            case CURRENCY_WALLET_CHANGE:
                 passwordDialog = new PasswordDialog();
                 passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
                 password = passwordDialog.getPassword();
                 if(password != null) {
                     try {
-                        Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCooinSet(), password);
+                        Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCurrencySet(), password);
                         EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(inboxMessage);
                         WebSocketAuthenticatedService.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
@@ -210,7 +207,7 @@ public class InboxService {
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                 }
@@ -219,7 +216,7 @@ public class InboxService {
                 String msg = MsgUtils.getWebSocketFormattedMessage(inboxMessage);
                 showMessage(msg, ContextVS.getMessage("messageLbl"));
                 break;
-            case COOIN_IMPORT:
+            case CURRENCY_IMPORT:
                 passwordDialog = new PasswordDialog();
                 passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
                 password = passwordDialog.getPassword();
@@ -230,7 +227,7 @@ public class InboxService {
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                 }
@@ -238,7 +235,7 @@ public class InboxService {
             case MESSAGEVS_TO_DEVICE:
                 showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());
                 break;
-            default:log.debug(inboxMessage.getTypeVS() + " not processed");
+            default:log.info(inboxMessage.getTypeVS() + " not processed");
         }
     }
 
@@ -254,15 +251,15 @@ public class InboxService {
     }
 
     private void flush() {
-        log.debug("flush");
+        log.info("flush");
         try {
-            JSONArray messageArray = new JSONArray();
+            List messageList = new ArrayList<>();
             for(InboxMessage inboxMessage : getMessageList()) {
-                messageArray.add(inboxMessage.toJSON());
+                messageList.add(inboxMessage.toMap());
             }
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageArray.toString().getBytes()), messagesFile);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageList.toString().getBytes()), messagesFile);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 

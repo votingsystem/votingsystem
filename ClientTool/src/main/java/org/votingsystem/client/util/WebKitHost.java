@@ -1,7 +1,8 @@
 package org.votingsystem.client.util;
 
-import net.sf.json.JSON;
-import org.votingsystem.model.OperationVS;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.util.OperationVS;
 
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  */
 public interface WebKitHost {
 
-    public void invokeBrowserCallback(JSON messageJSON, String callerCallback);
+    public void invokeBrowserCallback(Map dataMap, String callerCallback) throws JsonProcessingException;
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage);
     public void processOperationVS(String password, OperationVS operationVS);
     public void processSignalVS(Map signalData);

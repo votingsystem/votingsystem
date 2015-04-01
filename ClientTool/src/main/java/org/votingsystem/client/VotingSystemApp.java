@@ -2,16 +2,18 @@ package org.votingsystem.client;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.AccessControlVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CooinServer;
+import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.ContextVS;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -33,7 +35,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class VotingSystemApp extends Application {
 
-    private static Logger log = Logger.getLogger(VotingSystemApp.class);
+    private static Logger log = Logger.getLogger(VotingSystemApp.class.getSimpleName());
 
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
@@ -43,17 +45,17 @@ public class VotingSystemApp extends Application {
     // Create a trust manager that does not validate certificate chains
     private static TrustManager[] trustAllCerts = new TrustManager[] {
         new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            public X509Certificate[] getAcceptedIssuers() {
                 System.out.print("trustAllCerts - getAcceptedIssuers");
                 try {
                     return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
-                } catch (Exception ex) { log.error(ex.getMessage(), ex);}
+                } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex);}
                 return null;
             }
-            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
                 System.out.print("trustAllCerts - checkClientTrusted");
             }
-            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
+            public void checkServerTrusted(X509Certificate[] certs, String authType ) throws CertificateException {
                 System.out.print("trustAllCerts - checkServerTrusted");
                 try {
                     CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
@@ -97,7 +99,7 @@ public class VotingSystemApp extends Application {
     }
 
     @Override public void stop() {
-        log.debug("stop");
+        log.info("stop");
         System.exit(0);//Platform.exit();
     }
 
@@ -114,21 +116,21 @@ public class VotingSystemApp extends Application {
                         toString().contains("jar:file")) {
                     loadedFromJar = true;
                 }
-                log.debug("start - loadedFromJar: " + loadedFromJar + " - JavaFX version: " +
+                log.info("start - loadedFromJar: " + loadedFromJar + " - JavaFX version: " +
                         com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
                 try {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-                } catch (GeneralSecurityException ex) { log.error(ex.getMessage(), ex); }
+                } catch (GeneralSecurityException ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
                 String accessControlServerURL = null;
-                String cooinsServerURL = null;
+                String currencyServerURL = null;
                 if(loadedFromJar) {
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
-                    cooinsServerURL = ContextVS.getMessage("prodCooinsServerURL");
+                    currencyServerURL = ContextVS.getMessage("prodCurrencyServerURL");
                 } else {
                     accessControlServerURL = ContextVS.getMessage("devAccessControlServerURL");
-                    cooinsServerURL = ContextVS.getMessage("devCooinsServerURL");
+                    currencyServerURL = ContextVS.getMessage("devCurrencyServerURL");
                 }
                 ResponseVS responseVS = null;
                 try {
@@ -136,7 +138,7 @@ public class VotingSystemApp extends Application {
                     Map<String, List<String>> headers = new LinkedHashMap<String, List<String>>();
                     headers.put("Set-Cookie", Arrays.asList("Accept-Language=" + Locale.getDefault().getLanguage()));
                     cookieManager.put(new URI(accessControlServerURL), headers);
-                    cookieManager.put(new URI(cooinsServerURL), headers);
+                    cookieManager.put(new URI(currencyServerURL), headers);
                     CookieHandler.setDefault(cookieManager);
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -144,16 +146,16 @@ public class VotingSystemApp extends Application {
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
                         SessionService.getInstance().checkCSRRequest();
                     }
-                } catch(Exception ex) {log.error(ex.getMessage(), ex);}
+                } catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
                 try {
-                    responseVS = Utils.checkServer(cooinsServerURL);
+                    responseVS = Utils.checkServer(currencyServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        browserVS.setCooinServerAvailable(true);
-                        ContextVS.getInstance().setCooinServer((CooinServer) responseVS.getData());
-                    } else browserVS.setCooinServerAvailable(false);
+                        browserVS.setCurrencyServerAvailable(true);
+                        ContextVS.getInstance().setCurrencyServer((CurrencyServer) responseVS.getData());
+                    } else browserVS.setCurrencyServerAvailable(false);
                 } catch(Exception ex) {
-                    log.error(ex.getMessage());
-                    browserVS.setCooinServerAvailable(false);
+                    log.log(Level.SEVERE,ex.getMessage());
+                    browserVS.setCurrencyServerAvailable(false);
                 }
         }).start();
         browserVS.show();
@@ -168,8 +170,7 @@ public class VotingSystemApp extends Application {
     }
 
     public static void main(String[] args) {
-        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties",
-                Locale.getDefault().getLanguage());
+        ContextVS.initSignatureClient("clientToolMessages.properties", Locale.getDefault().getLanguage());
         if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
     }

@@ -5,11 +5,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
@@ -21,7 +23,7 @@ import java.security.cert.X509Certificate;
  */
 public class TimeStampCertPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampCertPane.class);
+    private static Logger log = Logger.getLogger(TimeStampCertPane.class.getSimpleName());
 
     private X509Certificate certificate;
 
@@ -47,7 +49,7 @@ public class TimeStampCertPane extends GridPane {
             MessageDialog messageDialog = new MessageDialog();
             messageDialog.showMessage(null, certificate.getSubjectDN().toString() + " - " + message);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 

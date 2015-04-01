@@ -7,7 +7,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
@@ -16,9 +16,9 @@ import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.TypeVS;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,17 +28,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class BrowserVSMenuButton extends MenuButton {
 
-    private static Logger log = Logger.getLogger(BrowserVSMenuButton.class);
+    private static Logger log = Logger.getLogger(BrowserVSMenuButton.class.getSimpleName());
 
     private MenuItem voteMenuItem;
     private MenuItem selectRepresentativeMenuItem;
-    private MenuItem cooinUsersProceduresMenuItem;
+    private MenuItem currencyUsersProceduresMenuItem;
     private MenuItem walletMenuItem;
     private MenuItem connectMenuItem;
 
     class EventBusConnectionListener {
         @Subscribe public void responseVSChange(ResponseVS responseVS) {
-            log.debug("EventBusConnectionListener - response type: " + responseVS.getType());
+            log.info("EventBusConnectionListener - response type: " + responseVS.getType());
             AtomicBoolean isConnected = new AtomicBoolean(false);
             if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
                 isConnected.set(true);
@@ -75,12 +75,12 @@ public class BrowserVSMenuButton extends MenuButton {
                     ContextVS.getMessage("selectRepresentativeButtonLbl"));
         });
 
-        cooinUsersProceduresMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
-        cooinUsersProceduresMenuItem.setVisible(false);
-        cooinUsersProceduresMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.BAR_CHART));
-        cooinUsersProceduresMenuItem.setOnAction(event -> {
-            BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getUserDashBoardURL(),
-                    ContextVS.getMessage("cooinUsersLbl"));
+        currencyUsersProceduresMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
+        currencyUsersProceduresMenuItem.setVisible(false);
+        currencyUsersProceduresMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.BAR_CHART));
+        currencyUsersProceduresMenuItem.setOnAction(event -> {
+            BrowserVS.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getUserDashBoardURL(),
+                    ContextVS.getMessage("currencyUsersLbl"));
         });
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
         walletMenuItem.setVisible(false);
@@ -96,19 +96,19 @@ public class BrowserVSMenuButton extends MenuButton {
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
-        MenuItem cooinAdminMenuItem = new MenuItem(ContextVS.getMessage("cooinAdminLbl"));
-        cooinAdminMenuItem.setOnAction(actionEvent ->  BrowserVS.getInstance().openCooinURL(ContextVS.getInstance().getCooinServer().getAdminDashBoardURL(),
-                ContextVS.getMessage("cooinAdminLbl")));
+        MenuItem currencyAdminMenuItem = new MenuItem(ContextVS.getMessage("currencyAdminLbl"));
+        currencyAdminMenuItem.setOnAction(actionEvent ->  BrowserVS.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getAdminDashBoardURL(),
+                ContextVS.getMessage("currencyAdminLbl")));
         MenuItem votingSystemAdminMenuItem = new MenuItem(ContextVS.getMessage("votingSystemProceduresLbl"));
         votingSystemAdminMenuItem.setOnAction(actionEvent -> BrowserVS.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getDashBoardURL(),
                 ContextVS.getMessage("votingSystemProceduresLbl")));
 
         Menu adminsMenu = new Menu(ContextVS.getMessage("adminsMenuLbl"));
         adminsMenu.setGraphic(Utils.getIcon(FontAwesomeIconName.USERS));
-        adminsMenu.getItems().addAll(cooinAdminMenuItem, votingSystemAdminMenuItem);
+        adminsMenu.getItems().addAll(currencyAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                connectMenuItem, walletMenuItem, cooinUsersProceduresMenuItem, new SeparatorMenuItem(),
+                connectMenuItem, walletMenuItem, currencyUsersProceduresMenuItem, new SeparatorMenuItem(),
                 signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
@@ -120,9 +120,9 @@ public class BrowserVSMenuButton extends MenuButton {
         });
     }
 
-    public void setCooinServerAvailable(boolean available) {
+    public void setCurrencyServerAvailable(boolean available) {
         PlatformImpl.runLater(() -> {
-            cooinUsersProceduresMenuItem.setVisible(available);
+            currencyUsersProceduresMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
             connectMenuItem.setVisible(available);
         });

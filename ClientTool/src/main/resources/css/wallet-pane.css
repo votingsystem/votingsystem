@@ -27,7 +27,7 @@
     -fx-font-size: 1.1em;
 }
 
-.cooinPane {
+.currencyPane {
     -fx-pref-width: 100px;
 
     -fx-padding: 4;
@@ -41,14 +41,14 @@
     -fx-background-color: #f9f9f9;
 }
 
-.cooinPane:hover {
+.currencyPane:hover {
     -fx-cursor: hand;
     -fx-background-color: #ccc;
     -fx-background-radius: 4;
     -fx-text-fill: #f9f9f9;
 }
 
-.cooinValue {
+.currencyValue {
     -fx-text-fill: #61a753;
     -fx-font-size: 1em;
 }

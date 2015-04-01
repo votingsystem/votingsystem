@@ -1,6 +1,6 @@
 package org.votingsystem.client.model;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.signature.util.SignedFile;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 public class RepresentativeData {
     
     private static Logger log = Logger.getLogger(
-            RepresentativeData.class);
+            RepresentativeData.class.getSimpleName());
     
     private String nif;
     private Long id;
@@ -35,7 +35,7 @@ public class RepresentativeData {
     
     public void addRepresentationDoc(SignedFile repDoc) {
         if(repDoc == null) {
-            log.debug("repDoc null");
+            log.info("repDoc null");
             return;
         } 
         representationDocumentList.add(repDoc);
@@ -145,7 +145,7 @@ public class RepresentativeData {
         return optionSelectedId;
     }
    
-    public Long getOptionSelectedIdFromVote() {
+    public Long getOptionSelectedIdFromVote() throws Exception {
         if(vote == null) {
             return null;
         }

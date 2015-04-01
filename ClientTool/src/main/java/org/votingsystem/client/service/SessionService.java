@@ -1,19 +1,21 @@
 package org.votingsystem.client.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.control.Button;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
-import org.votingsystem.model.*;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
@@ -23,7 +25,6 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -41,15 +42,15 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class SessionService {
 
-    private static Logger log = Logger.getLogger(SessionService.class);
+    private static Logger log = Logger.getLogger(SessionService.class.getSimpleName());
 
     private UserVS userVS;
     private File sessionFile;
     private File representativeStateFile;
     private AnonymousDelegationRequest anonymousDelegationRequest;
-    private JSONObject representativeStateJSON;
-    private JSONObject browserSessionDataJSON;
-    private JSONObject sessionDataJSON;
+    private Map representativeStateMap;
+    private Map browserSessionDataMap;
+    private Map sessionDataMap;
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
@@ -59,44 +60,44 @@ public class SessionService {
         try {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
-                sessionDataJSON = new JSONObject();
-                browserSessionDataJSON = new JSONObject();
-                browserSessionDataJSON.put("deviceId", UUID.randomUUID().toString());
-                browserSessionDataJSON.put("fileType", ContextVS.BROWSER_SESSION_FILE);
-                sessionDataJSON.put("browserSession", browserSessionDataJSON);
+                sessionDataMap = new HashMap<>();
+                browserSessionDataMap = new HashMap<>();
+                browserSessionDataMap.put("deviceId", UUID.randomUUID().toString());
+                browserSessionDataMap.put("fileType", ContextVS.BROWSER_SESSION_FILE);
+                sessionDataMap.put("browserSession", browserSessionDataMap);
             } else {
-                sessionDataJSON = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(sessionFile));
-                browserSessionDataJSON = sessionDataJSON.getJSONObject("browserSession");
+                sessionDataMap = new ObjectMapper().readValue(sessionFile, new TypeReference<HashMap<String, Object>>() {});
+                browserSessionDataMap = (Map) sessionDataMap.get("browserSession");
             }
-            browserSessionDataJSON.put("isConnected", false);
-            if(browserSessionDataJSON.get("userVS") != null) userVS =
-                    UserVS.parse((java.util.Map) browserSessionDataJSON.get("userVS"));
+            browserSessionDataMap.put("isConnected", false);
+            if(browserSessionDataMap.get("userVS") != null) userVS =
+                    UserVS.parse((Map) browserSessionDataMap.get("userVS"));
             flush();
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 
     private void loadRepresentationData() throws IOException {
-        JSONObject userVSStateOnServerJSON = null;
+        Map userVSStateOnServerMap = null;
         if(userVS != null) {
             ResponseVS responseVS = HttpHelper.getInstance().getData(ContextVS.getInstance().getAccessControl().
                     getRepresentationStateServiceURL(userVS.getNif()), ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                userVSStateOnServerJSON = (JSONObject) responseVS.getMessageJSON();
+                userVSStateOnServerMap = responseVS.getMessageMap();
             }
         }
         representativeStateFile = new File(ContextVS.APPDIR + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
         if(representativeStateFile.createNewFile()) {
-            representativeStateJSON = userVSStateOnServerJSON;
+            representativeStateMap = userVSStateOnServerMap;
             flush();
         } else {
-            representativeStateJSON = (JSONObject) JSONSerializer.toJSON(
-                    FileUtils.getStringFromFile(representativeStateFile));
-            if(userVSStateOnServerJSON != null) {
-                if(!userVSStateOnServerJSON.getString("base64ContentDigest").equals(
-                        representativeStateJSON.getString("base64ContentDigest"))) {
-                    representativeStateJSON = userVSStateOnServerJSON;
+            representativeStateMap = new ObjectMapper().readValue(
+                    representativeStateFile, new TypeReference<HashMap<String, Object>>() {});
+            if(userVSStateOnServerMap != null) {
+                if(!userVSStateOnServerMap.get("base64ContentDigest").equals(
+                        representativeStateMap.get("base64ContentDigest"))) {
+                    representativeStateMap = userVSStateOnServerMap;
                     flush();
                 }
             }
@@ -107,28 +108,28 @@ public class SessionService {
         try {
             loadRepresentationData();
             String serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
-            representativeStateJSON.put("state", Representation.State.WITH_ANONYMOUS_REPRESENTATION.toString());
-            representativeStateJSON.put("lastCheckedDate", DateUtils.getDateStr(Calendar.getInstance().getTime()));
-            representativeStateJSON.put("representative", delegation.getRepresentative().toJSON());
-            representativeStateJSON.put("anonymousDelegationObject", serializedDelegation);
-            representativeStateJSON.put("dateFrom", DateUtils.getDayWeekDateStr(delegation.getDateFrom()));
-            representativeStateJSON.put("dateTo", DateUtils.getDayWeekDateStr(delegation.getDateTo()));
-            representativeStateJSON.put("base64ContentDigest", delegation.getCancelVoteReceipt().getContentDigestStr());
+            representativeStateMap.put("state", Representation.State.WITH_ANONYMOUS_REPRESENTATION.toString());
+            representativeStateMap.put("lastCheckedDate", DateUtils.getDateStr(new Date()));
+            representativeStateMap.put("representative", delegation.getRepresentative().toMap());
+            representativeStateMap.put("anonymousDelegationObject", serializedDelegation);
+            representativeStateMap.put("dateFrom", DateUtils.getDayWeekDateStr(delegation.getDateFrom()));
+            representativeStateMap.put("dateTo", DateUtils.getDayWeekDateStr(delegation.getDateTo()));
+            representativeStateMap.put("base64ContentDigest", delegation.getCancelVoteReceipt().getContentDigestStr());
             this.anonymousDelegationRequest = delegation;
             flush();
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 
-    public JSONObject getRepresentationState() {
-        JSONObject result = null;
+    public Map getRepresentationState() {
+        Map result = null;
         try {
             loadRepresentationData();
-            result = (JSONObject) JSONSerializer.toJSON(representativeStateJSON);
+            result = new HashMap<>(representativeStateMap);
             result.remove("anonymousDelegationObject");
             Representation.State representationState =
-                    Representation.State.valueOf((String) representativeStateJSON.get("state"));
+                    Representation.State.valueOf((String) representativeStateMap.get("state"));
             String stateMsg = null;
             switch (representationState) {
                 case WITH_ANONYMOUS_REPRESENTATION:
@@ -144,11 +145,11 @@ public class SessionService {
                     stateMsg = ContextVS.getMessage("withoutRepresentationMsg");
                     break;
             }
-            Date lastCheckedDate = DateUtils.getDateFromString(representativeStateJSON.getString("lastCheckedDate"));
+            Date lastCheckedDate = DateUtils.getDateFromString((String) representativeStateMap.get("lastCheckedDate"));
             result.put("stateMsg", stateMsg);
             result.put("lastCheckedDateMsg", ContextVS.getMessage("lastCheckedDateMsg",
                     DateUtils.getDayWeekDateStr(lastCheckedDate)));
-        } catch(Exception ex) { log.error(ex.getMessage(), ex);
+        } catch(Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex);
         } finally {
             return result;
         }
@@ -158,13 +159,13 @@ public class SessionService {
         if(anonymousDelegationRequest != null) return anonymousDelegationRequest;
         try {
             loadRepresentationData();
-            String serializedDelegation = representativeStateJSON.getString("anonymousDelegationObject");
+            String serializedDelegation = (String) representativeStateMap.get("anonymousDelegationObject");
             if(serializedDelegation != null) {
                 anonymousDelegationRequest = (AnonymousDelegationRequest) ObjectUtils.deSerializeObject(
                         serializedDelegation.getBytes());
             }
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         } finally {
             return anonymousDelegationRequest;
         }
@@ -175,49 +176,48 @@ public class SessionService {
     }
 
     public void setIsConnected(boolean isConnected) {
-        browserSessionDataJSON.put("isConnected", isConnected);
+        browserSessionDataMap.put("isConnected", isConnected);
         flush();
     }
 
     public WebSocketMessage initAuthenticatedSession(WebSocketMessage socketMsg, UserVS userVS) {
         try {
             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                socketMsg.getMessageJSON().put("userVS", userVS.toJSON());
+                socketMsg.getMessageJSON().put("userVS", userVS.toMap());
                 socketMsg.setUserVS(userVS);
-                browserSessionDataJSON.put("userVS", userVS.toJSON());
-                browserSessionDataJSON.put("isConnected", true);
+                browserSessionDataMap.put("userVS", userVS.toMap());
+                browserSessionDataMap.put("isConnected", true);
                 flush();
                 VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
                 BrowserVS.getInstance().runJSCommand(
                         socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
-                log.error("ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
+                log.log(Level.SEVERE,"ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
             }
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         }
         return socketMsg;
     }
 
     public void setCSRRequestId(Long id) {
-        browserSessionDataJSON.put("csrRequestId", id);
+        browserSessionDataMap.put("csrRequestId", id);
         flush();
     }
 
-    public void setCryptoToken(CryptoTokenVS cryptoTokenVS, JSONObject deviceDataJSON) {
-        log.debug("setCryptoToken - type: " + cryptoTokenVS.toString() + "- deviceDataJSON: " +
-                ((deviceDataJSON != null)?deviceDataJSON.toString():"null"));
+    public void setCryptoToken(CryptoTokenVS cryptoTokenVS, Map deviceDataMap) {
+        log.info("setCryptoToken - type: " + cryptoTokenVS.toString() + "- deviceDataJSON: " + deviceDataMap);
         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoTokenVS.toString());
-        if(deviceDataJSON == null) deviceDataJSON = new JSONObject();
-        deviceDataJSON.put("type", cryptoTokenVS.toString());
-        browserSessionDataJSON.put("cryptoTokenVS", deviceDataJSON);
+        if(deviceDataMap == null) deviceDataMap = new HashMap<>();
+        deviceDataMap.put("type", cryptoTokenVS.toString());
+        browserSessionDataMap.put("cryptoTokenVS", deviceDataMap);
         flush();
     }
 
     //{"id":,"deviceName":"","certPEM":""}
-    public JSONObject getCryptoToken() {
-        return browserSessionDataJSON.getJSONObject("cryptoTokenVS");
+    public Map getCryptoToken() {
+        return (Map) browserSessionDataMap.get("cryptoTokenVS");
     }
 
     public static CryptoTokenVS getCryptoTokenType () {
@@ -226,19 +226,19 @@ public class SessionService {
     }
 
     public String getCryptoTokenName() {
-        if(browserSessionDataJSON.has("cryptoTokenVS")) {
-            if(browserSessionDataJSON.getJSONObject("cryptoTokenVS").has("deviceName")) {
-                return browserSessionDataJSON.getJSONObject("cryptoTokenVS").getString("deviceName");
+        if(browserSessionDataMap.containsKey("cryptoTokenVS")) {
+            if(((Map)browserSessionDataMap.get("cryptoTokenVS")).containsKey("deviceName")) {
+                return (String)((Map)browserSessionDataMap.get("cryptoTokenVS")).get("deviceName");
             } else return null;
         } else return null;
     }
 
     public Long getCSRRequestId() {
-        return browserSessionDataJSON.getLong("csrRequestId");
+        return ((Number)browserSessionDataMap.get("csrRequestId")).longValue();
     }
 
     public String getDeviceId() {
-        return browserSessionDataJSON.getString("deviceId");
+        return (String) browserSessionDataMap.get("deviceId");
     }
 
     public UserVS getUserVS() {
@@ -247,42 +247,42 @@ public class SessionService {
 
     public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
         this.userVS = userVS;
-        JSONArray userVSList = null;
-        if(browserSessionDataJSON.has("userVSList")) {
-            userVSList = browserSessionDataJSON.getJSONArray("userVSList");
+        List userVSList = null;
+        if(browserSessionDataMap.containsKey("userVSList")) {
+            userVSList = (List) browserSessionDataMap.get("userVSList");
             boolean updated = false;
             for(int i = 0; i < userVSList.size(); i++) {
-                JSONObject user = (JSONObject) userVSList.get(i);
-                if(user.getString("nif").equals(userVS.getNif())) {
+                Map user = (Map) userVSList.get(i);
+                if(user.get("nif").equals(userVS.getNif())) {
                     userVSList.remove(i);
-                    userVSList.add(userVS.toJSON());
+                    userVSList.add(userVS.toMap());
                     updated = true;
                 }
             }
-            if(!updated) userVSList.add(userVS.toJSON());
+            if(!updated) userVSList.add(userVS.toMap());
         } else {
-            userVSList = new JSONArray();
-            userVSList.add(userVS.toJSON());
-            browserSessionDataJSON.put("userVSList", userVSList);
+            userVSList = new ArrayList<>();
+            userVSList.add(userVS.toMap());
+            browserSessionDataMap.put("userVSList", userVSList);
         }
-        browserSessionDataJSON.put("isConnected", isConnected);
-        browserSessionDataJSON.put("userVS", userVS.toJSON());
+        browserSessionDataMap.put("isConnected", isConnected);
+        browserSessionDataMap.put("userVS", userVS.toMap());
         flush();
     }
 
-    public JSONObject getBrowserSessionData() {
-        return browserSessionDataJSON;
+    public Map getBrowserSessionData() {
+        return browserSessionDataMap;
     }
 
     public void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
         try {
             File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
             csrFile.createNewFile();
-            JSONObject jsonData = bundle.toJSON();
-            jsonData.put("requestId", requestId);
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(jsonData.toString().getBytes()), csrFile);
+            Map dataMap = bundle.toMap();
+            dataMap.put("requestId", requestId);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(dataMap.toString().getBytes()), csrFile);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 
@@ -292,7 +292,7 @@ public class SessionService {
     }
 
     private void deleteCSR() {
-        log.debug("deleteCSR");
+        log.info("deleteCSR");
         File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) csrFile.delete();
     }
@@ -300,11 +300,11 @@ public class SessionService {
     private void checkCSR() {
         File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) {
-            log.debug("csr request found");
+            log.info("csr request found");
             try {
-                JSONObject jsonData = (JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(csrFile));
+                Map dataMap = new ObjectMapper().readValue(csrFile, new TypeReference<HashMap<String, Object>>() {});
                 String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(
-                        jsonData.getLong("requestId"));
+                        ((Number)dataMap.get("requestId")).longValue());
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
@@ -312,7 +312,7 @@ public class SessionService {
                     X509Certificate userCert = certificates.iterator().next();
                     UserVS user = UserVS.getUserVS(userCert);
                     setUserVS(user, false);
-                    log.debug("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
+                    log.info("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
                     X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                     certificates.toArray(certsArray);
                     String passwd = null;
@@ -328,7 +328,7 @@ public class SessionService {
                             showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;
                         }
-                        Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(jsonData);
+                        Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(dataMap);
                         try {
                             serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
                         } catch (Exception ex) {
@@ -349,7 +349,7 @@ public class SessionService {
                     csrFile.delete();
                 } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
             } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE,ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
             }
         }
@@ -366,10 +366,10 @@ public class SessionService {
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
             String password, String subject, Header... headers) throws Exception {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
-        log.debug("getSMIME - tokenType: " + tokenType);
+        log.info("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
-                KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
+                KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
                 return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
@@ -378,11 +378,11 @@ public class SessionService {
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = DeviceVS.parse(getInstance().getCryptoToken());
-                JSONObject jsonObject = WebSocketMessage.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
+                Map jsonObject = WebSocketMessage.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
                 PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
                     try {
                         WebSocketService.getInstance().sendMessage(jsonObject.toString());
-                    } catch (Exception ex) { log.error(ex.getMessage(), ex); }
+                    } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
                 });
                 countDownLatch.await();
                 ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
@@ -410,7 +410,7 @@ public class SessionService {
                     smimeMessage = socketMsg.getSMIME();
                     messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
                 } catch(Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE,ex.getMessage(), ex);
                     messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());
                 }
                 countDownLatch.countDown();
@@ -422,14 +422,14 @@ public class SessionService {
     }
 
     private void flush() {
-        log.debug("flush");
+        log.info("flush");
         try {
-            sessionDataJSON.put("browserSession", browserSessionDataJSON);
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataJSON.toString().getBytes()), sessionFile);
-            if(representativeStateJSON != null) FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                            representativeStateJSON.toString().getBytes()), representativeStateFile);
+            sessionDataMap.put("browserSession", browserSessionDataMap);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataMap.toString().getBytes()), sessionFile);
+            if(representativeStateMap != null) FileUtils.copyStreamToFile(new ByteArrayInputStream(
+                            representativeStateMap.toString().getBytes()), representativeStateFile);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 

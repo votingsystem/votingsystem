@@ -1,5 +1,7 @@
 package org.votingsystem.client.pane;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;
@@ -17,20 +19,21 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
-
 import java.util.UUID;
 
 /**
@@ -39,7 +42,7 @@ import java.util.UUID;
  */
 public class SignDocumentFormStackPane extends StackPane {
 
-    private static Logger log = Logger.getLogger(SignDocumentFormStackPane.class);
+    private static Logger log = Logger.getLogger(SignDocumentFormStackPane.class.getSimpleName());
 
     public enum Operation {SEND_SMIME, SIGN_SMIME}
 
@@ -186,7 +189,7 @@ public class SignDocumentFormStackPane extends StackPane {
     }
 
     private void initBackgroundTask() {
-        log.debug("processOperation");
+        log.info("processOperation");
         Task<ResponseVS> operationHandlerTask = new OperationHandlerTask();
         progressMessageText.textProperty().bind(operationHandlerTask.messageProperty());
         progressBar.progressProperty().bind(operationHandlerTask.progressProperty());
@@ -211,7 +214,7 @@ public class SignDocumentFormStackPane extends StackPane {
     }
 
     private void checkPasswords() {
-        log.debug("checkPasswords");
+        log.info("checkPasswords");
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 String password1 = new String(password1Field.getText());
@@ -258,25 +261,27 @@ public class SignDocumentFormStackPane extends StackPane {
                                 serviceURL);
                         updateProgress(80, 100);
                     } catch(Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
                 case SIGN_SMIME:
                     try {
-                        JSONObject textToSignJSON = (JSONObject) JSONSerializer.toJSON(textToSign.replaceAll("(\\r|\\n)", "\\\\n"));
-                        textToSignJSON.put("UUID", UUID.randomUUID().toString());
+                        Map<String, Object> textToSignMap = new ObjectMapper().readValue(
+                                textToSign.replaceAll("(\\r|\\n)", "\\\\n"), new TypeReference<HashMap<String, Object>>() {});
+                        textToSignMap.put("UUID", UUID.randomUUID().toString());
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
-                        log.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
+                        log.info("toUser: " + toUser + " - timeStampService: " + timeStampService);
                         smimeMessage = SessionService.getSMIME(null, toUser,
-                                textToSignJSON.toString(), password, messageSubject, null);
+                                textToSignMap.toString(), password, messageSubject, null);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
                         updateProgress(40, 100);
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
-                        responseVS = timeStamper.call();
+                        smimeMessage = timeStamper.call();
+                        responseVS = ResponseVS.OK(null).setSMIME(smimeMessage);
                     } catch(Exception ex) {
-                        log.error(ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
+                        log.log(Level.SEVERE, ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;

@@ -8,11 +8,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ContextVS;
 
 /**
  * @author jgzornoza
@@ -20,7 +20,7 @@ import org.votingsystem.model.ContextVS;
  */
 public class CertNotFoundDialog extends VBox {
 
-    private static Logger log = Logger.getLogger(CertNotFoundDialog.class);
+    private static Logger log = Logger.getLogger(CertNotFoundDialog.class.getSimpleName());
 
 
     public CertNotFoundDialog() {

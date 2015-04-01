@@ -12,11 +12,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.*;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +35,7 @@ import java.util.zip.ZipInputStream;
  */
 public class DecompressBackupPane extends VBox {
 
-    private static Logger log = Logger.getLogger(DecompressBackupPane.class);
+    private static Logger log = Logger.getLogger(DecompressBackupPane.class.getSimpleName());
 
     public interface Listener {
         public void processDecompressedFile(ResponseVS response);
@@ -77,7 +79,7 @@ public class DecompressBackupPane extends VBox {
 
     public static void showDialog(final Listener listener, final File fileToOpen) {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-        log.debug("validateBackup - outputFolder: " + outputFolder);
+        log.info("validateBackup - outputFolder: " + outputFolder);
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);
@@ -94,7 +96,7 @@ public class DecompressBackupPane extends VBox {
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                 file = fileChooser.showOpenDialog(stage);
             } else {
-                log.debug("validateBackup - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
+                log.info("validateBackup - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
                 DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
                         file.getAbsolutePath(), outputFolder);
                 decompressBackupPane.getStyleClass().add("modal-dialog");
@@ -140,7 +142,7 @@ public class DecompressBackupPane extends VBox {
                     File newFile = new File(outputFolder + File.separator + fileName);
                     if(zipEntry.isDirectory()) {
                         newFile.mkdirs();
-                        log.debug("mkdirs : "+ newFile.getAbsoluteFile());
+                        log.info("mkdirs : " + newFile.getAbsoluteFile());
                     } else {
                         FileOutputStream fos = new FileOutputStream(newFile);
                         int len;
@@ -154,7 +156,7 @@ public class DecompressBackupPane extends VBox {
                 zis.closeEntry();
                 zis.close();
             } catch(IOException ex){
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
                 setVisible(false);
                 return new ResponseVS(ResponseVS.SC_ERROR);
             }

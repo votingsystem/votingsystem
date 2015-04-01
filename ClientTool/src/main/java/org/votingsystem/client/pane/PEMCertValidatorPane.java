@@ -12,11 +12,13 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.ContextVS;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -29,7 +31,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class PEMCertValidatorPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(PEMCertValidatorPane.class);
+    private static Logger log = Logger.getLogger(PEMCertValidatorPane.class.getSimpleName());
 
     private TextArea textArea;
     private Button acceptButton;
@@ -58,24 +60,24 @@ public class PEMCertValidatorPane extends GridPane {
     }
 
     private void validatePublicKey() {
-        log.debug("validatePublicKey");
+        log.info("validatePublicKey");
         Collection<X509Certificate> certs = null;
         try {
             certChainPEM = textArea.getText();
             certs = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
-                log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
+                log.info("Validating timeStampToken with cert: " + cert.getSubjectDN().toString());
                 try {
 
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
             }
@@ -88,7 +90,7 @@ public class PEMCertValidatorPane extends GridPane {
     }
 
     public static void showDialog() {
-        log.debug("validateBackup");
+        log.info("validateBackup");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

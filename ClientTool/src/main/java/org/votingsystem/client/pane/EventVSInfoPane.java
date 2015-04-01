@@ -8,13 +8,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TypeVS;
 
 import java.io.File;
 
@@ -24,7 +24,7 @@ import java.io.File;
  */
 public class EventVSInfoPane extends VBox {
 
-    private static Logger log = Logger.getLogger(EventVSInfoPane.class);
+    private static Logger log = Logger.getLogger(EventVSInfoPane.class.getSimpleName());
 
     private MetaInf metaInf = null;
     private Button validateBackupButton;

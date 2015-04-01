@@ -15,12 +15,14 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.backup.*;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 
@@ -32,7 +34,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class BackupValidatorPane extends VBox implements ValidatorListener<ValidationEvent> {
 
-    private static Logger log = Logger.getLogger(BackupValidatorPane.class);
+    private static Logger log = Logger.getLogger(BackupValidatorPane.class.getSimpleName());
 
     private java.util.List<String> errorList;
     private MetaInf metaInf;
@@ -135,7 +137,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                     progressBox.setVisible(false);
                 } else getScene().getWindow().hide();
                 break;
-            default: log.debug("processVotingValidationEvent - unprocessed: " + responseVS.getData().toString());
+            default: log.info("processVotingValidationEvent - unprocessed: " + responseVS.getData().toString());
         }
     }
 
@@ -174,7 +176,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
     }
 
     public static void validateBackup(String decompressedBackupBaseDir, MetaInf metaInf, Window parentWindow) {
-        log.debug("validateBackup - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
+        log.info("validateBackup - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
         final BackupValidatorPane validatorPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
         validatorPane.init();
         Platform.runLater(() -> {
@@ -206,7 +208,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
         }
 
         @Override protected ResponseVS call() throws Exception {
-            log.debug("worker.doInBackground");
+            log.info("worker.doInBackground");
             try {
                 switch(metaInf.getType()) {
                     case VOTING_EVENT:
@@ -219,7 +221,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                         return backupValidator.call();
                 }
             } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
             return new ResponseVS(ResponseVS.SC_ERROR, "Unknown event type: " + metaInf.getType());

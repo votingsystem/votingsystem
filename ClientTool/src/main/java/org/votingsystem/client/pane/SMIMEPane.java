@@ -1,5 +1,9 @@
 package org.votingsystem.client.pane;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
@@ -7,25 +11,24 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
-
+import org.votingsystem.util.*;
 import java.io.File;
 import java.security.cert.X509Certificate;
-
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
@@ -34,10 +37,11 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class SMIMEPane extends GridPane implements DocumentVS {
 
-    private static Logger log = Logger.getLogger(SMIMEPane.class);
+    private static Logger log = Logger.getLogger(SMIMEPane.class.getSimpleName());
 
     private SignedFile signedFile;
-    public SMIMEPane(final SignedFile signedFile) {
+    
+    public SMIMEPane(final SignedFile signedFile) throws Exception {
         super();
         this.signedFile = signedFile;
         setHgap(3);
@@ -62,9 +66,9 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         }
         String contentStr = null;
         try {
-            JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(
-                    signedFile.getSMIME().getSignedContent());
-            contentStr = Formatter.format(contentJSON);
+            Map dataMap = new ObjectMapper().readValue(signedFile.getSMIME().getSignedContent(), 
+                    new TypeReference<HashMap<String, Object>>() {});
+            contentStr = Formatter.format(dataMap);
         }  catch(Exception ex) {
             contentStr = signedFile.getSMIME().getSignedContent();
         }
@@ -85,24 +89,26 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         getRowConstraints().addAll(new RowConstraints(), row1);
         setColumnSpan(signatureContentWebView, 3);
         //add(contentWithoutFormatCheckBox, 0, 2);
-        JSONObject signedContentJSON = null;
+        Map signedContentMap = null;
         if(signedFile.getSMIME().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
-            signedContentJSON =  (JSONObject) JSONSerializer.toJSON(signedFile.getOperationDocument());
-        } else signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIME().getSignedContent());
+            signedContentMap =  signedFile.getOperationDocument();
+        } else signedContentMap = new ObjectMapper().readValue(signedFile.getSMIME().getSignedContent(), 
+                new TypeReference<HashMap<String, Object>>() {});
         String timeStampDateStr = "";
         if(signedFile.getSMIME().getTimeStampToken() != null) {
             timeStampDateStr = DateUtils.getDateStr(signedFile.getSMIME().
                     getTimeStampToken().getTimeStampInfo().getGenTime(),"dd/MMM/yyyy HH:mm");
         }
         try {
-            JSONObject signedContent = (JSONObject) JSONSerializer.toJSON(signedFile.getSMIME().getSignedContent());
-            signatureContentWebView.getEngine().loadContent(signedContent.toString(3), "application/json");
+            String signedContentStr = new ObjectMapper().configure(
+                    SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(signedContentMap);
+            signatureContentWebView.getEngine().loadContent(signedContentStr, "application/json");
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
-    private Region getSignedFileRegion() {
+    private Region getSignedFileRegion() throws Exception {
         TypeVS operation = signedFile.getTypeVS();
         if(operation == null) return Utils.getSpacer();
         switch(operation) {
@@ -120,12 +126,12 @@ public class SMIMEPane extends GridPane implements DocumentVS {
 
     private void initComponents() {
         if(signedFile == null) {
-            log.debug("### NULL signedFile");
+            log.info("### NULL signedFile");
             return;
         }
     }
 
-    public String getCaption() {
+    public String getCaption() throws Exception {
         return (signedFile != null)? signedFile.getCaption() : null;
     }
 
@@ -151,29 +157,28 @@ public class SMIMEPane extends GridPane implements DocumentVS {
 
         @Override protected ResponseVS call() throws Exception {
             updateMessage(ContextVS.getMessage("checkVoteLbl"));
-            JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VOTE_OID);
-            String hashCertVS = certExtensionData.getString("hashCertVS");
+            Map certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VOTE_OID);
+            String hashCertVS = (String) certExtensionData.get("hashCertVS");
             String voteStateServiceURL = ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(
                     StringUtils.toHex(hashCertVS));
             ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 //[state:voteVS.state.toString(), value:voteVS.optionSelected.content]
-                JSONObject responseJSON = (JSONObject) responseVS.getMessageJSON();
-                VoteVS.State voteState = VoteVS.State.valueOf(responseJSON.getString("state"));
+                Map responseMap = responseVS.getMessageMap();
+                VoteVS.State voteState = VoteVS.State.valueOf((String) responseMap.get("state"));
                 StringBuilder sb = new StringBuilder();
                 switch (voteState) {
                     case OK:
                         sb.append(ContextVS.getMessage("voteStateOKMsg"));
                         break;
-                    case CANCELLED:
-                        sb.append(ContextVS.getMessage("voteStateCANCELLEDMsg"));
+                    case CANCELED:
+                        sb.append(ContextVS.getMessage("voteStateCANCELEDMsg"));
                         break;
                     case ERROR:
                         sb.append(ContextVS.getMessage("voteStateERRORMsg"));
                         break;
                 }
-                sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " +
-                        responseJSON.getString("value"));
+                sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " + responseMap.get("value"));
                 showMessage(sb.toString(), ContextVS.getMessage("checkVoteLbl"));
             } else showMessage(responseVS);
             return responseVS;

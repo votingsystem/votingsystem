@@ -1,18 +1,24 @@
 package org.votingsystem.client.backup;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.RepresentativeData;
 import org.votingsystem.client.model.RepresentativesData;
-import org.votingsystem.model.*;
+import org.votingsystem.model.EventVS;
+import org.votingsystem.model.FieldEventVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.TypeVS;
 
 import java.io.File;
 import java.security.cert.TrustAnchor;
@@ -26,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 */
 public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(ElectionBackupValidator.class);
+    private static Logger log = Logger.getLogger(ElectionBackupValidator.class.getSimpleName());
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
@@ -46,7 +52,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     
     public ElectionBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
-            ContextVS.init("log4jClientTool.properties", "clientToolMessages.properties", "es");
+            ContextVS.initSignatureClient("clientToolMessages.properties", "es");
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
@@ -55,7 +61,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     }
    
     private String checkByteArraySize (byte[] signedFileBytes) {
-        //log.debug("checkByteArraySize");
+        //log.info("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg",
@@ -97,11 +103,14 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
         File representativeMetaInfFile = new File(backupPath + File.separator + TypeVS.REPRESENTATIVE_DATA.toString()  +
                 File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
+            log.log(Level.SEVERE, " - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
-            metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
-            metaInf.loadRepresentativeData((JSONObject) JSONSerializer.toJSON(
-                    FileUtils.getStringFromFile(representativeMetaInfFile)));
+            Map<String, Object> metaInfMap = new ObjectMapper().readValue(
+                    metaInfFile, new TypeReference<HashMap<String, Object>>() {});
+            metaInf = MetaInf.parse(metaInfMap);
+            Map<String, Object> representativeDataMap = new ObjectMapper().readValue(
+                    representativeMetaInfFile, new TypeReference<HashMap<String, Object>>() {});
+            metaInf.loadRepresentativeData(representativeDataMap);
             eventURL= EventVS.getURL(TypeVS.VOTING_EVENT, metaInf.getServerURL(), metaInf.getId());
         }
         for(FieldEventVS option : metaInf.getOptionList()) {
@@ -126,23 +135,23 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                 getElapsedTimeHoursMinutesFromMilliseconds(System.currentTimeMillis() - begin);
         notifyValidationListener(responseVS.getStatusCode(),votesValidationDurationStr, ValidationEvent.VOTE_FINISH);
         
-        log.debug("representativeValidation duration: " + representativeValidationDurationStr);
-        log.debug("accessrequestValidation duration: " + accessRequestValidationDurationStr);
-        log.debug("votesValidationDurationStr duration: " + votesValidationDurationStr);
+        log.info("representativeValidation duration: " + representativeValidationDurationStr);
+        log.info("accessrequestValidation duration: " + accessRequestValidationDurationStr);
+        log.info("votesValidationDurationStr duration: " + votesValidationDurationStr);
 
         Integer statusCode = errorList.size() > 0? ResponseVS.SC_ERROR:ResponseVS.SC_OK;
         responseVS.setErrorList(errorList);
         responseVS.setStatusCode(statusCode);
         if(!errorList.isEmpty()) {
-            log.error(" ------- " + errorList.size() + " errors: ");
+            log.log(Level.SEVERE, " ------- " + errorList.size() + " errors: ");
             for(String error : errorList) {
-                log.error(error);
+                log.log(Level.SEVERE, error);
             }
-        } else log.debug("Backup without errors");
+        } else log.info("Backup without errors");
         long finish = System.currentTimeMillis();
         long duration = finish - begin;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
-        log.debug("duration: " + durationStr);
+        log.info("duration: " + durationStr);
         responseVS.setMessage(durationStr);
         responseVS.setData(metaInf);
         return responseVS;
@@ -158,7 +167,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     }
     
     private ResponseVS validateRepresentativeData() throws Exception {
-        log.debug("validateRepresentativeData");
+        log.info("validateRepresentativeData");
         long numRepresentatives = 0;
         long numRepresented = 0;
         long numRepresentativesWithVote = 0;
@@ -170,7 +179,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
         File[] representativeDirList = representativeDataDir.listFiles();
         RepresentativesData representativesData = metaInf.getRepresentativesData();
         for(File file : representativeDirList) {
-            log.debug("checking representative dir:" + file.getAbsolutePath());
+            log.info("checking representative dir:" + file.getAbsolutePath());
             long numRepresentedWithVote = 0;
             long numRepresentations = 1;//the representative itself
             long numVotesRepresented = 0;
@@ -179,13 +188,13 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                 File[] batchDirList = file.listFiles();
                 String representativeNif = file.getAbsolutePath().split("representative_")[1];
                 RepresentativeData representativeDataMetaInf = metaInf.getRepresentativeData(representativeNif);
-                log.debug("representativeNif: " + representativeNif +
+                log.info("representativeNif: " + representativeNif +
                         " - vote: " + representativeDataMetaInf.getOptionSelectedId());
                 for(File batchDir : batchDirList) {
-                    log.debug("checking dir: " + batchDir.getAbsolutePath());
+                    log.info("checking dir: " + batchDir.getAbsolutePath());
                     File[] repDocs = batchDir.listFiles();
                     for(File repDoc: repDocs) {
-                        if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
+                        if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
                         numRepresented++;
                         numRepresentations++;
                         byte[] fileBytes = FileUtils.getBytesFromFile(repDoc);
@@ -207,7 +216,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                                 trustAnchors, metaInf.getDateBegin(),  metaInf.getDateFinish(), representativeNif,
                                 timeStampServerCert);
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                            log.debug("ERROR - responseVS.getStatusCode(): " +  responseVS.getStatusCode());
+                            log.info("ERROR - responseVS.getStatusCode(): " + responseVS.getStatusCode());
                             errorList.add(responseVS.getMessage());
                         }
                         notifyValidationListener(responseVS.getStatusCode(), 
@@ -240,7 +249,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                 String msg = "NIF: " + representativeNif + " - numRepresentations: " + numRepresentations +
                         " - numRepresentedWithVote: " + numRepresentedWithVote +
                         " - numVotesRepresented: " + numVotesRepresented;
-                log.debug(msg);
+                log.info(msg);
                 if(representativeDataMetaInf.getNumRepresentations() != numRepresentations ||
                     representativeDataMetaInf.getNumVotesRepresented() != numVotesRepresented ||
                     representativeDataMetaInf.getNumRepresentedWithVote() != numRepresentedWithVote) {           
@@ -267,12 +276,12 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             errorList.add(message);
             throw new ExceptionVS(message);
         }
-        log.debug(message);
+        log.info(message);
         return new ResponseVS(statusCode, message);
     }
     
     private ResponseVS validateAccessRequests() throws Exception {
-        log.debug("validateAccessRequests");
+        log.info("validateAccessRequests");
         File[] batchDirList = accessRequestsDir.listFiles();
         int statusCode = ResponseVS.SC_OK;
         int numAccessRequestOK = 0;
@@ -282,7 +291,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             if(batchDir.isDirectory()) {
                 File[] accessRequests = batchDir.listFiles();
                 for(File accessRequest : accessRequests) {
-                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
+                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName(), null);
@@ -308,7 +317,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     }
                     if(errorMessage != null) {
                         statusCode = ResponseVS.SC_ERROR;
-                        log.error(errorMessage);
+                        log.log(Level.SEVERE, errorMessage);
                         errorList.add(errorMessage);
                     } 
                     notifyValidationListener(statusCode, validationResponse.getMessage(),
@@ -317,7 +326,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        log.debug("numAccessRequestOK: " + numAccessRequestOK + " - numAccessRequestERROR: " +numAccessRequestERROR);
+        log.info("numAccessRequestOK: " + numAccessRequestOK + " - numAccessRequestERROR: " + numAccessRequestERROR);
         String message = null;
         if(metaInf.getNumAccessRequest() != numAccessRequestOK) {
             statusCode = ResponseVS.SC_ERROR;
@@ -329,7 +338,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     }
     
     private ResponseVS validateVotes() throws Exception {
-        log.debug("validateVotes");
+        log.info("validateVotes");
         int statusCode = ResponseVS.SC_OK;
         File[] batchDirList = votesDir.listFiles();
         int numVotesOK = 0;
@@ -340,7 +349,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             if(batchDir.isDirectory()) {
                 File[] votes = batchDir.listFiles();
                 for(File vote : votes) {
-                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
+                    if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
                     byte[] voteBytes = FileUtils.getBytesFromFile(vote);
                     SignedFile signedFile = new SignedFile(voteBytes, vote.getName(), null);
                     ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
@@ -372,7 +381,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                         numVotesERROR++;
                         String msg = "ERROR vote - File: " + vote.getAbsolutePath() + " - msg: " +
                                 validationResponse.getMessage();
-                        log.error(msg);
+                        log.log(Level.SEVERE, msg);
                         errorList.add(msg);
                     }
                     notifyValidationListener(statusCode, validationResponse.getMessage(), ValidationEvent.VOTE);
@@ -380,7 +389,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        log.debug("numVotesOK: " + numVotesOK +  " - numVotesERROR: " + numVotesERROR);
+        log.info("numVotesOK: " + numVotesOK + " - numVotesERROR: " + numVotesERROR);
         if(numVotesERROR > 0) statusCode = ResponseVS.SC_ERROR;
         if(numVotesOK != metaInf.getNumVotes()) {
             statusCode = ResponseVS.SC_ERROR;

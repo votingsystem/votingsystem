@@ -1,8 +1,8 @@
 package org.votingsystem.client.util;
 
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.AESParams;
+import org.votingsystem.util.TypeVS;
 
 /**
  * @author jgzornoza

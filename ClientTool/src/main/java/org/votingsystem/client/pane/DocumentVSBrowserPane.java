@@ -1,5 +1,7 @@
 package org.votingsystem.client.pane;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Insets;
@@ -9,30 +11,23 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
-import org.votingsystem.client.dialog.CooinDialog;
+import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.SignedFile;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 
@@ -42,7 +37,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.Listener {
 
-    private static Logger log = Logger.getLogger(DocumentVSBrowserPane.class);
+    private static Logger log = Logger.getLogger(DocumentVSBrowserPane.class.getSimpleName());
 
     private HBox buttonsHBox;
     private Button saveButton;
@@ -79,16 +74,16 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                     DecompressBackupPane.showDialog(DocumentVSBrowserPane.this, backup);
                     return;
                 }
-                if(backup.getName().endsWith(ContentTypeVS.COOIN.getExtension())) {
-                    CooinDialog.show((Cooin) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
+                if(backup.getName().endsWith(ContentTypeVS.CURRENCY.getExtension())) {
+                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
                             BrowserVS.getInstance().getScene().getWindow());
                 } else {
                     openFile(backup, operationDocument);
                 }
             } catch (IOException ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
-        } else log.debug("backup null");
+        } else log.info("backup null");
     }
 
     public void goNext() {
@@ -104,13 +99,13 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
     }
 
     private void showSignedFile(String signedFile) {
-        log.debug("TODO - showSignedFile: " + signedFile);
+        log.info("TODO - showSignedFile: " + signedFile);
     }
 
     private void openFile (File file, Map operationDocument) {
         try {
             int fileIndex = fileList.indexOf(file.getPath());
-            log.debug("openFile - file: " + file.getAbsolutePath() + " - fileIndex: " + fileIndex);
+            log.info("openFile - file: " + file.getAbsolutePath() + " - fileIndex: " + fileIndex);
             fileList.add(file.getPath());
             String fileName = file.getName().endsWith("temp") ? "":file.getName();
             SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
@@ -121,34 +116,36 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
             this.caption = SMIMEPane.getCaption();
         } catch (Exception ex) {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
     @Override public void processDecompressedFile(ResponseVS response) {
-        log.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
+        log.info("processDecompressedFile - statusCode:" + response.getStatusCode());
         PlatformImpl.runLater(() -> {
             if (ResponseVS.SC_OK == response.getStatusCode()) {
                 String decompressedBackupBaseDir = (String) response.getData();
-                log.debug("processDecompressedFile - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
+                log.info("processDecompressedFile - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
                 File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
                 File representativeMetaInfFile = new File(decompressedBackupBaseDir + File.separator + "REPRESENTATIVE_DATA" +
                         File.separator + "meta.inf");
                 if (!metaInfFile.exists()) {
                     String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
-                    log.error(message);
+                    log.log(Level.SEVERE, message);
                     showMessage(ResponseVS.SC_ERROR, "Error - " + message);
                     return;
                 }
                 try {
-                    metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
-                    if (representativeMetaInfFile.exists()) metaInf.loadRepresentativeData((JSONObject)
-                            JSONSerializer.toJSON(FileUtils.getStringFromFile(representativeMetaInfFile)));
+                    metaInf = MetaInf.parse(new ObjectMapper().readValue(metaInfFile,
+                            new TypeReference<HashMap<String, Object>>() {}));
+                    Map representativeDataMap = new ObjectMapper().readValue(representativeMetaInfFile,
+                            new TypeReference<HashMap<String, Object>>() {});
+                    if (representativeMetaInfFile.exists()) metaInf.loadRepresentativeData(representativeDataMap);
                     EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);
                     getChildren().add(1, eventPanel);
                     if (buttonsHBox.getChildren().contains(saveButton)) buttonsHBox.getChildren().remove(buttonsHBox);
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 saveButton.setVisible(true);
             }
@@ -175,12 +172,12 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                 }
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
     private String checkFileSize (File file) {
-        log.debug("checkFileSize");
+        log.info("checkFileSize");
         String result = null;
         if (file.length() > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", file.length(),

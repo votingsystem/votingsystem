@@ -18,13 +18,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,7 +40,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class BrowserVSTabPane extends TabPane {
 
-    private static Logger log = Logger.getLogger(BrowserVSTabPane.class);
+    private static Logger log = Logger.getLogger(BrowserVSTabPane.class.getSimpleName());
 
     private static final int MAX_CHARACTERS_TAB_CAPTION = 35;
     private static final String TAB_CAPTION_EMPTY = "                ";
@@ -93,7 +95,7 @@ public class BrowserVSTabPane extends TabPane {
             }
         });
         setRotateGraphic(false);
-        setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
+        setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
         setSide(Side.TOP);
         HBox.setHgrow(this, Priority.ALWAYS);
         VBox.setVgrow(this, Priority.ALWAYS);
@@ -110,7 +112,7 @@ public class BrowserVSTabPane extends TabPane {
         final WebView webView = new WebView();
         if(jsCommand != null) {
             webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newState) -> {
-                //log.debug("newState: " + newState);
+                //log.info("newState: " + newState);
                 if (newState == Worker.State.SUCCEEDED) webView.getEngine().executeScript(jsCommand.toString());
             });
         }
@@ -120,14 +122,14 @@ public class BrowserVSTabPane extends TabPane {
             public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
                 if (history.getCurrentIndex() > 0) toolbar.getPrevButton().setDisable(false);
-                //log.debug("currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
+                //log.info("currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
                 String params = "";
                 if (toolbar.getLocationField().getText().contains("?")) {
                     params = toolbar.getLocationField().getText().substring(toolbar.getLocationField().getText().indexOf("?"),
                             toolbar.getLocationField().getText().length());
                 }
                 WebHistory.Entry selectedEntry = history.getEntries().get(history.getEntries().size() - 1);
-                log.debug("history change - selectedEntry: " + selectedEntry);
+                log.info("history change - selectedEntry: " + selectedEntry);
                 String newURL = selectedEntry.getUrl();
                 if (!newURL.contains("?")) newURL = newURL + params;
                 if (history.getEntries().size() > 1 && selectedEntry.getTitle() != null) getSelectionModel().
@@ -135,7 +137,7 @@ public class BrowserVSTabPane extends TabPane {
                 toolbar.getLocationField().setText(newURL);
             }
         });
-        webView.getEngine().setOnError(event -> log.error(event.getMessage(), event.getException()));
+        webView.getEngine().setOnError(event -> log.log(Level.SEVERE, event.getMessage(), event.getException()));
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().locationProperty().addListener((observable, oldValue, newValue) ->
                 toolbar.getLocationField().setText(newValue));
@@ -148,7 +150,7 @@ public class BrowserVSTabPane extends TabPane {
             new ChangeListener<Worker.State>() {
                 @Override public void changed(ObservableValue<? extends Worker.State> ov,
                                               Worker.State oldState, Worker.State newState) {
-                    log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
+                    log.info("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
                             toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.COG));
@@ -174,14 +176,14 @@ public class BrowserVSTabPane extends TabPane {
             }
         );
         newTab.setOnSelectionChanged(event -> {
-            log.debug("selectedIdx - EventType: " + event.getEventType());
+            log.info("selectedIdx - EventType: " + event.getEventType());
             int selectedIdx = getSelectionModel().getSelectedIndex();
             ObservableList<WebHistory.Entry> entries = ((WebView)getSelectionModel().getSelectedItem().
                     getContent()).getEngine().getHistory().getEntries();
             if(entries.size() > 0){
                 WebHistory.Entry selectedEntry = entries.get(entries.size() -1);
                 if(entries.size() > 1 &&  selectedEntry.getTitle() != null) newTab.setText(selectedEntry.getTitle());
-                log.debug("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
+                log.info("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
                 toolbar.getLocationField().setText(selectedEntry.getUrl());
             }
         });

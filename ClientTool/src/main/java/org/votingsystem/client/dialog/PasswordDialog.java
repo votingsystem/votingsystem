@@ -19,9 +19,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ContextVS;
 
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PasswordDialog {
 
-    private static Logger log = Logger.getLogger(PasswordDialog.class);
+    private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
 
     private Stage stage;
     private VBox dialogVBox;
@@ -129,7 +129,7 @@ public class PasswordDialog {
     }
 
     private void checkPasswords() {
-        log.debug("checkPasswords");
+        log.info("checkPasswords");
         String password1 = new String(password1Field.getText());
         String password2 = null;
         if(!isWithPasswordConfirm) password2 = password1;

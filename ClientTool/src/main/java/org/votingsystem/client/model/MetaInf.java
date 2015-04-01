@@ -1,14 +1,12 @@
 package org.votingsystem.client.model;
 
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
+import java.util.logging.Logger;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.TypeVS;
 
 import java.text.ParseException;
 import java.util.*;
@@ -19,7 +17,7 @@ import java.util.*;
 */
 public class MetaInf {
     
-    private static Logger log = Logger.getLogger(MetaInf.class);
+    private static Logger log = Logger.getLogger(MetaInf.class.getSimpleName());
 
     private Long id;
     private Date dateFinish;
@@ -87,62 +85,62 @@ public class MetaInf {
         return result.append("</html>").toString();
     }
 
-    public void loadRepresentativeData(JSONObject metaInfJSON) throws ParseException {
+    public void loadRepresentativeData(Map metaInfMap) throws ParseException {
         RepresentativesData representativesData = new RepresentativesData();
-        if(metaInfJSON.containsKey("numRepresentatives")) {
-            representativesData.setNumRepresentatives(metaInfJSON.getLong("numRepresentatives"));
+        if(metaInfMap.containsKey("numRepresentatives")) {
+            representativesData.setNumRepresentatives(((Number)metaInfMap.get("numRepresentatives")).longValue());
         }
-        if(metaInfJSON.containsKey("numRepresented")) {
-            representativesData.setNumRepresented(metaInfJSON.getLong("numRepresented"));
+        if(metaInfMap.containsKey("numRepresented")) {
+            representativesData.setNumRepresented(((Number)metaInfMap.get("numRepresented")).longValue());
         }
-        if(metaInfJSON.containsKey("numRepresentedWithAccessRequest")) {
-            representativesData.setNumRepresentedWithAccessRequest(
-                    metaInfJSON.getLong("numRepresentedWithAccessRequest"));
+        if(metaInfMap.containsKey("numRepresentedWithAccessRequest")) {
+            representativesData.setNumRepresentedWithAccessRequest(((Number)
+                    metaInfMap.get("numRepresentedWithAccessRequest")).longValue());
         }
-        if(metaInfJSON.containsKey("numRepresentativesWithAccessRequest")) {
+        if(metaInfMap.containsKey("numRepresentativesWithAccessRequest")) {
             representativesData.setNumRepresentativesWithAccessRequest(
-                    metaInfJSON.getLong("numRepresentativesWithAccessRequest"));
+                    ((Number)metaInfMap.get("numRepresentativesWithAccessRequest")).longValue());
         }
-        if(metaInfJSON.containsKey("numRepresentativesWithVote")) {
-            representativesData.setNumRepresentativesWithVote(metaInfJSON.getLong("numRepresentativesWithVote"));
+        if(metaInfMap.containsKey("numRepresentativesWithVote")) {
+            representativesData.setNumRepresentativesWithVote(
+                    ((Number)metaInfMap.get("numRepresentativesWithVote")).longValue());
         }
-        if(metaInfJSON.containsKey("numVotesRepresentedByRepresentatives")) {
+        if(metaInfMap.containsKey("numVotesRepresentedByRepresentatives")) {
             representativesData.setNumVotesRepresentedByRepresentatives(
-                    metaInfJSON.getLong("numVotesRepresentedByRepresentatives"));
+                    ((Number)metaInfMap.get("numVotesRepresentedByRepresentatives")).longValue());
         }
-        if(metaInfJSON.containsKey("options")) {
-            JSONObject options = metaInfJSON.getJSONObject("options");
+        if(metaInfMap.containsKey("options")) {
+            Map options = (Map) metaInfMap.get("options");
             Set<String> keySet = options.keySet();
             List<FieldEventVS> optionList = new ArrayList<FieldEventVS>();
             for(String key:keySet) {
                 FieldEventVS option = new FieldEventVS();
-                JSONObject optionJSON = options.getJSONObject(key);
+                Map optionJSON = (Map) options.get(key);
                 option.setId(Long.valueOf(key));
-                option.setContent(optionJSON.getString("content"));
-                option.setNumVoteRequests(optionJSON.getLong("numVoteRequests"));
-                option.setNumUsersWithVote(optionJSON.getLong("numUsersWithVote"));
-                option.setNumRepresentativesWithVote(optionJSON.getLong("numRepresentativesWithVote"));
-                option.setNumVotesResult(optionJSON.getLong("numVotesResult"));
+                option.setContent((String) optionJSON.get("content"));
+                option.setNumVoteRequests(((Number)optionJSON.get("numVoteRequests")).longValue());
+                option.setNumUsersWithVote(((Number)optionJSON.get("numUsersWithVote")).longValue());
+                option.setNumRepresentativesWithVote(((Number)optionJSON.get("numRepresentativesWithVote")).longValue());
+                option.setNumVotesResult(((Number)optionJSON.get("numVotesResult")).longValue());
                 optionList.add(option);
             }
             setOptionList(optionList);
         }
-        if(metaInfJSON.containsKey("representatives")) {
-            JSONObject representatives = metaInfJSON.getJSONObject("representatives");
+        if(metaInfMap.containsKey("representatives")) {
+            Map representatives = (Map) metaInfMap.get("representatives");
             Set<String> keySet = representatives.keySet();
             Map<String, RepresentativeData> representativeMap = new HashMap<String, RepresentativeData>();
             for(String key:keySet) {
-                JSONObject representativeJSON = representatives.getJSONObject(key);
+                Map representativeJSON = (Map) representatives.get(key);
                 RepresentativeData repData = new RepresentativeData();
-                if(representativeJSON.containsKey("id")) repData.setId(representativeJSON.getLong("id"));
+                if(representativeJSON.containsKey("id")) repData.setId(((Number)representativeJSON.get("id")).longValue());
                 repData.setNif(key);
-                if(representativeJSON.containsKey("optionSelectedId") && !JSONNull.getInstance().equals(
-                        representativeJSON.get("optionSelectedId"))){
-                    repData.setOptionSelectedId(representativeJSON.getLong("optionSelectedId"));
+                if(representativeJSON.containsKey("optionSelectedId")){
+                    repData.setOptionSelectedId(((Number)representativeJSON.get("optionSelectedId")).longValue());
                 }
-                repData.setNumRepresentedWithVote(representativeJSON.getLong("numRepresentedWithVote"));
-                repData.setNumRepresentations(representativeJSON.getLong("numRepresentations"));
-                repData.setNumVotesRepresented(representativeJSON.getLong("numVotesRepresented"));
+                repData.setNumRepresentedWithVote(((Number)representativeJSON.get("numRepresentedWithVote")).longValue());
+                repData.setNumRepresentations(((Number)representativeJSON.get("numRepresentations")).longValue());
+                repData.setNumVotesRepresented(((Number)representativeJSON.get("numVotesRepresented")).longValue());
                 representativeMap.put(key, repData);
             }
             representativesData.setRepresentativeMap(representativeMap);
@@ -150,33 +148,29 @@ public class MetaInf {
         setRepresentativesData(representativesData);
     }
 
-    public static MetaInf parse(JSONObject metaInfJSON) throws ParseException {
-        log.debug("parse");
+    public static MetaInf parse(Map metaInfMap) throws ParseException {
+        log.info("parse");
         MetaInf metaInf = new MetaInf();
-        if (metaInfJSON.containsKey("id"))
-                metaInf.setId(metaInfJSON.getLong("id"));
-        if (metaInfJSON.containsKey("subject"))
-            metaInf.setSubject(metaInfJSON.getString("subject"));
-        if (metaInfJSON.containsKey("type"))
-            metaInf.setType(TypeVS.valueOf(metaInfJSON.getString("type")));
-        if(metaInfJSON.containsKey("serverURL"))
-            metaInf.setServerURL(metaInfJSON.getString("serverURL"));
-        if(metaInfJSON.containsKey("BACKUP")) {
-            JSONObject backupJSON = metaInfJSON.getJSONObject("BACKUP");
-            if(backupJSON.containsKey("numSignatures")) {
-                 metaInf.setNumSignatures(backupJSON.getLong("numSignatures"));
+        if (metaInfMap.containsKey("id")) metaInf.setId(((Number)metaInfMap.get("id")).longValue());
+        if (metaInfMap.containsKey("subject")) metaInf.setSubject((String) metaInfMap.get("subject"));
+        if (metaInfMap.containsKey("type")) metaInf.setType(TypeVS.valueOf((String) metaInfMap.get("type")));
+        if(metaInfMap.containsKey("serverURL")) metaInf.setServerURL((String) metaInfMap.get("serverURL"));
+        if(metaInfMap.containsKey("BACKUP")) {
+            Map backupMap = (Map) metaInfMap.get("BACKUP");
+            if(backupMap.containsKey("numSignatures")) {
+                 metaInf.setNumSignatures(((Number)backupMap.get("numSignatures")).longValue());
             }
-            if (backupJSON.containsKey("numVotes")) {
-                metaInf.setNumVotes(backupJSON.getLong("numVotes")); 
+            if (backupMap.containsKey("numVotes")) {
+                metaInf.setNumVotes(((Number)backupMap.get("numVotes")).longValue());
             } 
-            if (backupJSON.containsKey("numAccessRequest")) 
-                metaInf.setNumAccessRequest(backupJSON.getLong("numAccessRequest")); 
+            if (backupMap.containsKey("numAccessRequest")) 
+                metaInf.setNumAccessRequest(((Number)backupMap.get("numAccessRequest")).longValue());
         }
-        if(metaInfJSON.containsKey("dateFinish")) {
-            metaInf.setDateFinish(DateUtils.getDateFromString(metaInfJSON.getString("dateFinish")));
+        if(metaInfMap.containsKey("dateFinish")) {
+            metaInf.setDateFinish(DateUtils.getDateFromString((String) metaInfMap.get("dateFinish")));
         }
-        if(metaInfJSON.containsKey("dateBegin")) {
-            metaInf.setDateBegin(DateUtils.getDateFromString(metaInfJSON.getString("dateBegin")));
+        if(metaInfMap.containsKey("dateBegin")) {
+            metaInf.setDateBegin(DateUtils.getDateFromString((String) metaInfMap.get("dateBegin")));
         }
         return metaInf;
     }

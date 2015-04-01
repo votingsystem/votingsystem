@@ -1,7 +1,7 @@
 package org.votingsystem.client.service;
 
 import com.google.common.eventbus.EventBus;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza
@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
  */
 public class EventBusService {
 
-    private static Logger log = Logger.getLogger(EventBusService.class);
+    private static Logger log = Logger.getLogger(EventBusService.class.getSimpleName());
 
     private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
     private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);

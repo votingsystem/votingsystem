@@ -1,9 +1,9 @@
 package org.votingsystem.client.util;
 
-import org.apache.log4j.Logger;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.model.ContextVS;
+import java.util.logging.Logger;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.currency.Currency;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
@@ -15,15 +15,15 @@ import java.util.Map;
  */
 public class MsgUtils {
 
-    private static Logger log = Logger.getLogger(MsgUtils.class);
+    private static Logger log = Logger.getLogger(MsgUtils.class.getSimpleName());
 
-    public static String getCooinChangeWalletMsg(WebSocketMessage webSocketMessage) {
-        Map<String, BigDecimal> currencyMap = Cooin.getCurrencyMap(webSocketMessage.getCooinSet());
+    public static String getCurrencyChangeWalletMsg(WebSocketMessage webSocketMessage) {
+        Map<String, BigDecimal> currencyMap = Currency.getCurrencyMap(webSocketMessage.getCurrencySet());
         StringBuilder amountInfo = new StringBuilder();
         for(String currencyCode: currencyMap.keySet()) {
             amountInfo.append(" - " + currencyMap.get(currencyCode) + " " + currencyCode);
         }
-        return ContextVS.getMessage("cooin_wallet_change_msg", webSocketMessage.getDeviceFromName(), amountInfo.toString());
+        return ContextVS.getMessage("currency_wallet_change_msg", webSocketMessage.getDeviceFromName(), amountInfo.toString());
     }
 
     public static String getPlainWalletNotEmptyMsg(Map<String, BigDecimal> currencyMap) {

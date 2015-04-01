@@ -1,6 +1,6 @@
 package org.votingsystem.client.util;
 
-import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.util.ContentTypeVS;
 
 /**
  * @author jgzornoza

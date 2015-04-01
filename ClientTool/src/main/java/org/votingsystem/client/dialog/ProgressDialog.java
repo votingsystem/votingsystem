@@ -13,10 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 
 /**
  * @author jgzornoza
@@ -24,7 +24,7 @@ import org.votingsystem.model.ResponseVS;
  */
 public class ProgressDialog extends VBox {
 
-    private static Logger log = Logger.getLogger(ProgressDialog.class);
+    private static Logger log = Logger.getLogger(ProgressDialog.class.getSimpleName());
 
     public ProgressDialog(Task<ResponseVS> progressTask) {
         setAlignment(Pos.CENTER);
@@ -57,7 +57,7 @@ public class ProgressDialog extends VBox {
     }
 
     public static void showDialog(Task progressTask, String caption, Window owner) {
-        log.debug("showDialog");
+        log.info("showDialog");
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);

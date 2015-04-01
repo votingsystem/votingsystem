@@ -1,8 +1,0 @@
-/build
-/logs
-/target
-/VotingSystem
-wrapper
-.VotingSystem
-.idea
-*.iml

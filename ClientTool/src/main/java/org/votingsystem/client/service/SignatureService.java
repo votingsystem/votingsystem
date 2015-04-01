@@ -1,11 +1,9 @@
 package org.votingsystem.client.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
@@ -22,9 +20,9 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.cooin.model.Cooin;
-import org.votingsystem.cooin.model.CooinRequestBatch;
 import org.votingsystem.model.*;
+import org.votingsystem.model.currency.Currency;
+import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
@@ -38,9 +36,11 @@ import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toSet;
-import static org.votingsystem.model.ContextVS.*;
+import static org.votingsystem.util.ContextVS.*;
 
 /**
  * @author jgzornoza
@@ -48,7 +48,7 @@ import static org.votingsystem.model.ContextVS.*;
  */
 public class SignatureService extends Service<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(SignatureService.class);
+    private static Logger log = Logger.getLogger(SignatureService.class.getSimpleName());
 
     private OperationVS operationVS = null;
     private String password = null;
@@ -70,7 +70,7 @@ public class SignatureService extends Service<ResponseVS> {
     class SignatureTask extends Task<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
-            log.debug("SignatureService.SignatureTask - call:" + operationVS.getType());
+            log.info("SignatureService.SignatureTask - call:" + operationVS.getType());
             ResponseVS responseVS = null;
             updateProgress(5, 100);
             try {
@@ -87,7 +87,7 @@ public class SignatureService extends Service<ResponseVS> {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
                         break;
-                    case COOIN_DELETE:
+                    case CURRENCY_DELETE:
                         responseVS = new ResponseVS(ResponseVS.SC_OK);
                         break;
                     default:
@@ -117,7 +117,7 @@ public class SignatureService extends Service<ResponseVS> {
                         case ANONYMOUS_REPRESENTATIVE_SELECTION:
                             responseVS = processAnonymousDelegation(operationVS);
                             break;
-                        case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
                             responseVS = processCancelAnonymousDelegation(operationVS);
                             break;
                         case CLAIM_PUBLISHING:
@@ -133,11 +133,11 @@ public class SignatureService extends Service<ResponseVS> {
                         case FILE_FROM_URL:
                             responseVS = openFileFromURL(operationVS);
                             break;
-                        case COOIN_REQUEST:
-                            responseVS = sendCooinRequest(operationVS);
+                        case CURRENCY_REQUEST:
+                            responseVS = sendCurrencyRequest(operationVS);
                             break;
-                        case COOIN_DELETE:
-                            responseVS = deleteCooin(operationVS);
+                        case CURRENCY_DELETE:
+                            responseVS = deleteCurrency(operationVS);
                             break;
                         case REPRESENTATIVE_SELECTION:
                             responseVS = sendSMIME(operationVS);
@@ -149,7 +149,7 @@ public class SignatureService extends Service<ResponseVS> {
                     return responseVS;
                 } else return responseVS;
             } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
@@ -218,14 +218,14 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
-            log.debug("sendVote");
+            log.info("sendVote");
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
             EventVS eventVS = operationVS.getEventVS();
             eventVS.getVoteVS().genVote();
             String toUser = eventVS.getAccessControlVS().getName();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
-            SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, jsonObject.toString(),
+            SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
+                    new ObjectMapper().writeValueAsString(eventVS.getVoteVS().getAccessRequestDataMap()),
                     password, msgSubject, null);
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
@@ -235,8 +235,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getVoteDataMap());
-            String textToSign = jsonObject.toString();
+            String textToSign = new ObjectMapper().writeValueAsString(eventVS.getVoteVS().getVoteDataMap()); ;
             fromUser = eventVS.getVoteVS().getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
@@ -255,23 +254,23 @@ public class SignatureService extends Service<ResponseVS> {
                 voteResponse.setType(TypeVS.VOTEVS);
                 voteResponse.setData(eventVS.getVoteVS());
                 ContextVS.getInstance().addHashCertVSData(eventVS.getVoteVS().getHashCertVSBase64(), voteResponse);
-                JSONObject responseJSON = new JSONObject();
-                responseJSON.put("statusCode", ResponseVS.SC_OK);
-                responseJSON.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
-                responseJSON.put("hashCertVSBase64", eventVS.getVoteVS().getHashCertVSBase64());
-                responseJSON.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
-                responseJSON.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
+                Map dataMap = new HashMap<>();
+                dataMap.put("statusCode", ResponseVS.SC_OK);
+                dataMap.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
+                dataMap.put("hashCertVSBase64", eventVS.getVoteVS().getHashCertVSBase64());
+                dataMap.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
+                dataMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
                 //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
                 //String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
                 responseVS.setContentType(ContentTypeVS.JSON);
-                responseVS.setMessageJSON(responseJSON);
+                responseVS.setMessageMap(dataMap);
             }
             return responseVS;
         }
 
         //we know this is done in a background thread
         private ResponseVS cancelVote(OperationVS operationVS) throws Exception {
-            log.debug("cancelVote");
+            log.info("cancelVote");
             Map documentToSignMap = new HashMap<String, String>();
             documentToSignMap.put("operation", TypeVS.CANCEL_VOTE.toString());
             ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
@@ -292,9 +291,9 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processNewRepresentative(OperationVS operationVS) throws Exception {
             byte[] imageFileBytes = FileUtils.getBytesFromFile(operationVS.getFile());
-            log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+            log.info(" - imageFileBytes.length: " + imageFileBytes.length);
             if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                log.debug(" - MAX_FILE_SIZE exceeded ");
+                log.info(" - MAX_FILE_SIZE exceeded ");
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded",
                         ContextVS.IMAGE_MAX_FILE_SIZE_KB));
             } else {
@@ -304,9 +303,9 @@ public class SignatureService extends Service<ResponseVS> {
                 operationVS.getDocumentToSignMap().put("base64ImageHash", base64ResultDigest);
                 //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
                 //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
-                JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
                 SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
-                        documentToSignJSON.toString(), password, operationVS.getSignedMessageSubject(), null);
+                        new ObjectMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
+                        password, operationVS.getSignedMessageSubject(), null);
                 RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME,
                         operationVS.getFile(), operationVS.getServiceURL());
                 ResponseVS responseVS = dataSender.call();
@@ -314,61 +313,57 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
-        private ResponseVS sendCooinRequest(OperationVS operationVS) throws Exception {
-            log.debug("sendCooinRequest");
-            BigDecimal totalAmount = new BigDecimal((Integer)operationVS.getDocumentToSignMap().get("totalAmount"));
+        private ResponseVS sendCurrencyRequest(OperationVS operationVS) throws Exception {
+            log.info("sendCurrencyRequest");
+            BigDecimal totalAmount = new BigDecimal((String)operationVS.getDocumentToSignMap().get("totalAmount"));
             String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
             TagVS tag = new TagVS((String) operationVS.getDocumentToSignMap().get("tag"));
             Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
-            CooinRequestBatch cooinBatch = new CooinRequestBatch(totalAmount, totalAmount, currencyCode, tag,
-                    isTimeLimited, (CooinServer) operationVS.getTargetServer());
+            CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(totalAmount, totalAmount, currencyCode, tag,
+                    isTimeLimited, (CurrencyServer) operationVS.getTargetServer());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
-            mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
-                    cooinBatch.getCooinCSRRequest().toString().getBytes());
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
-                    cooinBatch.getRequestDataToSignJSON().toString(), password, operationVS.getSignedMessageSubject(), null);
+            byte[] fileContent = new ObjectMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
+            mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
+            String textToSign = new ObjectMapper().writeValueAsString(currencyBatch.getRequestDataToSignMap());
+            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
+                    password, operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     operationVS.getTargetServer().getTimeStampServiceURL());
-            ResponseVS responseVS = timeStamper.call();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            smimeMessage = timeStamper.getSMIME();
-            mapToSend.put(ContextVS.COOIN_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
-                    smimeMessage.getBytes());
-            responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    ((CooinServer)operationVS.getTargetServer()).getCooinRequestServiceURL());
+            smimeMessage = timeStamper.call();
+            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
+            ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                    ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(
-                        new String(responseVS.getMessageBytes(), "UTF-8"));
-                cooinBatch.initCooins(responseJSON.getJSONArray("issuedCooins"));
-                Wallet.saveToPlainWallet(Wallet.getCertificationRequestSerialized(cooinBatch.getCooinsMap().values()));
+                Map dataMap = responseVS.getMessageMap();
+                currencyBatch.initCurrency((List) dataMap.get("issuedCurrency"));
+                Wallet.saveToPlainWallet(Wallet.getCertificationRequestSerialized(currencyBatch.getCurrencyMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
-                responseMap.put("message", responseJSON.getString("message"));
+                responseMap.put("message", dataMap.get("message"));
                 responseVS.setContentType(ContentTypeVS.JSON);
-                responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
-                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),
-                        Calendar.getInstance().getTime());
-                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Cooin.getCurrencyMap(
-                        cooinBatch.getCooinsMap().values()))).setTypeVS(TypeVS.COOIN_IMPORT);
+                responseVS.setMessageMap(responseMap);
+                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Currency.getCurrencyMap(
+                        currencyBatch.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 InboxService.getInstance().newMessage(inboxMessage, false);
             }
             return responseVS;
         }
 
-        private ResponseVS deleteCooin(OperationVS operationVS) throws Exception {
-            log.debug("deleteCooin");
+        private ResponseVS deleteCurrency(OperationVS operationVS) throws Exception {
+            log.info("deleteCurrency");
             try {
-                Set<Cooin> wallet = Wallet.getWallet(password);
-                wallet = wallet.stream().filter(cooin -> {
-                    if (cooin.getHashCertVS().equals(operationVS.getMessage())) {
-                        log.debug("deleted cooin with hashCertVS: " + operationVS.getMessage());
+                Set<Currency> wallet = Wallet.getWallet(password);
+                wallet = wallet.stream().filter(currency -> {
+                    if (currency.getHashCertVS().equals(operationVS.getMessage())) {
+                        log.info("deleted currency with hashCertVS: " + operationVS.getMessage());
                         return false;
                     } else return true;
                 }).collect(toSet());
                 Wallet.saveWallet(wallet, password);
-                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.COOIN_DELETE).setStatus(new StatusVS() {});
+                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.CURRENCY_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
@@ -426,11 +421,10 @@ public class SignatureService extends Service<ResponseVS> {
                     smimeMessage.setTimeStampToken(timeStampToken);
                     //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
                     //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-                    String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
                     String representationDataFile = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
                             ContentTypeVS.JSON_SIGNED.getName();
                     Map<String, Object> mapToSend = new HashMap<String, Object>();
-                    mapToSend.put(csrFileName,anonymousDelegation.getCertificationRequest().getCsrPEM());
+                    mapToSend.put(ContextVS.CSR_FILE_NAME, anonymousDelegation.getCertificationRequest().getCsrPEM());
                     mapToSend.put(representationDataFile, smimeMessage.getBytes());
                     responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                             ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
@@ -460,20 +454,19 @@ public class SignatureService extends Service<ResponseVS> {
                 }
                 return responseVS;
             } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE, ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
 
         //we know this is done in a background thread
         private ResponseVS sendSMIME(OperationVS operationVS, String... header) throws Exception {
-            log.debug("sendSMIME");
+            log.info("sendSMIME");
             String documentToSignStr = null;
             if(operationVS.getAsciiDoc() != null) {
                 documentToSignStr = operationVS.getAsciiDoc();
             } else {
-                JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-                documentToSignStr = documentToSignJSON.toString();
+                documentToSignStr = new ObjectMapper().writeValueAsString(operationVS.getDocumentToSignMap());
             }
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSignStr, password, operationVS.getSignedMessageSubject(), null);
@@ -489,7 +482,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS<ActorVS> publishSMIME(OperationVS operationVS) throws Exception {
-            log.debug("publishPoll");
+            log.info("publishPoll");
             ResponseVS responseVS = sendSMIME(operationVS, "eventURL");
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";

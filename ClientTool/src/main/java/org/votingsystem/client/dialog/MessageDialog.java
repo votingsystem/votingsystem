@@ -14,11 +14,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 
@@ -28,7 +28,7 @@ import java.io.File;
  */
 public class MessageDialog extends VBox {
 
-    private static Logger log = Logger.getLogger(MessageDialog.class);
+    private static Logger log = Logger.getLogger(MessageDialog.class.getSimpleName());
 
     private static String webViewContent = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
             "font-family:arial, helvetica, sans-serif;border-radius: 5px;padding: 5px;'>%s</html>";

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="active_vs">#388746</color>
-    <color name="terminated_vs">#cc1606</color>
-    <color name="unknown_vs">#fba131</color>
-</resources>

@@ -1,18 +1,19 @@
 package org.votingsystem.client.backup;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.signature.util.SignedFile;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
-
 import java.io.File;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 */
 public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(ClaimBackupValidator.class);
+    private static Logger log = Logger.getLogger(ClaimBackupValidator.class.getSimpleName());
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
@@ -39,14 +40,14 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
     
     public ClaimBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
-            ContextVS.init("log4jClientTool.properties", "clientToolMessages.properties", "es");
+            ContextVS.initSignatureClient("clientToolMessages.properties", "es");
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
     }
    
     private String checkByteArraySize (byte[] signedFileBytes) {
-        //log.debug("checkByteArraySize");
+        //log.info("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", ContextVS.SIGNED_MAX_FILE_SIZE_KB,
@@ -80,9 +81,11 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
             
         File metaInfFile = new File(backupPath + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
+            log.log(Level.SEVERE, " - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
-            metaInf = MetaInf.parse((JSONObject) JSONSerializer.toJSON(FileUtils.getStringFromFile(metaInfFile)));
+            Map<String, Object> metaInfMap = new ObjectMapper().readValue(
+                    metaInfFile, new TypeReference<HashMap<String, Object>>() {});
+            metaInf = MetaInf.parse(metaInfMap);
             eventURL= EventVS.getURL(null, metaInf.getServerURL(), metaInf.getId());
         }
 
@@ -91,15 +94,15 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
         responseVS.setErrorList(errorList);
         responseVS.setStatusCode(statusCode);
         if(!errorList.isEmpty()) {
-            log.error(" ------- " + errorList.size() + " errors: ");
+            log.log(Level.SEVERE, " ------- " + errorList.size() + " errors: ");
             for(String error : errorList) {
-                log.error(error);
+                log.log(Level.SEVERE, error);
             }
-        } else log.debug("Backup without errors");
+        } else log.info("Backup without errors");
         long finish = System.currentTimeMillis();
         long duration = finish - begin;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
-        log.debug("duration: " + durationStr);
+        log.info("duration: " + durationStr);
         notifyValidationListener(responseVS.getStatusCode(), durationStr, ValidationEvent.CLAIM_FINISH);
         responseVS.setMessage(durationStr);
         responseVS.setData(metaInf);
@@ -116,14 +119,14 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
     }
     
     private ResponseVS validateClaims() throws Exception {
-        log.debug("validateClaims");
+        log.info("validateClaims");
         File[] batchDirs = backupDir.listFiles();
         int statusCode = ResponseVS.SC_OK;
         int numClaimsOK = 0;
         int numClaimsERROR = 0;
         Map<String, String> signersNifMap = new HashMap<String, String>();
         for(File batchDir:batchDirs) {
-            if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELLED);
+            if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
             if(batchDir.isDirectory()) {
                 File[] claims = batchDir.listFiles();
                 for(File claim : claims) {
@@ -152,7 +155,7 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
                     }
                     if(errorMessage != null) {
                         statusCode = ResponseVS.SC_ERROR;
-                        log.error(errorMessage);
+                        log.log(Level.SEVERE, errorMessage);
                         errorList.add(errorMessage);
                     } 
                     notifyValidationListener(statusCode, validationResponse.getMessage(), ValidationEvent.CLAIM);
@@ -160,7 +163,7 @@ public class ClaimBackupValidator  implements BackupValidator<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        log.debug("numClaimsOK: " + numClaimsOK + " - numClaimsERROR: " + numClaimsERROR);
+        log.info("numClaimsOK: " + numClaimsOK + " - numClaimsERROR: " + numClaimsERROR);
         String message = null;
         if(metaInf.getNumSignatures() != numClaimsOK) {
             statusCode = ResponseVS.SC_ERROR;

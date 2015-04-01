@@ -1,5 +1,7 @@
 package org.votingsystem.client.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.GlyphIcon;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -24,10 +26,8 @@ import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -35,14 +35,11 @@ import org.votingsystem.client.service.SessionService;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
@@ -73,7 +69,7 @@ public class Utils {
     public static final String EVENT_TYPE_MOUSEOVER = "mouseover";
     public static final String EVENT_TYPE_MOUSEOUT = "mouseclick";
 
-    private static Logger log = Logger.getLogger(Utils.class);
+    private static Logger log = Logger.getLogger(Utils.class.getSimpleName());
 
     public static Text getIcon(FontAwesomeIconName icon) {
         Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
@@ -114,7 +110,7 @@ public class Utils {
         try {
             image = new Image(baseObject.getClass().getResourceAsStream(iconPath));
         } catch(Exception ex) {
-            log.error(" ### iconPath: " + iconPath + " not found");
+            log.log(Level.SEVERE," ### iconPath: " + iconPath + " not found");
             image = new Image(baseObject.getClass().getResourceAsStream(
                     "/resources/icon_32/button_default.png"));
         }
@@ -183,28 +179,28 @@ public class Utils {
     }
 
     public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
-        log.debug(" - checkServer: " + serverURL);
+        log.info(" - checkServer: " + serverURL);
         ActorVS actorVS = ContextVS.getInstance().checkServer(serverURL.trim());
         if (actorVS == null) {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ActorVS.parse((Map) responseVS.getMessageJSON());
+                actorVS = ActorVS.parse((Map) responseVS.getMessageMap());
                 responseVS.setData(actorVS);
-                log.error("checkServer - adding " + serverURL.trim() + " to sever map");
+                log.log(Level.SEVERE,"checkServer - adding " + serverURL.trim() + " to sever map");
                 switch (actorVS.getType()) {
                     case ACCESS_CONTROL:
                         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
                         break;
-                    case COOINS:
-                        ContextVS.getInstance().setCooinServer((CooinServer) actorVS);
+                    case CURRENCY:
+                        ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorVS);
                         ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
                         break;
                     case CONTROL_CENTER:
                         ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
                         break;
                     default:
-                        log.debug("Unprocessed actor:" + actorVS.getType());
+                        log.info("Unprocessed actor:" + actorVS.getType());
                 }
             } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
@@ -219,14 +215,14 @@ public class Utils {
 
     public static File getReceiptBundle(ResponseVS responseVS) throws Exception {
         Map delegationDataMap = (Map) responseVS.getData();
-        JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
         java.util.List<File> fileList = new ArrayList<File>();
         File smimeTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentTypeVS.SIGNED.getExtension());
         smimeTempFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getSMIME().getBytes()), smimeTempFile);
         File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");
         certVSDataFile.deleteOnExit();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(messageJSON.toString().getBytes("UTF-8")), certVSDataFile);
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(
+                new ObjectMapper().writeValueAsString(delegationDataMap).getBytes("UTF-8")), certVSDataFile);
         fileList.add(certVSDataFile);
         fileList.add(smimeTempFile);
         File outputZip = File.createTempFile(ContextVS.CANCEL_BUNDLE_FILE_NAME, ".zip");
@@ -240,14 +236,18 @@ public class Utils {
     }
 
     public static void saveReceiptAnonymousDelegation(OperationVS operation, WebKitHost webKitHost) throws Exception{
-        log.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
+        log.info("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
                 " - callbackId: " + operation.getCallerCallback());
         Platform.runLater(() -> {
             ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
             if (responseVS == null) {
-                log.error("Missing receipt data for hash: " + operation.getMessage());
-                webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
-                        operation.getCallerCallback());
+                log.log(Level.SEVERE,"Missing receipt data for hash: " + operation.getMessage());
+                try {
+                    webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                            operation.getCallerCallback());
+                } catch (JsonProcessingException ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
             } else {
                 File fileToSave = null;
                 try {
@@ -266,7 +266,7 @@ public class Utils {
                     } else webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
                             operation.getCallerCallback());
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });
@@ -285,9 +285,9 @@ public class Utils {
                 File selectedImage = fileChooser.showOpenDialog(null);
                 if (selectedImage != null) {
                     byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
-                    log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+                    log.info(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                        log.debug(" - MAX_FILE_SIZE exceeded ");
+                        log.info(" - MAX_FILE_SIZE exceeded ");
                         webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                         ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB)),
                                 operationVS.getCallerCallback());
@@ -296,17 +296,21 @@ public class Utils {
                 } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                         operationVS.getCallerCallback());
             } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
-                webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
-                        operationVS.getCallerCallback());
+                log.log(Level.SEVERE,ex.getMessage(), ex);
+                try {
+                    webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
+                            operationVS.getCallerCallback());
+                } catch (JsonProcessingException e) {
+                    log.log(Level.SEVERE, e.getMessage(), e);
+                }
             }
         });
     }
 
     public static void receiptCancellation(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
-        log.debug("receiptCancellation");
+        log.info("receiptCancellation");
         switch(operationVS.getType()) {
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
                 PlatformImpl.runLater(() -> {
                     FileChooser fileChooser = new FileChooser();
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
@@ -317,17 +321,21 @@ public class Utils {
                     if(file != null){
                         operationVS.setFile(file);
                         webKitHost.processOperationVS(operationVS, null);
-                    } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
-                            operationVS.getCallerCallback());
+                    } else try {
+                        webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                                operationVS.getCallerCallback());
+                    } catch (JsonProcessingException ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                    }
                 });
                 break;
             default:
-                log.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
+                log.info("receiptCancellation - unknown receipt type: " + operationVS.getType());
         }
     }
 
     public static void selectKeystoreFile(OperationVS operationVS, WebKitHost webKitHost) {
-        log.debug("selectKeystoreFile");
+        log.info("selectKeystoreFile");
         PlatformImpl.runLater(() -> {
             try {
                 final FileChooser fileChooser = new FileChooser();
@@ -347,25 +355,25 @@ public class Utils {
                         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                 CryptoTokenVS.JKS_KEYSTORE.toString());
                         SessionService.getInstance().setUserVS(userVS, false);
-                        JSONObject userDataJSON = userVS.toJSON();
-                        userDataJSON.put("statusCode", ResponseVS.SC_OK);
+                        Map userDataMap = userVS.toMap();
+                        userDataMap.put("statusCode", ResponseVS.SC_OK);
                         if(operationVS != null) webKitHost.invokeBrowserCallback(
-                                userDataJSON, operationVS.getCallerCallback());
+                                userDataMap, operationVS.getCallerCallback());
                     } catch(Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                 ex.getMessage()), operationVS.getCallerCallback());
                     }
 
                 }
             } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.log(Level.SEVERE,ex.getMessage(), ex);
             }
         });
     }
 
     public static void saveReceipt(OperationVS operation, WebKitHost webKitHost) throws Exception{
-        log.debug("saveReceipt");
+        log.info("saveReceipt");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                 ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
@@ -380,11 +388,11 @@ public class Utils {
                 operation.getCallerCallback());
     }
 
-    public static JSONObject getMessageToBrowser(int statusCode, String message) {
+    public static Map getMessageToBrowser(int statusCode, String message) {
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
-        return (JSONObject)JSONSerializer.toJSON(resultMap);
+        return resultMap;
     }
 
     public static void createNewWallet() {
@@ -394,8 +402,8 @@ public class Utils {
             String password = passwordDialog.getPassword();
             if(password != null) {
                 try {
-                    Wallet.createWallet(new JSONArray(), password);
-                } catch (Exception ex) { log.error(ex.getMessage(), ex); }
+                    Wallet.createWallet(new ArrayList<>(), password);
+                } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
             }
         });
 

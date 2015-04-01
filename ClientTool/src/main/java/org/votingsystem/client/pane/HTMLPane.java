@@ -3,9 +3,9 @@ package org.votingsystem.client.pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ import java.io.File;
  */
 public class HTMLPane extends VBox{
 
-    private static Logger log = Logger.getLogger(HTMLPane.class);
+    private static Logger log = Logger.getLogger(HTMLPane.class.getSimpleName());
 
     private WebView webView;
 

@@ -12,13 +12,15 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.ContextVS;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -31,7 +33,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class TimeStampCertValidationPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampCertValidationPane.class);
+    private static Logger log = Logger.getLogger(TimeStampCertValidationPane.class.getSimpleName());
 
     private TimeStampToken timeStampToken;
     private TextArea textArea;
@@ -60,27 +62,27 @@ public class TimeStampCertValidationPane extends GridPane {
     }
 
     private void validateTimeStamp() {
-        log.debug("validateTimeStamp");
+        log.info("validateTimeStamp");
         Collection<X509Certificate> certs = null;
         try {
             String pemCert = textArea.getText();
             certs = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             showMessage(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
-                log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
+                log.info("Validating timeStampToken with cert: " + cert.getSubjectDN().toString());
                 try {
                     timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                             ContextVS.PROVIDER).build(cert));
                     showMessage(ResponseVS.SC_OK, ContextVS.getMessage("timeStampCertsValidationOKMsg",
                             cert.getSubjectDN().toString()));
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
             }
@@ -89,7 +91,7 @@ public class TimeStampCertValidationPane extends GridPane {
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {
-        log.debug("validateBackup");
+        log.info("validateBackup");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

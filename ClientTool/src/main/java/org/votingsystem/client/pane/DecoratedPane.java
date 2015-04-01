@@ -11,7 +11,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;
@@ -22,7 +22,7 @@ import org.votingsystem.client.util.Utils;
  */
 public class DecoratedPane extends VBox {
 
-    private static Logger log = Logger.getLogger(DecoratedPane.class);
+    private static Logger log = Logger.getLogger(DecoratedPane.class.getSimpleName());
 
     private FullScreenHelper fullScreenHelper;
     private Label captionLbl;

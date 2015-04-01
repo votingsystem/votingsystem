@@ -10,16 +10,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
-
 import java.io.IOException;
 
 /**
@@ -29,10 +29,10 @@ import java.io.IOException;
 public class UserDeviceSelectorDialog extends DialogVS {
 
     public interface Listener {
-        public void setSelectedDevice(JSONObject deviceDataJSON);
+        public void setSelectedDevice(Map deviceDataMap);
     }
 
-    private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class);
+    private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class.getSimpleName());
 
     @FXML private VBox mainPane;
     @FXML private Button acceptButton;
@@ -47,13 +47,15 @@ public class UserDeviceSelectorDialog extends DialogVS {
         super("/fxml/UserDeviceSelectorDialog.fxml", caption);
         this.listener = listener;
         messageLbl.setText(message);
-        new Thread(new Runnable() {
-            @Override public void run() {
-                ResponseVS responseVS = HttpHelper.getInstance().getData(
-                        ContextVS.getInstance().getCooinServer().getConnectedDeviceListByNifServiceURL(
-                        SessionService.getInstance().getUserVS().getNif()), ContentTypeVS.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    updateDeviceList((JSONArray) ((JSONObject)responseVS.getMessageJSON()).getJSONArray("deviceList"));
+        new Thread(() -> {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(
+                    ContextVS.getInstance().getCurrencyServer().getConnectedDeviceListByNifServiceURL(
+                            SessionService.getInstance().getUserVS().getNif()), ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    updateDeviceList((List<Map>) responseVS.getMessageMap().get("deviceList"));
+                } catch (IOException ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         }).start();
@@ -65,7 +67,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
         footerBox.getChildren().remove(acceptButton);
     }
 
-    private void updateDeviceList(JSONArray deviceArray) {
+    private void updateDeviceList(List<Map> deviceList) {
         PlatformImpl.runLater(() -> {
             if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
             if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
@@ -82,11 +84,10 @@ public class UserDeviceSelectorDialog extends DialogVS {
                 }
             });
             boolean deviceFound = false;
-            for(int i = 0; i < deviceArray.size() ; i++) {
-                JSONObject deviceData = (JSONObject) deviceArray.get(i);
-                if(!SessionService.getInstance().getDeviceId().equals(deviceData.getString("deviceId"))) {
+            for(Map deviceData: deviceList) {
+                if(!SessionService.getInstance().getDeviceId().equals(deviceData.get("deviceId"))) {
                     deviceFound = true;
-                    RadioButton radioButton = new RadioButton(deviceData.getString("deviceName"));
+                    RadioButton radioButton = new RadioButton((String) deviceData.get("deviceName"));
                     radioButton.setUserData(deviceData);
                     radioButton.setToggleGroup(deviceToggleGroup);
                     deviceListBox.getChildren().add(radioButton);
@@ -102,7 +103,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
 
     public void acceptButton(ActionEvent actionEvent) {
         if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
-            listener.setSelectedDevice((JSONObject) deviceToggleGroup.getSelectedToggle().getUserData());
+            listener.setSelectedDevice((Map) deviceToggleGroup.getSelectedToggle().getUserData());
         hide();
     }
 
@@ -113,7 +114,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
                     UserDeviceSelectorDialog dialog = new UserDeviceSelectorDialog(caption, message, listener);
                     dialog.show();
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });

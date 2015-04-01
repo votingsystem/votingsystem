@@ -1,5 +1,7 @@
 package org.votingsystem.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -9,24 +11,23 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.*;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.OperationVS;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza
@@ -34,7 +35,7 @@ import java.util.Map;
  */
 public class BrowserVS extends VBox implements WebKitHost {
 
-    private static Logger log = Logger.getLogger(BrowserVS.class);
+    private static Logger log = java.util.logging.Logger.getLogger(BrowserVS.class.getSimpleName());
 
     private Stage browserStage;
     private FullScreenHelper fullScreenHelper;
@@ -68,17 +69,19 @@ public class BrowserVS extends VBox implements WebKitHost {
         tabPaneVS = new BrowserVSTabPane(toolBar);
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(event -> {
-            log.debug("signatureService - OnSucceeded");
-            ResponseVS responseVS = browserHelper.getSignatureService().getValue();
-            if(responseVS.getStatus() != null) {
-                EventBusService.getInstance().post(responseVS);
-            } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
-                log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
-            } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                invokeBrowserCallback(responseVS.getMessageJSON(),
+            log.info("signatureService - OnSucceeded");
+            try {
+                ResponseVS responseVS = browserHelper.getSignatureService().getValue();
+                if(responseVS.getStatus() != null) {
+                    EventBusService.getInstance().post(responseVS);
+                } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
+                    log.info("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
+                } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    invokeBrowserCallback(responseVS.getMessageMap(),
+                            browserHelper.getSignatureService().getOperationVS().getCallerCallback());
+                } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
                         browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-            } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
-                    browserHelper.getSignatureService().getOperationVS().getCallerCallback());
+            } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         });
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         browserStage.setResizable(true);
@@ -86,7 +89,7 @@ public class BrowserVS extends VBox implements WebKitHost {
             event.consume();
             browserStage.hide();
             browserHelper.getSignatureService().cancel();
-            log.debug("browserStage.setOnCloseRequest");
+            log.info("browserStage.setOnCloseRequest");
         });
         browserHelper.getChildren().add(0, this);
         browserStage.setScene(new Scene(browserHelper));
@@ -101,15 +104,15 @@ public class BrowserVS extends VBox implements WebKitHost {
         return tabPaneVS.newTab(URL, tabCaption, jsCommand);
     }
 
-    @Override public void invokeBrowserCallback(JSON messageJSON, String callerCallback) {
-        String message = messageJSON.toString();
-        log.debug("invokeBrowserCallback - messageJSON: " + MsgUtils.truncateLog(message));
+    @Override public void invokeBrowserCallback(Map dataMap, String callerCallback) throws JsonProcessingException {
+        String message = new ObjectMapper().writeValueAsString(dataMap);
+        log.info("invokeBrowserCallback - dataMap: " + MsgUtils.truncateLog(message));
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     Base64.getEncoder().encodeToString(message.getBytes("UTF8")) + "')";
             PlatformImpl.runLater(() -> {  operationWebView.getEngine().executeScript(jsCommand); });
-        } catch(Exception ex) { log.error(ex.getMessage(), ex); }
+        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
     }
 
     @Override public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
@@ -121,7 +124,7 @@ public class BrowserVS extends VBox implements WebKitHost {
     }
 
     @Override public void processSignalVS(Map signalData) {//{title:, url:}
-        log.debug("processSignalVS - caption: " + signalData.get("caption"));
+        log.info("processSignalVS - caption: " + signalData.get("caption"));
         if(signalData.containsKey("caption")) tabPaneVS.getSelectionModel().getSelectedItem().setText(
                 (String)signalData.get("caption"));
     }
@@ -130,15 +133,15 @@ public class BrowserVS extends VBox implements WebKitHost {
         fullScreenHelper.toggleFullScreen();
     }
 
-    public void openCooinURL(final String URL, final String caption) {
-        log.debug("openCooinURL: " + URL);
-        if(ContextVS.getInstance().getCooinServer() == null) {
+    public void openCurrencyURL(final String URL, final String caption) {
+        log.info("openCurrencyURL: " + URL);
+        if(ContextVS.getInstance().getCurrencyServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
         } else Platform.runLater(() -> tabPaneVS.newTab(URL, caption, null));
     }
 
     public void openVotingSystemURL(final String URL, final String caption) {
-        log.debug("openVotingSystemURL: " + URL);
+        log.info("openVotingSystemURL: " + URL);
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"), ContextVS.getMessage("errorLbl"));
         } else Platform.runLater(() -> tabPaneVS.newTab(URL, caption, null));
@@ -177,8 +180,8 @@ public class BrowserVS extends VBox implements WebKitHost {
         });
     }
 
-    public void setCooinServerAvailable(boolean available) {
-        toolBar.setCooinServerAvailable(available);
+    public void setCurrencyServerAvailable(boolean available) {
+        toolBar.setCurrencyServerAvailable(available);
     }
 
     public void setVotingSystemAvailable(boolean available) {
@@ -190,7 +193,7 @@ public class BrowserVS extends VBox implements WebKitHost {
             Object currentContent = tabPaneVS.getSelectionModel().getSelectedItem().getContent();
             if(currentContent instanceof WebView) {
                 ((WebView)currentContent).getEngine().executeScript(jsCommand);
-            } else log.error("current content is not instance of WebView: " + currentContent.getClass());
+            } else log.log(Level.SEVERE, "current content is not instance of WebView: " + currentContent.getClass());
         });
     }
 
@@ -198,17 +201,19 @@ public class BrowserVS extends VBox implements WebKitHost {
         webViewMap.put(callerCallback, webView);
     }
 
-    public void fireCoreSignal(String name, JSONObject data, boolean fireToAllTabs) {
+    public void fireCoreSignal(String name, Map data, boolean fireToAllTabs) {
         //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
         try {
-            JSONObject coreSignal = new JSONObject();
+            Map coreSignal = new HashMap<>();
             coreSignal.put("name", name);
             coreSignal.put("data", data);
             String jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
-                    coreSignal.toString().getBytes("UTF-8")) + "')";
+                    new ObjectMapper().writeValueAsString(coreSignal).getBytes("UTF-8")) + "')";
             if(fireToAllTabs) runJSCommand(jsCommand);
             else runJSCommandCurrentView(jsCommand);
-        } catch (UnsupportedEncodingException ex) { log.error(ex.getMessage(), ex); }
+        } catch (UnsupportedEncodingException | JsonProcessingException ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
 }

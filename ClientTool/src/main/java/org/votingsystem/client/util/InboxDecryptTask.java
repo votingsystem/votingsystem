@@ -1,10 +1,12 @@
 package org.votingsystem.client.util;
 
 import javafx.concurrent.Task;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ContextVS;
 
 import java.security.PrivateKey;
 import java.util.Arrays;
@@ -18,7 +20,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class InboxDecryptTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(InboxDecryptTask.class);
+    private static Logger log = Logger.getLogger(InboxDecryptTask.class.getSimpleName());
 
     PrivateKey privateKey;
     private InboxMessage timeLimitedInboxMessage;
@@ -43,7 +45,7 @@ public class InboxDecryptTask extends Task<ResponseVS> {
             }
             InboxService.getInstance().updateDecryptedMessages(messageList);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return null;

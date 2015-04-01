@@ -10,7 +10,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
@@ -18,9 +18,9 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.BrowserVSMenuButton;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.TypeVS;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,7 +32,7 @@ import static org.votingsystem.client.BrowserVS.showMessage;
  */
 public class BrowserVSToolbar extends HBox {
 
-    private static Logger log = Logger.getLogger(BrowserVSToolbar.class);
+    private static Logger log = Logger.getLogger(BrowserVSToolbar.class.getSimpleName());
 
     private TextField locationField = new TextField("");
     private Button reloadButton;
@@ -44,7 +44,7 @@ public class BrowserVSToolbar extends HBox {
     class EventBusConnectionListener {
         @Subscribe
         public void responseVSChange(ResponseVS responseVS) {
-            log.debug("EventBusConnectionListener - response type: " + responseVS.getType());
+            log.info("EventBusConnectionListener - response type: " + responseVS.getType());
             AtomicBoolean isConnected = new AtomicBoolean(false);
             if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
                 isConnected.set(true);
@@ -122,8 +122,8 @@ public class BrowserVSToolbar extends HBox {
         return locationField;
     }
 
-    public void setCooinServerAvailable(boolean available) {
-        menuButton.setCooinServerAvailable(available);
+    public void setCurrencyServerAvailable(boolean available) {
+        menuButton.setCurrencyServerAvailable(available);
     }
 
     public void setVotingSystemAvailable(boolean available) {

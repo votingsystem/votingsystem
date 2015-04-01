@@ -12,11 +12,13 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.SignedFile;
+import org.votingsystem.util.ContextVS;
 
 import java.util.Set;
 
@@ -26,7 +28,7 @@ import java.util.Set;
  */
 public class SMIMESignersPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SMIMESignersPane.class);
+    private static Logger log = Logger.getLogger(SMIMESignersPane.class.getSimpleName());
     private TabPane tabPane;
 
     public SMIMESignersPane(SignedFile signedFile) {
@@ -42,7 +44,7 @@ public class SMIMESignersPane extends GridPane {
         Tab newTab = null;
         try {
             Set<UserVS> signersVS = signedFile.getSMIME().getSigners();
-            log.debug("Num. signers: " + signersVS.size());
+            log.info("Num. signers: " + signersVS.size());
             for (UserVS signerVS:signersVS) {
                 SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIME());
                 String tabName = ContextVS.getMessage("signerLbl");
@@ -56,7 +58,7 @@ public class SMIMESignersPane extends GridPane {
             setHgrow(tabPane, Priority.ALWAYS);
             setVgrow(tabPane, Priority.ALWAYS);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
