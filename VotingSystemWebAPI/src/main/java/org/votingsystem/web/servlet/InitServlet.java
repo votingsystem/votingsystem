@@ -46,7 +46,7 @@ public class InitServlet extends HttpServlet{
             signatureBean.initCertAuthorities(fileSystemX509TrustedCerts);
             signatureBean.initAdmins(admins);
 
-            URL res = getServletContext().getResource("bower_components/polymer/polymer.js");
+            URL res = getServletContext().getResource("/bower_components/polymer/polymer.js");
             if(res == null) {
                 log.log(Level.SEVERE, "Have you executed 'bower install' from web-app dir ???");
             }
