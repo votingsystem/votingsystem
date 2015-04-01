@@ -1,6 +1,7 @@
-package org.votingsystem.web.controlcenter.cdi;
+package org.votingsystem.web.cdi;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @RequestScoped
+@Named(value="messages")
 public class MessagesBean {
 
     private static final Logger log = Logger.getLogger(MessagesBean.class.getSimpleName());
@@ -30,11 +32,13 @@ public class MessagesBean {
     }
 
     public String get(String key, Object... arguments) {
-        String pattern = bundle.getString(key);
-            /*if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);*/
-        if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-        else return pattern;
+        try {
+            String pattern = bundle.getString(key);
+            if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
+            else return pattern;
+        } catch (Exception ex) {
+            return "-- " + key + " --";
+        }
     }
 
 }

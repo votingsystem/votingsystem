@@ -20,6 +20,7 @@
     <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
     <link href="${config.resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
     <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <decorator:head />
 </head>
 <body>

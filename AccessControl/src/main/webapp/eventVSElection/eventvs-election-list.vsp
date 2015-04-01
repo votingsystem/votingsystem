@@ -8,7 +8,8 @@
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style no-shim>
             .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;

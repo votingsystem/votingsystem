@@ -30,7 +30,8 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->

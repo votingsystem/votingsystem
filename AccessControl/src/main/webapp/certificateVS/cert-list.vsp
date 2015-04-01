@@ -8,7 +8,8 @@
 
 <polymer-element name="cert-list" attributes="url menuType">
     <template>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style no-shim>
             .view { :host {position: relative;} }
             .certDiv {

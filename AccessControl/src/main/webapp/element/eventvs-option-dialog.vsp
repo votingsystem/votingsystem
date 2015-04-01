@@ -11,7 +11,8 @@
     <template>
         <style></style>
         <paper-dialog id="xDialog" layered backdrop opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
-            <jsp:include page="/include/styles.jsp"/>
+            <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
                 .messageToUser {

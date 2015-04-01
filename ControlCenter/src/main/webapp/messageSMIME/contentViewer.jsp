@@ -11,7 +11,8 @@
     <jsp:include page="/include/utils_js.jsp"/>
     <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
     <link href="${config.webURL}/messageSMIME/${viewer}" rel="import"/>
-    <jsp:include page="/include/styles.jsp"/>
+    <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 </head>
 <body>
 <div id="voting_system_page" layout horizontal center center-justified>

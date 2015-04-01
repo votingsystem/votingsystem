@@ -17,7 +17,8 @@
             overflow:hidden;
         }
         </style>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <core-ajax id="ajax" auto url="{{url}}" response="{{cert}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <div layout vertical center center-justified >
                 <div layout horizontal class="pageWidth">

@@ -8,7 +8,8 @@
 
 <polymer-element name="alert-dialog">
     <template>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <paper-dialog id="xDialog" layered backdrop class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
             .votingsystemMessageDialog {

@@ -87,6 +87,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>0.1.0</Bundle-Version>
                         <Export-Package>
+                            iaik.pkcs.pkcs11.objects, iaik.pkcs.pkcs11,
                             org.votingsystem.callable, org.votingsystem.model.currency, org.votingsystem.model,
                             org.votingsystem.signature.dnie,org.votingsystem.signature.smime,
                             org.votingsystem.signature.util,org.votingsystem.throwable, org.votingsystem.util,

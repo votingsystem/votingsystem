@@ -9,7 +9,8 @@
 <polymer-element name="eventvs-vote-confirm-dialog" attributes="opened">
     <template>
         <paper-dialog id="xDialog" layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
-            <jsp:include page="/include/styles.jsp"/>
+            <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim> </style>
             <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
                 <div layout horizontal center center-justified>

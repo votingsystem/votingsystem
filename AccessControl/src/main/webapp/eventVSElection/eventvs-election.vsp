@@ -11,7 +11,8 @@
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
-        <jsp:include page="/include/styles.jsp"/>
+        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}

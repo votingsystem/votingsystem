@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <title>${msg.appTitle}</title>
-    <link href="${config.webURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+    <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
     <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
     <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
@@ -22,7 +22,7 @@
     <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
     <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${config.webURL}/element/vs-navbar.vsp" rel="import"/>
+    <link href="${config.resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
     <decorator:head />
@@ -32,7 +32,6 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
-        <link href="${config.webURL}/css/votingSystem.csss" media="all" rel="stylesheet" />
         <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" handleAs=""></core-xhr>
@@ -45,57 +44,13 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${config.restURL}/app/userVS">
-                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+                        <paper-item data-href="${config.restURL}/eventVSElection">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </paper-item>
-                        <paper-item data-href="${config.restURL}/groupVS">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                        <paper-item data-href="${config.webURL}/subscriptionVS/feeds.jsp">
+                            <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
                         </paper-item>
-                        <paper-item data-href="${config.restURL}/userVS/search">
-                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/currency/request">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
-                        </paper-item>
-                        <c:choose>
-                            <c:when test="${'admin'.equals(param.menu)}">
-                                <template if="{{isClientToolConnected}}">
-                                    <paper-item data-href="${config.restURL}/groupVS/newGroup">
-                                        <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
-                                    </paper-item>
-                                </template>
-                                {{ "${msg.adminPageTitle}" | setTitle}}
-                            </c:when>
-                            <c:when test="${'superuser'.equals(param.menu)}">
-                                <paper-item data-href="${config.restURL}/userVS/newBankVS">
-                                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
-                                </paper-item>
-                                <paper-item data-href="${config.restURL}/certificateVS/addCertificateAuthority"
-                                            style="margin:0px 10px 0px 0px;">
-                                    <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> ${msg.newCAAuthorityLbl}
-                                </paper-item>
-                                <paper-item data-href="${config.restURL}/certificateVS/certs">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                                </paper-item>
-                                <paper-item data-href="${config.restURL}/userVS/save">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newUserCertLbl}
-                                </paper-item>
-                                <paper-item id="changeToAdmin" data-href="${config.restURL}/app/contact" on-click="{{changeToAdminMenu}}">
-                                    <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i>${msg.changeToAdminMenuLbl}
-                                </paper-item>
-                                {{ "${msg.superUserTitle}" | setTitle}}
-                            </c:when>
-                            <c:otherwise>
-                                {{ "${msg.usersPageTitle}" | setTitle}}
-                            </c:otherwise>
-                        </c:choose>
-                        <paper-item data-href="${config.restURL}/transactionVS">
-                            <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> ${msg.transactionsLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/reports">
-                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/app/contact">
+                        <paper-item data-href="${config.webURL}/app/contact.jsp">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </paper-item>
                     </core-selector>

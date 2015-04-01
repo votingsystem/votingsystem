@@ -3,7 +3,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="org.votingsystem.web.accesscontrol.messages" var="bundle"/>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
 <head>
     <title>Test JSP</title>
     <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
@@ -44,7 +47,7 @@
     <h2>- resURL: - ${config.resourceURL}</h2>
     <h2>- Property: - ${config.getProperty('vs.systemNIF')}</h2>
     <h2>- i18N: ${msg.publicDelegationLbl}</h2>
-    <h2>- months1: ${msg.months1}</h2>
+    <h2>- votingsystemPageLbl: ${msg.votingsystemPageLbl}</h2>
     <h2>- test1: ${msg.test1}</h2>
     <h2>- groupVS: ${groupvs.email}</h2>
 
@@ -53,6 +56,12 @@
     InvalidErrorMsg: <fmt:message key="hashCertVSCurrencyInvalidErrorMsg" bundle="${bundle}">
         <fmt:param value="11111111111"/>
     </fmt:message><br/>
+
+Yeps
+    <h:outputFormat value="Hello, {0}! You are visitor number {1} to the page.">
+        <f:param value="Voter" />
+        <f:param value="100"/>
+    </h:outputFormat>
 
 
     <section>

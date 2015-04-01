@@ -2,7 +2,6 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,7 +27,6 @@ public class AppResource {
 
     @Inject ConfigVS config;
 
-
     @GET @Path("/androidClient")
     public Response androidClient(@QueryParam("browserToken") String browserToken, @QueryParam("eventId") String eventId,
             @QueryParam("serverURL") String serverURL, @QueryParam("msg") String msg,
@@ -50,13 +48,6 @@ public class AppResource {
             context.getRequestDispatcher(uri).forward(req, resp);
             return Response.ok().build();
         }
-    }
-
-    @GET @Path("/contact")
-    public Response contact(@Context ServletContext context, @Context HttpServletRequest req,
-                              @Context HttpServletResponse resp) throws ServletException, IOException, ExceptionVS {
-        context.getRequestDispatcher("/jsf/app/contact.jsp").forward(req, resp);
-        return Response.ok().build();
     }
 
 }
