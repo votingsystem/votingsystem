@@ -1,0 +1,133 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${config.resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
+<link href="${config.resourceURL}/paper-progress/paper-progress.html" rel="import"/>
+
+<polymer-element name="currency-wallet-tag-group" attributes="tag, currencyArray">
+    <template>
+        <style>
+            .tagHeader {font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;
+                color: #432; text-align: center;}
+            .currency {
+                background: #f9f9f9;
+                color: #61a753;
+                padding:10px;
+                margin:10px;
+                border-radius: 5px;
+                border: 1px solid #61a753;
+                font-size: 1.2em;
+                text-align: center;
+            }
+            .currency i {margin:5px 10px 0 0;}
+            .core-tooltip {padding: 8px;background: #f9f9f9;border: 1px solid #61a753; color:#61a753; }
+        </style>
+        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <div vertical layout center center-justified>
+            <div class="tagHeader">{{tag | tagDescription}}</div>
+            <template repeat="{{currencyMsg in currencyMsgs}}">
+                <div style="margin: 5px 0 0 20px;color: #888;">{{currencyMsg}}</div>
+            </template>
+            <div>
+                <template repeat="{{currency in currencyArray}}">
+                    <core-tooltip position="top" noarrow="false">
+                        <div horizontal layout center center-justified class="currency" on-click="{{showCurrency}}">
+                            <i class="fa {{currency.currencyCode | currencyIcon}}" style=""></i>
+                            {{currency.currencyValue}} {{currency.currencyCode}}
+                            <template if="{{currency | isTimeLimited}}">
+                                <div style="font-size: 1em; margin: 0 0 0 5px;">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                            </template>
+                        </div>
+                        <div tip>
+                            <template if="{{currency | isTimeLimited}}">
+                                <div style="font-size: 2em; margin: 10px 10px 20px 10px;">${msg.expendBeforeMonday}</div>
+                            </template>
+                            <div style="font-size: 1.2em; margin: 10px 10px 15px 10px;">{{currency | dateInfo}}</div>
+                        </div>
+                    </core-tooltip>
+                </template>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer('currency-wallet-tag-group', {
+            //Info inside currency: currencyServerURL, currencyValue, currencyCode, tag, notBefore, notAfter, hashCertVS
+            currencyMsgs:[],
+            publish: {
+                currencyArray: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            tagDescription:function(tag) {
+                if("WILDTAG" === tag) return "${msg.wildTagLbl}".toUpperCase()
+                else return tag
+            },
+            dateInfo:function(currency) {
+                var notBefore = getDateFormatted(currency.notBefore,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
+                var notAfter = getDateFormatted(currency.notAfter,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
+                return "${msg.dateRangeMsg}".format(notBefore, notAfter)
+            },
+            isTimeLimited:function(currency) {
+                var notBefore = DateUtils.parse(currency.notBefore)
+                var notAfter = DateUtils.parse(currency.notAfter)
+                var dayDiff = notAfter.daydiff(notBefore)
+                return dayDiff <= 7 //if lower than seven days -> timeLimited
+            },
+            currencyIcon: function(currencyCode) {
+                switch(currencyCode) {
+                    case 'EUR': return "fa-eur"
+                    case 'USD': return "fa-dollar"
+                    case 'JPY': return "fa-yen"
+                    case 'CNY': return "fa-cny"
+                    default: return "fa-money"
+                }
+            },
+            currencyArrayChanged:function() {
+                console.log(this.tagName + " - currencyArrayChanged")
+                var tagGroupMap = {}
+                this.currencyMsgs = []
+                for(currencyIdx in this.currencyArray) {
+                    var currency = this.currencyArray[currencyIdx]
+                    try {
+                        //{{currency.currencyValue}} {{currency.currencyCode}} {{currency.isTimeLimited}}
+                        if(tagGroupMap[currency.currencyCode]) {
+                            if(currency.isTimeLimited === true) {
+                                tagGroupMap[currency.currencyCode].isTimeLimited = addNumbers(
+                                                tagGroupMap[currency.currencyCode].isTimeLimited, currency.currencyValue)
+                            }
+                            tagGroupMap[currency.currencyCode].total = addNumbers(tagGroupMap[currency.currencyCode].total, currency.currencyValue)
+                        } else {
+                            var timeLimited = (currency.isTimeLimited === true)?currency.currencyValue:0
+                            tagGroupMap[currency.currencyCode] = {isTimeLimited: timeLimited, total:currency.currencyValue}
+                        }
+                    } catch(ex) {console.log(Ex)}
+
+                }
+                var currencies = Object.keys(tagGroupMap)
+                console.log("currencies: " + currencies)
+                for(currencyIdx in currencies) {
+                    var currency = currencies[currencyIdx]
+                    var msg = currency + ". ${msg.totalLbl}: " + tagGroupMap[currency].total
+                    if(tagGroupMap[currency].isTimeLimited > 0) msg = msg +
+                            " (${msg.timeLimitedForTagShortMsg})".format(tagGroupMap[currency].isTimeLimited)
+                    this.currencyMsgs.push(msg)
+                }
+            },
+            showCurrency: function(e) {
+                var webAppMessage = new WebAppMessage(Operation.OPEN_CURRENCY)
+                webAppMessage.document = e.target.templateInstance.model.currency
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("showCurrency - message: " + appMessage);
+                }.bind(this))
+                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            }
+        });
+    </script>
+</polymer-element>
+
+

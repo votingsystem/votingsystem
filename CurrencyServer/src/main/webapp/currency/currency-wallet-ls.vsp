@@ -1,0 +1,73 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/paper-slider/paper-slider.html" rel="import"/>
+<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${config.resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
+<link href="${config.webURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
+
+<!--Test with wallet inside browser localstorage--->
+<polymer-element name="currency-wallet-ls"  on-core-select="{{selectAction}}">
+    <template>
+        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <style>
+            .green-slider paper-slider::shadow #sliderKnobInner,
+            .green-slider paper-slider::shadow #sliderKnobInner::before,
+            .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
+                background-color: #0f9d58;
+            }
+            .messageToUser {font-weight: bold;margin:10px auto 30px auto;
+                background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;
+            }
+        </style>
+        <div vertical layout>
+            <template if="{{messageToUser}}">
+                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
+                    <div class="messageToUser">
+                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                            <div id="messageToUser">{{messageToUser}}</div>
+                        </div>
+                        <paper-shadow z="1"></paper-shadow>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <polymer-localstorage id="localstorage" name="currency-request-localstorage" value="{{currencysWallet}}"></polymer-localstorage>
+
+        <template repeat="{{tag in tagArray}}">
+            <currency-wallet-tag-group tag={{tag}} currencyArray="{{tagGroups[tag]}}"></currency-wallet-tag-group>
+        </template>
+    </template>
+    <script>
+        Polymer('currency-wallet-ls', {
+            selectedTags: [],
+            currencyCode:null,
+            currencysWalletArray:[],
+            tagGroups:{},
+            tagArray:[],
+            messageToUser:null,
+
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            currencysWalletChanged:function() {
+                console.log(this.tagName + " - currencysWalletChanged")
+                this.tagGroups = {}
+                this.currencysWalletArray = JSON.parse(this.currencysWallet)
+                this.testWallet = JSON.stringify({wallet:this.currencysWalletArray})
+
+                for(currencyIdx in this.currencysWalletArray) {
+                    var currency = this.currencysWalletArray[currencyIdx]
+                    if(this.tagGroups[currency.tag]) this.tagGroups[currency.tag].push(currency)
+                    else this.tagGroups[currency.tag] = [currency]
+                }
+                this.tagArray = Object.keys(this.tagGroups)
+            },
+            valueChanged:function() {
+                this.amountValue = this.value * 10;
+            }
+        });
+    </script>
+</polymer-element>

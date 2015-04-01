@@ -1,0 +1,49 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${config.webURL}/messageSMIME/message-smime.vsp" rel="import"/>
+
+<polymer-element name="message-smime-dialog" attributes="transactionvsURL opened">
+    <template>
+        <paper-dialog id="xDialog" layered backdrop class="currencyTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
+            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <core-ajax id="ajax" auto url="{{transactionvsURL}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+            <div style="display:{{isProcessing? 'block':'none'}}">
+                <div layout vertical center center-justified  style="text-align:center;min-height: 150px;">
+                    <progress style="margin:20px auto;"></progress>
+                </div>
+            </div>
+            <div>
+                <message-smime id="transactionViewer"></message-smime>
+            </div>
+        </vs-dialog>
+    </template>
+    <script>
+        Polymer('message-smime-dialog', {
+            transactionvsURL:null,
+            isProcessing:true,
+            ready: function() {
+                console.log(this.tagName + " - " + this.id + " - ready")
+                this.isClientToolConnected = window['isClientToolConnected']
+            },
+            transactionvsChanged:function() {
+                //this.transactionvsURL = ""
+                if(this.transactionvs == null) return
+                this.$.transactionViewer.signedDocument = this.transactionvs.signedContentMap
+                this.$.transactionViewer.timeStampDate = this.transactionvs.timeStampDate
+                this.$.transactionViewer.smimeMessage = this.transactionvs.smimeMessage
+                this.isProcessing = false
+                this.$.xDialog.opened = true
+            },
+            show: function(transactionvsURL) {
+                if(this.transactionvsURL != transactionvsURL) this.isProcessing = true
+                this.transactionvsURL = transactionvsURL
+                console.log(this.tagName + " - show - transactionvsURL:" + this.transactionvsURL)
+                this.$.xDialog.opened = true
+            }
+        });
+    </script>
+</polymer-element>

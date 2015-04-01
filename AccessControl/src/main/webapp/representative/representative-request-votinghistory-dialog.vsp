@@ -1,0 +1,135 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<script src="${config.resourceURL}/pikaday/pikaday.js" type="text/javascript"></script>
+<link href="${config.resourceURL}/pikaday/css/pikaday.css" media="all" rel="stylesheet" />
+
+<polymer-element name="representative-request-votinghistory-dialog">
+    <template>
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+            <jsp:include page="/include/styles.jsp"/>
+            <style no-shim>
+            .dialog {
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                overflow: auto;
+                background: white;
+                padding:10px 30px 30px 30px;
+                outline: 1px solid rgba(0,0,0,0.2);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                width: 550px;
+            }
+            </style>
+            <div>
+                <div layout horizontal center center-justified>
+                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                        <div style="text-align: center;">
+                            ${msg.requestVotingHistoryLbl}
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
+                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                    </div>
+                </div>
+                <div>${msg.representativeHistoryRequestMsg}</div>
+
+                <label>${msg.selectDateRangeMsg}</label>
+
+                <div layout horizontal style="margin:10px 0px 0px 20px;">
+                    <div>
+                        <label>${msg.firstDaterangeLbl}</label>
+                        <div id="dateFrom">
+                            <g:datePicker name="dateFrom" value="${new Date().minus(7)}" precision="day" relativeYears="[0..5]"/>
+                        </div>
+                    </div>
+                    <div style="margin:0px 0px 0px 20px;">
+                        <label>${msg.dateToLbl}</label>
+                        <div id="dateTo">
+                            <g:datePicker name="dateTo" value="${new Date()}" precision="day" relativeYears="[0..5]"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin:15px 0px 20px 0px">
+                    <input type="email" id="emailRequest" style="width:350px; margin:0px auto 0px auto;" required
+                           title='${msg.enterEmailLbl}' class="form-control"
+                           placeholder='${msg.emailInputLbl}'/>
+                </div>
+                <div layout horizontal>
+                    <div flex></div>
+                    <div>
+                        <paper-button raised on-click="{{submit}}">
+                            <i class="fa fa-check"></i> ${msg.acceptLbl}
+                        </paper-button>
+                    </div>
+                </div>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        Polymer('representative-request-votinghistory-dialog', {
+            representativeFullName:null,
+            publish: {
+                representative: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            show: function(representative) {
+                this.$.xDialog.opened = true
+                this.representative = representative
+                this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
+            },
+            submit: function() {
+                var dateFrom = getDatePickerValue('dateFrom', this.$.dateFrom)
+                var dateTo = getDatePickerValue('dateTo', this.$.dateTo)
+                this.$.dateFrom.classList.remove("formFieldError");
+                this.$.dateTo.classList.remove("formFieldError");
+                console.log("requestVotingHistory - dateFrom: " + dateFrom + " - dateTo: " + dateTo)
+                if(dateFrom > dateTo) {
+                    showMessageVS('${msg.dateRangeERRORMsg}', '${msg.errorLbl}')
+                    this.$.dateFrom.classList.add("formFieldError");
+                    this.$.dateTo.classList.add("formFieldError");
+                    return false
+                }
+
+                if(!this.$.emailRequest.validity.valid) {
+                    showMessageVS('${msg.emailERRORMsg}', '${msg.errorLbl}')
+                    return false
+                }
+                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
+                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
+                    representativeNif:this.representative.nif,
+                    representativeName:this.representativeFullName, dateFrom:dateFrom.formatWithTime(),
+                    dateTo:dateTo.formatWithTime(), email:this.$.emailRequest.value}
+                webAppMessage.serviceURL = "${config.webURL}/representative/history"
+                webAppMessage.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
+                webAppMessage.email = this.$.emailRequest.value
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("requestAccreditationsCallback - message: " + appMessage);
+                    var appMessageJSON = toJSON(appMessage)
+                    var caption = '${msg.operationERRORCaption}'
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "${msg.operationOKCaption}"
+                    } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
+                        caption = "${msg.operationCANCELEDLbl}"
+                    }
+                    var msg = appMessageJSON.message
+                    showMessageVS(msg, caption)
+                }.bind(this))
+                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                this.close()
+            },
+            close: function() {
+                this.$.xDialog.opened = false
+            }
+        });
+    </script>
+</polymer-element>

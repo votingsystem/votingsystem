@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.votingsystem</groupId>
+    <version>${votingsystem.version}</version>
+    <artifactId>VotingSystemAPI</artifactId>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${osgi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
+            <version>4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.3.6.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bctsp-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>org.votingsystem.VotingSystemAPI</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Bundle-Version>0.1.0</Bundle-Version>
+                        <Export-Package>
+                            org.votingsystem.callable, org.votingsystem.model.currency, org.votingsystem.model,
+                            org.votingsystem.signature.dnie,org.votingsystem.signature.smime,
+                            org.votingsystem.signature.util,org.votingsystem.throwable, org.votingsystem.util,
+                            org.votingsystem.services
+                        </Export-Package>
+                        <Bundle-Activator>org.votingsystem.util.ContextVS</Bundle-Activator>
+                        <Import-Package>
+                            org.osgi.framework;version="[1.5,2)", com.google.common.eventbus,
+                            org.apache.felix.service.command;version=0.6.0;status=provisional,
+                            org.apache.felix.gogo.commands;version="[0.6,1)",
+                            org.apache.karaf.shell.console;version="[2.2,4)",
+                            org.votingsystem.service, org.votingsystem.model, javax.mail,
+                            org.apache.http.client.methods,  org.apache.http.config, org.apache.http.conn,
+                            org.apache.http.conn.routing, org.apache.http.conn.socket,
+                            org.apache.http.conn.ssl, org.apache.http.entity, org.apache.http.entity.mime,
+                            org.apache.http.impl, org.apache.http.impl.io, org.apache.http.message, org.apache.http.util,
+                            org.hibernate.proxy,
+                            javassist.util.proxy,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <properties>
+        <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
+        <osgi.version>5.0.0</osgi.version>
+        <jackson.version>2.5.1</jackson.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+</project>

@@ -1,0 +1,85 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="org.votingsystem.util.TypeVS" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
+<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+
+<polymer-element name="message-smime-representative-anonymousdelegation-request"
+                 attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+    <template>
+        <jsp:include page="/include/styles.jsp"/>
+        <style>
+            .messageToUser {
+                font-weight: bold;
+                margin:10px auto 10px auto;
+                background: #f9f9f9;
+                padding:10px 20px 10px 20px;
+            }
+            .timeStampMsg {
+                color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
+            }
+        </style>
+        <div layout vertical style="margin: 10px auto;">
+            <div  layout horizontal center center-justified>
+                <div flex></div>
+                <div class="pageHeader"><h3>${msg.anonymousdelegationRequest}</h3></div>
+                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; display: block; min-width: 150px;">
+                    <template if="{{isClientToolConnected}}">
+                        <paper-button raised on-click="{{checkReceipt}}">
+                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                        </paper-button>
+                    </template>
+                </div>
+            </div>
+            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+                <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
+            </div>
+
+            <template if="{{messageToUser}}">
+                <div  layout horizontal center center-justified  class="messageToUser">
+                    <div>
+                        <div id="messageToUser">{{messageToUser}}</div>
+                    </div>
+                    <paper-shadow z="1"></paper-shadow>
+                </div>
+            </template>
+            <div><b>${msg.weeksAnonymousDelegation}: </b>{{smimeMessageContent.weeksOperationActive}}</div>
+            <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{smimeMessageContent.dateFrom}}
+                <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> {{smimeMessageContent.dateFrom}}</div>
+        </div>
+    </template>
+    <script>
+        Polymer('message-smime-representative-anonymousdelegation-request', {
+            publish: {
+                smimeMessageContent: {value: {}}
+            },
+            isClientToolConnected:window['isClientToolConnected'],
+            messageToUser:null,
+            timeStampDate:null,
+            ready: function() {
+                console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
+                    this.isClientToolConnected = true
+                }.bind(this))
+            },
+            attached: function () {
+                console.log(this.tagName + " - attached")
+                this.fire('attached', null);
+            },
+            smimeMessageContentChanged:function() {
+                this.messageToUser = null
+                if('${TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString()}' != this.smimeMessageContent.operation )
+                    this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
+            },
+            checkReceipt: function() {
+                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
+                webAppMessage.message = this.smimeMessage
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("saveReceiptCallback - message: " + appMessage);
+                }.bind(this))
+                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            }
+        });
+    </script>
+</polymer-element>

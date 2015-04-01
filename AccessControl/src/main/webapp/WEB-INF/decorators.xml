@@ -1,0 +1,16 @@
+<decorators defaultdir="/">
+
+    <excludes>
+        <pattern>*innerPage*</pattern>
+        <pattern>*.js</pattern>
+        <pattern>*.css</pattern>
+        <pattern>*.vsp</pattern>
+        <pattern>*.html</pattern>
+        <pattern>*_js.jsp</pattern>
+    </excludes>
+
+    <decorator name="decorator" page="/decorator.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+</decorators>

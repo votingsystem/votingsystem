@@ -1,0 +1,77 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link rel="import" href="${config.resourceURL}/vs-highcharts/highcharts-import.html">
+<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+
+<polymer-element name="eventvs-election-stats" attributes="title eventVSId">
+    <template>
+        <style></style>
+        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDataMap}}" method="get" contentType="application/json"
+                   on-core-response="{{ajaxResponse}}"></core-ajax>
+        <div id="messageToUser" vertical layout center center-justified style="padding: 10px;font-weight: bold;display:none">
+            ${msg.withoutVotesLbl}
+        </div>
+        <div id="graphContainer" vertical layout center center-justified style="margin:0 0 0 10px; height: 150px;display: block;"></div>
+    </template>
+    <script>
+        Polymer('eventvs-election-stats', {
+            title:null,
+            publish: {},
+            options: {
+                chart: {
+                    plotBackgroundColor: null,
+                    spacingTop: 10,
+                    spacingBottom: 30,
+                    spacingRight: 30,
+                    plotBorderWidth: 0
+                },
+                title: {
+                    text: ''
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y} ${msg.votesLbl} - {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: '${msg.votesLbl}',
+                    data: [ ]
+                }]
+            },
+            ready: function() {
+                this.options.chart.renderTo = this.$.graphContainer
+            },
+            ajaxResponse: function() {
+                var seriesData = []
+                var numTotalVotes = 0
+                Array.prototype.forEach.call(this.statsDataMap.fieldsEventVS, function(fieldEvent) {
+                    seriesData.push([fieldEvent.content, fieldEvent.numVotesVS])
+                    numTotalVotes += fieldEvent.numVotesVS
+                });
+                this.options.series[0].data = seriesData
+                if(numTotalVotes > 0) var chart = new Highcharts.Chart(this.options);
+                else this.$.messageToUser.style.display ='block'
+            },
+            eventVSIdChanged: function() {
+                var targetURL = "${config.webURL}/eventVSElection/" +
+                        this.eventVSId + "/stats"
+                console.log(this.tagName + "- targetURL: " + targetURL)
+                this.$.ajax.url = targetURL
+            }
+        });
+
+    </script>
+</polymer-element>

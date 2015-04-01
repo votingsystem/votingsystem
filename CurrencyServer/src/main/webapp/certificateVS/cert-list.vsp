@@ -1,0 +1,145 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${config.webURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
+
+
+<polymer-element name="cert-list" attributes="url menuType">
+    <template>
+        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <style no-shim>
+            .view { :host {position: relative;} }
+            .certDiv {
+                width:540px;
+                height: 140px;
+                padding: 10px;
+                border:1px solid #ccc;
+                background-color: #f9f9f9;
+                margin: 10px 5px 5px 10px;
+                -moz-border-radius: 5px; border-radius: 5px;
+                cursor: pointer;
+                overflow:hidden;
+                position: relative;
+                display: inline-block;
+                vertical-align: top;
+                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+            }
+        </style>
+        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+        <core-signals on-core-signal-votingsystem-cert-closed="{{closeCertDetails}}"></core-signals>
+        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+                             transitions="cross-fade-all">
+            <section id="page1">
+                <div cross-fade>
+                    <div layout horizontal center center-justified>
+                        <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
+                                max-width: 400px;" on-change="{{certTypeSelect}}">
+                            <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
+                            <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - ${msg.certAuthorityStateOKLbl} - </option>
+                            <option value="&type=USER&state=CANCELED"> - ${msg.certUserStateCancelledLbl} - </option>
+                            <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELED"> - ${msg.certAuthorityStateCancelledLbl} - </option>
+                        </select>
+                    </div>
+
+                    <h3><div id="pageHeader" class="pageHeader text-center">${msg.trustedCertsPageTitle}</div></h3>
+
+                    <div flex horizontal wrap around-justified layout>
+                        <template repeat="{{cert in responseData.certList}}">
+                            <div class="certDiv" style="" on-tap="{{showCert}}">
+                                <div>
+                                    <div style="display: inline;">
+                                        <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
+                                            ${msg.serialNumberLbl}: </span>{{cert.serialNumber}}</div>
+                                        <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em;
+                                        font-weight: bold; float: right;">{{cert.state | getState}}</div>
+                                    </div>
+                                </div>
+                                <div class='groupvsSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{cert.subjectDN}}</div>
+                                <div class=''><span style="font-weight: bold;">${msg.issuerLbl}: </span>
+                                    {{cert.issuerDN}}</div>
+                                <div class=''><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{cert.sigAlgName}}</div>
+                                <div>
+                                    <div class='' style="display: inline;">
+                                        <span style="font-weight: bold;">${msg.noBeforeLbl}: </span>{{cert.notBefore}}</div>
+                                    <div class='' style="display: inline; margin:0px 0px 0px 20px;">
+                                        <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{cert.notAfter}}</div>
+                                </div>
+                                <div>
+                                    <div class="text-center" style="font-weight: bold; display: {{cert.isRoot ? 'inline': 'none'}};
+                                    margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}</div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </section>
+            <section id="page2">
+                <div cross-fade>
+                    <votingsystem-cert id="certDetails" subpage cert="{{cert}}"></votingsystem-cert>
+                </div>
+            </section>
+        </core-animated-pages>
+    </template>
+    <script>
+        Polymer('cert-list', {
+            ready: function() {
+                console.log(this.tagName + " - ready")
+                this.page = 0;
+                var certType = getParameterByName('type')
+                var certState = getParameterByName('state')
+                var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
+                if(this.url != null) {
+                    this.url = updateMenuLink("${config.restURL}/certificateVS/certs", optionValue)
+                }
+            },
+            closeCertDetails:function(e, detail, sender) {
+                console.log(this.tagName + " - closeCertDetails")
+                this.page = 0;
+            },
+            showCert :  function(e) {
+                console.log(this.tagName + " - showCertDetails")
+                this.$.certDetails.certvs = e.target.templateInstance.model.cert;
+                this.page = 1;
+            },
+            responseDataChanged:function() {
+                console.log(this.tagName + " - responseDataChanged")
+                if("${CertificateVS.Type.USER.toString()}" == this.responseData.type) {
+                     this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
+                } else if("${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString()}" == this.responseData.type) {
+                    this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
+                } else this.$.pageHeader.innerHTML = this.responseData.type
+
+
+                var certType = getParameterByName('type')
+                var certState = getParameterByName('state')
+                var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
+                this.setPageHeader(optionValue)
+            },
+            getState:function(state){
+                var stateLbl
+                if("OK" == state) stateLbl = "${msg.certOKLbl}"
+                else if("CANCELED" ==  state) stateLbl = "${msg.certCancelledLbl}"
+                else stateLbl = state
+            },
+            setPageHeader: function (urlParams) {
+                if(urlParams.indexOf("${CertificateVS.Type.USER}") > -1)
+                    this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
+                else this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
+            },
+            certTypeSelect: function () {
+                var optionSelected = this.$.certTypeSelect.value
+                console.log("certTypeSelect: " + optionSelected)
+                if("" != optionSelected) {
+                    targetURL = "${config.restURL}/certificateVS/certs?menu=" + menuType + optionSelected
+                    history.pushState(null, null, targetURL);
+                    this.setPageHeader(targetURL)
+                    this.$.ajax.url = targetURL
+                }
+            }
+        });
+    </script>
+</polymer-element>

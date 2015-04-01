@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- License: https://github.com/votingsystem/votingsystem/wiki/Licencia -->
+<blueprint default-activation="eager"
+            xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <bean id="eventBusService" class="org.votingsystem.services.impl.EventBusServiceImpl" init-method="init" destroy-method="destroy"/>
+
+    <service ref="eventBusService" interface="org.votingsystem.services.EventBusService" />
+
+</blueprint>

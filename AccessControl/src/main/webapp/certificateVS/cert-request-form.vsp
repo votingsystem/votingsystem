@@ -1,0 +1,122 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
+
+<polymer-element name="cert-request-form" attributes="caption opened isForAdmins messageToUser">
+<template>
+    <jsp:include page="/include/styles.jsp"/>
+    <style>
+    .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
+    </style>
+    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccept}}"></core-signals>
+    <template if="{{messageToUser}}">
+        <div style="color: {{status == 200?'#388746':'#ba0011'}};">
+            <div class="messageToUser">
+                <div  layout horizontal center center-justified >
+                    <div id="messageToUser">{{messageToUser}}</div>
+                </div>
+                <paper-shadow z="1"></paper-shadow>
+            </div>
+        </div>
+    </template>
+    <div style="margin: 20px auto 10px auto; text-align: center;max-width: 600px; ">
+        ${msg.certRequestAdviceMsg}
+    </div>
+    <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
+        <div style="max-width: 600px; margin:10px auto;">
+            <input type="text" id="nif" class="form-control" required style="margin: 0 0 10px 0;"
+                   title="${msg.nifLbl}" placeholder="${msg.nifLbl}"/>
+            <div horizontal layout>
+                <input type="text" id="givenname" class="form-control" required style="margin: 0 0 10px 0;"
+                       title="${msg.nameLbl}" placeholder="${msg.nameLbl}"/>
+                <input type="text" id="surname" class="form-control" required style="margin: 0 0 10px 10px;"
+                       title="${msg.surnameLbl}" placeholder="${msg.surnameLbl}"/>
+            </div>
+
+            <input type="text" id="phone" class="form-control" required style="margin: 0 0 10px 0;"
+                   title="${msg.phoneLbl}" placeholder="${msg.phoneLbl}"/>
+            <input type="email" id="email" class="form-control" required style="margin: 0 0 10px 0;"
+                   title="${msg.emailLbl}" placeholder="${msg.emailLbl}"/>
+            <div layout horizontal style="margin:10px 20px 0px 0px;">
+                <div flex></div>
+                <paper-button raised on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
+                    <i class="fa fa-check"></i> ${msg.acceptLbl}
+                </paper-button>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    Polymer('cert-request-form', {
+        ready: function() { },
+        submitForm: function () {
+            console.log("submitForm")
+            this.removeErrorStyle(this.$.formDataDiv)
+            this.messageToUser = null
+            if(!this.$.nif.validity.valid || validateNIF(this.$.nif.value) == null) {
+                this.$.nif.classList.add("formFieldError")
+                this.messageToUser = "${msg.nifERRORMsg}"
+                return
+            }
+            if(!this.$.givenname.validity.valid) {
+                this.$.givenname.classList.add("formFieldError")
+                this.messageToUser = "${msg.emptyFieldMsg}"
+                return
+            }
+            if(!this.$.surname.validity.valid) {
+                this.$.surname.classList.add("formFieldError")
+                this.messageToUser = "${msg.emptyFieldMsg}"
+                return
+            }
+            if(!this.$.phone.validity.valid) {
+                this.$.phone.classList.add("formFieldError")
+                this.messageToUser = "${msg.emptyFieldMsg}"
+                return
+            }
+            if(!this.$.email.validity.valid) {
+                this.$.email.classList.add("formFieldError")
+                this.messageToUser = "${msg.emailFieldErrorMsg}"
+                return
+            }
+            showMessageVS("<b>${msg.nifLbl}:</b> " + validateNIF(this.$.nif.value) +
+                    "<br/><b>${msg.nameLbl}:</b> " + this.$.givenname.value.toUpperCase() +
+                    "<br/><b>${msg.surnameLbl}:</b> " + this.$.surname.value.toUpperCase() +
+                    "<br/><b>${msg.phoneLbl}:</b> " + this.$.phone.value +
+                    "<br/><b>${msg.emailLbl}:</b> " + this.$.email.value,
+                    "${msg.checkInputMsg}", null, true)
+        },
+        messagedialogAccept: function (e, detail, sender) {
+            console.log("messagedialogAccept - callerId:" + detail.callerId)
+            var webAppMessage = new WebAppMessage(Operation.CERT_USER_NEW)
+            webAppMessage.serviceURL = "${config.webURL}/csr/request"
+            webAppMessage.signedMessageSubject = "${msg.certRequestLbl}"
+            webAppMessage.document = {nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
+                surname:this.$.surname.value.toUpperCase(), phone:this.$.phone.value, email:this.$.email.value}
+            webAppMessage.setCallback(function(appMessage) {
+                var appMessageJSON = JSON.parse(appMessage)
+                var message = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    loadURL_VS( "${config.webURL}/certificationCenters.html")
+                    message = "${msg.certRequestOKMsg}"
+                    showMessageVS(message, '${msg.certRequestLbl}', 'resultMessage',true)
+                } else showMessageVS(message, '${msg.certRequestLbl}')
+            })
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        },
+        removeErrorStyle: function (element) {
+            var formElements = element.children
+            for(var i = 0; i < element.childNodes.length; i++) {
+                var child = element.childNodes[i];
+                this.removeErrorStyle(child);
+                if(child != undefined) {
+                    if(child.style != undefined) {
+                        //child.style.background = '#fff'
+                        child.classList.remove("formFieldError");
+                    }
+                }
+            }
+        }
+    });
+</script>
+</polymer-element>

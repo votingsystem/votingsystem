@@ -1,0 +1,63 @@
+{
+  "name": "AccessControl",
+  "version": "0.7.0",
+  "authors": [
+    "JJ <jgzornoza@gmail.com>"
+  ],
+  "description": "Voting System AccessControl",
+  "keywords": [
+    "accesscontrol",
+    "votingsystem"
+  ],
+  "license": "Apache 2",
+  "homepage": "http://www.sistemavotacion.org",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies":{
+    "app-router":"app-router#~2.4.0",
+    "jsoneditor":"jsoneditor#~3.1.2",
+    "pikaday":"pikaday#~1.3.2",
+    "juicy-jsoneditor":"juicy-jsoneditor#~0.0.3",
+    "highcharts":"highcharts#~4.1.1",
+    "font-awesome":"font-awesome#~4.3.0",
+    "ckeditor":"ckeditor#~4.4.6",
+    "polymer": "Polymer/polymer",
+    "core-ajax":"Polymer/core-ajax",
+    "core-animation":"Polymer/core-animation",
+    "core-animated-pages":"Polymer/core-animated-pages",
+    "core-doc-viewer":"Polymer/core-doc-viewer",
+    "core-docs":"Polymer/core-docs",
+    "core-drag-drop":"Polymer/core-drag-drop",
+    "paper-elements":"Polymer/paper-elements",
+    "paper-fab":"Polymer/paper-fab",
+    "paper-item":"Polymer/paper-item",
+    "paper-spinner":"PolymerLabs/paper-spinner",
+    "core-field":"Polymer/core-field",
+    "core-layout":"Polymer/core-layout",
+    "core-layout-grid":"Polymer/core-layout-grid",
+    "core-layout-trbl":"Polymer/core-layout-trbl",
+    "core-localstorage":"Polymer/core-localstorage",
+    "core-list":"Polymer/core-list",
+    "core-menu-button":"Polymer/core-menu-button",
+    "observe-js":"Polymer/observe-js",
+    "core-pages":"Polymer/core-pages",
+    "core-range":"Polymer/core-range",
+    "core-scaffold":"Polymer/core-scaffold",
+    "core-scroll-header-panel":"Polymer/core-scroll-header-panel",
+    "core-shared-lib":"Polymer/core-shared-lib",
+    "core-splitter":"Polymer/core-splitter",
+    "core-style":"Polymer/core-style",
+    "core-tooltip":"Polymer/core-tooltip",
+    "core-tests":"Polymer/core-tests",
+    "core-signals":"Polymer/core-signals",
+    "polymer-layout":"Polymer/polymer-layout",
+    "polymer-flex-layout":"Polymer/polymer-flex-layout",
+    "polymer-ui-toggle-button":"Polymer/polymer-ui-toggle-button"
+  }
+
+}

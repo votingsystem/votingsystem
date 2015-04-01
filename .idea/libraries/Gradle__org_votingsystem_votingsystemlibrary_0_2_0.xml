@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.votingsystem:votingsystemlibrary:0.2.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/votingsystem/votingsystemlibrary/0.2.0/votingsystemlibrary-0.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/votingsystem/votingsystemlibrary/0.2.0/votingsystemlibrary-0.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

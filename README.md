@@ -12,10 +12,7 @@ ejecutando en el servidor una instancia de la base de datos PostgreSQL según se
 (https://github.com/votingsystem/votingsystem/wiki/Configuraci%C3%B3n-de-la-base-de-datos)
 
 #### Instalación de las librerías web
-Para poder construir la aplicación es necesario tener instalado Bower(http://bower.io/) y ejecutar
+Para poder construir la aplicación es necesario tener instalado Bower(http://bower.io/) y ejecutar desde los directorios 'webapp'
 
-    gradle installAllBowerComponents
-
-En los directorios '/web-app/bower_components/polymer.html' de cada aplicación web se ha cambiado la referencia a
-'polymer.js' por 'polymer.min.js'
+	bower install
 

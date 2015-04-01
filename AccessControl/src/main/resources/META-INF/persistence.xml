@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+    <persistence-unit name="AccessControl" transaction-type="JTA">
+        <jta-data-source>java:jboss/datasources/AccessControl</jta-data-source>
+        <class>org.votingsystem.model.ActorVS</class>
+        <class>org.votingsystem.model.AddressVS</class>
+        <class>org.votingsystem.model.AccessControlVS</class>
+        <class>org.votingsystem.model.AccessRequestVS</class>
+        <class>org.votingsystem.model.AnonymousDelegation</class>
+        <class>org.votingsystem.model.BackupRequestVS</class>
+        <class>org.votingsystem.model.BatchRequest</class>
+        <class>org.votingsystem.model.CertificateVS</class>
+        <class>org.votingsystem.model.ControlCenterVS</class>
+        <class>org.votingsystem.model.DeviceVS</class>
+        <class>org.votingsystem.model.EventVS</class>
+        <class>org.votingsystem.model.EventVSClaim</class>
+        <class>org.votingsystem.model.EventVSElection</class>
+        <class>org.votingsystem.model.FieldEventVS</class>
+        <class>org.votingsystem.model.FieldValueEventVS</class>
+        <class>org.votingsystem.model.GroupVS</class>
+        <class>org.votingsystem.model.ImageVS</class>
+        <class>org.votingsystem.model.KeyStoreVS</class>
+        <class>org.votingsystem.model.MessageSMIME</class>
+        <class>org.votingsystem.model.RepresentationDocument</class>
+        <class>org.votingsystem.model.RepresentativeDocument</class>
+        <class>org.votingsystem.model.ResponseVS</class>
+        <class>org.votingsystem.model.SubscriptionVS</class>
+        <class>org.votingsystem.model.TagVS</class>
+        <class>org.votingsystem.model.UserRequestCsrVS</class>
+        <class>org.votingsystem.model.UserVS</class>
+        <class>org.votingsystem.model.VoteVSCanceler</class>
+        <class>org.votingsystem.model.VoteVS</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <!--<property name="javax.persistence.schema-generation.create-source" value="script"/>
+            <property name="javax.persistence.schema-generation.create-script-source" value="META-INF/create.sql"/>
+            <property name="javax.persistence.sql-load-script-source" value="META-INF/load.sql"/>-->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+        </properties>
+    </persistence-unit>
+</persistence>

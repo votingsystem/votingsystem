@@ -1,0 +1,19 @@
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>2.0</jsp-version>
+    <short-name>VotingSytem TLD</short-name>
+    <tag>
+        <name>msg</name>
+        <tag-class>org.votingsystem.web.tag.MsgTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>value</name>
+            <rtexprvalue>true</rtexprvalue>
+            <required>true</required>
+        </attribute>
+        <attribute>
+            <name>args</name>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+</taglib>

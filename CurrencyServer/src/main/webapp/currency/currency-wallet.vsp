@@ -1,0 +1,101 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${config.webURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
+
+
+<polymer-element name="currency-wallet"  on-core-select="{{selectAction}}">
+    <template>
+        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
+        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <style>
+            .messageToUser {font-weight: bold;margin:10px auto 30px auto;
+                background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;
+            }
+        </style>
+        <div vertical layout>
+            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+                <div class="messageToUser">
+                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                        <div id="messageToUser">{{messageToUser}}</div>
+                    </div>
+                    <paper-shadow z="1"></paper-shadow>
+                </div>
+            </div>
+            <div hidden?="{{walletLoaded}}" horizontal layout center center-justified style="font-size: 0.9em; ">
+                <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
+                    <i class="fa fa-money"></i> ${msg.accessToWalletMsg}
+                </paper-button>
+            </div>
+        </div>
+        <div  layout horizontal center-justified>
+            <template repeat="{{tag in plainWalletTagArray}}">
+                <currency-wallet-tag-group tag={{tag}} currencyArray="{{plainWalletTagGroups[tag]}}"
+                                         style="margin:10px 10px 0px 0px; border: 1px solid #ccc;"></currency-wallet-tag-group>
+            </template>
+        </div>
+        <template repeat="{{tag in tagArray}}">
+            <currency-wallet-tag-group tag={{tag}} currencyArray="{{tagGroups[tag]}}"></currency-wallet-tag-group>
+        </template>
+    </template>
+    <script>
+        Polymer('currency-wallet', {
+            selectedTags: [],
+            currencyCode:null,
+            plainWallet:null,
+            currencysWalletArray:[],
+            tagGroups:{},
+            plainWalletTagGroups:{},
+            tagArray:[],
+            plainWalletTagArray:[],
+            messageToUser:null,
+            walletLoaded:false,
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            domReady: function(){
+                var walletState = toJSON(VotingSystemClient.call(new WebAppMessage(Operation.WALLET_STATE)));
+                this.loadPlainWallet(walletState.plainWallet)
+
+                //this.showPasswdDialog()
+            },
+            showPasswdDialog: function(){
+                var webAppMessage = new WebAppMessage(Operation.WALLET_OPEN)
+                webAppMessage.setCallback(function(appMessage) {
+                    var appMessageJSON = JSON.parse(appMessage)
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        this.loadSecureWallet(appMessageJSON.message)
+                    } else {
+                        var caption = '${msg.errorLbl}'
+                        showMessageVS(appMessageJSON.message, caption)
+                    }
+                }.bind(this))
+                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            },
+            loadPlainWallet:function(currencysWalletArray) {
+                console.log(this.tagName + " - loadPlainWallet")
+                this.plainWalletTagGroups = {}
+                for(currencyIdx in currencysWalletArray) {
+                    var currency = currencysWalletArray[currencyIdx]
+                    if(this.plainWalletTagGroups[currency.tag]) this.plainWalletTagGroups[currency.tag].push(currency)
+                    else this.plainWalletTagGroups[currency.tag] = [currency]
+                }
+                this.plainWalletTagArray = Object.keys(this.plainWalletTagGroups)
+            },
+            loadSecureWallet:function(currencysWalletArray) {
+                console.log(this.tagName + " - loadSecureWallet")
+                this.tagGroups = {}
+                this.currencysWalletArray = currencysWalletArray
+                for(currencyIdx in this.currencysWalletArray) {
+                    var currency = this.currencysWalletArray[currencyIdx]
+                    if(this.tagGroups[currency.tag]) this.tagGroups[currency.tag].push(currency)
+                    else this.tagGroups[currency.tag] = [currency]
+                }
+                this.tagArray = Object.keys(this.tagGroups)
+                this.walletLoaded = true
+            }
+        });
+    </script>
+</polymer-element>

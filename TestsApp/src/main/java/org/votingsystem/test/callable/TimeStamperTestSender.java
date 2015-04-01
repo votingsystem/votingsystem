@@ -1,0 +1,59 @@
+package org.votingsystem.test.callable;
+
+import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.test.util.SignatureService;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.logging.Logger;
+
+/**
+* License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+*/
+public class TimeStamperTestSender implements Callable<ResponseVS> {
+    
+    private static Logger log = Logger.getLogger(TimeStamperTestSender.class.getSimpleName());
+
+    private String nif;
+    private String serverURL;
+    private Boolean withTimeStampValidation;
+
+    public TimeStamperTestSender(String nif, String timestampServerURL, Boolean withTimeStampValidation) throws Exception {
+        this.nif = nif;
+        this.serverURL = timestampServerURL;
+        this.withTimeStampValidation = withTimeStampValidation;
+    }
+        
+    @Override public ResponseVS call() throws Exception {
+        String subject = "Message from MultiSignTestSender";
+        SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
+        SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
+                StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject);
+        if(withTimeStampValidation) {
+            String timeStampTestServiceURL = serverURL + "/timeStamp/validateTestMessage";
+            SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, timeStampTestServiceURL,
+                    ActorVS.getTimeStampServiceURL(serverURL), ContentTypeVS.JSON_SIGNED, null, null);
+            return signedSender.call();
+        } else {
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, ActorVS.getTimeStampServiceURL(serverURL));
+            return ResponseVS.OK(null).setSMIME(timeStamper.call());
+        }
+    }
+        
+    private Map getRequestJSON(String nif) {
+        Map map = new HashMap();
+        map.put("operation", "TIMESTAMP_TEST");
+        map.put("nif", nif);
+        map.put("UUID", UUID.randomUUID().toString());
+        return map;
+    }
+
+}
