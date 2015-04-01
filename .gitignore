@@ -4,9 +4,3 @@ lib
 bundles
 classes
 *.iml
-
-
-
-
-AccessControl/AccessControl.iml
-ClientTool/ClientTool.iml
