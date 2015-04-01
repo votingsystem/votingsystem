@@ -4,6 +4,7 @@ import javax.ejb.Stateful;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -19,7 +20,13 @@ public class MessagesBean {
     public MessagesBean() { }
 
     public void setLocale(Locale locale) {
-        this.bundle = ResourceBundle.getBundle("org.votingsystem.web.accesscontrol.messages", locale);
+        try {
+            this.bundle = ResourceBundle.getBundle("org.votingsystem.web.controlcenter.messages", locale);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "resource not found for locale: " + locale);
+            this.bundle = ResourceBundle.getBundle("org.votingsystem.web.controlcenter.messages", new Locale("es"));
+        }
+
     }
 
     public String get(String key, Object... arguments) {

@@ -66,10 +66,10 @@ public class ConfigVSImpl implements ConfigVS {
             } else mode = EnvironmentVS.DEVELOPMENT;
             switch (mode) {
                 case DEVELOPMENT:
-                    resourceFile = "AccessControl_DEVELOPMENT.properties";
+                    resourceFile = "ControlCenter_DEVELOPMENT.properties";
                     break;
                 case PRODUCTION:
-                    resourceFile = "AccessControl_PRODUCTION.properties";
+                    resourceFile = "ControlCenter_PRODUCTION.properties";
                     break;
             }
             props = new Properties();
