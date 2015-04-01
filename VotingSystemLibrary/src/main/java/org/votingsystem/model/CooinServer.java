@@ -5,7 +5,6 @@ import org.votingsystem.util.StringUtils;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.DatatypeConverter;
 import java.io.Serializable;
 /**
  * @author jgzornoza

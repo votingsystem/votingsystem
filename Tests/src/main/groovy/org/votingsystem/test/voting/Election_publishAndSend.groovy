@@ -22,7 +22,7 @@ import java.util.concurrent.Future
 isWithVoteCancellation = false
 publisherNIF = "00111222V"
 Map eventDataMap = [subject:"voting subject", content:"<p>election content</p>", UUID:UUID.randomUUID().toString(),
-                    dateBegin:"2015/02/09 00:00:00", dateFinish:"2014/02/10  00:00:00",  fieldsEventVS:["field1", "field2"]]
+                    dateBegin:"2015/02/19 00:00:00", dateFinish:"2014/02/20  00:00:00",  fieldsEventVS:["field1", "field2"]]
 
 Map userBaseDataMap = [userIndex:100, numUsersWithoutRepresentative:1, numUsersWithoutRepresentativeWithVote:1,
                        numRepresentatives:2, numRepresentativesWithVote:1,
@@ -126,7 +126,6 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     byte[] responseBytes = responseVS.getMessageBytes();
     ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt")
     SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
-    //dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
     responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
     return EventVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 }

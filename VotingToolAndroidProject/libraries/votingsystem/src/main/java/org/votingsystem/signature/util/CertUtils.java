@@ -72,7 +72,6 @@ import javax.security.auth.x500.X500Principal;
 */
 public class CertUtils {
     
-    public static String ROOT_ALIAS = "root";
     public static String END_ENTITY_ALIAS = "end";
     public static final int PERIODO_VALIDEZ = 7 * 24 * 60 * 60 * 1000;
     

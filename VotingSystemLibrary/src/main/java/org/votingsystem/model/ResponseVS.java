@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import net.sf.json.JSON;
-import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessage;

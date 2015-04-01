@@ -33,8 +33,6 @@ class AuditingService {
             switch(cooin.getState()) {
                 case Cooin.State.LAPSED:
                     break;
-                case Cooin.State.CANCELLED:
-                    break;
                 case Cooin.State.EXPENDED:
                     break;
                 case Cooin.State.OK:

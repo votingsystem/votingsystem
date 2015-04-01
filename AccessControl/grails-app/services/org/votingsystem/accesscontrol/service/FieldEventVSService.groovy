@@ -12,14 +12,7 @@ class FieldEventVSService {
 	
     static transactional = true
 
-    Set<FieldEventVS> saveFieldsEventVS(EventVSElection eventVS, JSONArray fieldsEventVS) {
-        log.debug("saveFieldsEventVS - eventVS: ${eventVS.id} - fieldsEventVS: ${fieldsEventVS}")
-        Set<FieldEventVS> fieldsEventVSSet = fieldsEventVS.collect {
-			eventVS.refresh()
-            return new FieldEventVS(eventVS:eventVS, content:it.content).save();
-        }
-        return fieldsEventVSSet
-    }
+
 	
 }
 

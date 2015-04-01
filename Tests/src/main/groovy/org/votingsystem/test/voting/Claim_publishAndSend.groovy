@@ -114,7 +114,6 @@ private EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeM
     byte[] responseBytes = responseVS.getMessageBytes();
     ContextVS.getInstance().copyFile(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
     SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
-    //dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
     responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
     return EventVS.parse(JSONSerializer.toJSON(responseVS.getMessage()));
 }

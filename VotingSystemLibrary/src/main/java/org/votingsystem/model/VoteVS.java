@@ -10,12 +10,14 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.util.StringUtils;
+
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**

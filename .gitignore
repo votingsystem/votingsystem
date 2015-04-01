@@ -6,7 +6,6 @@
 
 /templates/*.jks
 
-GrailsRestDoc*
 .VotingSystem
 *.iml
 .classpath

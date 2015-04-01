@@ -54,7 +54,7 @@ sourceSets {
 }
 
 project.ext {
-    mainClass = "ClientTool"
+    mainClass = "VotingSystemApp"
 }
 
 configurations {

@@ -19,7 +19,6 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.io.Streams;
 
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

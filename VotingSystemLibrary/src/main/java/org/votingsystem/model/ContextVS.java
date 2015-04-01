@@ -9,32 +9,32 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.cooin.model.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ApplicationVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.KeyStoreExceptionVS;
+import org.votingsystem.util.OSValidator;
 
 import javax.mail.Session;
 import javax.security.auth.x500.X500PrivateCredential;
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author jgzornoza
@@ -131,38 +131,19 @@ public class ContextVS {
     public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;
 
     public static final String MULTISIGNED_FILE_NAME = "MultiSign";
-
     public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
-
-    //Settings vars
     public static final String CRYPTO_TOKEN = "CRYPTO_TOKEN";
     public static final String USER_NIF = "USER_NIF";
-    public static final String IS_DEBUG_ENABLED = "IS_DEBUG_ENABLED";
-
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
-
     public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
 
     //For tests environments
-    private static final String ROOT_ALIAS = "rootAlias";
     public static final String END_ENTITY_ALIAS = "endEntityAlias";
     public static final String PASSWORD = "PemPass";
-    private static final long CERT_VALID_FROM = System.currentTimeMillis();
-    private static final long ROOT_KEYSTORE_PERIOD = 20000000000L;
-    private static final long USER_KEYSTORE_PERIOD = 20000000000L;
 
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
-    public static final Charset US_ASCII = Charset.forName("US-ASCII");
-
-    private UserVS userTest;
-    private X509Certificate rootCACert;
     private X509Certificate timeStampCACert;
-    private KeyStore rootCAKeyStore;
-    private PrivateKey rootCAPrivateKey;
-    private X500PrivateCredential rootCAPrivateCredential;
     private Locale locale = new Locale("es");
-
 
     private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
@@ -290,9 +271,9 @@ public class ContextVS {
     
     public void shutdown() {
         try {
-            log.debug("------------------------------------------------");
-            log.debug("shutdown");
+            log.debug("------------------ shutdown --------------------");
             FileUtils.deleteRecursively(new File(APPTEMPDIR));
+            log.debug("------------------------------------------------");
         } catch (IOException ex) {
            log.error(ex.getMessage(), ex);
         }
@@ -320,54 +301,7 @@ public class ContextVS {
         return FileUtils.getBytesFromInputStream(input);
     }
 
-    public void initTestKeyStore() throws Exception {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
-        String dateStr = formatter.format(new Date(CERT_VALID_FROM));
-        String strSubjectDN = getMessage("rootTestCASubjectDN", dateStr);
-        rootCAKeyStore = KeyStoreUtil.createRootKeyStore (CERT_VALID_FROM, ROOT_KEYSTORE_PERIOD,
-                PASSWORD.toCharArray(), ROOT_ALIAS, strSubjectDN);
-        rootCACert = (X509Certificate)rootCAKeyStore.getCertificate(ROOT_ALIAS);
-        rootCAPrivateKey = (PrivateKey)rootCAKeyStore.getKey(ROOT_ALIAS,PASSWORD.toCharArray());
-        rootCAPrivateCredential = new X500PrivateCredential(rootCACert, rootCAPrivateKey,  ROOT_ALIAS);
-        userTest = new UserVS();
-        userTest.setNif(NifUtils.getNif(Integer.valueOf(getMessage("testUserNifNumber"))));
-        userTest.setFirstName(getMessage("testUserFirstName"));
-        userTest.setLastName(getMessage("testUserLastName"));
-        userTest.setEmail(getMessage("testUserEmail"));
-        String testUserDN = getMessage("userDN", userTest.getFirstName(),userTest.getLastName(), userTest.getNif());
-        KeyStore userKeySTore = KeyStoreUtil.createUserKeyStore(CERT_VALID_FROM, USER_KEYSTORE_PERIOD,
-                PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential, testUserDN);
-        userTest.setKeyStore(userKeySTore);
-    }
-
     public ConfigObject getConfig() {return config;}
-
-    public X509Certificate getRootCACert() {
-        return rootCACert;
-    }
-
-    public UserVS getUserTest() {
-        return userTest;
-    }
-
-    public KeyStore generateKeyStore(String userNIF) throws Exception {
-        KeyStore keyStore = KeyStoreUtil.createUserKeyStore(CERT_VALID_FROM, USER_KEYSTORE_PERIOD,
-                PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential,
-                "GIVENNAME=FirstName_" + userNIF + " ,SURNAME=lastName_" + userNIF + ", SERIALNUMBER=" + userNIF);
-        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, PASSWORD.toCharArray());
-        String userSubPath = StringUtils.getUserDirPath(userNIF);
-        copyFile(keyStoreBytes, userSubPath,  "userVS_" + userNIF + ".jks");
-        return keyStore;
-    }
-
-    public SMIMEMessage genTestSMIMEMessage (String toUser, String textToSign,
-            String subject) throws Exception {
-        KeyStore keyStore = userTest.getKeyStore();
-        PrivateKey privateKey = (PrivateKey)keyStore.getKey(END_ENTITY_ALIAS, PASSWORD.toCharArray());
-        Certificate[] chain = keyStore.getCertificateChain(END_ENTITY_ALIAS);
-        SMIMESignedGeneratorVS SMIMESignedGeneratorVS = new SMIMESignedGeneratorVS(privateKey, chain, DNIe_SIGN_MECHANISM);
-        return SMIMESignedGeneratorVS.getSMIME(userTest.getEmail(),toUser, textToSign, subject);
-    }
 
     public void setSessionUser(UserVS userVS) {
         log.debug("setSessionUser - nif: " + userVS.getNif());
@@ -544,16 +478,6 @@ public class ContextVS {
         if(this.defaultServer == null) this.defaultServer = accessControl;
     }
 
-    public PKIXParameters getSessionPKIXParameters() throws InvalidAlgorithmParameterException, Exception {
-        log.debug("getSessionPKIXParameters");
-        Set<TrustAnchor> anchors = accessControl.getTrustAnchors();
-        TrustAnchor rootCACertSessionAnchor = new TrustAnchor(rootCACert, null);
-        anchors.add(rootCACertSessionAnchor);
-        PKIXParameters sessionPKIXParams = new PKIXParameters(anchors);
-        sessionPKIXParams.setRevocationEnabled(false); // tell system do not check CRL's
-        return sessionPKIXParams;
-    }
-
     public ControlCenterVS getControlCenter() { return controlCenter; }
 
     public void setControlCenter(ControlCenterVS controlCenter) { this.controlCenter = controlCenter; }
@@ -561,8 +485,8 @@ public class ContextVS {
     public static String getMessage(String key, Object... arguments) {
         try {
             String pattern = appProperties.getProperty(key);
-            if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes("ISO-8859-1"), "UTF-8");
-            else return new String(pattern.getBytes("ISO-8859-1"), "UTF-8");
+            if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
+            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
         } catch(Exception ex) {
             log.error("### Value not found for key: " + key);
             return "---" + key + "---";
