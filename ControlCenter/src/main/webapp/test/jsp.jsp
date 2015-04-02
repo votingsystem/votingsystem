@@ -2,7 +2,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<fmt:setBundle basename="org.votingsystem.web.accesscontrol.messages" var="bundle"/>
+<fmt:setBundle basename="org.votingsystem.web.controlcenter.messages" var="bundle"/>
 <html>
 <head>
     <title>Test JSP</title>
@@ -40,8 +40,8 @@
 </head>
 <body bgcolor="white">
 
-    <h2>- contextURL: - ${config.webURL}</h2>
-    <h2>- resURL: - ${config.resourceURL}</h2>
+    <h2>--- contextURL: - ${config.webURL}</h2>
+    <h2>- restURL: - ${config.resourceURL}</h2>
     <h2>- Property: - ${config.getProperty('vs.systemNIF')}</h2>
     <h2>- i18N: ${msg.publicDelegationLbl}</h2>
     <h2>- months1: ${msg.months1}</h2>
@@ -50,7 +50,7 @@
 
     <input type="text" id="datepicker">
 
-    InvalidErrorMsg: <fmt:message key="hashCertVSCurrencyInvalidErrorMsg" bundle="${bundle}">
+    InvalidErrorMsg: <fmt:message key="certByHEXNotFound" bundle="${bundle}">
         <fmt:param value="11111111111"/>
     </fmt:message><br/>
 

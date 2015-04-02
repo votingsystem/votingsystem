@@ -41,7 +41,7 @@
 <body bgcolor="white">
 
     <h2>- contextURL: - ${config.webURL}</h2>
-    <h2>- resURL: - ${config.resourceURL}</h2>
+    <h2>- restURL: - ${config.resourceURL}</h2>
     <h2>- ping: - ${config.getProperty('vs.systemNIF')}</h2>
     <h2>- i18N: ${msg.dashBoardLbl}</h2>
     <h2>- groupVS: ${groupvs.email}</h2>

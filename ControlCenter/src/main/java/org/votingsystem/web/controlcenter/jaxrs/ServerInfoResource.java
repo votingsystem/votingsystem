@@ -2,6 +2,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 
@@ -28,6 +29,7 @@ public class ServerInfoResource {
 
     @Inject ConfigVS config;
     @Inject Logger log;
+    @Inject MessagesBean messages;
     @EJB SignatureBean signatureBean;
     @EJB TimeStampBean timeStampBean;
 
