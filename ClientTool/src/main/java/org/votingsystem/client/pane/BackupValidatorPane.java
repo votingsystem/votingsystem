@@ -15,9 +15,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.backup.*;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
@@ -25,6 +22,8 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

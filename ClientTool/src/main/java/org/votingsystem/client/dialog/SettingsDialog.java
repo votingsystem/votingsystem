@@ -10,10 +10,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
@@ -22,9 +18,13 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

@@ -12,9 +12,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.*;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -25,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;

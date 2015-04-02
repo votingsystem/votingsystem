@@ -1,15 +1,15 @@
 package org.votingsystem.client.util;
 
 import javafx.concurrent.Task;
-
-import java.util.*;
-import java.util.logging.Logger;
 import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+
+import java.util.*;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toSet;
 

@@ -18,9 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
@@ -31,6 +28,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

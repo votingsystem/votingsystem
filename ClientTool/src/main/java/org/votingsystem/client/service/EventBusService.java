@@ -1,6 +1,7 @@
 package org.votingsystem.client.service;
 
 import com.google.common.eventbus.EventBus;
+
 import java.util.logging.Logger;
 
 /**

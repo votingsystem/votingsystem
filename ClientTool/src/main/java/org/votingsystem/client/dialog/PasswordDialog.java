@@ -19,12 +19,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

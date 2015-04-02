@@ -63,7 +63,7 @@
                 console.log(this.tagName + " - removeRepresentative")
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_REVOKE)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
-                webAppMessage.serviceURL = "${config.webURL}/representative/revoke"
+                webAppMessage.serviceURL = "${config.restURL}/representative/revoke"
                 webAppMessage.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + "removeRepresentativeCallback - message: " + appMessage);

@@ -8,7 +8,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.UserVS;
@@ -17,6 +16,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

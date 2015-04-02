@@ -3,7 +3,7 @@
 <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${config.resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
-<link href="${config.webURL}/representative/image-viewer-dialog.vsp" rel="import"/>
+<link href="${config.webURL}/element/image-viewer-dialog.vsp" rel="import"/>
 <link href="${config.webURL}/representative/representative-select-dialog.vsp" rel="import"/>
 <link href="${config.webURL}/representative/representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="${config.webURL}/representative/representative-request-votinghistory-dialog.vsp" rel="import"/>
@@ -53,11 +53,11 @@
                     <paper-tab name="profile" style="width: 400px">${msg.profileLbl}</paper-tab>
                     <paper-tab name="votingHistory">${msg.votingHistoryLbl}</paper-tab>
                 </paper-tabs>
-                <div class="tabContent" style="display:{{selectedTab == 'profile'?'block':'none'}}">
+                <div hidden?="{{selectedTab != 'profile'}}" class="tabContent">
                     <div layout horizontal>
-                        <div>
-                            <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
-                                 style="text-align:center; width: 100px;margin-right: 20px;"></img>
+                        <div hidden?="{{true}}">
+                            <!--<img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
+                                 style="text-align:center; width: 100px;margin-right: 20px;"></img>-->
                         </div>
                         <div style="margin:auto auto">
                             <vs-html-echo html="{{representative.description}}"></vs-html-echo>

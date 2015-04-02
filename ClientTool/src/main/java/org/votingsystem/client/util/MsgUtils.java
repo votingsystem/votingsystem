@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import java.util.logging.Logger;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
@@ -8,6 +7,7 @@ import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

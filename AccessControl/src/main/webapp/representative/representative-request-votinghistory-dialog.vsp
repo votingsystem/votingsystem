@@ -46,15 +46,11 @@
                 <div layout horizontal style="margin:10px 0px 0px 20px;">
                     <div>
                         <label>${msg.firstDaterangeLbl}</label>
-                        <div id="dateFrom">
-                            <g:datePicker name="dateFrom" value="${new Date().minus(7)}" precision="day" relativeYears="[0..5]"/>
-                        </div>
+                        <input type="text" id="dateFrom">
                     </div>
                     <div style="margin:0px 0px 0px 20px;">
                         <label>${msg.dateToLbl}</label>
-                        <div id="dateTo">
-                            <g:datePicker name="dateTo" value="${new Date()}" precision="day" relativeYears="[0..5]"/>
-                        </div>
+                        <input type="text" id="dateTo">
                     </div>
                 </div>
 
@@ -77,11 +73,40 @@
     <script>
         Polymer('representative-request-votinghistory-dialog', {
             representativeFullName:null,
+            pickerFrom:null,
+            pickerTo:null,
             publish: {
                 representative: {value: {}}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.pickerFrom = new Pikaday( {
+                    i18n: {
+                        previousMonth : "${msg.previousMonth}",
+                        nextMonth     : "${msg.nextMonth}",
+                        months        : ${msg.months_pk},
+                        weekdays      : ${msg.weekdays_pk},
+                        weekdaysShort : ${msg.weekdaysShort}
+                    },
+                    showWeekNumber:true,
+                    format: 'YYYY',
+                    field: this.$.dateFrom,
+                    yearRange: [2010,2020]
+                });
+                this.pickerTo = new Pikaday( {
+                    i18n: {
+                        previousMonth : "${msg.previousMonth}",
+                        nextMonth     : "${msg.nextMonth}",
+                        months        : ${msg.months_pk},
+                        weekdays      : ${msg.weekdays_pk},
+                        weekdaysShort : ${msg.weekdaysShort}
+                    },
+                    showWeekNumber:true,
+                    format: 'YYYY',
+                    field: this.$.dateTo,
+                    yearRange: [2010,2020]
+                });
+                //picker.setDate('2015-01-01')
             },
             show: function(representative) {
                 this.$.xDialog.opened = true
@@ -89,8 +114,8 @@
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             submit: function() {
-                var dateFrom = getDatePickerValue('dateFrom', this.$.dateFrom)
-                var dateTo = getDatePickerValue('dateTo', this.$.dateTo)
+                var dateFrom = this.pickerFrom.getDate()
+                var dateTo = this.pickerTo.getDate()
                 this.$.dateFrom.classList.remove("formFieldError");
                 this.$.dateTo.classList.remove("formFieldError");
                 console.log("requestVotingHistory - dateFrom: " + dateFrom + " - dateTo: " + dateTo)
@@ -110,7 +135,7 @@
                     representativeNif:this.representative.nif,
                     representativeName:this.representativeFullName, dateFrom:dateFrom.formatWithTime(),
                     dateTo:dateTo.formatWithTime(), email:this.$.emailRequest.value}
-                webAppMessage.serviceURL = "${config.webURL}/representative/history"
+                webAppMessage.serviceURL = "${config.restURL}/representative/history"
                 webAppMessage.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
                 webAppMessage.email = this.$.emailRequest.value
                 webAppMessage.setCallback(function(appMessage) {

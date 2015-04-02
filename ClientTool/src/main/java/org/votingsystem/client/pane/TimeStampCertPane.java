@@ -5,9 +5,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.signature.util.CertUtils;
@@ -16,6 +13,8 @@ import org.votingsystem.util.DateUtils;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

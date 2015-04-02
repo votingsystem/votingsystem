@@ -22,7 +22,7 @@
         <form onsubmit="return submitForm()">
             <div style="position:relative; width:100%;">
                 <label>${msg.interestInfoLbl}</label>
-                <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
+                <textarea id="userInfo" rows="8" required=""></textarea>
             </div>
 
             <div style="margin:15px 0px 0px 0px;">
@@ -44,7 +44,6 @@
 </body>
 </html>
 <script>
-    var textEditor = document.querySelector('#textEditor')
 
     var appMessageJSON
     function submitForm() {
@@ -53,16 +52,17 @@
             return false
         }
 
-        if(textEditor.getData() == 0) {
-            textEditor.classList.add("formFieldError");
-            showMessageVS('${msg.emptyDocumentERRORMsg}', '${msg.dataFormERRORLbl}')
+        if(!document.getElementById('userInfo').validity.valid) {
+            showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
             return false
         }
+
         var webAppMessage = new WebAppMessage(Operation.CERT_CA_NEW)
         webAppMessage.serviceURL = "${config.restURL}/userVS/save"
         webAppMessage.signedMessageSubject = "${msg.newUserCertLbl}"
-        webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-                    operation:Operation.CERT_USER_NEW}
+        webAppMessage.signedContent = {info:document.querySelector("#userInfo").value,
+                certChainPEM:document.querySelector("#pemCert").value,
+                operation:Operation.CERT_USER_NEW}
         webAppMessage.setCallback(function(appMessage) {
         console.log("newUserCertCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)

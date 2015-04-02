@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,11 +10,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.ProgressDialog;
@@ -27,8 +21,14 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.*;
+
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**

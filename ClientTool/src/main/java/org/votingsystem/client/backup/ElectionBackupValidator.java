@@ -1,8 +1,5 @@
 package org.votingsystem.client.backup;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.model.MetaInf;
@@ -25,6 +22,8 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
 * @author jgzornoza

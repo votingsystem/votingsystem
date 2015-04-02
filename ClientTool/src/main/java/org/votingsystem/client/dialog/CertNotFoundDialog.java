@@ -8,11 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
+
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

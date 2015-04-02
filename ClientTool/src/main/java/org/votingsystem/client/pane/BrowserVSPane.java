@@ -15,13 +15,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import java.util.logging.Logger;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.OperationVS;
+
+import java.util.logging.Logger;
 
 
 /**

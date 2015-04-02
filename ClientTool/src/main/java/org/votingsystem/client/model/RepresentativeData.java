@@ -1,10 +1,10 @@
 package org.votingsystem.client.model;
 
-import java.util.logging.Logger;
 import org.votingsystem.signature.util.SignedFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
 * @author jgzornoza

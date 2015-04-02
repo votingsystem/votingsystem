@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.control.Button;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -25,6 +23,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -33,6 +32,8 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

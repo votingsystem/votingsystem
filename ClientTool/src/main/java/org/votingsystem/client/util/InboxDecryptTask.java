@@ -1,9 +1,6 @@
 package org.votingsystem.client.util;
 
 import javafx.concurrent.Task;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
@@ -11,6 +8,8 @@ import org.votingsystem.util.ContextVS;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

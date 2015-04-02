@@ -3,14 +3,10 @@ package org.votingsystem.client.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.dialog.PublishElectionDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.InboxService;
@@ -21,8 +17,14 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
+
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static org.votingsystem.client.BrowserVS.showMessage;
 
 /**
@@ -94,6 +96,9 @@ public class BrowserVSClient {
                     break;
                 case WALLET_OPEN:
                     WalletPane.showDialog(BrowserVS.getInstance().getScene().getWindow());
+                    break;
+                case VOTING_PUBLISHING:
+                    PublishElectionDialog.show(operationVS, BrowserVS.getInstance().getScene().getWindow());
                     break;
                 case WALLET_SAVE:
                     PasswordDialog passwordDialog = new PasswordDialog();

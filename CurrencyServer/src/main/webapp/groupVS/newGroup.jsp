@@ -1,7 +1,5 @@
 <html>
 <head>
-
-    <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.webURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 </head>
 <body>

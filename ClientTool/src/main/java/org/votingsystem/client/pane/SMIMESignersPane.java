@@ -12,15 +12,14 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.ContextVS;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

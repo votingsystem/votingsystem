@@ -15,9 +15,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
@@ -33,6 +30,8 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Wallet;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

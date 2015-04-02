@@ -144,7 +144,7 @@
                 this.eventvs.fieldsEventVS = fieldsArray
 
                 var webAppMessage = new WebAppMessage(Operation.SMIME_CLAIM_SIGNATURE)
-                webAppMessage.serviceURL = "${config.webURL}/eventVSClaimCollector"
+                webAppMessage.serviceURL = "${config.restURL}/eventVSClaimCollector"
                 webAppMessage.signedMessageSubject = this.eventvs.subject
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.eventVS = this.eventvs

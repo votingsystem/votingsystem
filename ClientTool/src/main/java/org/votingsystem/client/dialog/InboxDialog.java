@@ -8,9 +8,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.pane.InboxMessageRow;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.InboxMessage;
@@ -21,6 +18,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
 

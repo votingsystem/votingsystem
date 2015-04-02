@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
-
 <polymer-element name="representative-editor" attributes="pageHeader editorData">
     <template>
         <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
@@ -99,7 +97,7 @@
                 webAppMessage.filePath = this.selectedImagePath
                 webAppMessage.signedContent = {representativeInfo:this.$.textEditor.getData(),
                     operation:Operation.REPRESENTATIVE_DATA}
-                webAppMessage.serviceURL = "${config.webURL}/representative"
+                webAppMessage.serviceURL = "${config.restURL}/representative"
                 webAppMessage.signedMessageSubject = '${msg.representativeDataLbl}'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("newRepresentativeCallback - message: " + appMessage);

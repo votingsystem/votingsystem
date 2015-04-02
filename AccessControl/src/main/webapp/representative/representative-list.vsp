@@ -23,8 +23,8 @@
         }
         </style>
         <core-signals on-core-signal-representative-closed="{{closeRepresentativeDetails}}"></core-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
+        <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}"
+                             on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all" >
             <section id="page1">
                 <div cross-fade>
                     <div layout flex horizontal wrap around-justified>

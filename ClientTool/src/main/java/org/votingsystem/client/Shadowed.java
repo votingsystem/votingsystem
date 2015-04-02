@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuButton;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.votingsystem.client.dialog.PublishElectionDialog;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.util.ResizeHelper;
@@ -23,6 +24,10 @@ public class Shadowed extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        PublishElectionDialog.show(stage);
+    }
+
+    private void testLog() {
         ContextVS.initSignatureClient("clientToolMessages.properties", "es");
         log.setLevel(Level.FINEST);
         Handler conHdlr = new ConsoleHandler();
@@ -37,7 +42,9 @@ public class Shadowed extends Application {
         log.addHandler(conHdlr);
         log.info("info");
         log.fine("fine");
+    }
 
+    private void testWallet(Stage stage) throws Exception {
         Set<Currency> wallet = Wallet.getWallet("ABCDE");
         WalletPane walletPane = new WalletPane(wallet);
         stage.initStyle(StageStyle.UNDECORATED);

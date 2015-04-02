@@ -1,6 +1,5 @@
 <html>
 <head>
-    <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.webURL}/groupVS/groupvs-editor.vsp" rel="import"/>
 </head>
 <body>

@@ -33,7 +33,7 @@
     document.addEventListener('polymer-ready', function() {
         document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
             var webAppMessage = new WebAppMessage(Operation.CERT_EDIT)
-            webAppMessage.serviceURL = "${config.webURL}/certificateVS/editCert"
+            webAppMessage.serviceURL = "${config.restURL}/certificateVS/editCert"
             webAppMessage.signedMessageSubject = "${msg.cancelCertMessageSubject}"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                 changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}

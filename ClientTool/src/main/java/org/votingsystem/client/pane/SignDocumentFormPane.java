@@ -19,9 +19,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -30,6 +27,8 @@ import org.votingsystem.util.ContextVS;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

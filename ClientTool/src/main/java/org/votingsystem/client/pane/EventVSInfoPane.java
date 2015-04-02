@@ -8,7 +8,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import java.util.logging.Logger;
 import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
@@ -17,6 +16,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

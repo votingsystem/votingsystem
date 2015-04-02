@@ -73,7 +73,7 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(Operation.BACKUP_REQUEST)
-                webAppMessage.serviceURL = "${config.webURL}/backupVS"
+                webAppMessage.serviceURL = "${config.restURL}/backupVS"
                 webAppMessage.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.signedContent = this.eventvs

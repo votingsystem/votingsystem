@@ -12,9 +12,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -22,6 +19,8 @@ import org.votingsystem.util.ContextVS;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.votingsystem.client.BrowserVS.showMessage;
 

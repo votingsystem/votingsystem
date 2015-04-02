@@ -8,7 +8,7 @@
     <vs-innerpage-signal caption="${msg.representativesPageLbl}"></vs-innerpage-signal>
     <div class="pageContentDiv">
         <search-info id="searchInfo"></search-info>
-        <representative-list id="representativeList" representativeData="${representativeData}"></representative-list>
+        <representative-list id="representativeList" representativeData='${representativeData}'></representative-list>
     </div>
     <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
 </body>

@@ -19,7 +19,6 @@
     <link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
     <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
     <link href="${config.resourceURL}/vs-socket/vs-socket.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
     <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
     <link href="${config.webURL}/element/vs-navbar.vsp" rel="import"/>

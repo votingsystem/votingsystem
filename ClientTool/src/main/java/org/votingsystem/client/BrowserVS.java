@@ -51,6 +51,7 @@ public class BrowserVS extends VBox implements WebKitHost {
     }
 
     public static BrowserVS getInstance() {
+        if(INSTANCE == null) INSTANCE = new BrowserVS(new Stage());
         return INSTANCE;
     }
 

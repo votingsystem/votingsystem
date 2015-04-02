@@ -1,7 +1,5 @@
 package org.votingsystem.util;
 
-import org.w3c.dom.Document;
-
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -22,6 +20,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -68,6 +71,17 @@ public class StringUtils {
         return tmp.toString();
     }
     
+    public static boolean isHTMLEmpty(String textToCheck) {
+        String emptyContent = "<p><br></p>";
+        Document doc = Jsoup.parse(textToCheck);
+        Elements elements = doc.select("body").first().children();
+        if(elements.size() == 0) return true;
+        for (Element el : elements) {
+            if("".equals(el.toString()) || emptyContent.equals(el.toString())) return true;
+        }
+        return false;
+    }
+
     public static Clob getClobFromString (String string) {
     	if(string == null) return null;
         Clob clob = null;
@@ -129,7 +143,7 @@ public class StringUtils {
         return new String(salida.toByteArray(), "UTF-8");
     }
 
-    public String getStringFromDocument(Document doc) throws TransformerException {
+    public String getStringFromDocument(org.w3c.dom.Document doc) throws TransformerException {
         DOMSource domSource = new DOMSource(doc);
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);

@@ -1,9 +1,6 @@
 package org.votingsystem.client.dialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.Scene;
@@ -21,9 +18,6 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,47 +25,38 @@ import java.util.logging.Logger;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class JSONFormDialog extends VBox {
+public class AddVoteOptionDialog extends VBox {
 
-    private static Logger log = Logger.getLogger(JSONFormDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AddVoteOptionDialog.class.getSimpleName());
 
     public interface Listener {
-        public void processJSONForm(Map jsonForm);
+        public void addOption(String optionContent);
     }
 
     private final Stage stage;
     private TextArea textArea;
     private Listener listener;
     private Label messageLabel;
-    private static JSONFormDialog dialog;
+    private static AddVoteOptionDialog dialog;
 
-    public JSONFormDialog() {
+    public AddVoteOptionDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
-        stage.setResizable(true);
-        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+        if(BrowserVS.getInstance() != null) stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         textArea = new TextArea();
-        textArea.setPrefHeight(300);
-        textArea.setPrefWidth(600);
+        textArea.setPrefHeight(100);
+        textArea.setPrefWidth(400);
         HBox.setHgrow(textArea, Priority.ALWAYS);
         VBox.setVgrow(textArea, Priority.ALWAYS);
         textArea.setStyle("-fx-word-wrap:break-word;");
 
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
-            try {
-                Map<String, Object> dataMap = new ObjectMapper().readValue(textArea.getText(),
-                        new TypeReference<HashMap<String, Object>>() {});
-                if(listener != null) listener.processJSONForm(dataMap);
-                else log.info("No listeners to send JSON form");
-                stage.hide();
-            } catch (IOException ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
-
+            listener.addOption(textArea.getText());
+            stage.hide();
         });
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
@@ -88,20 +73,20 @@ public class JSONFormDialog extends VBox {
         Utils.addMouseDragSupport(stage);
     }
 
-    public void showMessage(String title, Map dataMap, Listener listener) throws JsonProcessingException {
+    public void showMessage(String title, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
-        textArea.setText(new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap));
+        textArea.setText("");
         stage.centerOnScreen();
         stage.show();
         stage.toFront();
     }
 
-    public static void show(Map formData, Listener listener) {
+    public static void show(Listener listener) {
         PlatformImpl.runLater(() -> {
             try {
-                if(dialog == null) dialog = new JSONFormDialog();
-                dialog.showMessage(ContextVS.getMessage("enterReceptorMsg"), formData, listener);
+                if(dialog == null) dialog = new AddVoteOptionDialog();
+                dialog.showMessage(ContextVS.getMessage("enterVoteOptionMsg"), listener);
             } catch (JsonProcessingException ex) {
                log.log(Level.SEVERE, ex.getMessage(), ex);
             }

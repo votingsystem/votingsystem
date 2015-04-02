@@ -43,9 +43,7 @@
 
                 <div style="margin:0px 0px 0px 20px;">
                     <label>${msg.dateRequestLbl}</label>
-                    <div id="dateRequest">
-                        <g:datePicker name="dateRequest" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
-                    </div>
+                    <input type="text" id="datepicker">
                 </div>
                 <div style="margin:15px 0px 20px 0px">
                     <input type="email" id="emailRequest" style="width:350px; margin:0px auto 0px auto;" required
@@ -66,11 +64,26 @@
     <script>
         Polymer('representative-request-accreditations-dialog', {
             representativeFullName:null,
+            picker:null,
             publish: {
                 representative: {value: {}}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.picker = new Pikaday( {
+                    i18n: {
+                        previousMonth : "${msg.previousMonth}",
+                        nextMonth     : "${msg.nextMonth}",
+                        months        : ${msg.months_pk},
+                        weekdays      : ${msg.weekdays_pk},
+                        weekdaysShort : ${msg.weekdaysShort}
+                    },
+                    showWeekNumber:true,
+                    format: 'YYYY',
+                    field: this.$.datepicker,
+                    yearRange: [2010,2020]
+                });
+                //picker.setDate('2015-01-01')
             },
             show: function(representative) {
                 this.representative = representative
@@ -78,7 +91,7 @@
                 this.$.xDialog.opened = true
             },
             submit: function() {
-                var dateRequest = getDatePickerValue('dateRequest', this.$.dateRequest)
+                var dateRequest = this.picker.getDate()
                 console.log("requestAccreditations - dateRequest: " + dateRequest)
                 if(!this.$.emailRequest.validity.valid) {
                     showMessageVS('${msg.emailERRORMsg}', '${msg.errorLbl}')
@@ -89,7 +102,7 @@
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
                     representativeNif:this.representative.nif, email:this.$.emailRequest.value,
                     representativeName:this.representativeFullName, selectedDate: dateRequest.formatWithTime()}
-                webAppMessage.serviceURL = "${config.webURL}/representative/accreditations"
+                webAppMessage.serviceURL = "${config.restURL}/representative/accreditations"
                 webAppMessage.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
                 webAppMessage.email = this.$.emailRequest.value
                 webAppMessage.setCallback(function(appMessage) {

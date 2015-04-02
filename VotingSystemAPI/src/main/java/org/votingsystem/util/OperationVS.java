@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
@@ -54,6 +55,15 @@ public class OperationVS {
         this.message = message;
     }
 
+    public static OperationVS VOTING_PUBLISHING(Map documentToSignMap, AccessControlVS accessControlVS) {
+        OperationVS result = new OperationVS(TypeVS.VOTING_PUBLISHING);
+        result.setReceiverName(accessControlVS.getName());
+        result.setSignedMessageSubject(ContextVS.getMessage("signedMessageSubject"));
+        result.setServiceURL(accessControlVS.getPublishElectionURL());
+        result.setTimeStampServerURL(accessControlVS.getTimeStampServerURL());
+        return result;
+    }
+
     public String[] getArgs() {
         return this.args;
     }
@@ -68,7 +78,7 @@ public class OperationVS {
         else return timeStampServerURL;
     }
 
-    public void setUrlTimeStampServer(String timeStampServerURL) {
+    public void setTimeStampServerURL(String timeStampServerURL) {
         this.timeStampServerURL = timeStampServerURL;
     }
 
@@ -217,7 +227,7 @@ public class OperationVS {
         if (dataMap.containsKey("nif")) operationVS.setNif((String)dataMap.get("nif"));
         if (dataMap.containsKey("serviceURL")) operationVS.setServiceURL((String)dataMap.get("serviceURL"));
         if (dataMap.containsKey("documentURL")) operationVS.setDocumentURL((String)dataMap.get("documentURL"));
-        if (dataMap.containsKey("timeStampServerURL")) operationVS.setUrlTimeStampServer((String)dataMap.get("timeStampServerURL"));
+        if (dataMap.containsKey("timeStampServerURL")) operationVS.setTimeStampServerURL((String) dataMap.get("timeStampServerURL"));
         if (dataMap.containsKey("serverURL")) {
             String serverURL = StringUtils.checkURL((String)dataMap.get("serverURL"));
             operationVS.setUrlServer(serverURL);

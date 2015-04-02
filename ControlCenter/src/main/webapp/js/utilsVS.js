@@ -98,24 +98,6 @@ function pad(n, width, z) {
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-function getDatePickerValue(datePickerId, htmlElement) {
-    if(!htmlElement) {
-        htmlElement = document
-    }
-    var day = pad(htmlElement.querySelector('#' + datePickerId + '_day').value, 2)
-    var month = pad(htmlElement.querySelector('#' + datePickerId + '_month').value, 2)
-    var year = htmlElement.querySelector('#' + datePickerId + '_year').value
-    var hour = "00"
-    var minute = "00"
-    var second = "00"
-    if(htmlElement.querySelector('#' + datePickerId + '_minute') != null) minute =
-        htmlElement.querySelector('#' + datePickerId + '_minute').value
-    if(htmlElement.querySelector('#' + datePickerId + '_hour') != null) hour =
-        htmlElement.querySelector('#' + datePickerId + '_hour').value
-    var dateStr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
-    return DateUtils.parse(dateStr)
-}
-
 function showMessageVS(message, caption, callerId, isConfirmMessage) {
     if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
         document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){

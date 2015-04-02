@@ -9,7 +9,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import java.util.logging.Logger;
 import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.ResponseVS;
@@ -19,6 +18,7 @@ import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

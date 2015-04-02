@@ -86,7 +86,7 @@
             },
             cancelAnonymousDelegation: function() {
                 var webAppMessage = new WebAppMessage(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED)
-                webAppMessage.serviceURL = "${config.webURL}/representative/cancelAnonymousDelegation"
+                webAppMessage.serviceURL = "${config.restURL}/representative/cancelAnonymousDelegation"
                 webAppMessage.signedMessageSubject = '${msg.cancelAnonymousDelegationMsgSubject}'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("selectRepresentativeCallback - message: " + appMessage);

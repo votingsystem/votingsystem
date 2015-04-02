@@ -11,10 +11,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.util.logging.Logger;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;
+
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

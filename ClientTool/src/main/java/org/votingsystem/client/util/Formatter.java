@@ -1,18 +1,17 @@
 package org.votingsystem.client.util;
 
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import iaik.pkcs.pkcs11.parameters.MacGeneralParameters;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.OperationVS;
+
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
 * @author jgzornoza

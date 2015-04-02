@@ -149,7 +149,7 @@
                 console.log("cancellationConfirmed")
                 var webAppMessage = new WebAppMessage(Operation.CANCEL_VOTE)
                 webAppMessage.message = this.hashCertVSBase64
-                webAppMessage.serviceURL = "${config.webURL}/voteVSCanceler"
+                webAppMessage.serviceURL = "${config.restURL}/voteVSCanceler"
                 webAppMessage.signedMessageSubject = "${msg.cancelVoteLbl}"
                 this.statusCode = appMessageJSON.statusCode
                 webAppMessage.setCallback(function(appMessage) {

@@ -1,6 +1,5 @@
 package org.votingsystem.client.model;
 
-import java.util.logging.Logger;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.util.ContextVS;
@@ -10,6 +9,7 @@ import org.votingsystem.util.TypeVS;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
 * @author jgzornoza

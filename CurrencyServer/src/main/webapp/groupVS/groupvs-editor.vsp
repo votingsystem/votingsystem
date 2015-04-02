@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link rel="import" href="${config.resourceURL}/vs-texteditor/vs-texteditor.html">
 
 <polymer-element name="groupvs-editor">
     <template>

@@ -1,7 +1,5 @@
 <html>
 <head>
-
-    <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
 </head>
 <body>

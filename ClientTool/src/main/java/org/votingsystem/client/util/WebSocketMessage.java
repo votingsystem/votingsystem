@@ -1,8 +1,5 @@
 package org.votingsystem.client.util;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.VotingSystemApp;
@@ -14,7 +11,10 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Wallet;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
@@ -24,6 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.text.ParseException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author jgzornoza

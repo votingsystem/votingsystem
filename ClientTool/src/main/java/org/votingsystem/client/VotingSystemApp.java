@@ -2,9 +2,6 @@ package org.votingsystem.client;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketSession;
@@ -26,6 +23,8 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
 

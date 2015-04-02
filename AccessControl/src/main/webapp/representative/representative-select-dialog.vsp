@@ -178,7 +178,7 @@
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
                     webAppMessage.document = this.representative
-                    webAppMessage.serviceURL = "${config.webURL}/representative/delegation"
+                    webAppMessage.serviceURL = "${config.restURL}/representative/delegation"
                     webAppMessage.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("selectRepresentativeCallback - message: " + appMessage);

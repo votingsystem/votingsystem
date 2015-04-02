@@ -19,7 +19,6 @@
     <link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
     <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
     <link href="${config.resourceURL}/vs-socket/vs-socket.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-texteditor/vs-texteditor.html" rel="import"/>
     <link href="${config.resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
     <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
     <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
@@ -52,7 +51,7 @@
                                 <paper-item data-href="${config.restURL}/eventVSElection">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.webURL}/eventVSElection/editor.jsp">
+                                <paper-item data-href="publish_election">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
                                 </paper-item>
                                 <paper-item data-href="${config.restURL}/representative">
@@ -156,6 +155,9 @@
                     this.fire('item-selected', this.coreSelectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                         window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
+                    } else if('publish_election' === this.coreSelectorValue) {
+                        var webAppMessage = new WebAppMessage(Operation.VOTING_PUBLISHING)
+                        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                     } else this.loadURL(this.coreSelectorValue)
                     this.coreSelectorValue = null
                 }
