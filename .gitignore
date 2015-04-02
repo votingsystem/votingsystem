@@ -1,6 +1,3 @@
-.VotingSystem
-lib
+*/target/*
 .idea
-bundles
-classes
 *.iml
