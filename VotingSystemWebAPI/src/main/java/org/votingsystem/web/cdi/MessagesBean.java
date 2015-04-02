@@ -1,6 +1,8 @@
 package org.votingsystem.web.cdi;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -18,15 +20,23 @@ public class MessagesBean {
     private static final Logger log = Logger.getLogger(MessagesBean.class.getSimpleName());
 
     private ResourceBundle bundle;
+    private String bundleBaseName;
+    @Inject ConfigVS config;
 
     public MessagesBean() { }
 
+    @PostConstruct
+    public void initialize() throws Exception {
+        bundleBaseName = config.getProperty("vs.bundleBaseName");
+    }
+
     public void setLocale(Locale locale) {
         try {
-            this.bundle = ResourceBundle.getBundle("org.votingsystem.web.controlcenter.messages", locale);
+
+            this.bundle = ResourceBundle.getBundle(bundleBaseName, locale);
         } catch (Exception ex) {
             log.log(Level.SEVERE, "resource not found for locale: " + locale);
-            this.bundle = ResourceBundle.getBundle("org.votingsystem.web.controlcenter.messages", new Locale("es"));
+            this.bundle = ResourceBundle.getBundle(bundleBaseName, new Locale("es"));
         }
 
     }

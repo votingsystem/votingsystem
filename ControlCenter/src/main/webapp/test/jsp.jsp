@@ -40,7 +40,6 @@
 </head>
 <body bgcolor="white">
 
-    <h2>--- contextURL: - ${config.webURL}</h2>
     <h2>- restURL: - ${config.resourceURL}</h2>
     <h2>- Property: - ${config.getProperty('vs.systemNIF')}</h2>
     <h2>- i18N: ${msg.publicDelegationLbl}</h2>

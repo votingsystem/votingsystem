@@ -28,7 +28,7 @@ public class FilterVS implements Filter {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         // To see this log message at run time, check out the terminal window where you started WildFly.
-        servletContext.log("=------- FilterVS initialized -------");
+        servletContext.log("=------- ControlCenter FilterVS initialized -------");
     }
 
 

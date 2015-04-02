@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.filter;
 
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -19,21 +20,23 @@ public class FilterVS implements Filter {
     private static final Logger log = Logger.getLogger(FilterVS.class.getSimpleName());
 
     private ServletContext servletContext;
-    @Inject
-    ConfigVS config;
+    @Inject ConfigVS config;
+    @Inject MessagesBean messages;
+
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         // To see this log message at run time, check out the terminal window where you started WildFly.
-        servletContext.log("------- FilterVS initialized -------");
+        servletContext.log("------- AccessControl FilterVS initialized -------");
     }
 
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
+        messages.setLocale(req.getLocale());
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
