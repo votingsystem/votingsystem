@@ -1,6 +1,8 @@
-<%@ taglib prefix="vs" uri="/WEB-INF/custom.tld"%>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
 <%@ page import="java.text.DateFormat" %>
-<%@ page import="java.text.DateFormat" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 
 <%
     DateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd");
@@ -21,8 +23,9 @@
             <c:forEach var="it" items="${periods}" varStatus="counter">
                 <div>
                     <a href="${config.restURL}/reports/week${formatter.format(it.getDateFrom())}">
-                        <vs:msg value="${msg.transactionsCurrentWeekPeriodMsg}" args="${formatter.format(it.getDateFrom())}"/>
-
+                        <fmt:message key="transactionsCurrentWeekPeriodMsg" bundle="${bundle}">
+                            <fmt:param value="${formatter.format(it.getDateFrom())}"/>
+                        </fmt:message>
                     </a>
                 </div>
             </c:forEach>

@@ -45,59 +45,46 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${config.restURL}/app/userVS">
-                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/groupVS">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/userVS/search">
-                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/currency/request">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
-                        </paper-item>
                         <c:choose>
                             <c:when test="${'admin'.equals(param.menu)}">
-                                <template if="{{isClientToolConnected}}">
-                                    <paper-item data-href="${config.restURL}/groupVS/newGroup">
-                                        <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
-                                    </paper-item>
-                                </template>
                                 {{ "${msg.adminPageTitle}" | setTitle}}
-                            </c:when>
-                            <c:when test="${'superuser'.equals(param.menu)}">
-                                <paper-item data-href="${config.restURL}/userVS/newBankVS">
-                                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
+                                <!--<template if="{{isClientToolConnected}}">-->
+                                <paper-item data-href="${config.restURL}/eventVSElection">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.restURL}/certificateVS/addCertificateAuthority"
-                                            style="margin:0px 10px 0px 0px;">
-                                    <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> ${msg.newCAAuthorityLbl}
+                                <paper-item data-href="${config.webURL}/eventVSElection/editor.jsp">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.restURL}/certificateVS/certs">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
+                                <paper-item data-href="${config.restURL}/representative">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.restURL}/userVS/save">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newUserCertLbl}
+                                <paper-item data-href="${config.webURL}/representative/newRepresentative.jsp">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
                                 </paper-item>
-                                <paper-item id="changeToAdmin" data-href="${config.restURL}/app/contact" on-click="{{changeToAdminMenu}}">
-                                    <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i>${msg.changeToAdminMenuLbl}
+                                <paper-item data-href="${config.webURL}/representative/edit.jsp">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
                                 </paper-item>
-                                {{ "${msg.superUserTitle}" | setTitle}}
+                                <!--</template>-->
                             </c:when>
                             <c:otherwise>
-                                {{ "${msg.usersPageTitle}" | setTitle}}
+                                {{ "${msg.votingsystemPageLbl}" | setTitle}}
+                                <paper-item data-href="${config.restURL}/eventVSElection">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
+                                </paper-item>
+                                <paper-item data-href="${config.restURL}/representative">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
+                                </paper-item>
+                                <paper-item data-href="${config.webURL}/app/tools.jsp">
+                                    <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
+                                </paper-item>
+                                <paper-item data-href="${config.webURL}/subscriptionVS/feeds.jsp">
+                                    <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
+                                </paper-item>
+                                <paper-item data-href="${config.webURL}/app/contact.jsp">
+                                    <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                                </paper-item>
                             </c:otherwise>
                         </c:choose>
-                        <paper-item data-href="${config.restURL}/transactionVS">
-                            <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> ${msg.transactionsLbl}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/reports">
-                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
-                        </paper-item>
-                        <paper-item data-href="${config.restURL}/app/contact">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
-                        </paper-item>
                     </core-selector>
                 </core-menu>
             </core-header-panel>

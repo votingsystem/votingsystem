@@ -52,33 +52,4 @@ public class AppResource {
         }
     }
 
-    @GET @Path("/tools")
-    public Response tools(@Context ServletContext context, @Context HttpServletRequest req,
-                      @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/tools.jsp").forward(req, resp);
-        return Response.ok().build();
-    }
-
-
-    @GET @Path("/contact")
-    public Response contact(@Context ServletContext context, @Context HttpServletRequest req,
-                              @Context HttpServletResponse resp) throws ServletException, IOException, ExceptionVS {
-        context.getRequestDispatcher("/jsf/app/contact.jsp").forward(req, resp);
-        return Response.ok().build();
-    }
-
-    @GET @Path("/jsonDocs")
-    public Response jsonDocs(@Context ServletContext context, @Context HttpServletRequest req,
-                            @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/jsonDocs.jsp").forward(req, resp);
-        return Response.ok().build();
-    }
-
-    @GET @Path("/backups")
-    public Response backups(@Context ServletContext context, @Context HttpServletRequest req,
-                             @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/backups.jsp").forward(req, resp);
-        return Response.ok().build();
-    }
-
 }

@@ -53,9 +53,14 @@
 
     <input type="text" id="datepicker">
 
+    <fmt:message key="androidAppDownloadMsg" bundle="${bundle}">
+        <fmt:param value="${config.contextURL}/android/SistemaVotacion.apk"/>
+    </fmt:message>
+
+
     InvalidErrorMsg: <fmt:message key="hashCertVSCurrencyInvalidErrorMsg" bundle="${bundle}">
-        <fmt:param value="11111111111"/>
-    </fmt:message><br/>
+                        <fmt:param value="11111111111"/>
+                    </fmt:message><br/>
 
 Yeps
     <h:outputFormat value="Hello, {0}! You are visitor number {1} to the page.">

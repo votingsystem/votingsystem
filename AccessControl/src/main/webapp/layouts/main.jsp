@@ -43,7 +43,7 @@
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
                         <c:choose>
-                            <c:when test="${'admin'.equals(param.menu)}">pizza.
+                            <c:when test="${'admin'.equals(param.menu)}">
                                 {{ "${msg.adminPageTitle}" | setTitle}}
                                 <!--<template if="{{isClientToolConnected}}">-->
                                 <paper-item data-href="${config.webURL}/eventVSElection">
@@ -63,7 +63,7 @@
                                 </paper-item>
                                 <!--</template>-->
                             </c:when>
-                            <c:otherwise>pizzas.
+                            <c:otherwise>
                                 {{ "${msg.votingsystemPageLbl}" | setTitle}}
                                 <paper-item data-href="${config.webURL}/eventVSElection">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}

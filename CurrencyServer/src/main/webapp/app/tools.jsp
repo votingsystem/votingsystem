@@ -1,6 +1,8 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="vs" uri="/WEB-INF/custom.tld"%>
 <!DOCTYPE html>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
 <html>
 <head></head>
 <body>
@@ -13,22 +15,25 @@
                         <ul>
                             <li>${msg.androidAppNeededMsg}</li>
                             <li>
-                                <vs:msg value="${msg.androidAppDownloadMsg}" args="${conf.contextURL}/android/SistemaVotacion.apk"/>
+                                <fmt:message key="androidAppDownloadMsg" bundle="${bundle}">
+                                    <fmt:param value="${config.contextURL}/android/SistemaVotacion.apk"/>
+                                </fmt:message>
                             <li>${msg.androidCertInstalledMsg}</li>
                             <li>${msg.androidSelectAppMsg}</li>
                         </ul>
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div>
-                        <vs:msg value="${msg.androidAppDownloadMsg}" args="${conf.contextURL}/tools/ClientTool.zip"/>
-                    <div>
-                        <vs:msg value="${msg.javaRequirementsMsg}"
-                                args="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"/>
+                    <div style="margin: 10px;">
+                        <fmt:message key="clientToolNeededMsg" bundle="${bundle}">
+                            <fmt:param value="${config.contextURL}/tools/ClientTool.zip"/>
+                        </fmt:message>
+                    </div>.
+                    <div style="margin: 10px;">
+                        <fmt:message key="javaRequirementsMsg" bundle="${bundle}">
+                            <fmt:param value="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"/>
+                        </fmt:message>
                     </div>
-                    <a href="${config.webURL}/tools/ClientTool.zip" class="downloadLink"
-                       style="margin:40px 20px 0px 0px; width:400px;">
-                            ${msg.downloadClientToolAppLbl} <i class="fa fa-cogs"></i></a>
                 </c:otherwise>
             </c:choose>
         </div>
