@@ -7,6 +7,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -26,6 +27,8 @@ public class EventVSClaimCollectorBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
+    @Inject MessagesBean messages;
+
 
     public MessageSMIME save(MessageSMIME messageSMIME) throws Exception {
         UserVS userVS = messageSMIME.getUserVS();
@@ -36,7 +39,7 @@ public class EventVSClaimCollectorBean {
                 .setParameter("userVS", userVS).setParameter("type", TypeVS.CLAIM_EVENT_SIGN);
         MessageSMIME smime = dao.getSingleResult(MessageSMIME.class, query);
         if(smime != null && EventVS.Cardinality.EXCLUSIVE.equals(request.eventVS.getCardinality())) {
-            throw new ValidationExceptionVS(config.get("claimSignatureRepeated",
+            throw new ValidationExceptionVS(messages.get("claimSignatureRepeated",
                     userVS.getNif(), request.eventVS.getSubject()));
         }
         if(request.fieldsEventVS != null && !request.fieldsEventVS.isEmpty()) {
@@ -49,7 +52,7 @@ public class EventVSClaimCollectorBean {
         }
         String fromUser = config.getServerName();
         String toUser = userVS.getNif();
-        String subject = config.get("mime.subject.claimSignatureValidated");
+        String subject = messages.get("mime.subject.claimSignatureValidated");
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned (fromUser, toUser,
                 messageSMIME.getSMIME(), subject);
         dao.merge(messageSMIME.setSMIME(receipt).setType(TypeVS.CLAIM_EVENT_SIGN).setEventVS(request.eventVS));
@@ -80,7 +83,7 @@ public class EventVSClaimCollectorBean {
             eventVS = dao.find(EventVSClaim.class, id);
             if (eventVS == null) throw new ValidationExceptionVS("ERROR - eventVSNotFound - EventVSClaim id: " + id);
             if(!eventVS.isActive(timeStampDate)) {
-                throw new ValidationExceptionVS(config.get("timeStampRangeErrorMsg",
+                throw new ValidationExceptionVS(messages.get("timeStampRangeErrorMsg",
                         DateUtils.getDayWeekDateStr(timeStampDate), DateUtils.getDayWeekDateStr(eventVS.getDateBegin()),
                         DateUtils.getDayWeekDateStr(eventVS.getDateFinish())));
             }

@@ -4,6 +4,7 @@ import org.votingsystem.model.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.ejb.Stateless;
@@ -21,15 +22,14 @@ public class TransactionVSBankVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBankVSBean.class.getSimpleName());
 
-    @PersistenceContext private EntityManager em;
+    @Inject MessagesBean messages;
     @Inject ConfigVS config;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
 
     public String processTransactionVS(TransactionVSBean.TransactionVSRequest request) throws ExceptionVS {
-        Query query = em.createNamedQuery("findUserByNIF").setParameter("nif", request.fromUserVS.getNif());
+        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.fromUserVS.getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);
-        if(bankVS == null) throw new ExceptionVS(config.get("bankVSPrivilegesErrorMsg", request.operation.toString()));
+        if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.operation.toString()));
         TransactionVS transactionParent = dao.persist(TransactionVS.BANKVS_PARENT(bankVS, request.fromUserIBAN, request.fromUser,
                 request.amount, request.currencyCode, request.subject, request.validTo, request.messageSMIME, request.tag));
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(

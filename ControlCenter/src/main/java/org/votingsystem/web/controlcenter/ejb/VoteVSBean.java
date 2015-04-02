@@ -82,7 +82,7 @@ public class VoteVSBean {
         VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(config.get(
+        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(certificateVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(certificateVS.getEventVS().getDateFinish())));

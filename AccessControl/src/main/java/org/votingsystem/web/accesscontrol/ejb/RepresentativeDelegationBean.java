@@ -14,8 +14,8 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.model.RepresentativeDocument;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -43,6 +43,7 @@ public class RepresentativeDelegationBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject CSRBean csrBean;
+    @Inject MessagesBean messages;
 
     //{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
     public synchronized RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
@@ -61,7 +62,7 @@ public class RepresentativeDelegationBean {
         RepresentationDocument representationDocument = dao.persist(new RepresentationDocument(messageSMIME,
                 userVS, representative, RepresentationDocument.State.OK));
         String toUser = userVS.getNif();
-        String subject = config.get("representativeSelectValidationSubject");
+        String subject = messages.get("representativeSelectValidationSubject");
         messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject));
         log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(),
                 representationDocument.getId()));
@@ -110,10 +111,10 @@ public class RepresentativeDelegationBean {
                 .setParameter("type", CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION).setParameter("state", CertificateVS.State.OK)
                 .setParameter("hashCertVS", certExtensionData.get("hashCertVS"));
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if(certificateVS == null) throw new ValidationExceptionVS(config.get("certificateVSUnknownErrorMsg"));
+        if(certificateVS == null) throw new ValidationExceptionVS(messages.get("certificateVSUnknownErrorMsg"));
         AnonymousDelegationRequest request = messageSMIME.getSignedContent(AnonymousDelegationRequest.class);
         String toUser = certificateVS.getHashCertVSBase64();
-        String subject = config.get("representativeSelectValidationSubject");
+        String subject = messages.get("representativeSelectValidationSubject");
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(toUser, messageSMIME.getSMIME(), subject);
         messageSMIME.setSMIME(smimeMessage);
         dao.merge(messageSMIME);
@@ -181,7 +182,7 @@ public class RepresentativeDelegationBean {
         if (anonymousDelegation != null) {
             String delegationURL = format("{0}/messageSMIME/id/{1}", config.getRestURL(),
                     anonymousDelegation.getDelegationSMIME().getId());
-            throw new RequestRepeatedException(config.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
+            throw new RequestRepeatedException(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
                     DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL);
         }
     }
@@ -193,7 +194,7 @@ public class RepresentativeDelegationBean {
                 "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
         if(representativeDocument == null) throw new ValidationExceptionVS( 
-                config.get("unsubscribeRepresentativeUserErrorMsg", userVS.getNif()));
+                messages.get("unsubscribeRepresentativeUserErrorMsg", userVS.getNif()));
         log.info("processRevoke - user: " + userVS.getId());
         RepresentativeRevokeRequest request = messageSMIME.getSignedContent(RepresentativeRevokeRequest.class);
         request.validate(userVS);
@@ -212,7 +213,7 @@ public class RepresentativeDelegationBean {
         }
         dao.merge(userVS.setType(UserVS.Type.USER));
         String toUser = userVS.getNif();
-        String subject = config.get("unsubscribeRepresentativeValidationSubject");
+        String subject = messages.get("unsubscribeRepresentativeValidationSubject");
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
         messageSMIME.setSMIME(smimeMessageResp);
         dao.merge(messageSMIME);

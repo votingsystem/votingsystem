@@ -9,6 +9,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -31,13 +32,11 @@ public class TransactionVSGroupVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSGroupVSBean.class.getSimpleName());
 
-    @PersistenceContext private EntityManager em;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject WalletBean walletBean;
-    @Inject
-    DAOBean dao;
-    @Inject ConfigVS data;
+    @Inject DAOBean dao;
+    @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
 
     public String processTransactionVS(TransactionVSBean.TransactionVSRequest request) throws Exception {
@@ -62,10 +61,10 @@ public class TransactionVSGroupVSBean {
                     request.toUserVSList.size()  + " - TransactionVS parent id: " + transactionParent.getId() +
                     " - amount: " + request.amount.toString());
             if(request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
-                return data.get("transactionVSFromGroupToMemberOKMsg", request.amount + " " + request.currencyCode,
+                return messages.get("transactionVSFromGroupToMemberOKMsg", request.amount + " " + request.currencyCode,
                         request.toUserVSList.iterator().next().getNif());
             } else if (request.transactionType == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
-                return data.get("transactionVSFromGroupToMemberGroupOKMsg", request.amount + " " + request.currencyCode);
+                return messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.amount + " " + request.currencyCode);
             } else return null;
         }
     }
@@ -77,7 +76,7 @@ public class TransactionVSGroupVSBean {
         TransactionVS transactionParent = dao.persist(TransactionVS.USERVS(request.groupVS, null, transactionVSType,
                 accountFromMovements, request.amount, request.currencyCode, request.subject, request.validTo,
                 request.messageSMIME, request.tag));
-        Query query = em.createNamedQuery("findSubscriptionByGroupAndState").setParameter("groupVS", request.groupVS)
+        Query query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndState").setParameter("groupVS", request.groupVS)
                 .setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
         for(SubscriptionVS subscription : subscriptionList) {
@@ -89,7 +88,7 @@ public class TransactionVSGroupVSBean {
                     subscription.getUserVS().getIBAN()));
         }
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.operation.toString());
-        return data.get("transactionVSFromGroupToAllMembersGroupOKMsg", request.amount.toString() + " " + request.currencyCode);
+        return messages.get("transactionVSFromGroupToAllMembersGroupOKMsg", request.amount.toString() + " " + request.currencyCode);
     }
 
 }

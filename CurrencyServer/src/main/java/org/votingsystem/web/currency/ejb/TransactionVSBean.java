@@ -13,6 +13,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.BalanceUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -37,14 +38,12 @@ public class TransactionVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBean.class.getSimpleName());
 
-    @PersistenceContext private EntityManager em;
     @Inject ConfigVS config;
-    @Inject
-    DAOBean dao;
+    @Inject MessagesBean messages;
+    @Inject DAOBean dao;
     @Inject SystemBean systemBean;
     @Inject IBANBean ibanBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject BankVSBean bankVSBean;
     @Inject GroupVSBean groupVSBean;
     @Inject UserVSBean userVSBean;
@@ -66,7 +65,7 @@ public class TransactionVSBean {
                 SMIMEMessage smime = transactionVSUserVSBean.processTransactionVS(request.getUserVSRequest());
                 return new String(smime.getBytes(), StandardCharsets.UTF_8);
             default:
-                throw new ExceptionVS(config.get("unknownTransactionErrorMsg",request.operation.toString()));
+                throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.operation.toString()));
         }
     }
 
@@ -78,7 +77,7 @@ public class TransactionVSBean {
 
     private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getToUserIBAN() == null) throw new ExceptionVS("transactionVS without toUserIBAN");
-        Query query = em.createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
+        Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("userIBAN", transactionVS.getToUserIBAN()).setParameter("tag", transactionVS.getTag())
                 .setParameter("currencyCode", transactionVS.getCurrencyCode())
                 .setParameter("state", CurrencyAccount.State.ACTIVE);
@@ -89,16 +88,16 @@ public class TransactionVSBean {
                     transactionVS.getTag(), transactionVS.getCurrencyCode());
             if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
                 resultAmount = resultAmount.subtract(wildTagExpensesForTag);
-                query = em.createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
+                query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                         .setParameter("userIBAN", transactionVS.getToUserIBAN())
                         .setParameter("tag", config.getTag(TagVS.WILDTAG))
                         .setParameter("currencyCode", transactionVS.getCurrencyCode())
                         .setParameter("state", CurrencyAccount.State.ACTIVE);
                 CurrencyAccount wildTagAccount = dao.getSingleResult(CurrencyAccount.class, query);
                 if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
-                    em.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(wildTagExpensesForTag)));
+                    dao.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(wildTagExpensesForTag)));
                 } else {
-                    em.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(
+                    dao.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(
                             wildTagExpensesForTag.subtract(resultAmount))));
                     resultAmount = BigDecimal.ZERO;
                 }
@@ -108,19 +107,19 @@ public class TransactionVSBean {
             //UserVS userVS, BigDecimal balance, String currencyCode, TagVS tag
             accountTo = new CurrencyAccount(transactionVS.getToUserVS(), resultAmount, transactionVS.getCurrencyCode(),
                     transactionVS.getTag());
-            em.persist(accountTo);
+            dao.persist(accountTo);
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transactionVS.getToUserIBAN() +
                     " -  tag:" + accountTo.getTag().getName() + " - amount:" + accountTo.getBalance());
-        } else em.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
+        } else dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
         return accountTo;
     }
 
     private void updateUserVSAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
-        if(transactionVS.getAccountFromMovements() == null) 
+        if(transactionVS.getAccountFromMovements() == null)
             throw new ExceptionVS("TransactionVS without accountFromMovements");
         for(Map.Entry<CurrencyAccount, BigDecimal> entry: transactionVS.getAccountFromMovements().entrySet()) {
             CurrencyAccount currencyAccount = entry.getKey();
-            em.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
+            dao.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
         }
     }
 
@@ -188,7 +187,7 @@ public class TransactionVSBean {
         if(incomesForTagVS.compareTo(expendedForTagVS) < 0) return expendedForTagVS.subtract(incomesForTagVS);
         else return BigDecimal.ZERO;
     }
-    
+
     public Map getTransactionListWithBalances(List<TransactionVS> transactionList, TransactionVS.Source source) {
         List<Map> transactionFromList = new ArrayList<>();
         for(TransactionVS transaction : transactionList) {
@@ -241,12 +240,12 @@ public class TransactionVSBean {
         if(transaction.getType()  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             TransactionVS transactionParent =
                     (transaction.getTransactionParent() == null)?transaction:transaction.getTransactionParent();
-            Query query = em.createNamedQuery("countTransByTransactionParent")
+            Query query = dao.getEM().createNamedQuery("countTransByTransactionParent")
                     .setParameter("transactionParent", transactionParent);
             transactionMap.put("numChildTransactions",  (long)query.getSingleResult());
         }
         if(transaction.getTag() != null) {
-            String tagName = TagVS.WILDTAG.equals(transaction.getTag().getName())? config.get("wildTagLbl")
+            String tagName = TagVS.WILDTAG.equals(transaction.getTag().getName())? messages.get("wildTagLbl")
                     .toUpperCase():transaction.getTag().getName();
             transactionMap.put("tags", Arrays.asList(tagName));
         } else transactionMap.put("tags", new ArrayList<>());
@@ -257,22 +256,22 @@ public class TransactionVSBean {
         String typeDescription;
         switch(transactionType) {
             case "CURRENCY_REQUEST":
-                typeDescription = config.get("currencyRequestLbl");
+                typeDescription = messages.get("currencyRequestLbl");
                 break;
             case "CURRENCY_SEND":
-                typeDescription = config.get("currencySendLbl");
+                typeDescription = messages.get("currencySendLbl");
                 break;
             case "FROM_BANKVS":
-                typeDescription = config.get("bankVSInputLbl");
+                typeDescription = messages.get("bankVSInputLbl");
                 break;
             case "FROM_GROUP_TO_MEMBER":
-                typeDescription = config.get("transactionVSFromGroupToMember");
+                typeDescription = messages.get("transactionVSFromGroupToMember");
                 break;
             case "FROM_GROUP_TO_MEMBER_GROUP":
-                typeDescription = config.get("transactionVSFromGroupToMemberGroup");
+                typeDescription = messages.get("transactionVSFromGroupToMemberGroup");
                 break;
             case "FROM_GROUP_TO_ALL_MEMBERS":
-                typeDescription = config.get("transactionVSFromGroupToAllMembers");
+                typeDescription = messages.get("transactionVSFromGroupToAllMembers");
                 break;
             default: typeDescription = transactionType;
         }
@@ -283,14 +282,14 @@ public class TransactionVSBean {
         List<TransactionVS> transactionList = null;
         Query query = null;
         if(fromUserVS instanceof GroupVS) {
-            query = em.createNamedQuery("findGroupVSTransFromByStateAndDateCreatedAndInListAndNotInList")
+            query = dao.getEM().createNamedQuery("findGroupVSTransFromByStateAndDateCreatedAndInListAndNotInList")
                     .setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
                     .setParameter("notList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS, TransactionVS.Type.CURRENCY_INIT_PERIOD))
                     .setParameter("inList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS));
             transactionList = query.getResultList();
         } else {
-            query = em.createNamedQuery("findUserVSTransFromByFromUserAndStateAndDateCreatedAndInList")
+            query = dao.getEM().createNamedQuery("findUserVSTransFromByFromUserAndStateAndDateCreatedAndInList")
                     .setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
                     .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_REQUEST, TransactionVS.Type.FROM_USERVS));
@@ -300,7 +299,7 @@ public class TransactionVSBean {
     }
 
     public List<TransactionVS> getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
-        Query query = em.createNamedQuery("findTransByToUserAndStateAndDateCreatedBetween")
+        Query query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndDateCreatedBetween")
                 .setParameter("toUserVS", toUserVS).setParameter("state", TransactionVS.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo());
         return query.getResultList();
@@ -358,7 +357,7 @@ public class TransactionVSBean {
                         "peration expected: 'FROM_USERVS' - operation found: " + operation.toString());
             if(dataJSON.get("toUserIBAN").size() != 1) throw new ExceptionVS(
                     "there can be only one receptor. request.toUserIBAN:" + dataJSON.get("toUserIBAN"));
-            Query query = em.createNamedQuery("findUserByIBAN").setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
+            Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
             toUserVS = dao.getSingleResult(UserVS.class, query);
             if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dataJSON.get("toUserIBAN").get(0));
             return this;
@@ -369,7 +368,7 @@ public class TransactionVSBean {
                     "operation expected: 'FROM_BANKVS' - operation found: " + operation.toString());
             if(dataJSON.get("toUserIBAN").size() != 1) throw new ExceptionVS(
                     "there can be only one receptor. request.toUserIBAN: " + dataJSON.get("toUserIBAN"));
-            Query query = em.createNamedQuery("findUserByIBAN").setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
+            Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
             toUserVS = dao.getSingleResult(UserVS.class, query);
             if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dataJSON.get("toUserIBAN").get(0));
             //this is to get data from banks clients
@@ -383,27 +382,27 @@ public class TransactionVSBean {
         public TransactionVSRequest getGroupVSRequest() throws ValidationExceptionVS {
             if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
 
-            Query query = em.createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
+            Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
                     "representative",this.fromUserVS).setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
             groupVS = dao.getSingleResult(GroupVS.class, query);
             if(groupVS == null) {
-                throw new ValidationExceptionVS(config.get(
+                throw new ValidationExceptionVS(messages.get(
                         "groupNotFoundByIBANErrorMsg",dataJSON.get("fromUserIBAN").asText(), fromUserVS.getNif()));
             }
             if(transactionType != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
                 for(int i = 0; i < dataJSON.get("toUserIBAN").size(); i++) {
-                    query = em.createNamedQuery("findSubscriptionByGroupAndStateAndUserIBAN").setParameter("groupVS", groupVS)
+                    query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndStateAndUserIBAN").setParameter("groupVS", groupVS)
                             .setParameter("state", SubscriptionVS.State.ACTIVE)
                             .setParameter("IBAN", dataJSON.get("toUserIBAN").get(0));
                     SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
-                    if(subscription == null) throw new ValidationExceptionVS(config.get("groupUserNotFoundByIBANErrorMsg",
+                    if(subscription == null) throw new ValidationExceptionVS(messages.get("groupUserNotFoundByIBANErrorMsg",
                             dataJSON.get("toUserIBAN").get(i).asText(), groupVS.getName()));
                     toUserVSList.add(subscription.getUserVS());
                 }
                 if(toUserVSList.isEmpty()) throw new ValidationExceptionVS("transaction without valid receptors");
                 numReceptors = new BigDecimal(toUserVSList.size());
             } else if (transactionType == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-                query = em.createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
+                query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
                         .setParameter("state", SubscriptionVS.State.ACTIVE);
                 numReceptors = new BigDecimal((long)query.getSingleResult());
             }

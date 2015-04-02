@@ -11,6 +11,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -43,6 +44,7 @@ public class EventVSElectionBean {
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
+    @Inject MessagesBean messages;
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
@@ -85,12 +87,12 @@ public class EventVSElectionBean {
         Header header = new Header ("serverURL", config.getContextURL());
         String fromUser = config.getServerName();
         String toUser = controlCenterVS.getName();
-        String subject = config.get("mime.subject.votingEventValidated");
+        String subject = messages.get("mime.subject.votingEventValidated");
         SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, dataMap.toString(), subject, header);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            throw new ExceptionVS(config.get("controlCenterCommunicationErrorMsg"));
+            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg"));
         }
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
                 "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)

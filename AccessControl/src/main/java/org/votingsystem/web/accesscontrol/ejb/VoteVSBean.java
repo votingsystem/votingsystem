@@ -6,6 +6,7 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -30,6 +31,7 @@ public class VoteVSBean {
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
     @Inject private SignatureBean signatureBean;
+    @Inject MessagesBean messages;
 
 
     public synchronized VoteVS validateVote(MessageSMIME messageSMIME) throws Exception {
@@ -37,11 +39,11 @@ public class VoteVSBean {
         VoteVS voteVSRequest = messageSMIME.getSMIME().getVoteVS();
         CertificateVS voteVSCertificate = voteVSRequest.getCertificateVS();
         FieldEventVS optionSelected = eventVS.checkOptionId(voteVSRequest.getOptionSelected().getId());
-        if (optionSelected == null) throw new ValidationExceptionVS(config.get("voteOptionNotFoundErrorMsg",
+        if (optionSelected == null) throw new ValidationExceptionVS(messages.get("voteOptionNotFoundErrorMsg",
                 voteVSRequest.getOptionSelected().getId().toString()));
         String fromUser = config.getServerName();
         String toUser = eventVS.getControlCenterVS().getName();
-        String subject = config.get("voteValidatedByAccessControlMsg");
+        String subject = messages.get("voteValidatedByAccessControlMsg");
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(
                 fromUser, toUser, messageSMIME.getSMIME(), subject);
         messageSMIME.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setSMIME(smimeMessageResp);
@@ -60,25 +62,25 @@ public class VoteVSBean {
                 "a.state =:state").setParameter("hashAccessRequestBase64", request.hashAccessRequestBase64)
                 .setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
-        if (accessRequestVS == null) throw new ValidationExceptionVS(config.get(
+        if (accessRequestVS == null) throw new ValidationExceptionVS(messages.get(
                 "voteCancellationAccessRequestNotFoundError"));
         query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
                 "c.state =:state").setParameter("hashCertVSBase64", request.hashCertVSBase64)
                 .setParameter("state", CertificateVS.State.OK);
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if (certificateVS == null) throw new ValidationExceptionVS(config.get(
+        if (certificateVS == null) throw new ValidationExceptionVS(messages.get(
                 "voteCancellationCsrRequestNotFoundError"));
         query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS =:certificateVS " +
                 "and v.state =:state").setParameter("certificateVS", certificateVS).setParameter("state", VoteVS.State.OK);
         VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(config.get(
+        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(certificateVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(certificateVS.getEventVS().getDateFinish())));
         String toUser = certificateVS.getEventVS().getControlCenterVS().getName();
-        String subject = config.get("voteCancelationSubject");
+        String subject = messages.get("voteCancelationSubject");
         smimeMessage.setMessageID(format("{0}/messageSMIME/id/{1}", config.getRestURL(), messageSMIME.getId()));
         SMIMEMessage smimeMessageReq = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
         String controlCenterURL = certificateVS.getEventVS().getControlCenterVS().getServerURL();
@@ -126,11 +128,11 @@ public class VoteVSBean {
             if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
             if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
             if(!hashAccessRequestBase64.equals(CMSUtils.getHashBase64(originHashAccessRequest,
-                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(config.get(
+                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(messages.get(
                     "voteCancellationAccessRequestHashError"));
             if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVote,
                     ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(
-                    config.get("voteCancellationHashCertificateError"));
+                    messages.get("voteCancellationHashCertificateError"));
         }
     }
 

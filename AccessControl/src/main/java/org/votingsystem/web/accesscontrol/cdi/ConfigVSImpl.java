@@ -8,17 +8,13 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -99,42 +95,13 @@ public class ConfigVSImpl implements ConfigVS {
         return props.getProperty(key);
     }
 
-
-    //TODO
-    public String get(String key, Object... arguments) {
-        Locale locale = null;
-        FacesContext ctx = FacesContext.getCurrentInstance();
-        if(ctx != null && ctx.getViewRoot() != null) locale = ctx.getViewRoot().getLocale();
-        if(locale == null) locale = Locale.getDefault();
-        ResourceBundle bundle = ResourceBundle.getBundle("org.votingsystem.web.accesscontrol.messages", locale);
-        try {
-            String pattern = bundle.getString(key);
-            /*if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);*/
-            if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-            else return pattern;
-        } catch(Exception ex) {
-            log.info("missing key: " + key + " - country: " + locale.getCountry());
-            return "---" + key + "---";
-        }
-    }
-
     public TagVS getTag(String tagName) {
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName);
         return dao.getSingleResult(TagVS.class, query);
     }
 
-    public String getTagMessage(String tag) {
-        if(TagVS.WILDTAG.equals(tag)) return get("wildTagMsg");
-        else return get("wildTagMsg", tag);
-    }
-
     public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
         this.x509TimeStampServerCert = x509TimeStampServerCert;
-    }
-
-    public boolean getIsDevelopment() {
-        return EnvironmentVS.DEVELOPMENT == mode;
     }
 
     public EnvironmentVS getMode() {

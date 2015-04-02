@@ -2,7 +2,6 @@ package org.votingsystem.web.cdi;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.EnvironmentVS;
-
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
@@ -17,11 +16,7 @@ public interface ConfigVS {
 
     public String getProperty(String key);
 
-    public String get(String key, Object... arguments) ;
-
     public TagVS getTag(String tagName);
-
-    public String getTagMessage(String tag);
 
     public void setX509TimeStampServerCert(X509Certificate x509Cert);
 

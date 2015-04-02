@@ -8,6 +8,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.ejb.BankVSBean;
 import org.votingsystem.web.currency.ejb.GroupVSBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
@@ -42,11 +43,10 @@ public class UserVSResource {
     @Inject GroupVSBean groupVSBean;
     @Inject UserVSBean userVSBean;
     @Inject BankVSBean bankVSBean;
-    @Inject
-    SignatureBean signatureBean;
-    @Inject
-    DAOBean dao;
+    @Inject SignatureBean signatureBean;
+    @Inject DAOBean dao;
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
     @Path("/") @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -127,11 +127,11 @@ public class UserVSResource {
             BankVSInfo bankVSInfo = dao.getSingleResult(BankVSInfo.class, query);
             if(bankVSInfo != null) {
                 userVS = bankVSInfo.getBankVS();
-                msg = config.get("ibanFromBankVSClientMsg", IBAN, bankVSInfo.getBankVS().getName());
+                msg = messages.get("ibanFromBankVSClientMsg", IBAN, bankVSInfo.getBankVS().getName());
             }
         }
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND)
-                .entity(config.get("itemNotFoundByIBANMsg", IBAN)).build();
+                .entity(messages.get("itemNotFoundByIBANMsg", IBAN)).build();
         return processUserVSResult(userVS, msg, req, resp, context);
     }
 
@@ -141,7 +141,7 @@ public class UserVSResource {
                         @Context HttpServletResponse resp) throws Exception {
         UserVS userVS = dao.find(UserVS.class, id);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                config.get("itemNotFoundMsg", Long.valueOf(id).toString())).build();
+                messages.get("itemNotFoundMsg", Long.valueOf(id).toString())).build();
         else return processUserVSResult(userVS, null, req, resp, context);
     }
 
@@ -360,7 +360,7 @@ public class UserVSResource {
         UserVS newUser = userVSBean.saveUser(messageSMIME);
         Map result = new HashMap<>();
         result.put("statusCode", ResponseVS.SC_OK);
-        result.put("message", config.get("certUserNewMsg", newUser.getNif()));
+        result.put("message", messages.get("certUserNewMsg", newUser.getNif()));
         result.put("URL", config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
         return result;
     }
@@ -371,7 +371,7 @@ public class UserVSResource {
         BankVS newBankVS = bankVSBean.saveBankVS(messageSMIME);
         Map result = new HashMap<>();
         result.put("statusCode", ResponseVS.SC_OK);
-        result.put("message", config.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()));
+        result.put("message", messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()));
         result.put("URL", config.getContextURL() + "/rest/userVS/id/" + newBankVS.getId());
         return result;
     }

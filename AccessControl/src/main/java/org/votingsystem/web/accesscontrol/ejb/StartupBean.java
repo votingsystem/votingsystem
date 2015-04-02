@@ -14,8 +14,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import java.io.IOException;
-import java.util.Calendar;
 import java.util.logging.Logger;
 
 @Singleton

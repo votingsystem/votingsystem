@@ -14,6 +14,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.ZipUtils;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -46,6 +47,7 @@ public class EventVSClaimBean {
     @Inject TagVSBean tagVSBean;
     @Inject EventVSBean eventVSBean;
     @Inject TimeStampBean timeStampBean;
+    @Inject MessagesBean messages;
 
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
@@ -73,7 +75,7 @@ public class EventVSClaimBean {
         }
         String fromUser = config.getServerName();
         String toUser = signerVS.getNif();
-        String subject = config.get("mime.subject.claimEventValidated");
+        String subject = messages.get("mime.subject.claimEventValidated");
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(fromUser, toUser, messageSMIME.getSMIME(), subject);
         messageSMIME.setSMIME(smimeMessage).setEventVS(eventVS);
         dao.merge(messageSMIME);
@@ -153,7 +155,7 @@ public class EventVSClaimBean {
 
         public void validate() throws ValidationExceptionVS {
             if(dateFinish.before(new Date())) {
-                throw new ValidationExceptionVS(config.get("publishDocumentDateErrorMsg",
+                throw new ValidationExceptionVS(messages.get("publishDocumentDateErrorMsg",
                         DateUtils.getDayWeekDateStr(dateFinish)));
             }
             if(cardinality == null) cardinality = EventVS.Cardinality.EXCLUSIVE;

@@ -6,6 +6,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.TransactionRequest;
 
 import javax.ejb.Stateless;
@@ -29,6 +30,7 @@ public class ShopExampleBean {
     private static Map<String, TransactionRequest> transactionRequestMap = new HashMap<String, TransactionRequest>();
 
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
 
     public void putTransactionRequest(String sessionId, TransactionRequest transactionRequest) {
@@ -73,7 +75,7 @@ public class ShopExampleBean {
         }
 
         public String getMessage() {
-            return config.get("transactionRequestOKMsg", transactionRequest.getAmount().toString(),
+            return messages.get("transactionRequestOKMsg", transactionRequest.getAmount().toString(),
                     transactionRequest.getCurrencyCode());
         }
     }

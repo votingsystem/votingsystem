@@ -8,6 +8,7 @@ import org.votingsystem.model.UserRequestCsrVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -36,6 +37,7 @@ public class CSRResource {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
+    @Inject MessagesBean messages;
 
     @Path("/") @POST
     public Response request(@Context ServletContext context,
@@ -65,13 +67,13 @@ public class CSRResource {
                 .setParameter("id", csrRequestId).setParameter("state", UserRequestCsrVS.State.OK);
         UserRequestCsrVS csrRequest = dao.getSingleResult(UserRequestCsrVS.class, query);
         if(csrRequest == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(config.get("csrRequestNotValidated")).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("csrRequestNotValidated")).build();
         }
         query = dao.getEM().createQuery("select c from CertificateVS c where c.userRequestCsrVS =:csrRequest")
                 .setParameter("csrRequest", csrRequest);
         CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
         if(certificate != null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                config.get("csrGenerationErrorMsg")).build();
+                messages.get("csrGenerationErrorMsg")).build();
         X509Certificate certX509 = CertUtils.loadCertificate(certificate.getContent());
         List<X509Certificate> certs = Arrays.asList(certX509, signatureBean.getServerCert());
         return Response.ok().entity(CertUtils.getPEMEncoded (certs)).build();

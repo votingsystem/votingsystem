@@ -92,10 +92,6 @@ public class ConfigVSImpl implements ConfigVS {
         }
     }
 
-    public String get(String key, Object... arguments) {
-        throw new RuntimeException("messages must be taken 'from MessagesBean'");   //TODO
-    }
-
     public String getProperty(String key) {
         return props.getProperty(key);
     }
@@ -105,17 +101,8 @@ public class ConfigVSImpl implements ConfigVS {
         return dao.getSingleResult(TagVS.class, query);
     }
 
-    public String getTagMessage(String tag) {
-        if(TagVS.WILDTAG.equals(tag)) return get("wildTagMsg");
-        else return get("wildTagMsg", tag);
-    }
-
     public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
         this.x509TimeStampServerCert = x509TimeStampServerCert;
-    }
-
-    public boolean getIsDevelopment() {
-        return EnvironmentVS.DEVELOPMENT == mode;
     }
 
     public EnvironmentVS getMode() {

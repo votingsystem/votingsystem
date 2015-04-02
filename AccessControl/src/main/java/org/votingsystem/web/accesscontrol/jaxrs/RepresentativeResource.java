@@ -11,6 +11,7 @@ import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.EmailTemplateWrapper;
 
@@ -36,7 +37,7 @@ public class RepresentativeResource {
     @Inject DAOBean dao;
     @Inject RepresentativeBean representativeBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
-
+    @Inject MessagesBean messages;
 
 
     @Path("/delegation") @POST
@@ -192,7 +193,7 @@ public class RepresentativeResource {
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - EventVSElection not found - eventId" + id).build();
         if(eventVS.isActive(new Date())) return Response.status(Response.Status.BAD_REQUEST).entity(
-                config.get("eventActiveErrorMsg")).build();
+                messages.get("eventActiveErrorMsg")).build();
         representativeBean.getAccreditationsBackupForEvent(eventVS);
         return Response.ok().entity("request procesed check your email").build();
     }

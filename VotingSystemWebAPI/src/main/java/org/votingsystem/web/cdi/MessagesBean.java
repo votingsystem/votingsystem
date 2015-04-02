@@ -1,5 +1,7 @@
 package org.votingsystem.web.cdi;
 
+import org.votingsystem.model.TagVS;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -28,6 +30,11 @@ public class MessagesBean {
     @PostConstruct
     public void initialize() throws Exception {
         bundleBaseName = config.getProperty("vs.bundleBaseName");
+    }
+
+    public String getTagMessage(String tag) {
+        if(TagVS.WILDTAG.equals(tag)) return get("wildTagMsg");
+        else return get("tagMsg", tag);
     }
 
     public void setLocale(Locale locale) {

@@ -9,6 +9,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.SocketServiceRequest;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
@@ -36,12 +37,10 @@ public class WebSocketBean {
     private static Logger log = Logger.getLogger(WebSocketBean.class.getSimpleName());
 
     @Inject ConfigVS config;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject
-    SignatureBean signatureBean;
-    @PersistenceContext private EntityManager em;
+    @Inject SignatureBean signatureBean;
+    @Inject MessagesBean messages;
 
     public void onTextMessage(Session session, String msg , boolean last) throws JsonProcessingException, ExceptionVS {
         try {
@@ -50,7 +49,7 @@ public class WebSocketBean {
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             String message = ex.getMessage();
-            if(message == null) message = config.get("socketRequestErrorMsg");
+            if(message == null) message = messages.get("socketRequestErrorMsg");
             processResponse(SocketServiceRequest.getResponse(ResponseVS.SC_ERROR, message, session, msg));
         }
     }
@@ -80,11 +79,11 @@ public class WebSocketBean {
                 break;
             case MESSAGEVS_FROM_DEVICE:
                 if(request.getSessionVS() == null) processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                        config.get("userNotAuthenticatedErrorMsg")));
+                        messages.get("userNotAuthenticatedErrorMsg")));
                 Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(request.getSessionId());
                 if(callerSession == null) callerSession = SessionVSManager.getInstance().getSession(request.getSessionId());
                 if(callerSession == null) {
-                    processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, config.get(
+                    processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, messages.get(
                             "messagevsSignRequestorNotFound")));
                 } else {
                     callerSession.getBasicRemote().sendText(request.getJsonData().toString());
@@ -99,7 +98,7 @@ public class WebSocketBean {
                     if(!signer.getDeviceVS().getDeviceId().equals(request.getDeviceFromId())) signer.setDeviceVS(null);
                 }
                 if(signer.getDeviceVS() == null && request.getDeviceFromId() > 0){
-                    Query query = em.createNamedQuery("findDeviceByUserAndDeviceId")
+                    Query query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId")
                             .setParameter("deviceId", request.getDeviceFromId()).setParameter("userVS", signer);
                     DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
                     signer.setDeviceVS(deviceVS);
@@ -108,9 +107,9 @@ public class WebSocketBean {
                     SessionVSManager.getInstance().putAuthenticatedDevice(request.getSession(), signer);
                     processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null,
                             signer.getDeviceVS().getId()));
-                    em.merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
+                    dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
                 } else processResponse(request.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
-                        config.get("certWithoutDeviceVSInfoErrorMsg"), null));
+                        messages.get("certWithoutDeviceVSInfoErrorMsg"), null));
                 break;
             case WEB_SOCKET_BAN_SESSION:
                 //talks

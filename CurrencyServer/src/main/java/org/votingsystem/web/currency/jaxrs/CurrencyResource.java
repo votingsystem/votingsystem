@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
@@ -33,15 +34,14 @@ public class CurrencyResource {
 
     private static final Logger log = Logger.getLogger(CurrencyResource.class.getSimpleName());
 
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject CurrencyResource currencyResource;
     @Inject UserVSBean userVSBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject ConfigVS config;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject CurrencyBean currencyBean;
+    @Inject MessagesBean messages;
 
     @Path("/request") @GET
     public Object request(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
@@ -81,20 +81,20 @@ public class CurrencyResource {
                 .setParameter("hashCertVS", hashCertVSBase64);
         Currency currency = dao.getSingleResult(Currency.class, query);
         if(currency == null) return Response.status(ResponseVS.SC_NOT_FOUND).entity(
-                config.get("currencyNotFoundErrorMsg")).build();
+                messages.get("currencyNotFoundErrorMsg")).build();
         switch(currency.getState()) {
             case EXPENDED: return Response.status(ResponseVS.SC_CURRENCY_EXPENDED)
-                    .entity(config.get("currencyExpendedShortErrorMsg")).build();
+                    .entity(messages.get("currencyExpendedShortErrorMsg")).build();
             case OK:
                 if(currency.getValidTo().after(new Date())) {
-                    return Response.status(ResponseVS.SC_CURRENCY_OK).entity(config.get("currencyOKMsg")).build();
+                    return Response.status(ResponseVS.SC_CURRENCY_OK).entity(messages.get("currencyOKMsg")).build();
                 } else {
                     dao.merge(currency.setState(Currency.State.LAPSED));
                     return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(
-                            config.get("currencyLapsedShortErrorMsg")).build();
+                            messages.get("currencyLapsedShortErrorMsg")).build();
                 }
             case LAPSED: return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(
-                    config.get("currencyLapsedShortErrorMsg")).build();
+                    messages.get("currencyLapsedShortErrorMsg")).build();
             default:return Response.status(Response.Status.BAD_REQUEST)
                     .entity("unknown currency state: " + currency.getState()).build();
         }

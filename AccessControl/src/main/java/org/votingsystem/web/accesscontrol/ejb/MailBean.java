@@ -3,6 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import org.votingsystem.model.BackupRequestVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -29,6 +30,7 @@ public class MailBean {
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;
     @Inject private ConfigVS config;
+    @Inject MessagesBean messages;
 
     @Asynchronous
     public void send(String toUser, String subject, String msg) {
@@ -78,7 +80,7 @@ public class MailBean {
         UserVS toUser = request.getMessageSMIME().getUserVS();
         String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
         String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = config.get("downloadBackupMailSubject");
+        String subject = messages.get("downloadBackupMailSubject");
         send(toUser.getEmail(), subject, content);
     }
 
@@ -92,7 +94,7 @@ public class MailBean {
         UserVS toUser = request.getMessageSMIME().getUserVS();
         String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
         String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = config.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
+        String subject = messages.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
         send(toUser.getEmail(), subject, content);
     }
 
@@ -106,7 +108,7 @@ public class MailBean {
         UserVS toUser = request.getMessageSMIME().getUserVS();
         String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
         String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = config.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
+        String subject = messages.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
         send(toUser.getEmail(), subject, content);
     }
 

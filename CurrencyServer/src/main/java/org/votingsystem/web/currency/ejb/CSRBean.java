@@ -6,7 +6,9 @@ import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;
@@ -29,9 +31,9 @@ public class CSRBean {
 
     private BigDecimal currencyMinValue = BigDecimal.ONE;
 
-    @PersistenceContext private EntityManager em;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject MessagesBean messages;
+    @Inject DAOBean dao;
+    @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
 
 
@@ -49,7 +51,7 @@ public class CSRBean {
             for(Currency currency : currencyCollection) {
                 X509Certificate x509AnonymousCert = signatureBean.signCSR(
                         currency.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-                em.persist(currency.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS));
+                dao.persist(currency.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS));
                 LoggerVS.logCurrencyIssued(currency.getId(), currency.getCurrencyCode(), currency.getAmount(), currency.getTag(),
                         currencyBatchRequest.getIsTimeLimited(), timePeriod.getDateFrom(), timePeriod.getDateTo());
             }
@@ -57,7 +59,7 @@ public class CSRBean {
         } catch(Exception ex) {
             for(Currency currency : currencyBatchRequest.getCurrencyMap().values()) {
                 if(currency.getId() != null) {
-                    em.merge(currency.setState(Currency.State.ERROR).setReason(ex.getMessage()));
+                    dao.merge(currency.setState(Currency.State.ERROR).setReason(ex.getMessage()));
                 }
             }
             throw new ExceptionVS("currencyRequestDataError");
@@ -65,7 +67,7 @@ public class CSRBean {
     }
 
     public synchronized Currency signCurrencyRequest(Currency currency) throws ExceptionVS {
-        if(currencyMinValue.compareTo(currency.getAmount()) > 0) throw new ExceptionVS(config.get("currencyMinValueError",
+        if(currencyMinValue.compareTo(currency.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), currency.getAmount().toString()));
         DateUtils.TimePeriod timePeriod = null;
         if(currency.getIsTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
@@ -78,11 +80,11 @@ public class CSRBean {
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     currency.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            em.persist(currency.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS));
+            dao.persist(currency.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS));
             LoggerVS.logCurrencyIssued(currency.getId(), currency.getCurrencyCode(), currency.getAmount(), currency.getTag(),
                     currency.getIsTimeLimited(), timePeriod.getDateFrom(), timePeriod.getDateTo());
         } catch(Exception ex) {
-            throw new ExceptionVS(config.get("currencyRequestDataError"));
+            throw new ExceptionVS(messages.get("currencyRequestDataError"));
         }
         return currency;
     }

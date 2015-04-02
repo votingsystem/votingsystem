@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.TransactionVSUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
@@ -32,35 +33,33 @@ import java.util.logging.Logger;
 public class UserVSBean {
 
     private static Logger log = Logger.getLogger(UserVSBean.class.getSimpleName());
-    
-    @PersistenceContext private EntityManager em;
-    @Inject
-    DAOBean dao;
+
+    @Inject DAOBean dao;
+    @Inject MessagesBean messages;
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject UserVSBean userVSBean;
     @Inject SystemBean systemBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject TransactionVSBean transactionVSBean;
     
     
     public UserVS saveUser(MessageSMIME messageSMIMEReq) throws Exception {
         UserVS signer = messageSMIMEReq.getUserVS();
-        if(!signatureBean.isUserAdmin(signer.getNif())) throw new ExceptionVS(config.get("userWithoutPrivilegesErrorMsg",
+        if(!signatureBean.isUserAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));
         ObjectNode dataJSON =(ObjectNode)  new ObjectMapper().readTree(messageSMIMEReq.getSMIME().getSignedContent());
         if (dataJSON.get("info") == null || dataJSON.get("certChainPEM") == null || dataJSON.get("operation") == null ||
                 (TypeVS.CERT_USER_NEW != TypeVS.valueOf(dataJSON.get("operation").asText()))) {
-            throw new ExceptionVS(config.get("paramsErrorMsg"));
+            throw new ExceptionVS(messages.get("paramsErrorMsg"));
         }
         Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                 dataJSON.get("certChainPEM").asText().getBytes());
         UserVS newUser = UserVS.getUserVS(certChain.iterator().next());
         signatureBean.verifyUserCertificate(newUser);
         newUser = subscriptionVSBean.checkUser(newUser);
-        em.merge(newUser.setState(UserVS.State.ACTIVE).setReason(dataJSON.get("info").asText()));
+        dao.merge(newUser.setState(UserVS.State.ACTIVE).setReason(dataJSON.get("info").asText()));
         return newUser;
     }
 
@@ -123,7 +122,7 @@ public class UserVSBean {
     public Map getUserVSDataMap(UserVS userVS, boolean withCerts) throws Exception {
         Map resultMap = new HashMap<>();
         if(withCerts) {
-            Query query = em.createNamedQuery("findCertByUserAndState").setParameter("userVS", userVS)
+            Query query = dao.getEM().createNamedQuery("findCertByUserAndState").setParameter("userVS", userVS)
                     .setParameter("state", CertificateVS.State.OK);
             List<CertificateVS> certificates = query.getResultList();
             List<Map> certList = new ArrayList<>();

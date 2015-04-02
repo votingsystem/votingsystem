@@ -9,8 +9,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.model.RepresentativeDocument;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.ejb.Asynchronous;
@@ -42,18 +42,19 @@ public class RepresentativeBean {
     @Inject DAOBean dao;
     @Inject MailBean mailBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
+    @Inject MessagesBean messages;
 
     public ResponseVS<RepresentativeDocument> saveRepresentativeData(MessageSMIME messageSMIME, byte[] imageBytes) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
-        if(anonymousDelegation == null) throw new ValidationExceptionVS(config.get(
+        if(anonymousDelegation == null) throw new ValidationExceptionVS(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
         Map requestMap = messageSMIME.getSignedContentMap();
         String base64ImageHash = (String) requestMap.get("base64ImageHash");
         MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
         byte[] resultDigest =  messageDigest.digest(imageBytes);
         String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
-        if(!base64ResultDigest.equals(base64ImageHash)) throw new ValidationExceptionVS(config.get("imageHashErrorMsg"));
+        if(!base64ResultDigest.equals(base64ImageHash)) throw new ValidationExceptionVS(messages.get("imageHashErrorMsg"));
         //String base64EncodedImage = requestMap.base64RepresentativeEncodedImage
         //BASE64Decoder decoder = new BASE64Decoder();
         //byte[] imageFileBytes = decoder.decodeBuffer(base64EncodedImage);
@@ -61,9 +62,9 @@ public class RepresentativeBean {
         if(UserVS.Type.REPRESENTATIVE != signer.getType()) {
             dao.merge(signer.setType(UserVS.Type.REPRESENTATIVE).setRepresentative(null));
             representativeDelegationBean.cancelRepresentationDocument(messageSMIME);
-            msg = config.get("representativeDataCreatedOKMsg", signer.getFirstName(), signer.getLastName());
+            msg = messages.get("representativeDataCreatedOKMsg", signer.getFirstName(), signer.getLastName());
         } else {
-            msg = config.get("representativeDataUpdatedMsg", signer.getFirstName(), signer.getLastName());
+            msg = messages.get("representativeDataUpdatedMsg", signer.getFirstName(), signer.getLastName());
         }
         Query query = dao.getEM().createQuery("select i from ImageVS i where i.userVS =:userVS and i.type =:type")
                 .setParameter("userVS", signer).setParameter("type", ImageVS.Type.REPRESENTATIVE);
@@ -91,7 +92,7 @@ public class RepresentativeBean {
         nifToCheck = NifUtils.validate(nifToCheck);
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", nifToCheck);
         UserVS userVS  = dao.getSingleResult(UserVS.class, query);
-        if(userVS == null) throw new ValidationExceptionVS(config.get("userVSNotFoundByNIF", nifToCheck));
+        if(userVS == null) throw new ValidationExceptionVS(messages.get("userVSNotFoundByNIF", nifToCheck));
         Map result = new HashMap<>();
         result.put("lastCheckedDate", new Date());
         if(userVS.getRepresentative() != null) {

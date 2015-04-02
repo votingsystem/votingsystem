@@ -7,6 +7,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.ejb.GroupVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
@@ -42,6 +43,7 @@ public class GroupVSResource {
     @Inject UserVSBean userVSBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
+    @Inject MessagesBean messages;
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -207,7 +209,7 @@ public class GroupVSResource {
         GroupVS groupVS = groupVSBean.saveGroup(messageSMIME);
         Map resultMap = new HashMap<>();
         resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", config.get("newCurrencyGroupOKMsg", groupVS.getName()));
+        resultMap.put("message", messages.get("newCurrencyGroupOKMsg", groupVS.getName()));
         resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
         return resultMap;
     }
@@ -222,7 +224,7 @@ public class GroupVSResource {
         groupVS = groupVSBean.editGroup(groupVS, messageSMIME);
         Map resultMap = new HashMap<>();
         resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", config.get("currencyGroupEditedOKMsg", groupVS.getName()));
+        resultMap.put("message", messages.get("currencyGroupEditedOKMsg", groupVS.getName()));
         resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
         return resultMap;
     }
@@ -249,7 +251,7 @@ public class GroupVSResource {
         groupVS = groupVSBean.cancelGroup(groupVS, messageSMIME);
         Map resultMap = new HashMap<>();
         resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", config.get("currencyGroupCancelledOKMsg", groupVS.getName()));
+        resultMap.put("message", messages.get("currencyGroupCancelledOKMsg", groupVS.getName()));
         resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
         return resultMap;
     }
@@ -263,7 +265,7 @@ public class GroupVSResource {
                 "GroupVS not found - groupId: " + id).build();
         UserVS signer = messageSMIME.getUserVS();
         SubscriptionVS subscriptionVS = groupVSBean.subscribe(messageSMIME);
-        return Response.ok().entity(config.get("groupvsSubscriptionOKMsg", signer.getNif(), signer.getName())).build();
+        return Response.ok().entity(messages.get("groupvsSubscriptionOKMsg", signer.getNif(), signer.getName())).build();
     }
 
     @Path("/id/{groupId}/user/id/{userId}") //old_url -> /groupVS/$id/user/$userId
@@ -323,7 +325,7 @@ public class GroupVSResource {
         currencyAccountBean.checkUserVSAccount(subscriptionVS.getUserVS());
         Map resultMap = new HashMap<>();
         resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", config.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
+        resultMap.put("message", messages.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
                 subscriptionVS.getGroupVS().getName()));
         return resultMap;
     }
@@ -335,7 +337,7 @@ public class GroupVSResource {
         SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(messageSMIME);
         Map resultMap = new HashMap<>();
         resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", config.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
+        resultMap.put("message", messages.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
                 subscriptionVS.getGroupVS().getName()));
         return resultMap;
     }

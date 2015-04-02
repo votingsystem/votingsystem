@@ -7,6 +7,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ public class SubscriptionVSResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
     List<String> supportedFormats = Arrays.asList("rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93",
             "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3");
@@ -59,16 +61,16 @@ public class SubscriptionVSResource {
             SyndContent description = new SyndContentImpl();
             description.setType("text/plain");
             String feedContent = format("<p>{0}</p><a href='{1}'>{3}</a>", eventVSClaim.getContent(), 
-                    claimURL, config.get("signClaim"));
+                    claimURL, messages.get("signClaim"));
             description.setValue(feedContent);
             entry.setDescription(description);
             feeds.add(entry);
         }
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType(feedType);
-        feed.setTitle(config.get("claimsSubscriptionTitle") + " - " + config.getServerName());
+        feed.setTitle(messages.get("claimsSubscriptionTitle") + " - " + config.getServerName());
         feed.setLink(config.getRestURL() + "/eventVSClaim");
-        feed.setDescription(config.get("claimsSubscriptionDescription"));
+        feed.setDescription(messages.get("claimsSubscriptionDescription"));
         feed.setEntries(feeds);
 
         StringWriter writer = new StringWriter();
@@ -92,16 +94,16 @@ public class SubscriptionVSResource {
             SyndContent description = new SyndContentImpl();
             description.setType("text/plain");
             String feedContent = format("<p>{0}</p><a href='{1}'>{3}</a>", eventVSElection.getContent(),
-                    electionURL, config.get("vote"));
+                    electionURL, messages.get("vote"));
             description.setValue(feedContent);
             entry.setDescription(description);
             feeds.add(entry);
         }
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType(feedType);
-        feed.setTitle(config.get("electionsSubscriptionTitle") + " - " + config.getServerName());
+        feed.setTitle(messages.get("electionsSubscriptionTitle") + " - " + config.getServerName());
         feed.setLink(config.getRestURL() + "/eventVSElection");
-        feed.setDescription(config.get("electionsSubscriptionDescription"));
+        feed.setDescription(messages.get("electionsSubscriptionDescription"));
         feed.setEntries(feeds);
 
         StringWriter writer = new StringWriter();

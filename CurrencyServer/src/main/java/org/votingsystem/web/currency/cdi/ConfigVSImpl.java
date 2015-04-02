@@ -99,25 +99,6 @@ public class ConfigVSImpl implements ConfigVS {
         return props.getProperty(key);
     }
 
-    //TODO
-    public String get(String key, Object... arguments) {
-        Locale locale = null;
-        FacesContext ctx = FacesContext.getCurrentInstance();
-        if(ctx != null && ctx.getViewRoot() != null) locale = ctx.getViewRoot().getLocale();
-        if(locale == null) locale = Locale.getDefault();
-        ResourceBundle bundle = ResourceBundle.getBundle("org.votingsystem.web.currency.messages", locale);
-        try {
-            String pattern = bundle.getString(key);
-            /*if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);*/
-            if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-            else return pattern;
-        } catch(Exception ex) {
-            log.info("missing key: " + key + " - country: " + locale.getCountry());
-            return "---" + key + "---";
-        }
-    }
-
     public Properties getProperties() {
         return props;
     }
@@ -127,17 +108,8 @@ public class ConfigVSImpl implements ConfigVS {
         return dao.getSingleResult(TagVS.class, query);
     }
 
-    public String getTagMessage(String tag) {
-        if(TagVS.WILDTAG.equals(tag)) return get("wildTagMsg");
-        else return get("tagMsg", tag);
-    }
-
     public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
         this.x509TimeStampServerCert = x509TimeStampServerCert;
-    }
-
-    public boolean getIsDevelopment() {
-        return EnvironmentVS.DEVELOPMENT == mode;
     }
 
     public EnvironmentVS getMode() {

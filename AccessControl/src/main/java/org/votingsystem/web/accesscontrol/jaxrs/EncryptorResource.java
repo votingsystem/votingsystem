@@ -7,6 +7,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -36,6 +37,7 @@ public class EncryptorResource {
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
     @Inject DAOBean dao;
+    @Inject MessagesBean messages;
 
     @Path("/") @POST
     public Response request(Map requestMap, @Context ServletContext context,
@@ -72,7 +74,7 @@ public class EncryptorResource {
         EventVS eventVS = dao.find(EventVS.class, ((Number)requestMap.get("eventId")).longValue());
         Date signatureTime = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!eventVS.isActive(signatureTime)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(config.get("checkedDateRangeErrorMsg",
+            return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("checkedDateRangeErrorMsg",
                     signatureTime, eventVS.getDateBegin(), eventVS.getDateFinish())).build();
         } else return Response.ok().build();
     }

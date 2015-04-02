@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -36,16 +37,14 @@ public class CurrencyBean {
 
     @PersistenceContext EntityManager em;
     @Inject ConfigVS config;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject UserVSBean userVSBean;
     @Inject CSRBean csrBean;
     @Inject WalletBean walletBean;
-    @Inject
-    TimeStampBean timeStampBean;
+    @Inject TimeStampBean timeStampBean;
+    @Inject MessagesBean messages;
 
 
     public Map processCurrencyTransaction(CurrencyTransactionBatch currencyBatch) throws Exception {
@@ -108,7 +107,7 @@ public class CurrencyBean {
             X509Certificate certCaResult = certValidatorResult.getResult().getTrustAnchor().getTrustedCert();
             CertExtensionCheckerVS extensionChecker = certValidatorResult.getChecker();
             //if (extensionChecker.isAnonymousSigner()) { }
-        } else  throw new ExceptionVS(config.get("currencyStateErrorMsg", currency.getId().toString(), currency.getState().toString()));
+        } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currency.getId().toString(), currency.getState().toString()));
         currency.setAuthorityCertificateVS(signatureBean.getServerCertificateVS());
         return currency;
     }
@@ -120,10 +119,10 @@ public class CurrencyBean {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), currencyBatch.getTagVS(), currencyBatch.getRequestAmount(), currencyBatch.getCurrencyCode());
         currencyBatch = csrBean.signCurrencyBatchRequest(currencyBatch);
-        TransactionVS userTransaction = currencyBatch.getTransactionVS(config.get("currencyRequestLbl"), accountFromMovements);
+        TransactionVS userTransaction = currencyBatch.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
         em.persist(userTransaction);
-        String message = config.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
-                currencyBatch.getCurrencyCode()) + " " + config.getTagMessage(currencyBatch.getTag());
+        String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
+                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTag());
         Map dataMap = new HashMap<>();
         dataMap.put("statusCode", ResponseVS.SC_OK);
         dataMap.put("message", message);

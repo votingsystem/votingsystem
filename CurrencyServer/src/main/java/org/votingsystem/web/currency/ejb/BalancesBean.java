@@ -9,6 +9,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.currency.util.TransactionVSUtils;
@@ -41,25 +42,23 @@ public class BalancesBean {
     private static Logger log = Logger.getLogger(BalancesBean.class.getSimpleName());
 
     private static final DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    
-    @PersistenceContext private EntityManager em;
+
     @Inject ConfigVS config;
     @Inject GroupVSBean groupVSBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject BankVSBean bankVSBean;
     @Inject UserVSBean userVSBean;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject SystemBean systemBean;
+    @Inject MessagesBean messages;
 
     public void initWeekPeriod(Calendar requestDate) throws IOException {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
-        String transactionMsgSubject =  config.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
-        Query query = em.createNamedQuery("countUserActiveOrCancelledAfter").setParameter("dateCancelled", timePeriod.getDateFrom());
+        String transactionMsgSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
+        Query query = dao.getEM().createNamedQuery("countUserActiveOrCancelledAfter").setParameter("dateCancelled", timePeriod.getDateFrom());
         long numTotalUsers = (long)query.getSingleResult();
         log.info(transactionMsgSubject + " - numTotalUsers:" + numTotalUsers + " - " + timePeriod.toString());
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
@@ -70,7 +69,7 @@ public class BalancesBean {
         int offset = 0;
         int pageSize = 100;
         List<UserVS> userVSList;
-        query = em.createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
+        query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
                 timePeriod.getDateFrom()).setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP))
                 .setFirstResult(0).setMaxResults(pageSize);
         while ((userVSList = query.getResultList()).size() > 0) {
@@ -85,8 +84,8 @@ public class BalancesBean {
                 //accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
                 //new File(accessRequestBaseDir).mkdirs()
             }
-            em.flush();
-            em.clear();
+            dao.getEM().flush();
+            dao.getEM().clear();
             offset += pageSize;
             query.setFirstResult(offset);
             String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
@@ -117,7 +116,7 @@ public class BalancesBean {
             for(Object entry:  currencyMap.get(currency).entrySet()) {
                 Map.Entry<String, BigDecimal> tagVSEntry = (Map.Entry<String, BigDecimal>)entry;
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
-                query = em.createNamedQuery("findTransByToUserAndStateAndTypeAndTagAndDateCreatedAfter")
+                query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndTypeAndTagAndDateCreatedAfter")
                         .setParameter("toUserVS", userVS).setParameter("state", TransactionVS.State.OK)
                         .setParameter("type", TransactionVS.Type.CURRENCY_INIT_PERIOD)
                         .setParameter("tag", currentTagVS).setParameter("dateFrom", timePeriod.getDateTo());
@@ -132,7 +131,7 @@ public class BalancesBean {
                 if(TagVS.WILDTAG.equals(currentTagVS.getName()) &&
                         timeLimitedNotExpended.compareTo(BigDecimal.ZERO) < 0) timeLimitedNotExpended = BigDecimal.ZERO;
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
-                String signedMessageSubject =  config.get("tagInitPeriodMsg", tagVSEntry.getKey());
+                String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
                         userVS.getNif(), TransactionVS.getInitPeriodTransactionVSData(amountResult,
                         timeLimitedNotExpended, tagVSEntry.getKey(), userVS).toString(),
@@ -142,7 +141,7 @@ public class BalancesBean {
                 dao.persist(new TransactionVS(userVS, userVS, amountResult, currency, signedMessageSubject, messageSMIME,
                         TransactionVS.Type.CURRENCY_INIT_PERIOD, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
-                    query = em.createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
+                    query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
                             .setParameter("userIBAN", userVS.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
                             .setParameter("currencyCode", currency).setParameter("tag", currentTagVS);
                     CurrencyAccount account = dao.getSingleResult (CurrencyAccount.class, query);
@@ -165,7 +164,7 @@ public class BalancesBean {
     //@Transactional
     public Map signPeriodResult(DateUtils.TimePeriod timePeriod) throws Exception {
         long beginCalc = System.currentTimeMillis();
-        Query query = em.createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
+        Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
                 .setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS));
         long numTotalUsers = (long)query.getSingleResult();
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getProperty("vs.weekReportsPath"), null);
@@ -175,7 +174,7 @@ public class BalancesBean {
         int offset = 0;
         int pageSize = 100;
         List<UserVS> userVSList;
-        query = em.createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
+        query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
                 timePeriod.getDateFrom()).setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS))
                 .setFirstResult(0).setMaxResults(pageSize);
         while ((userVSList = query.getResultList()).size() > 0) {
@@ -194,8 +193,8 @@ public class BalancesBean {
                 //accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
                 //new File(accessRequestBaseDir).mkdirs()
             }
-            em.flush();
-            em.clear();
+            dao.getEM().flush();
+            dao.getEM().clear();
             offset += pageSize;
             query.setFirstResult(offset);
             String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
@@ -215,7 +214,7 @@ public class BalancesBean {
         String resultBalanceStr = new ObjectMapper().writeValueAsString(resultMap);
         Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceStr.getBytes());
         String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " + DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
-        String subject =  config.get("periodBalancesReportMsgSubject", subjectSufix);
+        String subject =  messages.get("periodBalancesReportMsgSubject", subjectSufix);
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(), null,
                 resultBalanceStr, subject);
         receipt.writeTo(new FileOutputStream(reportFiles.getReceiptFile()));

@@ -9,6 +9,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ public class CertificateVSBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
     /*
      * Método para poder añadir certificados de confianza.
@@ -65,7 +67,7 @@ public class CertificateVSBean {
         }
         log.info("addCertificateAuthority - new CA - id:" + certificateVS.getId());
         signatureBean.addCertAuthority(certificateVS);
-        return new URLMessage(ResponseVS.SC_OK,  config.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
+        return new URLMessage(ResponseVS.SC_OK,  messages.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
                 config.getRestURL() + "/certificateVS/serialNumber/" + x509NewCACert.getSerialNumber().toString());
     }
 

@@ -6,6 +6,7 @@ import org.votingsystem.model.EventVSElection;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ public class BackupVSResource {
     @Inject DAOBean dao;
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
 
     @Path("/request/id/{requestId}/download")
     @GET
@@ -60,7 +62,7 @@ public class BackupVSResource {
                 "ERROR - EventVS without backup - eventId: " + eventId).build();
         eventVSElectionBean.generateBackup((EventVSElection) eventVS);
         dao.persist(new BackupRequestVS(null, TypeVS.VOTING_EVENT, email));
-        return Response.ok().entity(config.get("backupRequestOKMsg", email)).build();
+        return Response.ok().entity(messages.get("backupRequestOKMsg", email)).build();
     }
 
 }

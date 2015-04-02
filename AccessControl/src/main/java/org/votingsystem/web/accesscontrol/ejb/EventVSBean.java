@@ -11,6 +11,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -29,6 +30,7 @@ public class EventVSBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
+    @Inject MessagesBean messages;
     @Inject SignatureBean signatureBean;
 
     public void checkEventVSDates (EventVS eventVS) throws ValidationExceptionVS {
@@ -68,7 +70,7 @@ public class EventVSBean {
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         SMIMEMessage smimeMessageResp = null;
         String fromUser = config.getServerName();
-        String subject = config.get("mime.subject.eventCancellationValidated");
+        String subject = messages.get("mime.subject.eventCancellationValidated");
         if(request.eventVS instanceof EventVSElection) {
             String toUser = ((EventVSElection)request.eventVS).getControlCenterVS().getName();
                     smimeMessageResp = signatureBean.getSMIMEMultiSigned(
