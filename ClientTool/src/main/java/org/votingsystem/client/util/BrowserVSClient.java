@@ -7,6 +7,7 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.PublishElectionDialog;
+import org.votingsystem.client.dialog.PublishRepresentativeDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.InboxService;
@@ -99,6 +100,9 @@ public class BrowserVSClient {
                     break;
                 case VOTING_PUBLISHING:
                     PublishElectionDialog.show(operationVS, BrowserVS.getInstance().getScene().getWindow());
+                    break;
+                case NEW_REPRESENTATIVE:
+                    PublishRepresentativeDialog.show(operationVS, BrowserVS.getInstance().getScene().getWindow());
                     break;
                 case WALLET_SAVE:
                     PasswordDialog passwordDialog = new PasswordDialog();

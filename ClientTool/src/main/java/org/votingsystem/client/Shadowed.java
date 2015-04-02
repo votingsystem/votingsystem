@@ -24,7 +24,7 @@ public class Shadowed extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        PublishElectionDialog.show(stage);
+        PublishElectionDialog.show(null, stage);
     }
 
     private void testLog() {

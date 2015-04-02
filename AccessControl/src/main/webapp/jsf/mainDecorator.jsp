@@ -57,7 +57,7 @@
                                 <paper-item data-href="${config.restURL}/representative">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.webURL}/representative/newRepresentative.jsp">
+                                <paper-item data-href="new_representative">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
                                 </paper-item>
                                 <paper-item data-href="${config.webURL}/representative/edit.jsp">
@@ -156,9 +156,10 @@
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                         window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
                     } else if('publish_election' === this.coreSelectorValue) {
-                        var webAppMessage = new WebAppMessage(Operation.VOTING_PUBLISHING)
-                        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-                    } else this.loadURL(this.coreSelectorValue)
+                        VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.VOTING_PUBLISHING));
+                    } else if('new_representative' === this.coreSelectorValue) {
+                        VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.NEW_REPRESENTATIVE));
+                    } else  this.loadURL(this.coreSelectorValue)
                     this.coreSelectorValue = null
                 }
             },
