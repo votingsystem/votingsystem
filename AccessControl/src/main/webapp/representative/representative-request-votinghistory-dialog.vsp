@@ -4,8 +4,6 @@
 <link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
 <link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
-<script src="${config.resourceURL}/pikaday/pikaday.js" type="text/javascript"></script>
-<link href="${config.resourceURL}/pikaday/css/pikaday.css" media="all" rel="stylesheet" />
 
 <polymer-element name="representative-request-votinghistory-dialog">
     <template>

@@ -14,8 +14,6 @@
     <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
     <link href="${config.resourceURL}/core-icons/core-icons.html" rel="import"/>
     <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-    <script src="${config.resourceURL}/pikaday/pikaday.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/pikaday/css/pikaday.css" media="all" rel="stylesheet" />
 
     <style>
         body {

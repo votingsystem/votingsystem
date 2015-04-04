@@ -2,8 +2,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
+
 <fmt:setBundle basename="org.votingsystem.web.controlcenter.messages" var="bundle"/>
-<html>
+<html   xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:rich="http://richfaces.org/rich"
+        xmlns:a4j="http://richfaces.org/a4j">
 <head>
     <title>Test JSP</title>
     <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
@@ -11,8 +16,6 @@
     <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
     <link href="${config.resourceURL}/core-icons/core-icons.html" rel="import"/>
     <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-    <script src="${config.resourceURL}/pikaday/pikaday.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/pikaday/css/pikaday.css" media="all" rel="stylesheet" />
 
     <style>
         body {
@@ -39,6 +42,17 @@
     </style>
 </head>
 <body bgcolor="white">
+
+    <p:calendar id="popup" widgetVar="calendarWV"/>
+
+    <f:view>
+        <h1>
+            <h:outputText value="Example of using JSF tags with other custom tags"/>
+        </h1>
+        <h:inputText value="#{config.resourceURL}">
+        </h:inputText>.
+    </f:view>
+
 
     <h2>- restURL: - ${config.resourceURL}</h2>
     <h2>- Property: - ${config.getProperty('vs.systemNIF')}</h2>

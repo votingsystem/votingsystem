@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+    <title>kitchensink-ml</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
+    <link href="${config.resourceURL}/core-icons/core-icons.html" rel="import"/>
+    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+
+    <style>
+        body {
+            font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+            font-size: 14px;
+            margin: 0;
+            padding: 24px;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+        }
+        section { padding: 20px 0; }
+        section > div {
+            padding: 14px;
+            font-size: 16px;
+        }
+        paper-button.colored { color: #4285f4; }
+        paper-button[raised].colored {
+            background: #4285f4;
+            color: #fff;
+        }
+        paper-button.custom > core-icon { margin-right: 4px; }
+        paper-button.hover:hover { background: #eee; }
+        paper-button.blue-ripple::shadow #ripple { color: #4285f4; }
+    </style>
+</h:head>
+<body>
+    <div id="container">
+        <div class="dualbrand">
+            <img src="resources/gfx/dualbrand_logo.png" />
+        </div>
+        <div id="content">
+            <ui:insert name="content">
+                    [Template content will be inserted here]
+         </ui:insert>
+        </div>
+        <div id="aside">
+            <p>#{bundle.learnAboutJBossAS7}</p>
+            <ul>
+                <li><a
+                    href="https://github.com/wildfly/quickstart/blob/master/guide/Introduction.asciidoc">#{bundle.getStartedGuide}</a></li>
+                <li><a href="http://www.wildfly.org/">#{bundle.communityProjectInfo}</a></li>
+            </ul>
+        </div>
+        <div id="footer">
+            <p>#{bundle.projectGenerated}<br />
+            </p>
+        </div>
+    </div>
+    <paper-button raised>button</paper-button>
+
+</body>
+</html>

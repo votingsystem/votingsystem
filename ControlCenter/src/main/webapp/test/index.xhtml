@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Test JSP</title>
+    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
+    <link href="${config.resourceURL}/core-icons/core-icons.html" rel="import"/>
+    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+    <link href="${config.webURL}/element/test-pol.vsp" rel="import"/>
+
+    <style>
+        body {
+            font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+            font-size: 14px;
+            margin: 0;
+            padding: 24px;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+        }
+        section { padding: 20px 0; }
+        section > div {
+            padding: 14px;
+            font-size: 16px;
+        }
+        paper-button.colored { color: #4285f4; }
+        paper-button[raised].colored {
+            background: #4285f4;
+            color: #fff;
+        }
+        paper-button.custom > core-icon { margin-right: 4px; }
+        paper-button.hover:hover { background: #eee; }
+        paper-button.blue-ripple::shadow #ripple { color: #4285f4; }
+    </style>
+    Head
+</h:head>
+<h:body>
+    <h2>JSF msg: #{msg.voteRepeatedErrorMsg}</h2>
+
+    <p:outputLabel for="popup" value="Inline:" />
+    <p:calendar id="popup" widgetVar="calendarWV">
+        <f:convertDateTime pattern="dd/MM/yyyy" />
+    </p:calendar>
+
+    <p:editor id="editorVS" widgetVar="editorWidget" width="600" controls="bold italic underline strikethrough"/>
+
+    <h2>- ${config.contextURL}</h2>
+    <h2>- ${config.restURL}</h2>
+    <h2>- getProperty: - ${config.getProperty('vs.systemNIF')}</h2>
+
+    <paper-button raised="true" >button</paper-button>
+    <button onclick="buttonClicked();">Normal button</button>
+    <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
+        <div hidden="false" class="voteOption" style="width: 90%;margin: 15px auto 0px auto;
+                    font-size: 1.3em; font-weight: bold;">- {{optionvs.content}}
+        </div>
+    </template>
+    <f:verbatim>
+        <script type="text/javascript">
+            window.onload = function() {
+                console.log("=== index.xhtml - onload");
+            }
+            function buttonClicked() {
+                var editorWidget = PF('editorWidget')
+                editorWidget.saveHTML()
+                console.log("calendarWV: " + PF('calendarWV').getDate());//Saves html text in iframe back to the textarea.
+
+                console.log("getSelectedText: " +  document.getElementById("editor_input").value);
+                //console.log("====== editorWidget: " + editorWidget.clear());
+            }
+        </script>
+    </f:verbatim>
+    <test-pol></test-pol>
+</h:body>
+</html>
