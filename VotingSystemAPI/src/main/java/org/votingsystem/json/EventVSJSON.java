@@ -1,12 +1,12 @@
 package org.votingsystem.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MapUtils;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +14,7 @@ import java.util.Set;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventVSJSON {
 
     private Long id;

@@ -90,7 +90,7 @@ public class EventVSElectionBean {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg"), controlCenterVS.getServerURL());
+            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenterVS.getServerURL()));
         }
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
                 "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
@@ -106,8 +106,6 @@ public class EventVSElectionBean {
         dao.persist(messageSMIMEResult);
         dao.merge(eventVS.setState(EventVS.State.ACTIVE));
         return messageSMIMEResult;
-        /*return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
-                messageSMIME: messageSMIME, contentType: ContentTypeVS.JSON_SIGNED)*/
     }
 
     public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<Map> optionList) throws ExceptionVS {

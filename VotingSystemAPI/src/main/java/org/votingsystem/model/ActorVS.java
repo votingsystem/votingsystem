@@ -4,14 +4,12 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Logger;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -243,15 +241,15 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public String getRootCAServiceURL() {
-        return serverURL + "/certificateVS/addCertificateAuthority";
+        return serverURL + "/rest/certificateVS/addCertificateAuthority";
     }
 
     public static String getRootCAServiceURL(String serverURL) {
-        return serverURL + "/certificateVS/addCertificateAuthority";
+        return serverURL + "/rest/certificateVS/addCertificateAuthority";
     }
 
     public String getServerInfoURL() {
-        return serverURL + "/serverInfo";
+        return serverURL + "/rest/serverInfo";
     }
 
     public String getMultiSignedMessageTestServiceURL() {
@@ -267,27 +265,27 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public String getUserCertServiceURL() {
-        return getServerURL() + "/userVS";
+        return getServerURL() + "/rest/userVS";
     }
 
     public String getUserBaseInitServiceURL() {
-        return getServerURL() + "/userVS/prepareUserBaseData";
+        return getServerURL() + "/rest/userVS/prepareUserBaseData";
     }
 
     public String getReceiptViewerURL() {
-        return getServerURL() + "/messageSMIME/contentViewer";
+        return getServerURL() + "/rest/messageSMIME/contentViewer";
     }
 
     public static String getReceiptViewerURL(String serverURL) {
-        return serverURL + "/messageSMIME/contentViewer";
+        return serverURL + "/rest/messageSMIME/contentViewer";
     }
 
     public String getGroupURL(Long id) {
-        return getServerURL() + "/groupVS/" + String.valueOf(id);
+        return getServerURL() + "/rest/groupVS/id/" + String.valueOf(id);
     }
 
     public String getUserVSURL(Long id) {
-        return getServerURL() + "/userVS/id/" + String.valueOf(id);
+        return getServerURL() + "/rest/userVS/id/" + String.valueOf(id);
     }
 
 

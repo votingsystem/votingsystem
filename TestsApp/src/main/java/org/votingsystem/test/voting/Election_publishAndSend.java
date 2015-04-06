@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.json.ActorVSJSON;
 import org.votingsystem.json.EventVSElectionJSON;
+import org.votingsystem.json.EventVSJSON;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
@@ -73,7 +74,7 @@ public class Election_publishAndSend {
             throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
         }
         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-        eventVS = publishEvent(TestUtils.getSimulationData().getEventVS(), publisherNIF, "publishElectionMsgSubject");
+        EventVSJSON eventVSJSON = publishEvent(TestUtils.getSimulationData().getEventVS(), publisherNIF, "publishElectionMsgSubject");
         simulatorExecutor = Executors.newFixedThreadPool(100);
         CountDownLatch userBaseDataLatch = new CountDownLatch(1);
         ((VotingSimulationData)TestUtils.getSimulationData()).getUserBaseData().sendData(userBaseDataLatch);
@@ -154,7 +155,7 @@ public class Election_publishAndSend {
         TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
     }
 
-    private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
+    private static EventVSJSON publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
         log.info("publishEvent");
         eventVS.setDateBegin(new Date());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date()));
@@ -173,9 +174,8 @@ public class Election_publishAndSend {
         ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt");
         SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-        Map<String, Object> dataMap = new ObjectMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        return EventVS.parse(dataMap);
+        EventVSJSON response = new ObjectMapper().readValue(responseVS.getMessage(), EventVSJSON.class);
+        return response;
     }
 
     public static void startSimulationTimer(SimulationData simulationData) throws Exception {

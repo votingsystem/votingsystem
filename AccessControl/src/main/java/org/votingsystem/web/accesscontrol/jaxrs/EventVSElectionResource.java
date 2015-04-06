@@ -44,6 +44,7 @@ public class EventVSElectionResource {
     @Inject ConfigVS config;
 
     @Path("/id/{id}") @GET
+    @Transactional
     public Object getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -55,7 +56,7 @@ public class EventVSElectionResource {
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
         eventVSBean.checkEventVSDates(eventVS);
-        EventVSJSON eventVSJSON = new EventVSJSON(eventVS, config.getServerName(), config.getRestURL());
+        EventVSJSON eventVSJSON = new EventVSJSON(eventVS, config.getServerName(), config.getContextURL());
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
                     .type(ContentTypeVS.JSON.getName()).build();
@@ -111,7 +112,7 @@ public class EventVSElectionResource {
     public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessageSMIME response = eventVSElectionBean.saveEvent(messageSMIME);
-        resp.setHeader("eventURL", format("{0}/eventVSElection/{1}", config.getRestURL(), response.getEventVS().getId()));
+        resp.setHeader("eventURL", format("{0}/eventVSElection/id/{1}", config.getRestURL(), response.getEventVS().getId()));
         return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
     }
 
