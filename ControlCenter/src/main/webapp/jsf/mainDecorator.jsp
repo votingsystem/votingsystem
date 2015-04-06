@@ -42,7 +42,7 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="http://localhost:8080/ControlCenter/jsf/test/index1.xhtml">
+                        <paper-item data-href="${config.webURL}/jsf/eventVSElection/index.jsp">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </paper-item>
                         <paper-item data-href="${config.webURL}/subscriptionVS/feeds.jsp">

@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 public class TimeStamp_request {
     
     private static Logger log;
-    private static Boolean withTimeStampValidation = false;
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
@@ -56,19 +55,6 @@ public class TimeStamp_request {
         }*/
         ContextVS.getInstance().setDefaultServer(actorVS);
         ContextVS.getInstance().setTimeStampServerCert(actorVS.getX509Certificate());
-
-        if(withTimeStampValidation) {
-            SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService();
-            String serviceURL = TestUtils.getSimulationData().getServerURL() + "/certificateVS/addCertificateAuthority";
-            byte[] rootCACertPEMBytes = CertUtils.getPEMEncoded(authoritySignatureService.getCertSigner());
-            Map requestMap = new HashMap<>();
-            requestMap.put("operation", TypeVS.CERT_CA_NEW.toString());
-            requestMap.put("info", "Autority from Test Web App " + new Date());
-            requestMap.put("certChainPEM", new String(rootCACertPEMBytes, StandardCharsets.UTF_8));
-            responseVS = HttpHelper.getInstance().sendData(new ObjectMapper().writeValueAsString(requestMap).getBytes(),
-                    ContentTypeVS.JSON, serviceURL);
-            if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        }
         if(!(TestUtils.getSimulationData().getNumRequestsProjected() > 0)) {
             log.info("NumRequestsProjected = 0");
             return;
@@ -94,8 +80,7 @@ public class TimeStamp_request {
             if((TestUtils.getSimulationData().getNumRequests() - TestUtils.getSimulationData().
                     getNumRequestsCollected()) <= TestUtils.getSimulationData().getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(TestUtils.getSimulationData().getAndIncrementNumRequests().intValue());
-                completionService.submit(new TimeStamperTestSender(nifFrom, TestUtils.getSimulationData().getServerURL(),
-                        withTimeStampValidation));
+                completionService.submit(new TimeStamperTestSender(nifFrom, TestUtils.getSimulationData().getServerURL()));
             } else Thread.sleep(300);
         }
     }

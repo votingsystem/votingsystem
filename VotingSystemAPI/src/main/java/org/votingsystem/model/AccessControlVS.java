@@ -38,15 +38,15 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getAnonymousDelegationRequestServiceURL() {
-        return getServerURL() + "/representative/anonymousDelegationRequest";
+        return getServerURL() + "/rest/representative/anonymousDelegationRequest";
     }
 
     public String getAnonymousDelegationServiceURL() {
-        return getServerURL() + "/representative/anonymousDelegation";
+        return getServerURL() + "/rest/representative/anonymousDelegation";
     }
 
     public String getDelegationServiceURL() {
-        return getServerURL() + "/representative/delegation";
+        return getServerURL() + "/rest/representative/delegation";
     }
 
     public String getBackupServiceURL() {
@@ -58,15 +58,15 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getDownloadServiceURL(String param) {
-        return getServerURL() + "/backupVS/download/" + param;
+        return getServerURL() + "/rest/backupVS/download/" + param;
     }
 
     public String getPublishClaimURL() {
-        return getServerURL() + "/eventVSClaim";
+        return getServerURL() + "/rest/eventVSClaim";
     }
 
     public String getPublishElectionURL() {
-        return getServerURL() + "/eventVSElection";
+        return getServerURL() + "/rest/eventVSElection";
     }
 
     public String getClaimServiceURL() {
@@ -82,11 +82,11 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getServerSubscriptionServiceURL() {
-        return getServerURL() + "/subscriptionVS";
+        return getServerURL() + "/rest/subscriptionVS";
     }
 
     public String getRepresentativeServiceURL() {
-        return getServerURL() + "/representative";
+        return getServerURL() + "/rest/representative";
     }
 
     public String getControlCenterCheckServiceURL(String controlCenterServerURL) {
@@ -94,37 +94,37 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getVoteCancelerServiceURL() {
-        return getServerURL() + "/voteVS/cancel";
+        return getServerURL() + "/rest/voteVS/cancel";
     }
 
     public String getVoteStateServiceURL(String voteHashHex) {
-        return getServerURL() + "/voteVS/hash/" + voteHashHex;
+        return getServerURL() + "/rest/voteVS/hash/" + voteHashHex;
     }
     public String getVoteServiceURL() {
         return getServerURL() + "/rest/voteVS";
     }
 
     public String getDashBoardURL() {
-        return getServerURL() + "/app/admin?menu=admin";
+        return getServerURL() + "/jsf/app/admin.jsp?menu=admin";
     }
 
     public String getVotingPageURL() {
-        return getServerURL() + "/eventVSElection?menu=user";
+        return getServerURL() + "/rest/eventVSElection?menu=user";
     }
 
     public String getSelectRepresentativePageURL() {
-        return getServerURL() + "/representative?menu=user";
+        return getServerURL() + "/rest/representative?menu=user";
     }
 
     public String getUserCSRServiceURL (Long csrRequestId) {
-        return getServerURL() + "/csr?csrRequestId=" + csrRequestId;
+        return getServerURL() + "/rest/csr?csrRequestId=" + csrRequestId;
     }
 
     public String getUserCSRServiceURL () {
-        return getServerURL() + "/csr/request";
+        return getServerURL() + "/rest/csr/request";
     }
 
     public String getRepresentationStateServiceURL (String nif) {
-        return getServerURL() + "/representative/state/" + nif;
+        return getServerURL() + "/rest/representative/state/" + nif;
     }
 }

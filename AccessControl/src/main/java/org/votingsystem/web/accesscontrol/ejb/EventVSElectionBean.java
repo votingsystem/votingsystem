@@ -58,7 +58,7 @@ public class EventVSElectionBean {
         eventVSBean.setEventDatesState(eventVS);
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + dateFinish);
-        dataMap.put("dateFinish", DateUtils.getDateStr(dateFinish));
+        dataMap.put("dateFinish", dateFinish);
         dataMap.put("controlCenterURL", controlCenterVS.getServerURL());
         Map accessControlMap = new HashMap<>();
         accessControlMap.put("serverURL", config.getContextURL());
@@ -88,7 +88,8 @@ public class EventVSElectionBean {
         String fromUser = config.getServerName();
         String toUser = controlCenterVS.getName();
         String subject = messages.get("mime.subject.votingEventValidated");
-        SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, dataMap.toString(), subject, header);
+        SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, new ObjectMapper().writeValueAsString(
+                dataMap), subject, header);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -115,8 +116,11 @@ public class EventVSElectionBean {
     public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<String> optionList) throws ExceptionVS {
         if(optionList.size() < 2) throw new ExceptionVS("elections must have at least two options");
         Set<FieldEventVS> result = new HashSet<>();
-        for(String option : optionList) {
-            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, option));
+        for(Object option : optionList) {
+            String optionContent = null;
+            if(option instanceof String) optionContent = (String)option;
+            else optionContent = (String) ((Map)option).get("content");
+            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, optionContent));
             result.add(fieldEventVS);
         }
         return result;

@@ -16,7 +16,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
+import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless
+@Singleton
 public class ControlCenterBean {
 
     private static final Logger log = Logger.getLogger(ControlCenterBean.class.getSimpleName());

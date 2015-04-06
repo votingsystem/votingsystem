@@ -5,6 +5,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.StartupVS;
 import org.votingsystem.web.ejb.TimeStampBean;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
 
 @Singleton
 @Startup
-public class StartupBean {
+public class StartupBean implements StartupVS {
 
     private static Logger log = Logger.getLogger(StartupBean.class.getSimpleName());
 
@@ -43,4 +44,6 @@ public class StartupBean {
     }
 
     @PreDestroy private void shutdown() { log.info(" --------- shutdown ---------");}
+
+    @Override public void mainServletInitialized() throws Exception { }
 }

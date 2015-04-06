@@ -24,12 +24,10 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
 
     private String nif;
     private String serverURL;
-    private Boolean withTimeStampValidation;
 
-    public TimeStamperTestSender(String nif, String timestampServerURL, Boolean withTimeStampValidation) throws Exception {
+    public TimeStamperTestSender(String nif, String timestampServerURL) throws Exception {
         this.nif = nif;
         this.serverURL = timestampServerURL;
-        this.withTimeStampValidation = withTimeStampValidation;
     }
         
     @Override public ResponseVS call() throws Exception {
@@ -37,15 +35,8 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
         SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
                 StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject);
-        if(withTimeStampValidation) {
-            String timeStampTestServiceURL = serverURL + "/timeStamp/validateTestMessage";
-            SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, timeStampTestServiceURL,
-                    ActorVS.getTimeStampServiceURL(serverURL), ContentTypeVS.JSON_SIGNED, null, null);
-            return signedSender.call();
-        } else {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, ActorVS.getTimeStampServiceURL(serverURL));
-            return ResponseVS.OK(null).setSMIME(timeStamper.call());
-        }
+        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, ActorVS.getTimeStampServiceURL(serverURL));
+        return ResponseVS.OK(null).setSMIME(timeStamper.call());
     }
         
     private Map getRequestJSON(String nif) {

@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.inject.Inject;

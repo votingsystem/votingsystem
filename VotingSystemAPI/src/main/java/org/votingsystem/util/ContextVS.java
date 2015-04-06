@@ -429,7 +429,9 @@ public class ContextVS implements BundleActivator {
         FileUtils.copyStreamToFile(new ByteArrayInputStream(fileToCopy), newFile);
     }
 
-    public AccessControlVS getAccessControl() { return accessControl; }
+    public AccessControlVS getAccessControl() {
+        return accessControl;
+    }
 
     public void setAccessControl(AccessControlVS accessControl) {
         this.accessControl = accessControl;

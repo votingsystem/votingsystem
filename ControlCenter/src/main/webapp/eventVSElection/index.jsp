@@ -1,6 +1,5 @@
 <html>
 <head>
-
     <link href="${config.resourceURL}/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
     <link href="${config.webURL}/element/search-info.vsp" rel="import"/>
     <link href="${config.webURL}/eventVSElection/eventvs-election-list.vsp" rel="import"/>
@@ -14,9 +13,6 @@
                       eventvstype="election" eventVSState="${params.eventVSState}"></eventvs-election-list>
     </div>
     <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
-
-    =========== contextURL: ${contextURL}
-
 </body>
 </html>
 <script>

@@ -2,7 +2,11 @@ package org.votingsystem.web.ejb;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -15,7 +19,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
-
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.mail.Header;
@@ -28,10 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.security.*;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +46,6 @@ public class SignatureBean {
 
     private static Logger log = Logger.getLogger(SignatureBean.class.getSimpleName());
 
-    @PersistenceContext private EntityManager em;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
@@ -67,6 +66,7 @@ public class SignatureBean {
     private UserVS systemUser;
     private String password;
     private String keyAlias;
+    private String serverName;
 
     public void init() throws Exception {
         Properties properties = new Properties();
@@ -82,7 +82,10 @@ public class SignatureBean {
                 keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
-        List<java.security.cert.Certificate> certChain = Arrays.asList(keyStore.getCertificateChain(keyAlias));
+        certChain = new ArrayList<>();
+        for(java.security.cert.Certificate certificate : keyStore.getCertificateChain(keyAlias)) {
+            certChain.add((X509Certificate) certificate);
+        }
         keyStorePEMCerts = CertUtils.getPEMEncoded (certChain);
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         currencyAnchors = new HashSet<>();
@@ -92,11 +95,12 @@ public class SignatureBean {
             checkAuthorityCertDB((X509Certificate) certificate);
             certChain.add((X509Certificate) certificate);
         }
-        Query query = em.createNamedQuery("findCertBySerialNumber")
+        Query query = dao.getEM().createNamedQuery("findCertBySerialNumber")
                 .setParameter("serialNumber", localServerCertSigner.getSerialNumber().longValue());
         serverCertificateVS = dao.getSingleResult(CertificateVS.class, query);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
+        serverName = config.getServerName();
     }
 
     public boolean isUserAdmin(String nif) {
@@ -126,9 +130,7 @@ public class SignatureBean {
         return new KeyStoreInfo(keyStore, privateKeySigner, certSigner);
     }
 
-    @Transactional
     public void initAdmins(List<UserVS> admins) throws Exception {
-        log.info("initAdmins - admins.size: " + admins.size());
         Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
         systemUser = dao.getSingleResult(UserVS.class, query);
         Set<String> adminsNIF = new HashSet<>();
@@ -138,7 +140,7 @@ public class SignatureBean {
             adminsNIF.add(userVS.getNif());
         }
         systemUser.updateAdmins(adminsNIF);
-        em.merge(systemUser);
+        dao.merge(systemUser);
         log.info("initAdmins - admins list:" + adminsNIF);
         setAdmins(adminsNIF);
     }
@@ -148,7 +150,7 @@ public class SignatureBean {
         for(X509Certificate fileSystemX509TrustedCert:resourceCerts) {
             checkAuthorityCertDB(fileSystemX509TrustedCert);
         }
-        Query query = em.createNamedQuery("findCertByStateAndType")
+        Query query = dao.getEM().createNamedQuery("findCertByStateAndType")
                 .setParameter("type", CertificateVS.Type.CERTIFICATE_AUTHORITY)
                 .setParameter("state", CertificateVS.State.OK);
         List<CertificateVS>  trustedCertsList = query.getResultList();
@@ -172,7 +174,7 @@ public class SignatureBean {
     private CertificateVS checkAuthorityCertDB(X509Certificate x509AuthorityCert) throws CertificateException,
             NoSuchAlgorithmException, NoSuchProviderException, ExceptionVS {
         log.info(x509AuthorityCert.getSubjectDN().toString());
-        Query query = em.createNamedQuery("findCertBySerialNumberAndType")
+        Query query = dao.getEM().createNamedQuery("findCertBySerialNumberAndType")
                 .setParameter("type", CertificateVS.Type.CERTIFICATE_AUTHORITY)
                 .setParameter("serialNumber", x509AuthorityCert.getSerialNumber().longValue());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
@@ -190,7 +192,7 @@ public class SignatureBean {
             String msg = "Updated from type " + certificateVS.getType() + " to type 'CERTIFICATE_AUTHORITY'";
             certificateVS.setDescription(certificateVS.getDescription() + "###" + msg);
             certificateVS.setType(CertificateVS.Type.CERTIFICATE_AUTHORITY);
-            em.merge(certificateVS);
+            dao.merge(certificateVS);
         }
         return certificateVS;
     }
@@ -354,9 +356,7 @@ public class SignatureBean {
                                              Header... headers) throws Exception {
         log.info("getSMIMETimeStamped - subject:" + subject + " - fromUser: " + fromUser + " to user: " + toUser);
         SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers);
-        MessageTimeStamper timeStamper = new MessageTimeStamper(
-                smimeMessage, "${grailsApplication.config.vs.timeStampServerURL}/timeStamp");
-        return timeStamper.call();
+        return timeStampBean.timeStampSMIME(smimeMessage);
     }
 
     public synchronized SMIMEMessage getSMIMEMultiSigned (
@@ -367,11 +367,11 @@ public class SignatureBean {
 
     public synchronized SMIMEMessage getSMIMEMultiSigned (String toUser, final SMIMEMessage smimeMessage,
                                                           String subject) throws Exception {
-        return getSignedMailGenerator().getSMIMEMultiSigned( config.getServerName(), toUser, smimeMessage, subject);
+        return getSignedMailGenerator().getSMIMEMultiSigned(serverName, toUser, smimeMessage, subject);
     }
 
     public SMIMECheck validateSMIME(SMIMEMessage smimeMessage) throws Exception {
-        Query query = em.createNamedQuery("findMessageSMIMEByBase64ContentDigest")
+        Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
                 .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
         if(messageSMIME != null) throw new ExceptionVS("'smimeDigestRepeatedErrorMsg'");

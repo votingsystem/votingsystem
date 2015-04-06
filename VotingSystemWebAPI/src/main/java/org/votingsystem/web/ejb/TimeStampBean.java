@@ -4,14 +4,17 @@ package org.votingsystem.web.ejb;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -19,7 +22,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.cdi.ConfigVS;
-
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -38,22 +40,24 @@ public class TimeStampBean {
 
     private static Logger log = Logger.getLogger(TimeStampBean.class.getSimpleName());
 
-    @Inject
-    ConfigVS configVS;
+    @Inject ConfigVS config;
     @Inject DAOBean dao;
 
     private SignerInformationVerifier timeStampSignerInfoVerifier;
     private byte[] signingCertPEMBytes;
+    private X509Certificate x509TimeStampServerCert;
+    private String timeStampServiceURL;
 
     public TimeStampBean() { }
 
     public void init() {
         log.info("TimeStampBean");
         try {
-            String serverURL = StringUtils.checkURL(configVS.getTimeStampServerURL());
+            String serverURL = StringUtils.checkURL(config.getTimeStampServerURL());
+            timeStampServiceURL = serverURL + "/timestamp";
             Query query = dao.getEM().createNamedQuery("findActorVSByServerURL").setParameter("serverURL", serverURL);
             ActorVS timeStampServer = dao.getSingleResult(ActorVS.class, query);
-            X509Certificate x509TimeStampServerCert = null;
+            x509TimeStampServerCert = null;
             CertificateVS timeStampServerCert = null;
             if(timeStampServer == null) {
                 fetchTimeStampServerInfo(new ActorVS(serverURL));
@@ -77,7 +81,7 @@ public class TimeStampBean {
                 }
             }
             if(x509TimeStampServerCert != null) {
-                configVS.setX509TimeStampServerCert(x509TimeStampServerCert);
+                config.setX509TimeStampServerCert(x509TimeStampServerCert);
                 timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(x509TimeStampServerCert);
                 X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
@@ -146,5 +150,19 @@ public class TimeStampBean {
         return timeStampSignerInfoVerifier;
     }
 
+
+    public SMIMEMessage timeStampSMIME(SMIMEMessage smimeMessage) throws Exception {
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getTimeStampRequest().getEncoded(),
+                ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            byte[] bytesToken = responseVS.getMessageBytes();
+            TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
+            SignerInformationVerifier timeStampSignerInfoVerifier = new
+                    JcaSimpleSignerInfoVerifierBuilder().build(x509TimeStampServerCert);
+            timeStampToken.validate(timeStampSignerInfoVerifier);
+            smimeMessage.setTimeStampToken(timeStampToken);
+            return smimeMessage;
+        } else throw new ExceptionVS(responseVS.getMessage());
+    }
 
 }

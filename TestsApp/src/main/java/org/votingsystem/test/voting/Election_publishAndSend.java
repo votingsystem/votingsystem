@@ -3,6 +3,7 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.json.ActorVSJSON;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
@@ -35,8 +36,8 @@ public class Election_publishAndSend {
         eventDataMap.put("subject", "voting subject");
         eventDataMap.put("content", "<p>election content</p>");
         eventDataMap.put("UUID", UUID.randomUUID().toString());
-        eventDataMap.put("dateBegin", "2015/02/19 00:00:00");
-        eventDataMap.put("dateFinish", "2014/02/20  00:00:00");
+        eventDataMap.put("dateBegin", "2015/04/06 00:00:00");
+        eventDataMap.put("dateFinish", "2014/04/06  00:00:00");
         eventDataMap.put("fieldsEventVS", Arrays.asList("field1", "field2"));
 
         Map userBaseDataMap = new HashMap<>();
@@ -49,7 +50,7 @@ public class Election_publishAndSend {
         userBaseDataMap.put("numUsersWithRepresentativeWithVote", 3);
 
         Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("accessControlURL","http://currency/AccessControl");
+        simulationDataMap.put("accessControlURL","http://localhost:8080/AccessControl");
         simulationDataMap.put("maxPendingResponses", 50);
         simulationDataMap.put("userBaseData", userBaseDataMap);
         simulationDataMap.put("whenFinishChangeEventStateTo", "");
@@ -63,7 +64,6 @@ public class Election_publishAndSend {
         simulationDataMap.put("timer", timerMap);
 
         log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(simulationDataMap));
-
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 TestUtils.getSimulationData().getAccessControlURL()),ContentTypeVS.JSON);
         Map<String, Object> dataMap = new ObjectMapper().readValue(

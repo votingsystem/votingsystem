@@ -4,6 +4,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.StartupVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -24,6 +25,7 @@ public class InitServlet extends HttpServlet{
     private static Logger log = Logger.getLogger(InitServlet.class.getSimpleName());
 
     @Inject SignatureBean signatureBean;
+    @Inject StartupVS startupBean;
 
     @Override public void init() throws ServletException {
         try {
@@ -50,6 +52,7 @@ public class InitServlet extends HttpServlet{
             if(res == null) {
                 log.log(Level.SEVERE, "Have you executed 'bower install' from web-app dir ???");
             }
+            startupBean.mainServletInitialized();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

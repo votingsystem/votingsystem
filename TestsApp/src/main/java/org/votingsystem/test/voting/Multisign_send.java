@@ -26,7 +26,7 @@ public class Multisign_send {
 
     public static void main(String[] args) throws Exception {
         Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("serverURL", "http://localhost:8080/AccessControl");
+        simulationDataMap.put("serverURL", "http://localhost:8080/ControlCenter");
         simulationDataMap.put("maxPendingResponses", 10);
         simulationDataMap.put("numRequestsProjected", 1);
         Map timerMap = new HashMap<>();
