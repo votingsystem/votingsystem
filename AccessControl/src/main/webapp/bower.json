@@ -24,7 +24,6 @@
     "juicy-jsoneditor":"juicy-jsoneditor#~0.0.3",
     "highcharts":"highcharts#~4.1.1",
     "font-awesome":"font-awesome#~4.3.0",
-    "ckeditor":"ckeditor#~4.4.7",
     "polymer": "Polymer/polymer",
     "core-ajax":"Polymer/core-ajax",
     "core-animation":"Polymer/core-animation",

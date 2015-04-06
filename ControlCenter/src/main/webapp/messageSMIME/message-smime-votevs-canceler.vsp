@@ -1,14 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.votingsystem.util.TypeVS" %>
 
-<script src="${config.webURL}/js/utilsVS.js" type="text/javascript"></script>
+<script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
 <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${config.resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
 
 <polymer-element name="message-smime-votevs-canceler" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {

@@ -3,16 +3,15 @@
 <%@ taglib uri="http://www.opensymphony.com/sitemesh/decorator" prefix="decorator" %>
 <html>
 <head>
-    <link rel="shortcut icon" href="${config.webURL}/images/icon_16/fa-credit-card.png" type="image/x-icon">
+    <link rel="shortcut icon" href="${request.contextPath}/images/icon_16/fa-bolt.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <title>${msg.appTitle}</title>
-    <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+    <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
     <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <script src="${config.webURL}/js/utilsVS.js" type="text/javascript"></script>
-    <jsp:include page="/include/utils_js.jsp"/>
+    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
     <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
     <link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
     <link href="${config.resourceURL}/paper-item/paper-item.html" rel="import"/>
@@ -43,7 +42,7 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${config.restURL}/eventVSElection">
+                        <paper-item data-href="http://localhost:8080/ControlCenter/jsf/test/index1.xhtml">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </paper-item>
                         <paper-item data-href="${config.webURL}/subscriptionVS/feeds.jsp">
@@ -57,6 +56,7 @@
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content></content>
+            </iframe>
         </vs-navbar>
         <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
@@ -153,8 +153,15 @@
                 if(numImports == 0) document.querySelector('#navBar').loading = false;
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
-                    script.innerHTML = ajaxDocument.scripts[i].innerHTML;
-                    console.log("script.src: " + script.src)
+                    if(ajaxDocument.scripts[i].src !== '') {
+                        console.log("loading src")
+                        script.src = ajaxDocument.scripts[i].src
+                    } else {
+                        console.log("loading innerHTML")
+                        script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+                    }
+                    console.log("script.src: " + ajaxDocument.scripts[i].innerHTML)
+                    //console.log("ajaxDocument.scripts[i].src: " + ajaxDocument.scripts[i].src)
                     document.head.appendChild(script);
                 }
                 this.innerHTML = ajaxDocument.body.innerHTML

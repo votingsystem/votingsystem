@@ -8,7 +8,7 @@
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style></style>
         <div vertical layout>

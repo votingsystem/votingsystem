@@ -14,6 +14,9 @@
                       eventvstype="election" eventVSState="${params.eventVSState}"></eventvs-election-list>
     </div>
     <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
+
+    =========== contextURL: ${contextURL}
+
 </body>
 </html>
 <script>

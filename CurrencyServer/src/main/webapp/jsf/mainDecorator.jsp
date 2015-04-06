@@ -11,8 +11,8 @@
     <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
     <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <script src="${config.webURL}/js/utilsVS.js" type="text/javascript"></script>
-    <jsp:include page="/include/utils_js.jsp"/>
+    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
     <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
     <link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
     <link href="${config.resourceURL}/paper-item/paper-item.html" rel="import"/>

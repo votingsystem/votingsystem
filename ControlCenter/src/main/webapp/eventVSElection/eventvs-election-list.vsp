@@ -9,7 +9,7 @@
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style no-shim>
         .card { position: relative; display: inline-block; width: 300px; vertical-align: top;

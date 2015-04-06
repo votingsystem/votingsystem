@@ -1,9 +1,7 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<script>
+<%@page contentType="text/javascript" %>
+
     window['accessControlURL'] = "${config.accessControlURL}"
     window['serverURL'] = "${config.contextURL}"
-    window.CKEDITOR_BASEPATH = '${config.webURL}/bower_components/ckeditor/';
 
     function WebAppMessage(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
@@ -122,7 +120,7 @@
             document.querySelector("#_votingsystemMessageDialog").setMessage(text,
                     "${msg.messageLbl}")
         }  else {
-            console.log('utils_js.gsp - alert-dialog not found');
+            console.log('utils_js - alert-dialog not found');
             window._originalAlert(text);
         }
     }
@@ -141,5 +139,3 @@
             return result || dateToFormat
         }
     }
-
-</script>

@@ -60,10 +60,6 @@
         <paper-button raised noink>noink</paper-button>
     </section>
     <script>
-        var picker = new Pikaday( {
-                    field: document.getElementById('datepicker'),
-                    yearRange: [2010,2020]
-                });
     </script>
 </body>
 </html>

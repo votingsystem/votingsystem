@@ -1,6 +1,6 @@
-<script>
+<%@page contentType="text/javascript" %>
+
     window['serverURL'] = "${config.webURL}"
-    window.CKEDITOR_BASEPATH = '${config.webURL}/bower_components/ckeditor/';
 
     function WebAppMessage(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
@@ -87,5 +87,3 @@
             window._originalAlert(text);
         }
     }
-
-</script>
