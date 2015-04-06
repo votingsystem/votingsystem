@@ -1,5 +1,6 @@
 package org.votingsystem.test.callable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -41,8 +42,8 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         byte[] resultDigest =  messageDigest.digest(imageBytes);
         SignatureService signatureService = SignatureService.genUserVSSignatureService(representativeNIF);
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representativeNIF,
-                ContextVS.getInstance().getAccessControl().getName(),
-                getRequestJSON(representativeNIF, Base64.getEncoder().encodeToString(resultDigest)).toString(), subject);
+                ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
+                getRequestJSON(representativeNIF, Base64.getEncoder().encodeToString(resultDigest))), subject);
         RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage,
                 FileUtils.getFileFromBytes(imageBytes), ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
         ResponseVS responseVS = representativeDataSender.call();

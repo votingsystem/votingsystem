@@ -15,6 +15,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -31,6 +32,7 @@ public class DevelopmentResource {
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject DAOBean dao;
 
+    @Path("/adduser") @POST
     public Response adduser(@Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {

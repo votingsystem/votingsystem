@@ -41,13 +41,13 @@ public class Election_publishAndSend {
         eventDataMap.put("fieldsEventVS", Arrays.asList("field1", "field2"));
 
         Map userBaseDataMap = new HashMap<>();
-        userBaseDataMap.put("userIndex", 100);
+        userBaseDataMap.put("userIndex", 200);
         userBaseDataMap.put("numUsersWithoutRepresentative", 1);
         userBaseDataMap.put("numUsersWithoutRepresentativeWithVote", 1);
         userBaseDataMap.put("numRepresentatives", 2);
-        userBaseDataMap.put("numRepresentativesWithVote",2);
-        userBaseDataMap.put("numUsersWithRepresentative",10);
-        userBaseDataMap.put("numUsersWithRepresentativeWithVote", 3);
+        userBaseDataMap.put("numRepresentativesWithVote",1);
+        userBaseDataMap.put("numUsersWithRepresentative",2);
+        userBaseDataMap.put("numUsersWithRepresentativeWithVote", 1);
 
         Map simulationDataMap = new HashMap<>();
         simulationDataMap.put("accessControlURL","http://localhost:8080/AccessControl");

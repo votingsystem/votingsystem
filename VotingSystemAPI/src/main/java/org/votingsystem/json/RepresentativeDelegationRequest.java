@@ -4,7 +4,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
-
 import static java.text.MessageFormat.format;
 
 /**
@@ -14,6 +13,7 @@ public class RepresentativeDelegationRequest {
 
     private TypeVS operation;
     private String representativeNif;
+    private String UUID;
 
     public RepresentativeDelegationRequest() {}
 
@@ -32,5 +32,21 @@ public class RepresentativeDelegationRequest {
 
     public String getRepresentativeNif() {
         return representativeNif;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public void setRepresentativeNif(String representativeNif) {
+        this.representativeNif = representativeNif;
     }
 }

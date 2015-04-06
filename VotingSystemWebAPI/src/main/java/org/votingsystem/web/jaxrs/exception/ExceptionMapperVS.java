@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +25,7 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
         if(exception instanceof ExceptionVS) {
             log.log(Level.SEVERE, exception.getMessage(), exception);
             return Response.status(Response.Status.BAD_REQUEST).entity(
-                    "ExceptionVS:" + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
+                    "ExceptionVS:" + exception.getMessage()).type(MediaType.TEXT_PLAIN).encoding("UTF-8").build();
         }  else if(exception instanceof NotFoundException) {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "NotFoundException: " + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();

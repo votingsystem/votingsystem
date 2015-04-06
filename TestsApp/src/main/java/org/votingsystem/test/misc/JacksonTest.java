@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.votingsystem.json.RepresentativeDelegationRequest;
+import org.votingsystem.util.TypeVS;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,7 +22,7 @@ public class JacksonTest {
     private static final Logger log = Logger.getLogger(JacksonTest.class.getSimpleName());
 
     public static void main(String[] args) throws Exception {
-        treeModelfromString();
+
     }
 
     //Map<String, Object> map = new ObjectMapper().readValue(jsonStr, new TypeReference<HashMap<String, Object>>() {});

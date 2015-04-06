@@ -265,7 +265,7 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public String getUserCertServiceURL() {
-        return getServerURL() + "/rest/userVS";
+        return getServerURL() + "/rest/development/adduser";
     }
 
     public String getUserBaseInitServiceURL() {

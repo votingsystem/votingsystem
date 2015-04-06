@@ -38,7 +38,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getAnonymousDelegationRequestServiceURL() {
-        return getServerURL() + "/rest/representative/anonymousDelegationRequest";
+        return getServerURL() + "/representative/anonymousDelegationRequest";
     }
 
     public String getAnonymousDelegationServiceURL() {
@@ -86,7 +86,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getRepresentativeServiceURL() {
-        return getServerURL() + "/rest/representative";
+        return getServerURL() + "/representative";
     }
 
     public String getControlCenterCheckServiceURL(String controlCenterServerURL) {

@@ -47,7 +47,7 @@ public class RepresentativeBean {
     public ResponseVS<RepresentativeDocument> saveRepresentativeData(MessageSMIME messageSMIME, byte[] imageBytes) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
-        if(anonymousDelegation == null) throw new ValidationExceptionVS(messages.get(
+        if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
         Map requestMap = messageSMIME.getSignedContentMap();
         String base64ImageHash = (String) requestMap.get("base64ImageHash");

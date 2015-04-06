@@ -163,7 +163,7 @@ public class RepresentativeDelegationBean {
     public void cancelRepresentationDocument(MessageSMIME messageSMIME) {
         UserVS userVS = messageSMIME.getUserVS();
         Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS " +
-                "and r .state =:state").setParameter("userVS", userVS).setParameter("state", RepresentativeDocument.State.OK);
+                "and r .state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument != null) {
             representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(messageSMIME)
