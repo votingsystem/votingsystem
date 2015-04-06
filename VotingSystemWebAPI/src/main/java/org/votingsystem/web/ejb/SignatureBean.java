@@ -84,17 +84,13 @@ public class SignatureBean {
         keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         certChain = new ArrayList<>();
         for(java.security.cert.Certificate certificate : keyStore.getCertificateChain(keyAlias)) {
+            checkAuthorityCertDB((X509Certificate) certificate);
             certChain.add((X509Certificate) certificate);
         }
         keyStorePEMCerts = CertUtils.getPEMEncoded (certChain);
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         currencyAnchors = new HashSet<>();
         currencyAnchors.add(new TrustAnchor(localServerCertSigner, null));
-        certChain = new ArrayList<>();
-        for (java.security.cert.Certificate certificate : certChain) {
-            checkAuthorityCertDB((X509Certificate) certificate);
-            certChain.add((X509Certificate) certificate);
-        }
         Query query = dao.getEM().createNamedQuery("findCertBySerialNumber")
                 .setParameter("serialNumber", localServerCertSigner.getSerialNumber().longValue());
         serverCertificateVS = dao.getSingleResult(CertificateVS.class, query);

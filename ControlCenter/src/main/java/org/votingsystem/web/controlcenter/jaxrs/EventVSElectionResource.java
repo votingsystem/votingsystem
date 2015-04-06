@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
@@ -109,7 +110,7 @@ public class EventVSElectionResource {
     public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventVSElection eventVSElection = eventVSBean.saveEvent(messageSMIME);
-        return Response.ok().entity(eventVSElection.getId()).build();
+        return Response.ok().entity(eventVSElection.getId()).type(MediaType.TEXT_PLAIN).build();
     }
 
     @Path("/id/{id}/stats") @GET

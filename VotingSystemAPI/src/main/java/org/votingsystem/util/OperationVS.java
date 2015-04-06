@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import org.votingsystem.json.EventVSJSON;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.EventVS;
@@ -278,7 +279,7 @@ public class OperationVS {
         if(receiverName != null) dataMap.put("receiverName", receiverName);
         if(timeStampServerURL != null) dataMap.put("timeStampServerURL", timeStampServerURL);
         if(args != null) dataMap.put("args", args);
-        if(eventVS != null) dataMap.put("eventVS", eventVS.getDataMap());
+        if(eventVS != null) dataMap.put("eventVS", EventVSJSON.getJSON(eventVS));
         return dataMap;
     }
 

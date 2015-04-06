@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.votingsystem.json.EventVSElectionJSON;
 import org.votingsystem.json.EventVSMetaInf;
 import org.votingsystem.json.RepresentativesAccreditations;
 import org.votingsystem.model.*;
@@ -48,52 +49,48 @@ public class EventVSElectionBean {
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
-        Map<String, Object> dataMap = messageSMIME.getSignedContentMap();
-        Date requestDate = DateUtils.getDateFromString((String) dataMap.get("dateBegin"));
-        Date dateBegin = DateUtils.resetDay(requestDate).getTime();
-        Date dateFinish = DateUtils.resetDay(DateUtils.addDays(requestDate, 1).getTime()).getTime();
+        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = controlCenterBean.getControlCenter();
-        EventVSElection eventVS = new EventVSElection((String)dataMap.get("subject"), (String)dataMap.get("content"),
-                EventVS.Cardinality.EXCLUSIVE, userSigner, controlCenterVS, dateBegin, dateFinish);
+        EventVSElection eventVS = new EventVSElection(request.getSubject(), request.getContent(),
+                EventVS.Cardinality.EXCLUSIVE, userSigner, controlCenterVS, request.getDateBegin(), request.getDateFinish());
         eventVSBean.setEventDatesState(eventVS);
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
-                "ERROR - eventFinishedErrorMsg dateFinish: " + dateFinish);
-        dataMap.put("dateFinish", dateFinish);
-        dataMap.put("controlCenterURL", controlCenterVS.getServerURL());
+                "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
+        request.setControlCenterURL(controlCenterVS.getServerURL());
         Map accessControlMap = new HashMap<>();
         accessControlMap.put("serverURL", config.getContextURL());
         accessControlMap.put("name", config.getServerName());
-        if (dataMap.containsKey("tags")) {
-            Set<TagVS> tagSet = tagVSBean.save((List<String>) dataMap.get("tags"));
+        if (request.getTags() !=  null) {
+            Set<TagVS> tagSet = tagVSBean.save(request.getTags());
             if(!tagSet.isEmpty()) eventVS.setTagVSSet(tagSet);
         }
         dao.persist(eventVS);
-        Set<FieldEventVS> electionOptions = saveElectionOptions(eventVS, (List<String>) dataMap.get("fieldsEventVS"));
+        Set<FieldEventVS> electionOptions = saveElectionOptions(eventVS, request.getFieldsEventVS());
         List<Map> optionsMap = new ArrayList<>();
         for(FieldEventVS option : electionOptions) {
             optionsMap.add(option.toMap());
         }
-        dataMap.put("fieldsEventVS", optionsMap);
-        dataMap.put("id", eventVS.getId());
-        dataMap.put("URL",config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
-        dataMap.put("dateCreated", eventVS.getDateCreated());
-        dataMap.put("type", TypeVS.VOTING_EVENT);
-
+        request.setFieldsEventVS(optionsMap);
+        request.setId(eventVS.getId());
+        request.setURL(config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
+        request.setDateCreated(eventVS.getDateCreated());
+        request.setType(EventVS.Type.ELECTION);
         KeyStoreVS keyStoreVS = signatureBean.generateElectionKeysStore(eventVS);
-        dataMap.put("certCAVotacion", new String(CertUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
-        dataMap.put("certChain", CertUtils.getPEMEncoded (signatureBean.getCertChain()));
+        request.setCertCAVotacion( new String(CertUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
+        request.setCertChain(new String(CertUtils.getPEMEncoded (signatureBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();
-        dataMap.put("userVS", new String(CertUtils.getPEMEncoded(certUsuX509)));
+        request.setUserVS(new String(CertUtils.getPEMEncoded(certUsuX509)));
         Header header = new Header ("serverURL", config.getContextURL());
         String fromUser = config.getServerName();
         String toUser = controlCenterVS.getName();
         String subject = messages.get("mime.subject.votingEventValidated");
         SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, new ObjectMapper().writeValueAsString(
-                dataMap), subject, header);
+                request), subject, header);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg"));
+            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg"), controlCenterVS.getServerURL());
         }
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
                 "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
@@ -113,14 +110,11 @@ public class EventVSElectionBean {
                 messageSMIME: messageSMIME, contentType: ContentTypeVS.JSON_SIGNED)*/
     }
 
-    public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<String> optionList) throws ExceptionVS {
+    public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<Map> optionList) throws ExceptionVS {
         if(optionList.size() < 2) throw new ExceptionVS("elections must have at least two options");
         Set<FieldEventVS> result = new HashSet<>();
-        for(Object option : optionList) {
-            String optionContent = null;
-            if(option instanceof String) optionContent = (String)option;
-            else optionContent = (String) ((Map)option).get("content");
-            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, optionContent));
+        for(Map option : optionList) {
+            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, (String) option.get("content")));
             result.add(fieldEventVS);
         }
         return result;

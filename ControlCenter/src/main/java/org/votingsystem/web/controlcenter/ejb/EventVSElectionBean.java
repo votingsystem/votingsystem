@@ -2,7 +2,7 @@ package org.votingsystem.web.controlcenter.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSElectionPublishRequest;
+import org.votingsystem.json.EventVSElectionJSON;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
@@ -11,7 +11,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -45,8 +44,8 @@ public class EventVSElectionBean {
         SMIMEMessage smimeReq = messageSMIME.getSMIME();
         String serverURL = smimeReq.getHeader("serverURL")[0];
         AccessControlVS accessControl = checkAccessControl(serverURL);
-        EventVSElectionPublishRequest request = messageSMIME.getSignedContent(EventVSElectionPublishRequest.class);
-        request.validate();
+        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        request.validate(config.getContextURL());
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
         UserVS user = subscriptionVSBean.checkUser(UserVS.getUserVS(userCert));
@@ -79,7 +78,7 @@ public class EventVSElectionBean {
 
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
-        EventVSElectionPublishRequest request = messageSMIME.getSignedContent(EventVSElectionPublishRequest.class);
+        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
         request.validateCancelation();
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
                 .setParameter("eventId", request.getEventId());

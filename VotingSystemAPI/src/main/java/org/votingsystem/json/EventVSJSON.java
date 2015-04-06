@@ -151,4 +151,9 @@ public class EventVSJSON {
     public boolean isBackupAvailable() {
         return backupAvailable;
     }
+
+    public static Object getJSON(EventVS eventVS) {
+        if(eventVS instanceof EventVSElection) return new EventVSElectionJSON(eventVS);
+        else return new EventVSJSON(eventVS, null, null);
+    }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.json.ActorVSJSON;
+import org.votingsystem.json.EventVSElectionJSON;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
@@ -36,8 +37,6 @@ public class Election_publishAndSend {
         eventDataMap.put("subject", "voting subject");
         eventDataMap.put("content", "<p>election content</p>");
         eventDataMap.put("UUID", UUID.randomUUID().toString());
-        eventDataMap.put("dateBegin", "2015/04/06 00:00:00");
-        eventDataMap.put("dateFinish", "2014/04/06  00:00:00");
         eventDataMap.put("fieldsEventVS", Arrays.asList("field1", "field2"));
 
         Map userBaseDataMap = new HashMap<>();
@@ -56,8 +55,6 @@ public class Election_publishAndSend {
         simulationDataMap.put("whenFinishChangeEventStateTo", "");
         simulationDataMap.put("backupRequestEmail", "");
         simulationDataMap.put("event", eventDataMap);
-        simulationDataMap.put("dateBeginDocument", "2014/10/17 00:00:00");
-        simulationDataMap.put("dateFinishDocument", "2014/10/19 00:00:00");
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
@@ -65,7 +62,7 @@ public class Election_publishAndSend {
 
         log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(simulationDataMap));
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                TestUtils.getSimulationData().getAccessControlURL()),ContentTypeVS.JSON);
+                TestUtils.getSimulationData().getAccessControlURL()), ContentTypeVS.JSON);
         Map<String, Object> dataMap = new ObjectMapper().readValue(
                 responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -159,11 +156,12 @@ public class Election_publishAndSend {
 
     private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
         log.info("publishEvent");
+        eventVS.setDateBegin(new Date());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date()));
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
                 ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
-                eventVS.getDataMap()), smimeMessageSubject);
+                new EventVSElectionJSON(eventVS)), smimeMessageSubject);
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,

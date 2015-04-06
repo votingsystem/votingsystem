@@ -338,57 +338,6 @@ public class EventVS extends EntityVS implements Serializable {
         if(state != null && (state == State.CANCELED || state == State.DELETED_FROM_SYSTEM)) result = false;
         return result;
     }
-    public Map getDataMap() {
-        log.info("getDataMap");
-        Map resultMap = new HashMap();
-        resultMap.put("subject", subject);
-        resultMap.put("content", content);
-        resultMap.put("dateBegin", DateUtils.getDateStr(dateBegin));
-        resultMap.put("dateFinish", DateUtils.getDateStr(dateFinish));
-        if(url != null) resultMap.put("url", url);
-        resultMap.put("backupAvailable", backupAvailable);
-        if(userVS != null) {
-            Map userVSHashMap = new HashMap();
-            userVSHashMap.put("nif", userVS.getNif());
-            userVSHashMap.put("email", userVS.getEmail());
-            userVSHashMap.put("name", userVS.getName());
-            resultMap.put("userVS", userVSHashMap);
-        }
-        if(voteVS != null) resultMap.put("voteVS", voteVS.getDataMap());
-        if(accessControlEventVSId != null) resultMap.put("accessControlEventVSId", accessControlEventVSId);
-
-        if (type != null) resultMap.put("type", type.toString());
-        if (getAccessControlEventVSId() != null) resultMap.put("accessControlEventVSId", getAccessControlEventVSId());
-        if (id != null) resultMap.put("id", id);
-        resultMap.put("UUID", UUID.randomUUID().toString());
-        if (tagVSSet != null && !tagVSSet.isEmpty()) {
-            List<String> tagList = new ArrayList<String>();
-            for (TagVS tag : tagVSSet) {
-                tagList.add(tag.getName());
-            }
-            resultMap.put("tags", tagList);
-        }
-        if (controlCenterVS != null) {
-            Map controlCenterMap = new HashMap();
-            controlCenterMap.put("id", controlCenterVS.getId());
-            controlCenterMap.put("name", controlCenterVS.getName());
-            controlCenterMap.put("serverURL", controlCenterVS.getServerURL());
-            resultMap.put("controlCenter", controlCenterMap);
-        }
-        if (getFieldsEventVS() != null && !getFieldsEventVS().isEmpty()) {
-            List<Map> fieldList = new ArrayList<Map>();
-            for (FieldEventVS opcion : getFieldsEventVS()) {
-                Map field = new HashMap();
-                field.put("content", opcion.getContent());
-                field.put("value", opcion.getValue());
-                field.put("id", opcion.getId());
-                fieldList.add(field);
-            }
-            resultMap.put("fieldsEventVS", fieldList);
-        }
-        if (cardinality != null) resultMap.put("cardinality", cardinality.toString());
-        return resultMap;
-    }
 
     public static Type getType(EventVS eventVS) {
         if(eventVS instanceof EventVSClaim) return Type.CLAIM;
