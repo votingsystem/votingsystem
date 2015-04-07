@@ -78,23 +78,35 @@ public class CSRBean {
     }
 
 
-    public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS, UserVS userVS) throws Exception {
+    public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
-        DERTaggedObject representativeExtension = null;
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
+                keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish());
+        CertificateVS certificate = dao.persist(new CertificateVS(issuedCert, eventVS, CertificateVS.Type.VOTEVS,
+                CertificateVS.State.OK, csrResponse.getHashCertVSBase64()));
+        csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
+        return csrResponse;
+    }
+
+    public synchronized CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
+                          UserVS representative) throws Exception {
+        CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
+        KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
+        //TODO ==== vote keystore -- this is for developement
+        KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
+        String representativeURL = config.getRestURL() + "/representative/id/" + representative.getId();
+        DERTaggedObject representativeExtension = new DERTaggedObject(
+                ContextVS.REPRESENTATIVE_VOTE_TAG, new DERUTF8String(representativeURL));
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish(), representativeExtension);
         CertificateVS certificate = new CertificateVS(issuedCert, eventVS, CertificateVS.Type.VOTEVS,
-                 CertificateVS.State.OK, csrResponse.getHashCertVSBase64());
-        if(userVS.getType() == UserVS.Type.REPRESENTATIVE) {
-            String representativeURL = config.getRestURL() + "/representative/id/" + userVS.getId();
-            representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_VOTE_TAG,
-                    new DERUTF8String(representativeURL));
-            certificate.setUserVS(userVS);
-        }
+                CertificateVS.State.OK, csrResponse.getHashCertVSBase64());
+        certificate.setUserVS(representative);
         dao.persist(certificate);
         csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
         return csrResponse;

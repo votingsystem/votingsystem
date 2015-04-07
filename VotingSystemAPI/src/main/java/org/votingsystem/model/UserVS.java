@@ -142,6 +142,12 @@ public class UserVS extends EntityVS implements Serializable {
         this.phone = phone;
     }
 
+    public static UserVS REPRESENTATIVE(String representativeURL) {
+        UserVS result = new UserVS();
+        result.setType(UserVS.Type.REPRESENTATIVE).setUrl(representativeURL);
+        return result;
+    }
+
     public SignerInformation getSignerInformation() {
         return signerInformation;
     }

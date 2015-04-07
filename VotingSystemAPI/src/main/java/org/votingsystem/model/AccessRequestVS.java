@@ -1,11 +1,9 @@
 package org.votingsystem.model;
 
 import org.votingsystem.util.EntityVS;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -31,6 +29,8 @@ public class AccessRequestVS extends EntityVS implements Serializable {
     @Column(name="metainf") private String metaInf;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+
+    public AccessRequestVS() {}
 
     public AccessRequestVS(UserVS userVS, MessageSMIME messageSMIME, State state, String hashAccessRequestBase64,
                            EventVS eventVS) {

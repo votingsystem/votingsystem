@@ -44,7 +44,6 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
-        final PrintWriter writer = resp.getWriter();
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
             MessageSMIME messageSMIME = signatureBean.processSMIMERequest(requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED);
@@ -56,13 +55,9 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            writer.print(ex.getMessage());
-        } finally {
-            writer.flush();
-            writer.close();
+            resp.getOutputStream().write(ex.getMessage().getBytes());
         }
     }
-
 
     @Override
     public String getServletInfo() {

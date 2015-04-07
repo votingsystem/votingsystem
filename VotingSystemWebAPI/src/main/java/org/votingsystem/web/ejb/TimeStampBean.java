@@ -7,7 +7,6 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -22,6 +21,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.cdi.ConfigVS;
+
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.persistence.Query;

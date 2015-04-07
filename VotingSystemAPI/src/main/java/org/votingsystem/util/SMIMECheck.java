@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VoteVS;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,10 +12,15 @@ import java.util.Set;
 public class SMIMECheck {
 
     private UserVS signer;
+    private VoteVS voteVS;
     private UserVS anonymousSigner;
     private Set<UserVS> signers;
 
     public SMIMECheck() {}
+
+    public SMIMECheck(VoteVS voteVS) {
+        this.voteVS = voteVS;
+    }
 
     public UserVS getSigner() {
         return signer;
@@ -45,5 +51,13 @@ public class SMIMECheck {
     public void addSigner(UserVS signer) {
         if(signers == null) signers = new HashSet<>();
         signers.add(signer);
+    }
+
+    public VoteVS getVoteVS() {
+        return voteVS;
+    }
+
+    public void setVoteVS(VoteVS voteVS) {
+        this.voteVS = voteVS;
     }
 }

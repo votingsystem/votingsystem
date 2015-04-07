@@ -1,6 +1,5 @@
 package org.votingsystem.web.jaxrs.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.util.JSON;
 
 import javax.ws.rs.Produces;

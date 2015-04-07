@@ -2,6 +2,7 @@ package org.votingsystem.web.cdi;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.EnvironmentVS;
+
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 

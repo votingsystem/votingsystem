@@ -2,6 +2,7 @@ package org.votingsystem.test.callable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.json.RepresentativeDelegationRequest;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
@@ -37,7 +38,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF);
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
         SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, new ObjectMapper().writeValueAsString(
-                getRequestJSON(representativeNIF)), subject);
+                new RepresentativeDelegationRequest(representativeNIF)), subject);
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
@@ -46,12 +47,5 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         return reponseVS;
     }
 
-    private Map getRequestJSON(String representativeNif) {
-        Map map = new HashMap();
-        map.put("operation", "REPRESENTATIVE_SELECTION");
-        map.put("representativeNif", representativeNif);
-        map.put("UUID", UUID.randomUUID().toString());
-        return map;
-    }
 
 }

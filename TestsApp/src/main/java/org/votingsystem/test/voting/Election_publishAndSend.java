@@ -44,10 +44,10 @@ public class Election_publishAndSend {
         userBaseDataMap.put("userIndex", 200);
         userBaseDataMap.put("numUsersWithoutRepresentative", 1);
         userBaseDataMap.put("numUsersWithoutRepresentativeWithVote", 1);
-        userBaseDataMap.put("numRepresentatives", 2);
-        userBaseDataMap.put("numRepresentativesWithVote",1);
-        userBaseDataMap.put("numUsersWithRepresentative",2);
-        userBaseDataMap.put("numUsersWithRepresentativeWithVote", 1);
+        userBaseDataMap.put("numRepresentatives", 0);
+        userBaseDataMap.put("numRepresentativesWithVote",0);
+        userBaseDataMap.put("numUsersWithRepresentative",0);
+        userBaseDataMap.put("numUsersWithRepresentativeWithVote", 0);
 
         Map simulationDataMap = new HashMap<>();
         simulationDataMap.put("accessControlURL","http://localhost:8080/AccessControl");
@@ -75,6 +75,7 @@ public class Election_publishAndSend {
         }
         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
         EventVSJSON eventVSJSON = publishEvent(TestUtils.getSimulationData().getEventVS(), publisherNIF, "publishElectionMsgSubject");
+        eventVS = eventVSJSON.getEventVSElection();
         simulatorExecutor = Executors.newFixedThreadPool(100);
         CountDownLatch userBaseDataLatch = new CountDownLatch(1);
         ((VotingSimulationData)TestUtils.getSimulationData()).getUserBaseData().sendData(userBaseDataLatch);

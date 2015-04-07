@@ -34,10 +34,8 @@ public class QRServlet extends HttpServlet {
         processRequest(request, resp);
     }
 
-
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
-        final PrintWriter writer = resp.getWriter();
         try {
             QRUtils.ChartServletRequestParameters qrRequest = QRUtils.parseRequest(req, "POST".equals(req.getMethod()));
             BitMatrix matrix = new QRCodeWriter().encode(qrRequest.getText(), BarcodeFormat.QR_CODE,
@@ -52,12 +50,8 @@ public class QRServlet extends HttpServlet {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            writer.print(ex.getMessage());
-        } finally {
-            writer.flush();
-            writer.close();
+            resp.getOutputStream().write(ex.getMessage().getBytes());
         }
     }
-
 
 }

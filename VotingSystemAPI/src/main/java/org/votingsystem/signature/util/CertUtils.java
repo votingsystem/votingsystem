@@ -29,6 +29,7 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -189,9 +190,11 @@ public class CertUtils {
         }
         if(certExtensions != null) {
             for(DERTaggedObject taggedObject: certExtensions) {
-                ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
-                        taggedObject.getTagNo());
-                certGen.addExtension(oid, true, taggedObject);
+                if(taggedObject != null) {
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                            taggedObject.getTagNo());
+                    certGen.addExtension(oid, true, taggedObject);
+                } log.log(Level.FINE, "null taggedObject");
             }
         }
         X509Certificate cert = certGen.generate(caKey, ContextVS.PROVIDER);

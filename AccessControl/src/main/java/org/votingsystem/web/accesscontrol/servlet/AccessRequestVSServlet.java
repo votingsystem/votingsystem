@@ -49,7 +49,6 @@ public class AccessRequestVSServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
-        final PrintWriter writer = resp.getWriter();
         AccessRequestVS accessRequestVS = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
@@ -57,10 +56,11 @@ public class AccessRequestVSServlet extends HttpServlet {
             AccessRequestBean.AccessRequest accessRequest = accessRequestBean.saveRequest(messageSMIME);
             accessRequestVS = accessRequest.getAccessRequestVS();
             UserVS signer = accessRequestVS.getUserVS();
-            UserVS representative = (signer.getType() == UserVS.Type.REPRESENTATIVE)? signer:null;
-            CsrResponse csrResponse = csrBean.signCertVoteVS(requestVS.getCSRBytes(),
-                    accessRequest.getEventVS(), representative);
-
+            CsrResponse csrResponse = null;
+            if(signer.getType() == UserVS.Type.REPRESENTATIVE) {
+                csrResponse = csrBean.signCertVoteVS(requestVS.getCSRBytes(), accessRequest.getEventVS());
+            } else csrResponse = csrBean.signRepresentativeCertVoteVS(
+                    requestVS.getCSRBytes(), accessRequest.getEventVS(), signer);
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());
@@ -72,10 +72,7 @@ public class AccessRequestVSServlet extends HttpServlet {
                 dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
             }
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            writer.print(ex.getMessage());
-        } finally {
-            writer.flush();
-            writer.close();
+            resp.getOutputStream().write(ex.getMessage().getBytes());
         }
     }
 

@@ -41,7 +41,6 @@ public class CurrencyRequestServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
-        final PrintWriter writer = resp.getWriter();
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
 
@@ -51,15 +50,11 @@ public class CurrencyRequestServlet extends HttpServlet {
             currencyBatch.setTagVS(config.getTag(currencyBatch.getTag()));
             Map result = currencyBean.processCurrencyRequest(currencyBatch);
             resp.setContentType(ContentTypeVS.JSON.getName());
-            writer.print(new ObjectMapper().writeValueAsString(result));
-            writer.flush();
+            resp.getOutputStream().write(new ObjectMapper().writeValueAsBytes(result));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            writer.print(ex.getMessage());
-        } finally {
-            writer.flush();
-            writer.close();
+            resp.getOutputStream().write(ex.getMessage().getBytes());
         }
     }
 

@@ -69,6 +69,16 @@ public class EventVSJSON {
         this.accessControl = MapUtils.getActorVSMap(contextURL, serverName);
     }
 
+    public EventVSElection getEventVSElection() {
+        EventVSElection result = new EventVSElection();
+        result.setId(id);
+        result.setDateCreated(dateCreated);
+        result.setSubject(subject);
+        result.setDateBegin(dateBegin);
+        result.setFieldsEventVS(MapUtils.getFieldEventVSSet(fieldsEventVS));
+        return result;
+    }
+
     public void setNumSignatures(Long numSignatures) {
         this.numSignatures = numSignatures;
     }

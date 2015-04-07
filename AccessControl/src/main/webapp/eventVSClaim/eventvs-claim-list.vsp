@@ -116,8 +116,8 @@
                     case EventVS.State.CANCELED: return "${msg.cancelledLbl}"
                 }
             },
-            getElapsedTime: function(dateStr) {
-                return dateStr.getElapsedTime()
+            getElapsedTime: function(dateStamp) {
+                return new Date(dateStamp).getElapsedTime()
             },
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {

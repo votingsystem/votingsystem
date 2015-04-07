@@ -16,6 +16,7 @@ import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -85,7 +86,10 @@ public class EventVSElectionResource {
                 } else if(eventVSState != EventVS.State.DELETED_FROM_SYSTEM) inList = Arrays.asList(eventVSState);
             } catch(Exception ex) {}
         }
-        Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList")
+        Query query = dao.getEM().createQuery("select count(e) from EventVSElection e where e.state in :inList")
+                .setParameter("inList", inList);
+        Long totalCount = (Long) query.getSingleResult();
+        query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
         List<EventVSJSON> resultListJSON = new ArrayList<>();
@@ -97,7 +101,7 @@ public class EventVSElectionResource {
         eventsVSMap.put("eventVS", resultListJSON);
         eventsVSMap.put("offset", offset);
         eventsVSMap.put("max", max);
-        eventsVSMap.put("totalCount", resultListJSON.size()); //TODO
+        eventsVSMap.put("totalCount", totalCount);
         if(contentType.contains("json")){
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
                     .type(ContentTypeVS.JSON.getName()).build();

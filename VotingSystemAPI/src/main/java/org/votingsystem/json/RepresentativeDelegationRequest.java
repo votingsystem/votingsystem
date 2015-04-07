@@ -17,6 +17,12 @@ public class RepresentativeDelegationRequest {
 
     public RepresentativeDelegationRequest() {}
 
+    public RepresentativeDelegationRequest(String representativeNif) {
+        this.operation = TypeVS.REPRESENTATIVE_SELECTION;
+        this.representativeNif = representativeNif;
+        this.UUID = java.util.UUID.randomUUID().toString();
+    }
+
 
     public void validate() throws ExceptionVS {
         if(TypeVS.REPRESENTATIVE_SELECTION != operation) throw new ValidationExceptionVS(

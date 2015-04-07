@@ -39,6 +39,21 @@ public class MapUtils {
         return result;
     }
 
+    public static Set<FieldEventVS> getFieldEventVSSet(Collection<Map> collection) {
+        Set<FieldEventVS> result = new HashSet<>();
+        for(Map map : collection) {
+            result.add(getFieldEventVS(map));
+        }
+        return result;
+    }
+
+    public static FieldEventVS getFieldEventVS(Map fieldMap) {
+        FieldEventVS result = new FieldEventVS();
+        result.setId(((Number) fieldMap.get("id")).longValue());
+        result.setContent((String) fieldMap.get("content"));
+        return result;
+    }
+
     public static Set<Map> getFieldSet(Collection<FieldEventVS> fields) {
         Set<Map> result = new HashSet<>();
         for(FieldEventVS field : fields) {

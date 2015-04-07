@@ -64,7 +64,7 @@
                             </div>
                         </template>
                     </div>
-                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="${params.max}" style="margin: 0 0 100px 0;"
+                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="{{eventsVSMap.max}}" style="margin: 0 0 100px 0;"
                               next="${msg.nextLbl}" previous="${msg.previousLbl}"
                               first="${msg.firstLbl}" last="${msg.lastLbl}"
                               offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
@@ -92,6 +92,8 @@
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
             },
             eventsVSMapChanged:function() {
+                if(this.eventsVSMap == null) return
+                console.log(this.tagName + " - eventsVSMapChanged - offset: " + this.eventsVSMap.offset + " - totalCount: " + this.eventsVSMap.totalCount)
                 this.loading = false
             },
             closeEventVSDetails:function(e, detail, sender) {
@@ -103,7 +105,7 @@
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
                 this.$.vspager.style.display = 'none'
-                targetURL = "${config.webURL}/eventVSElection?menu=" + menuType + "&eventVSState=" +
+                targetURL = "${config.restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -130,8 +132,8 @@
                     case EventVS.State.CANCELED: return "${msg.cancelledLbl}"
                 }
             },
-            getElapsedTime: function(dateStr) {
-                return dateStr.getElapsedTime() + " ${msg.toCloseLbl}"
+            getElapsedTime: function(dateStamp) {
+                return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
             },
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {
@@ -144,7 +146,7 @@
             eventVSStateSelect: function() {
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
-                targetURL = "${config.webURL}/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
+                targetURL = "${config.restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 this.$.ajax.go()

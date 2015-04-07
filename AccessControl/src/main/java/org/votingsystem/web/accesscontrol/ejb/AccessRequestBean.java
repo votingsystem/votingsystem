@@ -34,7 +34,7 @@ public class AccessRequestBean {
                 signer.getTimeStampToken().getTimeStampInfo().getGenTime());
         Query query = dao.getEM().createQuery("select a from AccessRequestVS a where a.userVS =:userVS and " +
                 "a.eventVS =:eventVS and a.state =:state").setParameter("userVS", signer)
-                .setParameter("eventVS", request.eventVS).setParameter("state", TypeVS.OK);
+                .setParameter("eventVS", request.eventVS).setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if (accessRequestVS != null){
             throw new RequestRepeatedException(config.getRestURL() + "/messageSMIME/id/" +
@@ -59,7 +59,7 @@ public class AccessRequestBean {
             if(!messageMap.containsKey("hashAccessRequestBase64"))
                 throw new ValidationExceptionVS("missing param 'hashAccessRequestBase64'");
             hashAccessRequestBase64 = (String) messageMap.get("hashAccessRequestBase64");
-            eventVS = dao.find(EventVSElection.class, Long.valueOf((String) messageMap.get("eventId")));
+            eventVS = dao.find(EventVSElection.class,((Number)messageMap.get("eventId")).longValue());
             if(eventVS == null) throw new ValidationExceptionVS("eventVSNotFound - eventId: " + messageMap.get("eventId"));
             if(!eventVS.isActive(timeStampDate)) {
                 throw new ValidationExceptionVS("timeStampRangeErrorMsg - timeStampDate: " + timeStampDate +

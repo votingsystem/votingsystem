@@ -129,8 +129,7 @@ String.prototype.format = function() {
 
 	
 String.prototype.getDate = function() {
-	  var timeMillis = Date.parse(this)
-	  return new Date(timeMillis)
+	  return new Date(this)
 };
 
 function updateLinksVS(elementsArray) {
