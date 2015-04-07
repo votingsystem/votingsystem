@@ -4,6 +4,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
+
 import static java.text.MessageFormat.format;
 
 /**

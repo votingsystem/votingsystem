@@ -1,24 +1,25 @@
 package org.votingsystem.util;
 
-import org.votingsystem.json.EventVSJSON;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationVS {
     
     private static Logger log = Logger.getLogger(OperationVS.class.getSimpleName());
 
     private TypeVS typeVS;
     private Integer statusCode;
+    @JsonProperty("objectId")
     private String callerCallback;
     private String message;
     private String nif;
@@ -32,7 +33,8 @@ public class OperationVS {
     private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
-    private Map documentToSign;
+    @JsonProperty("signedContent")
+    private Map documentToSignMap;
     private Map documentToEncrypt;
     private Map documentToDecrypt;
     private Map document;
@@ -148,10 +150,15 @@ public class OperationVS {
         this.eventVS = eventVS;
     }
 
-    public Map getDocumentToSignMap() { return documentToSign;  }
+    public Map getDocumentToSignMap() {
+        if(documentToSignMap != null && !documentToSignMap.containsKey("UUID")) {
+            documentToSignMap.put("UUID", UUID.randomUUID().toString());
+        }
+        return documentToSignMap;
+    }
 
-    public void setDocumentToSignMap(Map documentToSign) {
-        this.documentToSign = documentToSign;
+    public void setDocumentToSignMap(Map documentToSignMap) {
+        this.documentToSignMap = documentToSignMap;
     }
 
     public void setContentType(String contentType) {
@@ -200,9 +207,9 @@ public class OperationVS {
         switch(typeVS) {
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 TypeVS receiptTypeVS = TypeVS.valueOf((String) receiptDataMap.get("operation"));
-                if(!documentToSign.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
-                   !documentToSign.get("UUID").equals(receiptDataMap.get("UUID")) ||
-                   !documentToSign.get("representativeNif").equals(receiptDataMap.get("representativeNif")) ||
+                if(!documentToSignMap.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
+                   !documentToSignMap.get("UUID").equals(receiptDataMap.get("UUID")) ||
+                   !documentToSignMap.get("representativeNif").equals(receiptDataMap.get("representativeNif")) ||
                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != receiptTypeVS) {
                     return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("receiptDataMismatchErrorMsg"));
                 } else return new ResponseVS(ResponseVS.SC_OK);
@@ -210,77 +217,6 @@ public class OperationVS {
                 return new ResponseVS(ResponseVS.SC_ERROR,
                         ContextVS.getMessage("serviceNotAvailableForOperationMsg", typeVS));
         }
-    }
-
-    public static OperationVS parse (Map dataMap) throws Exception {
-        if(dataMap == null) return null;
-        OperationVS operationVS = new OperationVS();
-        if (dataMap.containsKey("operation")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operation")));
-        if (dataMap.containsKey("args")) {
-            List<String> argList = (List<String>) dataMap.get("args");
-            if(argList != null) {
-                String[] args = argList.toArray(new String[argList.size()]);
-                operationVS.setArgs(args);
-            }
-        }
-        if (dataMap.containsKey("statusCode")) operationVS.setStatusCode((Integer)dataMap.get("statusCode"));
-        if (dataMap.containsKey("message")) operationVS.setMessage((String)dataMap.get("message"));
-        if (dataMap.containsKey("nif")) operationVS.setNif((String)dataMap.get("nif"));
-        if (dataMap.containsKey("serviceURL")) operationVS.setServiceURL((String)dataMap.get("serviceURL"));
-        if (dataMap.containsKey("documentURL")) operationVS.setDocumentURL((String)dataMap.get("documentURL"));
-        if (dataMap.containsKey("timeStampServerURL")) operationVS.setTimeStampServerURL((String) dataMap.get("timeStampServerURL"));
-        if (dataMap.containsKey("serverURL")) {
-            String serverURL = StringUtils.checkURL((String)dataMap.get("serverURL"));
-            operationVS.setUrlServer(serverURL);
-        }
-        if (dataMap.containsKey("objectId")) operationVS.setCallerCallback((String)dataMap.get("objectId"));
-        if (dataMap.containsKey("eventVS")) {
-            EventVS eventVS = EventVS.parse((Map) dataMap.get("eventVS"));
-            operationVS.setEventVS(eventVS);
-        }
-        if (dataMap.containsKey("signedContent")) {
-            Map documentToSignMap = (Map) dataMap.get("signedContent");
-            //to avoid process repeated messages on servers
-            documentToSignMap.put("UUID", UUID.randomUUID().toString());
-            operationVS.setDocumentToSignMap(documentToSignMap);
-        }
-        if (dataMap.containsKey("asciiDoc")) operationVS.setAsciiDoc((String) dataMap.get("asciiDoc"));
-        if (dataMap.containsKey("documentToEncrypt")) {
-            Map documentToEncrypt = (Map) dataMap.get("documentToEncrypt");
-            operationVS.setDocumentToEncrypt(documentToEncrypt);
-        }
-        if (dataMap.containsKey("documentToDecrypt")) {
-            Map documentToDecrypt = (Map) dataMap.get("documentToDecrypt");
-            operationVS.setDocumentToDecrypt(documentToDecrypt);
-        }
-        if (dataMap.containsKey("document")) {
-            Map documentMap = (Map) dataMap.get("document");
-            documentMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-            operationVS.setDocument(documentMap);
-        }
-        if(dataMap.containsKey("contentType")) operationVS.setContentType((String)dataMap.get("contentType"));
-        if (dataMap.containsKey("receiverName")) operationVS.setReceiverName((String)dataMap.get("receiverName"));
-        if (dataMap.containsKey("signedMessageSubject"))
-            operationVS.setSignedMessageSubject((String)dataMap.get("signedMessageSubject"));
-        if (dataMap.containsKey("filePath")) operationVS.setFile(new File((String)dataMap.get("filePath")));
-        if (dataMap.containsKey("email")) operationVS.setEmail((String)dataMap.get("email"));
-        return operationVS;
-    }
-
-    public Map getDataMap () {
-        log.info("getDataMap");
-        Map dataMap = new HashMap();
-        if(statusCode != null) dataMap.put("statusCode", statusCode);
-        if(message != null) dataMap.put("message", message);
-        if(typeVS != null) dataMap.put("operation", typeVS.toString());
-        if(documentURL != null) dataMap.put("documentURL", documentURL);
-        if(serviceURL != null) dataMap.put("serviceURL", serviceURL);
-        if(signedMessageSubject != null) dataMap.put("signedMessageSubject", signedMessageSubject);
-        if(receiverName != null) dataMap.put("receiverName", receiverName);
-        if(timeStampServerURL != null) dataMap.put("timeStampServerURL", timeStampServerURL);
-        if(args != null) dataMap.put("args", args);
-        if(eventVS != null) dataMap.put("eventVS", EventVSJSON.getJSON(eventVS));
-        return dataMap;
     }
 
     public File getFile() {
@@ -316,6 +252,8 @@ public class OperationVS {
     }
 
     public Map getDocument() {
+        if(document != null && !document.containsKey("locale")) document.put("locale",
+                ContextVS.getInstance().getLocale().getLanguage());
         return document;
     }
 

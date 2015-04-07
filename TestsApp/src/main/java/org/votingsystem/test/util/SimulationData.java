@@ -1,5 +1,6 @@
 package org.votingsystem.test.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
@@ -9,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimulationData {
 
     private static Logger log = Logger.getLogger(SimulationData.class.getSimpleName());
@@ -40,7 +42,7 @@ public class SimulationData {
 
     private UserBaseSimulationData userBaseSimulationData;
     private EventVS.State eventStateWhenFinished;
-
+    private Map timerMap;
     private List<String> errorList = new ArrayList<String>();
 
     public SimulationData(int status, String message) {
@@ -85,66 +87,6 @@ public class SimulationData {
         if(numRequestsOK != null) resultMap.put("numRequestsOK", numRequestsOK.longValue());
         if(numRequestsERROR != null) resultMap.put("numRequestsERROR", numRequestsERROR.longValue());
         return resultMap;
-    }
-
-    public static SimulationData parse (Map dataMap) throws Exception {
-        SimulationData simulationData = new SimulationData();
-        EventVS eventVS = new EventVS();
-        if (dataMap.containsKey("accessControlURL")) {
-            simulationData.setAccessControlURL((String) dataMap.get("accessControlURL"));
-        }
-        if (dataMap.containsKey("serverURL")) {
-            simulationData.setServerURL((String) dataMap.get("serverURL"));
-        }
-
-        if(dataMap.containsKey("userBaseData")) {
-            simulationData.setUserBaseSimulationData(
-                    (UserBaseSimulationData) UserBaseSimulationData.parse((Map) dataMap.get("userBaseData")));
-        }
-        if (dataMap.containsKey("numRequestsProjected")) {
-            simulationData.setNumRequestsProjected(((Number)dataMap.get("numRequestsProjected")).intValue());
-        }
-        if (dataMap.containsKey("maxPendingResponses")) {
-            simulationData.setMaxPendingResponses(((Number)dataMap.get("maxPendingResponses")).intValue());
-        }
-        if (dataMap.containsKey("event")) {
-            eventVS = EventVS.parse((Map) dataMap.get("event"));
-        }
-        if (dataMap.containsKey("eventId")) {
-            simulationData.setEventId(((Number)dataMap.get("eventId")).longValue());
-        }
-        if (dataMap.containsKey("groupId")) {
-            simulationData.setGroupId(((Number)dataMap.get("groupId")).longValue());
-        }
-        if (dataMap.containsKey("backupRequestEmail")) {
-            String email = (String) dataMap.get("backupRequestEmail");
-            if(email != null && !email.trim().isEmpty()) simulationData.setBackupRequestEmail(email);
-        }
-        if(dataMap.containsKey("timer")) {
-            Map timerJSONMap = (Map) dataMap.get("timer");
-            if(timerJSONMap.containsKey("active")) {
-                boolean timerBased = (boolean) timerJSONMap.get("active");
-                simulationData.setTimerBased(timerBased);
-                if(timerBased) {
-                    if(timerJSONMap.containsKey("time")) {
-                        String timeStr = (String) timerJSONMap.get("time");
-                        Long hoursMillis = 1000 * 60 * 60 * new Long(Integer.valueOf(timeStr.split(":")[0]));
-                        Long minutesMillis = 1000 * 60 * new Long(Integer.valueOf(timeStr.split(":")[1]));
-                        Long secondMillis = 1000 * new Long(Integer.valueOf(timeStr.split(":")[2]));
-                        simulationData.setDurationInMillis(hoursMillis + minutesMillis + secondMillis);
-                    }
-                }
-            }
-        }
-        if (dataMap.containsKey("whenFinishChangeEventStateTo")) {
-            try {
-                EventVS.State nextState = EventVS.State.valueOf((String) dataMap.get("whenFinishChangeEventStateTo"));
-                simulationData.setEventStateWhenFinished(nextState);
-            }catch(Exception ex) { }
-
-        }
-        simulationData.setEventVS(eventVS);
-        return simulationData;
     }
 
     public Long getNumRequestsCollected() {
@@ -316,4 +258,23 @@ public class SimulationData {
         return groupId;
     }
 
+    public Map getTimerMap() {
+        return timerMap;
+    }
+
+    public void setTimerMap(Map timerMap) {
+        this.timerMap = timerMap;
+        if(timerMap.containsKey("active")) {
+            timerBased = (boolean) timerMap.get("active");
+            if(timerBased) {
+                if(timerMap.containsKey("time")) {
+                    String timeStr = (String) timerMap.get("time");
+                    Long hoursMillis = 1000 * 60 * 60 * new Long(Integer.valueOf(timeStr.split(":")[0]));
+                    Long minutesMillis = 1000 * 60 * new Long(Integer.valueOf(timeStr.split(":")[1]));
+                    Long secondMillis = 1000 * new Long(Integer.valueOf(timeStr.split(":")[2]));
+                    setDurationInMillis(hoursMillis + minutesMillis + secondMillis);
+                }
+            }
+        }
+    }
 }

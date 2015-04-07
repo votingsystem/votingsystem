@@ -1,7 +1,5 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.util.ZipUtils;
-
 import java.util.logging.Logger;
 
 /**

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.EncryptionTestSender;
+import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -21,22 +22,22 @@ import java.util.logging.Logger;
 public class Encryption_send {
 
     private static Logger log;
+    private static SimulationData simulationData;
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("serverURL", "http://sistemavotacion.org/AccessControl");
-        simulationDataMap.put("maxPendingResponses", 10);
-        simulationDataMap.put("numRequestsProjected", 1);
+        simulationData = new SimulationData();
+        simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
-        
-        log = TestUtils.init(Encryption_send.class, simulationDataMap);
+        simulationData.setTimerMap(timerMap);
+        log = TestUtils.init(Encryption_send.class, simulationData);
 
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                TestUtils.getSimulationData().getServerURL()), ContentTypeVS.JSON);
+                simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Map<String, Object> dataMap = new ObjectMapper().readValue(
                 responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
@@ -50,12 +51,12 @@ public class Encryption_send {
 
     private static void initSimulation(){
         log.info("initSimulation");
-        if(!(TestUtils.getSimulationData().getNumRequestsProjected() > 0)) {
+        if(!(simulationData.getNumRequestsProjected() > 0)) {
             log.info("WITHOUT NumberOfRequestsProjected");
             return;
         }
-        log.info("initSimulation - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected() +
-                " -serverURL" + TestUtils.getSimulationData().getServerURL());
+        log.info("initSimulation - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
+                " -serverURL" + simulationData.getServerURL());
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         completionService = new ExecutorCompletionService<ResponseVS>(executorService);
         executorService.execute(new Runnable() {
@@ -80,11 +81,11 @@ public class Encryption_send {
     }
 
     public static void sendRequests(String serviceURL) throws Exception {
-        log.info("sendRequests - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected());
-        while(TestUtils.getSimulationData().getNumRequests() < TestUtils.getSimulationData().getNumRequestsProjected()) {
-            if((TestUtils.getSimulationData().getNumRequests() - TestUtils.getSimulationData().
-                    getNumRequestsCollected()) <= TestUtils.getSimulationData().getMaxPendingResponses()) {
-                String nifFrom = NifUtils.getNif(TestUtils.getSimulationData().getAndIncrementNumRequests().intValue());
+        log.info("sendRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+        while(simulationData.getNumRequests() < simulationData.getNumRequestsProjected()) {
+            if((simulationData.getNumRequests() - simulationData.
+                    getNumRequestsCollected()) <= simulationData.getMaxPendingResponses()) {
+                String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
                 completionService.submit(new EncryptionTestSender(nifFrom, serviceURL,
                         ContextVS.getInstance().getDefaultServer().getX509Certificate()));
             } else Thread.sleep(300);
@@ -93,22 +94,22 @@ public class Encryption_send {
 
 
     private static void waitForResponses() throws Exception {
-        log.info("waitForResponses - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected());
-        while (TestUtils.getSimulationData().getNumRequestsProjected() >
-                TestUtils.getSimulationData().getNumRequestsCollected()) {
+        log.info("waitForResponses - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+        while (simulationData.getNumRequestsProjected() >
+                simulationData.getNumRequestsCollected()) {
             try {
                 Future<ResponseVS> f = completionService.take();
                 ResponseVS responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    TestUtils.getSimulationData().getAndIncrementNumRequestsOK();
+                    simulationData.getAndIncrementNumRequestsOK();
                 } else TestUtils.finishWithError("ERROR", responseVS.getMessage(),
-                        TestUtils.getSimulationData().getNumRequestsOK());
+                        simulationData.getNumRequestsOK());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.getSimulationData().getNumRequestsOK());
+                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
             }
         }
-        TestUtils.finish("OK - Num. requests completed: " + TestUtils.getSimulationData().getNumRequestsOK());
+        TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsOK());
     }
     
 }

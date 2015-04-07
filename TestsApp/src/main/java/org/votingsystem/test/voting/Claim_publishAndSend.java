@@ -29,6 +29,7 @@ public class Claim_publishAndSend {
     private static Logger log;
     
     private static EventVS eventVS;
+    private static SimulationData simulationData;
     private static Timer simulationTimer;
     private static List synchronizedSignerList;
     private static ExecutorService simulatorExecutor;
@@ -36,31 +37,25 @@ public class Claim_publishAndSend {
 
     public static void main(String[] args) throws Exception {
         String publisherNIF = "00111222V";
-        Map eventDataMap = new HashMap<>();
-        eventDataMap.put("subject", "Claim subject");
-        eventDataMap.put("content", "<p>Claim content</p>");
-        eventDataMap.put("UUID", UUID.randomUUID().toString());
-        eventDataMap.put("dateBegin", "2014/10/17 00:00:00");
-        eventDataMap.put("dateFinish", "2014/11/25 00:00:00");
-        eventDataMap.put("fieldsEventVS", Arrays.asList("field1", "field2"));
-
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("accessControlURL", "http://sistemavotacion.org/AccessControl");
-        simulationDataMap.put("maxPendingResponses", 10);
-        simulationDataMap.put("numRequestsProjected", 2);
-        simulationDataMap.put("whenFinishChangeEventStateTo", "");
-        simulationDataMap.put("backupRequestEmail", "");
-        simulationDataMap.put("event", eventDataMap);
-        simulationDataMap.put("dateBeginDocument", "2014/10/17 00:00:00");
-        simulationDataMap.put("dateFinishDocument", "2014/11/25 00:00:00");
+        eventVS = new EventVS();
+        eventVS.setSubject("Claim subject");
+        eventVS.setContent("<p>Claim content</p>");
+        eventVS.setDateBegin(new Date());
+        eventVS.setFieldsEventVS(new HashSet<>(Arrays.asList(new FieldEventVS("field1", null), new FieldEventVS("field2", null))));
+        simulationData = new SimulationData();
+        simulationData.setAccessControlURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(2);
+        //simulationData.setEventStateWhenFinished();
+        //simulationData.setBackupRequestEmail();
+        simulationData.setEventVS(eventVS);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
-        // whenFinishChangeEventStateTo: one of EventVS.State,
-        log = TestUtils.init(Claim_publishAndSend.class, simulationDataMap);
+        simulationData.setTimerMap(timerMap);
+        log = TestUtils.init(Claim_publishAndSend.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                TestUtils.getSimulationData().getAccessControlURL()),ContentTypeVS.JSON);
+                simulationData.getAccessControlURL()),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage());
 
         Map<String, Object> dataMap = new ObjectMapper().readValue(
@@ -72,19 +67,19 @@ public class Claim_publishAndSend {
             throw new org.votingsystem.throwable.ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
         }
         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-        eventVS = publishEvent(TestUtils.getSimulationData().getEventVS(), publisherNIF, "publishClaimMsgSubject");
+        eventVS = publishEvent(simulationData.getEventVS(), publisherNIF, "publishClaimMsgSubject");
         simulatorExecutor = Executors.newFixedThreadPool(100);
         sendClaims();
     }
 
     private static void sendClaims(){
         log.info("sendClaims");
-        if(!(TestUtils.getSimulationData().getNumRequestsProjected() > 0)) {
+        if(!(simulationData.getNumRequestsProjected() > 0)) {
             log.info("WITHOUT NumberOfRequestsProjected");
             return;
         }
         List<String> signerList = new ArrayList<String>();
-        for(int i = 0; i < TestUtils.getSimulationData().getNumRequestsProjected(); i++) {
+        for(int i = 0; i < simulationData.getNumRequestsProjected(); i++) {
             signerList.add(NifUtils.getNif(i));
         }
         synchronizedSignerList = Collections.synchronizedList(signerList);
@@ -110,12 +105,12 @@ public class Claim_publishAndSend {
     }
 
     public static void sendRequests() throws Exception {
-        log.info("sendRequests - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected());
-        if(TestUtils.getSimulationData().isTimerBased()) startSimulationTimer(TestUtils.getSimulationData());
+        log.info("sendRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+        if(simulationData.isTimerBased()) startSimulationTimer(simulationData);
         else {
             while(!synchronizedSignerList.isEmpty()) {
-                if((TestUtils.getSimulationData().getNumRequests() - TestUtils.getSimulationData().getNumRequestsCollected()) <
-                        TestUtils.getSimulationData().getMaxPendingResponses()) {
+                if((simulationData.getNumRequests() - simulationData.getNumRequestsCollected()) <
+                        simulationData.getMaxPendingResponses()) {
                     int randomSigner = new Random().nextInt(synchronizedSignerList.size());
                     launchSignature((String) synchronizedSignerList.remove(randomSigner));
                 } else Thread.sleep(200);
@@ -125,24 +120,24 @@ public class Claim_publishAndSend {
 
     public static void launchSignature(String nif) throws Exception {
         signClaimCompletionService.submit(new ClaimSignedSender(nif, eventVS.getId()));
-        TestUtils.getSimulationData().getAndIncrementNumRequests();
+        simulationData.getAndIncrementNumRequests();
     }
 
     private static void waitForResponses() throws Exception {
-        log.info("waitForResponses - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected());
-        while (TestUtils.getSimulationData().getNumRequestsProjected() > TestUtils.getSimulationData().getNumRequestsCollected()) {
+        log.info("waitForResponses - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+        while (simulationData.getNumRequestsProjected() > simulationData.getNumRequestsCollected()) {
             try {
                 Future<ResponseVS> f = signClaimCompletionService.take();
                 ResponseVS responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    TestUtils.getSimulationData().getAndIncrementNumRequestsOK();
-                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), TestUtils.getSimulationData().getNumRequestsOK());
+                    simulationData.getAndIncrementNumRequestsOK();
+                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), simulationData.getNumRequestsOK());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.getSimulationData().getNumRequestsOK());
+                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
             }
         }
-        TestUtils.finish("OK - Num. requests completed: " + TestUtils.getSimulationData().getNumRequestsOK());
+        TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsOK());
     }
 
     private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
@@ -163,9 +158,8 @@ public class Claim_publishAndSend {
         ContextVS.getInstance().copyFile(responseBytes, "/claimSimulation", "ClaimPublishedReceipt");
         SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-        Map<String, Object> dataMap = new ObjectMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        return EventVS.parse(dataMap);
+        eventVS = new ObjectMapper().readValue(responseVS.getMessage(), EventVS.class);
+        return eventVS;
     }
 
 
@@ -188,7 +182,7 @@ public class Claim_publishAndSend {
     private void changeEventState(String publisherNIF) throws Exception {
         log.info("changeEventState");
         Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
-                TestUtils.getSimulationData().getEventStateWhenFinished());
+                simulationData.getEventStateWhenFinished());
         String smimeMessageSubject ="cancelEventMsgSubject";
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().

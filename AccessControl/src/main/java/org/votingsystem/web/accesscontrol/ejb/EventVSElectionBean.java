@@ -16,7 +16,6 @@ import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
-
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -28,9 +27,7 @@ import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Logger;
-
 import static java.text.MessageFormat.format;
-
 
 @Stateless
 public class EventVSElectionBean {
@@ -49,29 +46,19 @@ public class EventVSElectionBean {
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
-        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        EventVSElectionJSON request  = messageSMIME.getSignedContent(EventVSElectionJSON.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = controlCenterBean.getControlCenter();
-        EventVSElection eventVS = new EventVSElection(request.getSubject(), request.getContent(),
-                EventVS.Cardinality.EXCLUSIVE, userSigner, controlCenterVS, request.getDateBegin(), request.getDateFinish());
+        EventVSElection eventVS = request.getEventVSElection();
+        eventVS.setUserVS(userSigner);
+        eventVS.setControlCenterVS(controlCenterVS);
         eventVSBean.setEventDatesState(eventVS);
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
         request.setControlCenterURL(controlCenterVS.getServerURL());
-        Map accessControlMap = new HashMap<>();
-        accessControlMap.put("serverURL", config.getContextURL());
-        accessControlMap.put("name", config.getServerName());
-        if (request.getTags() !=  null) {
-            Set<TagVS> tagSet = tagVSBean.save(request.getTags());
-            if(!tagSet.isEmpty()) eventVS.setTagVSSet(tagSet);
-        }
+        if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
-        Set<FieldEventVS> electionOptions = saveElectionOptions(eventVS, request.getFieldsEventVS());
-        List<Map> optionsMap = new ArrayList<>();
-        for(FieldEventVS option : electionOptions) {
-            optionsMap.add(option.toMap());
-        }
-        request.setFieldsEventVS(optionsMap);
+        request.setFieldsEventVS(eventVS.getFieldsEventVS());
         request.setId(eventVS.getId());
         request.setURL(config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
         request.setDateCreated(eventVS.getDateCreated());
@@ -104,16 +91,6 @@ public class EventVSElectionBean {
         dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime).setEventVS(eventVS));
         dao.merge(eventVS.setState(EventVS.State.ACTIVE));
         return messageSMIME;
-    }
-
-    public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<Map> optionList) throws ExceptionVS {
-        if(optionList.size() < 2) throw new ExceptionVS("elections must have at least two options");
-        Set<FieldEventVS> result = new HashSet<>();
-        for(Map option : optionList) {
-            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, (String) option.get("content")));
-            result.add(fieldEventVS);
-        }
-        return result;
     }
 
     public synchronized void generateBackups () throws Exception {
@@ -220,7 +197,6 @@ public class EventVSElectionBean {
         log.info("ZipResult absolutePath: " + backupFiles.getZipResult().getAbsolutePath());
     }
 
-
     public Map getStatsMap (EventVSElection eventVS) {
         Map result = new HashMap();
         result.put("id", eventVS.getId());
@@ -242,13 +218,12 @@ public class EventVSElectionBean {
         query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.CANCELED);
         result.put("numVotesVSVotesVSCANCELED", (long) query.getSingleResult());
-        List<Map> optionList = new ArrayList<>();
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
                     "and v.state =:state").setParameter("option", option).setParameter("state", VoteVS.State.OK);
-            optionList.add(option.toMap((long) query.getSingleResult()));
+            option.setNumVotesVS((long) query.getSingleResult());
         }
-        result.put("fieldsEventVS", optionList);
+        result.put("fieldsEventVS", eventVS.getFieldsEventVS());
         return result;
     }
 

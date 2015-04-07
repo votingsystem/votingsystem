@@ -5,6 +5,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
+import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -26,15 +27,15 @@ public class VoteValidation {
     private static ExecutorCompletionService completionService;
 
     public void main(String[] args) throws Exception {
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("serverURL", "http://localhost:8080/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer
-        simulationDataMap.put("maxPendingResponses", 10);
-        simulationDataMap.put("numRequestsProjected", 1);
+        SimulationData simulationData = new SimulationData();
+        simulationData.setServerURL("http://localhost:8080/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
-        log = TestUtils.init(VoteValidation.class, simulationDataMap);
+        simulationData.setTimerMap(timerMap);
+        log = TestUtils.init(VoteValidation.class, simulationData);
         File voteFile = TestUtils.getFileFromResources("voting/vote.p7m");
         byte[] voteBytes = FileUtils.getBytesFromFile(voteFile);
         File trustedCertsFile = TestUtils.getFileFromResources("voting/systemTrustedCerts.pem");

@@ -1,5 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.json.VoteVSCancelerJSON;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -56,16 +57,16 @@ public class VoteVSBean {
     public synchronized VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        VoteVSRequest request = messageSMIME.getSignedContent(VoteVSRequest.class);
-        request.validateCancelationRequest();
+        VoteVSCancelerJSON request = messageSMIME.getSignedContent(VoteVSCancelerJSON.class);
+        request.validate();
         Query query = dao.getEM().createQuery("select a from AccessRequestVS a where a.hashAccessRequestBase64 =:hashAccessRequestBase64 and " +
-                "a.state =:state").setParameter("hashAccessRequestBase64", request.hashAccessRequestBase64)
+                "a.state =:state").setParameter("hashAccessRequestBase64", request.getHashAccessRequestBase64())
                 .setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if (accessRequestVS == null) throw new ValidationExceptionVS(messages.get(
                 "voteCancellationAccessRequestNotFoundError"));
         query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
-                "c.state =:state").setParameter("hashCertVSBase64", request.hashCertVSBase64)
+                "c.state =:state").setParameter("hashCertVSBase64", request.getHashCertVSBase64())
                 .setParameter("state", CertificateVS.State.OK);
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) throw new ValidationExceptionVS(messages.get(
@@ -103,8 +104,8 @@ public class VoteVSBean {
             throw new ValidationExceptionVS(responseVSControlCenter.getMessage());
         }
         VoteVSCanceler voteCanceler = new VoteVSCanceler(messageSMIME, accessRequestVS,
-                VoteVSCanceler.State.CANCELLATION_OK, request.originHashAccessRequest, request.hashCertVSBase64,
-                request.originHashCertVote, request.hashCertVSBase64, voteVS);
+                VoteVSCanceler.State.CANCELLATION_OK, request.getOriginHashAccessRequest(), request.getHashAccessRequestBase64(),
+                request.getOriginHashCertVote(), request.getHashCertVSBase64(), voteVS);
         dao.persist(voteCanceler);
         dao.merge(voteVS.setState(VoteVS.State.CANCELED));
         dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
@@ -112,28 +113,5 @@ public class VoteVSBean {
         return voteCanceler;
     }
 
-
-    private class VoteVSRequest {
-        String originHashCertVote, hashCertVSBase64, originHashAccessRequest, hashAccessRequestBase64;
-        TypeVS operation;
-
-        public VoteVSRequest(String signedContent) {}
-
-        public void validateCancelationRequest() throws ValidationExceptionVS, NoSuchAlgorithmException {
-            if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
-                    "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
-            if(originHashCertVote == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashCertVote'");
-            if(hashCertVSBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashCertVSBase64'");
-            if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
-            if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-            if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-            if(!hashAccessRequestBase64.equals(CMSUtils.getHashBase64(originHashAccessRequest,
-                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(messages.get(
-                    "voteCancellationAccessRequestHashError"));
-            if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVote,
-                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(
-                    messages.get("voteCancellationHashCertificateError"));
-        }
-    }
 
 }

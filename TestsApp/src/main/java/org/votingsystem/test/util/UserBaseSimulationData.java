@@ -1,5 +1,6 @@
 package org.votingsystem.test.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.test.callable.RepresentativeDelegatorDataSender;
@@ -13,7 +14,6 @@ import org.votingsystem.util.NifUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserBaseSimulationData extends SimulationData {
 
     private static Logger log = Logger.getLogger(UserBaseSimulationData.class.getSimpleName());
@@ -410,35 +411,6 @@ public class UserBaseSimulationData extends SimulationData {
         if(representativeNifList.isEmpty()) return null;
         // ThreadLocalRandom are not cryptographically secure
         return representativeNifList.get(ThreadLocalRandom.current().nextInt(representativeNifList.size()));
-    }
-
-    public static UserBaseSimulationData parse (Map dataJSON) {
-        if(dataJSON == null) return null;
-        UserBaseSimulationData userBaseData = new UserBaseSimulationData();
-        if (dataJSON.containsKey("userIndex")) {
-            userBaseData.setUserIndex(((Number)dataJSON.get("userIndex")).longValue());
-        }
-        if (dataJSON.containsKey("numUsersWithoutRepresentative")) {
-            userBaseData.setNumUsersWithoutRepresentative(
-                    ((Number)dataJSON.get("numUsersWithoutRepresentative")).intValue());
-        }
-        if (dataJSON.containsKey("numUsersWithoutRepresentativeWithVote")) {
-            userBaseData.setNumUsersWithoutRepresentativeWithVote(
-                    ((Number)dataJSON.get("numUsersWithoutRepresentativeWithVote")).intValue());
-        }
-        if (dataJSON.containsKey("numRepresentatives")) {
-            userBaseData.setNumRepresentatives(((Number)dataJSON.get("numRepresentatives")).intValue());
-        }
-        if (dataJSON.containsKey("numRepresentativesWithVote")) {
-            userBaseData.setNumRepresentativesWithVote(((Number)dataJSON.get("numRepresentativesWithVote")).intValue());
-        }
-        if (dataJSON.containsKey("numUsersWithRepresentative")) {
-            userBaseData.setNumUsersWithRepresentative(((Number)dataJSON.get("numUsersWithRepresentative")).intValue());
-        }
-        if (dataJSON.containsKey("numUsersWithRepresentativeWithVote")) {
-            userBaseData.setNumUsersWithRepresentativeWithVote(((Number)dataJSON.get("numUsersWithRepresentativeWithVote")).intValue());
-        }
-        return userBaseData;
     }
 
 }

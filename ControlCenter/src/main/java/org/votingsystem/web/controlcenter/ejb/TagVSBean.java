@@ -18,17 +18,18 @@ public class TagVSBean {
 
     @Inject DAOBean dao;
 
-    public Set<TagVS> save(List<String> tags) {
+    public Set<TagVS> save(Set<TagVS> tags) {
         Query query = dao.getEM().createQuery("select t from TagVS t where t.name =:name");
         Set<TagVS> result = new HashSet<>();
-        for(String tag : tags) {
-            query.setParameter("name", tag);
+        for(TagVS tag : tags) {
+            query.setParameter("name", tag.getName());
             TagVS tagVS = dao.getSingleResult(TagVS.class, query);
             if(tagVS != null) {
                 tagVS.setFrequency(tagVS.getFrequency() + 1);
                 dao.merge(tagVS);
             } else {
-                tagVS = dao.persist(new TagVS(tag, 1L));
+                tag.setFrequency(1L);
+                tagVS = dao.persist(tag);
             }
             result.add(tagVS);
         }

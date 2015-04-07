@@ -1,9 +1,11 @@
 package org.votingsystem.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -49,7 +51,8 @@ public class JSON {
 
     public static ObjectMapper getMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(dateFormat);
+        //mapper.setDateFormat(dateFormat);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN);
         //mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS,true);
         //mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,true);
@@ -58,6 +61,7 @@ public class JSON {
 
     public static ObjectMapper getEscapingMapper() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.getJsonFactory().setCharacterEscapes(new HTMLCharacterEscapes());
         return mapper;
     }

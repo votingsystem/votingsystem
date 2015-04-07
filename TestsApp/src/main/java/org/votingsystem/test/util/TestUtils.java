@@ -44,24 +44,8 @@ public class TestUtils {
     }
 
 
-    public static Logger init(Class clazz, Map simulationDataMap) throws Exception {
+    public static Logger init(Class clazz, SimulationData simulationData) throws Exception {
         Logger log = init(clazz);
-        simulationData = SimulationData.parse(simulationDataMap);
-        simulationData.init(System.currentTimeMillis());
-        return log;
-    }
-
-    public static Logger initWithUI(Class clazz, Map simulationDataMap) throws Exception {
-        Logger log = init(clazz);
-        new Thread(() -> TestsApp.getInstance().init(simulationData)).start();
-        simulationData = SimulationData.parse(simulationDataMap);
-        simulationData.init(System.currentTimeMillis());
-        return log;
-    }
-
-    public static Logger init(Class clazz, SimulationData simuData) throws Exception {
-        Logger log = init(clazz);
-        simulationData = simuData;
         simulationData.init(System.currentTimeMillis());
         return log;
     }

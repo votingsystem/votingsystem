@@ -2,10 +2,10 @@ package org.votingsystem.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import java.util.*;
@@ -29,8 +29,8 @@ public class EventVSElectionJSON {
     private String certChain;
     private String accessControlURL;
     private String serverURL;
-    private List<Map> fieldsEventVS;
-    private List<String> tags;
+    private Set<FieldEventVS> fieldsEventVS;
+    private Set<TagVS> tags;
     private Date dateFinish;
     private Date dateBegin;
     private Date dateCreated;
@@ -55,28 +55,14 @@ public class EventVSElectionJSON {
         type = eventVS.getType();
         id = eventVS.getId();
         UUID =  java.util.UUID.randomUUID().toString();
-        if(eventVS.getTagVSSet() != null) {
-            tags = new ArrayList<String>();
-            for (TagVS tag : eventVS.getTagVSSet()) {
-                tags.add(tag.getName());
-            }
-        }
+        tags = eventVS.getTagVSSet();
         if(eventVS.getControlCenterVS() != null) {
             controlCenter = new HashMap();
             controlCenter.put("id", eventVS.getControlCenterVS().getId());
             controlCenter.put("name", eventVS.getControlCenterVS().getName());
             controlCenter.put("serverURL", eventVS.getControlCenterVS().getServerURL());
         }
-        if (eventVS.getFieldsEventVS() != null) {
-            fieldsEventVS = new ArrayList<>();
-            for (FieldEventVS opcion : eventVS.getFieldsEventVS()) {
-                Map field = new HashMap();
-                field.put("content", opcion.getContent());
-                field.put("value", opcion.getValue());
-                field.put("id", opcion.getId());
-                fieldsEventVS.add(field);
-            }
-        }
+        fieldsEventVS = eventVS.getFieldsEventVS();
         cardinality = eventVS.getCardinality();
     }
 
@@ -104,6 +90,25 @@ public class EventVSElectionJSON {
         if(eventId == null) throw new ValidationExceptionVS("ERROR - missing param 'eventId'");
         if(state == null || EventVS.State.DELETED_FROM_SYSTEM != state || EventVS.State.CANCELED != state)
             throw new ValidationExceptionVS("ERROR - expected state 'DELETED_FROM_SYSTEM' found: " + state);
+    }
+
+    public EventVSElection getEventVSElection() {
+        EventVSElection result = new EventVSElection();
+        result.setId(id);
+        result.setDateCreated(dateCreated);
+        result.setSubject(subject);
+        result.setContent(getContent());
+        result.setDateBegin(dateBegin);
+        result.setDateFinish(dateFinish);
+        result.setFieldsEventVS(fieldsEventVS);
+        result.setTagVSSet(getTags());
+        result.setUrl(getURL());
+        Set<FieldEventVS> fieldEventVSSet = new HashSet<>(getFieldsEventVS());
+        for(FieldEventVS fieldEventVS : fieldEventVSSet) {
+            fieldEventVS.setEventVS(result);
+        }
+        result.setFieldsEventVS(fieldEventVSSet);
+        return result;
     }
 
     public TypeVS getOperation() {
@@ -158,11 +163,11 @@ public class EventVSElectionJSON {
         return serverURL;
     }
 
-    public List<Map> getFieldsEventVS() {
+    public Set<FieldEventVS> getFieldsEventVS() {
         return fieldsEventVS;
     }
 
-    public List<String> getTags() {
+    public Set<TagVS> getTags() {
         return tags;
     }
 
@@ -182,7 +187,7 @@ public class EventVSElectionJSON {
         this.controlCenterURL = controlCenterURL;
     }
 
-    public void setFieldsEventVS(List<Map> fieldsEventVS) {
+    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
         this.fieldsEventVS = fieldsEventVS;
     }
 
@@ -234,7 +239,7 @@ public class EventVSElectionJSON {
         this.serverURL = serverURL;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<TagVS> tags) {
         this.tags = tags;
     }
 

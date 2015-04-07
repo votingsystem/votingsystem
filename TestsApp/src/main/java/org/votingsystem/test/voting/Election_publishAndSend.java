@@ -3,7 +3,6 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.json.ActorVSJSON;
 import org.votingsystem.json.EventVSElectionJSON;
 import org.votingsystem.json.EventVSJSON;
 import org.votingsystem.model.*;
@@ -13,7 +12,6 @@ import org.votingsystem.test.callable.VoteSender;
 import org.votingsystem.test.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-
 import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,6 +24,7 @@ public class Election_publishAndSend {
     private static Logger log;
 
     private static EventVS eventVS;
+    private static VotingSimulationData simulationData;
     private static boolean isWithVoteCancellation = false;
     private static String publisherNIF = "00111222V";
     private static List<String> synchronizedElectorList;
@@ -34,36 +33,35 @@ public class Election_publishAndSend {
     private static ExecutorCompletionService signClaimCompletionService;
 
     public static void main(String[] args) throws Exception {
-        Map eventDataMap = new HashMap<>();
-        eventDataMap.put("subject", "voting subject");
-        eventDataMap.put("content", "<p>election content</p>");
-        eventDataMap.put("UUID", UUID.randomUUID().toString());
-        eventDataMap.put("fieldsEventVS", Arrays.asList("field1", "field2"));
+        eventVS = new EventVS();
+        eventVS.setSubject("voting subject");
+        eventVS.setContent("<p>election content</p>");
+        eventVS.setDateBegin(new Date());
+        eventVS.setFieldsEventVS(new HashSet<>(Arrays.asList(new FieldEventVS("field1", null), new FieldEventVS("field2", null))));
 
-        Map userBaseDataMap = new HashMap<>();
-        userBaseDataMap.put("userIndex", 200);
-        userBaseDataMap.put("numUsersWithoutRepresentative", 1);
-        userBaseDataMap.put("numUsersWithoutRepresentativeWithVote", 1);
-        userBaseDataMap.put("numRepresentatives", 0);
-        userBaseDataMap.put("numRepresentativesWithVote",0);
-        userBaseDataMap.put("numUsersWithRepresentative",0);
-        userBaseDataMap.put("numUsersWithRepresentativeWithVote", 0);
+        UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
+        userBaseSimulationData.setUserIndex(200);
+        userBaseSimulationData.setNumUsersWithoutRepresentative(1);
+        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(1);
+        userBaseSimulationData.setNumRepresentatives(0);
+        userBaseSimulationData.setNumRepresentativesWithVote(0);
+        userBaseSimulationData.setNumUsersWithRepresentative(0);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
 
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("accessControlURL","http://localhost:8080/AccessControl");
-        simulationDataMap.put("maxPendingResponses", 50);
-        simulationDataMap.put("userBaseData", userBaseDataMap);
-        simulationDataMap.put("whenFinishChangeEventStateTo", "");
-        simulationDataMap.put("backupRequestEmail", "");
-        simulationDataMap.put("event", eventDataMap);
+        simulationData = new VotingSimulationData();
+        simulationData.setServerURL("http://localhost:8080/AccessControl");
+        simulationData.setMaxPendingResponses(50);
+        simulationData.setUserBaseData(userBaseSimulationData);
+        //simulationData.setEventStateWhenFinished();
+        //simulationData.setBackupRequestEmail();
+        simulationData.setEventVS(eventVS);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
-
-        log = TestUtils.init(Election_publishAndSend.class, VotingSimulationData.parse(simulationDataMap));
+        simulationData.setTimerMap(timerMap);
+        log = TestUtils.init(Election_publishAndSend.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                TestUtils.getSimulationData().getAccessControlURL()), ContentTypeVS.JSON);
+                simulationData.getServerURL()), ContentTypeVS.JSON);
         Map<String, Object> dataMap = new ObjectMapper().readValue(
                 responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -74,20 +72,20 @@ public class Election_publishAndSend {
             throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
         }
         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-        EventVSJSON eventVSJSON = publishEvent(TestUtils.getSimulationData().getEventVS(), publisherNIF, "publishElectionMsgSubject");
-        eventVS = eventVSJSON.getEventVSElection();
+        //EventVSJSON eventVSJSON = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
+        eventVS = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
         simulatorExecutor = Executors.newFixedThreadPool(100);
         CountDownLatch userBaseDataLatch = new CountDownLatch(1);
-        ((VotingSimulationData)TestUtils.getSimulationData()).getUserBaseData().sendData(userBaseDataLatch);
+        simulationData.getUserBaseData().sendData(userBaseDataLatch);
         userBaseDataLatch.await();
-        sendVotes(((VotingSimulationData)TestUtils.getSimulationData()).getUserBaseData());
+        sendVotes(((VotingSimulationData)simulationData).getUserBaseData());
     }
 
     private static void sendVotes(UserBaseSimulationData userBaseSimulationData) throws Exception {
         log.info("sendVotes");
         synchronizedElectorList =  Collections.synchronizedList(userBaseSimulationData.getElectorList());
         if(synchronizedElectorList.isEmpty()) {
-            /*if(TestUtils.getSimulationData().getBackupRequestEmail() != null) {
+            /*if(simulationData.getBackupRequestEmail() != null) {
                 try {
                     requestBackup(eventVS, publisherNIF);
                 } catch (Exception e) {
@@ -98,7 +96,7 @@ public class Election_publishAndSend {
         } else {
             simulatorExecutor = Executors.newFixedThreadPool(100);
             responseService = new ExecutorCompletionService<ResponseVS>(simulatorExecutor);
-            ((VotingSimulationData)TestUtils.getSimulationData()).setNumOfElectors(
+            ((VotingSimulationData)simulationData).setNumOfElectors(
                     new Integer(synchronizedElectorList.size()).longValue());
             simulatorExecutor.execute(new Runnable() {@Override public void run() {
                 try {
@@ -118,10 +116,10 @@ public class Election_publishAndSend {
     }
 
     public static void sendVoteRequests(UserBaseSimulationData userBaseSimulationData) throws Exception {
-        if(TestUtils.getSimulationData().isTimerBased()) startSimulationTimer(userBaseSimulationData);
+        if(simulationData.isTimerBased()) startSimulationTimer(userBaseSimulationData);
         else {
             while(!synchronizedElectorList.isEmpty()) {
-                if(!((VotingSimulationData)TestUtils.getSimulationData()).waitingForVoteRequests()) {
+                if(!((VotingSimulationData)simulationData).waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
                     String electorNif = synchronizedElectorList.remove(randomElector);
                     responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST, eventVS),
@@ -132,7 +130,6 @@ public class Election_publishAndSend {
     }
 
     private static void waitForVoteResponses() throws Exception {
-        VotingSimulationData simulationData = ((VotingSimulationData)TestUtils.getSimulationData());
         log.info("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
         while (simulationData.hasPendingVotes()) {
             try {
@@ -145,10 +142,10 @@ public class Election_publishAndSend {
                     if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom);
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else TestUtils.finishWithError("ERROR", responseVS.getMessage(),
-                        TestUtils.getSimulationData().getNumRequestsOK());
+                        simulationData.getNumRequestsOK());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), TestUtils.getSimulationData().getNumRequestsOK());
+                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
             }
         }
         if(simulationData.getEventStateWhenFinished() != null) changeEventState(publisherNIF);
@@ -156,14 +153,14 @@ public class Election_publishAndSend {
         TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
     }
 
-    private static EventVSJSON publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
+    private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
         log.info("publishEvent");
         eventVS.setDateBegin(new Date());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date()));
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
                 ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
-                new EventVSElectionJSON(eventVS)), smimeMessageSubject);
+                        eventVS), smimeMessageSubject);
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,
@@ -175,8 +172,8 @@ public class Election_publishAndSend {
         ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt");
         SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-        EventVSJSON response = new ObjectMapper().readValue(responseVS.getMessage(), EventVSJSON.class);
-        return response;
+        EventVSElectionJSON eventVSJSON = new ObjectMapper().readValue(responseVS.getMessage(), EventVSElectionJSON.class);
+        return eventVSJSON.getEventVSElection();
     }
 
     public static void startSimulationTimer(SimulationData simulationData) throws Exception {
@@ -189,7 +186,7 @@ public class Election_publishAndSend {
     private static void changeEventState(String publisherNIF) throws Exception {
         log.info("changeEventState");
         Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
-                TestUtils.getSimulationData().getEventStateWhenFinished());
+                simulationData.getEventStateWhenFinished());
         String smimeMessageSubject = "cancelEventMsgSubject";
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().
@@ -207,7 +204,7 @@ public class Election_publishAndSend {
         Map cancelDataMap = new HashMap<String, String>();
         cancelDataMap.put("operation", TypeVS.CANCEL_VOTE.toString());
         cancelDataMap.put("originHashAccessRequest", voteVS.getOriginHashAccessRequest());
-        cancelDataMap.put("hashAccessRequestBase64", voteVS.getAccessRequestHashBase64());
+        cancelDataMap.put("hashAccessRequestBase64", voteVS.getHashAccessRequestBase64());
         cancelDataMap.put("originHashCertVote", voteVS.getOriginHashCertVote());
         cancelDataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
         cancelDataMap.put("UUID", UUID.randomUUID().toString());

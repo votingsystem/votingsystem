@@ -1,8 +1,12 @@
 package org.votingsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -14,6 +18,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @NamedQueries({
         @NamedQuery(name = "findTagByName", query = "SELECT tag FROM TagVS tag WHERE tag.name =:name")
 })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TagVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,11 +32,10 @@ public class TagVS implements Serializable {
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) private Set<EventVS> eventVSSet;
-    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) private Set<UserVS> userVSSet;
+    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<EventVS> eventVSSet;
+    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<UserVS> userVSSet;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
-    private int JSON;
 
     public TagVS() { }
 
@@ -111,28 +115,6 @@ public class TagVS implements Serializable {
     @PreUpdate
     public void preUpdate() {
         setLastUpdated(new Date());
-    }
-
-    public static TagVS parse(Map dataMap) throws Exception {
-        TagVS tagVS = new TagVS();
-        tagVS.setName((String) dataMap.get("name"));
-        if(dataMap.containsKey("id")) tagVS.setId((Long) dataMap.get("id"));
-        return tagVS;
-    }
-
-    public static List<TagVS> parse(List<Map> mapList) throws Exception {
-        List<TagVS> result = new ArrayList<TagVS>();
-        for(Map map: mapList) {
-            result.add(parse(map));
-        }
-        return result;
-    }
-
-    public Map toMap() {
-        Map dataMap = new HashMap<>();
-        dataMap.put("id", id);
-        dataMap.put("name", name);
-        return dataMap;
     }
 
 }

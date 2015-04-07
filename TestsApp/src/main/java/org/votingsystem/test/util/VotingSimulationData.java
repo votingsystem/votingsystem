@@ -1,5 +1,6 @@
 package org.votingsystem.test.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 
@@ -13,6 +14,7 @@ import java.util.logging.Logger;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VotingSimulationData extends SimulationData {
 
     private static Logger log = Logger.getLogger(SimulationData.class.getSimpleName());
@@ -126,72 +128,33 @@ public class VotingSimulationData extends SimulationData {
         return controlCenterURL;
     }
 
-    /**
-     * @param controlCenterURL the controlCenterURL to set
-     */
     public void setControlCenterURL(String controlCenterURL) {
         this.controlCenterURL = controlCenterURL;
     }
 
-    /**
-     * @return the numOfElectors
-     */
     public Long getNumOfElectors() {
         return numOfElectors.get();
     }
 
-    /**
-     * @param numOfElectors the numOfElectors to set
-     */
     public void setNumOfElectors(Long numOfElectors) {
         this.numOfElectors.set(numOfElectors);
     }
 
-    /**
-     * @return the userBaseData
-     */
     public UserBaseSimulationData getUserBaseData() {
         return userBaseData;
     }
 
-    /**
-     * @param userBaseData the userBaseData to set
-     */
     public void setUserBaseData(UserBaseSimulationData userBaseData) {
         this.userBaseData = userBaseData;
     }
 
-    /**
-     * @return the error
-     */
     public Error getError() {
         return error;
     }
 
-    /**
-     * @param error the error to set
-     */
     public void setError(Error error) {
         setStatusCode(ResponseVS.SC_ERROR);
         this.error = error;
-    }
-
-    public static VotingSimulationData parse (Map dataMap) throws Exception {
-        VotingSimulationData simulationData = new VotingSimulationData(SimulationData.parse(dataMap));
-        if (dataMap.containsKey("controlCenterURL")) {
-            simulationData.setControlCenterURL((String) dataMap.get("controlCenterURL"));
-        }
-        if (dataMap.containsKey("options")) {
-            Set<FieldEventVS> eventOptions = new HashSet<FieldEventVS>();
-            List<String> optionList = (List) dataMap.get("options");
-            for (String option : optionList) {
-                FieldEventVS optionVS = new FieldEventVS();
-                optionVS.setContent(option);
-                eventOptions.add(optionVS);
-            }
-            simulationData.getEventVS().setFieldsEventVS(eventOptions);
-        }
-        return simulationData;
     }
 
 }

@@ -3,6 +3,7 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
+import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.DateUtils;
 
@@ -17,16 +18,15 @@ public class Multisign {
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("serverURL", "http://sistemavotacion.org/AccessControl");
-        simulationDataMap.put("maxPendingResponses", 10);
-        simulationDataMap.put("numRequestsProjected", 1);
+        SimulationData simulationData = new SimulationData();
+        simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
-
-        log = TestUtils.init(Multisign.class, simulationDataMap);
+        simulationData.setTimerMap(timerMap);
+        log = TestUtils.init(Multisign.class, simulationData);
         Map dataToSignMap = new HashMap<>();
         dataToSignMap.put("UUID", UUID.randomUUID().toString());
 

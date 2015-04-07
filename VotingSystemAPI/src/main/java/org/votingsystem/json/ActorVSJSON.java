@@ -2,6 +2,7 @@ package org.votingsystem.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ActorVS;
+
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

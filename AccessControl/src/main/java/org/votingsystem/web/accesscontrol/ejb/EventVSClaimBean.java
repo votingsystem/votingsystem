@@ -138,25 +138,22 @@ public class EventVSClaimBean {
         return eventMetaInf;
     }
 
-
-    public class PublishClaimRequest {
+    public static class PublishClaimRequest {
         Long id;
         Date dateFinish;
         Date dateCreated;
         String subject, content;
         Boolean backupAvailable;
         EventVS.Cardinality cardinality;
-        List<String> tags;
+        Set<TagVS> tags;
         List<Map> fieldsEventVS;
         TypeVS type;
-
 
         public PublishClaimRequest() { }
 
         public void validate() throws ValidationExceptionVS {
             if(dateFinish.before(new Date())) {
-                throw new ValidationExceptionVS(messages.get("publishDocumentDateErrorMsg",
-                        DateUtils.getDayWeekDateStr(dateFinish)));
+                throw new ValidationExceptionVS("publishDocumentDateErrorMsg");
             }
             if(cardinality == null) cardinality = EventVS.Cardinality.EXCLUSIVE;
         }

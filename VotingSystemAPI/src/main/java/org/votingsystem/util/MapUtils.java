@@ -1,10 +1,10 @@
 package org.votingsystem.util;
 
-import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TagVS;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -26,43 +26,6 @@ public class MapUtils {
             this.tag = tag;
             this.total = total;
         }
-    }
-
-    public static Set<Map> getTagSet(Collection<TagVS> tags) {
-        Set<Map> result = new HashSet<>();
-        for(TagVS tag : tags) {
-            Map tagMap = new HashMap<>();
-            tagMap.put("id", tag.getId());
-            tagMap.put("content", tag.getName());
-            result.add(tagMap);
-        }
-        return result;
-    }
-
-    public static Set<FieldEventVS> getFieldEventVSSet(Collection<Map> collection) {
-        Set<FieldEventVS> result = new HashSet<>();
-        for(Map map : collection) {
-            result.add(getFieldEventVS(map));
-        }
-        return result;
-    }
-
-    public static FieldEventVS getFieldEventVS(Map fieldMap) {
-        FieldEventVS result = new FieldEventVS();
-        result.setId(((Number) fieldMap.get("id")).longValue());
-        result.setContent((String) fieldMap.get("content"));
-        return result;
-    }
-
-    public static Set<Map> getFieldSet(Collection<FieldEventVS> fields) {
-        Set<Map> result = new HashSet<>();
-        for(FieldEventVS field : fields) {
-            Map fieldMap = new HashMap<>();
-            fieldMap.put("id", field.getId());
-            fieldMap.put("content", field.getContent());
-            result.add(fieldMap);
-        }
-        return result;
     }
 
     public static Map<String, String> getActorVSMap(String serverURL, String name) {

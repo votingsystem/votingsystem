@@ -1,5 +1,8 @@
 package org.votingsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -12,16 +15,13 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -29,9 +29,18 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity
 @Table(name="VoteVS")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VoteVS extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(VoteVS.class.getSimpleName());
+
+    public String getEventURL() {
+        return eventURL;
+    }
+
+    public void setEventURL(String eventURL) {
+        this.eventURL = eventURL;
+    }
 
     public enum State{OK, CANCELED, ERROR}
 
@@ -39,16 +48,17 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private MessageSMIME messageSMIME;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne @JsonIgnore private MessageSMIME messageSMIME;
+    @OneToOne @JsonIgnore private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVSElection") private EventVS eventVS;
+    @JoinColumn(name="eventVSElection") private @JsonIgnore EventVS eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="dateCreated", length=23) @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
+    @JsonProperty("UUID")
     @Transient private String voteUUID;
     @Transient private String originHashCertVote;
     @Transient private String hashCertVoteHex;
@@ -56,11 +66,12 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private String originHashAccessRequest;
     @Transient private String hashAccessRequestBase64;
     @Transient private String accessControlURL;
+    @Transient private String eventURL;
     @Transient private String representativeURL;
-    @Transient private X509Certificate x509Certificate;
-    @Transient private TimeStampToken timeStampToken;
-    @Transient private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
-    @Transient private SMIMEMessage receipt;
+    @Transient @JsonIgnore private X509Certificate x509Certificate;
+    @Transient @JsonIgnore private TimeStampToken timeStampToken;
+    @Transient @JsonIgnore private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
+    @Transient @JsonIgnore private SMIMEMessage receipt;
     @Transient private boolean isValid = false;
 
     public VoteVS () {}
@@ -81,6 +92,14 @@ public class VoteVS extends EntityVS implements Serializable {
         this.state = state;
         this.certificateVS = certificateVS;
         this.messageSMIME = messageSMIME;
+    }
+
+    public String getHashAccessRequestBase64() {
+        return hashAccessRequestBase64;
+    }
+
+    public void setHashAccessRequestBase64(String hashAccessRequestBase64) {
+        this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }
 
     public FieldEventVS getOptionSelected() {
@@ -105,14 +124,6 @@ public class VoteVS extends EntityVS implements Serializable {
 
     public void setOriginHashAccessRequest(String originHashAccessRequest) {
         this.originHashAccessRequest = originHashAccessRequest;
-    }
-
-    public String getAccessRequestHashBase64() {
-        return hashAccessRequestBase64;
-    }
-
-    public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
-        this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }
 
     public Date getDateCreated() {
@@ -265,11 +276,9 @@ public class VoteVS extends EntityVS implements Serializable {
         return (FieldEventVS) options.toArray()[item];
     }
 
-    public static VoteVS getInstance(Map contentMap, X509Certificate x509Certificate, TimeStampToken timeStampToken)
-            throws IOException {
-        VoteVS voteVS = VoteVS.parse(contentMap);
-        voteVS.setTimeStampToken(timeStampToken);
-        voteVS.setX509Certificate(x509Certificate);
+    public void loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws IOException {
+        this.timeStampToken = timeStampToken;
+        this.x509Certificate = x509Certificate;
         byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
         if(voteExtensionValue != null) {
             DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
@@ -277,19 +286,20 @@ public class VoteVS extends EntityVS implements Serializable {
                     new TypeReference<HashMap<String, String>>() {});
             EventVS eventVS = new EventVS();
             eventVS.setId(Long.valueOf(voteCertData.get("eventId")));
-            voteVS.setEventVS(eventVS);
-            voteVS.setAccessControlURL(voteCertData.get("accessControlURL"));
-            voteVS.setHashCertVSBase64(voteCertData.get("hashCertVS"));
+            eventVS.setUrl(eventURL);
+            setEventVS(eventVS);
+            setAccessControlURL(voteCertData.get("accessControlURL"));
+            setHashCertVSBase64(voteCertData.get("hashCertVS"));
         }
         byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
         if(representativeURLExtensionValue != null) {
             DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
                     representativeURLExtensionValue);
-            voteVS.setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
+            setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
         }
-        return voteVS;
     }
 
+    @JsonIgnore
     public HashMap getVoteDataMap() {
         log.info("getVoteDataMap");
         Map map = new HashMap();
@@ -303,6 +313,7 @@ public class VoteVS extends EntityVS implements Serializable {
         return new HashMap(map);
     }
 
+    @JsonIgnore
     public HashMap getAccessRequestDataMap() {
         log.info("getAccessRequestDataMap");
         Map map = new HashMap();
@@ -314,6 +325,7 @@ public class VoteVS extends EntityVS implements Serializable {
         return new HashMap(map);
     }
 
+    @JsonIgnore
     public HashMap getCancelVoteDataMap() {
         log.info("getCancelVoteDataMap");
         Map map = new HashMap();
@@ -327,6 +339,7 @@ public class VoteVS extends EntityVS implements Serializable {
         return dataMap;
     }
 
+    @JsonIgnore
     public Map getDataMap() {
         log.info("getDataMap");
         Map resultMap = new HashMap();
@@ -349,38 +362,6 @@ public class VoteVS extends EntityVS implements Serializable {
         if (id != null) resultMap.put("id", id);
         //map.put("UUID", UUID.randomUUID().toString());
         return resultMap;
-    }
-
-    public static VoteVS parse (Map eventMap) {
-        VoteVS voteVS = null;
-        try {
-            voteVS = new VoteVS();
-            EventVS eventVS = new EventVS();
-            if(eventMap.containsKey("eventId")) {
-                eventVS.setId(((Integer) eventMap.get("eventId")).longValue());
-            }
-            if(eventMap.containsKey("UUID")) {
-                voteVS.setVoteUUID((String) eventMap.get("UUID"));
-            }
-            if(eventMap.containsKey("eventURL")) eventVS.setUrl((String) eventMap.get("eventURL"));
-            if(eventMap.containsKey("hashAccessRequestBase64")) voteVS.setAccessRequestHashBase64(
-                    (String) eventMap.get("hashAccessRequestBase64"));
-            if(eventMap.containsKey("optionSelectedId")) {
-                FieldEventVS optionSelected = new FieldEventVS();
-                optionSelected.setId(((Integer) eventMap.get("optionSelectedId")).longValue());
-                if(eventMap.containsKey("optionSelectedContent")) {
-                    optionSelected.setContent((String) eventMap.get("optionSelectedContent"));
-                }
-                voteVS.setOptionSelected(optionSelected);
-            }
-            if(eventMap.containsKey("optionSelected")) {
-                voteVS.setOptionSelected(FieldEventVS.parse((Map) eventMap.get("optionSelected")));
-            }
-            voteVS.setEventVS(eventVS);
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-        return voteVS;
     }
 
 }

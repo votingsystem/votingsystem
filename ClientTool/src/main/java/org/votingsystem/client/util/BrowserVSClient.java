@@ -47,9 +47,7 @@ public class BrowserVSClient {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
             log.info("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
-            Map<String, Object> dataMap = new ObjectMapper().readValue(
-                    jsonStr, new TypeReference<HashMap<String, Object>>() {});
-            OperationVS operationVS = OperationVS.parse(dataMap);
+            OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
             BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
@@ -139,9 +137,7 @@ public class BrowserVSClient {
         String result = null;
         try {
             String jsonStr = StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
-            Map<String, Object> dataMap = new ObjectMapper().readValue(
-                    jsonStr, new TypeReference<HashMap<String, Object>>() {});
-            OperationVS operationVS = OperationVS.parse(dataMap);
+            OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
             switch (operationVS.getType()) {
                 case FORMAT_DATE:
                     Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),

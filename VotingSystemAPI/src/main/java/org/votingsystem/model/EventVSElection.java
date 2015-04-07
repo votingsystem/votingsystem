@@ -1,8 +1,12 @@
 package org.votingsystem.model;
 
+
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.StringUtils;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -46,6 +50,21 @@ public class EventVSElection extends EventVS implements Serializable {
         setUserVS(userVS);
         setDateBegin(dateBegin);
         setDateFinish(dateFinish);
+    }
+
+    public EventVSElection resetId() {
+        setId(null);
+        if(getFieldsEventVS() != null) {
+            for(FieldEventVS fieldEventVS : getFieldsEventVS()) {
+                fieldEventVS.setId(null);
+            }
+        }
+        if(getTagVSSet() != null) {
+            for(TagVS tagVS : getTagVSSet()) {
+                tagVS.setId(null);
+            }
+        }
+        return this;
     }
 
 }

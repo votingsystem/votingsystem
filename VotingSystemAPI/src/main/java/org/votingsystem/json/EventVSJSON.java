@@ -1,12 +1,10 @@
 package org.votingsystem.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSClaim;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MapUtils;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +30,8 @@ public class EventVSJSON {
     private String userVS;
     private EventVS.Cardinality cardinality;
     private EventVS.State state;
-    private Set<Map> tags;
-    private Set<Map> fieldsEventVS;
+    private Set<TagVS> tags;
+    private Set<FieldEventVS> fieldsEventVS;
     private Map<String, String> accessControl;
     private Map<String, String> controlCenter;
     private boolean backupAvailable;
@@ -47,7 +45,7 @@ public class EventVSJSON {
         this.content = eventVS.getContent();
         this.userVS = eventVS.getUserVS().getName();
         this.cardinality = eventVS.getCardinality();
-        this.tags = MapUtils.getTagSet(eventVS.getTagVSSet());
+        this.tags = eventVS.getTagVSSet();
         this.backupAvailable = eventVS.getBackupAvailable();
         this.state = eventVS.getState();
         this.dateBegin = eventVS.getDateBegin();
@@ -65,7 +63,7 @@ public class EventVSJSON {
             this.URL = contextURL + "/eventVSClaim/id/" + eventVS.getId();
             this.publishRequestURL = contextURL + "/eventVSClaim/id/" + eventVS.getId() + "/publishRequest";
         }
-        this.fieldsEventVS = MapUtils.getFieldSet(eventVS.getFieldsEventVS());
+        this.fieldsEventVS = eventVS.getFieldsEventVS();
         this.accessControl = MapUtils.getActorVSMap(contextURL, serverName);
     }
 
@@ -75,7 +73,7 @@ public class EventVSJSON {
         result.setDateCreated(dateCreated);
         result.setSubject(subject);
         result.setDateBegin(dateBegin);
-        result.setFieldsEventVS(MapUtils.getFieldEventVSSet(fieldsEventVS));
+        result.setFieldsEventVS(fieldsEventVS);
         return result;
     }
 
@@ -143,11 +141,11 @@ public class EventVSJSON {
         return state;
     }
 
-    public Set<Map> getTags() {
+    public Set<TagVS> getTags() {
         return tags;
     }
 
-    public Set<Map> getFieldsEventVS() {
+    public Set<FieldEventVS> getFieldsEventVS() {
         return fieldsEventVS;
     }
 

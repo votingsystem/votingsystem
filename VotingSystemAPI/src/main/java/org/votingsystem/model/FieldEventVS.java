@@ -1,17 +1,19 @@
 package org.votingsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+
 @Entity @Table(name="FieldEventVS")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FieldEventVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -21,7 +23,7 @@ public class FieldEventVS extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="accessControlFieldEventId") private Long accessControlFieldEventId;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVS", nullable=false) private EventVS eventVS;
+    @JoinColumn(name="eventVS", nullable=false) @JsonIgnore private EventVS eventVS;
     @Column(name="content", length=10000, nullable=false) private String content;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
@@ -33,6 +35,7 @@ public class FieldEventVS extends EntityVS implements Serializable {
     @Transient private Long numUsersWithVote;
     @Transient private Long numRepresentativesWithVote;
     @Transient private Long numVotesResult;
+    @Transient private Long numVotesVS;
 
     public FieldEventVS() {}
 
@@ -130,6 +133,14 @@ public class FieldEventVS extends EntityVS implements Serializable {
         return dateCreated;
     }
 
+    public Long getNumVotesVS() {
+        return numVotesVS;
+    }
+
+    public void setNumVotesVS(Long numVotesVS) {
+        this.numVotesVS = numVotesVS;
+    }
+
     @Override
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
@@ -144,26 +155,4 @@ public class FieldEventVS extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public Map toMap() {
-        Map result = new HashMap<>();
-        result.put("id", id);
-        result.put("content", content);
-        return result;
-    }
-
-    public Map toMap(Long numVotes) {
-        Map result = toMap();
-        result.put("numVotesVS", numVotes);
-        return result;
-    }
-
-    public static FieldEventVS parse (Map fieldMap) {
-        FieldEventVS fieldEvent = new FieldEventVS();
-        if(fieldMap.containsKey("id")) fieldEvent.setId(((Integer) fieldMap.get("id")).longValue());
-        if(fieldMap.containsKey("content")) {
-            fieldEvent.setContent((String) fieldMap.get("content"));
-        }
-        if(fieldMap.containsKey("value")) fieldEvent.setValue((String) fieldMap.get("value"));
-        return fieldEvent;
-    }
 }

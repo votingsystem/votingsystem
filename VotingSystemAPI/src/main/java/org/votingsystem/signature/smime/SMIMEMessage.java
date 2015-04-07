@@ -1,6 +1,5 @@
 package org.votingsystem.signature.smime;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -386,9 +385,8 @@ public class SMIMEMessage extends MimeMessage {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    Map<String, Object> voteMap = new ObjectMapper().readValue(signedContent,
-                            new TypeReference<HashMap<String, Object>>() {});
-                    voteVS = VoteVS.getInstance(voteMap, cert, timeStampToken);
+                    VoteVS voteVS = new ObjectMapper().readValue(signedContent, VoteVS.class);
+                    voteVS.loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}

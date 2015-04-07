@@ -49,10 +49,12 @@ public class EventVSElectionBean {
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
         UserVS user = subscriptionVSBean.checkUser(UserVS.getUserVS(userCert));
-        //Publish request comes with Access Control cert
-        EventVSElection eventVS = new EventVSElection(request.getId(), request.getSubject(),
-                request.getContent(), request.getURL(), accessControl, user, request.getDateBegin(), request.getDateFinish());
+        EventVSElection eventVS = request.getEventVSElection();
+        eventVS.setAccessControlVS(accessControl);
+        eventVS.setUserVS(user);
         setEventDatesState(eventVS);
+        eventVS.resetId(); //this is to avoid collisions with access control ids
+        if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = signatureBean.getServerCert();
         CertificateVS eventVSControlCenterCertificate =  new CertificateVS(controlCenterX509Cert, eventVS,
@@ -67,11 +69,6 @@ public class EventVSElectionBean {
                 CertificateVS.Type.VOTEVS_ROOT, CertificateVS.State.OK);
         eventVSRootCertificate.setActorVS(accessControl);
         dao.persist(eventVSRootCertificate);
-        saveElectionOptions(eventVS, request.getFieldsEventVS());
-        if (request.getTags() != null) {
-            Set<TagVS> tags = tagVSBean.save(request.getTags());
-            eventVS.setTagVSSet(tags);
-        }
         eventVS.setState(EventVS.State.ACTIVE);
         return dao.merge(eventVS);
     }
@@ -103,18 +100,6 @@ public class EventVSElectionBean {
         dao.merge(eventVS);
         log.info("cancelEvent - canceled EventVSElection  id:" + eventVS.getId());
         return messageSMIME;
-    }
-
-
-    public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<Map> optionList) throws ExceptionVS {
-        if(optionList.size() < 2) throw new ExceptionVS("elections must have at least two options");
-        Set<FieldEventVS> result = new HashSet<>();
-        for(Map optionMap : optionList) {
-            FieldEventVS fieldEventVS = dao.persist(new FieldEventVS(eventVS, (String) optionMap.get("content"),
-                    ((Number)optionMap.get("id")).longValue()));
-            result.add(fieldEventVS);
-        }
-        return result;
     }
 
     private AccessControlVS checkAccessControl(String serverURL) {
@@ -192,13 +177,12 @@ public class EventVSElectionBean {
         query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.CANCELED);
         result.put("numVotesVSVotesVSCANCELED", (long) query.getSingleResult());
-        List<Map> optionList = new ArrayList<>();
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
                     "and v.state =:state").setParameter("option", option).setParameter("state", VoteVS.State.OK);
-            optionList.add(option.toMap((long) query.getSingleResult()));
+            option.setNumVotesVS((long) query.getSingleResult());
         }
-        result.put("fieldsEventVS", optionList);
+        result.put("fieldsEventVS", eventVS.getFieldsEventVS());
         return result;
     }
 

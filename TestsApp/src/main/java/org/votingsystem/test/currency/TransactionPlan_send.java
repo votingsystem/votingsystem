@@ -1,6 +1,7 @@
 package org.votingsystem.test.currency;
 
 import org.votingsystem.model.CurrencyServer;
+import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSPlan;
 import org.votingsystem.util.ContextVS;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
 public class TransactionPlan_send {
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(BankVS_sendTransactionVS.class, new HashMap());
+        Logger log = TestUtils.init(BankVS_sendTransactionVS.class, new SimulationData());
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
         TransactionVSPlan transactionVSPlan = new TransactionVSPlan(

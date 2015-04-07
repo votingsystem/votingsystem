@@ -4,12 +4,14 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Logger;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**

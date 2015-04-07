@@ -1,14 +1,11 @@
 package org.votingsystem.model;
 
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 //import org.apache.solr.analysis.HTMLStripCharFilterFactory;
@@ -63,8 +60,7 @@ public class EventVS extends EntityVS implements Serializable {
     private State state;
     @Column(name="cardinality") @Enumerated(EnumType.STRING)
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
-    @OneToOne(mappedBy="eventVS")
-    private KeyStoreVS keyStoreVS;
+    @OneToOne(mappedBy="eventVS") private KeyStoreVS keyStoreVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS")
     private UserVS userVS;
@@ -355,71 +351,6 @@ public class EventVS extends EntityVS implements Serializable {
         resultMap.put("state", state.toString());
         resultMap.put("UUID", UUID.randomUUID().toString());
         return resultMap;
-    }
-
-    public static EventVS parse (Map eventMap) throws Exception {
-        EventVS eventVS = new EventVS();
-        if(eventMap.get("id") != null &&
-                !"null".equals(eventMap.get("id").toString())) {
-            eventVS.setId(((Integer) eventMap.get("id")).longValue());
-        }
-        if(eventMap.containsKey("accessControlEventVSId")) eventVS.setAccessControlEventVSId(
-                ((Integer) eventMap.get("accessControlEventVSId")).longValue());
-        if(eventMap.containsKey("URL")) eventVS.setUrl((String) eventMap.get("URL"));
-        if(eventMap.containsKey("controlCenter")) {
-            Map controlCenterMap = (Map) eventMap.get("controlCenter");
-            controlCenterMap.put("serverType", ActorVS.Type.CONTROL_CENTER);
-            eventVS.setControlCenterVS((ControlCenterVS) ActorVS.parse(controlCenterMap));
-        }
-        if(eventMap.containsKey("accessControl")) {
-            Map accessControlMap = (Map) eventMap.get("accessControl");
-            accessControlMap.put("serverType", ActorVS.Type.ACCESS_CONTROL);
-            eventVS.setAccessControlVS((AccessControlVS) ActorVS.parse(accessControlMap));
-        }
-        if(eventMap.containsKey("subject")) eventVS.setSubject((String) eventMap.get("subject"));
-        if(eventMap.containsKey("voteVS")) {
-            VoteVS voteVS = VoteVS.parse((Map) eventMap.get("voteVS"));
-            eventVS.setVoteVS(voteVS);
-        }
-        if(eventMap.containsKey("state")) {
-            State state = State.valueOf((String) eventMap.get("state"));
-            eventVS.setState(state);
-        }
-        if(eventMap.containsKey("content")) eventVS.setContent((String) eventMap.get("content"));
-        if(eventMap.containsKey("dateBegin")) eventVS.setDateBegin(
-                DateUtils.getDateFromString((String) eventMap.get("dateBegin")));
-        if(eventMap.containsKey("dateFinish")) eventVS.setDateFinish(
-                DateUtils.getDateFromString((String) eventMap.get("dateFinish")));
-        if (eventMap.containsKey("numSignaturesCollected"))
-            eventVS.setNumSignaturesCollected((Integer) eventMap.get("numSignaturesCollected"));
-        if (eventMap.containsKey("numVotesCollected"))eventVS.setNumVotesCollected((Integer) eventMap.get("numVotesCollected"));
-        if(eventMap.containsKey("cardinality")) {
-            eventVS.setCardinality(Cardinality.valueOf((String) eventMap.get("cardinality")));
-        }
-        if (eventMap.containsKey("userVS")) {
-            Object userVSData = eventMap.get("userVS");
-            if(userVSData instanceof String) {
-                UserVS userVS = new UserVS();
-                userVS.setName((String) eventMap.get("userVS"));
-            } else eventVS.setUserVS(UserVS.parse((Map) userVSData));
-        }
-        if (eventMap.containsKey("backupAvailable")) {
-            eventVS.setBackupAvailable((Boolean) eventMap.get("backupAvailable"));
-        }
-        if(eventMap.containsKey("fieldsEventVS")) {
-            Set<FieldEventVS> fieldsEventVS =  new HashSet<FieldEventVS>();
-            Object fieldList =  eventMap.get("fieldsEventVS");
-            for(Object option : (List) eventMap.get("fieldsEventVS")) {
-                if(option instanceof Map) fieldsEventVS.add(FieldEventVS.parse((Map)option));
-                else fieldsEventVS.add(new FieldEventVS(((String)option), null));
-            }
-            eventVS.setFieldsEventVS(fieldsEventVS);
-        }
-        if(eventMap.get("tags") != null && !"null".equals(eventMap.get("tags").toString())) {
-            List<String> labelList = (List<String>)eventMap.get("tags");
-            eventVS.setTags(labelList.toArray(new String[labelList.size()]));
-        }
-        return eventVS;
     }
 
 }

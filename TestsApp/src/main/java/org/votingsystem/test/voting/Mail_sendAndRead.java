@@ -26,21 +26,20 @@ public class Mail_sendAndRead {
     private static ExecutorCompletionService completionService;
     
     public static void main(String[] args) throws Exception {
-        Map simulationDataMap = new HashMap<>();
-        simulationDataMap.put("smtpHostName", "localhost");
-        simulationDataMap.put("pop3HostName", "localhost");
-        simulationDataMap.put("userName", "voting_system_access_control");
-        simulationDataMap.put("domainName", "votingsystem.org");
-        simulationDataMap.put("password", "1234");
-        simulationDataMap.put("maxPendingResponses", 10);
-        simulationDataMap.put("numRequestsProjected", 2);
+        simulationData = new POP3SimulationData();
+        simulationData.setSmtpHostName("localhost");
+        simulationData.setPop3HostName("localhost");
+        simulationData.setUserName("voting_system_access_control");
+        simulationData.setDomainname("votingsystem.org");
+        simulationData.setPassword("1234");
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(2);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
-        simulationDataMap.put("timer", timerMap);
+        simulationData.setTimerMap(timerMap);
 
-        log = TestUtils.init(Mail_sendAndRead.class, simulationDataMap);
-        simulationData = POP3SimulationData.parse(simulationDataMap);
+        log = TestUtils.init(Mail_sendAndRead.class, simulationData);
 
         Properties properties = new Properties();
         properties.put("mail.smtp.host", simulationData.getSmtpHostName());
@@ -57,11 +56,11 @@ public class Mail_sendAndRead {
     }
     private static void initSimulation(){
         log.info("initSimulation");
-        if(!(TestUtils.getSimulationData().getNumRequestsProjected() > 0)) {
+        if(!(simulationData.getNumRequestsProjected() > 0)) {
             log.info("WITHOUT NumberOfRequestsProjected");
             return;
         }
-        log.info("initSimulation - NumRequestsProjected: " + TestUtils.getSimulationData().getNumRequestsProjected());
+        log.info("initSimulation - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         completionService = new ExecutorCompletionService<ResponseVS>(executorService);
         executorService.execute(new Runnable() {

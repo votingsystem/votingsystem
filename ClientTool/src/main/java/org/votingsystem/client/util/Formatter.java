@@ -7,6 +7,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.OperationVS;
+import org.votingsystem.util.TypeVS;
 
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -45,8 +46,8 @@ public class Formatter {
     public static String format(Map dataMap) {
         String result = null;
         try {
-            OperationVS operation = OperationVS.parse(dataMap);
-            switch(operation.getType()) {
+            TypeVS operation = TypeVS.valueOf((String) dataMap.get("operation"));
+            switch(operation) {
                 case SEND_SMIME_VOTE:
                     result = formatVote(dataMap);
                     break;
@@ -54,7 +55,7 @@ public class Formatter {
                     result = formatTransactionVSFromGroupToAllMembers(dataMap);
                     break;
                 default:
-                    log.info("Formatter not found for " + operation.getType());
+                    log.info("Formatter not found for " + operation);
                     result =new ObjectMapper().configure(
                             SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap);
             }

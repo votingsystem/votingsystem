@@ -45,7 +45,7 @@ public class CurrencyAccountWriter implements MessageBodyWriter<CurrencyAccount>
         accountData.put("currency", account.getCurrencyCode());
         accountData.put("IBAN", account.getIBAN());
         accountData.put("amount", account.getBalance());
-        accountData.put("tag", account.getTag().toMap());
+        accountData.put("tag", account.getTag());
         mapper.writeValue(out, accountData);
 
     }

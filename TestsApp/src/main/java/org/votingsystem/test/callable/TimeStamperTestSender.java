@@ -1,12 +1,10 @@
 package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.StringUtils;
 
 import java.util.HashMap;
