@@ -83,7 +83,7 @@ public class TransactionVSResource {
 
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("transactionsMap", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("transactionsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/transactionVS/index.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -137,7 +137,7 @@ public class TransactionVSResource {
 
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("transactionsMap", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("transactionsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/transactionVS/index.jsp").forward(req, resp);
             return Response.ok().build();
         }

@@ -61,7 +61,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventMap", JSON.getInstance().writeValueAsString(eventVSJSON));
+            req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSJSON));
             context.getRequestDispatcher("/jsf/eventVSElection/eventVSElection.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -102,7 +102,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventsVSMap", JSON.getInstance().writeValueAsString(eventsVSMap));
+            req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(eventsVSMap));
             context.getRequestDispatcher("/jsf/eventVSElection/index.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -116,19 +116,21 @@ public class EventVSElectionResource {
         return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
     }
 
+    @Transactional
     @Path("/id/{id}/stats") @GET
     public Response stats(@PathParam("id") long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
-        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
-                "eventId: " + id).build();
+        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - EventVSElection not found - eventId: " + id).build();
         Map statsMap = eventVSElectionBean.getStatsMap(eventVS);
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(statsMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("statsJSON", JSON.getInstance().writeValueAsString(statsMap));
+            log.info("====== " + JSON.getEscapingMapper().writeValueAsString(statsMap));
+            req.setAttribute("statsDataMap", JSON.getEscapingMapper().writeValueAsString(statsMap));
             context.getRequestDispatcher("/jsf/eventVSElection/stats.jsp").forward(req, resp);
             return Response.ok().build();
         }

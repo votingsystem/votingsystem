@@ -9,7 +9,7 @@
     </head>
     <body>
         <div style="margin: 0 auto;padding: 100px;">
-            <eventvs-election-stats eventVSId="${params.id}"></eventvs-election-stats>
+            <eventvs-election-stats statsDataMap='${statsDataMap}'></eventvs-election-stats>
         </div>
     </body>
 </html>

@@ -97,7 +97,7 @@ public class RepresentativeResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("representativeData", JSON.getInstance().writeValueAsString(representativeMap));
+            req.setAttribute("representativeData", JSON.getEscapingMapper().writeValueAsString(representativeMap));
             context.getRequestDispatcher("/jsf/representative/index.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -117,7 +117,7 @@ public class RepresentativeResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeJSON))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("representativeMap", JSON.getInstance().writeValueAsString(representativeJSON));
+            req.setAttribute("representativeMap", JSON.getEscapingMapper().writeValueAsString(representativeJSON));
             context.getRequestDispatcher("/jsf/representative/representative.jsp").forward(req, resp);
             return Response.ok().build();
         }

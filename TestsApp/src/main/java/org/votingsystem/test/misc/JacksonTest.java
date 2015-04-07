@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.json.RepresentativeDelegationRequest;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.io.BufferedReader;
@@ -22,7 +23,10 @@ public class JacksonTest {
     private static final Logger log = Logger.getLogger(JacksonTest.class.getSimpleName());
 
     public static void main(String[] args) throws Exception {
-
+        Map testMap = new HashMap<>();
+        testMap.put("statusCode", 200);
+        testMap.put("message", "O'tool with 'quotes'");
+        log.info("testMap: " + JSON.getEscapingMapper().writeValueAsString(testMap));
     }
 
     //Map<String, Object> map = new ObjectMapper().readValue(jsonStr, new TypeReference<HashMap<String, Object>>() {});

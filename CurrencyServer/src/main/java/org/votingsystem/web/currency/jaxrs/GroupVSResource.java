@@ -100,7 +100,7 @@ public class GroupVSResource {
         resultMap.put("state", state);
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("groupVSList", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("groupVSList", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/groupVS/index.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -118,7 +118,7 @@ public class GroupVSResource {
         Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("groupvsMap", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/groupVS/groupvs.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -174,7 +174,7 @@ public class GroupVSResource {
             resultMap.put("totalCount", totalCount);
             return resultMap;
         } else {
-            req.setAttribute("subscriptionMap", JSON.getInstance().writeValueAsString(new HashMap<>()));
+            req.setAttribute("subscriptionMap", JSON.getEscapingMapper().writeValueAsString(new HashMap<>()));
             context.getRequestDispatcher("/jsf/groupVS/listUsers.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -196,7 +196,7 @@ public class GroupVSResource {
         Map resultMap = groupVSBean.getDataWithBalancesMap(groupVS, DateUtils.getCurrentWeekPeriod());
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("groupvsMap", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/groupVS/groupvs.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -236,7 +236,7 @@ public class GroupVSResource {
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
-        req.setAttribute("groupvsMap", JSON.getInstance().writeValueAsString(resultMap));
+        req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
         context.getRequestDispatcher("/jsf/groupVS/edit.jsp").forward(req, resp);
         return Response.ok().build();
     }
@@ -282,7 +282,7 @@ public class GroupVSResource {
         Map resultMap = userVSBean.getSubscriptionVSDetailedDataMap(subscriptionVS);
         if(contentType.contains("json")) return resultMap;
         else {
-            req.setAttribute("subscriptionMap", JSON.getInstance().writeValueAsString(resultMap));
+            req.setAttribute("subscriptionMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
             context.getRequestDispatcher("/jsf/groupVS/user.jsp").forward(req, resp);
             return Response.ok().build();
         }

@@ -69,7 +69,7 @@ public class EventVSClaimResource {
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
                         .type(ContentTypeVS.JSON.getName()).build();
             } else {
-                req.setAttribute("eventMap", JSON.getInstance().writeValueAsString(eventVSJSON));
+                req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSJSON));
                 context.getRequestDispatcher("/jsf/eventVSClaim/eventVSClaim.jsp").forward(req, resp);
                 return Response.ok().build();
             }
@@ -101,7 +101,7 @@ public class EventVSClaimResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventsVSMap", JSON.getInstance().writeValueAsString(eventsVSMap));
+            req.setAttribute("eventsVSMap", JSON.getEscapingMapper().writeValueAsString(eventsVSMap));
             context.getRequestDispatcher("/jsf/eventVSClaim/index.jsp").forward(req, resp);
             return Response.ok().build();
         }

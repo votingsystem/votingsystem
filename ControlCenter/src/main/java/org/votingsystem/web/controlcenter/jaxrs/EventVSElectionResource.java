@@ -59,7 +59,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventMap", JSON.getInstance().writeValueAsString(eventVSJSON));
+            req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSJSON));
             context.getRequestDispatcher("/jsf/eventVSElection/eventVSElection.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -100,7 +100,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventsVSMap", JSON.getInstance().writeValueAsString(eventsVSMap));
+            req.setAttribute("eventsVSMap", JSON.getEscapingMapper().writeValueAsString(eventsVSMap));
             context.getRequestDispatcher("/jsf/eventVSElection/index.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -125,7 +125,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(statsMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("statsJSON", JSON.getInstance().writeValueAsString(statsMap));
+            req.setAttribute("statsJSON", JSON.getEscapingMapper().writeValueAsString(statsMap));
             context.getRequestDispatcher("/jsf/eventVSElection/stats.jsp").forward(req, resp);
             return Response.ok().build();
         }

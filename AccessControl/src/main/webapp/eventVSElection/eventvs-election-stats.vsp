@@ -17,7 +17,9 @@
     <script>
         Polymer('eventvs-election-stats', {
             title:null,
-            publish: {},
+            publish: {
+                statsDataMap: {value: {}}
+            },
             options: {
                 chart: {
                     plotBackgroundColor: null,
@@ -54,7 +56,10 @@
             ready: function() {
                 this.options.chart.renderTo = this.$.graphContainer
             },
-            ajaxResponse: function() {
+            statsDataMapChanged: function() {
+                if(this.statsDataMap == null) return
+                console.log(this.tagName + " - statsDataMap: " + this.statsDataMap.fieldsEventVS);
+                console.log(this.tagName + " - subject: " + this.statsDataMap.subject);
                 var seriesData = []
                 var numTotalVotes = 0
                 Array.prototype.forEach.call(this.statsDataMap.fieldsEventVS, function(fieldEvent) {
@@ -66,8 +71,7 @@
                 else this.$.messageToUser.style.display ='block'
             },
             eventVSIdChanged: function() {
-                var targetURL = "${config.webURL}/eventVSElection/" +
-                        this.eventVSId + "/stats"
+                var targetURL = "${config.restURL}/eventVSElection/id/" + this.eventVSId + "/stats"
                 console.log(this.tagName + "- targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
             }

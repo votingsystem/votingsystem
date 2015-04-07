@@ -37,7 +37,6 @@ public class ListWriter implements MessageBodyWriter<List> {
     public void writeTo(List list, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> multivaluedMap, OutputStream out) throws IOException,
             WebApplicationException {
-        ObjectMapper mapper = JSON.getInstance().getMapper();
-        mapper.writeValue(out, list);
+        JSON.getEscapingMapper().writeValue(out, list);
     }
 }

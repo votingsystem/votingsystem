@@ -101,11 +101,9 @@ public class EventVSElectionBean {
                 new CertificateVS(controlCenterVS, eventVS, controlCenterX509Cert));
         CertificateVS eventVSAccessControlCertificate = dao.persist(
                 new CertificateVS(null, eventVS, signatureBean.getServerCert()));
-        MessageSMIME messageSMIMEResult = new MessageSMIME(smime, TypeVS.RECEIPT, messageSMIME);
-        messageSMIMEResult.setEventVS(eventVS);
-        dao.persist(messageSMIMEResult);
+        dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime).setEventVS(eventVS));
         dao.merge(eventVS.setState(EventVS.State.ACTIVE));
-        return messageSMIMEResult;
+        return messageSMIME;
     }
 
     public Set<FieldEventVS> saveElectionOptions(EventVSElection eventVS, List<Map> optionList) throws ExceptionVS {
@@ -226,7 +224,7 @@ public class EventVSElectionBean {
     public Map getStatsMap (EventVSElection eventVS) {
         Map result = new HashMap();
         result.put("id", eventVS.getId());
-        result.put("subject", eventVS.getSubject());
+        result.put("subject", eventVS.getSubject() + " - 'this is inside simple quotes' - ");
         Query query = dao.getEM().createQuery("select count (a) from AccessRequestVS a where a.eventVS =:eventVS")
                 .setParameter("eventVS", eventVS);
         result.put("numAccessRequests", (long) query.getSingleResult());

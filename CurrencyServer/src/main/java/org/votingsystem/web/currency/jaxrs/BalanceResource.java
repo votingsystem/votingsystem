@@ -72,7 +72,7 @@ public class BalanceResource {
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 return balanceMap;
             } else {
-                req.setAttribute("balanceMap", JSON.getInstance().writeValueAsString(balanceMap));
+                req.setAttribute("balanceMap", JSON.getEscapingMapper().writeValueAsString(balanceMap));
                 context.getRequestDispatcher("/jsf/balance/userVS.jsp").forward(req, resp);
                 return Response.ok().build();
             }
@@ -105,7 +105,7 @@ public class BalanceResource {
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 return dataMap;
             } else {
-                req.setAttribute("balancesJSON", JSON.getInstance().writeValueAsString(dataMap));
+                req.setAttribute("balancesJSON", JSON.getEscapingMapper().writeValueAsString(dataMap));
                 context.getRequestDispatcher("/jsf/balance/week.jsp").forward(req, resp);
                 return Response.ok().build();
             }

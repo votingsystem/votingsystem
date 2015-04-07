@@ -39,7 +39,7 @@ public class CurrencyAccountWriter implements MessageBodyWriter<CurrencyAccount>
     @Override
     public void writeTo(CurrencyAccount account, Class<?> type, Type type1, Annotation[] antns, MediaType mt,
                         MultivaluedMap<String, Object> mm, OutputStream out) throws IOException, WebApplicationException {
-        ObjectMapper mapper = JSON.getInstance().getMapper();
+        ObjectMapper mapper = JSON.getEscapingMapper();
         Map<String,Object> accountData = new HashMap<String, Object>();
         accountData.put("id", account.getId());
         accountData.put("currency", account.getCurrencyCode());
