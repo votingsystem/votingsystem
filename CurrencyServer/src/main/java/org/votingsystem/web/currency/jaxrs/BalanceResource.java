@@ -73,7 +73,7 @@ public class BalanceResource {
                 return balanceMap;
             } else {
                 req.setAttribute("balanceMap", JSON.getEscapingMapper().writeValueAsString(balanceMap));
-                context.getRequestDispatcher("/jsf/balance/userVS.jsp").forward(req, resp);
+                context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
         }
@@ -106,7 +106,7 @@ public class BalanceResource {
                 return dataMap;
             } else {
                 req.setAttribute("balancesJSON", JSON.getEscapingMapper().writeValueAsString(dataMap));
-                context.getRequestDispatcher("/jsf/balance/week.jsp").forward(req, resp);
+                context.getRequestDispatcher("/balance/week.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
         }

@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${config.resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
+<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
 
 <polymer-element name="uservs-dashboard" attributes="dataMap">
     <template>
@@ -114,14 +114,14 @@
                 if("${msg.lastHourMovementsLbl}" === details.item.innerHTML) numHours = 1
                 if("${msg.last12HourMovementsLbl}" === details.item.innerHTML) numHours = 12
                 if("${msg.last24HourMovementsLbl}" === details.item.innerHTML) numHours = 24
-                var targetURL = "${config.restURL}/app/userVS/" + numHours
+                var targetURL = "${restURL}/app/userVS/" + numHours
                 console.log(this.tagName + " - targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
                 this.$.ajax.go()
             }
         },
         transBlockSelected: function(e) {
-            var targetURL = "${config.restURL}/transactionVS/from/" +
+            var targetURL = "${restURL}/transactionVS/from/" +
                     this.dateFrom.urlFormatWithTime() + "/to/" + this.dateTo.urlFormatWithTime() +
                     "?transactionvsType=" + e.target.parentNode.id
             console.log(this.tagName + " - showTransBlock - targetURL: " + targetURL)

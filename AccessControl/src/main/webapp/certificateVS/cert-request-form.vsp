@@ -1,12 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 
 <polymer-element name="cert-request-form" attributes="caption opened isForAdmins messageToUser">
 <template>
-    <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <style>
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
@@ -90,7 +90,7 @@
         messagedialogAccept: function (e, detail, sender) {
             console.log("messagedialogAccept - callerId:" + detail.callerId)
             var webAppMessage = new WebAppMessage(Operation.CERT_USER_NEW)
-            webAppMessage.serviceURL = "${config.restURL}/csr/request"
+            webAppMessage.serviceURL = "${restURL}/csr/request"
             webAppMessage.signedMessageSubject = "${msg.certRequestLbl}"
             webAppMessage.document = {nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
                 surname:this.$.surname.value.toUpperCase(), phone:this.$.phone.value, email:this.$.email.value}
@@ -98,7 +98,7 @@
                 var appMessageJSON = JSON.parse(appMessage)
                 var message = appMessageJSON.message
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    loadURL_VS( "${config.webURL}/certificationCenters.html")
+                    loadURL_VS( "${contextURL}/resources/certificationCenters.html")
                     message = "${msg.certRequestOKMsg}"
                     showMessageVS(message, '${msg.certRequestLbl}', 'resultMessage',true)
                 } else showMessageVS(message, '${msg.certRequestLbl}')

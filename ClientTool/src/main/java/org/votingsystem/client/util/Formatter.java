@@ -106,9 +106,9 @@ public class Formatter {
         if(eventVS.getUrl() != null) result.append("<b>" + urlLabel + "</b>: ").
                 append(eventVS.getUrl() + "<br/>");
         if(eventVS.getVoteVS() != null) {
-            if(eventVS.getVoteVS().getAccessRequestHashBase64() != null) result.append("<b>" +
+            if(eventVS.getVoteVS().getHashCertVSBase64() != null) result.append("<b>" +
                     hashAccessRequestBase64Label + "</b>: ").append(
-                    eventVS.getVoteVS().getAccessRequestHashBase64() + "<br/>");
+                    eventVS.getVoteVS().getHashAccessRequestBase64() + "<br/>");
             if(eventVS.getVoteVS().getOptionSelected() != null) {
                 result.append("<b>" +
                         optionSelectedContentLabel + "</b>: ").append(

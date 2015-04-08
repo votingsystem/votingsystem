@@ -74,7 +74,7 @@ public class MailBean {
 
     @Asynchronous
     public void sendBackupMsg (BackupRequestVS request, String content) {
-        /*(view:"/mail/backupRequestMessage", model:[fromUser:fromUser, requestURL:requestURL, 
+        /*(view:"/mail/backupRequestMessage.jsp", model:[fromUser:fromUser, requestURL:requestURL,
         subject:subject, downloadURL:downloadURL])*/
         log.log(Level.FINE, "sendBackupMsg - email:" + request.getEmail() + " - request:"+ request.getId());
         UserVS toUser = request.getMessageSMIME().getUserVS();
@@ -86,7 +86,7 @@ public class MailBean {
 
     @Asynchronous
     public void sendRepresentativeAccreditations (BackupRequestVS request, String content, Date electedDate) {
-        /*view:"/mail/RepresentativeAccreditationRequestDownloadInstructions",
+        /*view:"/mail/RepresentativeAccreditationRequestDownloadInstructions.jsp",
                 model:[fromUser:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
                 requestURL:requestURL, representative:representativeName, downloadURL:downloadURL]
          */

@@ -1,14 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-<link href="${config.webURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${elementURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
 
 
 <polymer-element name="currency-wallet"  on-core-select="{{selectAction}}">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {font-weight: bold;margin:10px auto 30px auto;
                 background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;

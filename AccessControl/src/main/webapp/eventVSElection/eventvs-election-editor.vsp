@@ -1,13 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 
-<link href="${config.webURL}/element/eventvs-option-dialog.vsp" rel="import"/>
-<link href="${config.resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
+<link href="${elementURL}/element/eventvs-option-dialog.vsp" rel="import"/>
+<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 
 <polymer-element name="eventvs-election-editor">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser { font-weight: bold; margin:10px auto 10px auto;  padding:10px 20px 10px 20px; }
         </style>
@@ -158,7 +158,7 @@
 
                 var webAppMessage = new WebAppMessage(Operation.VOTING_PUBLISHING)
                 webAppMessage.signedContent = eventVS
-                webAppMessage.serviceURL = "${config.restURL}/eventVSElection"
+                webAppMessage.serviceURL = "${restURL}/eventVSElection"
                 webAppMessage.signedMessageSubject = "${msg.publishVoteSubject}"
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("publishDocumentCallback - message: " + appMessage);

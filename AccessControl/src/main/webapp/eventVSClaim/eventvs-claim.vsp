@@ -1,13 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.webURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/element/eventvs-backup-request-dialog.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
+<link href="${elementURL}/element/eventvs-backup-request-dialog.vsp" rel="import"/>
 
 <polymer-element name="eventvs-claim">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -144,7 +144,7 @@
                 this.eventvs.fieldsEventVS = fieldsArray
 
                 var webAppMessage = new WebAppMessage(Operation.SMIME_CLAIM_SIGNATURE)
-                webAppMessage.serviceURL = "${config.restURL}/eventVSClaimCollector"
+                webAppMessage.serviceURL = "${restURL}/eventVSClaimCollector"
                 webAppMessage.signedMessageSubject = this.eventvs.subject
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.eventVS = this.eventvs

@@ -4,15 +4,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${config.webURL}/element/time-elements.vsp" rel="import"/>
-    <link href="${config.restURL}/messageSMIME/${viewer}" rel="import"/>
-    <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="${elementURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
+    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
+    <link href="${elementURL}/element/time-elements.vsp" rel="import"/>
+    <link href="${restURL}/messageSMIME/${viewer}" rel="import"/>
+    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 </head>
 <body>
 <div id="voting_system_page" layout horizontal center center-justified>

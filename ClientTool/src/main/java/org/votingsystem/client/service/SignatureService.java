@@ -276,7 +276,7 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
             VoteVS voteVS = (VoteVS) voteResponse.getData();
             documentToSignMap.put("originHashAccessRequest", voteVS.getOriginHashAccessRequest());
-            documentToSignMap.put("hashAccessRequestBase64", voteVS.getAccessRequestHashBase64());
+            documentToSignMap.put("hashAccessRequestBase64", voteVS.getHashAccessRequestBase64());
             documentToSignMap.put("originHashCertVote", voteVS.getOriginHashCertVote());
             documentToSignMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
             documentToSignMap.put("UUID", UUID.randomUUID().toString());

@@ -101,7 +101,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return resultMap;
         else {
             req.setAttribute("groupVSList", JSON.getEscapingMapper().writeValueAsString(resultMap));
-            context.getRequestDispatcher("/jsf/groupVS/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -119,7 +119,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return resultMap;
         else {
             req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
-            context.getRequestDispatcher("/jsf/groupVS/groupvs.jsp").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -175,7 +175,7 @@ public class GroupVSResource {
             return resultMap;
         } else {
             req.setAttribute("subscriptionMap", JSON.getEscapingMapper().writeValueAsString(new HashMap<>()));
-            context.getRequestDispatcher("/jsf/groupVS/listUsers.jsp").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/listUsers.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -197,7 +197,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return resultMap;
         else {
             req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
-            context.getRequestDispatcher("/jsf/groupVS/groupvs.jsp").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -237,7 +237,7 @@ public class GroupVSResource {
                 "GroupVS not found - groupId: " + id).build();
         Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
         req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
-        context.getRequestDispatcher("/jsf/groupVS/edit.jsp").forward(req, resp);
+        context.getRequestDispatcher("/groupVS/edit.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
@@ -283,7 +283,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return resultMap;
         else {
             req.setAttribute("subscriptionMap", JSON.getEscapingMapper().writeValueAsString(resultMap));
-            context.getRequestDispatcher("/jsf/groupVS/user.jsp").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

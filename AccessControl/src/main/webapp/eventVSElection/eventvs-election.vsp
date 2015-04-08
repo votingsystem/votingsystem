@@ -1,18 +1,18 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.resourceURL}/core-media-query/core-media-query.html" rel="import"/>
-<link href="${config.webURL}/eventVSElection/eventvs-election-voteconfirm-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/element/votevs-result-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
-<link href="${config.resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${resourceURL}/core-media-query/core-media-query.html" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-election-voteconfirm-dialog.vsp" rel="import"/>
+<link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
+<link href="${elementURL}/element/votevs-result-dialog.vsp" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
+<link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
@@ -160,7 +160,7 @@
             },
             getResults:function() {
                 console.log("getResults")
-                var fileURL = "${config.webURL}/backup/" + this.dateFinish.urlFormat() +
+                var fileURL = "${restURL}/backup/" + this.dateFinish.urlFormat() +
                         "/VOTING_EVENT_" + this.eventvs.id + ".zip"
                 if(window['isClientToolConnected']) {
                     var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)

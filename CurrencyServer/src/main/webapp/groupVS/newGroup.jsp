@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.webURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
+    <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 </head>
 <body>
 <innerpage-signal title="${msg.newGroupVSLbl}"></innerpage-signal>
@@ -20,7 +20,7 @@
             </ul>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"
-                                        serviceURL="${config.restURL}/tagVS"></tagvs-select-dialog>
+                                        serviceURL="${restURL}/tagVS"></tagvs-select-dialog>
         <form onsubmit="return submitForm();">
 
             <div layout vertical>
@@ -123,7 +123,7 @@
             return false
         }
         var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_NEW)
-        webAppMessage.serviceURL = "${config.restURL}/groupVS/newGroup"
+        webAppMessage.serviceURL = "${restURL}/groupVS/newGroup"
         webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
         webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
             groupvsName:document.querySelector("#groupSubject").value, operation:Operation.CURRENCY_GROUP_NEW}

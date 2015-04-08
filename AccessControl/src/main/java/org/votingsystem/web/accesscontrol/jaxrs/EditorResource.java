@@ -41,7 +41,7 @@ public class EditorResource {
         controlCenterMap.put("dateCreated", controlCenterVS.getDateCreated());
         List<Map> controlCenterList = Arrays.asList(controlCenterMap);
         req.setAttribute("controlCenters", JSON.getEscapingMapper().writeValueAsString(controlCenterList));
-        context.getRequestDispatcher("/jsf/eventVSElection/editor.jsp").forward(req, resp);
+        context.getRequestDispatcher("/eventVSElection/editor.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
@@ -49,7 +49,7 @@ public class EditorResource {
     @Path("/claim") @GET
     public Object getIssuedCert(@Context ServletContext context, @Context HttpServletRequest req,
                                 @Context HttpServletResponse resp) throws Exception {
-        context.getRequestDispatcher("/jsf/eventVSClaim/editor.jsp").forward(req, resp);
+        context.getRequestDispatcher("/eventVSClaim/editor.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

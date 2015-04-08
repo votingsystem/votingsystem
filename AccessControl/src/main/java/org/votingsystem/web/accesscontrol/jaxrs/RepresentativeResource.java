@@ -98,7 +98,7 @@ public class RepresentativeResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("representativeData", JSON.getEscapingMapper().writeValueAsString(representativeMap));
-            context.getRequestDispatcher("/jsf/representative/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/representative/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -118,7 +118,7 @@ public class RepresentativeResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("representativeMap", JSON.getEscapingMapper().writeValueAsString(representativeDto));
-            context.getRequestDispatcher("/jsf/representative/representative.jsp").forward(req, resp);
+            context.getRequestDispatcher("/representative/representative.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

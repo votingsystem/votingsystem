@@ -1,17 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-<link href="${config.webURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
-<link href="${config.webURL}/element/messagevs-send-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
+<link href="${elementURL}/element/messagevs-send-dialog.vsp" rel="import"/>
+<link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
 
 <polymer-element name="uservs-data" attributes="messageToUser">
 <template>
-    <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <style no-shim>
         .uservsCancelled {
             background: #ff0000; opacity:0.5; left:20%; top:-60px; font-size: 1.8em; font-weight: bold;
@@ -70,7 +70,7 @@
                         - ${msg.groupsLbl} -
                     </div>
                     <template repeat="{{subscriptionVS in uservs.subscriptionVSList}}">
-                        <a href="${config.restURL}/userVS/{{subscriptionVS.groupVS.id}}"
+                        <a href="${restURL}/userVS/{{subscriptionVS.groupVS.id}}"
                            style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
                     </template>
                 </div>
@@ -115,7 +115,7 @@
             }
         },
         goToWeekBalance:function() {
-            loadURL_VS("${config.restURL}/balance/userVS/" + this.uservs.id)
+            loadURL_VS("${restURL}/balance/userVS/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))
@@ -130,7 +130,7 @@
             this.page = 1;
         },
         showByIBAN:function(IBAN) {
-            var serviceURL =  "${config.restURL}/userVS/IBAN/" + IBAN
+            var serviceURL =  "${restURL}/userVS/IBAN/" + IBAN
             if(this.$.ajax.url != serviceURL) {
                 console.log(this.tagName + " - showByIBAN - url: " + serviceURL)
                 this.$.ajax.url = serviceURL

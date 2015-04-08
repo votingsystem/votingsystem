@@ -3,19 +3,19 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
-<link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/core-item/core-item.html" rel="import"/>
-<link href="${config.resourceURL}/core-selector/core-selector.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${config.resourceURL}/core-menu/core-menu.html" rel="import"/>
-<link href="${config.webURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
-<link href="${config.webURL}/userVS/uservs-list.vsp" rel="import"/>
-<link href="${config.webURL}/groupVS/groupvs-user.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+<link href="${resourceURL}/core-selector/core-selector.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
+<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
+<link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
+<link href="${elementURL}/groupVS/groupvs-user.vsp" rel="import"/>
 
 <polymer-element name="groupvs-details" attributes="selectedItem subpage">
 <template>
@@ -24,8 +24,8 @@
         .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
         .colored { color: #6c0404; }
     </style>
-    <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
                   on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
@@ -129,10 +129,10 @@
         <template if="{{!isClientToolConnected}}">
             <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
                 <fmt:message key="clientToolNeededMsg" bundle="${bundle}">
-                    <fmt:param value="${config.contextURL}/tools/ClientTool.zip"/>
+                    <fmt:param value="${contextURL}/tools/ClientTool.zip"/>
                 </fmt:message>
                 <fmt:message key="clientToolDownloadMsg" bundle="${bundle}">
-                    <fmt:param value="${config.webURL}/app/tools.jsp"/>
+                    <fmt:param value="${contextURL}/app/tools.xhtml"/>
                 </fmt:message>
             </div>
         </template>
@@ -172,7 +172,7 @@
             console.log(this.tagName + ".messagedialogAccepted")
             if('cancel_group' == detail.callerId) {
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_CANCEL)
-                webAppMessage.serviceURL = "${config.restURL}/groupVS/cancel/" + this.groupvs.userVS.id
+                webAppMessage.serviceURL = "${restURL}/groupVS/cancel/" + this.groupvs.userVS.id
                 webAppMessage.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
                 webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_CANCEL, groupvsName:this.groupvs.userVS.name,
                     id:this.groupvs.userVS.id}
@@ -182,7 +182,7 @@
                     var caption = '${msg.groupCancelERRORLbl}'
                     if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                         caption = "${msg.groupCancelOKLbl}"
-                        loadURL_VS("${config.restURL}/groupVS/" + this.groupvs.userVS.id)
+                        loadURL_VS("${restURL}/groupVS/" + this.groupvs.userVS.id)
                     }
                     showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                 }.bind(this))
@@ -191,7 +191,7 @@
             }
         },
         goToWeekBalance:function() {
-            loadURL_VS("${config.restURL}/balance/userVS/" + this.groupvs.userVS.id)
+            loadURL_VS("${restURL}/balance/userVS/" + this.groupvs.userVS.id)
         },
         messagedialogClosed:function(e) {
             console.log("messagedialog signal - messagedialogClosed: " + e)
@@ -206,7 +206,7 @@
             var groupvsRepresentative = {id:this.groupvs.userVS.representative.id, nif:this.groupvs.userVS.representative.nif}
             var groupVSData = {id:this.groupvs.userVS.id, name:this.groupvs.userVS.name , representative:groupvsRepresentative}
             var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_SUBSCRIBE)
-            webAppMessage.serviceURL = "${config.restURL}/groupVS/" + this.groupvs.userVS.id + "/subscribe"
+            webAppMessage.serviceURL = "${restURL}/groupVS/" + this.groupvs.userVS.id + "/subscribe"
             webAppMessage.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
             webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData}
             webAppMessage.contentType = 'application/pkcs7-signature'
@@ -216,7 +216,7 @@
                 var caption
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.groupSubscriptionOKLbl}"
-                    loadURL_VS( "${config.restURL}/groupVS/" + this.groupvs.userVS.id)
+                    loadURL_VS( "${restURL}/groupVS/" + this.groupvs.userVS.id)
                 } else caption = '${msg.groupSubscriptionERRORLbl}'
                 var msg = appMessageJSON.message
                 showMessageVS(msg, caption)
@@ -245,7 +245,7 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
-            this.$.userList.url = "${config.restURL}/groupVS/" + this.groupvs.userVS.id + "/users"
+            this.$.userList.url = "${restURL}/groupVS/" + this.groupvs.userVS.id + "/users"
             this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.userVS.state: " + this.groupvs.userVS.state +
                 " - menuType: " + menuType)
@@ -256,7 +256,7 @@
                 showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.userVS.name),
                         "${msg.confirmOperationMsg}", 'cancel_group', true)
             } else if('editDataItem' == e.detail.item.id) {
-                window.location.href = "${config.restURL}/groupVS/edit?menu=admin&id=" +
+                window.location.href = "${restURL}/groupVS/edit?menu=admin&id=" +
                         this.groupvs.userVS.id
             }
             this.$.configGroupCoreMenu.selected = null
@@ -282,7 +282,7 @@
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")
-            this.$.userDescription.show("${config.restURL}/groupVS/" + this.groupvs.userVS.id + "/user", detail)
+            this.$.userDescription.show("${restURL}/groupVS/" + this.groupvs.userVS.id + "/user", detail)
         }
     })
 </script>

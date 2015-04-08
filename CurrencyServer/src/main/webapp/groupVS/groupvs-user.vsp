@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.webURL}/element/reason-dialog.vsp" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${elementURL}/element/reason-dialog.vsp" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
         <paper-dialog id="xDialog" layered backdrop class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
@@ -61,7 +61,7 @@
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
                     var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-                    webAppMessage.serviceURL = "${config.restURL}/groupVS/deActivateUser"
+                    webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
                     webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
                     webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
                         groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
@@ -84,7 +84,7 @@
                 this.opened = this.$.xDialog.opened
             },
             goToUserVSPage:function() {
-                loadURL_VS("${config.restURL}/userVS/" + this.userId, "_blank")
+                loadURL_VS("${restURL}/userVS/" + this.userId, "_blank")
                 this.$.xDialog.opened = false
             },
             openedChanged:function() {
@@ -101,7 +101,7 @@
             activateUser : function(e) {
                 console.log("activateUser")
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_ACTIVATE)
-                webAppMessage.serviceURL = "${config.restURL}/groupVS/activateUser"
+                webAppMessage.serviceURL = "${restURL}/groupVS/activateUser"
                 webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
                         this.subscriptionData.groupvs.name + "'"
                 webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,

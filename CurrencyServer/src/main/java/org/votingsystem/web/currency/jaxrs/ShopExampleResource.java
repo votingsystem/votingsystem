@@ -54,7 +54,7 @@ public class ShopExampleResource {
         req.setAttribute("paymentInfoServiceURL", paymentInfoServiceURL);
         req.setAttribute("shopSessionID", shopSessionID);
         req.setAttribute("transactionRequest", transactionRequest);
-        context.getRequestDispatcher("/jsf/shopExample/index.jsp").forward(req, resp);
+        context.getRequestDispatcher("/shopExample/index.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

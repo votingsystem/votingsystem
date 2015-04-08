@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-toast/paper-toast.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/paper-toast/paper-toast.html" rel="import"/>
 
 
 <polymer-element name="messagevs-send-dialog" attributes="opened">
@@ -12,8 +12,8 @@
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop title="${msg.sendMessageVSDialogCaption}"
                       on-core-overlay-open="{{onCoreOverlayOpen}}" style="margin:auto;">
             <style></style>
-            <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+            <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
                 <div>
                     <div layout horizontal center center-justified>
                         <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">

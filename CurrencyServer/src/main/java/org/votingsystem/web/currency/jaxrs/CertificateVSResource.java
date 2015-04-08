@@ -137,7 +137,7 @@ public class CertificateVSResource {
             resultMap.put("type", type.toString());
             resultMap.put("state", state.toString());
             req.setAttribute("certsMap", resultMap);
-            context.getRequestDispatcher("/jsf/certificateVS/certs.jsp").forward(req, resp);
+            context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -162,7 +162,7 @@ public class CertificateVSResource {
                    return certMap;
                 } else {
                     req.setAttribute("certMap", certMap);
-                    context.getRequestDispatcher("/jsf/certificateVS/cert.jsp").forward(req, resp);
+                    context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                     return Response.ok().build();
                 }
             }

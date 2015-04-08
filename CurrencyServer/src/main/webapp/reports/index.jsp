@@ -16,13 +16,13 @@
     <div horizontal layout>
         <div vertical layout class="pageContentDiv" style="max-width:1000px; padding:20px 30px 0px 30px;">
             <div style="margin:20px 0px;">
-                <a href="${config.restURL}/userVS/bankVSList">
+                <a href="${restURL}/userVS/bankVSList">
                     ${msg.bankVSListLbl}
                 </a>
             </div>
             <c:forEach var="it" items="${periods}" varStatus="counter">
                 <div>
-                    <a href="${config.restURL}/reports/week${formatter.format(it.getDateFrom())}">
+                    <a href="${restURL}/reports/week${formatter.format(it.getDateFrom())}">
                         <fmt:message key="transactionsCurrentWeekPeriodMsg" bundle="${bundle}">
                             <fmt:param value="${formatter.format(it.getDateFrom())}"/>
                         </fmt:message>
@@ -30,7 +30,7 @@
                 </div>
             </c:forEach>
             <div style="margin:20px 0px;">
-                <a href="${config.restURL}/reports/week${formatter.format(Calendar.getInstance().getTime())}">
+                <a href="${restURL}/reports/week${formatter.format(Calendar.getInstance().getTime())}">
                     ${msg.currentWeekLbl}
                 </a>
             </div>

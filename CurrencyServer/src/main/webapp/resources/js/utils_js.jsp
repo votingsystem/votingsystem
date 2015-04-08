@@ -1,7 +1,6 @@
 <%@page contentType="text/javascript" %>
 
-    window['accessControlURL'] = "${config.accessControlURL}"
-    window['serverURL'] = "${config.contextURL}"
+    window['serverURL'] = "${contextURL}"
 
     function WebAppMessage(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
@@ -12,9 +11,9 @@
         this.signedContent;
         this.serviceURL;
         this.documentURL;
-        this.receiverName = "${config.serverName}";
-        this.serverURL = "${config.contextURL}";
-        this.timeStampServerURL = "${config.timeStampServerURL}"
+        this.receiverName = "${serverName}";
+        this.serverURL = "${contextURL}";
+        this.timeStampServerURL = "${timeStampServerURL}"
         this.objectId = Math.random().toString(36).substring(7);
     }
 
@@ -26,7 +25,7 @@
     function updateLinksVS(elementsArray) {
         for (var i = 0; i < elementsArray.length; i++) {
             //console.log("elementsArray[i].href: " + elementsArray[i].href)
-            if(elementsArray[i].href.indexOf("${config.contextURL}") > -1) {
+            if(elementsArray[i].href.indexOf("${contextURL}") > -1) {
                 elementsArray[i].addEventListener('click', function(e) {
                     document.querySelector('#navBar').loadURL(e.target.href)
                     e.preventDefault()

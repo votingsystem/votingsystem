@@ -3,8 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <link href="${config.webURL}/transactionVS/transactionvs-list.vsp" rel="import"/>
-    <link href="${config.webURL}/transactionVS/transactionvs-selector.vsp" rel="import"/>
+    <link href="${elementURL}/transactionVS/transactionvs-list.vsp" rel="import"/>
+    <link href="${elementURL}/transactionVS/transactionvs-selector.vsp" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.transactionPageTitle}"></vs-innerpage-signal>
@@ -32,7 +32,7 @@
     document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
         var transactionvsType = e.detail
         console.log("index.gsp - transactionvsType: " + transactionvsType)
-        targetURL = "${config.restURL}/transactionVS";
+        targetURL = "${restURL}/transactionVS";
         if("" != transactionvsType) {
             targetURL = targetURL + "?transactionvsType=" + transactionvsType
         }
@@ -43,11 +43,11 @@
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "${msg.searchResultLbl} '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = "block"
-        document.querySelector("#currencyTransactionTable").url = "${config.restURL}/transactionVS?searchText=" + textToSearch
+        document.querySelector("#currencyTransactionTable").url = "${restURL}/transactionVS?searchText=" + textToSearch
     }
 
     function processSearchJSON(dataJSON) {
         document.querySelector("#currencyTransactionTable").params = dataJSON
-        document.querySelector("#currencyTransactionTable").url = "${config.restURL}/transactionVS"
+        document.querySelector("#currencyTransactionTable").url = "${restURL}/transactionVS"
     }
 </script>

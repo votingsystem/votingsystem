@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.webURL}/eventVSClaim/eventvs-claim.vsp" rel="import"/>
+    <link href="${elementURL}/eventVSClaim/eventvs-claim.vsp" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.claimLbl}"></vs-innerpage-signal>

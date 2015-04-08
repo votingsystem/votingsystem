@@ -60,42 +60,42 @@ public class AppResource {
     @GET @Path("/accounts")
     public Response accounts(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/accounts.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/accounts.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @GET @Path("/admin")
     public Response admin(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/admin.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/admin.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @GET @Path("/transactions")
     public Response transactions(@Context ServletContext context, @Context HttpServletRequest req,
                           @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/transactions.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/transactions.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @GET @Path("/messagevs")
     public Response messagevs(@Context ServletContext context, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/messagevs.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/messagevs.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @GET @Path("/contact")
     public Response contact(@Context ServletContext context, @Context HttpServletRequest req,
                               @Context HttpServletResponse resp) throws ServletException, IOException, ExceptionVS {
-        context.getRequestDispatcher("/jsf/app/contact.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/contact.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @GET @Path("/jsonDocs")
     public Response jsonDocs(@Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/jsonDocs.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/jsonDocs.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
@@ -110,7 +110,7 @@ public class AppResource {
             return dataMap;
         } else {
             req.setAttribute("dataMap", JSON.getEscapingMapper().writeValueAsString(dataMap));
-            context.getRequestDispatcher("/jsf/app/user.jsp").forward(req, resp);
+            context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

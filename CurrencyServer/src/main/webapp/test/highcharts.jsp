@@ -4,7 +4,7 @@
 
 
 
-    <link rel="import" href="${config.resourceURL}/vs-highcharts/demo.html">
+    <link rel="import" href="${resourceURL}/vs-highcharts/demo.html">
 
 
 </head>

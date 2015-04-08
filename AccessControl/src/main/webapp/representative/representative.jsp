@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.webURL}/representative/representative-info.vsp" rel="import"/>
+    <link href="${elementURL}/representative/representative-info.vsp" rel="import"/>
 </head>
 <body>
     <vs-innerpage-signal caption="${msg.representativeLbl}"></vs-innerpage-signal>

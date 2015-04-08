@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link rel="import" href="${config.resourceURL}/vs-highcharts/highcharts-import.html">
+<link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
 
 <polymer-element name="balance-uservs-chart-donut" attributes="chart title yAxisTitle xAxisCategories">
     <template>

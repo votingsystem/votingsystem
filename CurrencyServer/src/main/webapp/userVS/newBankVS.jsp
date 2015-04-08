@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
+    <link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.newBankVSLbl}"></vs-innerpage-signal>
@@ -67,7 +67,7 @@
                 return false
             }
             var webAppMessage = new WebAppMessage(Operation.BANKVS_NEW)
-            webAppMessage.serviceURL = "${config.restURL}/userVS/newBankVS"
+            webAppMessage.serviceURL = "${restURL}/userVS/newBankVS"
             webAppMessage.signedMessageSubject = "${msg.newBankVSMsgSubject}"
             webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                 IBAN:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW}

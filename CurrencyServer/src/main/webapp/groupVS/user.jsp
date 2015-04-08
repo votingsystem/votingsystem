@@ -5,7 +5,7 @@
 <head>
     <title>${msg.groupUserPageLbl}</title>
 
-    <link href="${config.webURL}/element/reason-dialog.vsp" rel="import"/>
+    <link href="${elementURL}/element/reason-dialog.vsp" rel="import"/>
 </head>
 <style>
 
@@ -44,7 +44,7 @@
         document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
             console.log("deActivateUser")
             var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-            webAppMessage.serviceURL = "${config.restURL}/groupVS/deActivateUser"
+            webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
             webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
             webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
                 groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
@@ -84,7 +84,7 @@
     function activateUser () {
         console.log("activateUser")
         var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_ACTIVATE)
-        webAppMessage.serviceURL = "${config.restURL}/groupVS/activateUser"
+        webAppMessage.serviceURL = "${restURL}/groupVS/activateUser"
         webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
 
         webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,

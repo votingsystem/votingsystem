@@ -1,17 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.votingsystem.util.TypeVS" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
-<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 
 <polymer-element name="message-smime-transactionvs-currency-request" attributes="signedDocument smimeMessage
         isClientToolConnected timeStampDate">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .messageToUser {
             font-weight: bold;
@@ -103,11 +103,11 @@
                 console.log(this.tagName + " - signedDocumentChanged: " + JSON.stringify(this.signedDocument))
             },
             showFromUserVSByIBAN:function(e) {
-                loadURL_VS("${config.restURL}/userVS/BANKVS/IBAN/" + this.signedDocument.bankIBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/BANKVS/IBAN/" + this.signedDocument.bankIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${config.restURL}/userVS/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

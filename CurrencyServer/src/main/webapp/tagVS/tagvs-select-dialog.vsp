@@ -1,13 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
-<link rel="import" href="${config.resourceURL}/vs-i18n/vs-i18n.html">
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link rel="import" href="${resourceURL}/vs-i18n/vs-i18n.html">
 
 
 <polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
@@ -29,8 +29,8 @@
                 width: 400px;
             }
         </style>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <vs-i18n id="i18nVS"></vs-i18n>
         <div layout vertical>
             <div layout horizontal center center-justified style="margin:0 0 10px 0;">

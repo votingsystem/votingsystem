@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.webURL}/balance/balance-list.vsp" rel="import"/>
-<link href="${config.webURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
-<link href="${config.webURL}/userVS/uservs-list.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${elementURL}/balance/balance-list.vsp" rel="import"/>
+<link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
+<link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 
 <polymer-element name="groupvs-details-balance-tabs" attributes="groupvs">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style shim-shadowdom>
             .tabContent {
                 padding: 10px 20px 10px 20px;
@@ -63,13 +63,13 @@
                 console.log(this.tagName + " - groupvsChanged")
                 if(this.groupvs != null && this.groupvs.userVS != null) {
                     if(this.groupvs.transactionFromList == null) {
-                        this.$.ajax.url = "${config.restURL}/groupVS/" + this.groupvs.userVS.id
+                        this.$.ajax.url = "${restURL}/groupVS/" + this.groupvs.userVS.id
                     }
                     this.$.transactionFromTable.transactionList = this.groupvs.transactionFromList
                     this.$.transactionToTable.transactionList = this.groupvs.transactionToList
-                    this.$.balanceList.url = "${config.restURL}/currencyAccount/balance?id=" + this.groupvs.userVS.id
-                    this.$.userList.userURLPrefix = "${config.restURL}/groupVS/" + this.groupvs.userVS.id + "/user"
-                    this.$.userList.url = "${config.restURL}/groupVS/listUsers/" + this.groupvs.userVS.id
+                    this.$.balanceList.url = "${restURL}/currencyAccount/balance?id=" + this.groupvs.userVS.id
+                    this.$.userList.userURLPrefix = "${restURL}/groupVS/" + this.groupvs.userVS.id + "/user"
+                    this.$.userList.url = "${restURL}/groupVS/listUsers/" + this.groupvs.userVS.id
                 }
             },
             groupvsWithDetailsChanged:function() {

@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <link href="${config.webURL}/groupVS/groupvs-list.vsp" rel="import"/>
+    <link href="${elementURL}/groupVS/groupvs-list.vsp" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.groupvsLbl}"></vs-innerpage-signal>
@@ -18,6 +18,6 @@
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "${msg.searchResultLbl} '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = 'block'
-        document.querySelector("#groupvsList").url = "${config.restURL}/search/groupVS?searchText=" + textToSearch
+        document.querySelector("#groupvsList").url = "${restURL}/search/groupVS?searchText=" + textToSearch
     }
 </script>

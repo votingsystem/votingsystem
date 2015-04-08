@@ -34,7 +34,7 @@ public class AppResource {
             @Context ServletContext context, @Context HttpServletRequest req,
                                   @Context HttpServletResponse resp) throws ServletException, IOException {
         if(req.getParameter("androidClientLoaded") != null && Boolean.getBoolean(req.getParameter("androidClientLoaded"))) {
-            context.getRequestDispatcher("/jsf/app/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/app/index.xhtml").forward(req, resp);
             return Response.ok().build();
         } else {
             String uri = config.getWebURL() + "/eventVSElection/main?androidClientLoaded=false";

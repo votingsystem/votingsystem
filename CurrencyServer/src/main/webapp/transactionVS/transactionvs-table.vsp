@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 
 <polymer-element name="transactionvs-table" attributes="url userNif isUserVSTable transactionsMap">
 <template>

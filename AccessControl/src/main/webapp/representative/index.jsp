@@ -1,8 +1,8 @@
 <html>
 <head>
-    <link href="${config.resourceURL}/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
-    <link href="${config.webURL}/element/search-info.vsp" rel="import"/>
-    <link href="${config.webURL}/representative/representative-list.vsp" rel="import"/>
+    <link href="${resourceURL}/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
+    <link href="${elementURL}/element/search-info.vsp" rel="import"/>
+    <link href="${elementURL}/representative/representative-list.vsp" rel="import"/>
 </head>
 <body>
     <vs-innerpage-signal caption="${msg.representativesPageLbl}"></vs-innerpage-signal>
@@ -15,11 +15,11 @@
 </html>
 <script>
     function processSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-        var ajaxUrl= "${config.webURL}/search/eventVS?searchText=" +
+        var ajaxUrl= "${restURL}/search/eventVS?searchText=" +
             textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=ELECTION"
     }
 
     function processSearchJSON(dataJSON) {
-        var ajaxUrl= "${config.webURL}/search/eventVS";
+        var ajaxUrl= "${restURL}/search/eventVS";
     }
 </script>

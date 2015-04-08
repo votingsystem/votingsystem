@@ -46,14 +46,14 @@ public class CurrencyResource {
     @Path("/request") @GET
     public Object request(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
-        context.getRequestDispatcher("/jsf/currency/request.jsp").forward(req, resp);
+        context.getRequestDispatcher("/currency/request.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
     @Path("/wallet") @GET
     public Object wallet(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
-        context.getRequestDispatcher("/jsf/currency/wallet.jsp").forward(req, resp);
+        context.getRequestDispatcher("/currency/wallet.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

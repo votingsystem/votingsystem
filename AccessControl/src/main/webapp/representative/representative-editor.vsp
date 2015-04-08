@@ -2,8 +2,8 @@
 
 <polymer-element name="representative-editor" attributes="pageHeader editorData">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -97,7 +97,7 @@
                 webAppMessage.filePath = this.selectedImagePath
                 webAppMessage.signedContent = {representativeInfo:this.$.textEditor.getData(),
                     operation:Operation.REPRESENTATIVE_DATA}
-                webAppMessage.serviceURL = "${config.restURL}/representative"
+                webAppMessage.serviceURL = "${restURL}/representative"
                 webAppMessage.signedMessageSubject = '${msg.representativeDataLbl}'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("newRepresentativeCallback - message: " + appMessage);

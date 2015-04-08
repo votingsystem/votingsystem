@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
-<link href="${config.resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 <polymer-element name="representative-select-dialog">
     <template>
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
-            <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+            <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim>
             .dialog {
                 box-sizing: border-box;
@@ -178,7 +178,7 @@
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
                     webAppMessage.document = this.representative
-                    webAppMessage.serviceURL = "${config.restURL}/representative/delegation"
+                    webAppMessage.serviceURL = "${restURL}/representative/delegation"
                     webAppMessage.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("selectRepresentativeCallback - message: " + appMessage);

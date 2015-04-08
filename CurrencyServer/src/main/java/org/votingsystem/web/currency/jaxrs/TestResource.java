@@ -86,13 +86,6 @@ public class TestResource {
         return "Hello from async resource";
     }
 
-    @GET @Path("/spa")
-    public Response spa(@Context ServletContext context, @Context HttpServletRequest req,
-                          @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/test/spa.jsp").forward(req, resp);
-        return Response.ok().build();
-    }
-
     @GET @Path("/IBAN")
     public Response IBAN(@Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws ServletException, IOException {

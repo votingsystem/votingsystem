@@ -3,8 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <link href="${config.webURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
-    <link href="${config.webURL}/element/reason-dialog.vsp" rel="import"/>
+    <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
+    <link href="${elementURL}/element/reason-dialog.vsp" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.trustedCertPageTitle}"></vs-innerpage-signal>
@@ -34,13 +34,13 @@
     document.addEventListener('polymer-ready', function() {
         document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
             var webAppMessage = new WebAppMessage(Operation.CERT_EDIT)
-            webAppMessage.serviceURL = "${config.restURL}/certificateVS/editCert"
+            webAppMessage.serviceURL = "${restURL}/certificateVS/editCert"
             webAppMessage.signedMessageSubject = "${msg.cancelCertMessageSubject}"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                 changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
             webAppMessage.contentType = 'application/pkcs7-signature'
             webAppMessage.setCallback(function(appMessage) {
-                document.querySelector("#certData").url = "${config.restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
             })
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         })

@@ -2,9 +2,9 @@
 <head>
     <title>WebView Test</title>
 
-    <link href="${config.resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
-    <link rel="import" href="${config.resourceURL}/polymer-ui-toggle-button/polymer-ui-toggle-button.html">
-    <link href="${config.resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
+    <link href="${resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
+    <link rel="import" href="${resourceURL}/polymer-ui-toggle-button/polymer-ui-toggle-button.html">
+    <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 
 </head>
 <body id="voting_system_page">

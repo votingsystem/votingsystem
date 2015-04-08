@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
-<link href="${config.webURL}/userVS/uservs-selector.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${elementURL}/userVS/uservs-selector.vsp" rel="import"/>
 
 
 <polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
@@ -13,8 +13,8 @@
         <style no-shim>
             .uservsSearchDialog {  width: 700px;  min-height: 300px; padding: 10px 20px; }
         </style>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <div id="main">
                 <div>
                     <vs-user-box flex id="receptorBox" boxCaption="${msg.receptorLbl}"></vs-user-box>

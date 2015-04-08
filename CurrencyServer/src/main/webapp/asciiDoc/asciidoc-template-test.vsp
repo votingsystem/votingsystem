@@ -1,14 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 
 <polymer-element name="asciidoc-template-test" attributes="jsonDoc">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .messageToUser {
             font-weight: bold;
@@ -98,7 +98,7 @@ v1.0, 2013-05-20: First draft
             submitForm: function(e) {
                 e.preventDefault()
                 var asciiDoc = this.$.asciiDocTemplate.innerHTML.trim()
-                var serviceURL = "${config.webURL}/asciiDoc/test"
+                var serviceURL = "${restURL}/asciiDoc/test"
                 console.log(this.tagName + " - submitForm - asciiDoc: " + asciiDoc)
 
                 if(this.$.isSignedDocument.checked) {

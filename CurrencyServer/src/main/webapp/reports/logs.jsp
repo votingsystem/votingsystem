@@ -33,7 +33,7 @@
         <script> Polymer('record-list', {});</script>
     </polymer-element>
 
-    <record-list id="recordList" url= "${config.restURL}/reports"></record-list>
+    <record-list id="recordList" url= "${restURL}/reports"></record-list>
 
 </div>
 </body>

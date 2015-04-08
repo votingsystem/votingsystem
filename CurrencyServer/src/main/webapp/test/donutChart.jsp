@@ -1,7 +1,7 @@
 <!DOCTYPE html> <%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%> <html>
 <head>
 
-    <link rel="import" href="${config.resourceURL}/vs-highcharts/highcharts-import.html">
+    <link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
 </head>
 <body>
 <balance-uservs-chart></balance-uservs-chart>

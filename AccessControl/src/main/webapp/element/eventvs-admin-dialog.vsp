@@ -1,17 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
-<link href="${config.resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 
 <polymer-element name="eventvs-admin-dialog" attributes="opened">
     <template>
         <paper-dialog flex vertical id="xDialog" layered backdrop opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
-            <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-            <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+            <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
                 .messageToUser {
@@ -98,9 +98,9 @@
                         messageSubject = '${msg.cancelEventVSMsgSubject}'
                     }
                     var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING, Operation.EVENT_CANCELLATION)
-                    webAppMessage.serviceURL= "${config.webURL}/eventVS/cancelled"
+                    webAppMessage.serviceURL= "${restURL}/eventVS/cancelled"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
-                        accessControlURL:"${config.webURL}",
+                        accessControlURL:"${contextURL}",
                         eventId:Number(this.eventvs.id), state:state}
                     webAppMessage.signedContent = signedContent
                     webAppMessage.signedMessageSubject = messageSubject
@@ -112,7 +112,7 @@
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "${msg.operationOKCaption}"
                             msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
-                            window.location.href = "${config.webURL}/eventVSElection/" + votingEvent.id
+                            window.location.href = "${restURL}/eventVSElection/id/" + votingEvent.id
                         } else {
                             caption = "${msg.operationERRORCaption}"
                             msg = appMessageJSON.message

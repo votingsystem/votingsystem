@@ -1,8 +1,8 @@
 <!DOCTYPE html> <%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%> <html>
 <head>
     <!--https://github.com/josdejong/jsoneditor-->
-    <link rel="stylesheet" type="text/css" href="${config.resourceURL}/jsoneditor/jsoneditor.min.css">
-    <script type="text/javascript" src="${config.resourceURL}/jsoneditor/jsoneditor.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="${resourceURL}/jsoneditor/jsoneditor.min.css">
+    <script type="text/javascript" src="${resourceURL}/jsoneditor/jsoneditor.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -45,8 +45,8 @@
                 fromUser: "ClientBankVS App1 App2", currencyCode: "EUR",
                 fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"], toUserName:"toUserName",
                 amount:"30000", tags:["HIDROGENO"], isTimeLimited:true, subject:"BankVS transactionvs" },
-            serviceURL:"${config.restURL}/transactionVS",
-            serverURL:"${config.restURL}",
+            serviceURL:"${restURL}/transactionVS",
+            serverURL:"${restURL}",
             timeStampServerURL:"${config.timeStampServerURL}"
         }
         //fromUserIBAN -> IBAN external to Currency System controlled by BankVS

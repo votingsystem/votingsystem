@@ -69,7 +69,7 @@ public class EventVSClaimResource {
                         .type(ContentTypeVS.JSON.getName()).build();
             } else {
                 req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSDto));
-                context.getRequestDispatcher("/jsf/eventVSClaim/eventVSClaim.jsp").forward(req, resp);
+                context.getRequestDispatcher("/eventVSClaim/eventVSClaim.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
         }
@@ -101,7 +101,7 @@ public class EventVSClaimResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("eventsVSMap", JSON.getEscapingMapper().writeValueAsString(eventsVSMap));
-            context.getRequestDispatcher("/jsf/eventVSClaim/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/eventVSClaim/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -109,7 +109,7 @@ public class EventVSClaimResource {
     @Path("/editor") @GET
     public Response editor(@Context ServletContext context,
             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        context.getRequestDispatcher("/jsf/eventVSClaim/editor.jsp").forward(req, resp);
+        context.getRequestDispatcher("/eventVSClaim/editor.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

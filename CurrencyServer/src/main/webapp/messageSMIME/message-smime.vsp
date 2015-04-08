@@ -1,15 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.votingsystem.util.TypeVS" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 <polymer-element name="message-smime" attributes="signedDocument smimeMessage isClientToolConnected timeStampDate">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .messageToUser {
             font-weight: bold;
@@ -153,20 +153,20 @@
                 }
             },
             showToUserInfo:function(e) {
-                var groupURL = "${config.restURL}/groupVS/" + e.target.templateInstance.model.signedDocument.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.signedDocument.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = ""${config.restURL}/groupVS/" +  e.target.templateInstance.model.signedDocument.fromUserVS.id
+                var groupURL = ""${restURL}/groupVS/" +  e.target.templateInstance.model.signedDocument.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = "${config.restURL}/IBAN/from/" + e.target.templateInstance.model.signedDocument.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = "${restURL}/IBAN/from/" + e.target.templateInstance.model.signedDocument.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                loadURL_VS("${config.restURL}/userVS/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

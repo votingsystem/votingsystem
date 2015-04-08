@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="shortcut icon" type="image/png" href="#{request.contextPath}/images/icon_16/fa-bolt.png" />
+    </f:facet>
+    <title><ui:insert name="title" /></title>
+    <h:outputScript name="js/utilsVS.js" />
+    <h:outputStylesheet name="css/votingSystem.css" />
+    <script src="${contextURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
+    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
+    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
+    <ui:insert name="head" />
+</h:head>
+<h:body id="voting_system_page">
+    <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center; margin:15px auto;"></div>
+    <div id="pageLayoutDiv" style="display:none;">
+        <ui:insert name="content"/>
+    </div>
+    <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+        <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+    </div>
+
+    <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
+    <core-signals id="coreSignals"></core-signals>
+
+    <script>
+        document.addEventListener('polymer-ready', function() {
+            document.querySelector('#pageLayoutDiv').style.display = 'block';
+            document.querySelector('#loadingDiv').style.display = 'none';
+            updateMenuLinks()
+        });
+
+        document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
+            if(e.detail.title) document.querySelector('#appTitle').innerHTML = e.detail.title
+            document.dispatchEvent( new Event('innerPageSignal'));
+        });
+    </script>
+</h:body>
+</html>

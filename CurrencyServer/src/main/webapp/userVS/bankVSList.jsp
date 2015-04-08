@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <link href="${config.webURL}/userVS/bankVS-list.vsp" rel="import"/>
+    <link href="${elementURL}/userVS/bankVS-list.vsp" rel="import"/>
 </head>
 <body>
 <div class="pageContentDiv">

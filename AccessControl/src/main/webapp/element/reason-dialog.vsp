@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-overlay/core-overlay.html" rel="import"/>
-<link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-overlay/core-overlay.html" rel="import"/>
+<link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
 
 
 <polymer-element name="reason-dialog" attributes="caption opened isForAdmins messageToUser">

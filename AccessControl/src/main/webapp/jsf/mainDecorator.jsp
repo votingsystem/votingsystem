@@ -3,25 +3,25 @@
 <%@ taglib uri="http://www.opensymphony.com/sitemesh/decorator" prefix="decorator" %>
 <html>
 <head>
-    <link rel="shortcut icon" href="${config.webURL}/images/icon_16/fa-credit-card.png" type="image/x-icon">
+    <link rel="shortcut icon" href="${contextURL}/resources/images/icon_16/fa-credit-card.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <title>${msg.appTitle}</title>
-    <link href="${config.webURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-item/paper-item.html" rel="import"/>
-    <link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-socket/vs-socket.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
-    <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
+    <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="${elementURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
+    <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+    <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+    <link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
+    <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
+    <link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
+    <link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
+    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
     <decorator:head />
@@ -31,8 +31,8 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
-        <link href="${config.webURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" handleAs=""></core-xhr>
         <!-- put core signals names in lower case !!!-->
@@ -48,13 +48,13 @@
                             <c:when test="${'admin'.equals(param.menu)}">
                                 {{ "${msg.adminPageTitle}" | setTitle}}
                                 <!--<template if="{{isClientToolConnected}}">-->
-                                <paper-item data-href="${config.restURL}/eventVSElection">
+                                <paper-item data-href="${restURL}/eventVSElection">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                                 </paper-item>
                                 <paper-item data-href="publish_election">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.restURL}/representative">
+                                <paper-item data-href="${restURL}/representative">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                                 </paper-item>
                                 <paper-item data-href="new_representative">
@@ -67,10 +67,10 @@
                             </c:when>
                             <c:otherwise>
                                 {{ "${msg.votingsystemPageLbl}" | setTitle}}
-                                <paper-item data-href="${config.restURL}/eventVSElection">
+                                <paper-item data-href="${restURL}/eventVSElection">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                                 </paper-item>
-                                <paper-item data-href="${config.restURL}/representative">
+                                <paper-item data-href="${restURL}/representative">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                                 </paper-item>
                                 <paper-item data-href="${config.webURL}/app/tools.jsp">

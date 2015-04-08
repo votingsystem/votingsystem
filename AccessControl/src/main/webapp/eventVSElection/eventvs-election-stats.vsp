@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link rel="import" href="${config.resourceURL}/vs-highcharts/highcharts-import.html">
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 
 <polymer-element name="eventvs-election-stats" attributes="title eventVSId">
     <template>
@@ -71,7 +71,7 @@
                 else this.$.messageToUser.style.display ='block'
             },
             eventVSIdChanged: function() {
-                var targetURL = "${config.restURL}/eventVSElection/id/" + this.eventVSId + "/stats"
+                var targetURL = "${restURL}/eventVSElection/id/" + this.eventVSId + "/stats"
                 console.log(this.tagName + "- targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
             }

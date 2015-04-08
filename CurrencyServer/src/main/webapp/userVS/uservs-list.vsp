@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
-<link href="${config.resourceURL}/vs-pager/vs-pager.html" rel="import"/>
-<link href="${config.webURL}/userVS/uservs-card.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
+<link href="${elementURL}/userVS/uservs-card.vsp" rel="import"/>
 
 <polymer-element name="uservs-list" attributes="url menuType isNifVisible">
     <template>

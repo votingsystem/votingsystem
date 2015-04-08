@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.webURL}/representative/representative-edit-form.vsp" rel="import"/>
+    <link href="${elementURL}/representative/representative-edit-form.vsp" rel="import"/>
 </head>
 <body>
     <vs-innerpage-signal caption="${msg.editRepresentativeLbl}"></vs-innerpage-signal>

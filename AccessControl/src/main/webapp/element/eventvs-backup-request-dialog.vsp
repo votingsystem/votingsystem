@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${config.resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 
 <polymer-element name="eventvs-backup-request-dialog" attributes="opened">
@@ -73,7 +73,7 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(Operation.BACKUP_REQUEST)
-                webAppMessage.serviceURL = "${config.restURL}/backupVS"
+                webAppMessage.serviceURL = "${restURL}/backupVS"
                 webAppMessage.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.signedContent = this.eventvs

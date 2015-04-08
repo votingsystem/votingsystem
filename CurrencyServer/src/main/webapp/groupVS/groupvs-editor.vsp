@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 
 <polymer-element name="groupvs-editor">
     <template>
@@ -54,7 +54,7 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_EDIT)
-                webAppMessage.serviceURL = "${config.restURL}/groupVS/edit/" + this.groupvs.id
+                webAppMessage.serviceURL = "${restURL}/groupVS/edit/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
                 webAppMessage.signedContent = {groupvsInfo:this.$.textEditor.getData(), groupvsName:this.groupvs.name,
                     id:this.groupvs.id, operation:Operation.CURRENCY_GROUP_NEW}

@@ -54,7 +54,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getCertRequestServiceURL() {
-        return getServerURL() + "/jsf/certificateVS/certRequest.jsp";
+        return getServerURL() + "/certificateVS/certRequest.xhtml";
     }
 
     public String getDownloadServiceURL(String param) {
@@ -105,7 +105,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getDashBoardURL() {
-        return getServerURL() + "/jsf/app/admin.jsp?menu=admin";
+        return getServerURL() + "/app/admin.xhtml?menu=admin";
     }
 
     public String getVotingPageURL() {

@@ -1,20 +1,20 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-<link href="${config.resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
-<link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
-<link href="${config.webURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
-<link href="${config.webURL}/currency/currency-request-result-dialog.vsp" rel="import"/>
-<link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
+<link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
+<link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
+<link href="${elementURL}/currency/currency-request-result-dialog.vsp" rel="import"/>
+<link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
 
 <polymer-element name="currency-request-form">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -98,7 +98,7 @@
             </div>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"
-                 serviceURL="${config.restURL}/tagVS"></tagvs-select-dialog>
+                 serviceURL="${restURL}/tagVS"></tagvs-select-dialog>
         <currency-request-result-dialog id="resultDialog"></currency-request-result-dialog>
     </template>
     <script>
@@ -147,7 +147,7 @@
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_REQUEST)
-                webAppMessage.serviceURL = "${config.restURL}/currency/processRequest"
+                webAppMessage.serviceURL = "${restURL}/currency/processRequest"
                 webAppMessage.signedMessageSubject = "${msg.currencyRequestLbl}"
                 webAppMessage.signedContent = {operation:Operation.CURRENCY_REQUEST, totalAmount:new Number(this.amountValue),
                     isTimeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),

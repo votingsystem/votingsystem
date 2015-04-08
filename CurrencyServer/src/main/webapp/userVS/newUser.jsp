@@ -58,7 +58,7 @@
         }
 
         var webAppMessage = new WebAppMessage(Operation.CERT_CA_NEW)
-        webAppMessage.serviceURL = "${config.restURL}/userVS/save"
+        webAppMessage.serviceURL = "${restURL}/userVS/save"
         webAppMessage.signedMessageSubject = "${msg.newUserCertLbl}"
         webAppMessage.signedContent = {info:document.querySelector("#userInfo").value,
                 certChainPEM:document.querySelector("#pemCert").value,

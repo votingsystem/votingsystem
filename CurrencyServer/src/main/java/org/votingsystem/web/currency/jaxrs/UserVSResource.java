@@ -156,7 +156,7 @@ public class UserVSResource {
             userMap = groupVSBean.getDataMap((GroupVS) userVS, timePeriod);
             resultMap.put("groupvsMap", userMap);
             req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
-            view = "/jsf/groupVS/groupvs.jsp";
+            view = "/groupVS/groupvs.xhtml";
         }
         else if(userVS instanceof BankVS) {
             userMap = bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
@@ -164,12 +164,12 @@ public class UserVSResource {
             resultMap.put("messageToUser", msg);
             req.setAttribute("uservsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
             req.setAttribute("messageToUser", msg);
-            view = "/jsf/userVS/userVS.jsp";
+            view = "/userVS/userVS.xhtml";
         } else {
             userMap = userVSBean.getDataWithBalancesMap(userVS, timePeriod);
             resultMap.put("uservsMap", userMap);
             req.setAttribute("uservsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
-            view = "/jsf/userVS/userVS.jsp";
+            view = "/userVS/userVS.xhtml";
         }
         if(contentType.contains("json")) {
             return resultMap;
@@ -189,7 +189,7 @@ public class UserVSResource {
         if(contentType.contains("json")) {
             return processSearch(searchText, offset, max);
         } else {
-            context.getRequestDispatcher("/jsf/userVS/search.jsp").forward(req, resp);
+            context.getRequestDispatcher("/userVS/search.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -331,7 +331,7 @@ public class UserVSResource {
         if(contentType.contains("json")) return resultList;
         else {
             req.setAttribute("bankVSMap", JSON.getEscapingMapper().writeValueAsString(resultList));
-            context.getRequestDispatcher("/jsf/userVS/bankVSList.jsp").forward(req, resp);
+            context.getRequestDispatcher("/userVS/bankVSList.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -350,7 +350,7 @@ public class UserVSResource {
     @Path("/save") @GET
     public Object saveForm(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/userVS/newUser.jsp").forward(req, resp);
+        context.getRequestDispatcher("/userVS/newUser.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

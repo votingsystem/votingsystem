@@ -1,5 +1,5 @@
 <%@page contentType="text/javascript" %>
-        window['serverURL'] = "${elementURL}"
+        window['serverURL'] = "${contextURL}"
 
         function WebAppMessage(operation, statusCode) {
             this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING

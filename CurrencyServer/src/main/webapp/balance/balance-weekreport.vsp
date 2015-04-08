@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<jsp:include page="/include/balanceVSUtils_js.jsp"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<script src="${contextURL}/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
 
 <polymer-element name="balance-uservs-details" attributes="balance type">
     <template>
@@ -129,8 +129,8 @@
 
 <polymer-element name="balance-weekreport" attributes="url">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
 
         </style>

@@ -109,15 +109,15 @@ public class MessageSMIMEResource {
             resultMap.put("smimeMessage", smimeMessageStr);
             req.setAttribute("signedContentMap", new ObjectMapper().writeValueAsString(signedContentMap));
             resultMap.put("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            resultMap.put("viewer", viewer + ".jsp");
+            resultMap.put("viewer", viewer + ".vsp");
             return resultMap;
         } else {
             req.setAttribute("operation", signedContentMap.get("operation"));
             req.setAttribute("smimeMessage", smimeMessageStr);
             req.setAttribute("signedContentMap", signedContentMap);
             req.setAttribute("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            req.setAttribute("viewer",  viewer + ".jsp");
-            context.getRequestDispatcher("/jsf/messageSMIME/contentViewer.jsp").forward(req, resp);
+            req.setAttribute("viewer",  viewer + ".vsp");
+            context.getRequestDispatcher("/jsf/messageSMIME/contentViewer.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

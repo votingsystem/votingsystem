@@ -3,8 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <link href="${config.webURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
-    <link href="${config.webURL}/transactionVS/transactionvs-selector.vsp" rel="import"/>
+    <link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
+    <link href="${elementURL}/transactionVS/transactionvs-selector.vsp" rel="import"/>
 </head>
 <body>
 <vs-innerpage-signal caption="${msg.transactionPageTitle}"></vs-innerpage-signal>
@@ -16,7 +16,7 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <transactionvs-table id="recordList" url="${config.restURL}/reports/transactionvs"></transactionvs-table>
+    <transactionvs-table id="recordList" url="${restURL}/reports/transactionvs"></transactionvs-table>
 
 </div>
 </body>
@@ -26,7 +26,7 @@
     document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
         var transactionvsType = e.detail
         console.log("transactionvsType: " + transactionvsType)
-        targetURL = "${config.restURL}/reports/transactionvs";
+        targetURL = "${restURL}/reports/transactionvs";
         if("" != transactionvsType) {
             targetURL = targetURL + "?transactionvsType=" + transactionvsType
         }
@@ -37,11 +37,11 @@
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "${msg.searchResultLbl} '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = "block"
-        document.querySelector("#recordList").url = "${config.restURL}/transactionVS?searchText=" + textToSearch
+        document.querySelector("#recordList").url = "${restURL}/transactionVS?searchText=" + textToSearch
     }
 
     function processSearchJSON(dataJSON) {
         document.querySelector("#recordList").params = dataJSON
-        document.querySelector("#recordList").url = "${config.restURL}/transactionVS"
+        document.querySelector("#recordList").url = "${restURL}/transactionVS"
     }
 </script>

@@ -1,15 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/paper-input/paper-input.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${config.resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
 
 <polymer-element name="uservs-selector" attributes="url contactSelector">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .card {
                 position: relative; display:inline-block; width: 300px; vertical-align: top;
@@ -144,7 +144,7 @@
             },
             processSearch:function() {
                 if(this.textToSearch.trim() === "") return
-                this.url = "${config.restURL}/userVS/search?searchText=" + this.textToSearch
+                this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch
                 this.$.ajax.go()
             },
             toggleContactsView:function(event, detail, target) {

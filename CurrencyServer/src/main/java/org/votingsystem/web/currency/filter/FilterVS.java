@@ -36,6 +36,13 @@ public class FilterVS implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         messages.setLocale(req.getLocale());
+        req.setAttribute("request", req);
+        req.setAttribute("resourceURL", ((HttpServletRequest) req).getContextPath() + "/resources/bower_components");
+        req.setAttribute("elementURL", ((HttpServletRequest) req).getContextPath() + "/jsf");
+        req.setAttribute("restURL", ((HttpServletRequest) req).getContextPath() + "/rest");
+        req.setAttribute("contextURL", ((HttpServletRequest) req).getContextPath());
+        req.setAttribute("serverName", config.getServerName());
+        req.setAttribute("timeStampServerURL", config.getTimeStampServerURL());
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +

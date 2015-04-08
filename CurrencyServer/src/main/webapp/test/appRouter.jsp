@@ -1,19 +1,19 @@
 <!DOCTYPE html> <%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%> <html>
 <head>
     <title><app-router></app-router></title>
-    <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <link href="${config.resourceURL}/core-scaffold/core-scaffold.html" rel="import"/>
-    <link href="${config.resourceURL}/core-toolbar/core-toolbar.html" rel="import"/>
-    <link href="${config.resourceURL}/core-menu/core-menu.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-item/paper-item.html" rel="import"/>
-    <link href="${config.resourceURL}/core-item/core-item.html" rel="import"/>
-    <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
-    <link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-    <link href="${config.resourceURL}/core-header-panel/core-header-panel.html" rel="import"/>
-    <link href="${config.resourceURL}/core-animated-pages/transitions/slide-from-right.html" rel="import"/>
-    <link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-    <link href="${config.resourceURL}/app-router/app-router.html" rel="import"/>
+    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${resourceURL}/core-scaffold/core-scaffold.html" rel="import"/>
+    <link href="${resourceURL}/core-toolbar/core-toolbar.html" rel="import"/>
+    <link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+    <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+    <link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+    <link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
+    <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+    <link href="${resourceURL}/core-header-panel/core-header-panel.html" rel="import"/>
+    <link href="${resourceURL}/core-animated-pages/transitions/slide-from-right.html" rel="import"/>
+    <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+    <link href="${resourceURL}/app-router/app-router.html" rel="import"/>
 
     <style>
         /** main content */

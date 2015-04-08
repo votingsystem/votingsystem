@@ -1,13 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.votingsystem.util.TypeVS" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
 <polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .messageToUser {
             font-weight: bold;
@@ -188,19 +188,19 @@
        // "dateCreated":"27 sep 2014 21:16","validTo":"29 sep 2014 00:00","id":5,"subject":"Asunto sábado españa - 21:16","type":"FROM_GROUP_TO_MEMBER","amount":"200.00",
        // "currency":"EUR","messageSMIMEURL":"http://currency:8086/CurrencyServer/messageSMIME/35","numChildTransactions":1,"tags":[{"id":3,"name":"HIDROGENO"}]}
         showToUserInfo:function(e) {
-                var groupURL = "${config.restURL}/groupVS/" + e.target.templateInstance.model.transactionvs.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = "${config.restURL}/groupVS/" +  e.target.templateInstance.model.transactionvs.fromUserVS.id
+                var groupURL = "${restURL}/groupVS/" +  e.target.templateInstance.model.transactionvs.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
-                var serviceURL =  "${config.restURL}/userVS/IBAN/" + this.getFromUserIBAN(e.target.templateInstance.model.transactionvs)
+                var serviceURL =  "${restURL}/userVS/IBAN/" + this.getFromUserIBAN(e.target.templateInstance.model.transactionvs)
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
-                var serviceURL =  "${config.restURL}/userVS/IBAN/" + this.transactionvs.toUserVS.IBAN
+                var serviceURL =  "${restURL}/userVS/IBAN/" + this.transactionvs.toUserVS.IBAN
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {

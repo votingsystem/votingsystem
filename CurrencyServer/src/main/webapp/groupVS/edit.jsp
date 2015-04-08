@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link href="${config.webURL}/groupVS/groupvs-editor.vsp" rel="import"/>
+    <link href="${elementURL}/groupVS/groupvs-editor.vsp" rel="import"/>
 </head>
 <body>
     <vs-innerpage-signal caption="${msg.editGroupVSLbl}"></vs-innerpage-signal>

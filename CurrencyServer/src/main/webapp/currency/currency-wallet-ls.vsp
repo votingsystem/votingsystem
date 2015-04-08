@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-slider/paper-slider.html" rel="import"/>
-<link href="${config.resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-<link href="${config.resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
-<link href="${config.webURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-slider/paper-slider.html" rel="import"/>
+<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
+<link href="${resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
+<link href="${elementURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
 
 <!--Test with wallet inside browser localstorage--->
 <polymer-element name="currency-wallet-ls"  on-core-select="{{selectAction}}">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .green-slider paper-slider::shadow #sliderKnobInner,
             .green-slider paper-slider::shadow #sliderKnobInner::before,

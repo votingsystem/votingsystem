@@ -1,6 +1,6 @@
 <%@page contentType="text/javascript" %>
 
-    window['serverURL'] = "${config.webURL}"
+    window['serverURL'] = "${contextURL}"
 
     function WebAppMessage(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
@@ -11,9 +11,9 @@
         this.signedContent;
         this.serviceURL;
         this.documentURL;
-        this.receiverName = "${config.serverName}";
-        this.serverURL = "${config.webURL}";
-        this.timeStampServerURL = "${config.timeStampServerURL}"
+        this.receiverName = "${serverName}";
+        this.serverURL = "${contextURL}";
+        this.timeStampServerURL = "${timeStampServerURL}"
         this.objectId = Math.random().toString(36).substring(7);
     }
 

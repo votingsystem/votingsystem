@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
-<link href="${config.webURL}/transactionVS/transactionvs-card.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
+<link href="${elementURL}/transactionVS/transactionvs-card.vsp" rel="import"/>
 
 
 <polymer-element name="transactionvs-list" attributes="url transactionsMap">

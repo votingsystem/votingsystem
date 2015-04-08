@@ -1,14 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-<link href="${config.resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${config.webURL}/representative/representative-info.vsp" rel="import"/>
-<link href="${config.webURL}/representative/representation-state.vsp" rel="import"/>
+<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
+<link href="${elementURL}/representative/representative-info.vsp" rel="import"/>
+<link href="${elementURL}/representative/representation-state.vsp" rel="import"/>
 
 <polymer-element name="representative-list" attributes="url">
     <template>
-        <link href="${config.contextURL}/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style no-shim>
         .card {
             position: relative;

@@ -4,14 +4,14 @@
 <html>
 <head>
     <title>WebView Test</title>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+    <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="${elementURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
+    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
+    <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 </head>
 <body id="voting_system_page">
 WebView Test

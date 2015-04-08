@@ -6,9 +6,9 @@
 <head>
     <title></title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
     <style>
     html,body {
         height: 100%;
@@ -28,7 +28,7 @@
 </head>
 <body >
 <h3 style="text-align: center;">
-    <a class="headerTitle" href="${config.webURL}">${msg.appTitle}</a>
+    <a class="headerTitle" href="${contextURL}">${msg.appTitle}</a>
 </h3>
 <polymer-element name="info-page-tabs">
     <template>

@@ -6,11 +6,11 @@
 <html>
 <head>
     <title>Test JSP</title>
-    <link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${config.resourceURL}/core-icon/core-icon.html" rel="import"/>
-    <link href="${config.resourceURL}/core-icons/core-icons.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+    <link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
+    <link href="${resourceURL}/core-icons/core-icons.html" rel="import"/>
+    <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
     <style>
         body {
@@ -38,8 +38,8 @@
 </head>
 <body bgcolor="white">
 
-    <h2>- contextURL: - ${config.webURL}</h2>
-    <h2>- restURL: - ${config.resourceURL}</h2>
+    <h2>- contextURL: - ${contextURL}</h2>
+    <h2>- restURL: - ${resourceURL}</h2>
     <h2>- ping: - ${config.getProperty('vs.systemNIF')}</h2>
     <h2>- i18N: ${msg.dashBoardLbl}</h2>
     <h2>- groupVS: ${groupvs.email}</h2>

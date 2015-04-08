@@ -16,7 +16,7 @@
                             <li>${msg.androidAppNeededMsg}</li>
                             <li>
                                 <fmt:message key="androidAppDownloadMsg" bundle="${bundle}">
-                                    <fmt:param value="${config.contextURL}/android/SistemaVotacion.apk"/>
+                                    <fmt:param value="${contextURL}/android/SistemaVotacion.apk"/>
                                 </fmt:message>
                             <li>${msg.androidCertInstalledMsg}</li>
                             <li>${msg.androidSelectAppMsg}</li>
@@ -26,7 +26,7 @@
                 <c:otherwise>
                     <div style="margin: 10px;">
                         <fmt:message key="clientToolNeededMsg" bundle="${bundle}">
-                            <fmt:param value="${config.contextURL}/tools/ClientTool.zip"/>
+                            <fmt:param value="${contextURL}/tools/ClientTool.zip"/>
                         </fmt:message>
                     </div>.
                     <div style="margin: 10px;">

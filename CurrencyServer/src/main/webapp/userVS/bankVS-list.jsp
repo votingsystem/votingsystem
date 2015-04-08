@@ -1,9 +1,9 @@
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 
 <polymer-element name="bankVS-list">
     <template>
-        <link href="${config.webURL}/css/cryptocurrency.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .bankvs {border: 1px solid #6c0404; margin: 10px; padding:0 10px 10px 10px;
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); text-align: center;
@@ -24,7 +24,7 @@
             ready: function() { console.log(this.tagName + " - ready")},
             publish: { bankVSMap: {value: {}} },
             bankVSSelected: function(e) {
-                loadURL_VS("${config.restURL}/userVS/" + e.target.templateInstance.model.bankVS.id)
+                loadURL_VS("${restURL}/userVS/" + e.target.templateInstance.model.bankVS.id)
             }
         });
     </script>

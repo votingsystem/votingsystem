@@ -6,9 +6,9 @@
 <head>
     <title>${msg.weekReportsPageTitle}</title>
 
-    <link rel="import" href="${config.resourceURL}/juicy-jsoneditor/src/juicy-jsoneditor.html">
+    <link rel="import" href="${resourceURL}/juicy-jsoneditor/src/juicy-jsoneditor.html">
     <!-- josdejong/jsoneditor#104 workaround-->
-    <link rel="stylesheet" type="text/css" href="${config.resourceURL}/jsoneditor/jsoneditor.min.css">
+    <link rel="stylesheet" type="text/css" href="${resourceURL}/jsoneditor/jsoneditor.min.css">
 </head>
 <body>
     <vs-innerpage-signal caption="${msg.reportsPageTitle}"></vs-innerpage-signal>
