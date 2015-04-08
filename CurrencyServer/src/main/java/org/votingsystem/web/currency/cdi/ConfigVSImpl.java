@@ -8,17 +8,13 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,11 +28,10 @@ public class ConfigVSImpl implements ConfigVS {
     private static final Logger log = Logger.getLogger(ConfigVS.class.getSimpleName());
 
     @Inject DAOBean dao;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
 
-    public static final String RESOURCE_PATH= "/bower_components";
+    public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
     public static final String REST_PATH= "/rest";
 

@@ -15,6 +15,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
@@ -22,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Logger;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**

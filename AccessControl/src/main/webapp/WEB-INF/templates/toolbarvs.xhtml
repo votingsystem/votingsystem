@@ -27,7 +27,7 @@
 </h:head>
 <h:body id="voting_system_page" style="margin: 0px; padding: 0px;">
     <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool="">{{appTitle}}</div>
-    <votingsystem-navbar>
+    <votingsystem-navbar id="navBar" menu="${param.menu}">
         <ui:insert name="content"/>
     </votingsystem-navbar>
     <h:messages styleClass="messages"

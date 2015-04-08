@@ -1,0 +1,41 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="content">
+        <vs-innerpage-signal caption="${msg.toolsPageTitle}"></vs-innerpage-signal>
+        <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto;">
+            <c:choose>
+                <c:when test="${request.getHeader('user-agent').toLowerCase().contains('android')}">
+                    <div class="userAdvert">
+                        <ul>
+                            <li>${msg.androidAppNeededMsg}</li>
+                            <li>
+                                <h:outputFormat value="#{msg.androidAppDownloadMsg}" escape="false">
+                                    <f:param value="${contextURL}/android/SistemaVotacion.apk"/>
+                                </h:outputFormat>
+                            </li>
+                            <li>${msg.androidCertInstalledMsg}</li>
+                            <li>${msg.androidSelectAppMsg}</li>
+                        </ul>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div style="margin: 10px;">
+                        <h:outputFormat value="#{msg.clientToolNeededMsg}" escape="false">
+                            <f:param value="${contextURL}/tools/ClientTool.zip"/>
+                        </h:outputFormat>
+                    </div>
+                    <div style="margin: 10px;">
+                        <h:outputFormat value="#{msg.javaRequirementsMsg}" escape="false">
+                            <f:param value="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"/>
+                        </h:outputFormat>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -78,32 +78,8 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.pickerFrom = new Pikaday( {
-                    i18n: {
-                        previousMonth : "${msg.previousMonth}",
-                        nextMonth     : "${msg.nextMonth}",
-                        months        : ${msg.months_pk},
-                        weekdays      : ${msg.weekdays_pk},
-                        weekdaysShort : ${msg.weekdaysShort}
-                    },
-                    showWeekNumber:true,
-                    format: 'YYYY',
-                    field: this.$.dateFrom,
-                    yearRange: [2010,2020]
-                });
-                this.pickerTo = new Pikaday( {
-                    i18n: {
-                        previousMonth : "${msg.previousMonth}",
-                        nextMonth     : "${msg.nextMonth}",
-                        months        : ${msg.months_pk},
-                        weekdays      : ${msg.weekdays_pk},
-                        weekdaysShort : ${msg.weekdaysShort}
-                    },
-                    showWeekNumber:true,
-                    format: 'YYYY',
-                    field: this.$.dateTo,
-                    yearRange: [2010,2020]
-                });
+                this.pickerFrom = null;
+                this.pickerTo = null
                 //picker.setDate('2015-01-01')
             },
             show: function(representative) {

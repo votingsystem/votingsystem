@@ -1,4 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${resourceURL}/core-ajax/core-xhr.html" rel="import"/>
 <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
@@ -20,7 +20,7 @@
 <link href="${resourceURL}/core-dropdown/core-dropdown.html" rel="import"/>
 <link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
 
-<polymer-element name="votingsystem-navbar" attributes="url loading">
+<polymer-element name="votingsystem-navbar" attributes="url loading menu">
     <template>
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
@@ -34,21 +34,48 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${restURL}/eventVSElection">
-                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
-                        </paper-item>
-                        <paper-item data-href="${contextURL}/subscriptionVS/feeds.xhtml">
-                            <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
-                        </paper-item>
-                        <paper-item data-href="${contextURL}/app/contact.xhtml">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
-                        </paper-item>
+                        <template if="{{'admin' === menu}}">
+                            <!--<template if="{{isClientToolConnected}}">-->
+                            <paper-item data-href="${restURL}/eventVSElection">
+                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
+                            </paper-item>
+                            <paper-item data-href="publish_election">
+                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
+                            </paper-item>
+                            <paper-item data-href="${restURL}/representative">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
+                            </paper-item>
+                            <paper-item data-href="new_representative">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
+                            </paper-item>
+                            <paper-item data-href="${config.webURL}/representative/edit.jsp">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
+                            </paper-item>
+                            <!--</template>-->
+                        </template>
+                        <template if="{{menu == null || 'admin' !== menu}}">
+                            {{ "${msg.votingsystemPageLbl}" | setTitle}}
+                            <paper-item data-href="${restURL}/eventVSElection">
+                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
+                            </paper-item>
+                            <paper-item data-href="${restURL}/representative">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
+                            </paper-item>
+                            <paper-item data-href="${contextURL}/app/tools.xhtml">
+                                <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
+                            </paper-item>
+                            <paper-item data-href="${contextURL}/subscriptionVS/feeds.xhtml">
+                                <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
+                            </paper-item>
+                            <paper-item data-href="${contextURL}/app/contact.xhtml">
+                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                            </paper-item>
+                        </template>
                     </core-selector>
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content></content>
-            </iframe>
         </vs-navbar>
         <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
@@ -61,8 +88,6 @@
             url:'',
             ajaxOptions:{method:'get', responseType:'document'},
             ready: function() {
-                this.isClientToolConnected = window['isClientToolConnected']
-                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
@@ -70,6 +95,8 @@
                 window.addEventListener('popstate', function(event) {
                     navBar.url = document.location.href
                 });
+                this.isClientToolConnected = window['isClientToolConnected']
+                console.log(this.tagName + " - menu: " + (this.menu == null) + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 //window.addEventListener("popstate", function(e) {  });
             },
             urlChanged: function() { //for history navigation
@@ -115,7 +142,11 @@
                     this.fire('item-selected', this.coreSelectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                         window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
-                    } else this.loadURL(this.coreSelectorValue)
+                    } else if('publish_election' === this.coreSelectorValue) {
+                        VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.VOTING_PUBLISHING));
+                    } else if('new_representative' === this.coreSelectorValue) {
+                        VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.NEW_REPRESENTATIVE));
+                    } else  this.loadURL(this.coreSelectorValue)
                     this.coreSelectorValue = null
                 }
             },
@@ -142,18 +173,11 @@
                         document.head.appendChild(links[i]);
                     }
                 }
-                if(numImports == 0) this.loading = false;
+                if(numImports == 0) document.querySelector('#navBar').loading = false;
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
-                    if(ajaxDocument.scripts[i].src !== '') {
-                        console.log("loading src")
-                        script.src = ajaxDocument.scripts[i].src
-                    } else {
-                        console.log("loading innerHTML")
-                        script.innerHTML = ajaxDocument.scripts[i].innerHTML;
-                    }
-                    console.log("script.src: " + ajaxDocument.scripts[i].innerHTML)
-                    //console.log("ajaxDocument.scripts[i].src: " + ajaxDocument.scripts[i].src)
+                    script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+                    console.log("script.src: " + script.src)
                     document.head.appendChild(script);
                 }
                 this.innerHTML = ajaxDocument.body.innerHTML

@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
 
@@ -9,6 +10,7 @@ import java.util.Date;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificateVSDto {
 
     //SerialNumber as String to avoid Javascript problem handling such big numbers

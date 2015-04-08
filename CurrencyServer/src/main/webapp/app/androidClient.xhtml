@@ -1,0 +1,23 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="content">
+        <div class="pageContent" style="position:relative;">
+            <div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
+                <div style="font-size: 1.5em;margin-bottom: 30px;">
+                    <h:outputFormat value="#{msg.selectVotingAppAndroidMsg}" escape="false"/>
+                </div>
+                <a href="" onclick="return goBack();" style="font-size: 1.5em;">${msg.retryLbl}</a>
+            </div>
+        </div>
+        <script>
+            function goBack() {
+                window.history.back()
+                return false
+            }
+        </script>
+    </ui:define>
+</ui:composition>

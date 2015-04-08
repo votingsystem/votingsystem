@@ -33,7 +33,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
 
-    public static final String RESOURCE_PATH= "/bower_components";
+    public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
     public static final String REST_PATH= "/rest";
 

@@ -6,11 +6,9 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateEncodingException;
-import java.util.Date;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

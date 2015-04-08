@@ -1,0 +1,13 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <link href="${elementURL}/balance/balance-weekreport.vsp" rel="import"/>
+    </ui:define>
+    <ui:define name="content">
+        <balance-weekreport id="balanceWeekreport" balances="${balancesJSON}"></balance-weekreport>
+    </ui:define>
+</ui:composition>

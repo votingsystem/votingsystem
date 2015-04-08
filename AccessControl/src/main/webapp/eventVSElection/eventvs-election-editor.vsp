@@ -88,19 +88,7 @@
                 this.$.addVotingOptionDialog.addEventListener('on-submit', function (e) {
                     this.pollOptionList.push(e.detail)
                 }.bind(this))
-                this.picker = new Pikaday( {
-                    i18n: {
-                        previousMonth : "${msg.previousMonth}",
-                        nextMonth     : "${msg.nextMonth}",
-                        months        : ${msg.months_pk},
-                        weekdays      : ${msg.weekdays_pk},
-                        weekdaysShort : ${msg.weekdaysShort}
-                    },
-                    trigger: this.$.datepickerButton,
-                    showWeekNumber:true,
-                    format: 'YYYY',
-                    yearRange: [2010,2020]
-                });
+                this.picker = null;
             },
             showVotingOptionDialog: function() {
                 this.$.addVotingOptionDialog.show()

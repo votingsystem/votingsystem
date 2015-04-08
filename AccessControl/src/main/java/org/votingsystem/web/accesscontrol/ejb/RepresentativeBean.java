@@ -410,7 +410,7 @@ public class RepresentativeBean {
     public RepresentativeDto geRepresentativeJSON(UserVS representative) {
         Query query = dao.getEM().createQuery("select count(d) from RepresentationDocument d where " +
                 "d.representative =:representative and d.state =:state").setParameter("representative", representative)
-                .setParameter("state", RepresentativeDocument.State.OK);
+                .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult();
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:representative " +
                 "and r.state =:state").setParameter("representative", representative)

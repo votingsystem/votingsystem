@@ -7,10 +7,13 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.*;
 import org.bouncycastle.util.Store;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.services.TimeStampService;
-import org.votingsystem.signature.util.*;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.signature.util.SignatureData;
+import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContextVS;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.votingsystem.signature.util.TimeStampResponseGenerator;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

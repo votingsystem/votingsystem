@@ -68,20 +68,7 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.picker = new Pikaday( {
-                    i18n: {
-                        previousMonth : "${msg.previousMonth}",
-                        nextMonth     : "${msg.nextMonth}",
-                        months        : ${msg.months_pk},
-                        weekdays      : ${msg.weekdays_pk},
-                        weekdaysShort : ${msg.weekdaysShort}
-                    },
-                    showWeekNumber:true,
-                    format: 'YYYY',
-                    field: this.$.datepicker,
-                    yearRange: [2010,2020]
-                });
-                //picker.setDate('2015-01-01')
+                this.picker = null;
             },
             show: function(representative) {
                 this.representative = representative

@@ -11,7 +11,6 @@ import org.votingsystem.web.ejb.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
@@ -31,14 +30,11 @@ public class StartupBean implements StartupVS {
 
     private static Logger log = Logger.getLogger(StartupBean.class.getSimpleName());
 
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject IBANBean ibanBean;
     @Inject ConfigVS config;
-    @Inject
-    TimeStampBean timeStampBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject TimeStampBean timeStampBean;
+    @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject BalancesBean balancesBean;
 
@@ -65,7 +61,7 @@ public class StartupBean implements StartupVS {
         signatureBean.init();
     }
 
-    @Schedule(dayOfWeek = "Mon", hour="0")
+    //@Schedule(dayOfWeek = "Mon", hour="0")
     public void initWeekPeriod() throws IOException {
         checkCancelledCooins();
         balancesBean.initWeekPeriod(Calendar.getInstance());

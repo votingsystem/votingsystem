@@ -21,8 +21,6 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;

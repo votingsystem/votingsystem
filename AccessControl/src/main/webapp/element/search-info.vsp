@@ -16,10 +16,10 @@
             border-bottom: 1pt solid #cccccc;
         }
         </style>
-        <div class="eventSearchInfo" style="display:{{isVisible? 'block':'none'}}">
+        <div hidden?="{{!isVisible}}" class="eventSearchInfo">
             <div class="eventSearchText">{{searchResultMsg}}</div>
-            <div class="eventSearchDateBegin" style="display:{{beginSearchMsg? 'block':'none'}}">{{beginSearchMsg}}</div>
-            <div class="eventSearchDateFinish" style="display:{{endSearchMsg? 'block':'none'}}">{{endSearchMsg}}</div>
+            <div hidden?="{{!beginSearchMsg}}" class="eventSearchDateBegin">{{beginSearchMsg}}</div>
+            <div hidden?="{{!endSearchMsg}}" class="eventSearchDateFinish">{{endSearchMsg}}</div>
         </div>
     </template>
     <script>

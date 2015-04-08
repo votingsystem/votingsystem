@@ -1,13 +1,15 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.currency.ejb.CertificateVSBean;
+import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -77,9 +79,10 @@ public class CertificateVSResource {
 
     @Path("/addCertificateAuthority")
     @POST @Consumes(MediaTypeVS.JSON_SIGNED) @Produces(MediaType.APPLICATION_JSON)
-    public Map addCertificateAuthority(MessageSMIME messageSMIME, @Context HttpServletRequest req,
+    public Response addCertificateAuthority(MessageSMIME messageSMIME, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws Exception {
-        return certificateVSBean.addCertificateAuthority(messageSMIME);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certificateVSBean.addCertificateAuthority(messageSMIME)))
+                .type(ContentTypeVS.JSON.getName()).build();
     }
 
     @Path("/editCert")
@@ -118,7 +121,7 @@ public class CertificateVSResource {
             List resultList = new ArrayList<>();
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 for(CertificateVS certificateVS : certificates) {
-                    resultList.add(certificateVSBean.getCertificateVSDataMap(certificateVS));
+                    resultList.add(new CertificateVSDto(certificateVS));
                 }
                 Map resultMap = new HashMap<>();
                 resultMap.put("certList", resultList);
@@ -157,11 +160,10 @@ public class CertificateVSResource {
                 return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
                         .type(ContentTypeVS.PEM.getName()).build();
             } else {
-                Map certMap = certificateVSBean.getCertificateVSDataMap(certificate);
                 if(req.getContentType().contains("json")) {
-                   return certMap;
+                   return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateVSDto(certificate)));
                 } else {
-                    req.setAttribute("certMap", certMap);
+                    req.setAttribute("certMap", JSON.getMapper().writeValueAsString(new CertificateVSDto(certificate)));
                     context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                     return Response.ok().build();
                 }

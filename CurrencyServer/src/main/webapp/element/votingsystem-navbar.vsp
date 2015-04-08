@@ -1,38 +1,29 @@
-<!DOCTYPE html>
-<%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib uri="http://www.opensymphony.com/sitemesh/decorator" prefix="decorator" %>
-<html>
-<head>
-    <link rel="shortcut icon" href="${contextURL}/resources/images/icon_16/fa-credit-card.png" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>${msg.appTitle}</title>
-    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-    <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="${elementURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-    <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-    <link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
-    <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
-    <link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
-    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${elementURL}/element/vs-navbar.vsp" rel="import"/>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
-    <decorator:head />
-    <style>
-    </style>
-</head>
-<body id="voting_system_page" style="margin:0px auto 0px auto;">
-<polymer-element name="nav-bar" attributes="url loading">
+<link href="${resourceURL}/core-ajax/core-xhr.html" rel="import"/>
+<link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
+<link href="${resourceURL}/core-drawer-panel/core-drawer-panel.html" rel="import"/>
+<link href="${resourceURL}/core-header-panel/core-header-panel.html" rel="import"/>
+<link href="${resourceURL}/core-toolbar/core-toolbar.html" rel="import"/>
+<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+<link href="${resourceURL}/core-scaffold/core-scaffold.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
+<link href="${resourceURL}/core-menu-button/core-menu-button.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/core-dropdown/core-dropdown.html" rel="import"/>
+<link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
+
+<polymer-element name="votingsystem-navbar" attributes="url loading menu">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" handleAs=""></core-xhr>
         <!-- put core signals names in lower case !!!-->
@@ -56,38 +47,34 @@
                         <paper-item data-href="${restURL}/currency/request">
                             <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
                         </paper-item>
-                        <c:choose>
-                            <c:when test="${'admin'.equals(param.menu)}">
-                                <template if="{{isClientToolConnected}}">
-                                    <paper-item data-href="${restURL}/groupVS/newGroup">
-                                        <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
-                                    </paper-item>
-                                </template>
-                                {{ "${msg.adminPageTitle}" | setTitle}}
-                            </c:when>
-                            <c:when test="${'superuser'.equals(param.menu)}">
-                                <paper-item data-href="${restURL}/userVS/newBankVS">
-                                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
-                                </paper-item>
-                                <paper-item data-href="${restURL}/certificateVS/addCertificateAuthority"
-                                            style="margin:0px 10px 0px 0px;">
-                                    <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> ${msg.newCAAuthorityLbl}
-                                </paper-item>
-                                <paper-item data-href="${restURL}/certificateVS/certs">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                                </paper-item>
-                                <paper-item data-href="${restURL}/userVS/save">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newUserCertLbl}
-                                </paper-item>
-                                <paper-item id="changeToAdmin" data-href="${restURL}/app/contact" on-click="{{changeToAdminMenu}}">
-                                    <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i>${msg.changeToAdminMenuLbl}
-                                </paper-item>
-                                {{ "${msg.superUserTitle}" | setTitle}}
-                            </c:when>
-                            <c:otherwise>
-                                {{ "${msg.usersPageTitle}" | setTitle}}
-                            </c:otherwise>
-                        </c:choose>
+                        <template if="{{'admin' === menu && isClientToolConnected}}">
+                            <paper-item data-href="${restURL}/groupVS/newGroup">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
+                            </paper-item>
+                            {{ "${msg.adminPageTitle}" | setTitle}}
+                        </template>
+                        <template if="{{'superuser' === menu}}">
+                            <paper-item data-href="${restURL}/userVS/newBankVS">
+                                <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
+                            </paper-item>
+                            <paper-item data-href="${restURL}/certificateVS/addCertificateAuthority"
+                                        style="margin:0px 10px 0px 0px;">
+                                <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> ${msg.newCAAuthorityLbl}
+                            </paper-item>
+                            <paper-item data-href="${restURL}/certificateVS/certs">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
+                            </paper-item>
+                            <paper-item data-href="${restURL}/userVS/save">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newUserCertLbl}
+                            </paper-item>
+                            <paper-item id="changeToAdmin" data-href="${restURL}/app/contact" on-click="{{changeToAdminMenu}}">
+                                <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i>${msg.changeToAdminMenuLbl}
+                            </paper-item>
+                            {{ "${msg.superUserTitle}" | setTitle}}
+                        </template>
+                        <template if="{{'superuser' !== menu && 'admin' !== menu}}">
+                            {{ "${msg.usersPageTitle}" | setTitle}}
+                        </template>
                         <paper-item data-href="${restURL}/transactionVS">
                             <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> ${msg.transactionsLbl}
                         </paper-item>
@@ -109,7 +96,7 @@
         <content id="content"></content>
     </template>
     <script>
-        Polymer('nav-bar', {
+        Polymer('votingsystem-navbar', {
             appTitle:"${msg.appTitle}",
             url:'',
             ajaxOptions:{method:'get', responseType:'document'},
@@ -216,39 +203,3 @@
         });
     </script>
 </polymer-element>
-<nav-bar id="navBar">
-    <decorator:body />
-</nav-bar>
-
-<alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-<core-signals id="coreSignals"></core-signals>
-<!--<vs-socket id="socketvs" socketservice="${config.webSocketURL}"></vs-socket>-->
-</body>
-</html>
-<script>
-    window.addEventListener('WebComponentsReady', function(e) {  });
-    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {});
-    document.addEventListener('polymer-ready', function() {
-        console.log("main.gsp - polymer-ready")
-        updateLinksVS(document.getElementsByTagName('a'))
-    });
-
-    if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {
-        console.log("main.gsp - socketvs - message: " + e.detail)
-        var socketMessage = e.detail
-        if(200 != socketMessage.status) {
-            console.log("main.gsp - socketvs - error")
-            showMessageVS(socketMessage.message, 'ERROR')
-        }
-    });
-
-    function sendSocketVSMessage(dataJSON) {
-        console.log ("sendSocketVSMessage")
-        dataJSON.locale = navigator.language
-        if(document.querySelector("#socketvs")) document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
-    }
-
-    function updateSessionInfo(sessionData) {
-        if(sessionData.userVSList) document.querySelector("#userSelector").userVSList = sessionData.userVSList
-    }
-</script>

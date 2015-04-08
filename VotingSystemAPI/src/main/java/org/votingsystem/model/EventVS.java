@@ -2,10 +2,12 @@ package org.votingsystem.model;
 
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 //import org.apache.solr.analysis.HTMLStripCharFilterFactory;

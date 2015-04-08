@@ -9,8 +9,6 @@ import org.votingsystem.web.ejb.DAOBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.logging.Logger;
 

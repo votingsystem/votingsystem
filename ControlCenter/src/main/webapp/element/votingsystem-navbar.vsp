@@ -1,3 +1,5 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
 <link href="${resourceURL}/core-ajax/core-xhr.html" rel="import"/>
 <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
@@ -140,7 +142,7 @@
                         document.head.appendChild(links[i]);
                     }
                 }
-                if(numImports == 0) this.loading = false;
+                if(numImports == 0) document.querySelector('#navBar').loading = false;
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
                     if(ajaxDocument.scripts[i].src !== '') {
