@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.UserVS;
 
@@ -7,7 +7,7 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeJSON {
+public class RepresentativeDto {
 
     private Long id;
     private Long numRepresentations ;
@@ -21,9 +21,9 @@ public class RepresentativeJSON {
     private String imageURL;
     private UserVS.Type type;
 
-    public RepresentativeJSON() {}
+    public RepresentativeDto() {}
 
-    public RepresentativeJSON(UserVS userVS, Long smimeActivationId, Long numRepresentations, String contextURL) {
+    public RepresentativeDto(UserVS userVS, Long smimeActivationId, Long numRepresentations, String contextURL) {
         this.id = userVS.getId();
         this.numRepresentations = numRepresentations;
         this.nif = userVS.getNif();

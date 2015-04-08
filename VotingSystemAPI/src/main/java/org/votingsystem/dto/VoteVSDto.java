@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.VoteVSCanceler;
@@ -8,24 +8,24 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VoteVSJSON {
+public class VoteVSDto {
 
     Long id, cancelerId, optionSelectedId, eventVSId;
     String certificateURL, hashCertVSBase64, messageSMIMEURL, cancelationMessageSMIMEURL, eventVSURL;
     VoteVS.State state;
 
 
-    public VoteVSJSON() {}
+    public VoteVSDto() {}
 
 
-    public VoteVSJSON(VoteVSCanceler canceler, String contextURL) {
+    public VoteVSDto(VoteVSCanceler canceler, String contextURL) {
         this.id = canceler.getVoteVS().getId();
         this.cancelerId = canceler.getId();
         this.state = canceler.getVoteVS().getState();
         this.cancelationMessageSMIMEURL = contextURL + "/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation";
     }
 
-    public VoteVSJSON(VoteVS voteVS, String contextURL) {
+    public VoteVSDto(VoteVS voteVS, String contextURL) {
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         this.id = voteVS.getId();
         this.state = voteVS.getState();

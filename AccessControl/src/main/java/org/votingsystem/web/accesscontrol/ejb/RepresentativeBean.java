@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.json.*;
+import org.votingsystem.dto.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
@@ -407,7 +407,7 @@ public class RepresentativeBean {
         return metaInf;
     }
 
-    public RepresentativeJSON geRepresentativeJSON(UserVS representative) {
+    public RepresentativeDto geRepresentativeJSON(UserVS representative) {
         Query query = dao.getEM().createQuery("select count(d) from RepresentationDocument d where " +
                 "d.representative =:representative and d.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentativeDocument.State.OK);
@@ -418,7 +418,7 @@ public class RepresentativeBean {
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
         if(representativeDocument == null) throw new NotFoundException(
                 "ERROR - RepresentativeDocument not found - representativeId: " + representative.getId());
-        return new RepresentativeJSON(representative,
+        return new RepresentativeDto(representative,
                 representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getRestURL());
     }
 }

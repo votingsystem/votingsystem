@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CertificateVSJSON {
+public class CertificateVSDto {
 
     //SerialNumber as String to avoid Javascript problem handling such big numbers
     private String serialNumber;
@@ -25,9 +25,9 @@ public class CertificateVSJSON {
     private CertificateVS.State state;
     private boolean isRoot;
 
-    public CertificateVSJSON() {}
+    public CertificateVSDto() {}
 
-    public CertificateVSJSON(CertificateVS certificate) throws Exception {
+    public CertificateVSDto(CertificateVS certificate) throws Exception {
         X509Certificate x509Cert = CertUtils.loadCertificate(certificate.getContent());
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);

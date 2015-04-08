@@ -1,7 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.VoteVSJSON;
+import org.votingsystem.dto.VoteVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.VoteVSCanceler;
@@ -51,7 +51,7 @@ public class VoteVSResource {
         if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVS not found - voteId: " + id).build();
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(
-                new VoteVSJSON(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
+                new VoteVSDto(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
     }
 
 
@@ -65,7 +65,7 @@ public class VoteVSResource {
         if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVS not found - hashHex: " + hashHex).build();
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(
-                new VoteVSJSON(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
+                new VoteVSDto(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
     }
 
     @Path("/id/{id}/cancelation")
@@ -94,7 +94,7 @@ public class VoteVSResource {
         VoteVSCanceler voteCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
         if(voteCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - hashHex: " + hashHex + " - hashBase64: " + hashCertVSBase64).build();
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(new VoteVSJSON(voteCanceler, config.getRestURL())))
+        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(new VoteVSDto(voteCanceler, config.getRestURL())))
                 .entity(ContentTypeVS.JSON.getName()).build();
     }
 

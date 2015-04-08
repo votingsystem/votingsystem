@@ -5,9 +5,12 @@ import org.votingsystem.service.VotingSystemRemote;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.web.ejb.DAOBean;
 
+import javax.ejb.AsyncResult;
+import javax.ejb.Asynchronous;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 @Stateless
@@ -27,4 +30,13 @@ public class RemoteTestBean implements VotingSystemRemote {
         eventVSElectionBean.generateBackup(eventVSElection);
     }
 
+    @Asynchronous @Override
+    public Future<String> testAsync(String message) {
+        try {
+            Thread.sleep(10000);
+            return new AsyncResult<>("testAsync response - to message: " + message);
+        } catch (InterruptedException e) {
+            return new AsyncResult<>(e.getMessage());
+        }
+    }
 }

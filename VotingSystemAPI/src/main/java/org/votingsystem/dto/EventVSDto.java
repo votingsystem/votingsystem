@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.*;
@@ -13,7 +13,7 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventVSJSON {
+public class EventVSDto {
 
     private Long id;
     private Long numSignatures;
@@ -36,9 +36,9 @@ public class EventVSJSON {
     private Map<String, String> controlCenter;
     private boolean backupAvailable;
 
-    public EventVSJSON() {}
+    public EventVSDto() {}
 
-    public EventVSJSON(EventVS eventVS, String serverName, String contextURL) {
+    public EventVSDto(EventVS eventVS, String serverName, String contextURL) {
         this.id = eventVS.getId();
         this.dateCreated = eventVS.getDateCreated();
         this.subject = eventVS.getSubject();
@@ -162,7 +162,7 @@ public class EventVSJSON {
     }
 
     public static Object getJSON(EventVS eventVS) {
-        if(eventVS instanceof EventVSElection) return new EventVSElectionJSON(eventVS);
-        else return new EventVSJSON(eventVS, null, null);
+        if(eventVS instanceof EventVSElection) return new EventVSElectionDto(eventVS);
+        else return new EventVSDto(eventVS, null, null);
     }
 }

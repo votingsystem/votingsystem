@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.EventVS;
@@ -11,7 +11,7 @@ import org.votingsystem.util.TypeVS;
 import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventVSElectionJSON {
+public class EventVSElectionDto {
 
     private TypeVS operation;
     private EventVS.Type type;
@@ -40,9 +40,9 @@ public class EventVSElectionJSON {
     private EventVS.Cardinality cardinality;
 
 
-    public EventVSElectionJSON() {}
+    public EventVSElectionDto() {}
 
-    public EventVSElectionJSON(EventVS eventVS) {
+    public EventVSElectionDto(EventVS eventVS) {
         subject = eventVS.getSubject();
         content = eventVS.getContent();
         dateBegin = eventVS.getDateBegin();
@@ -66,7 +66,7 @@ public class EventVSElectionJSON {
         cardinality = eventVS.getCardinality();
     }
 
-    public EventVSElectionJSON(String serverURL) {
+    public EventVSElectionDto(String serverURL) {
         this.serverURL = serverURL;
     }
 

@@ -2,7 +2,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSJSON;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -78,7 +78,7 @@ public class SearchResource {
         List<EventVS> eventvsList = query.getResultList();
         List resultList = null;
         for(EventVS eventVS : eventvsList) {
-            resultList.add(new EventVSJSON(eventVS, config.getServerName(), config.getContextURL()));
+            resultList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
         }
         Map resultMap = new HashMap<>();
         resultMap.put("eventVS", resultList);

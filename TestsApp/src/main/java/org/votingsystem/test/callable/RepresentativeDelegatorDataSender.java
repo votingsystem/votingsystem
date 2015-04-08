@@ -2,7 +2,7 @@ package org.votingsystem.test.callable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.json.RepresentativeDelegationRequest;
+import org.votingsystem.dto.RepresentativeDelegationRequest;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;

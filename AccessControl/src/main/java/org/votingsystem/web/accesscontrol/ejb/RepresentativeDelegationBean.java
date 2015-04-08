@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.json.RepresentativeDelegationRequest;
-import org.votingsystem.json.RepresentativeJSON;
-import org.votingsystem.json.RepresentativeRevokeRequest;
+import org.votingsystem.dto.RepresentativeDelegationRequest;
+import org.votingsystem.dto.RepresentativeDto;
+import org.votingsystem.dto.RepresentativeRevokeRequest;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -307,7 +307,7 @@ public class RepresentativeDelegationBean {
     }
 
 
-    public RepresentativeJSON getRepresentativeJSON(UserVS representative) {
+    public RepresentativeDto getRepresentativeJSON(UserVS representative) {
         Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
                 "r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
@@ -319,7 +319,7 @@ public class RepresentativeDelegationBean {
                 "r.representative =:representative and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
-        return new RepresentativeJSON(representative,  representativeDocument.getActivationSMIME().getId(),
+        return new RepresentativeDto(representative,  representativeDocument.getActivationSMIME().getId(),
                 numRepresentations, config.getRestURL());
     }
 

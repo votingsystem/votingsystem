@@ -4,7 +4,7 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.json.EventVSJSON;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.ClaimSignedSender;
@@ -146,7 +146,7 @@ public class Claim_publishAndSend {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
 
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().getName(),
-                new ObjectMapper().writeValueAsString(EventVSJSON.getJSON(eventVS)), smimeMessageSubject);
+                new ObjectMapper().writeValueAsString(EventVSDto.getJSON(eventVS)), smimeMessageSubject);
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getPublishClaimURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,

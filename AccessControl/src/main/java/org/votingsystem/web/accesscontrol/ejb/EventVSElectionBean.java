@@ -2,9 +2,9 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.json.EventVSElectionJSON;
-import org.votingsystem.json.EventVSMetaInf;
-import org.votingsystem.json.RepresentativesAccreditations;
+import org.votingsystem.dto.EventVSElectionDto;
+import org.votingsystem.dto.EventVSMetaInf;
+import org.votingsystem.dto.RepresentativesAccreditations;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
@@ -46,7 +46,7 @@ public class EventVSElectionBean {
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
-        EventVSElectionJSON request  = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        EventVSElectionDto request  = messageSMIME.getSignedContent(EventVSElectionDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = controlCenterBean.getControlCenter();
         EventVSElection eventVS = request.getEventVSElection();

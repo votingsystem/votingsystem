@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.json.ActorVSJSON;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.web.accesscontrol.ejb.ControlCenterBean;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -43,7 +43,7 @@ public class ServerInfoResource {
         serverInfo.put("serverURL", config.getContextURL());
         serverInfo.put("state",  ActorVS.State.OK);
         serverInfo.put("date", new Date());
-        serverInfo.put("controlCenter", new ActorVSJSON(controlCenterBean.getControlCenter()));
+        serverInfo.put("controlCenter", new ActorVSDto(controlCenterBean.getControlCenter()));
         serverInfo.put("environmentMode", config.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", config.getTimeStampServerURL());

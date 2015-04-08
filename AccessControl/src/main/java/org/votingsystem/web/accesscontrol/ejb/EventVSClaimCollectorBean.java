@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.json.EventVSClaimStats;
+import org.votingsystem.dto.EventVSClaimStats;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;

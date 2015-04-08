@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

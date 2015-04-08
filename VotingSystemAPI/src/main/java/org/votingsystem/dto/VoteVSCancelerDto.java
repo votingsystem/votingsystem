@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -7,7 +7,7 @@ import org.votingsystem.util.TypeVS;
 import java.security.NoSuchAlgorithmException;
 
 
-public class VoteVSCancelerJSON {
+public class VoteVSCancelerDto {
 
     private String originHashCertVote;
     private String hashCertVSBase64;
@@ -15,7 +15,7 @@ public class VoteVSCancelerJSON {
     private String hashAccessRequestBase64;
     private TypeVS operation;
 
-    public VoteVSCancelerJSON() {}
+    public VoteVSCancelerDto() {}
 
     public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
         if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(

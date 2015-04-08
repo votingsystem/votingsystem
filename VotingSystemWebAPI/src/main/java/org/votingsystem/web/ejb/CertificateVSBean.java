@@ -1,6 +1,6 @@
 package org.votingsystem.web.ejb;
 
-import org.votingsystem.json.URLMessage;
+import org.votingsystem.dto.URLMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;

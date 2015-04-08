@@ -2,8 +2,8 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSJSON;
-import org.votingsystem.json.RepresentativeJSON;
+import org.votingsystem.dto.EventVSDto;
+import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -64,7 +64,7 @@ public class SearchResource {
                 "or u.lastName like :searchText or u.description like :searchText)").setParameter(
                 "type", UserVS.Type.REPRESENTATIVE).setParameter("searchText", "%" + searchText + "%");
         List<UserVS> representativeList = query.getResultList();
-        List<RepresentativeJSON> resultList = new ArrayList<>();
+        List<RepresentativeDto> resultList = new ArrayList<>();
         for(UserVS representative : representativeList) {
             resultList.add(representativeBean.geRepresentativeJSON(representative));
         }
@@ -102,7 +102,7 @@ public class SearchResource {
         List<EventVS> eventvsList = query.getResultList();
         List resultList = null;
         for(EventVS eventVS : eventvsList) {
-            resultList.add(new EventVSJSON(eventVS, config.getServerName(), config.getContextURL()));
+            resultList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
         }
         Map resultMap = new HashMap<>();
         resultMap.put("eventVS", resultList);

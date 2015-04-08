@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.json.EventVSMetaInf;
+import org.votingsystem.dto.EventVSMetaInf;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;

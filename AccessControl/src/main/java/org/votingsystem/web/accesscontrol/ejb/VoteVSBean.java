@@ -1,9 +1,8 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.json.VoteVSCancelerJSON;
+import org.votingsystem.dto.VoteVSCancelerDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -15,7 +14,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.io.ByteArrayInputStream;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -57,7 +55,7 @@ public class VoteVSBean {
     public synchronized VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        VoteVSCancelerJSON request = messageSMIME.getSignedContent(VoteVSCancelerJSON.class);
+        VoteVSCancelerDto request = messageSMIME.getSignedContent(VoteVSCancelerDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select a from AccessRequestVS a where a.hashAccessRequestBase64 =:hashAccessRequestBase64 and " +
                 "a.state =:state").setParameter("hashAccessRequestBase64", request.getHashAccessRequestBase64())

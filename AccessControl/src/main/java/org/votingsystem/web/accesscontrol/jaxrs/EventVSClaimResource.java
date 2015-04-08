@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSJSON;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.MessageSMIME;
@@ -60,15 +60,15 @@ public class EventVSClaimResource {
             if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSClaim not found - " +
                     "eventId: " + id).build();
             eventVSBean.checkEventVSDates(eventVS);
-            EventVSJSON eventVSJSON = new EventVSJSON(eventVS, config.getServerName(), config.getRestURL());
+            EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getRestURL());
             query = dao.getEM().createQuery("select count(m) from MessageSMIME m where m.eventVS =:eventVS and " +
                     "m.type =:type").setParameter("eventVS", eventVS).setParameter("type", TypeVS.CLAIM_EVENT_SIGN);
-            eventVSJSON.setNumSignatures((long) query.getSingleResult());
+            eventVSDto.setNumSignatures((long) query.getSingleResult());
             if(contentType.contains("json")) {
-                return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
+                return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSDto))
                         .type(ContentTypeVS.JSON.getName()).build();
             } else {
-                req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSJSON));
+                req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSDto));
                 context.getRequestDispatcher("/jsf/eventVSClaim/eventVSClaim.jsp").forward(req, resp);
                 return Response.ok().build();
             }
@@ -86,10 +86,10 @@ public class EventVSClaimResource {
         Query query = dao.getEM().createQuery("select e from EventVSClaim e where e.state in :inList")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSClaim> resultList = query.getResultList();
-        List<EventVSJSON> resultListJSON = new ArrayList<>();
+        List<EventVSDto> resultListJSON = new ArrayList<>();
         for(EventVSClaim eventVSClaim : resultList) {
             eventVSBean.checkEventVSDates(eventVSClaim);
-            resultListJSON.add(new EventVSJSON(eventVSClaim, config.getServerName(), config.getContextURL()));
+            resultListJSON.add(new EventVSDto(eventVSClaim, config.getServerName(), config.getContextURL()));
         }
         Map eventsVSMap = new HashMap();
         eventsVSMap.put("eventVS", resultListJSON);

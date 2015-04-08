@@ -2,7 +2,7 @@ package org.votingsystem.web.controlcenter.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSElectionJSON;
+import org.votingsystem.dto.EventVSElectionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
@@ -44,7 +44,7 @@ public class EventVSElectionBean {
         SMIMEMessage smimeReq = messageSMIME.getSMIME();
         String serverURL = smimeReq.getHeader("serverURL")[0];
         AccessControlVS accessControl = checkAccessControl(serverURL);
-        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        EventVSElectionDto request = messageSMIME.getSignedContent(EventVSElectionDto.class);
         request.validate(config.getContextURL());
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
@@ -75,7 +75,7 @@ public class EventVSElectionBean {
 
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
-        EventVSElectionJSON request = messageSMIME.getSignedContent(EventVSElectionJSON.class);
+        EventVSElectionDto request = messageSMIME.getSignedContent(EventVSElectionDto.class);
         request.validateCancelation();
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
                 .setParameter("eventId", request.getEventId());

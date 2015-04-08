@@ -1,7 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.EventVSJSON;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
@@ -26,8 +26,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
-
-import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -54,12 +52,12 @@ public class EventVSElectionResource {
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
         eventVSBean.checkEventVSDates(eventVS);
-        EventVSJSON eventVSJSON = new EventVSJSON(eventVS, config.getServerName(), config.getRestURL());
+        EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getRestURL());
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSJSON))
+            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSDto))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSJSON));
+            req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSDto));
             context.getRequestDispatcher("/jsf/eventVSElection/eventVSElection.jsp").forward(req, resp);
             return Response.ok().build();
         }
@@ -86,10 +84,10 @@ public class EventVSElectionResource {
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
-        List<EventVSJSON> resultListJSON = new ArrayList<>();
+        List<EventVSDto> resultListJSON = new ArrayList<>();
         for(EventVSElection eventVSElection : resultList) {
             eventVSBean.checkEventVSDates(eventVSElection);
-            resultListJSON.add(new EventVSJSON(eventVSElection, config.getServerName(), config.getContextURL()));
+            resultListJSON.add(new EventVSDto(eventVSElection, config.getServerName(), config.getContextURL()));
         }
         Map eventsVSMap = new HashMap();
         eventsVSMap.put("eventVS", resultListJSON);

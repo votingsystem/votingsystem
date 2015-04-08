@@ -1,7 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.CertificateVSJSON;
+import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
@@ -84,9 +84,9 @@ public class CertificateVSResource {
                 }
                 return Response.ok().entity(CertUtils.getPEMEncoded (resultList)).build();
             } else {
-                List<CertificateVSJSON> resultList = new ArrayList<>();
+                List<CertificateVSDto> resultList = new ArrayList<>();
                 for(CertificateVS certificateVS : certList) {
-                    resultList.add(new CertificateVSJSON(certificateVS));
+                    resultList.add(new CertificateVSDto(certificateVS));
                 }
                 Map resultMap = new HashMap<>();
                 resultMap.put("certList", resultList);
@@ -120,7 +120,7 @@ public class CertificateVSResource {
             resp.setHeader("Content-Disposition", format("inline; filename='trustedCert_{0}'", serialNumber));
             return Response.ok().entity(CertUtils.getPEMEncoded (x509Cert)).build();
         } else {
-            CertificateVSJSON certJSON = new CertificateVSJSON(certificate);
+            CertificateVSDto certJSON = new CertificateVSDto(certificate);
             if(req.getContentType().contains("json")) {
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(certJSON))
                         .type(ContentTypeVS.JSON.getName()).build();
@@ -237,7 +237,7 @@ public class CertificateVSResource {
             List resultList = new ArrayList<>();
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 for(CertificateVS certificateVS : certificates) {
-                    resultList.add(new CertificateVSJSON(certificateVS));
+                    resultList.add(new CertificateVSDto(certificateVS));
                 }
                 Map resultMap = new HashMap<>();
                 resultMap.put("certList", resultList);
@@ -276,7 +276,7 @@ public class CertificateVSResource {
                 return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
                         .type(ContentTypeVS.PEM.getName()).build();
             } else {
-                CertificateVSJSON certJSON = new CertificateVSJSON(certificate);
+                CertificateVSDto certJSON = new CertificateVSDto(certificate);
                 if(req.getContentType().contains("json")) {
                    return certJSON;
                 } else {

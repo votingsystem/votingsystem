@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ActorVS;
@@ -6,7 +6,7 @@ import org.votingsystem.model.ActorVS;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ActorVSJSON {
+public class ActorVSDto {
 
     private Long id;
     private String name;
@@ -15,9 +15,9 @@ public class ActorVSJSON {
     private String state;
     private Date dateCreated;
 
-    public ActorVSJSON() {}
+    public ActorVSDto() {}
 
-    public ActorVSJSON(ActorVS actorVS) {
+    public ActorVSDto(ActorVS actorVS) {
         this.id = actorVS.getId();
         this.name = actorVS.getName();
         this.serverURL = actorVS.getServerURL();

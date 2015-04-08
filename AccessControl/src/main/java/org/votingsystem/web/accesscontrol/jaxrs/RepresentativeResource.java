@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.json.RepresentativeJSON;
+import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -80,7 +80,7 @@ public class RepresentativeResource {
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        List<RepresentativeJSON> responseList = new ArrayList<>();
+        List<RepresentativeDto> responseList = new ArrayList<>();
         Map representativeMap  = new HashMap();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -112,12 +112,12 @@ public class RepresentativeResource {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - UserVS is not a representative - id: " + id).build();
         }
-        RepresentativeJSON representativeJSON = representativeBean.geRepresentativeJSON(representative);
+        RepresentativeDto representativeDto = representativeBean.geRepresentativeJSON(representative);
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeJSON))
+            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeDto))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("representativeMap", JSON.getEscapingMapper().writeValueAsString(representativeJSON));
+            req.setAttribute("representativeMap", JSON.getEscapingMapper().writeValueAsString(representativeDto));
             context.getRequestDispatcher("/jsf/representative/representative.jsp").forward(req, resp);
             return Response.ok().build();
         }

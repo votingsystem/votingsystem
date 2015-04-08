@@ -1,4 +1,4 @@
-package org.votingsystem.json;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
