@@ -99,7 +99,7 @@ public class CertificateVSResource {
                         .type(ContentTypeVS.JSON.getName()).build();
             }
         }
-        context.getRequestDispatcher("/jsf/certificateVS/certs.jsp").forward(req, resp);
+        context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
@@ -126,7 +126,7 @@ public class CertificateVSResource {
                         .type(ContentTypeVS.JSON.getName()).build();
             } else {
                 req.setAttribute("certMap", JSON.getEscapingMapper().writeValueAsString(certJSON));
-                context.getRequestDispatcher("/jsf/certificateVS/cert.jsp").forward(req, resp);
+                context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
         }
@@ -256,7 +256,7 @@ public class CertificateVSResource {
             resultMap.put("type", type.toString());
             resultMap.put("state", state.toString());
             req.setAttribute("certsMap", resultMap);
-            context.getRequestDispatcher("/jsf/certificateVS/certs.jsp").forward(req, resp);
+            context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -281,7 +281,7 @@ public class CertificateVSResource {
                    return certJSON;
                 } else {
                     req.setAttribute("certMap", JSON.getEscapingMapper().writeValueAsString(certJSON));
-                    context.getRequestDispatcher("/jsf/certificateVS/cert.jsp").forward(req, resp);
+                    context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                     return Response.ok().build();
                 }
             }

@@ -58,7 +58,8 @@ public class EventVSDto {
             this.eventCACertificateURL = contextURL + "/certificateVS/eventVS/id/" + eventVS.getId() + "/CACertificate";
             this.voteVSInfoURL = contextURL + "/eventVSElection/id/" + eventVS.getId() + "/voteVSInfo";
             ControlCenterVS controlCenterVS = eventVS.getControlCenterVS();
-            this.controlCenter = MapUtils.getActorVSMap(controlCenterVS.getServerURL(), controlCenterVS.getName());
+            if(controlCenterVS != null) this.controlCenter = MapUtils.getActorVSMap(
+                    controlCenterVS.getServerURL(), controlCenterVS.getName());
         } else if (eventVS instanceof EventVSClaim) {
             this.URL = contextURL + "/eventVSClaim/id/" + eventVS.getId();
             this.publishRequestURL = contextURL + "/eventVSClaim/id/" + eventVS.getId() + "/publishRequest";

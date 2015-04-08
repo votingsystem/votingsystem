@@ -54,6 +54,7 @@ public class ConfigVSImpl implements ConfigVS {
     private Properties props;
     private String bankCode = null;
     private String  branchCode = null;
+    private String emailAdmin = null;
     private TagVS wildTag;
     private X509Certificate x509TimeStampServerCert;
 
@@ -77,6 +78,7 @@ public class ConfigVSImpl implements ConfigVS {
             props.load(res.openStream());
             systemNIF = (String) props.get("vs.systemNIF");
             contextURL = (String) props.get("vs.contextURL");
+            emailAdmin = (String) props.get("vs.emailAdmin");
             resourceURL = contextURL + RESOURCE_PATH;
             restURL = contextURL + REST_PATH;
             webURL = contextURL + WEB_PATH;
@@ -170,6 +172,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getSystemNIF() {
         return systemNIF;
+    }
+
+    @Override
+    public String getEmailAdmin() {
+        return emailAdmin;
     }
 
 }

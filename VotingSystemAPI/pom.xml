@@ -92,7 +92,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>0.1.0</Bundle-Version>
                         <Export-Package>
-                            iaik.pkcs.pkcs11.objects, iaik.pkcs.pkcs11,
+                            iaik.pkcs.pkcs11.objects, iaik.pkcs.pkcs11, org.votingsystem.service,
                             org.votingsystem.callable, org.votingsystem.model.currency, org.votingsystem.model,
                             org.votingsystem.signature.dnie,org.votingsystem.signature.smime,
                             org.votingsystem.signature.util,org.votingsystem.throwable, org.votingsystem.util,
@@ -104,7 +104,7 @@
                             org.apache.felix.service.command;version=0.6.0;status=provisional,
                             org.apache.felix.gogo.commands;version="[0.6,1)",
                             org.apache.karaf.shell.console;version="[2.2,4)",
-                            org.votingsystem.service, org.votingsystem.model, javax.mail,
+                            javax.mail,
                             org.apache.http.client.methods,  org.apache.http.config, org.apache.http.conn,
                             org.apache.http.conn.routing, org.apache.http.conn.socket,
                             org.apache.http.conn.ssl, org.apache.http.entity, org.apache.http.entity.mime,

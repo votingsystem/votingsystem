@@ -1,0 +1,18 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="title">${msg.subscriptionLbl}</ui:define>
+    <ui:define name="content">
+        <vs-innerpage-signal caption="${msg.subscriptionLbl}"></vs-innerpage-signal>
+        <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto;">
+            <a href="${restURL}/subscriptionVS/elections">
+                <i class="fa fa-rss-square" style="margin:3px 0 0 10px; color: #f0ad4e;"></i> ${msg.subscribeToVotingFeedsLbl}
+            </a>
+        </div>
+    </ui:define>
+</ui:composition>
+
+

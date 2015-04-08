@@ -1,15 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.webURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
-<link href="${config.webURL}/element/time-elements.vsp" rel="import"/>
+<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
+<link href="${elementURL}/element/time-elements.vsp" rel="import"/>
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
-        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style></style>
         <div vertical layout>
 

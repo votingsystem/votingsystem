@@ -37,7 +37,7 @@ public class FilterVS implements Filter {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         req.setAttribute("request", req);
         req.setAttribute("resourceURL", ((HttpServletRequest) req).getContextPath() + "/bower_components");
-        req.setAttribute("elementURL", ((HttpServletRequest) req).getContextPath() + "/fsf");
+        req.setAttribute("elementURL", ((HttpServletRequest) req).getContextPath() + "/jsf");
         req.setAttribute("restURL", ((HttpServletRequest) req).getContextPath() + "/rest");
         req.setAttribute("contextURL", ((HttpServletRequest) req).getContextPath());
         messages.setLocale(req.getLocale());
@@ -66,9 +66,6 @@ public class FilterVS implements Filter {
                 log.info("header - " + header + " - value:" + request.getHeader(header));
             }*/
             contentTypeVS = ContentTypeVS.getByName(request.getContentType());
-            /*if(ContentTypeVS.JSON == contentTypeVS) {
-
-            }*/
         }
 
         private Map<String, String> headerMap = new HashMap<String, String>();

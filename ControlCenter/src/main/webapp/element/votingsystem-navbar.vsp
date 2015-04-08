@@ -1,36 +1,26 @@
-<!DOCTYPE html>
-<%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib uri="http://www.opensymphony.com/sitemesh/decorator" prefix="decorator" %>
-<html>
-<head>
-    <link rel="shortcut icon" href="${request.contextPath}/images/icon_16/fa-bolt.png" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>${msg.appTitle}</title>
-    <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-    <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <script src="${config.resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-    <script src="${config.webURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="${config.webURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${config.resourceURL}/font-roboto/roboto.html" rel="import"/>
-    <link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-item/paper-item.html" rel="import"/>
-    <link href="${config.resourceURL}/core-signals/core-signals.html" rel="import"/>
-    <link href="${config.resourceURL}/paper-button/paper-button.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-socket/vs-socket.html" rel="import"/>
-    <link href="${config.resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
-    <link href="${config.webURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${config.resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-xhr.html" rel="import"/>
+<link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
+<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
+<link href="${resourceURL}/core-drawer-panel/core-drawer-panel.html" rel="import"/>
+<link href="${resourceURL}/core-header-panel/core-header-panel.html" rel="import"/>
+<link href="${resourceURL}/core-toolbar/core-toolbar.html" rel="import"/>
+<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+<link href="${resourceURL}/core-scaffold/core-scaffold.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
+<link href="${resourceURL}/core-menu-button/core-menu-button.html" rel="import"/>
+<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/core-dropdown/core-dropdown.html" rel="import"/>
+<link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
-    <decorator:head />
-    <style>
-    </style>
-</head>
-<body id="voting_system_page" style="margin:0px auto 0px auto;">
-<polymer-element name="nav-bar" attributes="url loading">
+<polymer-element name="votingsystem-navbar" attributes="url loading">
     <template>
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
         <core-xhr id="ajax" handleAs=""></core-xhr>
         <!-- put core signals names in lower case !!!-->
@@ -42,13 +32,13 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${config.webURL}/jsf/eventVSElection/index.jsp">
+                        <paper-item data-href="${restURL}/eventVSElection">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </paper-item>
-                        <paper-item data-href="${config.webURL}/subscriptionVS/feeds.jsp">
+                        <paper-item data-href="${contextURL}/subscriptionVS/feeds.xhtml">
                             <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
                         </paper-item>
-                        <paper-item data-href="${config.webURL}/app/contact.jsp">
+                        <paper-item data-href="${contextURL}/app/contact.xhtml">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </paper-item>
                     </core-selector>
@@ -64,11 +54,13 @@
         <content id="content"></content>
     </template>
     <script>
-        Polymer('nav-bar', {
+        Polymer('votingsystem-navbar', {
             appTitle:"${msg.appTitle}",
             url:'',
             ajaxOptions:{method:'get', responseType:'document'},
             ready: function() {
+                this.isClientToolConnected = window['isClientToolConnected']
+                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
@@ -76,8 +68,6 @@
                 window.addEventListener('popstate', function(event) {
                     navBar.url = document.location.href
                 });
-                this.isClientToolConnected = window['isClientToolConnected']
-                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 //window.addEventListener("popstate", function(e) {  });
             },
             urlChanged: function() { //for history navigation
@@ -150,7 +140,7 @@
                         document.head.appendChild(links[i]);
                     }
                 }
-                if(numImports == 0) document.querySelector('#navBar').loading = false;
+                if(numImports == 0) this.loading = false;
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
                     if(ajaxDocument.scripts[i].src !== '') {
@@ -178,39 +168,3 @@
         });
     </script>
 </polymer-element>
-<nav-bar id="navBar">
-    <decorator:body />
-</nav-bar>
-
-<alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-<core-signals id="coreSignals"></core-signals>
-<!--<vs-socket id="socketvs" socketservice="${config.webSocketURL}"></vs-socket>-->
-</body>
-</html>
-<script>
-    window.addEventListener('WebComponentsReady', function(e) {  });
-    document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {});
-    document.addEventListener('polymer-ready', function() {
-        console.log("main.gsp - polymer-ready")
-        updateLinksVS(document.getElementsByTagName('a'))
-    });
-
-    if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {
-        console.log("main.gsp - socketvs - message: " + e.detail)
-        var socketMessage = e.detail
-        if(200 != socketMessage.status) {
-            console.log("main.gsp - socketvs - error")
-            showMessageVS(socketMessage.message, 'ERROR')
-        }
-    });
-
-    function sendSocketVSMessage(dataJSON) {
-        console.log ("sendSocketVSMessage")
-        dataJSON.locale = navigator.language
-        if(document.querySelector("#socketvs")) document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
-    }
-
-    function updateSessionInfo(sessionData) {
-        if(sessionData.userVSList) document.querySelector("#userSelector").userVSList = sessionData.userVSList
-    }
-</script>

@@ -5,6 +5,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -49,8 +50,8 @@ public class MessageSMIMEResource {
     private Object processRequest(MessageSMIME messageSMIME, @Context ServletContext context,
                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        String smimeMessageStr = Base64.getEncoder().encodeToString(messageSMIME.getContent());
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
+        String smimeMessageStr = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
         Date timeStampDate = null;
         Map signedContentMap;
         String viewer = "message-smime";
@@ -79,15 +80,15 @@ public class MessageSMIMEResource {
             resultMap.put("smimeMessage", smimeMessageStr);
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            resultMap.put("viewer", viewer + ".jsp");
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+            resultMap.put("viewer", viewer + ".vsp");
+            return Response.ok().entity(JSON.getEscapingMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);
             req.setAttribute("signedContentMap", new ObjectMapper().writeValueAsString(signedContentMap));
             req.setAttribute("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            req.setAttribute("viewer",  viewer + ".jsp");
-            context.getRequestDispatcher("/jsf/messageSMIME/contentViewer.jsp").forward(req, resp);
+            req.setAttribute("viewer",  viewer + ".vsp");
+            context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

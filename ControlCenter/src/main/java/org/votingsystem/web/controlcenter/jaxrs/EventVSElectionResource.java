@@ -19,6 +19,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -58,12 +59,13 @@ public class EventVSElectionResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("eventMap", JSON.getEscapingMapper().writeValueAsString(eventVSDto));
-            context.getRequestDispatcher("/jsf/eventVSElection/eventVSElection.jsp").forward(req, resp);
+            context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
 
+    @Transactional
     @Path("/") @GET
     public Object index (@QueryParam("eventVSState") String eventVSStateReq,
                          @DefaultValue("0") @QueryParam("offset") int offset,
@@ -99,7 +101,7 @@ public class EventVSElectionResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("eventsVSMap", JSON.getEscapingMapper().writeValueAsString(eventsVSMap));
-            context.getRequestDispatcher("/jsf/eventVSElection/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/eventVSElection/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -124,7 +126,7 @@ public class EventVSElectionResource {
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("statsJSON", JSON.getEscapingMapper().writeValueAsString(statsMap));
-            context.getRequestDispatcher("/jsf/eventVSElection/stats.jsp").forward(req, resp);
+            context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

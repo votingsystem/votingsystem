@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
+<link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 
 <polymer-element name="votingsystem-cert" attributes="url cert subpage">
     <template>
@@ -17,8 +17,8 @@
             overflow:hidden;
         }
         </style>
-        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <core-ajax id="ajax" auto url="{{url}}" response="{{cert}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <div layout vertical center center-justified >
                 <div layout horizontal class="pageWidth">
@@ -102,7 +102,7 @@
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = e.target.templateInstance.model.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = "${config.webURL}/certificateVS/cert/" + issuerSerialNumber
+                    var certURL = "${elementURL}/certificateVS/cert/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

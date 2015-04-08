@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -26,6 +28,8 @@ import static java.text.MessageFormat.format;
 public class VoteVSBean {
 
     private static Logger log = Logger.getLogger(VoteVSBean.class.getSimpleName());
+
+    private final Queue<MessageSMIME> pendingVotes = new ConcurrentLinkedQueue<>();
 
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;

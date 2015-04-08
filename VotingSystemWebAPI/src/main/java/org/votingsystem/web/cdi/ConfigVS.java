@@ -15,6 +15,8 @@ public interface ConfigVS {
 
     public String getSystemNIF();
 
+    public String getEmailAdmin();
+
     public String getProperty(String key);
 
     public TagVS getTag(String tagName);

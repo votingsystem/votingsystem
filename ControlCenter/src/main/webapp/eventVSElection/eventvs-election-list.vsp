@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${config.resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${config.resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-<link href="${config.resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${config.webURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
-<link href="${config.resourceURL}/vs-pager/vs-pager.html" rel="import"/>
-<link href="${config.webURL}/element/time-elements.vsp" rel="import"/>
+<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
+<link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
+<link href="${elementURL}/element/time-elements.vsp" rel="import"/>
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
-        <link href="${config.webURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${config.resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style no-shim>
         .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
@@ -105,7 +105,7 @@
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
                 this.$.vspager.style.display = 'none'
-                targetURL = "${config.restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" +
+                targetURL = "${restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -146,7 +146,7 @@
             eventVSStateSelect: function() {
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
-                targetURL = "${config.restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
+                targetURL = "${restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 this.$.ajax.go()

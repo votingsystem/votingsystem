@@ -5,7 +5,7 @@
 <body>
 <div class="" style="max-width:300px; margin:20px auto 0 auto;">
     <vs-innerpage-signal caption="${msg.contactLbl}"></vs-innerpage-signal>
-    <a  href="mailto:${grailsApplication.config.vs.emailAdmin}"
+    <a  href="mailto:${config.emailAdmin}"
         style="font-weight: bold;">${msg.emailLbl} <i class="fa fa-envelope-o"></i>
     </a>
 </div>
