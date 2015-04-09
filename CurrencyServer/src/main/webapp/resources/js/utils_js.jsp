@@ -30,7 +30,7 @@
                     document.querySelector('#navBar').loadURL(e.target.href)
                     e.preventDefault()
                 });
-            } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
+            } else if("" != elementsArray[i].href.trim()) console.log("utils_js - not system url: " + elementsArray[i].href)
         }
     }
 

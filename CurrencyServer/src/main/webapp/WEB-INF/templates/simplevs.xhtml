@@ -18,6 +18,18 @@
     <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <ui:insert name="head" />
+    <script>
+        document.addEventListener('polymer-ready', function() {
+            console.log("simplevs - polymer-ready")
+            document.querySelector('#pageLayoutDiv').style.display = 'block';
+            document.querySelector('#loadingDiv').style.display = 'none';
+            document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
+                if(e.detail.title) document.querySelector('#appTitle').innerHTML = e.detail.title
+                document.dispatchEvent( new Event('innerPageSignal'));
+            });
+            updateMenuLinks()
+        });
+    </script>
 </h:head>
 <h:body id="voting_system_page">
     <div id="pageLayoutDiv" style="display:none;">
@@ -29,18 +41,5 @@
 
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
     <core-signals id="coreSignals"></core-signals>
-
-    <script>
-        document.addEventListener('polymer-ready', function() {
-            document.querySelector('#pageLayoutDiv').style.display = 'block';
-            document.querySelector('#loadingDiv').style.display = 'none';
-            updateMenuLinks()
-        });
-
-        document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
-            if(e.detail.title) document.querySelector('#appTitle').innerHTML = e.detail.title
-            document.dispatchEvent( new Event('innerPageSignal'));
-        });
-    </script>
 </h:body>
 </html>

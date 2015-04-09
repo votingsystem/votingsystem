@@ -2,14 +2,14 @@ package org.votingsystem.test.dto;
 
 import org.votingsystem.model.VoteVS;
 
-public class VoteVSDto {
+public class VoteResultDto {
 
     private VoteVS voteVS;
     private String electorNIF;
 
-    public VoteVSDto() {}
+    public VoteResultDto() {}
 
-    public VoteVSDto(VoteVS voteVS, String electorNIF) {
+    public VoteResultDto(VoteVS voteVS, String electorNIF) {
         this.voteVS = voteVS;
         this.electorNIF = electorNIF;
     }

@@ -8,7 +8,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
 import org.votingsystem.test.callable.VoteSender;
-import org.votingsystem.test.dto.VoteVSDto;
+import org.votingsystem.test.dto.VoteResultDto;
 import org.votingsystem.test.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -41,12 +41,12 @@ public class Election_publishAndSend {
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(200);
-        userBaseSimulationData.setNumUsersWithoutRepresentative(1);
-        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(1);
-        userBaseSimulationData.setNumRepresentatives(0);
-        userBaseSimulationData.setNumRepresentativesWithVote(0);
-        userBaseSimulationData.setNumUsersWithRepresentative(0);
-        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
+        userBaseSimulationData.setNumUsersWithoutRepresentative(100);
+        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(50);
+        userBaseSimulationData.setNumRepresentatives(10);
+        userBaseSimulationData.setNumRepresentativesWithVote(5);
+        userBaseSimulationData.setNumUsersWithRepresentative(100);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(20);
 
         simulationData = new VotingSimulationData();
         simulationData.setServerURL("http://localhost:8080/AccessControl");
@@ -133,8 +133,8 @@ public class Election_publishAndSend {
         log.info("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
         while (simulationData.hasPendingVotes()) {
             try {
-                Future<ResponseVS<VoteVSDto>> f = responseService.take();
-                ResponseVS<VoteVSDto> responseVS = f.get();
+                Future<ResponseVS<VoteResultDto>> f = responseService.take();
+                ResponseVS<VoteResultDto> responseVS = f.get();
                 String nifFrom = null;
                 if(responseVS.getData() != null) nifFrom = responseVS.getData().getElectorNIF();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
