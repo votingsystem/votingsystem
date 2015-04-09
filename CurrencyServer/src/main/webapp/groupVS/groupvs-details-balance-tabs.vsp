@@ -46,7 +46,7 @@
                 <transactionvs-table id="transactionFromTable" isUserVSTable="true"></transactionvs-table>
             </div>
             <div id="userList" class="tabContent" style="display:{{selectedTab == 'userList'?'block':'none'}}">
-                <uservs-list id="userList" menuType="${params.menu}"></uservs-list>
+                <uservs-list id="userList" menuType="${param.menu}"></uservs-list>
             </div>
         </div>
     </template>

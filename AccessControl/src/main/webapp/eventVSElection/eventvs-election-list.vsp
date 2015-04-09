@@ -19,8 +19,8 @@
         <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
+        <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+                             transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
@@ -42,9 +42,9 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
-                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
+                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{getEventVSClass(eventvs.state)}}'>
                                 <div  eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
-                                    <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
+                                    <p style='margin:0px 0px 0px 0px;text-align:center;'>{{getSubject(eventvs.subject)}}</p></div>
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
                                         <div class='eventDateBeginLblDiv'>${msg.electionDateLbl}:</div>
@@ -54,12 +54,12 @@
                                         <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
                                         <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
                                     </div>
-                                    <div class='cancelMessage' style="display: {{(eventvs.state == 'CANCELED')?'block':'none'}}">
+                                    <div hidden?="{{eventvs.state !== 'CANCELED'}}" class='cancelMessage'>
                                         ${msg.eventCancelledLbl}</div>
                                 </div>
                                 <div class='eventDivFooter'>
-                                    <div class='eventRemainingDiv'>{{eventvs.dateFinish | getElapsedTime}}</div>
-                                    <div class='eventStateDiv'>{{eventvs.state | getMessage}}</div>
+                                    <div class='eventRemainingDiv'>{{getElapsedTime(eventvs.dateFinish)}}</div>
+                                    <div class='eventStateDiv'>{{getMessage(eventvs.state)}}</div>
                                 </div>
                             </div>
                         </template>
@@ -85,7 +85,7 @@
                 eventsVSMap: {value: {}}
             },
             ready:function(e) {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready - eventVSState: " + this.eventVSState)
                 this.loading = true
                 this.page = 0;
                 this.subpage = 0;

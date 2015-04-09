@@ -72,8 +72,7 @@ public class EventVSElectionResource {
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
             IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING,
-                EventVS.State.TERMINATED, EventVS.State.CANCELED);
+        List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE);
         if(eventVSStateReq != null) {
             try {
                 EventVS.State eventVSState = EventVS.State.valueOf(eventVSStateReq);

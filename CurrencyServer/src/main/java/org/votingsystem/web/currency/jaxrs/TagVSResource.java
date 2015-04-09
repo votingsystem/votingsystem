@@ -66,7 +66,7 @@ public class TagVSResource {
         }
         Map result = MapUtils.getTagMap(tagVS);
         //resp.setHeader("Access-Control-Allow-Origin", "*");
-        //if (params.callback) render "${params.callback}(${result as JSON})"
+        //if (params.callback) render "${param.callback}(${result as JSON})"
         return result;
     }
 

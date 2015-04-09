@@ -122,7 +122,7 @@
             </div>
 
             <div id="userList" style="margin: 0 0 100px 0;">
-                <uservs-list id="userList" menuType="${params.menu}"></uservs-list>
+                <uservs-list id="userList" menuType="${param.menu}"></uservs-list>
             </div>
 
         </div>

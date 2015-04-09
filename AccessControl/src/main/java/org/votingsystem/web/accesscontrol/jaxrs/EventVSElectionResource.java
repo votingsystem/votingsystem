@@ -71,12 +71,11 @@ public class EventVSElectionResource {
     @Transactional
     public Object index (@QueryParam("eventVSState") String eventVSStateReq,
                          @DefaultValue("0") @QueryParam("offset") int offset,
-                         @DefaultValue("100") @QueryParam("max") int max, @Context ServletContext context,
+                         @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
             IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING,
-                EventVS.State.TERMINATED, EventVS.State.CANCELED);
+        List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE);
         if(eventVSStateReq != null) {
             try {
                 EventVS.State eventVSState = EventVS.State.valueOf(eventVSStateReq);
