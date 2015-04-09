@@ -65,10 +65,21 @@ public enum ContentTypeVS {
 
     private String name;
     private String extension;
+    private TypeVS typeVS;
 
     private ContentTypeVS(String name, String extension) {
         this.name = name;
         this.extension = "." + extension;
+    }
+
+    private ContentTypeVS(String name, String extension, TypeVS typeVS) {
+        this.name = name;
+        this.extension = "." + extension;
+    }
+
+
+    public TypeVS getTypeVS() {
+        return typeVS;
     }
 
     public String getName() {

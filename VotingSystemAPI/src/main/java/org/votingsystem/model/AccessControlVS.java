@@ -15,7 +15,9 @@ public class AccessControlVS extends ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public AccessControlVS() {}
+    public AccessControlVS() {
+        setType(Type.ACCESS_CONTROL);
+    }
 
     public AccessControlVS (ActorVS actorVS) {
         setName(actorVS.getName());

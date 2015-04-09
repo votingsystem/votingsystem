@@ -12,6 +12,8 @@ import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -33,12 +35,14 @@ public class VoteVSBean {
 
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
+    @PersistenceContext private EntityManager em;
     @Inject private SignatureBean signatureBean;
     @Inject MessagesBean messages;
 
 
     public synchronized VoteVS validateVote(MessageSMIME messageSMIME) throws Exception {
         EventVSElection eventVS = (EventVSElection) messageSMIME.getEventVS();
+        eventVS = em.merge(eventVS);
         VoteVS voteVSRequest = messageSMIME.getSMIME().getVoteVS();
         CertificateVS voteVSCertificate = voteVSRequest.getCertificateVS();
         FieldEventVS optionSelected = eventVS.checkOptionId(voteVSRequest.getOptionSelected().getId());
@@ -50,7 +54,7 @@ public class VoteVSBean {
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(
                 fromUser, toUser, messageSMIME.getSMIME(), subject);
         messageSMIME.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setSMIME(smimeMessageResp);
-        dao.merge(voteVSCertificate.setState(CertificateVS.State.USED));
+        em.merge(voteVSCertificate.setState(CertificateVS.State.USED));
         VoteVS voteVS = dao.persist(new VoteVS(optionSelected, eventVS, VoteVS.State.OK, voteVSCertificate,  messageSMIME));
         return voteVS;
     }

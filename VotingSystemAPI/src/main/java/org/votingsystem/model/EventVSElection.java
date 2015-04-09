@@ -1,6 +1,8 @@
 package org.votingsystem.model;
 
 
+import org.votingsystem.throwable.ValidationExceptionVS;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -15,14 +17,6 @@ import java.util.Date;
 public class EventVSElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    public FieldEventVS checkOptionId(Long opcionId) {
-        if(opcionId == null) return null;
-        for(FieldEventVS opcion: getFieldsEventVS()) {
-            if(opcionId.longValue() == opcion.getId().longValue()) return opcion;
-        }
-        return null;
-    }
 
     public EventVSElection() {}
 
@@ -49,10 +43,18 @@ public class EventVSElection extends EventVS implements Serializable {
         setDateFinish(dateFinish);
     }
 
-    public EventVSElection resetId() {
+    public FieldEventVS checkOptionId(Long optionId) throws ValidationExceptionVS {
+        for(FieldEventVS option: getFieldsEventVS()) {
+            if(optionId.longValue() == option.getId().longValue()) return option;
+        }
+        throw new ValidationExceptionVS("FieldEventVS not found - id: " + optionId);
+    }
+
+    public EventVSElection updateAccessControlIds() {
         setId(null);
         if(getFieldsEventVS() != null) {
             for(FieldEventVS fieldEventVS : getFieldsEventVS()) {
+                fieldEventVS.setAccessControlFieldEventId(fieldEventVS.getId());
                 fieldEventVS.setId(null);
             }
         }

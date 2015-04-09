@@ -42,8 +42,8 @@ public class CurrencyRequestServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
-
-            MessageSMIME messageSMIME = signatureBean.processSMIMERequest(requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED);
+            MessageSMIME messageSMIME = signatureBean.validateSMIME(
+                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(requestVS.getCSRBytes(),
                     messageSMIME, config.getContextURL());
             currencyBatch.setTagVS(config.getTag(currencyBatch.getTag()));

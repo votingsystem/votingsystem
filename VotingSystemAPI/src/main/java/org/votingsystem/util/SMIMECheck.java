@@ -1,8 +1,9 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.EventVS;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,8 +14,10 @@ public class SMIMECheck {
 
     private UserVS signer;
     private VoteVS voteVS;
+    private EventVS eventVS;
     private UserVS anonymousSigner;
     private Set<UserVS> signers;
+    private MessageSMIME messageSMIME;
 
     public SMIMECheck() {}
 
@@ -59,5 +62,21 @@ public class SMIMECheck {
 
     public void setVoteVS(VoteVS voteVS) {
         this.voteVS = voteVS;
+    }
+
+    public EventVS getEventVS() {
+        return eventVS;
+    }
+
+    public void setEventVS(EventVS eventVS) {
+        this.eventVS = eventVS;
+    }
+
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
+    }
+
+    public void setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
     }
 }

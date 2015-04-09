@@ -8,6 +8,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
 import org.votingsystem.test.callable.VoteSender;
+import org.votingsystem.test.dto.VoteVSDto;
 import org.votingsystem.test.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -132,12 +133,12 @@ public class Election_publishAndSend {
         log.info("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
         while (simulationData.hasPendingVotes()) {
             try {
-                Future<ResponseVS> f = responseService.take();
-                ResponseVS responseVS = f.get();
+                Future<ResponseVS<VoteVSDto>> f = responseService.take();
+                ResponseVS<VoteVSDto> responseVS = f.get();
                 String nifFrom = null;
-                if(responseVS.getData() != null) nifFrom = ((UserVS)((Map)responseVS.getData()).get("userVS")).getNif();
+                if(responseVS.getData() != null) nifFrom = responseVS.getData().getElectorNIF();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    VoteVS voteReceipt = (VoteVS) ((Map)responseVS.getData()).get("voteVS");
+                    VoteVS voteReceipt = responseVS.getData().getVoteVS();
                     if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom);
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else TestUtils.finishWithError("ERROR", responseVS.getMessage(),

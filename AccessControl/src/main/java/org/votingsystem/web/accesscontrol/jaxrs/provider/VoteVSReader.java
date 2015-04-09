@@ -1,8 +1,7 @@
-package org.votingsystem.web.jaxrs.provider;
+package org.votingsystem.web.accesscontrol.jaxrs.provider;
 
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -29,8 +28,7 @@ public class VoteVSReader implements MessageBodyReader<MessageSMIME> {
 
     private static final Logger log = Logger.getLogger(VoteVSReader.class.getSimpleName());
 
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -41,10 +39,10 @@ public class VoteVSReader implements MessageBodyReader<MessageSMIME> {
     public MessageSMIME readFrom(Class<MessageSMIME> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                  MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.processSMIMERequest(new SMIMEMessage(inputStream), ContentTypeVS.VOTE);
+            return signatureBean.validatedVoteFromControlCenter(new SMIMEMessage(inputStream)).getMessageSMIME();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new WebApplicationException(ex);
         }
-        return null;
     }
 }

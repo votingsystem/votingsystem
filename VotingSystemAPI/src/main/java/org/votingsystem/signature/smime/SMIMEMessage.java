@@ -365,8 +365,8 @@ public class SMIMEMessage extends MimeMessage {
                     //concurrency issues ->
                     //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
                 } catch(CMSVerifierCertificateNotValidException ex) {
-                    log.log(Level.SEVERE, "checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
-                    log.log(Level.SEVERE, "checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
+                    log.log(Level.SEVERE, "checkSignature - cert notBefore: " + cert.getNotBefore() + " - NotAfter: " +
+                            cert.getNotAfter());
                     throw ex;
                 } catch (Exception ex) {
                     throw ex;
@@ -385,7 +385,7 @@ public class SMIMEMessage extends MimeMessage {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    VoteVS voteVS = new ObjectMapper().readValue(signedContent, VoteVS.class);
+                    voteVS = new ObjectMapper().readValue(signedContent, VoteVS.class);
                     voteVS.loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;

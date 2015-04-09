@@ -11,7 +11,6 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreInfo;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -219,23 +218,6 @@ public class SignatureBean {
         return eventTrustedAnchors;
     }
 
-    public MessageSMIME processSMIMERequest(SMIMEMessage smimeMessage, ContentTypeVS contenType) throws Exception {
-        if (smimeMessage.isValidSignature()) {
-            SMIMECheck smimeCheck = null;
-            switch(contenType) {
-                //case CURRENCY: break;
-                case VOTE:
-                    smimeCheck = validateSMIMEVote(smimeMessage);
-                    break;
-                default:
-                    smimeCheck = validateSMIME(smimeMessage);
-            }
-            TypeVS typeVS = TypeVS.OK;
-            if(contenType != null && ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
-            return dao.persist(new MessageSMIME(smimeMessage, smimeCheck, typeVS));
-        } else throw new ValidationExceptionVS("invalid SMIMEMessage");
-    }
-
     public boolean isSignerCertificate(Set<UserVS> signers, X509Certificate cert) throws CertificateEncodingException {
         for(UserVS userVS : signers) {
             if(Arrays.equals(userVS.getCertificate().getEncoded(), cert.getEncoded())) return true;
@@ -368,21 +350,28 @@ public class SignatureBean {
         return getSignedMailGenerator().getSMIMEMultiSigned(serverName, toUser, smimeMessage, subject);
     }
 
-    public SMIMECheck validateSMIME(SMIMEMessage smimeMessage) throws Exception {
-        Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
-                .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
-        MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
-        if(messageSMIME != null) throw new ExceptionVS("'smimeDigestRepeatedErrorMsg'");
-        return validateSignersCerts(smimeMessage);
+    public SMIMECheck validateSMIME(SMIMEMessage smimeMessage, ContentTypeVS contenType) throws Exception {
+        if (smimeMessage.isValidSignature()) {
+            Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
+                    .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
+            MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
+            if(messageSMIME != null) throw new ExceptionVS("'smimeDigestRepeatedErrorMsg'");
+            SMIMECheck smimeCheck = validateSignersCerts(smimeMessage);
+            TypeVS typeVS = TypeVS.OK;
+            if(contenType != null && ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
+            messageSMIME = dao.persist(new MessageSMIME(smimeMessage, smimeCheck, typeVS));
+            smimeCheck.setMessageSMIME(messageSMIME);
+            return smimeCheck;
+        } else throw new ValidationExceptionVS("invalid SMIMEMessage");
     }
 
-    public SMIMECheck validateSMIMEVote(SMIMEMessage smimeMessage) throws Exception {
+    public SMIMECheck validatedVote(SMIMEMessage smimeMessage) throws Exception {
         Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
                 .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
         if(messageSMIME != null) throw new ExceptionVS("smimeDigestRepeatedErrorMsg");
         VoteVS voteVS = smimeMessage.getVoteVS();
-        SMIMECheck result = new SMIMECheck(voteVS);
+        SMIMECheck smimeCheck = new SMIMECheck(voteVS);
         if(voteVS == null || voteVS.getX509Certificate() == null) throw new ExceptionVS(
                 messages.get("documentWithoutSignersErrorMsg"));
         if (voteVS.getRepresentativeURL() != null) {
@@ -390,28 +379,39 @@ public class SignatureBean {
                     .setParameter("userURL", voteVS.getRepresentativeURL());
             UserVS checkedSigner = dao.getSingleResult(UserVS.class, query);
             if(checkedSigner == null) checkedSigner = dao.persist(UserVS.REPRESENTATIVE(voteVS.getRepresentativeURL()));
-            result.setSigner(checkedSigner);
+            smimeCheck.setSigner(checkedSigner);
         }
-        query = dao.getEM().createQuery("select e from EventVS e where e.accessControlEventVSId =:eventId")
-                .setParameter("eventId", voteVS.getEventVS().getId());
-        EventVS eventVS = dao.getSingleResult(EventVS.class, query);
-        if(eventVS == null) throw new ExceptionVS(messages.get("voteEventVSElectionUnknownErrorMsg"));
+        query = dao.getEM().createQuery("select e from EventVS e where e.accessControlEventVSId =:eventId and " +
+                "e.accessControlVS.serverURL =:serverURL").setParameter("eventId", voteVS.getAccessControlEventVSId())
+                .setParameter("serverURL", voteVS.getAccessControlURL());
+        EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
+        if(eventVS == null) throw new ExceptionVS(messages.get("voteEventVSElectionUnknownErrorMsg",
+                voteVS.getAccessControlURL(), voteVS.getAccessControlEventVSId()));
         if(eventVS.getState() != EventVS.State.ACTIVE)
             throw new ExceptionVS(messages.get("electionClosed", eventVS.getSubject()));
-        query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVS")
-                .setParameter("hashCertVS", voteVS.getHashCertVSBase64());
-        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if (certificateVS != null) {
-            String url = config.getRestURL() + "/voteVS/certificateVS/id/" + certificateVS.getId();
-            throw new RequestRepeatedException(messages.get("voteRepeatedErrorMsg", certificateVS.getId()), url);
-        }
+        smimeCheck.setEventVS(eventVS);
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS);
         timeStampBean.validateToken(voteVS.getTimeStampToken());
         X509Certificate checkedCert = voteVS.getX509Certificate();
         CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                 eventTrustedAnchors, false, Arrays.asList(checkedCert));
         X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
-        return result;
+        smimeCheck.setMessageSMIME(dao.persist(new MessageSMIME(smimeMessage, smimeCheck, TypeVS.VOTEVS)));
+        return smimeCheck;
+    }
+
+    public SMIMECheck validatedVoteFromControlCenter(SMIMEMessage smimeMessage) throws Exception {
+        SMIMECheck smimeCheck = validatedVote(smimeMessage);
+        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVS and c.state =:state")
+                .setParameter("hashCertVS", smimeCheck.getVoteVS().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
+        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
+        if (certificateVS == null) {
+            smimeCheck.getMessageSMIME().setType(TypeVS.VOTE_ERROR).setReason("missing VoteVS CertificateVS");
+            dao.merge(smimeCheck.getMessageSMIME());
+            throw new ValidationExceptionVS("missing VoteVS CertificateVS");
+        }
+        smimeCheck.getMessageSMIME().getSMIME().getVoteVS().setCertificateVS(certificateVS);
+        return smimeCheck;
     }
     
     public CertUtils.CertValidatorResultVS validateCertificates(List<X509Certificate> certificateList) throws ExceptionVS {
@@ -425,20 +425,20 @@ public class SignatureBean {
         if(signersVS.isEmpty()) throw new ExceptionVS("documentWithoutSignersErrorMsg");
         CertUtils.CertValidatorResultVS validatorResult = null;
         String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif());
-        SMIMECheck result = new SMIMECheck();
+        SMIMECheck smimeCheck = new SMIMECheck();
         for(UserVS userVS: signersVS) {
             timeStampBean.validateToken(userVS.getTimeStampToken());
             validatorResult = verifyUserCertificate(userVS);
             if(validatorResult.getChecker().isAnonymousSigner()) {
                 log.log(Level.FINE, "validateSignersCerts - is anonymous signer");
-                result.setAnonymousSigner(userVS);
+                smimeCheck.setAnonymousSigner(userVS);
             } else {
                 UserVS user = subscriptionVSBean.checkUser(userVS);
-                if(user.getNif().equals(signerNIF)) result.setSigner(user);
-                else result.addSigner(user);
+                if(user.getNif().equals(signerNIF)) smimeCheck.setSigner(user);
+                else smimeCheck.addSigner(user);
             }
         }
-        return result;
+        return smimeCheck;
     }
 
     public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {

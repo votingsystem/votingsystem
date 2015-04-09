@@ -12,7 +12,6 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;

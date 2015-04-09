@@ -100,6 +100,7 @@ public class MessageSMIME extends EntityVS implements Serializable {
         this.userVS = smimeCheck.getSigner();
         this.anonymousSigner = smimeCheck.getAnonymousSigner();
         this.signers = smimeCheck.getSigners();
+        this.eventVS = smimeCheck.getEventVS();
     }
 
     public MessageSMIME(SMIMEMessage smime, UserVS userVS, TypeVS type) throws Exception {

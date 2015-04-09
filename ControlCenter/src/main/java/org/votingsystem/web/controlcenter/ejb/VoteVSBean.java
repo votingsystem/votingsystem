@@ -10,9 +10,14 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.DAOUtils;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -30,18 +35,20 @@ public class VoteVSBean {
     private static Logger log = Logger.getLogger(VoteVSBean.class.getSimpleName());
 
     @Inject private ConfigVS config;
-    @Inject private DAOBean dao;
+    @PersistenceContext private EntityManager em;
     @Inject private SignatureBean signatureBean;
-    @Inject
-    MessagesBean messages;
+    @Inject MessagesBean messages;
 
+    @Transactional
     public VoteVS validateVote(MessageSMIME messageSMIME) throws Exception {
         EventVSElection eventVS = (EventVSElection) messageSMIME.getEventVS();
+        eventVS = em.merge(eventVS);
         VoteVS voteVS = messageSMIME.getSMIME().getVoteVS();
-        Query query = dao.getEM().createQuery("select f from FieldEventVS f where f.eventVS =:eventVS and " +
+        voteVS.setMessageSMIME(messageSMIME);
+        Query query = em.createQuery("select f from FieldEventVS f where f.eventVS =:eventVS and " +
                 "f.accessControlFieldEventId =:fieldEventId").setParameter("eventVS", eventVS).setParameter(
                 "fieldEventId", voteVS.getOptionSelected().getId());
-        FieldEventVS optionSelected = dao.getSingleResult(FieldEventVS.class, query);
+        FieldEventVS optionSelected = DAOUtils.getSingleResult(FieldEventVS.class, query);
         if (optionSelected == null) throw new ValidationExceptionVS("ERROR - FieldEventVS not found - fieldEventId: " +
                 voteVS.getOptionSelected().getId());
         CertificateVS certificateVS = CertificateVS.VOTE(voteVS);
@@ -49,9 +56,9 @@ public class VoteVSBean {
         String fromUser = config.getServerName();
         String toUser = eventVS.getAccessControlVS().getName();
         String subject = messages.get("voteValidatedByAccessControlMsg");
-        SMIMEMessage smimeVoteValidation = signatureBean.getSMIMEMultiSigned(
+        SMIMEMessage validatedVote = signatureBean.getSMIMEMultiSigned(
                 fromUser, toUser, messageSMIME.getSMIME(), subject);
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeVoteValidation.getBytes(), ContentTypeVS.VOTE,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(validatedVote.getBytes(), ContentTypeVS.VOTE,
                 eventVS.getAccessControlVS().getVoteServiceURL());
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(messages.get(
                 "accessRequestVoteErrorMsg", responseVS.getMessage()));
@@ -62,9 +69,13 @@ public class VoteVSBean {
         }
         signatureBean.validateVoteCerts(smimeMessageResp, eventVS);
         smimeMessageResp.setMessageID(format("{0}/messageSMIME/id/{1}", config.getRestURL(), messageSMIME.getId()));
-        dao.merge(messageSMIME.setSMIME(smimeMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
-        voteVS = dao.persist(new VoteVS(optionSelected, eventVS, VoteVS.State.OK, certificateVS, messageSMIME));
-        log.log(Level.FINE, "validateVote OK - voteVS id: " + voteVS.getId());
+        em.merge(messageSMIME.setSMIME(smimeMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
+        voteVS.setState(VoteVS.State.OK).setOptionSelected(optionSelected);
+        em.persist(certificateVS);
+        voteVS.setCertificateVS(certificateVS);
+        voteVS.setEventVS(eventVS);
+        em.persist(voteVS);
+        log.log(Level.INFO, "validateVote OK - voteVS id: " + voteVS.getId());
         return voteVS;
     }
 
@@ -72,14 +83,14 @@ public class VoteVSBean {
         UserVS signer = messageSMIME.getUserVS();
         VoteVSRequest request = messageSMIME.getSignedContent(VoteVSRequest.class);
         request.validateCancelationRequest();
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
+        Query query = em.createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
                 "c.state =:state").setParameter("hashCertVSBase64", request.hashCertVSBase64)
                 .setParameter("state", CertificateVS.State.OK);
-        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
+        CertificateVS certificateVS = DAOUtils.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) throw new ValidationExceptionVS(messages.get("certNotFoundErrorMsg"));
-        query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS =:certificateVS " +
+        query = em.createQuery("select v from VoteVS v where v.certificateVS =:certificateVS " +
                 "and v.state =:state").setParameter("certificateVS", certificateVS).setParameter("state", VoteVS.State.OK);
-        VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
+        VoteVS voteVS = DAOUtils.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
@@ -91,12 +102,13 @@ public class VoteVSBean {
         String subject = messages.get("voteCancelationSubject");
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(fromUser, toUser, messageSMIME.getSMIME(), subject);
         messageSMIME.setSMIME(smimeMessage);
-        dao.merge(messageSMIME);
-        VoteVSCanceler voteCanceler = dao.persist(new VoteVSCanceler(messageSMIME, null,
+        em.merge(messageSMIME);
+        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageSMIME, null,
                 VoteVSCanceler.State.CANCELLATION_OK, request.originHashAccessRequest, request.hashCertVSBase64,
-                request.originHashCertVote, request.hashCertVSBase64, voteVS));
-        dao.merge(voteVS.setState(VoteVS.State.CANCELED));
-        dao.merge(certificateVS.setState(CertificateVS.State.CANCELED));
+                request.originHashCertVote, request.hashCertVSBase64, voteVS);
+        em.persist(voteCanceler);
+        em.merge(voteVS.setState(VoteVS.State.CANCELED));
+        em.merge(certificateVS.setState(CertificateVS.State.CANCELED));
         return voteCanceler;
     }
 

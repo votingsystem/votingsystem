@@ -128,7 +128,7 @@ public class CSRBean {
             }
         }
         String eventId = certDataMap.get("eventId");
-        if (Long.valueOf(eventId) != eventVS.getId()) {
+        if (Long.valueOf(eventId).longValue() != eventVS.getId().longValue()) {
             throw new ExceptionVS("validateCSRVote - expected eventId: " + eventVS.getId() + " - found: " + eventId);
         }
         String accessControlURL = StringUtils.checkURL(certDataMap.get("accessControlURL"));

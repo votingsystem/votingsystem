@@ -1,5 +1,7 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -40,6 +42,15 @@ public class StartupBean implements StartupVS {
         UserVS systemUser = dao.getSingleResult(UserVS.class, query);
         if(systemUser == null) {
             dao.persist(new UserVS(config.getSystemNIF(), config.getServerName(), UserVS.Type.SYSTEM));
+        }
+        query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
+                .setParameter("serverURL", config.getContextURL());
+        AccessControlVS actorVS = dao.getSingleResult(AccessControlVS.class, query);
+        if(actorVS == null) {
+            actorVS = new AccessControlVS();
+            actorVS.setServerURL(config.getContextURL());
+            actorVS.setState(ActorVS.State.OK).setName(config.getServerName());
+            dao.persist(actorVS);
         }
         timeStampBean.init();
         signatureBean.init();

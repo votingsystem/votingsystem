@@ -40,7 +40,7 @@ public class CurrencyReader implements MessageBodyReader<MessageSMIME> {
     public MessageSMIME readFrom(Class<MessageSMIME> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                  MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.processSMIMERequest(new SMIMEMessage(inputStream), ContentTypeVS.JSON_SIGNED);
+            return signatureBean.validateSMIME(new SMIMEMessage(inputStream), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

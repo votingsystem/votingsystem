@@ -46,7 +46,8 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
-            MessageSMIME messageSMIME = signatureBean.processSMIMERequest(requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED);
+            MessageSMIME messageSMIME = signatureBean.validateSMIME(
+                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(messageSMIME, requestVS.getCSRBytes());
             byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(anonymousIssuedCert);
             resp.setContentType(ContentTypeVS.PEM.getName());

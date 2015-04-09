@@ -36,14 +36,6 @@ public class VoteVS extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(VoteVS.class.getSimpleName());
 
-    public String getEventURL() {
-        return eventURL;
-    }
-
-    public void setEventURL(String eventURL) {
-        this.eventURL = eventURL;
-    }
-
     public enum State{OK, CANCELED, ERROR}
 
     private static final long serialVersionUID = 1L;
@@ -69,6 +61,7 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private String hashAccessRequestBase64;
     @Transient private String accessControlURL;
     @Transient private String eventURL;
+    @Transient private Long accessControlEventVSId;
     @Transient private String representativeURL;
     @Transient @JsonIgnore private X509Certificate x509Certificate;
     @Transient @JsonIgnore private TimeStampToken timeStampToken;
@@ -257,6 +250,22 @@ public class VoteVS extends EntityVS implements Serializable {
         this.timeStampToken = timeStampToken;
     }
 
+    public String getEventURL() {
+        return eventURL;
+    }
+
+    public void setEventURL(String eventURL) {
+        this.eventURL = eventURL;
+    }
+
+    public Long getAccessControlEventVSId() {
+        return accessControlEventVSId;
+    }
+
+    public void setAccessControlEventVSId(Long accessControlEventVSId) {
+        this.accessControlEventVSId = accessControlEventVSId;
+    }
+
     public void genVote() throws NoSuchAlgorithmException {
         log.info(" --- genVote ---");
         originHashAccessRequest = UUID.randomUUID().toString();
@@ -286,12 +295,9 @@ public class VoteVS extends EntityVS implements Serializable {
             DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
             Map<String,String> voteCertData = new ObjectMapper().readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
                     new TypeReference<HashMap<String, String>>() {});
-            EventVS eventVS = new EventVS();
-            eventVS.setId(Long.valueOf(voteCertData.get("eventId")));
-            eventVS.setUrl(eventURL);
-            setEventVS(eventVS);
-            setAccessControlURL(voteCertData.get("accessControlURL"));
-            setHashCertVSBase64(voteCertData.get("hashCertVS"));
+            this.accessControlEventVSId = Long.valueOf(voteCertData.get("eventId"));
+            this.accessControlURL = voteCertData.get("accessControlURL");
+            this.hashCertVSBase64 = voteCertData.get("hashCertVS");
         }
         byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
         if(representativeURLExtensionValue != null) {

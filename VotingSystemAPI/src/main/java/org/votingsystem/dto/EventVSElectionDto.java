@@ -96,6 +96,7 @@ public class EventVSElectionDto {
     public EventVSElection getEventVSElection() {
         EventVSElection result = new EventVSElection();
         result.setId(id);
+        result.setAccessControlEventVSId(accessControlEventVSId);
         result.setDateCreated(dateCreated);
         result.setSubject(subject);
         result.setContent(getContent());
@@ -270,5 +271,13 @@ public class EventVSElectionDto {
 
     public void setBackupAvailable(boolean backupAvailable) {
         this.backupAvailable = backupAvailable;
+    }
+
+    public Long getAccessControlEventVSId() {
+        return accessControlEventVSId;
+    }
+
+    public void setAccessControlEventVSId(Long accessControlEventVSId) {
+        this.accessControlEventVSId = accessControlEventVSId;
     }
 }

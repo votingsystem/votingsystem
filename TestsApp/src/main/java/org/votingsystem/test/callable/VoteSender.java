@@ -8,6 +8,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.test.dto.VoteVSDto;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -33,7 +34,7 @@ public class VoteSender implements Callable<ResponseVS> {
         this.electorNIF = electorNIF;
     }
     
-    @Override public ResponseVS call() throws Exception {
+    @Override public ResponseVS<VoteVSDto> call() throws Exception {
         String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(electorNIF);
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
@@ -58,9 +59,7 @@ public class VoteSender implements Callable<ResponseVS> {
                 //_ TODO _ validate receipt
             }
         }
-        Map result = new HashMap();
-        result.put("voteVS", voteVS);
-        result.put("userVS", new UserVS(electorNIF));
+        responseVS.setData(new VoteVSDto(voteVS, electorNIF));
         return responseVS;
     }
 

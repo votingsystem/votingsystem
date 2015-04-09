@@ -89,7 +89,7 @@ public class WebSocketBean {
                 }
                 break;
             case INIT_VALIDATED_SESSION:
-                MessageSMIME messageSMIME = signatureBean.processSMIMERequest(request.getSMIME(), null);
+                MessageSMIME messageSMIME = signatureBean.validateSMIME(request.getSMIME(), null).getMessageSMIME();
                 UserVS signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {
                     //check if accessing from one device and signing from another

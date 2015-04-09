@@ -44,8 +44,7 @@ public class EventVSElectionBean {
         SMIMEMessage smimeReq = messageSMIME.getSMIME();
         String serverURL = smimeReq.getHeader("serverURL")[0];
         AccessControlVS accessControl = checkAccessControl(serverURL);
-        EventVSElectionDto request = messageSMIME.getSignedContent(EventVSElectionDto.class);
-        request.validate(config.getContextURL());
+        EventVSElectionDto request = messageSMIME.getSignedContent(EventVSElectionDto.class);request.validate(config.getContextURL());
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
         UserVS user = subscriptionVSBean.checkUser(UserVS.getUserVS(userCert));
@@ -53,7 +52,7 @@ public class EventVSElectionBean {
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);
         setEventDatesState(eventVS);
-        eventVS.resetId(); //this is to avoid collisions with access control ids
+        eventVS.updateAccessControlIds();
         if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = signatureBean.getServerCert();

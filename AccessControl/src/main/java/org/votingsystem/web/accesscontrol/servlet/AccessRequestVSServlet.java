@@ -52,7 +52,8 @@ public class AccessRequestVSServlet extends HttpServlet {
         AccessRequestVS accessRequestVS = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
-            MessageSMIME messageSMIME = signatureBean.processSMIMERequest(requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED);
+            MessageSMIME messageSMIME = signatureBean.validateSMIME(
+                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             AccessRequestBean.AccessRequest accessRequest = accessRequestBean.saveRequest(messageSMIME);
             accessRequestVS = accessRequest.getAccessRequestVS();
             UserVS signer = accessRequestVS.getUserVS();

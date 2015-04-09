@@ -49,17 +49,23 @@ public class EventVSElectionBean {
         EventVSElectionDto request  = messageSMIME.getSignedContent(EventVSElectionDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = controlCenterBean.getControlCenter();
+        Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
+                .setParameter("serverURL", config.getContextURL());
+        AccessControlVS accessControlVS = dao.getSingleResult(AccessControlVS.class, query);
         EventVSElection eventVS = request.getEventVSElection();
         eventVS.setUserVS(userSigner);
         eventVS.setControlCenterVS(controlCenterVS);
+        eventVS.setAccessControlVS(accessControlVS);
         eventVSBean.setEventDatesState(eventVS);
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
         request.setControlCenterURL(controlCenterVS.getServerURL());
         if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
+        eventVS.setAccessControlEventVSId(eventVS.getId());
         request.setFieldsEventVS(eventVS.getFieldsEventVS());
         request.setId(eventVS.getId());
+        request.setAccessControlEventVSId(eventVS.getId());
         request.setURL(config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
         request.setDateCreated(eventVS.getDateCreated());
         request.setType(EventVS.Type.ELECTION);
@@ -79,7 +85,7 @@ public class EventVSElectionBean {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenterVS.getServerURL()));
         }
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
+        query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
                 "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
                 .setParameter("actorVS", controlCenterVS).setParameter("state", CertificateVS.State.OK);
         CertificateVS controlCenterCert = dao.getSingleResult(CertificateVS.class, query);

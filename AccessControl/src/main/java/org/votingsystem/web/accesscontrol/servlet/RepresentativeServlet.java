@@ -45,7 +45,8 @@ public class RepresentativeServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.REPRESENTATIVE_DATA);
-            MessageSMIME messageSMIME = signatureBean.processSMIMERequest(requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED);
+            MessageSMIME messageSMIME = signatureBean.validateSMIME(
+                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             ResponseVS responseVS = representativeBean.saveRepresentativeData(messageSMIME, requestVS.getImageBytes());
             resp.getOutputStream().write(responseVS.getMessageBytes());
         } catch (Exception ex) {
