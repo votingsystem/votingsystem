@@ -1,0 +1,34 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <title>vs-socket</title>
+        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+        <link rel="import" href="${resourceURL}/vs-socket/vs-socket.html"/>
+        <style type="text/css" media="screen"></style>
+    </ui:define>
+    <ui:define name="content">
+        <div class="pageContentDiv">
+            <vs-socket id="socketvs" socketservice="${config.webSocketURL}">
+                <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text"/>
+                <button onclick="sendMessage()">Send message</button>
+            </vs-socket>
+        </div>
+        <script>
+            document.querySelector("#socketvs").addEventListener('on-message', function (e) {
+                console.log("message: " + JSON.stringify(e.detail))
+            })
+
+            document.addEventListener('polymer-ready', function() {
+                document.querySelector("#socketvs").sendMessage("{locale:'es', operation:'LISTEN_TRANSACTIONS'}")
+            });
+
+            function sendMessage() {
+                document.querySelector("#socketvs").sendMessage(document.querySelector("#messageBox").value)
+            }
+        </script>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="title">${msg.weekReportsPageTitle}</ui:define>
+    <ui:define name="head">
+        <link rel="import" href="${resourceURL}/juicy-jsoneditor/src/juicy-jsoneditor.html"/>
+        <!-- josdejong/jsoneditor#104 workaround-->
+        <link rel="stylesheet" type="text/css" href="${resourceURL}/jsoneditor/jsoneditor.min.css"/>
+    </ui:define>
+    <ui:define name="content">
+        <vs-innerpage-signal caption="${msg.reportsPageTitle}"></vs-innerpage-signal>
+        <div class="pageContentDiv" style="max-width:1000px; margin: 20px auto 0px auto;">
+            <div class="pageHeader" style="margin:0px auto; text-align: center;">
+                ${msg.periodLbl}: ${spa.formatDate(timePeriod.dateFrom)} - ${spa.formatDate(timePeriod.dateTo)}
+            </div>
+            <juicy-jsoneditor json="${reportsFile}" id="jsoneditor" modes="['code', 'form', 'text', 'tree', 'view']"
+                              style="width:100%; height:1000px;"></juicy-jsoneditor>
+        </div>
+        <script>
+            var options = { mode: 'code', modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
+                error: function (err) { alert(err.toString());}
+            };
+
+            document.addEventListener('innerPageSignal', function() {
+                document.querySelector('#jsoneditor').editor.expandAll();
+            });
+        </script>
+    </ui:define>
+</ui:composition>

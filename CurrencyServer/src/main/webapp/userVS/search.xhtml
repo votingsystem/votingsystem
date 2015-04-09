@@ -1,0 +1,23 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <link href="${elementURL}/userVS/uservs-selector.vsp" rel="import"/>
+    </ui:define>
+    <ui:define name="content">
+        <vs-innerpage-signal caption="${msg.userSearchPageTitle}"></vs-innerpage-signal>
+        <div class="pageContentDiv">
+            <div layout="" vertical="" center="">
+                <uservs-selector id="userVSSelector" style="width:800px; margin:10px 0px 0px 0px;" contactSelector=""></uservs-selector>
+            </div>
+        </div>
+        <script>
+            document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
+                if(document.querySelector("#navBar") != null) {
+                    document.querySelector("#navBar").url = "${restURL}/userVS/" + e.detail.id + "?menu=" + menuType
+                } else window.location.href = "${restURL}/userVS/" + e.detail.id + "?menu=" + menuType
+            });
+        </script>
+    </ui:define>
+</ui:composition>

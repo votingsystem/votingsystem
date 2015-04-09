@@ -1,0 +1,36 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <title>WebView Test</title>
+        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+        <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
+        <script src="${elementURL}/resources/js/utils_js.jsp" type="text/javascript"></script>
+        <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
+        <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+    </ui:define>
+    <ui:define name="content">
+        WebView Test
+    </ui:define>
+    <script>
+        function webViewLoaded() {
+            console.log("webViewLoaded")
+            var webAppMessage = new WebAppMessage( 'init')
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        }
+
+        function serverMessage(message) {
+            var webAppMessage = new WebAppMessage('message: ' + message, ResponseVS.OK)
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        }
+
+        document.addEventListener('polymer-ready', function() {
+            webViewLoaded()
+        })
+
+    </script>
+</ui:composition>

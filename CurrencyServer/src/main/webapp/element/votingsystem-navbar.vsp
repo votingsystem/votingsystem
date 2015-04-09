@@ -81,7 +81,7 @@
                         <paper-item data-href="${restURL}/reports">
                             <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
                         </paper-item>
-                        <paper-item data-href="${restURL}/app/contact">
+                        <paper-item data-href="${restURL}/app/contact" icon="question-answer">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </paper-item>
                     </core-selector>

@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <link href="${resourceURL}/core-overlay/core-overlay.html" rel="import"/>
+        <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+        <link href="${resourceURL}/core-transition/core-transition-css.html" rel="import"/>
+        <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
+        <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+    </ui:define>
+    <ui:define name="content">
+        <button onclick="document.querySelector('#tagDialog').show()" style="margin:10px;">Tag dialog</button>
+
+        <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"
+                             serviceURL="${restURL}/tagVS"></tagvs-select-dialog>
+    </ui:define>
+    <script>
+        var webAppMessage = new WebAppMessage( this.operation)
+        webAppMessage.serviceURL = ${restURL}/transactionVS"
+        webAppMessage.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
+        webAppMessage.signedContent = {operation:"TEST"}
+
+        webAppMessage.setCallback(function () {
+            console.log("====#### callback")
+        })
+        window[webAppMessage.objectId]()
+    </script>
+</ui:composition>
