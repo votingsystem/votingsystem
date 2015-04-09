@@ -39,7 +39,7 @@
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
-                                        <div class='eventDateBeginLblDiv'>${msg.electionDateLbl}:</div>
+                                        <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
                                         <div class='eventDateBeginValueDiv'>
                                             <time is="local-time" datetime="{{eventvs.dateBeginStr}}"
                                                   day="numeric" month="short" year="numeric"/></div>

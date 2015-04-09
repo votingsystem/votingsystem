@@ -138,3 +138,10 @@
             return result || dateToFormat
         }
     }
+
+    var weekdays = [${msg.weekdaysShort}];
+    var months = [${msg.monthsShort}];
+
+    Date.prototype.getDayWeekFormat = function() {
+        return weekdays[this.getDay()] + " " + this.getDay() + " " + months[ this.getMonth()] + " " + this.getFullYear();
+    };

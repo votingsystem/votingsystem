@@ -47,8 +47,8 @@
                                     <p style='margin:0px 0px 0px 0px;text-align:center;'>{{getSubject(eventvs.subject)}}</p></div>
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
-                                        <div class='eventDateBeginLblDiv'>${msg.electionDateLbl}:</div>
-                                        <div class='eventDateBeginValueDiv'>{{eventvs.dateBeginStr}}</div>
+                                        <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
+                                        <div class='eventDateBeginValueDiv'>{{getDate(eventvs.dateBegin)}}</div>
                                     </div>
                                     <div class='eventAuthorDiv'>
                                         <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
@@ -90,6 +90,9 @@
                 this.page = 0;
                 this.subpage = 0;
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             eventsVSMapChanged:function() {
                 if(this.eventsVSMap == null) return

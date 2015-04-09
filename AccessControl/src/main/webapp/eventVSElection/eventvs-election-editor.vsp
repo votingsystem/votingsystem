@@ -33,7 +33,7 @@
                            placeholder="${msg.subjectLbl}" error="${msg.requiredLbl}" required/>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
-                    <label>${msg.electionDateLbl}</label>
+                    <label>${msg.dateLbl}</label>
                     <input type="text" id="datepicker">
                     <div id="datepickerButton" style="background: blue;">Choose Date</div>
                 </div>

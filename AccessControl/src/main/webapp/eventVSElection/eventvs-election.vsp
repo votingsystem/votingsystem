@@ -59,7 +59,7 @@
                         <div style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
                     </template>
                 </div>
-                <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.electionDateLbl}: </b>
+                <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
                     {{eventvs.dateBeginStr}}</div>
             </div>
 
