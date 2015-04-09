@@ -17,7 +17,7 @@ public class ReportsResource {
 
     //main web page
     def index() {
-        String weekReportsBaseDir = "${grailsApplication.config.vs.backupCopyPath}/weekReports"
+        String weekReportsBaseDir = "${config.vs.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
         List<DateUtils.TimePeriod> periods = []
         if(dir.exists()) {
@@ -50,7 +50,7 @@ public class ReportsResource {
     def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        ReportFiles reportFiles = new ReportFiles(timePeriod, "$grailsApplication.config.vs.weekReportsPath", null)
+        ReportFiles reportFiles = new ReportFiles(timePeriod, config.vs.weekReportsPath", null)
         if(request.contentType?.contains("json")) {
             if(reportFiles.jsonFile.exists()) {
                 render JSON.parse(reportFiles.jsonFile.text) as JSON

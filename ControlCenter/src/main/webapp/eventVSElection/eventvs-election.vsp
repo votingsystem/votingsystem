@@ -4,7 +4,6 @@
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
-<link href="${elementURL}/element/time-elements.vsp" rel="import"/>
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>

@@ -13,7 +13,6 @@
 <link href="${elementURL}/transactionVS/transactionvs-list-balance.vsp" rel="import"/>
 <link href="${resourceURL}/core-media-query/core-media-query.html" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
-<link href="${elementURL}/element/time-elements.vsp" rel="import"/>
 <script src="${contextURL}/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
 
 

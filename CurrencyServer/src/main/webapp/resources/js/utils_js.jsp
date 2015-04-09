@@ -143,5 +143,5 @@
     var months = [${msg.monthsShort}];
 
     Date.prototype.getDayWeekFormat = function() {
-        return weekdays[this.getDay()] + " " + this.getDay() + " " + months[ this.getMonth()] + " " + this.getFullYear();
+        return weekdays[this.getDay()] + " " + this.getDate() + " " + months[ this.getMonth()] + " " + this.getFullYear();
     };

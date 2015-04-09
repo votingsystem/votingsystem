@@ -76,7 +76,7 @@ public class RepresentativeResource {
     }
 
     @Path("/") @GET
-    public Response index( @DefaultValue("0") @QueryParam("offset") int offset, @DefaultValue("100") @QueryParam("max") int max,
+    public Response index( @DefaultValue("0") @QueryParam("offset") int offset, @DefaultValue("50") @QueryParam("max") int max,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
         String contentType = req.getContentType() != null ? req.getContentType():"";

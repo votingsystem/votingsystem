@@ -5,7 +5,6 @@
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
-<link href="${elementURL}/element/time-elements.vsp" rel="import"/>
 
 <polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>

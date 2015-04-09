@@ -81,7 +81,7 @@ public class EventVSElectionResource {
                 } else if(eventVSState != EventVS.State.DELETED_FROM_SYSTEM) inList = Arrays.asList(eventVSState);
             } catch(Exception ex) {}
         }
-        Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList")
+        Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList order by e.dateBegin desc")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
         List<EventVSDto> resultListJSON = new ArrayList<>();

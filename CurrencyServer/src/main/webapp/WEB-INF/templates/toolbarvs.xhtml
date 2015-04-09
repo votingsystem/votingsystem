@@ -48,9 +48,12 @@
     </script>
 </h:head>
 <h:body id="voting_system_page" style="margin: 0px; padding: 0px;">
-    <votingsystem-navbar id="navBar" menu="${param.menu}">
+    <votingsystem-navbar id="navBar" menu="${param.menu}" style="display:none;">
         <ui:insert name="content"/>
     </votingsystem-navbar>
+    <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;">
+        <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+    </div>
     <h:messages styleClass="messages"
                 style="list-style: none; padding:0; margin:0;"
                 errorClass="alert alert-error" infoClass="alert alert-success"

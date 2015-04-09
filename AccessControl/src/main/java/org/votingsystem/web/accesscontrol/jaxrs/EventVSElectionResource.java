@@ -87,7 +87,7 @@ public class EventVSElectionResource {
         Query query = dao.getEM().createQuery("select count(e) from EventVSElection e where e.state in :inList")
                 .setParameter("inList", inList);
         Long totalCount = (Long) query.getSingleResult();
-        query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList")
+        query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList order by e.dateBegin desc")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
         List<EventVSDto> resultListJSON = new ArrayList<>();

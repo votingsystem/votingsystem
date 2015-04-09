@@ -132,18 +132,6 @@ String.prototype.getDate = function() {
 	  return new Date(this)
 };
 
-function updateLinksVS(elementsArray) {
-    for (var i = 0; i < elementsArray.length; i++) {
-        //console.log("elementsArray[i].href: " + elementsArray[i].href)
-        if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
-            elementsArray[i].addEventListener('click', function(e) {
-                document.querySelector('#navBar').loadURL(e.target.href)
-                e.preventDefault()
-            });
-        } else if("" != elementsArray[i].href.trim()) console.log("utilsVS - not system url: " + elementsArray[i].href)
-    }
-}
-
 String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()
 };

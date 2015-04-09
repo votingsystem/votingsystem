@@ -43,8 +43,9 @@
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{getEventVSClass(eventvs.state)}}'>
-                                <div  eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
-                                    <p style='margin:0px 0px 0px 0px;text-align:center;'>{{getSubject(eventvs.subject)}}</p></div>
+                                <div layout horizontal center center-justified eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
+                                    {{getSubject(eventvs.subject)}}
+                                </div>
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
                                         <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>

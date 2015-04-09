@@ -28,7 +28,7 @@
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}" on-core-signal-vs-session-data="{{sessionDataSignal}}"
                       on-core-signal-vs-websocket-message="{{websocketSignal}}"></core-signals>
-        <vs-navbar id="_navbar" style="display: none;">
+        <vs-navbar id="_navbar">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="vs-navbar">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
                 </core-toolbar>
@@ -48,7 +48,6 @@
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
             <content></content>
-            </iframe>
         </vs-navbar>
         <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
@@ -64,13 +63,14 @@
                 this.isClientToolConnected = window['isClientToolConnected']
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
                 this.$._navbar.searchVisible(false)
-                this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
-                var navBar = this
                 window.addEventListener('popstate', function(event) {
-                    navBar.url = document.location.href
-                });
+                    this.url = document.location.href
+                }.bind(this));
                 //window.addEventListener("popstate", function(e) {  });
+                this.loading = false
+                document.querySelector("#navBar").style.display = 'block'
+                document.querySelector("#loadingDiv").style.display = 'none'
             },
             urlChanged: function() { //for history navigation
                 this.loadURL(this.url)
@@ -142,7 +142,7 @@
                         document.head.appendChild(links[i]);
                     }
                 }
-                if(numImports == 0) document.querySelector('#navBar').loading = false;
+                if(numImports == 0) this.loading = false;
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
                     if(ajaxDocument.scripts[i].src !== '') {
