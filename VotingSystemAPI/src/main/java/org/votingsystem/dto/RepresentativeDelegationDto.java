@@ -10,15 +10,15 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeDelegationRequest {
+public class RepresentativeDelegationDto {
 
     private TypeVS operation;
     private String representativeNif;
     private String UUID;
 
-    public RepresentativeDelegationRequest() {}
+    public RepresentativeDelegationDto() {}
 
-    public RepresentativeDelegationRequest(String representativeNif) {
+    public RepresentativeDelegationDto(String representativeNif) {
         this.operation = TypeVS.REPRESENTATIVE_SELECTION;
         this.representativeNif = representativeNif;
         this.UUID = java.util.UUID.randomUUID().toString();

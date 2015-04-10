@@ -59,7 +59,7 @@
             publish: {
                 representativeData: {value: {}}
             },
-            ready :  function(e) {
+            ready : function(e) {
                 console.log(this.tagName + " - ready")
                 this.loading = true
                 this.page = 0;
@@ -68,6 +68,9 @@
                 if(window['isClientToolConnected']) {
                     this.$.representationState.opened = true
                 }
+            },
+            representativeDataChanged:function() {
+                console.log(this.tagName + " - representativeData: " + this.representativeData)
             },
             closeRepresentativeDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeRepresentativeDetails")

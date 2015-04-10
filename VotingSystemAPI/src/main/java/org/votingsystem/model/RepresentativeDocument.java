@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import org.votingsystem.util.EntityVS;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -13,7 +15,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity
 @Table(name="RepresentativeDocument")
-public class RepresentativeDocument implements Serializable {
+public class RepresentativeDocument  extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(RepresentativeDocument.class.getSimpleName());
 

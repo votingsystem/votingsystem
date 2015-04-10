@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.dto.RepresentativeDelegationRequest;
+import org.votingsystem.dto.RepresentativeDelegationDto;
 import org.votingsystem.dto.RepresentativeDto;
-import org.votingsystem.dto.RepresentativeRevokeRequest;
+import org.votingsystem.dto.RepresentativeRevokeDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -18,7 +18,6 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import static java.text.MessageFormat.format;
 
 /**
@@ -50,7 +48,7 @@ public class RepresentativeDelegationBean {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);
-        RepresentativeDelegationRequest request = messageSMIME.getSignedContent(RepresentativeDelegationRequest.class);
+        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                 .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -64,8 +62,7 @@ public class RepresentativeDelegationBean {
         String toUser = userVS.getNif();
         String subject = messages.get("representativeSelectValidationSubject");
         messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject));
-        log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(),
-                representationDocument.getId()));
+        log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(), representationDocument.getId()));
         return representationDocument;
         /*String msg = messageSource.getMessage('representativeAssociatedMsg',[messageJSON.representativeName, userVS.nif].toArray(), locale)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIME,
@@ -146,20 +143,6 @@ public class RepresentativeDelegationBean {
         return messageSMIME;
     }
 
-    public void cancelRepresentationDocument(MessageSMIME messageSMIME, UserVS userVS) {
-        Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS " +
-                "and r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
-        RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-        if(representationDocument != null) {
-            log.info("cancelRepresentationDocument - User changing representative");
-            representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(messageSMIME)
-                    .setDateCanceled(userVS.getTimeStampToken().getTimeStampInfo().getGenTime());
-            dao.merge(representationDocument);
-            log.info("cancelRepresentationDocument - user: " + userVS.getNif());
-        } else log.info("cancelRepresentationDocument - user without representative -  nif: " + userVS.getNif());
-    }
-
-
     public void cancelRepresentationDocument(MessageSMIME messageSMIME) {
         UserVS userVS = messageSMIME.getUserVS();
         Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS " +
@@ -175,7 +158,6 @@ public class RepresentativeDelegationBean {
     }
 
     private void checkUserDelegationStatus(UserVS userVS) throws ValidationExceptionVS, RequestRepeatedException {
-        String msg = null;
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) throw new ValidationExceptionVS(
                 "ERROR - user is representative: " + userVS.getNif());
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
@@ -196,7 +178,7 @@ public class RepresentativeDelegationBean {
         if(representativeDocument == null) throw new ValidationExceptionVS( 
                 messages.get("unsubscribeRepresentativeUserErrorMsg", userVS.getNif()));
         log.info("processRevoke - user: " + userVS.getId());
-        RepresentativeRevokeRequest request = messageSMIME.getSignedContent(RepresentativeRevokeRequest.class);
+        RepresentativeRevokeDto request = messageSMIME.getSignedContent(RepresentativeRevokeDto.class);
         request.validate(userVS);
         query = dao.getEM().createQuery("select u from UserVS u where u.representative =:userVS")
                 .setParameter("userVS", userVS);
@@ -307,7 +289,7 @@ public class RepresentativeDelegationBean {
     }
 
 
-    public RepresentativeDto getRepresentativeJSON(UserVS representative) {
+    public RepresentativeDto getRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
                 "r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);

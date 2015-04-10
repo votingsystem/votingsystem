@@ -66,7 +66,7 @@ public class SearchResource {
         List<UserVS> representativeList = query.getResultList();
         List<RepresentativeDto> resultList = new ArrayList<>();
         for(UserVS representative : representativeList) {
-            resultList.add(representativeBean.geRepresentativeJSON(representative));
+            resultList.add(representativeBean.geRepresentativeDto(representative));
         }
         Map representativeMap = new HashMap<>();
         representativeMap.put("representatives", resultList);

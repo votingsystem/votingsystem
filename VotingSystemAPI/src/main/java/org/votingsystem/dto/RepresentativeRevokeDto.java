@@ -10,11 +10,11 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeRevokeRequest {
+public class RepresentativeRevokeDto {
 
     private TypeVS operation;
 
-    public RepresentativeRevokeRequest() {}
+    public RepresentativeRevokeDto() {}
 
     public void validate(UserVS userVS) throws ExceptionVS {
         if(TypeVS.REPRESENTATIVE_REVOKE != operation) throw new ValidationExceptionVS(

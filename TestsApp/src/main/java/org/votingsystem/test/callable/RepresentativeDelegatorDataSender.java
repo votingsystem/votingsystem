@@ -2,13 +2,12 @@ package org.votingsystem.test.callable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.dto.RepresentativeDelegationRequest;
+import org.votingsystem.dto.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.StringUtils;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -33,9 +32,9 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         String subject = "representativeDelegationMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF);
-        String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
+        String toUser = ContextVS.getInstance().getAccessControl().getName();
         SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, new ObjectMapper().writeValueAsString(
-                new RepresentativeDelegationRequest(representativeNIF)), subject);
+                new RepresentativeDelegationDto(representativeNIF)), subject);
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);

@@ -101,12 +101,12 @@ public class RepresentativeBean {
             RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
             result.put("state", RepresentationState.WITH_PUBLIC_REPRESENTATION);
             result.put("base64ContentDigest", representationDocument.getActivationSMIME().getBase64ContentDigest());
-            result.put("representative", representativeDelegationBean.getRepresentativeJSON(userVS.getRepresentative()));
+            result.put("representative", representativeDelegationBean.getRepresentativeDto(userVS.getRepresentative()));
             return result;
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
             result.put("state", RepresentationState.REPRESENTATIVE);
-            result.put("representative", representativeDelegationBean.getRepresentativeJSON(userVS));
+            result.put("representative", representativeDelegationBean.getRepresentativeDto(userVS));
             return result;
         }
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(userVS);
@@ -331,7 +331,7 @@ public class RepresentativeBean {
     public void processVotingHistoryRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS userVS = messageSMIME.getUserVS();
-        RepresentativeVotingHistoryRequest request = messageSMIME.getSignedContent(RepresentativeVotingHistoryRequest.class);
+        RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                 .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -351,7 +351,7 @@ public class RepresentativeBean {
     public void processAccreditationsRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS userVS = messageSMIME.getUserVS();
-        RepresentativeAccreditationsRequest request = messageSMIME.getSignedContent(RepresentativeAccreditationsRequest.class);
+        RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                 .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -407,7 +407,7 @@ public class RepresentativeBean {
         return metaInf;
     }
 
-    public RepresentativeDto geRepresentativeJSON(UserVS representative) {
+    public RepresentativeDto geRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select count(d) from RepresentationDocument d where " +
                 "d.representative =:representative and d.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);

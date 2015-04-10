@@ -12,7 +12,7 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeVotingHistoryRequest {
+public class RepresentativeVotingHistoryDto {
 
     private TypeVS operation;
     private Date dateFrom;
@@ -20,7 +20,7 @@ public class RepresentativeVotingHistoryRequest {
     private String representativeNif;
     private String email;
 
-    public RepresentativeVotingHistoryRequest() {}
+    public RepresentativeVotingHistoryDto() {}
 
 
     public void validate() throws ExceptionVS {

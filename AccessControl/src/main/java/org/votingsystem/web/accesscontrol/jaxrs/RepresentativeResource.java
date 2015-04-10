@@ -86,7 +86,7 @@ public class RepresentativeResource {
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
         List<UserVS> representativeList = query.getResultList();
         for(UserVS representative : representativeList) {
-            responseList.add(representativeBean.geRepresentativeJSON(representative));
+            responseList.add(representativeBean.geRepresentativeDto(representative));
         }
         representativeMap.put("offset", offset);
         representativeMap.put("max", max);
@@ -112,7 +112,7 @@ public class RepresentativeResource {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - UserVS is not a representative - id: " + id).build();
         }
-        RepresentativeDto representativeDto = representativeBean.geRepresentativeJSON(representative);
+        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeDto))
                     .type(ContentTypeVS.JSON.getName()).build();
@@ -188,7 +188,7 @@ public class RepresentativeResource {
 
 
     @Path("eventVS/id/{id}/accreditationsBackup") @GET
-    public Response iaccreditationsBackupForEvent(@PathParam("id") Long id) throws IOException, ExceptionVS {
+    public Response accreditationsBackupForEvent(@PathParam("id") Long id) throws IOException, ExceptionVS {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - EventVSElection not found - eventId" + id).build();

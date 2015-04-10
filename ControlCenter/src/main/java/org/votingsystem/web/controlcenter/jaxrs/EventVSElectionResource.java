@@ -111,6 +111,7 @@ public class EventVSElectionResource {
         return Response.ok().entity(eventVSElection.getId()).type(MediaType.TEXT_PLAIN).build();
     }
 
+    @Transactional
     @Path("/id/{id}/stats") @GET
     public Response stats(@PathParam("id") long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {

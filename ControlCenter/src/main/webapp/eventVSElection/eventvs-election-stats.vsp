@@ -61,8 +61,7 @@
                 else this.$.messageToUser.style.display ='block'
             },
             eventVSIdChanged: function() {
-                var targetURL = "${elementURL}/eventVSElection/" +
-                        this.eventVSId + "/stats"
+                var targetURL = "${restURL}/eventVSElection/id/" + this.eventVSId + "/stats"
                 console.log(this.tagName + "- targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
             }

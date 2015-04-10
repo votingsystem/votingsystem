@@ -12,7 +12,7 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeAccreditationsRequest {
+public class RepresentativeAccreditationsDto {
 
     private TypeVS operation;
     private Date selectedDate;
@@ -20,7 +20,7 @@ public class RepresentativeAccreditationsRequest {
     private String email;
     private String UUID;
 
-    public RepresentativeAccreditationsRequest() {}
+    public RepresentativeAccreditationsDto() {}
 
     public void validate() throws ExceptionVS {
         if(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != operation) throw new ValidationExceptionVS(
