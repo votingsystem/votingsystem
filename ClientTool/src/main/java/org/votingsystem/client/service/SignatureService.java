@@ -20,6 +20,8 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.EventVSDto;
+import org.votingsystem.dto.VoteVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
@@ -76,12 +78,12 @@ public class SignatureService extends Service<ResponseVS> {
             try {
                 switch (operationVS.getType()) {
                     case SEND_SMIME_VOTE:
-                        String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL();
+                        String accessControlURL = operationVS.getEventVS().getServerURL();
                         responseVS = Utils.checkServer(accessControlURL);
                         if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                         else ContextVS.getInstance().setServer((AccessControlVS) responseVS.getData());
                         operationVS.setTargetServer((AccessControlVS) responseVS.getData());
-                        String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL();
+                        String controlCenterURL = operationVS.getEventVS().getControlCenter().getServerURL();
                         responseVS = Utils.checkServer(controlCenterURL);
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
@@ -220,22 +222,20 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
             log.info("sendVote");
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
-            EventVS eventVS = operationVS.getEventVS();
-            eventVS.getVoteVS().genVote();
-            String toUser = eventVS.getAccessControlVS().getName();
+            EventVSDto eventVS = operationVS.getEventVS();
+            VoteVS voteVS = new VoteVS(eventVS.getVoteVS());
+            voteVS.genVote();
+            String toUser = eventVS.getAccessControl().getName();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
-                    new ObjectMapper().writeValueAsString(eventVS.getVoteVS().getAccessRequestDataMap()),
+                    new ObjectMapper().writeValueAsString(voteVS.getAccessRequestDataMap()),
                     password, msgSubject, null);
-            //No se hace la comprobación antes porque no hay usuario en contexto
-            //hasta que no se firma al menos una vez
-            eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
-            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, eventVS.getVoteVS());
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
             ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String textToSign = new ObjectMapper().writeValueAsString(eventVS.getVoteVS().getVoteDataMap()); ;
+            String textToSign = new ObjectMapper().writeValueAsString(new VoteVSDto(voteVS, null)); ;
             fromUser = eventVS.getVoteVS().getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
@@ -249,16 +249,16 @@ public class SignatureService extends Service<ResponseVS> {
             updateProgress(90, 100);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage validatedVote = responseVS.getSMIME();
-                eventVS.getVoteVS().setReceipt(validatedVote);
+                voteVS.setReceipt(validatedVote);
                 ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK, ContentTypeVS.VOTE);
                 voteResponse.setType(TypeVS.VOTEVS);
-                voteResponse.setData(eventVS.getVoteVS());
-                ContextVS.getInstance().addHashCertVSData(eventVS.getVoteVS().getHashCertVSBase64(), voteResponse);
+                voteResponse.setData(voteVS);
+                ContextVS.getInstance().addHashCertVSData(voteVS.getHashCertVSBase64(), voteResponse);
                 Map dataMap = new HashMap<>();
                 dataMap.put("statusCode", ResponseVS.SC_OK);
                 dataMap.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
-                dataMap.put("hashCertVSBase64", eventVS.getVoteVS().getHashCertVSBase64());
-                dataMap.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
+                dataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
+                dataMap.put("hashCertVSHex", new String(Hex.encode(voteVS.getHashCertVSBase64().getBytes())));
                 dataMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
                 //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
                 //String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));

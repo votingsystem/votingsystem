@@ -7,7 +7,6 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.test.ui.TestsApp;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 

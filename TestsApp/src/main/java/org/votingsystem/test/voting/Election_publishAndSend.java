@@ -1,10 +1,9 @@
 package org.votingsystem.test.voting;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.EventVSElectionDto;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
@@ -13,6 +12,7 @@ import org.votingsystem.test.dto.VoteResultDto;
 import org.votingsystem.test.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+
 import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -171,7 +171,7 @@ public class Election_publishAndSend {
         ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt");
         SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
-        EventVSElectionDto eventVSJSON = new ObjectMapper().readValue(responseVS.getMessage(), EventVSElectionDto.class);
+        EventVSDto eventVSJSON = new ObjectMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventVSElection();
     }
 

@@ -1,7 +1,5 @@
 package org.votingsystem.test.util;
 
-import java.util.Map;
-
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

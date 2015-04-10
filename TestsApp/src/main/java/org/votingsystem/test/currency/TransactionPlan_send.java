@@ -6,7 +6,6 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSPlan;
 import org.votingsystem.util.ContextVS;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 

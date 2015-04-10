@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.dto.EventVSElectionDto;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.dto.EventVSMetaInf;
 import org.votingsystem.dto.RepresentativesAccreditations;
 import org.votingsystem.model.*;
@@ -46,7 +46,7 @@ public class EventVSElectionBean {
 
     public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
-        EventVSElectionDto request  = messageSMIME.getSignedContent(EventVSElectionDto.class);
+        EventVSDto request  = messageSMIME.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = controlCenterBean.getControlCenter();
         Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")

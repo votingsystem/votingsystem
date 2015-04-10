@@ -3,7 +3,6 @@ package org.votingsystem.test.util;
 import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 

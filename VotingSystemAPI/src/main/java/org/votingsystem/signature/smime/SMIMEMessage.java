@@ -28,6 +28,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;

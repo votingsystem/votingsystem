@@ -4,6 +4,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.TrustAnchor;

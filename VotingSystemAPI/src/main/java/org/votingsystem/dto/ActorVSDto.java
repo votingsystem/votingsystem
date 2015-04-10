@@ -8,10 +8,7 @@ import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.util.EnvironmentVS;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActorVSDto {
@@ -32,6 +29,11 @@ public class ActorVSDto {
     private EnvironmentVS environmentMode;
 
     public ActorVSDto() {}
+
+    public ActorVSDto(String serverURL, String name) {
+        this.serverURL = serverURL;
+        this.name = name;
+    }
 
     public ActorVSDto(ActorVS actorVS) {
         this.setId(actorVS.getId());

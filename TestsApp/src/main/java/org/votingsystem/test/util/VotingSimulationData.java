@@ -1,13 +1,9 @@
 package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 

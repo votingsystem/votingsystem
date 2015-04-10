@@ -1,11 +1,8 @@
 package org.votingsystem.test.voting;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.test.callable.TimeStamperTestSender;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;

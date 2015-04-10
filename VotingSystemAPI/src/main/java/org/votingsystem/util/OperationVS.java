@@ -1,10 +1,11 @@
 package org.votingsystem.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 
 import java.io.File;
@@ -14,10 +15,10 @@ import java.util.logging.Logger;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationVS {
-    
+
     private static Logger log = Logger.getLogger(OperationVS.class.getSimpleName());
 
-    private TypeVS typeVS;
+    private TypeVS operation;
     private Integer statusCode;
     @JsonProperty("objectId")
     private String callerCallback;
@@ -30,29 +31,28 @@ public class OperationVS {
     private String receiverName;
     private String email;
     private String asciiDoc;
-    private ActorVS targetServer;
+    @JsonIgnore private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
-    @JsonProperty("signedContent")
-    private Map documentToSignMap;
+    @JsonProperty("signedContent") private Map documentToSignMap;
     private Map documentToEncrypt;
     private Map documentToDecrypt;
     private Map document;
     private String contentType;
-    private EventVS eventVS;
+    private EventVSDto eventVS;
     private String[] args;
 
-    
+
     public OperationVS() {}
-    
+
     public OperationVS(int statusCode) {
         this.statusCode = statusCode;
     }
-    
-    public OperationVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+
+    public OperationVS(TypeVS operation) {
+        this.setOperation(operation);
     }
-    
+
     public OperationVS(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
@@ -70,7 +70,7 @@ public class OperationVS {
     public String[] getArgs() {
         return this.args;
     }
-    
+
     public void setArgs(String[] args) {
         this.args = args;
     }
@@ -94,20 +94,20 @@ public class OperationVS {
     }
 
     public TypeVS getType() {
-        return typeVS;
+        return getOperation();
     }
 
     public String getFileName() {
-        if(typeVS == null) return "DEFAULT_OPERATION_NAME";
-        else return typeVS.toString();
+        if(getOperation() == null) return "DEFAULT_OPERATION_NAME";
+        else return getOperation().toString();
     }
 
     public String getCaption() {
-        return ContextVS.getInstance().getMessage(typeVS.toString());
+        return ContextVS.getInstance().getMessage(getOperation().toString());
     }
 
-    public void setType(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setType(TypeVS operation) {
+        this.setOperation(operation);
     }
 
     public Integer getStatusCode() {
@@ -142,11 +142,11 @@ public class OperationVS {
         this.serviceURL = serviceURL;
     }
 
-    public EventVS getEventVS() {
+    public EventVSDto getEventVS() {
         return eventVS;
     }
 
-    public void setEventVS(EventVS eventVS) {
+    public void setEventVS(EventVSDto eventVS) {
         this.eventVS = eventVS;
     }
 
@@ -204,7 +204,7 @@ public class OperationVS {
     }
 
     public ResponseVS validateReceiptDataMap(Map receiptDataMap) {
-        switch(typeVS) {
+        switch(getOperation()) {
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 TypeVS receiptTypeVS = TypeVS.valueOf((String) receiptDataMap.get("operation"));
                 if(!documentToSignMap.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
@@ -215,7 +215,7 @@ public class OperationVS {
                 } else return new ResponseVS(ResponseVS.SC_OK);
             default:
                 return new ResponseVS(ResponseVS.SC_ERROR,
-                        ContextVS.getMessage("serviceNotAvailableForOperationMsg", typeVS));
+                        ContextVS.getMessage("serviceNotAvailableForOperationMsg", getOperation()));
         }
     }
 
@@ -275,6 +275,14 @@ public class OperationVS {
 
     public void setNif(String nif) {
         this.nif = nif;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 }
 

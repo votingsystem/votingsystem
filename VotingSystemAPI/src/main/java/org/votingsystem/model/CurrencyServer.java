@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.util.StringUtils;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;

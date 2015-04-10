@@ -28,13 +28,6 @@ public class MapUtils {
         }
     }
 
-    public static Map<String, String> getActorVSMap(String serverURL, String name) {
-        Map result = new HashMap<>();
-        result.put("serverURL", serverURL);
-        result.put("name", name);
-        return result;
-    }
-
     public static Map<String, Map> getTagMapForIncomes(TagData... tags) {
         //HIDROGENO:[total:new BigDecimal(880.5), timeLimited:new BigDecimal(700.5)]
         Map result = new HashMap<>();

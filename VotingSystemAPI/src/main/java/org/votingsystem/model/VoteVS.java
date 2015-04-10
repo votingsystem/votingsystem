@@ -9,11 +9,11 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.votingsystem.dto.VoteVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
@@ -70,6 +70,19 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private boolean isValid = false;
 
     public VoteVS () {}
+
+    public VoteVS (VoteVSDto voteVSDto) {
+        id = voteVSDto.getId();
+        EventVSElection eventVSElection = new EventVSElection();
+        eventVSElection.setId(voteVSDto.getEventVSId());
+        eventVSElection.setUrl(voteVSDto.getEventVSURL());
+        eventURL = voteVSDto.getEventVSURL();
+        hashAccessRequestBase64 = voteVSDto.getHashAccessRequestBase64();
+        hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
+        hashCertVoteHex = voteVSDto.getHashCertVoteHex();
+        optionSelected = voteVSDto.getOptionSelected();
+        state = voteVSDto.getState();
+    }
 
     public VoteVS (EventVS eventVS) {
         this.eventVS = eventVS;
@@ -345,31 +358,6 @@ public class VoteVS extends EntityVS implements Serializable {
         map.put("UUID", UUID.randomUUID().toString());
         HashMap dataMap = new HashMap(map);
         return dataMap;
-    }
-
-    @JsonIgnore
-    public Map getDataMap() {
-        log.info("getDataMap");
-        Map resultMap = new HashMap();
-        if(optionSelected != null) {
-            HashMap opcionHashMap = new HashMap();
-            opcionHashMap.put("id", optionSelected.getId());
-            opcionHashMap.put("content", optionSelected.getContent());
-            resultMap.put("optionSelected", opcionHashMap);
-        }
-        if(hashCertVSBase64 != null) {
-            resultMap.put("hashCertVSBase64", hashCertVSBase64);
-            resultMap.put("hashCertVoteHex", StringUtils.toHex(hashCertVSBase64));
-        }
-        if(hashAccessRequestBase64 != null) {
-            resultMap.put("hashAccessRequestBase64", hashAccessRequestBase64);
-            resultMap.put("hashSolicitudAccesoHex", StringUtils.toHex(hashAccessRequestBase64));
-        }
-
-        if (eventVS != null) resultMap.put("eventId", eventVS.getId());
-        if (id != null) resultMap.put("id", id);
-        //map.put("UUID", UUID.randomUUID().toString());
-        return resultMap;
     }
 
 }
