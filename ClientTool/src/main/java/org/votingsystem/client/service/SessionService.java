@@ -11,6 +11,7 @@ import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.dto.AnonymousDelegationDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -48,7 +49,7 @@ public class SessionService {
     private UserVS userVS;
     private File sessionFile;
     private File representativeStateFile;
-    private AnonymousDelegationRequest anonymousDelegationRequest;
+    private AnonymousDelegationDto anonymousDelegationDto;
     private Map representativeStateMap;
     private Map browserSessionDataMap;
     private Map sessionDataMap;
@@ -105,7 +106,7 @@ public class SessionService {
         }
     }
 
-    public void setAnonymousDelegationRequest(AnonymousDelegationRequest delegation) {
+    public void setAnonymousDelegationDto(AnonymousDelegationDto delegation) {
         try {
             loadRepresentationData();
             String serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
@@ -116,7 +117,7 @@ public class SessionService {
             representativeStateMap.put("dateFrom", DateUtils.getDayWeekDateStr(delegation.getDateFrom()));
             representativeStateMap.put("dateTo", DateUtils.getDayWeekDateStr(delegation.getDateTo()));
             representativeStateMap.put("base64ContentDigest", delegation.getCancelVoteReceipt().getContentDigestStr());
-            this.anonymousDelegationRequest = delegation;
+            this.anonymousDelegationDto = delegation;
             flush();
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
@@ -156,19 +157,19 @@ public class SessionService {
         }
     }
 
-    public AnonymousDelegationRequest getAnonymousDelegationRequest() {
-        if(anonymousDelegationRequest != null) return anonymousDelegationRequest;
+    public AnonymousDelegationDto getAnonymousDelegationDto() {
+        if(anonymousDelegationDto != null) return anonymousDelegationDto;
         try {
             loadRepresentationData();
             String serializedDelegation = (String) representativeStateMap.get("anonymousDelegationObject");
             if(serializedDelegation != null) {
-                anonymousDelegationRequest = (AnonymousDelegationRequest) ObjectUtils.deSerializeObject(
+                anonymousDelegationDto = (AnonymousDelegationDto) ObjectUtils.deSerializeObject(
                         serializedDelegation.getBytes());
             }
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         } finally {
-            return anonymousDelegationRequest;
+            return anonymousDelegationDto;
         }
     }
 

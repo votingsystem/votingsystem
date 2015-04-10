@@ -35,6 +35,6 @@ public class MapWriter implements MessageBodyWriter<Map> {
     public void writeTo(Map map, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> multivaluedMap, OutputStream out) throws IOException,
             WebApplicationException {
-        JSON.getEscapingMapper().writeValue(out, map);
+        JSON.getMapper().writeValue(out, map);
     }
 }

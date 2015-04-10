@@ -20,7 +20,9 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.AnonymousDelegationDto;
 import org.votingsystem.dto.EventVSDto;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.VoteVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
@@ -371,7 +373,7 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {
             String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-            AnonymousDelegationRequest delegation = SessionService.getInstance().getAnonymousDelegationRequest();
+            AnonymousDelegationDto delegation = SessionService.getInstance().getAnonymousDelegationDto();
             if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                     ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
@@ -399,7 +401,7 @@ public class SignatureService extends Service<ResponseVS> {
             String caption = operationVS.getCaption();
             UserVS representative = UserVS.parse(operationVS.getDocument());
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
-            AnonymousDelegationRequest anonymousDelegation = new AnonymousDelegationRequest(
+            AnonymousDelegationDto anonymousDelegation = new AnonymousDelegationDto(
                     Integer.valueOf((String) operationVS.getDocumentToSignMap().get("weeksOperationActive")),
                     (String) operationVS.getDocumentToSignMap().get("representativeNif"),
                     (String) operationVS.getDocumentToSignMap().get("representativeName"),
@@ -450,7 +452,7 @@ public class SignatureService extends Service<ResponseVS> {
                     anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
                     anonymousDelegation.setRepresentative(representative);
-                    SessionService.getInstance().setAnonymousDelegationRequest(anonymousDelegation);
+                    SessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
                 }
                 return responseVS;
             } catch (Exception ex) {

@@ -1,7 +1,5 @@
 package org.votingsystem.util;
 
-import org.votingsystem.model.TagVS;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +46,4 @@ public class MapUtils {
         return result;
     }
 
-    public static Map getTagMap(TagVS tagVS) {
-        Map result = new HashMap<>();
-        result.put("id", tagVS.getId());
-        result.put("name", tagVS.getName());
-        return null;
-    }
 }

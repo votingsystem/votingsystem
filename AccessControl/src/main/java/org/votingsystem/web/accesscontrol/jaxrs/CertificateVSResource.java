@@ -125,7 +125,7 @@ public class CertificateVSResource {
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(certJSON))
                         .type(ContentTypeVS.JSON.getName()).build();
             } else {
-                req.setAttribute("certMap", JSON.getEscapingMapper().writeValueAsString(certJSON));
+                req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
                 context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
@@ -280,7 +280,7 @@ public class CertificateVSResource {
                 if(req.getContentType().contains("json")) {
                    return certJSON;
                 } else {
-                    req.setAttribute("certMap", JSON.getEscapingMapper().writeValueAsString(certJSON));
+                    req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
                     context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
                     return Response.ok().build();
                 }

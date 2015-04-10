@@ -18,6 +18,7 @@ import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;

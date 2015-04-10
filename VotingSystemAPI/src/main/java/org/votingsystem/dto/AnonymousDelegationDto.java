@@ -1,24 +1,25 @@
-package org.votingsystem.util;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
-
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TypeVS;
 import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AnonymousDelegationRequest implements Serializable {
+public class AnonymousDelegationDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = AnonymousDelegationRequest.class.getSimpleName();
+    public static final String TAG = AnonymousDelegationDto.class.getSimpleName();
 
     private Long localId = -1L;
     private transient SMIMEMessage delegationReceipt;
@@ -45,8 +46,8 @@ public class AnonymousDelegationRequest implements Serializable {
         return delegationReceipt;
     }
 
-    public AnonymousDelegationRequest(Integer weeksOperationActive, String representativeNif, String representativeName,
-              String serverURL) throws Exception {
+    public AnonymousDelegationDto(Integer weeksOperationActive, String representativeNif, String representativeName,
+                                  String serverURL) throws Exception {
         this.setWeeksOperationActive(weeksOperationActive);
         this.serverURL = serverURL;
         this.dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
@@ -209,8 +210,8 @@ public class AnonymousDelegationRequest implements Serializable {
         return result;
     }
 
-    public static AnonymousDelegationRequest parse(Map dataMap) throws Exception {
-        AnonymousDelegationRequest result = new AnonymousDelegationRequest((Integer)dataMap.get("weeksOperationActive"),
+    public static AnonymousDelegationDto parse(Map dataMap) throws Exception {
+        AnonymousDelegationDto result = new AnonymousDelegationDto((Integer)dataMap.get("weeksOperationActive"),
                 null, null, (String)dataMap.get("accessControlURL"));
         if(dataMap.containsKey("representativeNif"))
             result.setRepresentativeNif((String) dataMap.get("representativeNif"));

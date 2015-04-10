@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.BrowserVS;
@@ -14,6 +13,7 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.service.WebSocketService;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
@@ -21,8 +21,6 @@ import org.votingsystem.util.*;
 
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

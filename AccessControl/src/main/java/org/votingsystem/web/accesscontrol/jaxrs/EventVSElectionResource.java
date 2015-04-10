@@ -131,7 +131,7 @@ public class EventVSElectionResource {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(statsMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
-            req.setAttribute("statsDataMap", JSON.getEscapingMapper().writeValueAsString(statsMap));
+            req.setAttribute("statsDataMap", JSON.getMapper().writeValueAsString(statsMap));
             context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
             return Response.ok().build();
         }

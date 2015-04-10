@@ -48,21 +48,14 @@ public class JSON {
         }
     }
 
-
     public static ObjectMapper getMapper() {
         ObjectMapper mapper = new ObjectMapper();
         //mapper.setDateFormat(dateFormat);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN);
+        mapper.getJsonFactory().setCharacterEscapes(new HTMLCharacterEscapes());
         //mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS,true);
         //mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,true);
-        return mapper;
-    }
-
-    public static ObjectMapper getEscapingMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.getJsonFactory().setCharacterEscapes(new HTMLCharacterEscapes());
         return mapper;
     }
 

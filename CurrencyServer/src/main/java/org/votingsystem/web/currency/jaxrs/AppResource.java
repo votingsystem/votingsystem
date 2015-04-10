@@ -109,7 +109,7 @@ public class AppResource {
         if(req.getContentType() != null && req.getContentType().contains("json")) {
             return dataMap;
         } else {
-            req.setAttribute("dataMap", JSON.getEscapingMapper().writeValueAsString(dataMap));
+            req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
             context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -126,7 +126,7 @@ public class AppResource {
         if(req.getContentType() != null && req.getContentType().contains("json")) {
             return dataMap;
         } else {
-            req.setAttribute("dataMap", JSON.getEscapingMapper().writeValueAsString(dataMap));
+            req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
             context.getRequestDispatcher("/jsf/app/user.jsp").forward(req, resp);
             return Response.ok().build();
         }

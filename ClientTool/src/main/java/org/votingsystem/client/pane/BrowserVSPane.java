@@ -20,7 +20,7 @@ import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.OperationVS;
+import org.votingsystem.dto.OperationVS;
 
 import java.util.logging.Logger;
 

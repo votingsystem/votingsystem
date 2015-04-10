@@ -1,7 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MapUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -43,7 +47,7 @@ public class TagVSResource {
         List<TagVS> tagVSList = query.getResultList();
         List resultList = new ArrayList<>();
         for(TagVS tagVS : tagVSList) {
-            resultList.add(MapUtils.getTagMap(tagVS));
+            resultList.add(tagVS);
         }
         Map result = new HashMap<>();
         result.put("tagRecords", resultList);
@@ -54,7 +58,7 @@ public class TagVSResource {
     @POST @Path("/")
     @Consumes({"application/json"})
     public Object indexPost(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
-                          @Context HttpServletResponse resp) {
+                          @Context HttpServletResponse resp) throws JsonProcessingException {
         if(!requestMap.containsKey("tag"))  return Response.status(Response.Status.BAD_REQUEST).entity(
                 "missing json node - tag").build();
         String tagName = (String) requestMap.get("tag");
@@ -64,10 +68,7 @@ public class TagVSResource {
             dao.persist(new CurrencyAccount(signatureBean.getSystemUser(), BigDecimal.ZERO,
                     Currency.getInstance("EUR").getCurrencyCode(), tagVS));
         }
-        Map result = MapUtils.getTagMap(tagVS);
-        //resp.setHeader("Access-Control-Allow-Origin", "*");
-        //if (params.callback) render "${param.callback}(${result as JSON})"
-        return result;
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(tagVS)).type(ContentTypeVS.JSON.getName()).build();
     }
 
     @Path("/list")
@@ -76,7 +77,7 @@ public class TagVSResource {
         List<TagVS> tagVSList = dao.findAll(TagVS.class);
         List resultList = new ArrayList<>();
         for(TagVS tagVS : tagVSList) {
-            resultList.add(MapUtils.getTagMap(tagVS));
+            resultList.add(tagVS);
         }
         Map result = new HashMap<>();
         result.put("tagRecords", resultList);

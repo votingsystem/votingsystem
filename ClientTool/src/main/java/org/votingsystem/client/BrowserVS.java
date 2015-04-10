@@ -20,7 +20,7 @@ import org.votingsystem.client.util.*;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.OperationVS;
+import org.votingsystem.dto.OperationVS;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;

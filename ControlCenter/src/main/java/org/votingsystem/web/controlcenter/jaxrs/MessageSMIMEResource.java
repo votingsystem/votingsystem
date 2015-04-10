@@ -81,7 +81,7 @@ public class MessageSMIMEResource {
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", DateUtils.getISODateStr(timeStampDate));
             resultMap.put("viewer", viewer + ".vsp");
-            return Response.ok().entity(JSON.getEscapingMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);

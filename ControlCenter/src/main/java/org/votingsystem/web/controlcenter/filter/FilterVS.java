@@ -22,12 +22,16 @@ public class FilterVS implements Filter {
     private ServletContext servletContext;
     @Inject ConfigVS config;
     @Inject MessagesBean messages;
+    private String serverName;
+    private String contextURL;
+    private String timeStampServerURL;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
-        // To see this log message at run time, check out the terminal window where you started WildFly.
+        contextURL = config.getContextURL();
+        serverName = config.getServerName();
+        timeStampServerURL = config.getTimeStampServerURL();
         servletContext.log("=------- ControlCenter FilterVS initialized -------");
     }
 
@@ -36,12 +40,12 @@ public class FilterVS implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         req.setAttribute("request", req);
-        req.setAttribute("resourceURL", ((HttpServletRequest) req).getContextPath() + "/resources/bower_components");
-        req.setAttribute("elementURL", ((HttpServletRequest) req).getContextPath() + "/jsf");
-        req.setAttribute("restURL", ((HttpServletRequest) req).getContextPath() + "/rest");
-        req.setAttribute("contextURL", ((HttpServletRequest) req).getContextPath());
-        req.setAttribute("serverName", config.getServerName());
-        req.setAttribute("timeStampServerURL", config.getTimeStampServerURL());
+        req.setAttribute("resourceURL", contextURL + "/resources/bower_components");
+        req.setAttribute("elementURL", contextURL + "/jsf");
+        req.setAttribute("restURL", contextURL + "/rest");
+        req.setAttribute("contextURL", contextURL);
+        req.setAttribute("serverName", serverName);
+        req.setAttribute("timeStampServerURL", timeStampServerURL);
         messages.setLocale(req.getLocale());
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);

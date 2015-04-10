@@ -29,12 +29,10 @@ public class FilterVS implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         contextURL = config.getContextURL();
         serverName = config.getServerName();
         timeStampServerURL = config.getTimeStampServerURL();
-        // To see this log message at run time, check out the terminal window where you started WildFly.
         servletContext.log("------- AccessControl FilterVS initialized -------");
     }
 

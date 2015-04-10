@@ -155,20 +155,20 @@ public class UserVSResource {
         if(userVS instanceof GroupVS) {
             userMap = groupVSBean.getDataMap((GroupVS) userVS, timePeriod);
             resultMap.put("groupvsMap", userMap);
-            req.setAttribute("groupvsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
+            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(userMap));
             view = "/groupVS/groupvs.xhtml";
         }
         else if(userVS instanceof BankVS) {
             userMap = bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
             resultMap.put("uservsMap", userMap);
             resultMap.put("messageToUser", msg);
-            req.setAttribute("uservsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
+            req.setAttribute("uservsMap", JSON.getMapper().writeValueAsString(userMap));
             req.setAttribute("messageToUser", msg);
             view = "/userVS/userVS.xhtml";
         } else {
             userMap = userVSBean.getDataWithBalancesMap(userVS, timePeriod);
             resultMap.put("uservsMap", userMap);
-            req.setAttribute("uservsMap", JSON.getEscapingMapper().writeValueAsString(userMap));
+            req.setAttribute("uservsMap", JSON.getMapper().writeValueAsString(userMap));
             view = "/userVS/userVS.xhtml";
         }
         if(contentType.contains("json")) {
@@ -330,7 +330,7 @@ public class UserVSResource {
         }
         if(contentType.contains("json")) return resultList;
         else {
-            req.setAttribute("bankVSMap", JSON.getEscapingMapper().writeValueAsString(resultList));
+            req.setAttribute("bankVSMap", JSON.getMapper().writeValueAsString(resultList));
             context.getRequestDispatcher("/userVS/bankVSList.xhtml").forward(req, resp);
             return Response.ok().build();
         }

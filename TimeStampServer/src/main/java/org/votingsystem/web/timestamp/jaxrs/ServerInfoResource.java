@@ -37,7 +37,7 @@ public class ServerInfoResource {
         serverInfo.put("serverURL", data.getContextURL());
         serverInfo.put("environmentMode", data.getMode());
         resp.setHeader("Access-Control-Allow-Origin", "*");
-        return JSON.getEscapingMapper().writeValueAsString(serverInfo);
+        return JSON.getMapper().writeValueAsString(serverInfo);
     }
 
 }

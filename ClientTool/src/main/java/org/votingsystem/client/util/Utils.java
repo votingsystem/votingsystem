@@ -31,6 +31,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;

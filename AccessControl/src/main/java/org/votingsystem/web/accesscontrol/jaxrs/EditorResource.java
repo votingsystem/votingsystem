@@ -40,7 +40,7 @@ public class EditorResource {
         controlCenterMap.put("serverURL", controlCenterVS.getServerURL());
         controlCenterMap.put("dateCreated", controlCenterVS.getDateCreated());
         List<Map> controlCenterList = Arrays.asList(controlCenterMap);
-        req.setAttribute("controlCenters", JSON.getEscapingMapper().writeValueAsString(controlCenterList));
+        req.setAttribute("controlCenters", JSON.getMapper().writeValueAsString(controlCenterList));
         context.getRequestDispatcher("/eventVSElection/editor.xhtml").forward(req, resp);
         return Response.ok().build();
     }
