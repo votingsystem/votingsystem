@@ -1,10 +1,13 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Date;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentativeVotingHistoryMetaInf {
 
     private Long numVotes;

@@ -443,17 +443,22 @@ public class ContextVS implements BundleActivator {
     public void setControlCenter(ControlCenterVS controlCenter) { this.controlCenter = controlCenter; }
 
     public static String getMessage(String key, Object... arguments) {
+        String pattern = null;
         try {
-            String pattern = null;
             if(getInstance().resBundle != null) {
                 pattern = getInstance().resBundle.getString(key);
             }
-            if(pattern == null) pattern = getInstance().parentBundle.getString(key);
-            if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
         } catch(Exception ex) {
-            log.log(Level.SEVERE, "### Value not found for key: " + key);
-            return "---" + key + "---";
+        } finally {
+            try {
+                if(pattern == null) pattern = getInstance().parentBundle.getString(key);
+                if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
+                else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, "### Value not found for key: " + key);
+                return "---" + key + "---";
+            }
+
         }
     }
 

@@ -18,7 +18,7 @@
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
 
-        <div style="display:{{step == 'operationSelection'?'block':'none'}}">
+        <div hidden?="{{step !== 'operationSelection'}}">
             <div layout horizontal center center-justified>
                 <paper-button raised type="button" on-click="{{representativeCancel}}"
                         style="margin:15px 20px 15px 0px;">

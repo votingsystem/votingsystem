@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.NifUtils;
@@ -10,10 +11,13 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentativeDelegationDto {
 
     private TypeVS operation;
     private String representativeNif;
+    private String representativeName;
+    private Integer weeksOperationActive;
     private String UUID;
 
     public RepresentativeDelegationDto() {}
@@ -55,5 +59,21 @@ public class RepresentativeDelegationDto {
 
     public void setRepresentativeNif(String representativeNif) {
         this.representativeNif = representativeNif;
+    }
+
+    public Integer getWeeksOperationActive() {
+        return weeksOperationActive;
+    }
+
+    public void setWeeksOperationActive(Integer weeksOperationActive) {
+        this.weeksOperationActive = weeksOperationActive;
+    }
+
+    public String getRepresentativeName() {
+        return representativeName;
+    }
+
+    public void setRepresentativeName(String representativeName) {
+        this.representativeName = representativeName;
     }
 }

@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.UserVS;
 
 import static java.text.MessageFormat.format;
@@ -7,6 +8,7 @@ import static java.text.MessageFormat.format;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentativeDto {
 
     private Long id;

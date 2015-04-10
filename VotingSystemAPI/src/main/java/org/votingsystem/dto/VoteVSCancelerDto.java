@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -7,7 +8,10 @@ import org.votingsystem.util.TypeVS;
 
 import java.security.NoSuchAlgorithmException;
 
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VoteVSCancelerDto {
 
     private String originHashCertVote;

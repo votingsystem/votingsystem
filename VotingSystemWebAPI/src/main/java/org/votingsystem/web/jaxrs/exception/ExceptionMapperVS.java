@@ -22,17 +22,19 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
 
         if(exception instanceof ExceptionVS) {
-            log.log(Level.SEVERE, exception.getMessage(), exception);
+            log.log(Level.SEVERE, "--- ExceptionVS --- " + exception.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(
-                    "ExceptionVS:" + exception.getMessage()).type(MediaType.TEXT_PLAIN).encoding("UTF-8").build();
+                    "ExceptionVS:" + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
         }  else if(exception instanceof NotFoundException) {
+            log.log(Level.SEVERE, "--- NotFoundException --- " + exception.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "NotFoundException: " + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
         } else if(exception instanceof WebApplicationException) {
-            log.log(Level.SEVERE, exception.getMessage(), exception);
+            log.log(Level.SEVERE, "--- WebApplicationException --- " + exception.getMessage(), exception);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     "WebApplicationException: " + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
         } else if(exception instanceof RequestRepeatedException) {
+            log.log(Level.SEVERE, "--- RequestRepeatedException --- " + exception.getMessage());
             return Response.status(ResponseVS.SC_ERROR_REQUEST_REPEATED).entity(
                     ((RequestRepeatedException) exception).toMap()).type(MediaType.APPLICATION_JSON).build();
         } else {

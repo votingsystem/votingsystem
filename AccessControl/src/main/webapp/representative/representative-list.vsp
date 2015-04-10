@@ -71,6 +71,7 @@
             },
             representativeDataChanged:function() {
                 console.log(this.tagName + " - representativeData: " + this.representativeData)
+                this.loading = false
             },
             closeRepresentativeDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeRepresentativeDetails")

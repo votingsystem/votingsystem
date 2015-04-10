@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.EventVSElection;
@@ -12,6 +13,7 @@ import java.util.Map;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventVSMetaInf {
 
     private Long id;

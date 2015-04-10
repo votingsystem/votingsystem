@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.FieldEventVS;
@@ -8,6 +9,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventVSClaimStats {
 
     private Long id;

@@ -69,7 +69,7 @@ public class RepresentativeResource {
     }
 
 
-    @Path("/revoke")
+    @Path("/revoke") @POST
     public Response revoke(MessageSMIME messageSMIME) throws Exception {
         MessageSMIME response = representativeDelegationBean.processRevoke(messageSMIME);
         return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();

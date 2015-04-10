@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationVS {
 
