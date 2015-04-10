@@ -35,8 +35,7 @@
             <div horizontal layout>
                 <div flex class="stateInfo">{{uservs.state | userState}}</div>
                 <div class="date">
-                    <time is="local-time" datetime="{{uservs.dateCreated}}"
-                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                    {{getDate(uservs.dateCreated)}}
                 </div>
             </div>
         </div>
@@ -46,6 +45,9 @@
             isNifVisible:false,
             publish: {
                 uservs: {value: {}}
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             ready: function() { console.log(this.tagName + " - ready") },
             userState: function(state) {

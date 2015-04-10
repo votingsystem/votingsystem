@@ -33,26 +33,25 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">
-                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{ eventvs.state | getEventVSClass }}'>
-                                <div class='eventSubjectDiv'>
-                                    <p style='margin:0px 0px 0px 0px;text-align:center;'>{{eventvs.subject | getSubject}}</p></div>
+                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{getEventVSClass(eventvs.state)}}'>
+                                <div layout horizontal center center-justified class='eventSubjectDiv'>
+                                    <p style='margin:0px 0px 0px 0px;text-align:center;'>{{getSubject(eventvs.subject)}}</p></div>
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
-                                        <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
-                                        <div class='eventDateBeginValueDiv'>
-                                            <time is="local-time" datetime="{{eventvs.dateBeginStr}}"
-                                                  day="numeric" month="short" year="numeric"/></div>
+                                        <div class='eventDateBeginLblDiv'>${msg.dateLbl}: </div>
+                                        <div class='eventDateBeginValueDiv'>{{getDate(eventvs.dateBegin)}}
                                     </div>
                                     <div class='eventAuthorDiv'>
                                         <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
                                         <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
                                     </div>
-                                    <div class='cancelMessage' style="display: {{(eventvs.state == 'CANCELED')?'block':'none'}}">
-                                        ${msg.eventCancelledLbl}</div>
+                                    <div hidden?="{{eventvs.state !== 'CANCELED'}}" class='cancelMessage'>
+                                        ${msg.eventCancelledLbl}
+                                    </div>
                                 </div>
                                 <div class='eventDivFooter'>
-                                    <div class='eventRemainingDiv'>{{eventvs.dateFinish | getElapsedTime}}</div>
-                                    <div class='eventStateDiv'>{{eventvs.state | getMessage}}</div>
+                                    <div class='eventRemainingDiv'>{{getElapsedTime(eventvs.dateFinish)}}</div>
+                                    <div class='eventStateDiv'>{{getMessage(eventvs.state)}}</div>
                                 </div>
                             </div>
                         </template>
@@ -84,6 +83,9 @@
                 this.page = 0;
                 this.subpage = 0;
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             eventsVSMapChanged:function() {
                 this.loading = false

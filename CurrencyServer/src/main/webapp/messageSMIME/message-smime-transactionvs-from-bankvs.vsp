@@ -42,9 +42,7 @@
                 </div>
 
                 <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                    <b>${msg.dateLbl}: </b>
-                    <time is="local-time" datetime="{{timeStampDate}}"
-                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                    <b>${msg.dateLbl}: </b> {{getDate(timeStampDate)}}
                 </div>
 
                 <div style="display:{{messageToUser? 'block':'none'}}">
@@ -121,6 +119,9 @@
                     this.isClientToolConnected = true
                 }.bind(this))
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             attached: function () {
                 console.log(this.tagName + " - attached")

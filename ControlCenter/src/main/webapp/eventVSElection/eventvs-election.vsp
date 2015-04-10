@@ -29,9 +29,7 @@
                         <div style="font-size: 2em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
                     </template>
                 </div>
-                <div style="margin:0px 30px 0px 30px;"><b>${msg.beginLbl}: </b>
-                    <time is="local-time" datetime="{{eventvs.dateBeginStr}}" hour="numeric" minute="numeric"
-                          day="numeric" month="short" year="numeric"/></div>
+                <div style="margin:0px 30px 0px 30px;"><b>${msg.beginLbl}: </b>{{getDate(eventvs.dateBegin)}}</div>
             </div>
 
             <div>
@@ -92,6 +90,9 @@
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             getResults:function() {
                 console.log("getResults")

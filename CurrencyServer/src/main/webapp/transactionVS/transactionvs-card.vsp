@@ -29,8 +29,7 @@
             <div horizontal layout>
                 <div flex horizontal layout center-justified class="transactionDescription">{{transaction| transactionDescription}}</div>
                 <div class="date">
-                    <time is="local-time" datetime="{{transaction.dateCreated}}"
-                          day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                    {{getDate(transaction.dateCreated)}}
                 </div>
             </div>
             <div id="subjectDiv" horizontal layout center-justified class="subject">{{transaction | getSubject}}</div>
@@ -53,6 +52,9 @@
                 this.isConfirmMessage = this.isConfirmMessage || false
                 if("${msg.selectCurrencyRequestLbl}" === transaction.subject) return null
                 else return transaction.subject
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             getClass: function(transactionvs) {
                 if(!this.isUserVSTable) return

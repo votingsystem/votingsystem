@@ -146,14 +146,13 @@
                 for (var i = 0; i < ajaxDocument.scripts.length; i++) {
                     var script = document.createElement("script");
                     if(ajaxDocument.scripts[i].src !== '') {
-                        console.log("loading src")
+                        console.log("loading script src")
                         script.src = ajaxDocument.scripts[i].src
                     } else {
-                        console.log("loading innerHTML")
+                        console.log("loading script innerHTML")
                         script.innerHTML = ajaxDocument.scripts[i].innerHTML;
                     }
-                    console.log("script.src: " + ajaxDocument.scripts[i].innerHTML)
-                    //console.log("ajaxDocument.scripts[i].src: " + ajaxDocument.scripts[i].src)
+                    console.log("ajaxDocument.scripts[i].src: " + ajaxDocument.scripts[i].src)
                     document.head.appendChild(script);
                 }
                 this.innerHTML = ajaxDocument.body.innerHTML

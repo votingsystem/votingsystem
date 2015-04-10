@@ -27,9 +27,7 @@
                 </div>
             </div>
             <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.dateLbl}: </b>
-                <time is="local-time" datetime="{{timeStampDate}}"
-                      day="numeric" month="short" year="numeric" hour="numeric" minute="numeric"/>
+                <b>${msg.dateLbl}: </b> {{getDate(timeStampDate)}}
             </div>
             <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                 <div>
@@ -73,6 +71,9 @@
             caption:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

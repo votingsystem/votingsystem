@@ -52,10 +52,7 @@
             </div>
             <div horizontal layout center center-justified style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
                 ${msg.periodLbl}:
-                <div><time is="local-time" datetime="{{balance.timePeriod.dateFrom}}"
-                           day="numeric" month="short" year="numeric"></time> - </div>
-                <div><time is="local-time" datetime="{{balance.timePeriod.dateTo}}"
-                           day="numeric" month="short" year="numeric"></time></div>
+                <div>{{getDate(balance.timePeriod.dateFrom)}} - </div> {{getDate(balance.timePeriod.dateTo)}} </div>
             </div>
             <div hidden?="{{!status}}" class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
@@ -138,6 +135,9 @@
             selectedTab:'incomesTab',
             publish: {
                 balance: {value: {}}
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             formatAmount: function(amount) {
                 if(Object.prototype.toString.call(amount) !== '[object String]') return amount.toFixed(2)

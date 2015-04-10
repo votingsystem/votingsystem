@@ -60,7 +60,7 @@
                     </template>
                 </div>
                 <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
-                    {{eventvs.dateBeginStr}}</div>
+                    {{getDate(eventvs.dateBegin)}}</div>
             </div>
 
             <div>
@@ -135,6 +135,9 @@
             optionVSSelected:null,
             fireSignal:function() {
                 this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             eventvsChanged:function() {
                 this.optionVSSelected = null

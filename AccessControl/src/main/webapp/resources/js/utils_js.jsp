@@ -106,3 +106,4 @@
     Date.prototype.getDayWeekFormat = function() {
         return weekdays[this.getDay()] + " " + this.getDate() + " " + months[ this.getMonth()] + " " + this.getFullYear();
     };
+
