@@ -15,11 +15,11 @@ import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.dto.OperationVS;
 import org.votingsystem.util.StringUtils;
 
 import java.time.Instant;
@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -98,7 +98,7 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
             }
             mapToSign.put("fieldsEventVS", optionList);
             operationVS.setDocumentToSignMap(mapToSign);
-            BrowserVS.getInstance().processOperationVS(operationVS, null);
+            Browser.getInstance().processOperationVS(operationVS, null);
             stage.hide();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

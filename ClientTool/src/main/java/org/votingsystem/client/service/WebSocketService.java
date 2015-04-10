@@ -7,7 +7,7 @@ import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -157,7 +157,7 @@ public class WebSocketService extends Service<ResponseVS> {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             switch(socketMsg.getOperation()) {
                 case INIT_VALIDATED_SESSION:
-                    BrowserVS.getInstance().runJSCommand(
+                    Browser.getInstance().runJSCommand(
                             socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
                     break;
                 case MESSAGEVS_TO_DEVICE:
@@ -184,11 +184,11 @@ public class WebSocketService extends Service<ResponseVS> {
         else log.info("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.OPEN));
                 break;
         }

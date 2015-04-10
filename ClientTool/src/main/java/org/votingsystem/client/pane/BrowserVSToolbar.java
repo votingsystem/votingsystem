@@ -10,7 +10,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.InboxService;
@@ -24,7 +24,7 @@ import org.votingsystem.util.TypeVS;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -65,7 +65,7 @@ public class BrowserVSToolbar extends HBox {
         forwardButton.setDisable(true);
         Button newTabButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.PLUS));
         newTabButton.getStyleClass().add("toolbar-button");
-        newTabButton.setOnAction(event -> BrowserVS.getInstance().newTab(null, null, null));
+        newTabButton.setOnAction(event -> Browser.getInstance().newTab(null, null, null));
         connectionButton.setVisible(false);
         connectionButton.setOnAction(event -> {
             Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
@@ -91,7 +91,7 @@ public class BrowserVSToolbar extends HBox {
         setOnMouseClicked(mouseEvent -> {
                 if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     if(mouseEvent.getClickCount() == 2){
-                        BrowserVS.getInstance().toggleFullScreen();
+                        Browser.getInstance().toggleFullScreen();
                     }
                 }
             });

@@ -30,7 +30,7 @@ import java.io.FileOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza

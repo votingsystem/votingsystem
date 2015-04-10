@@ -17,10 +17,10 @@ import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.*;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.dto.OperationVS;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -33,9 +33,9 @@ import java.util.logging.Logger;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVS extends VBox implements WebKitHost {
+public class Browser extends VBox implements BrowserVS {
 
-    private static Logger log = java.util.logging.Logger.getLogger(BrowserVS.class.getSimpleName());
+    private static Logger log = java.util.logging.Logger.getLogger(Browser.class.getSimpleName());
 
     private Stage browserStage;
     private FullScreenHelper fullScreenHelper;
@@ -43,15 +43,15 @@ public class BrowserVS extends VBox implements WebKitHost {
     private BrowserVSTabPane tabPaneVS;
     private BrowserVSPane browserHelper;
     private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
-    private static BrowserVS INSTANCE;
+    private static Browser INSTANCE;
 
-    public static BrowserVS init(Stage browserStage) {
-        INSTANCE = new BrowserVS(browserStage);
+    public static Browser init(Stage browserStage) {
+        INSTANCE = new Browser(browserStage);
         return INSTANCE;
     }
 
-    public static BrowserVS getInstance() {
-        if(INSTANCE == null) INSTANCE = new BrowserVS(new Stage());
+    public static Browser getInstance() {
+        if(INSTANCE == null) INSTANCE = new Browser(new Stage());
         return INSTANCE;
     }
 
@@ -60,7 +60,7 @@ public class BrowserVS extends VBox implements WebKitHost {
         browserStage.toFront();
     }
 
-    private BrowserVS(Stage browserStage) {
+    private Browser(Stage browserStage) {
         getStylesheets().add(Utils.getResource("/css/browservs.css"));
         getStyleClass().add("main-dialog");
         this.browserStage = browserStage;

@@ -14,7 +14,7 @@ import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
@@ -170,7 +170,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
                         FileUtils.getFileFromBytes(responseVS.getMessageBytes()), null);
-                BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                 return new ResponseVS(ResponseVS.SC_OK);
             }
             return responseVS;
@@ -194,7 +194,7 @@ public class SignatureService extends Service<ResponseVS> {
                 PlatformImpl.runLater(() -> {
                         DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(),
                                 null, operationVS.getDocument());
-                        BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                        Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                     });
             }
             return responseVS;

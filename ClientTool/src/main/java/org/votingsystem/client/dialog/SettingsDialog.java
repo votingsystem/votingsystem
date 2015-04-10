@@ -10,7 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -86,7 +86,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         requestCertButton.setOnAction(actionEvent -> {
             if (ContextVS.getInstance().getAccessControl() != null) {
                 Platform.runLater(() -> {
-                    BrowserVS.getInstance().newTab(
+                    Browser.getInstance().newTab(
                             ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),null, null);
                     getStage().close();
                 });

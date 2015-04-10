@@ -108,7 +108,7 @@ public class VotingSystemApp extends Application {
 
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
-        BrowserVS browserVS = BrowserVS.init(primaryStage);
+        Browser browser = Browser.init(primaryStage);
         new Thread(() -> {
                 boolean loadedFromJar = false;
                 if(VotingSystemApp.class.getResource(VotingSystemApp.this.getClass().getSimpleName() + ".class").
@@ -141,7 +141,7 @@ public class VotingSystemApp extends Application {
                     CookieHandler.setDefault(cookieManager);
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        browserVS.setVotingSystemAvailable(true);
+                        browser.setVotingSystemAvailable(true);
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
                         SessionService.getInstance().checkCSRRequest();
                     }
@@ -149,15 +149,15 @@ public class VotingSystemApp extends Application {
                 try {
                     responseVS = Utils.checkServer(currencyServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        browserVS.setCurrencyServerAvailable(true);
+                        browser.setCurrencyServerAvailable(true);
                         ContextVS.getInstance().setCurrencyServer((CurrencyServer) responseVS.getData());
-                    } else browserVS.setCurrencyServerAvailable(false);
+                    } else browser.setCurrencyServerAvailable(false);
                 } catch(Exception ex) {
                     log.log(Level.SEVERE,ex.getMessage());
-                    browserVS.setCurrencyServerAvailable(false);
+                    browser.setCurrencyServerAvailable(false);
                 }
         }).start();
-        browserVS.show();
+        browser.show();
     }
 
     public Long getDeviceId() {

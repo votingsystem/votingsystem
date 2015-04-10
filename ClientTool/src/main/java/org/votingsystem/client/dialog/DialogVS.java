@@ -8,7 +8,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 
@@ -32,7 +32,7 @@ public class DialogVS {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
         stage = new Stage(stageStyle);
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+        stage.initOwner(Browser.getInstance().getScene().getWindow());
         fxmlLoader.setController(this);
         stage.centerOnScreen();
         decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);

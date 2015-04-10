@@ -14,7 +14,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
@@ -42,7 +42,7 @@ public class AddVoteOptionDialog extends VBox {
     public AddVoteOptionDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
-        if(BrowserVS.getInstance() != null) stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+        if(Browser.getInstance() != null) stage.initOwner(Browser.getInstance().getScene().getWindow());
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         messageLabel = new Label();
         messageLabel.setWrapText(true);

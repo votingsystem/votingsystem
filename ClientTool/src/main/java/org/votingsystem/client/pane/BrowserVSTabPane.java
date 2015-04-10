@@ -18,7 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.BrowserVSClient;
 import org.votingsystem.client.util.Utils;
@@ -31,7 +31,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -162,7 +162,7 @@ public class BrowserVSTabPane extends TabPane {
                             if(element != null) {
                                 JSObject win = (JSObject) webView.getEngine().executeScript("window");
                                 win.setMember("clientTool", new BrowserVSClient(webView));
-                                BrowserVS.getInstance().fireCoreSignal("vs-session-data",
+                                Browser.getInstance().fireCoreSignal("vs-session-data",
                                         SessionService.getInstance().getBrowserSessionData(), true);
                             }
                             break;
@@ -194,7 +194,7 @@ public class BrowserVSTabPane extends TabPane {
         getTabs().add(newTab);
         getSelectionModel().select(newTab);
         if(URL != null) PlatformImpl.runLater(() -> webView.getEngine().load(URL));
-        BrowserVS.getInstance().show();
+        Browser.getInstance().show();
         return webView;
     }
 

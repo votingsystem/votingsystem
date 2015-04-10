@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -117,7 +117,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                 Button checkVoteButton = new Button(ContextVS.getMessage("checkVoteLbl"));
                 checkVoteButton.setOnAction(actionEvent -> ProgressDialog.showDialog(new CheckVoteTask(
                         signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl"),
-                        BrowserVS.getInstance().getScene().getWindow()));
+                        Browser.getInstance().getScene().getWindow()));
                 result.getChildren().add(checkVoteButton);
                 return result;
             default: return Utils.getSpacer();

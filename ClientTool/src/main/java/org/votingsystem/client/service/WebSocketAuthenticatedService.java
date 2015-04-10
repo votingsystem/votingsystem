@@ -10,7 +10,7 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -23,7 +23,10 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.TypeVS;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -34,7 +37,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -135,12 +138,12 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     private void connect(Map connectionDataMap, String password) {
         ProgressDialog.showDialog(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
-                password, targetServer), ContextVS.getMessage("connectLbl"), BrowserVS.getInstance().getScene().getWindow());
+                password, targetServer), ContextVS.getMessage("connectLbl"), Browser.getInstance().getScene().getWindow());
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled, Map connectionDataMap){
         if(SessionService.getInstance().getUserVS() == null) {
-            CertNotFoundDialog.show(BrowserVS.getInstance().getScene().getWindow());
+            CertNotFoundDialog.show(Browser.getInstance().getScene().getWindow());
             return;
         }
         if(isConnectionEnabled) {
@@ -268,11 +271,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         else log.info("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                BrowserVS.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
+                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
                         null, WebSocketMessage.ConnectionStatus.OPEN));
                 break;
         }

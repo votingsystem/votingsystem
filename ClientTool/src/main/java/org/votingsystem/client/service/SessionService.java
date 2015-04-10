@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.control.Button;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
@@ -36,7 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -191,7 +191,7 @@ public class SessionService {
                 browserSessionDataMap.put("isConnected", true);
                 flush();
                 VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
-                BrowserVS.getInstance().runJSCommand(
+                Browser.getInstance().runJSCommand(
                         socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());

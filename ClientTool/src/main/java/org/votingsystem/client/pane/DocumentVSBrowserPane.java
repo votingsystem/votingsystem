@@ -11,7 +11,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.DocumentVS;
@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -75,7 +75,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                 }
                 if(backup.getName().endsWith(ContentTypeVS.CURRENCY.getExtension())) {
                     CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
-                            BrowserVS.getInstance().getScene().getWindow());
+                            Browser.getInstance().getScene().getWindow());
                 } else {
                     openFile(backup, operationDocument);
                 }

@@ -17,7 +17,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
@@ -49,7 +49,7 @@ public class JSONFormDialog extends VBox {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setResizable(true);
-        stage.initOwner(BrowserVS.getInstance().getScene().getWindow());
+        stage.initOwner(Browser.getInstance().getScene().getWindow());
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         messageLabel = new Label();
         messageLabel.setWrapText(true);

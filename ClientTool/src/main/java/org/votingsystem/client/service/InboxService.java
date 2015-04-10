@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
@@ -31,7 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -115,7 +115,7 @@ public class InboxService {
                         PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                                 password.toCharArray());
                         ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage), 
-                                ContextVS.getMessage("decryptingMessagesMsg"), BrowserVS.getInstance().getScene().getWindow());
+                                ContextVS.getMessage("decryptingMessagesMsg"), Browser.getInstance().getScene().getWindow());
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);
                         showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));

@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
@@ -31,13 +31,13 @@ public class CertNotFoundDialog extends VBox {
         messageLabel.setWrapText(true);
         Button importCertButton = new Button(ContextVS.getMessage("importCertLbl"));
         importCertButton.setOnAction(actionEvent -> {
-            Utils.selectKeystoreFile(null, BrowserVS.getInstance());
+            Utils.selectKeystoreFile(null, Browser.getInstance());
             getScene().getWindow().hide();
         });
         importCertButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setOnAction(actionEvent -> {
-                BrowserVS.getInstance().openVotingSystemURL(
+                Browser.getInstance().openVotingSystemURL(
                         ContextVS.getInstance().getAccessControl().getCertRequestServiceURL(),
                         ContextVS.getMessage("requestCertLbl"));
                 getScene().getWindow().hide();

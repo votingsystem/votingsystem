@@ -2,7 +2,7 @@ package org.votingsystem.client.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.PublishElectionDialog;
@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * JavaScript interface object
@@ -46,7 +46,7 @@ public class BrowserVSClient {
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
             log.info("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
             OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
-            BrowserVS.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
+            Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
                     WebSocketAuthenticatedService.getInstance().setConnectionEnabled(
@@ -56,49 +56,49 @@ public class BrowserVSClient {
                     WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false, null);
                     break;
                 case FILE_FROM_URL:
-                    BrowserVS.getInstance().processOperationVS(null, operationVS);
+                    Browser.getInstance().processOperationVS(null, operationVS);
                     break;
                 case MESSAGEVS_TO_DEVICE:
                     WebSocketService.getInstance().sendMessage(jsonStr);
                     break;
                 case  KEYSTORE_SELECT:
-                    Utils.selectKeystoreFile(operationVS, BrowserVS.getInstance());
+                    Utils.selectKeystoreFile(operationVS, Browser.getInstance());
                     break;
                 case SELECT_IMAGE:
-                    Utils.selectImage(operationVS, BrowserVS.getInstance());
+                    Utils.selectImage(operationVS, Browser.getInstance());
                     break;
                 case OPEN_SMIME:
                     String smimeMessageStr = new String(Base64.getDecoder().decode(
                             operationVS.getMessage().getBytes()), "UTF-8");
                     DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
                             smimeMessageStr, null, operationVS.getDocument());
-                    BrowserVS.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                    Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                     break;
                 case OPEN_CURRENCY:
                     CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((
                                     (String) operationVS.getDocument().get("object")).getBytes()),
-                            BrowserVS.getInstance().getScene().getWindow());
+                            Browser.getInstance().getScene().getWindow());
                     break;
                 case OPEN_SMIME_FROM_URL:
-                    BrowserVS.getInstance().processOperationVS(null, operationVS);
+                    Browser.getInstance().processOperationVS(null, operationVS);
                     break;
                 case SAVE_SMIME:
-                    Utils.saveReceipt(operationVS, BrowserVS.getInstance());
+                    Utils.saveReceipt(operationVS, Browser.getInstance());
                     break;
                 case SAVE_SMIME_ANONYMOUS_DELEGATION:
-                    Utils.saveReceiptAnonymousDelegation(operationVS, BrowserVS.getInstance());
+                    Utils.saveReceiptAnonymousDelegation(operationVS, Browser.getInstance());
                     break;
                 case CERT_USER_NEW:
-                    BrowserVS.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
+                    Browser.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                     break;
                 case WALLET_OPEN:
-                    WalletPane.showDialog(BrowserVS.getInstance().getScene().getWindow());
+                    WalletPane.showDialog(Browser.getInstance().getScene().getWindow());
                     break;
                 case VOTING_PUBLISHING:
-                    PublishElectionDialog.show(operationVS, BrowserVS.getInstance().getScene().getWindow());
+                    PublishElectionDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case NEW_REPRESENTATIVE:
-                    PublishRepresentativeDialog.show(operationVS, BrowserVS.getInstance().getScene().getWindow());
+                    PublishRepresentativeDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case WALLET_SAVE:
                     PasswordDialog passwordDialog = new PasswordDialog();
@@ -107,7 +107,7 @@ public class BrowserVSClient {
                     if(password != null) {
                         try {
                             Wallet.getWallet(password);
-                            BrowserVS.getInstance().fireCoreSignal("vs-wallet-save", null, false);
+                            Browser.getInstance().fireCoreSignal("vs-wallet-save", null, false);
                             InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
                         } catch (WalletException wex) {
                             Utils.showWalletNotFoundMessage();
@@ -118,12 +118,12 @@ public class BrowserVSClient {
                     }
                     break;
                 case MESSAGEVS:
-                    if(operationVS.getDocumentToSignMap() != null) BrowserVS.getInstance().processOperationVS(
+                    if(operationVS.getDocumentToSignMap() != null) Browser.getInstance().processOperationVS(
                             operationVS, null);
-                    else  BrowserVS.getInstance().processOperationVS(null, operationVS);
+                    else  Browser.getInstance().processOperationVS(null, operationVS);
                     break;
                 default:
-                    BrowserVS.getInstance().processOperationVS(operationVS, null);
+                    Browser.getInstance().processOperationVS(operationVS, null);
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -149,7 +149,7 @@ public class BrowserVSClient {
                     else result = DateUtils.getDayWeekDateStr(dateToFormat);
                     break;
                 case SIGNAL_VS:
-                    BrowserVS.getInstance().processSignalVS(operationVS.getDocument());
+                    Browser.getInstance().processSignalVS(operationVS.getDocument());
                     break;
                 case REPRESENTATIVE_STATE:
                     result = SessionService.getInstance().getRepresentationState().toString();

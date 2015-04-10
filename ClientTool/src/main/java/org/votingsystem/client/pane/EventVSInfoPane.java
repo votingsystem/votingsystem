@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
@@ -55,7 +55,7 @@ public class EventVSInfoPane extends VBox {
         if(metaInf.getType() == TypeVS.VOTING_EVENT) {
             Button representativesButton = new Button(ContextVS.getMessage("representativesDetailsLbl"));
             representativesButton.setOnAction(actionEvent ->  {
-                BrowserVS.getInstance().newTab(new HTMLPane(metaInf.getRepresentativesHTML()),
+                Browser.getInstance().newTab(new HTMLPane(metaInf.getRepresentativesHTML()),
                         ContextVS.getMessage("representativesDetailsLbl"));
             });
             representativesButton.setGraphic(Utils.getIcon(FontAwesomeIconName.GROUP));

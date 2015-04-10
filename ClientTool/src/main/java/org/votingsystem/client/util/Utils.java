@@ -26,7 +26,7 @@ import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.votingsystem.client.BrowserVS;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.service.SessionService;
@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.BrowserVS.showMessage;
+import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * @author jgzornoza
@@ -166,7 +166,7 @@ public class Utils {
                             webView.getEngine().getLoadWorker().cancel();
                             String href = ((Element)evt.getTarget()).getAttribute("href");
                             evt.preventDefault();
-                            BrowserVS.getInstance().newTab(href, null, null);
+                            Browser.getInstance().newTab(href, null, null);
                         }
                     };
 
@@ -239,7 +239,7 @@ public class Utils {
         return ContextVS.getMessage("forLbl") + " " + MsgUtils.getTagDescription(tagName);
     }
 
-    public static void saveReceiptAnonymousDelegation(OperationVS operation, WebKitHost webKitHost) throws Exception{
+    public static void saveReceiptAnonymousDelegation(OperationVS operation, BrowserVS browserVS) throws Exception{
         log.info("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
                 " - callbackId: " + operation.getCallerCallback());
         Platform.runLater(() -> {
@@ -247,7 +247,7 @@ public class Utils {
             if (responseVS == null) {
                 log.log(Level.SEVERE,"Missing receipt data for hash: " + operation.getMessage());
                 try {
-                    webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                    browserVS.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
                             operation.getCallerCallback());
                 } catch (JsonProcessingException ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -265,9 +265,9 @@ public class Utils {
                     File file = fileChooser.showSaveDialog(new Stage());
                     if (file != null) {
                         FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                        webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_OK, null),
+                        browserVS.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_OK, null),
                                 operation.getCallerCallback());
-                    } else webKitHost.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                    } else browserVS.invokeBrowserCallback(Utils.getMessageToBrowser(ResponseVS.SC_ERROR, null),
                             operation.getCallerCallback());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -276,7 +276,7 @@ public class Utils {
         });
     }
 
-    public static void selectImage(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
+    public static void selectImage(final OperationVS operationVS, BrowserVS browserVS) throws Exception {
         PlatformImpl.runLater(() -> {
             try {
                 FileChooser fileChooser = new FileChooser();
@@ -292,17 +292,17 @@ public class Utils {
                     log.info(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
                         log.info(" - MAX_FILE_SIZE exceeded ");
-                        webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
+                        browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                         ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB)),
                                 operationVS.getCallerCallback());
-                    } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK,
+                    } else browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK,
                             selectedImage.getAbsolutePath()), operationVS.getCallerCallback());
-                } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                } else browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                         operationVS.getCallerCallback());
             } catch (Exception ex) {
                 log.log(Level.SEVERE,ex.getMessage(), ex);
                 try {
-                    webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
+                    browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, ex.getMessage()),
                             operationVS.getCallerCallback());
                 } catch (JsonProcessingException e) {
                     log.log(Level.SEVERE, e.getMessage(), e);
@@ -311,7 +311,7 @@ public class Utils {
         });
     }
 
-    public static void receiptCancellation(final OperationVS operationVS, WebKitHost webKitHost) throws Exception {
+    public static void receiptCancellation(final OperationVS operationVS, BrowserVS browserVS) throws Exception {
         log.info("receiptCancellation");
         switch(operationVS.getType()) {
             case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
@@ -324,9 +324,9 @@ public class Utils {
                     File file = fileChooser.showSaveDialog(new Stage());
                     if(file != null){
                         operationVS.setFile(file);
-                        webKitHost.processOperationVS(operationVS, null);
+                        browserVS.processOperationVS(operationVS, null);
                     } else try {
-                        webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+                        browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                                 operationVS.getCallerCallback());
                     } catch (JsonProcessingException ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -338,7 +338,7 @@ public class Utils {
         }
     }
 
-    public static void selectKeystoreFile(OperationVS operationVS, WebKitHost webKitHost) {
+    public static void selectKeystoreFile(OperationVS operationVS, BrowserVS browserVS) {
         log.info("selectKeystoreFile");
         PlatformImpl.runLater(() -> {
             try {
@@ -361,11 +361,11 @@ public class Utils {
                         SessionService.getInstance().setUserVS(userVS, false);
                         Map userDataMap = userVS.toMap();
                         userDataMap.put("statusCode", ResponseVS.SC_OK);
-                        if(operationVS != null) webKitHost.invokeBrowserCallback(
+                        if(operationVS != null) browserVS.invokeBrowserCallback(
                                 userDataMap, operationVS.getCallerCallback());
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
-                        if(operationVS != null) webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
+                        if(operationVS != null) browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,
                                 ex.getMessage()), operationVS.getCallerCallback());
                     }
 
@@ -376,7 +376,7 @@ public class Utils {
         });
     }
 
-    public static void saveReceipt(OperationVS operation, WebKitHost webKitHost) throws Exception{
+    public static void saveReceipt(OperationVS operation, BrowserVS browserVS) throws Exception{
         log.info("saveReceipt");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
@@ -387,8 +387,8 @@ public class Utils {
         File file = fileChooser.showSaveDialog(new Stage());
         if(file != null){
             FileUtils.copyStringToFile(operation.getMessage(), file);
-            webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK, null), operation.getCallerCallback());
-        } else webKitHost.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
+            browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_OK, null), operation.getCallerCallback());
+        } else browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR, null),
                 operation.getCallerCallback());
     }
 
