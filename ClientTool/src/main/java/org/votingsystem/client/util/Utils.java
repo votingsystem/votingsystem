@@ -30,6 +30,7 @@ import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.service.SessionService;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -187,7 +188,7 @@ public class Utils {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ActorVS.parse((Map) responseVS.getMessageMap());
+                actorVS = ((ActorVSDto) responseVS.getDto(ActorVSDto.class)).getActorVS();
                 responseVS.setData(actorVS);
                 log.log(Level.SEVERE,"checkServer - adding " + serverURL.trim() + " to sever map");
                 switch (actorVS.getType()) {

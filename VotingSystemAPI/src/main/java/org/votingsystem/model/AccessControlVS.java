@@ -19,10 +19,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         setType(Type.ACCESS_CONTROL);
     }
 
-    public AccessControlVS (ActorVS actorVS) {
+    public AccessControlVS (ActorVS actorVS) throws Exception {
         setName(actorVS.getName());
         setX509Certificate(actorVS.getX509Certificate());
-        setControlCenters(actorVS.getControlCenters());
+        setControlCenter(actorVS.getControlCenter());
         setEnvironmentVS(actorVS.getEnvironmentVS());
         setServerURL(actorVS.getServerURL());
         setState(actorVS.getState());

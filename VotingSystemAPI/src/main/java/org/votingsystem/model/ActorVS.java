@@ -4,7 +4,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.TrustAnchor;
@@ -63,7 +62,7 @@ public class ActorVS extends EntityVS implements Serializable {
     @Transient private EnvironmentVS environmentMode;
     @Transient private String certificateURL;
     @Transient private String voteVSInfoURL;
-    @Transient private List<ControlCenterVS> controlCenters;
+    @Transient private ControlCenterVS controlCenter;
     @Transient private X509Certificate timeStampCert = null;
 
     public ActorVS() { }
@@ -137,7 +136,7 @@ public class ActorVS extends EntityVS implements Serializable {
         return timeStampServerURL;
     }
 
-    public void setUrlTimeStampServer(String timeStampServerURL) {
+    public void setTimeStampServerURL(String timeStampServerURL) {
         this.timeStampServerURL = timeStampServerURL;
     }
 
@@ -145,7 +144,11 @@ public class ActorVS extends EntityVS implements Serializable {
         return serverURL;
     }
 
-    public X509Certificate getX509Certificate() {
+    public X509Certificate getX509Certificate() throws Exception {
+        if(x509Certificate != null) return x509Certificate;
+        if(certChainPEM == null) return null;
+        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        x509Certificate = certChain.iterator().next();
         return x509Certificate;
     }
 
@@ -196,7 +199,14 @@ public class ActorVS extends EntityVS implements Serializable {
         this.timeStampCert = timeStampCert;
     }
 
-    public Set<TrustAnchor> getTrustAnchors() {
+    public Set<TrustAnchor> getTrustAnchors() throws Exception {
+        if(trustAnchors != null) return trustAnchors;
+        if(certChainPEM == null) return null;
+        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        trustAnchors = new HashSet<TrustAnchor>();
+        for (X509Certificate cert:certChain) {
+            trustAnchors.add(new TrustAnchor(cert, null));
+        }
         return trustAnchors;
     }
 
@@ -209,6 +219,10 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
+        if(timeStampPEM == null) {
+            this.timeStampCert = null;
+            return;
+        }
         timeStampCert = CertUtils.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
@@ -220,13 +234,7 @@ public class ActorVS extends EntityVS implements Serializable {
         this.webSocketURL = webSocketURL;
     }
 
-    public void setCertChainPEM(String certChainPEM) throws Exception {
-        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
-        x509Certificate = certChain.iterator().next();
-        trustAnchors = new HashSet<TrustAnchor>();
-        for (X509Certificate cert:certChain) {
-            trustAnchors.add(new TrustAnchor(cert, null));
-        }
+    public void setCertChainPEM(String certChainPEM) {
         this.certChainPEM = certChainPEM;
     }
 
@@ -234,12 +242,12 @@ public class ActorVS extends EntityVS implements Serializable {
         return certChain;
     }
 
-    public List<ControlCenterVS> getControlCenters() {
-        return controlCenters;
+    public ControlCenterVS getControlCenter() {
+        return controlCenter;
     }
 
-    public void setControlCenters(List<ControlCenterVS> controlCenters) {
-        this.controlCenters = controlCenters;
+    public void setControlCenter(ControlCenterVS controlCenter) {
+        this.controlCenter = controlCenter;
     }
 
     public String getRootCAServiceURL() {
@@ -307,73 +315,6 @@ public class ActorVS extends EntityVS implements Serializable {
         map.put("name", name);
         map.put("voteVSInfoURL", voteVSInfoURL);
         return map;
-    }
-
-    public static ActorVS parse(Map actorVSMap) throws Exception {
-        ActorVS actorVS = null;
-        Type serverType = null;
-        if(actorVSMap.get("serverType") != null && !"null".equals(actorVSMap.get("serverType").toString())) {
-            Object serverTypeObject = actorVSMap.get("serverType");
-            if(serverTypeObject instanceof String) serverType = Type.valueOf((String) serverTypeObject);
-            else if(serverTypeObject instanceof Type) serverType = (Type) serverTypeObject;
-        }
-        log.info("parse - serverType: " + serverType);
-        switch (serverType) {
-            case CONTROL_CENTER:
-                actorVS = new ControlCenterVS();
-                break;
-            case ACCESS_CONTROL:
-                actorVS =  new AccessControlVS();
-                if (actorVSMap.get("controlCenter") != null) {
-                    Map controlCenterMap = (Map) actorVSMap.get("controlCenter");
-                    List<ControlCenterVS> controlCenters = new ArrayList<ControlCenterVS>();
-                    ControlCenterVS controlCenter = new ControlCenterVS();
-                    controlCenter.setName((String) controlCenterMap.get("name"));
-                    controlCenter.setServerURL((String) controlCenterMap.get("serverURL"));
-                    controlCenter.setId(((Integer) controlCenterMap.get("id")).longValue());
-                    if (controlCenterMap.get("state") != null) {
-                        controlCenter.setState(State.valueOf((String) controlCenterMap.get("state")));
-                    }
-                    controlCenters.add(controlCenter);
-                    actorVS.setControlCenters(controlCenters);
-                }
-                break;
-            case CURRENCY:
-                actorVS = new CurrencyServer();
-                break;
-            default:
-                actorVS = new ActorVS();
-                actorVS.setType(serverType);
-                break;
-        }
-        if(actorVSMap.containsKey("id") && !"null".equals(actorVSMap.get("id").toString()))
-            actorVS.setId(((Integer) actorVSMap.get("id")).longValue());
-        if (actorVSMap.containsKey("environmentMode")) {
-            actorVS.setEnvironmentVS(EnvironmentVS.valueOf((String) actorVSMap.get("environmentMode")));
-        }
-        if (actorVSMap.containsKey("certChainURL"))
-            actorVS.setCertificateURL((String) actorVSMap.get("certChainURL"));
-        if (actorVSMap.containsKey("serverURL")) {
-            String serverURL = StringUtils.checkURL((String) actorVSMap.get("serverURL"));
-            actorVS.setServerURL(serverURL);
-        }
-        if (actorVSMap.containsKey("webSocketURL")) {
-            actorVS.setWebSocketURL((String) actorVSMap.get("webSocketURL"));
-        }
-        if (actorVSMap.containsKey("name")) actorVS.setName((String) actorVSMap.get("name"));
-        if(actorVSMap.containsKey("voteVSInfoURL"))
-            actorVS.setVoteVSInfoURL((String) actorVSMap.get("voteVSInfoURL"));
-        if (actorVSMap.containsKey("certChainPEM")) {
-            actorVS.setCertChainPEM((String) actorVSMap.get("certChainPEM"));
-        }
-        if (actorVSMap.containsKey("timeStampCertPEM")) {
-            actorVS.setTimeStampCertPEM((String) actorVSMap.get("timeStampCertPEM"));
-        }
-        if(actorVSMap.containsKey("timeStampServerURL")) {
-            String timeStampServerURL = StringUtils.checkURL((String) actorVSMap.get("timeStampServerURL"));
-            actorVS.setUrlTimeStampServer(timeStampServerURL);
-        }
-        return actorVS;
     }
 
 }

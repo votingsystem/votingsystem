@@ -175,6 +175,10 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.contentType = contentType;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getMessage() {
         if(message == null && messageBytes != null) {
             try {
@@ -198,9 +202,10 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.messageMap = messageMap;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public <T> T getDto(Class<T> type) throws Exception {
+        return new ObjectMapper().readValue(getMessage(), type);
     }
+
     
     public String toString () {
     	StringBuilder responseVS = new StringBuilder();

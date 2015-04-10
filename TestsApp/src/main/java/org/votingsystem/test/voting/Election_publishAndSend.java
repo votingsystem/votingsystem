@@ -3,6 +3,7 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.EventVSElectionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -62,10 +63,8 @@ public class Election_publishAndSend {
         log = TestUtils.init(Election_publishAndSend.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
-        Map<String, Object> dataMap = new ObjectMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        ActorVS actorVS = ActorVS.parse(dataMap);
+        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
         if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " +
                 actorVS.getType().toString());
         if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {

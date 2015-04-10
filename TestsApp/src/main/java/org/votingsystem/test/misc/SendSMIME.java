@@ -2,6 +2,7 @@ package org.votingsystem.test.misc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -29,9 +30,8 @@ public class SendSMIME {
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                "http://localhost:8080/AccessControl"),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        Map<String, Object> dataMap = new ObjectMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        ContextVS.getInstance().setDefaultServer(ActorVS.parse(dataMap));
+        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+        ContextVS.getInstance().setDefaultServer(actorVS);
 
         String uuid = UUID.randomUUID().toString();
         Map requestDataMap = new HashMap<>();

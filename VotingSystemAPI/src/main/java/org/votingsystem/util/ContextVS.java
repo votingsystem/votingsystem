@@ -139,7 +139,8 @@ public class ContextVS implements BundleActivator {
     private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
     private Set<TrustAnchor> votingSystemSSLTrustAnchors;
-    private Properties appProperties;
+    private ResourceBundle resBundle;
+    private ResourceBundle parentBundle;
     private Properties settings;
     private UserVS userVS;
     private CurrencyServer currencyServer;
@@ -155,28 +156,26 @@ public class ContextVS implements BundleActivator {
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
-    public ContextVS(String localizatedMessagesFileName, String locale) {
+    public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
             initDirs(System.getProperty("user.home"));
-            appProperties = new Properties();
-            String messagesFileName = null;
-            if(locale == null) messagesFileName = "votingSystemAPI" + ".properties";
-            else messagesFileName = "votingSystemAPI" + "_" + locale +  ".properties";
-            URL res = Thread.currentThread().getContextClassLoader().getResource(messagesFileName);
-            if (res == null) {
-                messagesFileName = "votingSystemAPI.properties";;
-                res = Thread.currentThread().getContextClassLoader().getResource(messagesFileName);
-            }
-            appProperties.load(res.openStream());
-            if(localizatedMessagesFileName != null) {
-                String providedProperties = localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties";
-                log.info("provided localizatedMessagesFileName: " + providedProperties);
-                appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                        providedProperties));
-            }
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-            Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdown(); } });
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    shutdown();
+                }
+            });
+            if(localeParam != null) locale = new Locale(localeParam);
+            try {
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI", locale);
+            } catch (Exception ex) {
+                log.info("loading default parent bundle - locale: " + locale);
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI");
+            }
+            if(localizatedMessagesFileName != null) {
+                resBundle = ResourceBundle.getBundle(localizatedMessagesFileName, locale);
+            }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage() + " - localizatedMessagesFileName: " +
                     localizatedMessagesFileName, ex);
@@ -435,7 +434,7 @@ public class ContextVS implements BundleActivator {
 
     public void setAccessControl(AccessControlVS accessControl) {
         this.accessControl = accessControl;
-        this.controlCenter = accessControl.getControlCenters().iterator().next();
+        this.controlCenter = accessControl.getControlCenter();
         if(this.defaultServer == null) this.defaultServer = accessControl;
     }
 
@@ -445,7 +444,11 @@ public class ContextVS implements BundleActivator {
 
     public static String getMessage(String key, Object... arguments) {
         try {
-            String pattern = getInstance().appProperties.getProperty(key);
+            String pattern = null;
+            if(getInstance().resBundle != null) {
+                pattern = getInstance().resBundle.getString(key);
+            }
+            if(pattern == null) pattern = getInstance().parentBundle.getString(key);
             if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
             else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
         } catch(Exception ex) {
@@ -514,20 +517,17 @@ public class ContextVS implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        System.out.println("System.out ----> Activator start - org.votingsystem.util.ContextVS");
-        log.info("Log4j ----> Activator - org.votingsystem.util.ContextVS");
+        log.info(" --- start --- ");
         INSTANCE = this;
         try {
             initDirs(System.getProperty("user.home"));
-            appProperties = new Properties();
-            String providedProperties =  "votingSystemAPI" + "_" + locale +  ".properties";
-            URL res = context.getBundle().getEntry(providedProperties);
-            if (res == null) {
-                providedProperties = "votingSystemAPI.properties";;
-                res = context.getBundle().getEntry(providedProperties);
+            try {
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI", locale);
+            } catch (Exception ex) {
+                log.info("resource bundle not found for locale: " + locale);
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI");
             }
-            appProperties.load(res.openStream());
-            res = context.getBundle().getEntry("VotingSystemSSLCert.pem");
+            URL res = context.getBundle().getEntry("VotingSystemSSLCert.pem");
             votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
                     FileUtils.getBytesFromStream(res.openStream()));
             votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
@@ -542,6 +542,6 @@ public class ContextVS implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        System.out.println("System.out ----> Activator stop - org.votingsystem.util.ContextVS");
+        log.info(" --- stop --- ");
     }
 }

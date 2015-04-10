@@ -169,7 +169,7 @@ public class VotingSystemApp extends Application {
     }
 
     public static void main(String[] args) {
-        ContextVS.initSignatureClient("clientToolMessages.properties", Locale.getDefault().getLanguage());
+        ContextVS.initSignatureClient("clientToolMessages", Locale.getDefault().getLanguage());
         if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
     }

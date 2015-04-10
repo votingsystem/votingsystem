@@ -1,13 +1,12 @@
 package org.votingsystem.model;
 
 import org.votingsystem.util.StringUtils;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
-/**
 
+/**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
@@ -19,10 +18,10 @@ public class CurrencyServer extends ActorVS implements Serializable {
 
     public CurrencyServer() {}
 
-    public CurrencyServer(ActorVS actorVS) {
+    public CurrencyServer(ActorVS actorVS) throws Exception {
         setName(actorVS.getName());
         setX509Certificate(actorVS.getX509Certificate());
-        setControlCenters(actorVS.getControlCenters());
+        setControlCenter(actorVS.getControlCenter());
         setEnvironmentVS(actorVS.getEnvironmentVS());
         setServerURL(actorVS.getServerURL());
         setState(actorVS.getState());

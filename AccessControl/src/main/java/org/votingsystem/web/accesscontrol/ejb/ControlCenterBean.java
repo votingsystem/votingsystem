@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ControlCenterVS;
@@ -68,9 +69,7 @@ public class ControlCenterBean {
         }
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            Map<String, Object> responseMap = new ObjectMapper().readValue(responseVS.getMessage(),
-                    new TypeReference<HashMap<String, Object>>() {});
-            ActorVS actorVS = ActorVS.parse(responseMap);
+            ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
             if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
                     "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
             if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(

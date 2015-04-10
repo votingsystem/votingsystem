@@ -2,6 +2,7 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
@@ -67,9 +68,7 @@ public class TestUtils {
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    Map<String, Object> dataMap = new ObjectMapper().readValue(responseVS.getMessage(), 
-                            new TypeReference<HashMap<String, Object>>() {});
-                    currencyServer = (CurrencyServer) ActorVS.parse(dataMap);
+                    currencyServer = (CurrencyServer) ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
                     ContextVS.getInstance().setCurrencyServer(currencyServer);
                 } catch(Exception ex) { throw new ExceptionVS("Error fetching Currency server: " + ex.getMessage(), ex);}
             } else throw new ExceptionVS("Error fetching Currency server: " + responseVS.getMessage());

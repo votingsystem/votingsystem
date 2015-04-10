@@ -2,6 +2,7 @@ package org.votingsystem.test.misc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -32,8 +33,7 @@ public class FetchX509Cert {
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("$serverInfoURL - error: " + responseVS.getMessage());
-        Map dataMap = new ObjectMapper().readValue(responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        ActorVS actorVS = ActorVS.parse(dataMap);
+        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
         if(serverURL.equals(actorVS.getServerURL())) {
             Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
                     actorVS.getCertChainPEM().getBytes());

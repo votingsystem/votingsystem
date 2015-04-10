@@ -426,9 +426,8 @@ public class SessionService {
         log.info("flush");
         try {
             sessionDataMap.put("browserSession", browserSessionDataMap);
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(sessionDataMap.toString().getBytes()), sessionFile);
-            if(representativeStateMap != null) FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                            representativeStateMap.toString().getBytes()), representativeStateFile);
+            new ObjectMapper().writeValue(sessionFile, sessionDataMap);
+            if(representativeStateMap != null) new ObjectMapper().writeValue(representativeStateFile, representativeStateMap);
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }

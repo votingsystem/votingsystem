@@ -2,6 +2,7 @@ package org.votingsystem.web.controlcenter.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.EventVSElectionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -113,9 +114,7 @@ public class EventVSElectionBean {
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    Map responseMap = new ObjectMapper().readValue(responseVS.getMessage(),
-                            new TypeReference<HashMap<String, Object>>() {});
-                    accessControl = new AccessControlVS(ActorVS.parse(responseMap));
+                    accessControl = (AccessControlVS) ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
                     return dao.persist(accessControl);
                 } catch(Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);

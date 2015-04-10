@@ -2,6 +2,7 @@ package org.votingsystem.test.voting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.MultiSignTestSender;
@@ -39,9 +40,7 @@ public class Multisign_send {
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        Map<String, Object> dataMap = new ObjectMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        ActorVS actorVS = ActorVS.parse(dataMap);
+        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
         if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
             throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
         }

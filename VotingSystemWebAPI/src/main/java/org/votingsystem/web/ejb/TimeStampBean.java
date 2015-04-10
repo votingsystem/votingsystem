@@ -10,6 +10,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
@@ -117,9 +118,7 @@ public class TimeStampBean {
                             timeStampServer.getServerURL()), ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    Map dataMap = new ObjectMapper().readValue(responseVS.getMessage(),
-                            new TypeReference<HashMap<String,String>>(){});
-                    ActorVS serverActorVS = ActorVS.parse(dataMap);
+                    ActorVS serverActorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
                     if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
                         if(timeStampServer.getId() != null) {
                             timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
