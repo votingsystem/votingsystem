@@ -143,7 +143,7 @@
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             },
             cancellationConfirmed: function() {
                 console.log("cancellationConfirmed")
@@ -165,7 +165,7 @@
                         this.opened = true
                     } else  showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         });
     </script>

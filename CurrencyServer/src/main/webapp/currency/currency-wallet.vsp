@@ -72,7 +72,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             },
             loadPlainWallet:function(currencysWalletArray) {
                 console.log(this.tagName + " - loadPlainWallet")

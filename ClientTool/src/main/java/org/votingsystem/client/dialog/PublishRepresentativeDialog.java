@@ -17,8 +17,7 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;
-
-import java.io.File;
+    import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -125,7 +124,8 @@ public class PublishRepresentativeDialog extends DialogVS {
                     log.info(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
                         log.info(" - MAX_FILE_SIZE exceeded ");
-                        showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB));
+                        showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded",
+                                ContextVS.IMAGE_MAX_FILE_SIZE_KB));
                         selectedImage = null;
                     }
                 }
@@ -159,13 +159,16 @@ public class PublishRepresentativeDialog extends DialogVS {
 
     public class FetchRepresentativeDataTask extends Task<ResponseVS> {
 
-        public FetchRepresentativeDataTask(String nif) { }
+        private String nif;
+
+        public FetchRepresentativeDataTask(String nif) {
+            this.nif = nif;
+        }
 
         @Override protected ResponseVS call() throws Exception {
             updateProgress(1, 10);
-            updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-            String serviceURL = ContextVS.getInstance().getAccessControl().getRepresentativeByNifServiceURL(
-                    operationVS.getNif());
+            updateMessage(ContextVS.getMessage("editRepresentativeLbl"));
+            String serviceURL = ContextVS.getInstance().getAccessControl().getRepresentativeByNifServiceURL(nif);
             updateProgress(3, 10);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
             updateProgress(8, 10);
@@ -173,8 +176,9 @@ public class PublishRepresentativeDialog extends DialogVS {
                 showMessage(responseVS);
             } else {
                 RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getDto(RepresentativeDto.class);
-                String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()), StandardCharsets.UTF_8);
-                editor.setHtmlText(description);
+                String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()),
+                        StandardCharsets.UTF_8);
+                Platform.runLater(() -> editor.setHtmlText(description));
             }
             return responseVS;
         }

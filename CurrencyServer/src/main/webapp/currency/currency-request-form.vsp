@@ -117,7 +117,7 @@
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
             showWallet: function() {
-                VotingSystemClient.setJSONMessageToSignatureClient(new WebAppMessage(Operation.WALLET_OPEN));
+                VotingSystemClient.setMessage(new WebAppMessage(Operation.WALLET_OPEN));
             },
             removeTag: function(e) {
                 var tagToDelete = e.target.templateInstance.model.tag
@@ -163,7 +163,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         });
     </script>

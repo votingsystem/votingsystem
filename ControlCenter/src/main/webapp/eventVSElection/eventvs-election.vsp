@@ -106,7 +106,7 @@
                         var appMessageJSON = toJSON(appMessage)
                         if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
                     }.bind(this))
-                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+                    VotingSystemClient.setMessage(webAppMessage)
                 } else window.location.href = fileURL
             },
             back:function() {

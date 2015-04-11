@@ -80,7 +80,7 @@
                     this.fire('message-response', appMessage)
                 }.bind(this))
                 //alert(JSON.stringify(webAppMessage))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
                 this.opened = false
                 this.$.toast.show()
             }

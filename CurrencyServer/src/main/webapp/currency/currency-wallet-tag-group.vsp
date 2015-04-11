@@ -124,7 +124,7 @@
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("showCurrency - message: " + appMessage);
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         });
     </script>

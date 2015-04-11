@@ -163,7 +163,7 @@
                         showMessageVS(msg, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+                VotingSystemClient.setMessage(webAppMessage)
             },
             messageDialogClosed:function() {
                 if(this.appMessageJSON != null && this.appMessageJSON.message != null &&

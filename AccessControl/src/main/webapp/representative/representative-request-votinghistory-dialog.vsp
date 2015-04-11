@@ -124,7 +124,7 @@
                     var msg = appMessageJSON.message
                     showMessageVS(msg, caption)
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
                 this.close()
             },
             close: function() {

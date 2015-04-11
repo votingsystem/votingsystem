@@ -20,12 +20,12 @@
         function webViewLoaded() {
             console.log("webViewLoaded")
             var webAppMessage = new WebAppMessage( 'init')
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setMessage(webAppMessage);
         }
 
         function serverMessage(message) {
             var webAppMessage = new WebAppMessage('message: ' + message, ResponseVS.OK)
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setMessage(webAppMessage);
         }
 
         document.addEventListener('polymer-ready', function() {

@@ -103,7 +103,7 @@
                     showMessageVS(message, '${msg.certRequestLbl}', 'resultMessage',true)
                 } else showMessageVS(message, '${msg.certRequestLbl}')
             })
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setMessage(webAppMessage);
         },
         removeErrorStyle: function (element) {
             var formElements = element.children

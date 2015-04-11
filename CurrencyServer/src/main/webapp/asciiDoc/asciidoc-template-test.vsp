@@ -112,7 +112,7 @@ v1.0, 2013-05-20: First draft
                         var appMessageJSON = toJSON(appMessage)
                         showMessageVS(appMessageJSON.message, "sendCertAuthority - status: " + appMessageJSON.statusCode)
                     })
-                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                    VotingSystemClient.setMessage(webAppMessage);
                 } else {
                     this.$.ajax.url = ""
                     this.$.ajax.body= JSON.stringify({asciiDoc:asciiDoc})

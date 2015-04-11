@@ -69,7 +69,7 @@
                     appMessageJSON = JSON.parse(appMessage)
                     showMessageVS(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBankVS " + appMessageJSON.statusCode)
                 }
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
 
             var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
@@ -121,7 +121,7 @@
                     appMessageJSON = JSON.parse(appMessage)
                     showMessageVS(JSON.stringify(appMessageJSON.message), "signWithMobile " + appMessageJSON.statusCode)
                 }
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         </script>
     </ui:define>

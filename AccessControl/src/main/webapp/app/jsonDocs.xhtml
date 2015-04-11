@@ -47,7 +47,7 @@
                     var appMessageJSON = toJSON(appMessage)
                     showMessageVS(appMessageJSON.message, "validateCert - status: " + appMessageJSON.statusCode)
                 }
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         </script>
 

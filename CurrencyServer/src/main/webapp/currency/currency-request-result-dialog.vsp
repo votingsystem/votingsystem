@@ -63,7 +63,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             },
             showMessage:function(caption, message) {
                 this.caption = caption;

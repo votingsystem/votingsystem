@@ -262,7 +262,7 @@
                     } else caption = '${msg.transactionvsERRORLbl}'
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setMessage(webAppMessage);
         },
         getToUserIBAN: function () {
             if(this.operation === Operation.FROM_GROUP_TO_ALL_MEMBERS) return null

@@ -72,7 +72,7 @@
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         });
     </script>

@@ -43,7 +43,7 @@
                     webAppMessage.setCallback(function(appMessage) {
                         document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
                     })
-                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                    VotingSystemClient.setMessage(webAppMessage);
                 })
             });
 

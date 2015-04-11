@@ -40,11 +40,11 @@ public class BrowserVSClient {
     public BrowserVSClient(WebView webView) {
         this.webView = webView;
     }
-    public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
+    public void setMessage(String messageToSignatureClient) {
         try {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
-            log.info("BrowserVSClient.setJSONMessageToSignatureClient: " + logMsg);
+            log.info("BrowserVSClient.setMessage: " + logMsg);
             OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
             Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {

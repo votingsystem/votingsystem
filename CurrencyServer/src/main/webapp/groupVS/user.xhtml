@@ -55,7 +55,7 @@
                     var msg = appMessageJSON.message
                     showMessageVS(msg, caption)
                 })
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             })
         });
 
@@ -100,7 +100,7 @@
                     }
                     showMessageVS(appMessageJSON.message, caption)
                 })
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
 
             function makeTransactionVS () {

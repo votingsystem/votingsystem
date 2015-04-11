@@ -77,7 +77,7 @@
                         var msg = appMessageJSON.message
                         showMessageVS(msg, caption)
                     }.bind(this))
-                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                    VotingSystemClient.setMessage(webAppMessage);
                 }.bind(this))
             },
             onCoreOverlayOpen:function(e) {
@@ -121,7 +121,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             },
             initCancellation : function(e) {
                 this.$.reasonDialog.toggle();

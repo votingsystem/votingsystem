@@ -70,7 +70,7 @@
                     showMessageVS(msg, caption)
                     window.scrollTo(0,0);
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
             }
         })
     </script>

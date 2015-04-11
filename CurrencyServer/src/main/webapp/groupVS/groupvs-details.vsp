@@ -186,7 +186,7 @@
                     }
                     showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                 }.bind(this))
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                VotingSystemClient.setMessage(webAppMessage);
                 this.appMessageJSON = null
             }
         },
@@ -221,7 +221,7 @@
                 var msg = appMessageJSON.message
                 showMessageVS(msg, caption)
             }.bind(this))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            VotingSystemClient.setMessage(webAppMessage);
         },
         groupvsChanged:function() {
             console.log("groupvsChanged - groupvs: " + Object.prototype.toString.call(this.groupvs))

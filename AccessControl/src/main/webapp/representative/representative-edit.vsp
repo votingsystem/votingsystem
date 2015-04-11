@@ -62,7 +62,7 @@
                 else {
                     var webAppMessage = new WebAppMessage(Operation.EDIT_REPRESENTATIVE)
                     webAppMessage.nif = validatedNif
-                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                    VotingSystemClient.setMessage(webAppMessage);
                 }
             }
         });
