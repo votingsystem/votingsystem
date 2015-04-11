@@ -131,35 +131,19 @@ public class RepresentativeResource {
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS is not a representative - nif: " + nif).build();
-        Map result = new HashMap<>();
-        result.put("representativeId", representative.getId());
-        result.put("representativeName", representative.getName());
-        result.put("representativeNIF", representative.getNif());
-        result.put("firstName", representative.getFirstName());
-        result.put("info", representative.getDescription());
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(ContentTypeVS.JSON.getName()).build();
+        query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS " +
+                "and r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
+        RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
+        if(representativeDocument == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - RepresentativeDocument not found - nif: " + nif).build();
+        RepresentativeDto representativeDto = new RepresentativeDto(
+                representativeDocument.getUserVS(), representativeDocument.getDescription());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto)).type(ContentTypeVS.JSON.getName()).build();
     }
 
     @Path("/nif/{nif}/state") @GET
     public Response state(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
         Map result = representativeBean.checkRepresentationState(nifReq);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(ContentTypeVS.JSON.getName()).build();
-    }
-
-    @Path("/nif/{nif}/edit") @GET
-    public Response edit(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
-        String nif = NifUtils.validate(nifReq);
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", nif).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
-        if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - UserVS is not a representative - nif: " + nif).build();
-        Map result = new HashMap<>();
-        result.put("id", representative.getId());
-        result.put("name", representative.getName());
-        result.put("nif", representative.getNif());
-        result.put("firstName", representative.getFirstName());
-        result.put("info", representative.getDescription());
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(ContentTypeVS.JSON.getName()).build();
     }
 

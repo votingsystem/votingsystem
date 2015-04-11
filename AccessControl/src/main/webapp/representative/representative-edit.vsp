@@ -1,23 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${elementURL}/representative/representative-editor.vsp" rel="import"/>
 <link href="${elementURL}/representative/representative-cancel-dialog.vsp" rel="import"/>
 
-<polymer-element name="representative-edit-form">
+<polymer-element name="representative-edit">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style>
-            .messageToUser {
-                font-weight: bold;
-                margin:10px auto 10px auto;
-                background: #f9f9f9;
-                padding:10px 20px 10px 20px;
-            }
-        </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
-
+        <style></style>
         <div hidden?="{{step !== 'operationSelection'}}">
             <div layout horizontal center center-justified>
                 <paper-button raised type="button" on-click="{{representativeCancel}}"
@@ -30,8 +19,7 @@
                 </paper-button>
             </div>
         </div>
-
-        <div style="display:{{step == 'requestrepresentativeNIF' && !isLoading?'block':'none'}}">
+        <div hidden?="{{step !== 'requestNIF'}}">
             <div class="pageHeader"  layout horizontal center center-justified>
                 <h3>${msg.editRepresentativeLbl}</h3>
             </div>
@@ -47,25 +35,14 @@
                     </div>
                 </div>
             </div>
-            <div style="display:{{(step == 'requestrepresentativeNIF' && isLoading)?'block':'none'}}">
-                <p style='text-align: center;'>${msg.checkingDataLbl}</p>
-                <progress style='display:block;margin:0px auto 10px auto;'></progress>
-            </div>
         </div>
-
-        <div style="visibility:{{step == 'editData'?'visible':'hidden'}}">
-            <representative-editor id="representativeEditor"></representative-editor>
-        </div>
-
     </div>
     <representative-cancel-dialog id="representativeCancelDialog"></representative-cancel-dialog>
     </template>
     <script>
-        Polymer('representative-edit-form', {
+        Polymer('representative-edit', {
             selectedImagePath:null,
             step:'operationSelection',
-            isLoading:false,
-            responseData:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.$.representativeNif.onkeypress = function(event){
@@ -73,7 +50,7 @@
                 }.bind(this)
             },
             representativeEdit: function() {
-                this.step = 'requestrepresentativeNIF'
+                this.step = 'requestNIF'
             },
             representativeCancel: function() {
                 this.$.representativeCancelDialog.show()
@@ -83,21 +60,11 @@
                 var validatedNif = validateNIF(this.$.representativeNif.value)
                 if(validatedNif == null) showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
                 else {
-                    if(this.url != "${restURL}/representative/nif/" + validatedNif + "/edit") this.isLoading = true
-                    this.url = "${restURL}/representative/nif/" + validatedNif + "/edit"
-                    console.log("url: " + this.url)
+                    var webAppMessage = new WebAppMessage(Operation.EDIT_REPRESENTATIVE)
+                    webAppMessage.nif = validatedNif
+                    VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 }
-            },
-            responseDataChanged:function() {
-                this.isLoading = false
-                this.url = ""
-                this.step = 'editData'
-                this.fire('representative-selected')
-                console.log("====== representative-selected event dispatched")
-                this.$.representativeEditor.pageHeader = "${msg.editingRepresentativeMsgTitle}".format(this.responseData.fullName)
-                this.$.representativeEditor.editorData = this.responseData.info
             }
         });
     </script>
-
 </polymer-element>

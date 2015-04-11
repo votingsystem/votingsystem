@@ -2,6 +2,7 @@ package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,13 +14,13 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.votingsystem.client.Browser;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -37,29 +38,49 @@ public class PublishRepresentativeDialog extends DialogVS {
     private static Logger log = Logger.getLogger(PublishRepresentativeDialog.class.getSimpleName());
 
     private OperationVS operationVS;
-    @FXML private Label requestInfoLbl;
+    @FXML private Label adviceLbl;
     @FXML private Button selectImageButton;
     @FXML private Button publishButton;
     @FXML private HTMLEditor editor;
     @FXML private VBox optionsVBox;
     @FXML private ImageView imageView;
     private File selectedImage;
+    private static PublishRepresentativeDialog INSTANCE;
 
-    public PublishRepresentativeDialog(OperationVS operationVS) throws IOException {
-        super("/fxml/RepresentativeEditor.fxml", ContextVS.getMessage("publishRepresentativeLbl"));
+    public PublishRepresentativeDialog(String caption, OperationVS operationVS) throws IOException {
+        super("/fxml/RepresentativeEditor.fxml", caption);
         this.operationVS = operationVS;
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
-        requestInfoLbl.setText(ContextVS.getMessage("enterRepresentativeDescriptionMsg"));
         selectImageButton.setText(ContextVS.getMessage("selectRepresentativeImgLbl"));
         selectImageButton.setOnAction(actionEvent -> selectImage());
-        publishButton.setText(ContextVS.getMessage("publishRepresentativeLbl"));
+        adviceLbl.setWrapText(true);
+        adviceLbl.setText(" - " + ContextVS.getMessage("newRepresentativeAdviceMsg3") + "\n" +
+                " - " + ContextVS.getMessage("newRepresentativeAdviceMsg2") + "\n" +
+                " - " + ContextVS.getMessage("newRepresentativeAdviceMsg1"));
         publishButton.setOnAction(actionEvent -> {
             submitForm();
         });
         publishButton.setVisible(true);
         editor.setHtmlText("<html><body></body></html>");
+    }
+
+    private void loadOperationData() {
+        log.info("loadOperationData - type: " + operationVS.getType());
+        switch (operationVS.getType()) {
+            case NEW_REPRESENTATIVE:
+                publishButton.setText(ContextVS.getMessage("publishRepresentativeLbl"));
+                setCaption(ContextVS.getMessage("publishRepresentativeLbl"));
+                break;
+            case EDIT_REPRESENTATIVE:
+                publishButton.setText(ContextVS.getMessage("editRepresentativeLbl"));
+                setCaption(ContextVS.getMessage("editRepresentativeLbl"));
+                ProgressDialog.showDialog(new FetchRepresentativeDataTask(operationVS.getNif()),
+                        ContextVS.getMessage("editRepresentativeLbl"), getStage());
+                break;
+        }
+        show();
     }
 
     private void submitForm(){
@@ -119,12 +140,43 @@ public class PublishRepresentativeDialog extends DialogVS {
     public static void show(OperationVS operationVS, Window owner) {
         Platform.runLater(() -> {
             try {
-                PublishRepresentativeDialog dialog = new PublishRepresentativeDialog(operationVS);
-                dialog.show();
+                String caption = null;
+                switch (operationVS.getType()) {
+                    case NEW_REPRESENTATIVE:
+                        caption = ContextVS.getMessage("publishRepresentativeLbl");
+                        break;
+                    case EDIT_REPRESENTATIVE:
+                        caption = ContextVS.getMessage("editRepresentativeLbl");
+                        break;
+                }
+                if(INSTANCE == null) INSTANCE =  new PublishRepresentativeDialog(caption, operationVS);
+                INSTANCE.loadOperationData();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }
 
+    public class FetchRepresentativeDataTask extends Task<ResponseVS> {
+
+        public FetchRepresentativeDataTask(String nif) { }
+
+        @Override protected ResponseVS call() throws Exception {
+            updateProgress(1, 10);
+            updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
+            String serviceURL = ContextVS.getInstance().getAccessControl().getRepresentativeByNifServiceURL(
+                    operationVS.getNif());
+            updateProgress(3, 10);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
+            updateProgress(8, 10);
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                showMessage(responseVS);
+            } else {
+                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getDto(RepresentativeDto.class);
+                String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()), StandardCharsets.UTF_8);
+                editor.setHtmlText(description);
+            }
+            return responseVS;
+        }
+    }
 }

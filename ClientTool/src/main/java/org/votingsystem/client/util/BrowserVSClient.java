@@ -98,6 +98,7 @@ public class BrowserVSClient {
                     PublishElectionDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case NEW_REPRESENTATIVE:
+                case EDIT_REPRESENTATIVE:
                     PublishRepresentativeDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case WALLET_SAVE:

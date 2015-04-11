@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.RepresentativeDocument;
 import org.votingsystem.model.UserVS;
 
 import static java.text.MessageFormat.format;
@@ -25,15 +26,23 @@ public class RepresentativeDto {
 
     public RepresentativeDto() {}
 
-    public RepresentativeDto(UserVS userVS, Long smimeActivationId, Long numRepresentations, String contextURL) {
+    public RepresentativeDto(UserVS userVS, String description) {
+        this(userVS);
+        this.description = description;
+    }
+
+    public RepresentativeDto(UserVS userVS) {
         this.id = userVS.getId();
-        this.numRepresentations = numRepresentations;
         this.nif = userVS.getNif();
         this.name = userVS.getName();
         this.firstName = userVS.getFirstName();
         this.lastName = userVS.getLastName();
-        this.description = userVS.getDescription();
         this.type = userVS.getType();
+    }
+
+    public RepresentativeDto(UserVS userVS, Long smimeActivationId, Long numRepresentations, String contextURL) {
+        this(userVS);
+        this.numRepresentations = numRepresentations;
         this.URL = format("{0}/representative/id/{1}", contextURL, userVS.getId());
         this.representativeMessageURL = format("{0}/messageSMIME/id/{1}", contextURL, smimeActivationId);
         this.imageURL = format("{0}/representative/id/{1}/image", contextURL, userVS.getId());
