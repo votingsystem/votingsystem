@@ -88,7 +88,8 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
             Date dateBegin = Date.from(instant);
             Map mapToSign = new HashMap<>();
             mapToSign.put("subject", caption.getText().trim());
-            mapToSign.put("content", editor.getHtmlText());
+            //this is to allow parsing json html fields with javascript
+            mapToSign.put("content",  Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
             mapToSign.put("dateBegin", dateBegin);
             List<Map> optionList = new ArrayList<>();
             for(String option : optionSet) {

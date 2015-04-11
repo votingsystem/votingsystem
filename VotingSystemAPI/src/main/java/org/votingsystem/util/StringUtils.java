@@ -4,7 +4,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -34,6 +33,7 @@ public class StringUtils {
     private static Logger log = Logger.getLogger(StringUtils.class.getSimpleName());
 
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 
     public static String decodeB64_TO_UTF8 (String encodedStr) throws UnsupportedEncodingException, ScriptException {
         String decodeStr = new String(Base64.getDecoder().decode(encodedStr.getBytes()), "UTF-8");

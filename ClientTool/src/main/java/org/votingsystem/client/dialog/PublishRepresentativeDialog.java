@@ -21,6 +21,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -73,7 +74,8 @@ public class PublishRepresentativeDialog extends DialogVS {
             }
             Map mapToSign = new HashMap<>();
             mapToSign.put("operation", TypeVS.NEW_REPRESENTATIVE);
-            mapToSign.put("representativeInfo", editor.getHtmlText());
+            //this is to allow parsing json html fields with javascript
+            mapToSign.put("representativeInfo", Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
             operationVS.setDocumentToSignMap(mapToSign);
             operationVS.setFile(selectedImage);
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishRepresentativeLbl"));

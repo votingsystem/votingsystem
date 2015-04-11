@@ -3,6 +3,7 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 
 <polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
@@ -29,10 +30,10 @@
                     </template>
                 </div>
             </div>
-            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
-            <div style="display:{{messageToUser? 'block':'none'}}">
+            <div hidden?="{{!messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
                     <div>
                         <div id="messageToUser">{{messageToUser}}</div>

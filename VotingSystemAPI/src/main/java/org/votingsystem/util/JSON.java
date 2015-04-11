@@ -31,8 +31,8 @@ public class JSON {
             // start with set of characters known to require escaping (double-quote, backslash etc)
             int[] esc = CharacterEscapes.standardAsciiEscapesForJSON();
             // and force escaping of a few others:
-            esc['<'] = CharacterEscapes.ESCAPE_STANDARD;
-            esc['>'] = CharacterEscapes.ESCAPE_STANDARD;
+            //esc['<'] = CharacterEscapes.ESCAPE_STANDARD;
+            //esc['>'] = CharacterEscapes.ESCAPE_STANDARD;
             esc['&'] = CharacterEscapes.ESCAPE_STANDARD;
             esc['\''] = CharacterEscapes.ESCAPE_STANDARD;
             asciiEscapes = esc;

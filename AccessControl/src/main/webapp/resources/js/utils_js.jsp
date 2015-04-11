@@ -107,3 +107,6 @@
         return weekdays[this.getDay()] + " " + this.getDate() + " " + months[ this.getMonth()] + " " + this.getFullYear();
     };
 
+    Date.prototype.getDayWeekAndHourFormat = function() {
+        return this.getDayWeekFormat() + " - " + this.getHours() + ":" + this.getMinutes();
+    };

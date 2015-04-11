@@ -1,11 +1,10 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -73,26 +72,20 @@ public class MessageSMIMEResource {
                 viewer = "message-smime-access-request";
                 break;
         }
-        Map model = new HashMap<>();
-        model.put("operation", operation);
-        model.put("smimeMessage", smimeMessageStr);
-        model.put("viewer", viewer);
-        model.put("signedContentMap", signedContentMap);
-        model.put("timeStampDate", timeStampDate);
         if(contentType.contains("json")) {
             Map resultMap = new HashMap<>();
             resultMap.put("operation", operation);
             resultMap.put("smimeMessage", smimeMessageStr);
             resultMap.put("signedContentMap", signedContentMap);
-            resultMap.put("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            resultMap.put("viewer", viewer + ".vsp");
+            resultMap.put("timeStampDate", timeStampDate.getTime());
+            resultMap.put("viewer", viewer);
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", new ObjectMapper().writeValueAsString(signedContentMap));
-            req.setAttribute("timeStampDate", DateUtils.getISODateStr(timeStampDate));
-            req.setAttribute("viewer",  viewer + ".vsp");
+            req.setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
+            req.setAttribute("timeStampDate", timeStampDate.getTime());
+            req.setAttribute("viewer",  viewer);
             context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);
             return Response.ok().build();
         }

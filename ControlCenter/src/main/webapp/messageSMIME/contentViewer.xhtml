@@ -13,7 +13,7 @@
     <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"/>
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"/>
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
-    <link href="${elementURL}/messageSMIME/${viewer}" rel="import"/>
+    <link href="${elementURL}/messageSMIME/${viewer}.vsp" rel="import"/>
     <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 </h:head>
@@ -24,7 +24,7 @@
     <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 
     <script>
-        var timeStampDate = "${timeStampDate}"
+        var timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
         var viewer = null
         var smimeMessageContent = toJSON('${signedContentMap}')
 
