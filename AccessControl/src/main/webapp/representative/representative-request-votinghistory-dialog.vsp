@@ -107,23 +107,9 @@
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representativeNif:this.representative.nif,
-                    representativeName:this.representativeFullName, dateFrom:dateFrom.formatWithTime(),
-                    dateTo:dateTo.formatWithTime(), email:this.$.emailRequest.value}
+                    representativeName:this.representativeFullName}
                 webAppMessage.serviceURL = "${restURL}/representative/history"
                 webAppMessage.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
-                webAppMessage.email = this.$.emailRequest.value
-                webAppMessage.setCallback(function(appMessage) {
-                    console.log("requestAccreditationsCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    var caption = '${msg.operationERRORCaption}'
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.operationOKCaption}"
-                    } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
-                        caption = "${msg.operationCANCELEDLbl}"
-                    }
-                    var msg = appMessageJSON.message
-                    showMessageVS(msg, caption)
-                }.bind(this))
                 VotingSystemClient.setMessage(webAppMessage);
                 this.close()
             },

@@ -38,16 +38,6 @@
                     </div>
                 </div>
                 <div>${msg.accreditationRequestMsg}</div>
-
-                <div style="margin:0px 0px 0px 20px;">
-                    <label>${msg.dateRequestLbl}</label>
-                    <input type="text" id="datepicker">
-                </div>
-                <div style="margin:15px 0px 20px 0px">
-                    <input type="email" id="emailRequest" style="width:350px; margin:0px auto 0px auto;" required
-                           title='${msg.enterEmailLbl}' class="form-control"
-                           placeholder='${msg.emailInputLbl}'/>
-                </div>
                 <div layout horizontal>
                     <div flex></div>
                     <div>
@@ -76,32 +66,11 @@
                 this.$.xDialog.opened = true
             },
             submit: function() {
-                var dateRequest = this.picker.getDate()
-                console.log("requestAccreditations - dateRequest: " + dateRequest)
-                if(!this.$.emailRequest.validity.valid) {
-                    showMessageVS('${msg.emailERRORMsg}', '${msg.errorLbl}')
-                    return false
-                }
-
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
-                    representativeNif:this.representative.nif, email:this.$.emailRequest.value,
-                    representativeName:this.representativeFullName, selectedDate: dateRequest.formatWithTime()}
+                    representativeNif:this.representative.nif, representativeName:this.representativeFullName}
                 webAppMessage.serviceURL = "${restURL}/representative/accreditations"
                 webAppMessage.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
-                webAppMessage.email = this.$.emailRequest.value
-                webAppMessage.setCallback(function(appMessage) {
-                    console.log("requestAccreditationsCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    var caption = '${msg.operationERRORCaption}'
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.operationOKCaption}"
-                    } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
-                        caption = "${msg.operationCANCELEDLbl}"
-                    }
-                    var msg = appMessageJSON.message
-                    showMessageVS(msg, caption)
-                }.bind(this))
                 VotingSystemClient.setMessage(webAppMessage);
                 this.close()
             },

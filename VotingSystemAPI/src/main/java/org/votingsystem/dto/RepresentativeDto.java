@@ -35,6 +35,7 @@ public class RepresentativeDto {
         this.id = userVS.getId();
         this.nif = userVS.getNif();
         this.name = userVS.getName();
+        this.description = userVS.getDescription();
         this.firstName = userVS.getFirstName();
         this.lastName = userVS.getLastName();
         this.type = userVS.getType();

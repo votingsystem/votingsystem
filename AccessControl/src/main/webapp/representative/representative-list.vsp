@@ -31,7 +31,7 @@
                         <template repeat="{{representative in representativeData.representatives}}">
                             <div on-tap="{{showRepresentativeDetails}}" class='card representativeDiv'>
                                 <div class='representativeImgCol'>
-                                    <img src='{{representative.imageURL}}'></img>
+                                    <img src='{{representative.imageURL}}'/>
                                 </div>
                                 <div class='representativeDataCol'>
                                     <p class='representativeName'>{{representative.name}}</p>

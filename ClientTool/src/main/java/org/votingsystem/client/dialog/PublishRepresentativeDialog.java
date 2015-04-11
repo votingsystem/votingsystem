@@ -17,7 +17,8 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;
-    import java.io.File;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
@@ -46,9 +48,8 @@ public class PublishRepresentativeDialog extends DialogVS {
     private File selectedImage;
     private static PublishRepresentativeDialog INSTANCE;
 
-    public PublishRepresentativeDialog(String caption, OperationVS operationVS) throws IOException {
+    public PublishRepresentativeDialog(String caption) throws IOException {
         super("/fxml/RepresentativeEditor.fxml", caption);
-        this.operationVS = operationVS;
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
@@ -65,8 +66,10 @@ public class PublishRepresentativeDialog extends DialogVS {
         editor.setHtmlText("<html><body></body></html>");
     }
 
-    private void loadOperationData() {
+    private void loadOperationData(OperationVS operationVS) {
         log.info("loadOperationData - type: " + operationVS.getType());
+        this.operationVS = operationVS;
+        editor.setHtmlText("<html><body></body></html>");
         switch (operationVS.getType()) {
             case NEW_REPRESENTATIVE:
                 publishButton.setText(ContextVS.getMessage("publishRepresentativeLbl"));
@@ -149,8 +152,8 @@ public class PublishRepresentativeDialog extends DialogVS {
                         caption = ContextVS.getMessage("editRepresentativeLbl");
                         break;
                 }
-                if(INSTANCE == null) INSTANCE =  new PublishRepresentativeDialog(caption, operationVS);
-                INSTANCE.loadOperationData();
+                if(INSTANCE == null) INSTANCE =  new PublishRepresentativeDialog(caption);
+                INSTANCE.loadOperationData(operationVS);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

@@ -3,10 +3,7 @@ package org.votingsystem.client.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.dialog.CurrencyDialog;
-import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.dialog.PublishElectionDialog;
-import org.votingsystem.client.dialog.PublishRepresentativeDialog;
+import org.votingsystem.client.dialog.*;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.InboxService;
@@ -81,6 +78,12 @@ public class BrowserVSClient {
                     break;
                 case OPEN_SMIME_FROM_URL:
                     Browser.getInstance().processOperationVS(null, operationVS);
+                    break;
+                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                    RepresentativeAccreditationsDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
+                    break;
+                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+                    RepresentativeVotingHistoryDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case SAVE_SMIME:
                     Utils.saveReceipt(operationVS, Browser.getInstance());

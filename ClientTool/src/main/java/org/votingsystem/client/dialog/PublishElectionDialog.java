@@ -55,7 +55,7 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
         this.operationVS = operationVS;
     }
 
-    @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
+    @FXML void initialize() {
         optionSet = new HashSet<>();
         caption.setPromptText(ContextVS.getMessage("electionSubjectLbl"));
         addOptionButton.setText(ContextVS.getMessage("addVoteOptionLbl"));

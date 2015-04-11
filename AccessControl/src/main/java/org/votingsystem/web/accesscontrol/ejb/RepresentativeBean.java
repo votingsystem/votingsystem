@@ -59,13 +59,14 @@ public class RepresentativeBean {
         //BASE64Decoder decoder = new BASE64Decoder();
         //byte[] imageFileBytes = decoder.decodeBuffer(base64EncodedImage);
         String msg = null;
+        signer.setDescription((String) requestMap.get("representativeInfo"));
         if(UserVS.Type.REPRESENTATIVE != signer.getType()) {
-            dao.merge(signer.setType(UserVS.Type.REPRESENTATIVE).setRepresentative(null));
             representativeDelegationBean.cancelRepresentationDocument(messageSMIME);
             msg = messages.get("representativeDataCreatedOKMsg", signer.getFirstName(), signer.getLastName());
         } else {
             msg = messages.get("representativeDataUpdatedMsg", signer.getFirstName(), signer.getLastName());
         }
+        dao.merge(signer.setType(UserVS.Type.REPRESENTATIVE).setRepresentative(null));
         Query query = dao.getEM().createQuery("select i from ImageVS i where i.userVS =:userVS and i.type =:type")
                 .setParameter("userVS", signer).setParameter("type", ImageVS.Type.REPRESENTATIVE);
         List<ImageVS> images = query.getResultList();

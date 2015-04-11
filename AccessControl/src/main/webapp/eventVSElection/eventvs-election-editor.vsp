@@ -16,7 +16,7 @@
             ${msg.publishVoteLbl}
         </div>
 
-        <div style="display:{{messageToUser? 'block':'none'}}">
+        <div hidden?="{{!messageToUser}}">
             <div class="messageToUser">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser">{{messageToUser}}</div>
@@ -42,7 +42,7 @@
             <div style="position:relative; width:100%;">
             </div>
 
-            <div id="fieldsDiv" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
+            <div hidden?="{{pollOptionList.length === 0}}" id="fieldsDiv">
                 <div class="fieldsBox">
                     <fieldset>
                         <legend>${msg.pollFieldLegend}</legend>
@@ -84,7 +84,6 @@
             picker:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
-                //alert( CKEDITOR.basePath );
                 this.$.addVotingOptionDialog.addEventListener('on-submit', function (e) {
                     this.pollOptionList.push(e.detail)
                 }.bind(this))
