@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity @Table(name="RepresentationDocument")

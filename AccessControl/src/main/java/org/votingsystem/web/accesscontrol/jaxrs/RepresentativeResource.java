@@ -94,7 +94,7 @@ public class RepresentativeResource {
         representativeMap.put("numRepresentatives", responseList.size());
         representativeMap.put("numTotalRepresentatives", responseList.size());//TODO totalCount
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeMap))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeMap))
                     .type(ContentTypeVS.JSON.getName()).build();
         } else {
             req.setAttribute("representativeData", JSON.getMapper().writeValueAsString(representativeMap));

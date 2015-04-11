@@ -22,6 +22,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -77,11 +78,15 @@ public class Browser extends VBox implements BrowserVS {
                     EventBusService.getInstance().post(responseVS);
                 } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                     log.info("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
-                } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                    invokeBrowserCallback(responseVS.getMessageMap(),
+                } else {
+                    if(browserHelper.getSignatureService().getOperationVS().getCallerCallback() == null)
+                        showOperationResult(responseVS);
+                    if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                        invokeBrowserCallback(responseVS.getMessageMap(),
+                                browserHelper.getSignatureService().getOperationVS().getCallerCallback());
+                    } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
                             browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-                } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
-                        browserHelper.getSignatureService().getOperationVS().getCallerCallback());
+                }
             } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         });
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -103,6 +108,13 @@ public class Browser extends VBox implements BrowserVS {
 
     public WebView newTab(String URL, String tabCaption, String jsCommand) {
         return tabPaneVS.newTab(URL, tabCaption, jsCommand);
+    }
+
+    private void showOperationResult(ResponseVS responseVS) throws IOException {
+        if(ContentTypeVS.JSON == responseVS.getContentType()) {
+            showMessage(((Number)responseVS.getMessageMap().get("statusCode")).intValue(),
+                    (String)responseVS.getMessageMap().get("message"));
+        } else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
     @Override public void invokeBrowserCallback(Map dataMap, String callerCallback) throws JsonProcessingException {

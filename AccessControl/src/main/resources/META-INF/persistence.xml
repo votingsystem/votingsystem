@@ -23,6 +23,7 @@
         <class>org.votingsystem.model.KeyStoreVS</class>
         <class>org.votingsystem.model.MessageSMIME</class>
         <class>org.votingsystem.model.RepresentationDocument</class>
+        <class>org.votingsystem.web.accesscontrol.model.RepresentationDocument</class>
         <class>org.votingsystem.model.RepresentativeDocument</class>
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.SubscriptionVS</class>

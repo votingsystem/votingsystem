@@ -4,6 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -39,6 +40,9 @@ public class DialogVS {
         stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
+        decoratedPane.getStyleClass().add("glassBox");
+        decoratedPane.getScene().setFill(Color.TRANSPARENT);
     }
 
     public void setCaption(String caption) {

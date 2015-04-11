@@ -60,6 +60,7 @@ public class MessageDialog extends VBox {
         stage.setScene(new Scene(this, Color.TRANSPARENT));
         decoratedPane = new DecoratedPane(null, null, this, stage);
         stage.setScene(new Scene(decoratedPane));
+        decoratedPane.getScene().setFill(Color.TRANSPARENT);
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
     }

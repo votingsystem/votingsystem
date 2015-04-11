@@ -73,4 +73,9 @@ public class RemoteTestBean implements VotingSystemRemote {
         return "issued cert:" + issuedCert.getSerialNumber().longValue() + "- subjectDN: " + issuedCert.getSubjectDN();
     }
 
+    public void logTest(UserVS userVS) {
+        log.info("========= logTest: " + userVS.getNif());
+
+    }
+
 }

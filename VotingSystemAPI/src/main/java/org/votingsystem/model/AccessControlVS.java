@@ -92,7 +92,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getControlCenterCheckServiceURL(String controlCenterServerURL) {
-        return getServerURL() + "/subscriptionVS/checkControlCenter?serverURL=" + controlCenterServerURL;
+        return getServerURL() + "/rest/subscriptionVS/checkControlCenter?serverURL=" + controlCenterServerURL;
     }
 
     public String getVoteCancelerServiceURL() {

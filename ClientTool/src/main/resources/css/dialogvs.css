@@ -1,0 +1,17 @@
+.glassBox {
+    -fx-background-insets: 0;
+    -fx-effect: dropshadow(gaussian, #888, 5, 0, 0, 0);
+    -fx-background-radius: 4;
+    -fx-padding: 5, 5;
+}
+
+.main-dialog {
+    -fx-background-radius: 4;
+    -fx-pref-width: 375px;
+}
+
+.caption {
+    -fx-text-fill: #888;
+    -fx-font-weight: bold;
+    -fx-background-color: #eee;
+}

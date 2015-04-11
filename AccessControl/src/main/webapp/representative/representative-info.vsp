@@ -55,9 +55,9 @@
                 </paper-tabs>
                 <div hidden?="{{selectedTab != 'profile'}}" class="tabContent">
                     <div layout horizontal>
-                        <div hidden?="{{true}}">
-                            <!--<img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
-                                 style="text-align:center; width: 100px;margin-right: 20px;"></img>-->
+                        <div hidden?="{{false}}">
+                            <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
+                                 style="text-align:center; width: 100px;margin-right: 20px;"/>
                         </div>
                         <div style="margin:auto auto">
                             <vs-html-echo html="{{representative.description}}"></vs-html-echo>
@@ -109,6 +109,7 @@
             },
             representativeChanged: function() {
                 console.log(this.tagName + ".representativeChanged - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
+                console.log(this.tagName + ".representativeChanged:  " + JSON.stringify(this.representative))
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             ready: function() {

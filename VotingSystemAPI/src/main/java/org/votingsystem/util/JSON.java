@@ -59,8 +59,4 @@ public class JSON {
         return mapper;
     }
 
-
-    public String writeValueAsString(Object test) {
-        return null;
-    }
 }

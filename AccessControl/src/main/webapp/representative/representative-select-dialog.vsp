@@ -36,7 +36,7 @@
                     </div>
                 </div>
 
-                <div style="display:{{step == 'main'?'block':'none'}}"}}">
+                <div hidden?="{{step !== 'main'}}">
                     <p>${msg.delegationIntroLbl}</p>
 
                     <div style="font-size:1.2em;font-weight: bold;">${msg.anonymousDelegationLbl}</div>
@@ -87,7 +87,7 @@
                                title="${msg.numWeeksAnonymousDelegationMsg}">
                     </div>
 
-                <div style="display: {{step == 'main'?'block':'none'}};">
+                <div hidden?="{{step !== 'main'}}">
                     <div layout horizontal style="margin:0px 20px 0px 0px;">
                         <div flex></div>
                         <div style="margin:10px 0px 10px 0px;">
@@ -98,7 +98,7 @@
                     </div>
                 </div>
 
-                <div style=" display: {{step == 'confirm'?'block':'none'}}">
+                <div hidden?="{{step !== 'confirm'}}">
                     <div layout horizontal style="margin:0px 20px 0px 0px;">
                         <div flex></div>
                         <div style="margin:10px 20px 10px 0px;">
