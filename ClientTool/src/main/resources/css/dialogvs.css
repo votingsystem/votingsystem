@@ -7,7 +7,6 @@
 
 .main-dialog {
     -fx-background-radius: 4;
-    -fx-pref-width: 375px;
 }
 
 .caption {

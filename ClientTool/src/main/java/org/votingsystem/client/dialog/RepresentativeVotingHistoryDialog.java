@@ -82,7 +82,6 @@ public class RepresentativeVotingHistoryDialog extends DialogVS {
             dateFromPicker.getStyleClass().add("text-field-ok");
             dateToPicker.getStyleClass().add("text-field-ok");
         }
-        OperationVS operationVS = new OperationVS();
         Map mapToSign = operationVS.getDocumentToSignMap();
         mapToSign.put("dateFrom", dateFrom.getTime());
         mapToSign.put("dateTo", dateTo.getTime());

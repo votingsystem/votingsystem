@@ -14,6 +14,7 @@ import org.votingsystem.web.accesscontrol.ejb.EventVSClaimBean;
 import org.votingsystem.web.accesscontrol.ejb.EventVSClaimCollectorBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;

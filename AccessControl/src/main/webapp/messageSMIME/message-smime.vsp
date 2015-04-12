@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
@@ -54,7 +53,7 @@
             timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttool-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))
             },

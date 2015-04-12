@@ -18,7 +18,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,18 +83,5 @@ public class MailBean {
         send(toUser.getEmail(), subject, content);
     }
 
-    @Asynchronous
-    public void sendRepresentativeVotingHistory (BackupRequestVS request, String content, Date dateFrom, Date dateTo) {
-        /*view:"/mail/RepresentativeVotingHistoryDownloadInstructions",
-                model:[fromUser:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
-                pageTitle:emailSubject,	requestURL:requestURL, representative:representativeName, downloadURL:downloadURL]
-         */
-        log.log(Level.FINE, "sendRepresentativeVotingHistory - email:" + request.getEmail() + " - request:"+ request.getId());
-        UserVS toUser = request.getMessageSMIME().getUserVS();
-        String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
-        String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = messages.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
-        send(toUser.getEmail(), subject, content);
-    }
 
 }

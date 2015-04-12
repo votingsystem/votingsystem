@@ -164,6 +164,7 @@ public class BrowserVSTabPane extends TabPane {
                                 win.setMember("clientTool", new BrowserVSClient(webView));
                                 Browser.getInstance().fireCoreSignal("vs-session-data",
                                         SessionService.getInstance().getBrowserSessionData(), true);
+                                Browser.getInstance().runJSCommandCurrentView("setClientToolConnected()");
                             }
                             break;
                         case FAILED:

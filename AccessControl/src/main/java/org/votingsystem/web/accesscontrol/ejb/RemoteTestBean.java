@@ -11,6 +11,7 @@ import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Remote;

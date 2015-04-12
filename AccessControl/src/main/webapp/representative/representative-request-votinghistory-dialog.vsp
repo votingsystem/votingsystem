@@ -24,25 +24,6 @@
                     </div>
                 </div>
                 <div>${msg.representativeHistoryRequestMsg}</div>
-
-                <label>${msg.selectDateRangeMsg}</label>
-
-                <div layout horizontal style="margin:10px 0px 0px 20px;">
-                    <div>
-                        <label>${msg.firstDaterangeLbl}</label>
-                        <input type="text" id="dateFrom">
-                    </div>
-                    <div style="margin:0px 0px 0px 20px;">
-                        <label>${msg.dateToLbl}</label>
-                        <input type="text" id="dateTo">
-                    </div>
-                </div>
-
-                <div style="margin:15px 0px 20px 0px">
-                    <input type="email" id="emailRequest" style="width:350px; margin:0px auto 0px auto;" required
-                           title='${msg.enterEmailLbl}' class="form-control"
-                           placeholder='${msg.emailInputLbl}'/>
-                </div>
                 <div layout horizontal>
                     <div flex></div>
                     <div>

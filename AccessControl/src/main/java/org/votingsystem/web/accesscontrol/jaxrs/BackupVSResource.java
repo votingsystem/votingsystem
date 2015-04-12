@@ -3,11 +3,13 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import org.votingsystem.model.BackupRequestVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSElection;
+import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.RequestUtils;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -36,19 +38,30 @@ public class BackupVSResource {
     @Inject ConfigVS config;
     @Inject MessagesBean messages;
 
-    @Path("/request/id/{requestId}/download")
-    @GET
+    @Path("/request/id/{requestId}/download") @GET
     public Object download(@PathParam("requestId") long requestId, @Context ServletContext context,
                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ServletException, IOException {
         BackupRequestVS backupRequest = dao.find(BackupRequestVS.class, requestId);
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - BackupRequestVS not found - id: " + requestId).build();
-        context.getRequestDispatcher(backupRequest.getFilePath()).forward(req, resp);
+        log.info("backupRequest: " + backupRequest.getId() + " - " + backupRequest.getFilePath());
+        resp.sendRedirect(backupRequest.getFilePath());
         return Response.ok().build();
     }
 
-    @Path("/")
-    @GET
+    @Path("/request/id/{requestId}") @GET
+    public Object getRequest(@PathParam("requestId") long requestId, @Context ServletContext context,
+                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
+        BackupRequestVS backupRequest = dao.find(BackupRequestVS.class, requestId);
+        if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - BackupRequestVS not found - id: " + requestId).build();
+        if(contentType.contains(ContentTypeVS.TEXT.getName())) {
+            return Response.ok().entity(backupRequest.getMessageSMIME().getContent()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        } else return RequestUtils.processRequest(backupRequest.getMessageSMIME(), context, req, resp);
+    }
+
+    @Path("/") @GET
     public Object genBackup(@QueryParam("eventId") Long eventId,
                         @QueryParam("email") String email,
                         @Context ServletContext context, @Context HttpServletRequest req,

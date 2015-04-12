@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<fmt:setBundle basename="org.votingsystem.web.accesscontrol.messages" var="bundle"/>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core"%>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html"%>
+
 <html>
-    <head>
-        <title>${pageTitle}</title>
-        <style type="text/css" media="screen">
-        </style>
-    </head>
-    <body>
-    <fmt:message key="representativeVotingHistoryMailBody" bundle="${bundle}">
-        <fmt:param value="${fromUser}"/>
-        <fmt:param value="${requestURL}"/>
-        <fmt:param value="${representative}"/>
-        <fmt:param value="${dateFromStr}"/>
-        <fmt:param value="${dateToStr}"/>
-        <fmt:param value="${downloadURL}"/>
-    </fmt:message>
-    </body>
+<head>
+    <title>${pageTitle}</title>
+</head>
+<body>
+    <f:view>
+        <h:outputText value="#{msg.representativeVotingHistoryMailBody}"/>
+    </f:view>
+</body>
 </html>

@@ -16,6 +16,7 @@ import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Logger;
+
 import static java.text.MessageFormat.format;
 
 @Stateless

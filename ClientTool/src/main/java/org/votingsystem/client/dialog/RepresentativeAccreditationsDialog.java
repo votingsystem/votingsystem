@@ -57,9 +57,16 @@ public class RepresentativeAccreditationsDialog extends DialogVS {
             datePicker.getStyleClass().add("text-field-error");
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("selectDateLbl"));
             return;
-        } else datePicker.getStyleClass().add("text-field-ok");
+        }
         Instant instant = isoDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
         Date selectedDate = Date.from(instant);
+        if(selectedDate.after(new Date())) {
+            datePicker.getStyleClass().add("text-field-error");
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("dateAfterCurrentDateErrorMsg"));
+            return;
+        }
+        datePicker.getStyleClass().add("text-field-ok");
+
 
         Map mapToSign = operationVS.getDocumentToSignMap();
         mapToSign.put("selectedDate", selectedDate.getTime());

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.RepresentativeDto;
+import org.votingsystem.dto.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
@@ -53,11 +53,11 @@ public class RepresentativeResource {
     public Response history(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
-        context.getRequestDispatcher("/jsf/mail/RepresentativeVotingHistoryDownloadInstructions.vsp").forward(req, responseWrapper);
+        context.getRequestDispatcher("/jsf/mail/RepresentativeVotingHistoryDownloadInstructions.jsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        //log.info("Output : " + content);
         representativeBean.processVotingHistoryRequest(messageSMIME, mailTemplate);
-        return Response.ok().build();
+        RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
+        return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
     @Path("/accreditations") @POST

@@ -1,7 +1,5 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CertificateVS;
@@ -21,8 +19,6 @@ import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

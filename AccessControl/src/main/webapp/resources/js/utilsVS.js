@@ -389,9 +389,14 @@ VotingSystemClient.call = function (messageJSON) {
 
 window['isClientToolConnected'] = false
 
+function setClientToolConnected() {
+    console.log("setClientToolConnected");
+    window['isClientToolConnected'] = true;
+    document.querySelector("#voting_system_page").fire('votingsystem-clienttool-connected', {})
+}
+
 var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
-    window['isClientToolConnected'] = true
     if(document.querySelector("#navBar") != null && document.querySelector("#navBar").fire != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
         document.querySelector("#navBar").fire('core-signal', toJSON(b64_to_utf8));
@@ -403,8 +408,10 @@ function fireCoreSignal(coreSignalDataBase64) {
 }
 
 window.addEventListener('polymer-ready', function() {
-    console.log("utilsVS.js - polymer-ready - sending pending core signal")
-    if(coreSignalData != null) fireCoreSignal(coreSignalData)
+    if(coreSignalData != null) {
+        console.log("utilsVS.js - polymer-ready -- sending pending core signal")
+        fireCoreSignal(coreSignalData)
+    }
     coreSignalData = null
 });
 

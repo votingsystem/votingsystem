@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:h="http://java.sun.com/jsf/html">
 <h:head>
     <title>${msg.signedDocumentLbl}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -19,14 +17,14 @@
 </h:head>
 <h:body id="voting_system_page">
 
-    <div id="voting_system_page" layout="" horizontal="" center="" center-justified="">
-    </div>
+    <div id="voting_system_page" layout="" horizontal="" center="" center-justified=""></div>
+    <core-signals id="coreSignals"></core-signals>
     <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 
     <script>
         var timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
         var viewer = null
-        var smimeMessageContentStr = toJSON('${signedContentMap}')
+        var smimeMessageContent = toJSON('${signedContentMap}')
 
         document.addEventListener('polymer-ready', function() {
             console.log("receiptViewer - polymer-ready - viewer: ${viewer}")

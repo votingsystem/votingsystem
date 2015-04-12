@@ -291,7 +291,7 @@ public class RepresentativeBean {
                 .setMaxResults(pageSize);
 
         String selectedDatePath = DateUtils.getDateStr(selectedDate, "yyyy/MM/dd");
-        String accreditationsPath =  format("/backup/AccreditationsBackup/{1}/representative{2}", selectedDatePath,
+        String accreditationsPath =  format("/backup/AccreditationsBackup/{0}/representative{1}", selectedDatePath,
                 representative.getNif());
         String downloadURL = config.getStaticResURL() + accreditationsPath + ".zip";
         String representativeURL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
@@ -350,7 +350,17 @@ public class RepresentativeBean {
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
                     TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representative, messageSMIME, request.getEmail()));
-            mailBean.sendRepresentativeVotingHistory(backupRequest, messageTemplate, request.getDateFrom(), request.getDateTo());
+
+            String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
+            String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
+            String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
+                    DateUtils.getDayWeekDateStr(request.getDateFrom()), DateUtils.getDayWeekDateStr(request.getDateTo()),
+                    downloadURL);
+
+            log.info("========= content: " + content);
+
+            mailBean.send(request.getEmail(), subject, content);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -387,7 +397,7 @@ public class RepresentativeBean {
                 dateFrom, dateTo));
         String dateFromPath = DateUtils.getDateStr(dateFrom, "yyyy/MM/dd");
         String dateToPath = DateUtils.getDateStr(dateTo,"yyyy/MM/dd");
-        String votingHistoryPath = format("/backup/RepresentativeHistoryVoting/{1}_{2}/representative_{3}",
+        String votingHistoryPath = format("/backup/RepresentativeHistoryVoting/{0}_{1}/representative_{2}",
                 dateFromPath, dateToPath, representative.getNif());
         String basedir = config.getServerDir().getAbsolutePath() + votingHistoryPath;
         new File(basedir).mkdirs();

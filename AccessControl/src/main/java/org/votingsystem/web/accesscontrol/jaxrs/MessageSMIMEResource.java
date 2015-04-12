@@ -1,11 +1,9 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.RequestUtils;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -16,10 +14,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -41,56 +35,7 @@ public class MessageSMIMEResource {
                 "MessageSMIME not found - id: " + id).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
             return Response.ok().entity(messageSMIME.getContent()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
-        } else return processRequest(messageSMIME, context, req, resp);
+        } else return RequestUtils.processRequest(messageSMIME, context, req, resp);
     }
-
-
-    private Object processRequest(MessageSMIME messageSMIME, @Context ServletContext context,
-                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
-        String smimeMessageStr = Base64.getEncoder().encodeToString(messageSMIME.getContent());
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        Date timeStampDate = null;
-        Map signedContentMap;
-        String viewer = "message-smime";
-        if(smimeMessage.getTimeStampToken() != null) {
-            timeStampDate = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
-        }
-        signedContentMap = messageSMIME.getSignedContentMap();
-        TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
-        switch(operation) {
-            case SEND_SMIME_VOTE:
-                viewer = "message-smime-votevs";
-                break;
-            case CANCEL_VOTE:
-                viewer = "message-smime-votevs-canceler";
-                break;
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                viewer = "message-smime-representative-anonymousdelegation-request";
-                break;
-            case ACCESS_REQUEST:
-                viewer = "message-smime-access-request";
-                break;
-        }
-        if(contentType.contains("json")) {
-            Map resultMap = new HashMap<>();
-            resultMap.put("operation", operation);
-            resultMap.put("smimeMessage", smimeMessageStr);
-            resultMap.put("signedContentMap", signedContentMap);
-            resultMap.put("timeStampDate", timeStampDate.getTime());
-            resultMap.put("viewer", viewer);
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
-        } else {
-            req.setAttribute("operation", operation);
-            req.setAttribute("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
-            req.setAttribute("timeStampDate", timeStampDate.getTime());
-            req.setAttribute("viewer",  viewer);
-            context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
-    }
-
-
 
 }
