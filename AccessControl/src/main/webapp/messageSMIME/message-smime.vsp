@@ -53,7 +53,7 @@
             timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttool-connected', function() {
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))
             },

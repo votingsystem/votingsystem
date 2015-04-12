@@ -346,20 +346,15 @@ public class RepresentativeBean {
                     request.getRepresentativeNif());
             RepresentativeVotingHistoryMetaInf metaInf =
                     getVotingHistoryBackup(representative, request.getDateFrom(), request.getDateTo());
-
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
                     TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representative, messageSMIME, request.getEmail()));
-
             String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getDateFrom()), DateUtils.getDayWeekDateStr(request.getDateTo()),
                     downloadURL);
-
-            log.info("========= content: " + content);
-
             mailBean.send(request.getEmail(), subject, content);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

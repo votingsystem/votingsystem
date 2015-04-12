@@ -392,7 +392,7 @@ window['isClientToolConnected'] = false
 function setClientToolConnected() {
     console.log("setClientToolConnected");
     window['isClientToolConnected'] = true;
-    document.querySelector("#voting_system_page").fire('votingsystem-clienttool-connected', {})
+    document.querySelector("#voting_system_page").fire('votingsystem-client-connected', {})
 }
 
 var coreSignalData = null
