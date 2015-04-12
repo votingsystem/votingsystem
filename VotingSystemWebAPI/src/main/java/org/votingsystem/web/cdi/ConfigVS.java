@@ -40,5 +40,5 @@ public interface ConfigVS {
 
     public Properties getProperties();
 
-    public File getBackupDir();
+    public File getServerDir();
 }

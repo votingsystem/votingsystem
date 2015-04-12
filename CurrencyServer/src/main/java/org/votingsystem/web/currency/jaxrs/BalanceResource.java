@@ -96,7 +96,7 @@ public class BalanceResource {
             throws IOException, ServletException {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getProperty("vs.weekReportsPath"), null);
+        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
         if(reportFiles.getJsonFile() == null) {
             throw new NotFoundException("reportsForWeekNotFoundMsg - timePeriod: " + timePeriod.toString());
         } else {

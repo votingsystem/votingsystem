@@ -19,14 +19,15 @@ public class ReportFiles {
     private File jsonFile;
 
     public ReportFiles(DateUtils.TimePeriod timePeriod, String baseDirPath, String subPath) {
+        String reportsBasePath = baseDirPath + "/backup/weekReports";
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
-        baseDirPath = baseDirPath + "/" + dateFromPathPart + "_" +dateToPathPart + "/";
-        if(subPath != null) baseDirPath = baseDirPath + subPath;;
-        setBaseDir(new File(baseDirPath));
+        reportsBasePath = reportsBasePath + "/" + dateFromPathPart + "_" +dateToPathPart + "/";
+        if(subPath != null) reportsBasePath = reportsBasePath + subPath;;
+        setBaseDir(new File(reportsBasePath));
         getBaseDir().mkdirs();
-        setJsonFile(new File(baseDirPath + "/balances.json"));
-        setReceiptFile(new File(baseDirPath + "/weekReportReceipt.p7s"));
+        setJsonFile(new File(reportsBasePath + "/balances.json"));
+        setReceiptFile(new File(reportsBasePath + "/weekReportReceipt.p7s"));
     }
 
     public File getTagReceiptFile(String tagName) {

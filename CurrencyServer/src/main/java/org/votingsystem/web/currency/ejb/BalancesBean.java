@@ -61,8 +61,8 @@ public class BalancesBean {
         log.info(transactionMsgSubject + " - numTotalUsers:" + numTotalUsers + " - " + timePeriod.toString());
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
-        String weekReportsLogPath = config.getProperty("vs.weekReportsPath") + "/" + dateFromPathPart + "_" +
-                dateToPathPart + "/initWeekPeriod.log";
+        String reportsBasePath = config.getServerDir().getAbsolutePath() + "/backup/weekReports";
+        String weekReportsLogPath = reportsBasePath + "/" + dateFromPathPart + "_" + dateToPathPart + "/initWeekPeriod.log";
         Logger weekPeriodLogger = LoggerVS.getLogger(weekReportsLogPath, "org.votingsysem.currency.initWeekPeriod");
         int offset = 0;
         int pageSize = 100;
@@ -106,7 +106,7 @@ public class BalancesBean {
             log.info("userVS id: " + userVS.getId() + " is " + userVS.getClass().getSimpleName() + " - no init period");
             return false;
         }
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getProperty("vs.weekReportsPath"), userSubPath);
+        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), userSubPath);
         log.info("$methodName - UserVS '$userVS.id' - dir: '$reportFiles.baseDir.absolutePath'");
         Map<String, Map> currencyMap = (Map<String, Map>) balanceMap.get("balancesCash");
         Query query = null;
@@ -165,7 +165,8 @@ public class BalancesBean {
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
                 .setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS));
         long numTotalUsers = (long)query.getSingleResult();
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getProperty("vs.weekReportsPath"), null);
+
+        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
         List groupVSBalanceList = new ArrayList<>();
         List userVSBalanceList = new ArrayList<>();
         List bankVSBalanceList = new ArrayList<>();

@@ -85,8 +85,7 @@ public class EventVSClaimBean {
 
     public synchronized EventVSMetaInf generateBackup (EventVSClaim eventVS) throws ExceptionVS, IOException {
         log.info("generateBackup - eventId: " + eventVS.getId());
-        BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.CLAIM_EVENT, config.getProperty("vs.errorsBasePath"),
-                config.getProperty("vs.backupBasePath"));
+        BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.CLAIM_EVENT, config.getServerDir().getAbsolutePath());
         String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy/MM/dd");
         String downloadURL = format("/backup/{0}/eventvs_claim_{1}.zip", datePathPart, eventVS.getId()); 
         //String downloadURLPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${downloadURL}"

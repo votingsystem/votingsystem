@@ -130,8 +130,7 @@ public class RepresentativeBean {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage('eventActiveErrorMsg',
                     [event.id].toArray(), locale))
 		}*/
-        BakupFiles bakupFiles = new BakupFiles(eventVS, TypeVS.REPRESENTATIVE_DATA, config.getProperty("vs.errorsBasePath"),
-                config.getProperty("vs.backupBasePath"));
+        BakupFiles bakupFiles = new BakupFiles(eventVS, TypeVS.REPRESENTATIVE_DATA, config.getServerDir().getAbsolutePath());
         File zipResult   = bakupFiles.getZipResult();
         File filesDir    = bakupFiles.getFilesDir();
         File metaInfFile = bakupFiles.getMetaInfFile();
@@ -292,7 +291,7 @@ public class RepresentativeBean {
                 .setMaxResults(pageSize);
 
         String selectedDateStr = DateUtils.getDateStr(selectedDate, "yyyy/MM/dd");
-        String basedir = format("{0}/AccreditationsBackup/{1}/representative{2}", config.getProperty("vs.backupBasePath"),
+        String basedir = format("/backup/{0}/AccreditationsBackup/{1}/representative{2}", config.getServerDir().getAbsolutePath(),
                 selectedDateStr, representative.getNif());
         new File(basedir).mkdirs();
         File zipResult = new File(basedir + ".zip");
@@ -387,8 +386,8 @@ public class RepresentativeBean {
         String dateFromStr = DateUtils.getDateStr(dateFrom, "yyyy/MM/dd");
         String dateToStr = DateUtils.getDateStr(dateTo,"yyyy/MM/dd");
         String datePathPart = DateUtils.getDateStr(Calendar.getInstance().getTime(), "yyyy/MM/dd");
-        String basedir = format("{0}/RepresentativeHistoryVoting/{1}_{2}/representative_{3}",
-                config.getProperty("vs.backupBasePath"), dateFromStr, dateToStr, representative.getNif());
+        String basedir = format("/backup/{0}/RepresentativeHistoryVoting/{1}_{2}/representative_{3}",
+                config.getServerDir().getAbsolutePath(), dateFromStr, dateToStr, representative.getNif());
         new File(basedir).mkdirs();
         log.info("getVotingHistoryBackup - basedir: " + basedir);
         File zipResult = new File(basedir + ".zip");

@@ -43,7 +43,7 @@ public class AuditingBean {
         String lapsePath = DateUtils.getDirPath(timePeriod.getDateFrom());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         lapsePath = "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
-        File backupDir = new File(config.getProperty("vs.backupBasePath") + "/userTransactionHistory" + lapsePath);
+        File backupDir = new File(config.getServerDir().getAbsolutePath() + "/backups/userTransactionHistory" + lapsePath);
         backupDir.mkdirs();
         log.info( "user: " + userVS.getId() + " - timePeriod: " + timePeriod.toString() + " - backupDir: " + backupDir.getAbsolutePath());
         //Expenses

@@ -17,8 +17,9 @@ public class BakupFiles {
     private File baseDir;
     private File filesDir;
 
-    public BakupFiles(EventVS eventVS, TypeVS type, String errorsBasePath, String backupBasePath) throws ExceptionVS {
-        new File(errorsBasePath).mkdirs();
+    public BakupFiles(EventVS eventVS, TypeVS type, String serverBasePath) throws ExceptionVS {
+        String backupBasePath = serverBasePath + "/backup";
+        new File(serverBasePath + "/error").mkdirs();
         new File(backupBasePath).mkdirs();
         String datePartPath = DateUtils.getDateStr(eventVS.getDateFinish(), "yyyy_MM_dd");
         String baseDirPath = backupBasePath + "/" + datePartPath + "/EventVS_" + eventVS.getId();

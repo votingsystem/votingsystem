@@ -50,7 +50,7 @@ public class ReportsResource {
     def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.vs.weekReportsPath", null)
+        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null)
         if(request.contentType?.contains("json")) {
             if(reportFiles.jsonFile.exists()) {
                 render JSON.parse(reportFiles.jsonFile.text) as JSON

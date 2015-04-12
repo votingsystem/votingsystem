@@ -116,8 +116,7 @@ public class EventVSElectionBean {
         /*if (eventVS.isActive(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))
         }*/
-        BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.VOTING_EVENT, config.getProperty("vs.errorsBasePath"),
-                config.getProperty("vs.backupBasePath"));
+        BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.VOTING_EVENT, config.getServerDir().getAbsolutePath());
         File filesDir = backupFiles.getFilesDir();
         String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy_MM_dd");
         String downloadURL = format("/backup/{0}/{1}_${2}.zip", datePathPart, TypeVS.VOTING_EVENT, eventVS.getId());
