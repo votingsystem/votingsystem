@@ -163,7 +163,7 @@
             },
             getResults:function() {
                 console.log("getResults")
-                var fileURL = "${restURL}/backup/" + this.dateFinish.urlFormat() +
+                var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() +
                         "/VOTING_EVENT_" + this.eventvs.id + ".zip"
                 if(window['isClientToolConnected']) {
                     var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)

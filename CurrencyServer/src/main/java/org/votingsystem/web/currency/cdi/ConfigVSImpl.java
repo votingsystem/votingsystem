@@ -50,7 +50,7 @@ public class ConfigVSImpl implements ConfigVS {
     private String bankCode = null;
     private String  branchCode = null;
     private String emailAdmin = null;
-    private String backupsURL = null;
+    private String staticResURL = null;
     private File serverDir = null;
     private TagVS wildTag;
     private X509Certificate x509TimeStampServerCert;
@@ -85,12 +85,12 @@ public class ConfigVSImpl implements ConfigVS {
             timeStampServerURL = (String) props.get("vs.timeStampServerURL");
             bankCode = (String) props.get("vs.IBAN_bankCode");
             branchCode = (String) props.get("vs.IBAN_branchCode");
-            backupsURL = (String) props.get("vs.staticResourcesURL");
-            serverDir =  new File(System.getProperty("user.home") + (String) props.get("vs.serverDirPath"));
+            staticResURL = (String) props.get("vs.staticResourcesURL");
+            serverDir =  new File((String) props.get("vs.serverDirPath"));
             serverDir.mkdirs();
             log.info("serverDir: " + serverDir.getAbsolutePath());
-            new File(System.getProperty("user.home") + (String) props.get("vs.serverDirPath") + "/backup");
-            new File(System.getProperty("user.home") + (String) props.get("vs.serverDirPath") + "/error").mkdirs();
+            new File((String) props.get("vs.serverDirPath") + "/backup");
+            new File((String) props.get("vs.serverDirPath") + "/error").mkdirs();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -155,8 +155,8 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public String getBackupsURL() {
-        return backupsURL;
+    public String getStaticResURL() {
+        return staticResURL;
     }
 
     public String getWebURL() {

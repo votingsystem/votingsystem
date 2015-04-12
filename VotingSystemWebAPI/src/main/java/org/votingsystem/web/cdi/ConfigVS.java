@@ -34,7 +34,7 @@ public interface ConfigVS {
 
     public String getRestURL();
 
-    public String getBackupsURL();
+    public String getStaticResURL();
 
     public EnvironmentVS getMode();
 

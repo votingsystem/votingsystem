@@ -290,9 +290,12 @@ public class RepresentativeBean {
                 .setParameter("inList", Arrays.asList(RepresentationDocument.State.CANCELED, RepresentationDocument.State.OK))
                 .setMaxResults(pageSize);
 
-        String selectedDateStr = DateUtils.getDateStr(selectedDate, "yyyy/MM/dd");
-        String basedir = format("/backup/{0}/AccreditationsBackup/{1}/representative{2}", config.getServerDir().getAbsolutePath(),
-                selectedDateStr, representative.getNif());
+        String selectedDatePath = DateUtils.getDateStr(selectedDate, "yyyy/MM/dd");
+        String accreditationsPath =  format("/backup/AccreditationsBackup/{1}/representative{2}", selectedDatePath,
+                representative.getNif());
+        String downloadURL = config.getStaticResURL() + accreditationsPath + ".zip";
+        String representativeURL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
+        String basedir = config.getServerDir().getAbsolutePath() + accreditationsPath;
         new File(basedir).mkdirs();
         File zipResult = new File(basedir + ".zip");
         File metaInfFile;
@@ -321,8 +324,7 @@ public class RepresentativeBean {
             offset = offset + pageSize;
         }
         RepresentativeAccreditationsMetaInf metaInf = new RepresentativeAccreditationsMetaInf(numAccreditations,
-                selectedDate, format("{0}/representative/id/{1}", config.getRestURL(), representative.getId()),
-                zipResult.getAbsolutePath());
+                selectedDate, representativeURL, downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
         new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);
@@ -383,16 +385,15 @@ public class RepresentativeBean {
             UserVS representative, Date dateFrom, Date dateTo) throws IOException {
         log.info(format("getVotingHistoryBackup - representative: {0} - dateFrom: {1} - dateTo: {2}", representative.getNif(),
                 dateFrom, dateTo));
-        String dateFromStr = DateUtils.getDateStr(dateFrom, "yyyy/MM/dd");
-        String dateToStr = DateUtils.getDateStr(dateTo,"yyyy/MM/dd");
-        String datePathPart = DateUtils.getDateStr(Calendar.getInstance().getTime(), "yyyy/MM/dd");
-        String basedir = format("/backup/{0}/RepresentativeHistoryVoting/{1}_{2}/representative_{3}",
-                config.getServerDir().getAbsolutePath(), dateFromStr, dateToStr, representative.getNif());
+        String dateFromPath = DateUtils.getDateStr(dateFrom, "yyyy/MM/dd");
+        String dateToPath = DateUtils.getDateStr(dateTo,"yyyy/MM/dd");
+        String votingHistoryPath = format("/backup/RepresentativeHistoryVoting/{1}_{2}/representative_{3}",
+                dateFromPath, dateToPath, representative.getNif());
+        String basedir = config.getServerDir().getAbsolutePath() + votingHistoryPath;
         new File(basedir).mkdirs();
         log.info("getVotingHistoryBackup - basedir: " + basedir);
         File zipResult = new File(basedir + ".zip");
-        String downloadURL = format("/backup/{0}/representative_{1}.zip", datePathPart, representative.getNif());
-        String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}";//TODO
+        String downloadURL = config.getStaticResURL() + votingHistoryPath + ".zip";
         File metaInfFile;
         if(zipResult.exists()) {
             metaInfFile = new File(basedir + "/meta.inf");
@@ -431,7 +432,7 @@ public class RepresentativeBean {
                 "and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-        if(representativeDocument == null) throw new NotFoundException(
+        if (representativeDocument == null) throw new NotFoundException(
                 "ERROR - RepresentativeDocument not found - representativeId: " + representative.getId());
         return new RepresentativeDto(representative,
                 representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getRestURL());

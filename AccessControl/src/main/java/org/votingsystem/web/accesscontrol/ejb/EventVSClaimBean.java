@@ -87,8 +87,7 @@ public class EventVSClaimBean {
         log.info("generateBackup - eventId: " + eventVS.getId());
         BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.CLAIM_EVENT, config.getServerDir().getAbsolutePath());
         String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy/MM/dd");
-        String downloadURL = format("/backup/{0}/eventvs_claim_{1}.zip", datePathPart, eventVS.getId()); 
-        //String downloadURLPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${downloadURL}"
+        String downloadURL = config.getStaticResURL() + format("/backup/{0}/eventvs_claim_{1}.zip", datePathPart, eventVS.getId());
         if(backupFiles.getZipResult().exists()) {
             log.info("generateBackup - backup file already exists");
             log.info("generateBackup - backup file already exists");

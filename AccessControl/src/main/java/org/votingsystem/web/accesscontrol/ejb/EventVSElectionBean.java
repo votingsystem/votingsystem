@@ -119,8 +119,8 @@ public class EventVSElectionBean {
         BakupFiles backupFiles = new BakupFiles(eventVS, TypeVS.VOTING_EVENT, config.getServerDir().getAbsolutePath());
         File filesDir = backupFiles.getFilesDir();
         String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(),"yyyy_MM_dd");
-        String downloadURL = format("/backup/{0}/{1}_${2}.zip", datePathPart, TypeVS.VOTING_EVENT, eventVS.getId());
-        //String webResourcePath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${downloadURL}"
+        String downloadURL = config.getStaticResURL() + format("/backup/{0}/{1}_${2}.zip", datePathPart,
+                TypeVS.VOTING_EVENT, eventVS.getId());
         if(backupFiles.getZipResult().exists()) {
             log.info("generateBackup - backup file already exists");
             //return new ObjectMapper().readValue(backupFiles.getMetaInfFile(), new TypeReference<EventVSMetaInf>() {});
@@ -196,7 +196,6 @@ public class EventVSElectionBean {
         }
         new ZipUtils(backupFiles.getBaseDir()).zipIt(backupFiles.getZipResult());
         //TODO copy zip result to serve as static resource -> downloadURL
-        //if (!eventVS.isAttached()) { eventVS.attach() }
         eventVS.setMetaInf(new ObjectMapper().writeValueAsString(eventMetaInf));
         dao.merge(eventVS);
         log.info("ZipResult absolutePath: " + backupFiles.getZipResult().getAbsolutePath());
