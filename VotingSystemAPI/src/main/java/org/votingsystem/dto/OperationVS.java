@@ -11,7 +11,6 @@ import org.votingsystem.util.TypeVS;
 
 import java.io.File;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -44,7 +43,8 @@ public class OperationVS {
     private Map document;
     private String contentType;
     private EventVSDto eventVS;
-    private String[] args;
+    @JsonProperty("UUID")
+    private String UUID;
 
 
     public OperationVS() {}
@@ -69,14 +69,6 @@ public class OperationVS {
         result.setServiceURL(accessControlVS.getPublishElectionURL());
         result.setTimeStampServerURL(accessControlVS.getTimeStampServerURL());
         return result;
-    }
-
-    public String[] getArgs() {
-        return this.args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
     }
 
     public String getTimeStampServerURL() {
@@ -156,7 +148,7 @@ public class OperationVS {
 
     public Map getDocumentToSignMap() {
         if(documentToSignMap != null && !documentToSignMap.containsKey("UUID")) {
-            documentToSignMap.put("UUID", UUID.randomUUID().toString());
+            documentToSignMap.put("UUID", java.util.UUID.randomUUID().toString());
         }
         return documentToSignMap;
     }
@@ -287,6 +279,14 @@ public class OperationVS {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }
 

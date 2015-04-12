@@ -3,6 +3,7 @@ package org.votingsystem.web.cdi;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.EnvironmentVS;
 
+import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
@@ -33,8 +34,11 @@ public interface ConfigVS {
 
     public String getRestURL();
 
+    public String getBackupsURL();
+
     public EnvironmentVS getMode();
 
     public Properties getProperties();
 
+    public File getBackupDir();
 }

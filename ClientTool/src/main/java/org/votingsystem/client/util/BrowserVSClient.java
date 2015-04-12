@@ -25,7 +25,6 @@ import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * JavaScript interface object
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class BrowserVSClient {

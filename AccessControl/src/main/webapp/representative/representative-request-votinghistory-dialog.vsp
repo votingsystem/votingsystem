@@ -7,25 +7,11 @@
 
 <polymer-element name="representative-request-votinghistory-dialog">
     <template>
-        <paper-dialog id="xDialog" class="dialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" class="vs-dialog" style="width: 550px;" autoCloseDisabled layered
+                      backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-            <style no-shim>
-            .dialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 550px;
-            }
-            </style>
+            <style no-shim></style>
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -71,16 +57,11 @@
     <script>
         Polymer('representative-request-votinghistory-dialog', {
             representativeFullName:null,
-            pickerFrom:null,
-            pickerTo:null,
             publish: {
                 representative: {value: {}}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.pickerFrom = null;
-                this.pickerTo = null
-                //picker.setDate('2015-01-01')
             },
             show: function(representative) {
                 this.$.xDialog.opened = true
@@ -88,22 +69,6 @@
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             submit: function() {
-                var dateFrom = this.pickerFrom.getDate()
-                var dateTo = this.pickerTo.getDate()
-                this.$.dateFrom.classList.remove("formFieldError");
-                this.$.dateTo.classList.remove("formFieldError");
-                console.log("requestVotingHistory - dateFrom: " + dateFrom + " - dateTo: " + dateTo)
-                if(dateFrom > dateTo) {
-                    showMessageVS('${msg.dateRangeERRORMsg}', '${msg.errorLbl}')
-                    this.$.dateFrom.classList.add("formFieldError");
-                    this.$.dateTo.classList.add("formFieldError");
-                    return false
-                }
-
-                if(!this.$.emailRequest.validity.valid) {
-                    showMessageVS('${msg.emailERRORMsg}', '${msg.errorLbl}')
-                    return false
-                }
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representativeNif:this.representative.nif,

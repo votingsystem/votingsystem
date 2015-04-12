@@ -79,8 +79,10 @@ public class Browser extends VBox implements BrowserVS {
                 } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                     log.info("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                 } else {
-                    if(browserHelper.getSignatureService().getOperationVS().getCallerCallback() == null)
+                    if(browserHelper.getSignatureService().getOperationVS().getCallerCallback() == null) {
                         showOperationResult(responseVS);
+                        return;
+                    }
                     if(ContentTypeVS.JSON == responseVS.getContentType()) {
                         invokeBrowserCallback(responseVS.getMessageMap(),
                                 browserHelper.getSignatureService().getOperationVS().getCallerCallback());
@@ -166,15 +168,15 @@ public class Browser extends VBox implements BrowserVS {
     }
 
     public static void showMessage(Integer statusCode, String message) {
-        PlatformImpl.runLater(() ->  new MessageDialog().showMessage(statusCode, message));
+        PlatformImpl.runLater(() ->  new MessageDialog(getInstance().getScene().getWindow()).showMessage(statusCode, message));
     }
 
     public static void showMessage(final String message, final Button optionButton) {
-        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, optionButton));
+        PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, optionButton));
     }
 
     public static void showMessage(final String message, final String caption) {
-        PlatformImpl.runLater(() -> new MessageDialog().showHtmlMessage(message, caption));
+        PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, caption));
     }
 
 

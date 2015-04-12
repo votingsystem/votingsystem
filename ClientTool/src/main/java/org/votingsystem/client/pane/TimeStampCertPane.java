@@ -45,7 +45,7 @@ public class TimeStampCertPane extends GridPane {
     private void showPEMCert() {
         try {
             String message = new String(CertUtils.getPEMEncoded(certificate));
-            MessageDialog messageDialog = new MessageDialog();
+            MessageDialog messageDialog = new MessageDialog(getScene().getWindow());
             messageDialog.showMessage(null, certificate.getSubjectDN().toString() + " - " + message);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

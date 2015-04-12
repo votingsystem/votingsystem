@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -36,7 +37,11 @@ public class DialogVS {
         stage.initOwner(Browser.getInstance().getScene().getWindow());
         fxmlLoader.setController(this);
         stage.centerOnScreen();
+
+
         decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
+        decoratedPane.setAlignment(Pos.CENTER_RIGHT);
+
         stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));

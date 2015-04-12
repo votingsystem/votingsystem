@@ -18,8 +18,7 @@ import org.votingsystem.client.util.Utils;
 import java.util.logging.Logger;
 
 /**
- * @author jgzornoza
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class DecoratedPane extends VBox {
 
@@ -41,11 +40,12 @@ public class DecoratedPane extends VBox {
                 "-fx-padding: 5, 5;");
         mainDialog = new VBox();
         mainDialog.setStyle("-fx-background-radius: 4;");
+        mainDialog.setAlignment(Pos.TOP_CENTER);
         VBox.setVgrow(mainDialog, Priority.ALWAYS);
         toolBar = new HBox();
         toolBar.setSpacing(10);
         toolBar.setStyle("-fx-padding: 3, 20;");
-        toolBar.setAlignment(Pos.TOP_RIGHT);
+        toolBar.setAlignment(Pos.TOP_CENTER);
         HBox captionBox = new HBox();
         captionBox.setAlignment(Pos.CENTER);
         HBox.setHgrow(captionBox, Priority.ALWAYS);

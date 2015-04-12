@@ -12,14 +12,17 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static org.votingsystem.client.Browser.showMessage;
 
 
@@ -41,36 +44,53 @@ public class RepresentativeVotingHistoryDialog extends DialogVS {
 
     @FXML void initialize() {
         acceptButton.setOnAction(actionEvent -> submitForm());
+        acceptButton.setText(ContextVS.getMessage("requestLbl"));
+        dateFromPicker.setPromptText(ContextVS.getMessage("dateFromLbl"));
+        dateToPicker.setPromptText(ContextVS.getMessage("dateToLbl"));
+        emailText.setPromptText(ContextVS.getMessage("emailLbl"));
     }
 
     private void submitForm(){
-        LocalDate isoDate = dateToPicker.getValue();
+        if(!StringUtils.validateMail(emailText.getText())) {
+            emailText.getStyleClass().add("text-field-error");
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterValidEmailMsg"));
+            return;
+        } else emailText.getStyleClass().add("text-field-ok");
+        LocalDate isoDate = dateFromPicker.getValue();
+        if(isoDate == null) {
+            dateFromPicker.getStyleClass().add("text-field-error");
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("selectDateLbl"));
+            return;
+        } else dateFromPicker.getStyleClass().add("text-field-ok");
         Instant instant = isoDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
-        Date dateTo = Date.from(instant);
-        isoDate = dateFromPicker.getValue();
-        instant = isoDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
         Date dateFrom = Date.from(instant);
-        try {
-            if(!StringUtils.validateMail(emailText.getText())) {
-                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterValidEmailMsg"));
-                return;
-            }
-            if(dateFrom.after(dateTo)) {
-                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("dateRangeErrorMsg", DateUtils.getDateStr(dateFrom),
-                        DateUtils.getDateStr(dateTo)));
-                return;
-            }
-            OperationVS operationVS = new OperationVS();
-            Map mapToSign = operationVS.getDocumentToSignMap();
-            mapToSign.put("dateFrom", dateFrom.getTime());
-            mapToSign.put("dateTo", dateTo.getTime());
-            mapToSign.put("email", emailText.getText());
-            operationVS.setCallerCallback(null);
-            Browser.getInstance().processOperationVS(operationVS, null);
-            hide();
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
+        isoDate = dateToPicker.getValue();
+        if(isoDate == null) {
+            dateToPicker.getStyleClass().add("text-field-error");
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("selectDateLbl"));
+            return;
+        } else dateToPicker.getStyleClass().add("text-field-ok");
+        instant = isoDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
+        Date dateTo = Date.from(instant);
+        if(dateFrom.after(dateTo)) {
+            dateFromPicker.getStyleClass().add("text-field-error");
+            dateToPicker.getStyleClass().add("text-field-error");
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("dateRangeErrorMsg", DateUtils.getDateStr(dateFrom),
+                    DateUtils.getDateStr(dateTo)));
+            return;
+        } else {
+            dateFromPicker.getStyleClass().add("text-field-ok");
+            dateToPicker.getStyleClass().add("text-field-ok");
         }
+        OperationVS operationVS = new OperationVS();
+        Map mapToSign = operationVS.getDocumentToSignMap();
+        mapToSign.put("dateFrom", dateFrom.getTime());
+        mapToSign.put("dateTo", dateTo.getTime());
+        mapToSign.put("email", emailText.getText());
+        mapToSign.put("UUID", UUID.randomUUID().toString());
+        operationVS.setCallerCallback(null);
+        Browser.getInstance().processOperationVS(operationVS, null);
+        hide();
     }
 
     public static void show(OperationVS operationVS, Window owner) {

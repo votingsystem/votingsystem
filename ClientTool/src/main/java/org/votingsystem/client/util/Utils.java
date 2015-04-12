@@ -64,6 +64,7 @@ public class Utils {
     public static final String APPLICATION_ICON = "mail-mark-unread.png";
 
     public static final String COLOR_BUTTON_OK = "#888";
+    public static final String COLOR_RESULT_OK = "#388746";
     public static final String COLOR_RED = "#ba0011";
     public static final String COLOR_RED_DARK = "#6c0404";
     public static final String COLOR_YELLOW_ALERT = "#fa1";

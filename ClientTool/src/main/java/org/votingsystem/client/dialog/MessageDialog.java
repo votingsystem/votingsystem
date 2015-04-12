@@ -10,10 +10,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
@@ -39,10 +36,10 @@ public class MessageDialog extends VBox {
     private DecoratedPane decoratedPane;
     private WebView messageWebView;
 
-    public MessageDialog() {
+    public MessageDialog(Window parentWindow) {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
-        //stage.initOwner(window);
+        stage.initOwner(parentWindow);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         messageLabel = new Label();
         messageLabel.setWrapText(true);
@@ -106,7 +103,7 @@ public class MessageDialog extends VBox {
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {
                 decoratedPane.setCaption(null);
-                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK, 32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK, Utils.COLOR_RESULT_OK ,32));
             } else {
                 decoratedPane.setCaption(ContextVS.getMessage("errorLbl"));
                 messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK, 32));

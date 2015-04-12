@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -9,10 +10,13 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
-
 import java.io.*;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -37,6 +41,8 @@ public class AnonymousDelegationDto implements Serializable {
     private UserVS representative;
     private Date dateFrom;
     private Date dateTo;
+    @JsonProperty("UUID")
+    private String UUID;
 
     public SMIMEMessage getCancelVoteReceipt() {
         if(delegationReceipt == null && delegationReceiptBytes != null) {
@@ -57,7 +63,7 @@ public class AnonymousDelegationDto implements Serializable {
         this.dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         this.representativeName = representativeName;
         this.representativeNif = representativeNif;
-        originHashCertVS = UUID.randomUUID().toString();
+        originHashCertVS = java.util.UUID.randomUUID().toString();
         hashCertVSBase64 = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
@@ -181,7 +187,7 @@ public class AnonymousDelegationDto implements Serializable {
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
-        result.put("UUID", UUID.randomUUID().toString());
+        result.put("UUID", java.util.UUID.randomUUID().toString());
         return result;
     }
 
@@ -196,7 +202,7 @@ public class AnonymousDelegationDto implements Serializable {
         result.put("hashCertVSBase64", hashCertVSBase64);
         result.put("originHashCertVSBase64", originHashCertVS);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED.toString());
-        result.put("UUID", UUID.randomUUID().toString());
+        result.put("UUID", java.util.UUID.randomUUID().toString());
         return result;
     }
 
@@ -209,7 +215,7 @@ public class AnonymousDelegationDto implements Serializable {
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
         result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
-        result.put("UUID", UUID.randomUUID().toString());
+        result.put("UUID", java.util.UUID.randomUUID().toString());
         return result;
     }
 
@@ -225,4 +231,11 @@ public class AnonymousDelegationDto implements Serializable {
         return result;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
 }

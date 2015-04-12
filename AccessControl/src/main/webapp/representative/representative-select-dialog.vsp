@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
@@ -70,7 +69,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="padding:15px 0 0 0;display:{{step == 'confirm'?'block':'none'}}"}}">
+                <div hidden?="{{step !== 'confirm'}}">
                     <vs-html-echo id="delegationMsg"></vs-html-echo>
                     <template if="{{isAnonymousDelegation == true}}">
                         <div style="margin:25px 0 25px 0;">
@@ -78,15 +77,12 @@
                         </div>
                     </template>
                 </div>
-
-
-                    <div style="margin:10px 0; display:{{isAnonymousDelegation == true && step == 'main'?'block':'none'}}">
-                        <label>${msg.numWeeksAnonymousDelegationMsg}</label>
-                        <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
-                               style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
-                               title="${msg.numWeeksAnonymousDelegationMsg}">
-                    </div>
-
+                <div hidden?="{{isAnonymousDelegation == false || step !== 'main'}}" style="margin:10px 0;">
+                    <label>${msg.numWeeksAnonymousDelegationMsg}</label>
+                    <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
+                           style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
+                           title="${msg.numWeeksAnonymousDelegationMsg}">
+                </div>
                 <div hidden?="{{step !== 'main'}}">
                     <div layout horizontal style="margin:0px 20px 0px 0px;">
                         <div flex></div>
@@ -114,7 +110,7 @@
                     </div>
                 </div>
 
-                <div style="display: {{step == 'anonymousDelegationResponse'?'block':'none'}}">
+                <div hidden="{{step !== 'anonymousDelegationResponse'}}">
                     <p style="text-align: center; font-size: 1.2em;">
                         {{anonymousDelegationResponseMsg}}
                     </p>
@@ -230,9 +226,9 @@
                 this.step = 'confirm'
             },
             cancel: function() {
-                if(this.step == 'main') {
+                if(this.step === 'main') {
                     this.close()
-                }else if(this.step == 'confirm') {
+                }else if(this.step === 'confirm') {
                     this.step = 'main'
                 }
             }

@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -37,19 +38,18 @@ public class EventVSDto {
     private ActorVSDto accessControl;
     private ActorVSDto controlCenter;
     private boolean backupAvailable;
-
     private TypeVS operation;
     private EventVS.Type type;
     private Long eventId;
     private Long accessControlEventVSId;
     private String certCAVotacion;
-    private String UUID;
     private String controlCenterURL;
     private String certChain;
     private String accessControlURL;
     private String serverURL;
     private VoteVSDto voteVS;
-
+    @JsonProperty("UUID")
+    private String UUID;
 
     public EventVSDto() {}
 

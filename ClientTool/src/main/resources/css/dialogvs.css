@@ -15,3 +15,13 @@
     -fx-font-weight: bold;
     -fx-background-color: #eee;
 }
+
+.text-field-error {
+    -fx-text-box-border: red ;
+    -fx-focus-color: red ;
+}
+
+.text-field-ok {
+    -fx-text-box-border: #bbb ;
+    -fx-focus-color: red ;
+}

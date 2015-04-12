@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.NifUtils;
@@ -18,6 +19,7 @@ public class RepresentativeDelegationDto {
     private String representativeNif;
     private String representativeName;
     private Integer weeksOperationActive;
+    @JsonProperty("UUID")
     private String UUID;
 
     public RepresentativeDelegationDto() {}

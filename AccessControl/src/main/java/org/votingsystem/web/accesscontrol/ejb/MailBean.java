@@ -85,20 +85,6 @@ public class MailBean {
     }
 
     @Asynchronous
-    public void sendRepresentativeAccreditations (BackupRequestVS request, String content, Date electedDate) {
-        /*view:"/mail/RepresentativeAccreditationRequestDownloadInstructions.jsp",
-                model:[fromUser:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
-                requestURL:requestURL, representative:representativeName, downloadURL:downloadURL]
-         */
-        log.log(Level.FINE, "sendRepresentativeAccreditations - email:" + request.getEmail() + " - request:"+ request.getId());
-        UserVS toUser = request.getMessageSMIME().getUserVS();
-        String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
-        String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = messages.get("representativeAccreditationsMailSubject", request.getRepresentative().getName());
-        send(toUser.getEmail(), subject, content);
-    }
-
-    @Asynchronous
     public void sendRepresentativeVotingHistory (BackupRequestVS request, String content, Date dateFrom, Date dateTo) {
         /*view:"/mail/RepresentativeVotingHistoryDownloadInstructions",
                 model:[fromUser:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,

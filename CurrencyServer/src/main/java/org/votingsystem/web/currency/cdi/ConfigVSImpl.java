@@ -50,6 +50,8 @@ public class ConfigVSImpl implements ConfigVS {
     private String bankCode = null;
     private String  branchCode = null;
     private String emailAdmin = null;
+    private String backupsURL = null;
+    private File backupDir = null;
     private TagVS wildTag;
     private X509Certificate x509TimeStampServerCert;
 
@@ -83,7 +85,8 @@ public class ConfigVSImpl implements ConfigVS {
             timeStampServerURL = (String) props.get("vs.timeStampServerURL");
             bankCode = (String) props.get("vs.IBAN_bankCode");
             branchCode = (String) props.get("vs.IBAN_branchCode");
-            File backupDir = new File((String) props.get("vs.backupBasePath"));
+            backupsURL = (String) props.get("vs.staticResourcesURL");
+            backupDir =  new File(System.getProperty("user.home") + (String) props.get("vs.backupBasePath"));
             backupDir.mkdirs();
             log.info("backupDir: " + backupDir.getAbsolutePath());
             new File((String) props.get("vs.errorsBasePath")).mkdirs();
@@ -98,6 +101,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     public Properties getProperties() {
         return props;
+    }
+
+    @Override
+    public File getBackupDir() {
+        return backupDir;
     }
 
     public TagVS getTag(String tagName) {
@@ -143,6 +151,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getRestURL() {
         return restURL;
+    }
+
+    @Override
+    public String getBackupsURL() {
+        return backupsURL;
     }
 
     public String getWebURL() {

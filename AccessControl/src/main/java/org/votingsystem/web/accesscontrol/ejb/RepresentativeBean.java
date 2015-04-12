@@ -23,7 +23,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -325,44 +327,57 @@ public class RepresentativeBean {
         metaInfFile = new File(basedir + "/meta.inf");
         new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);
+        log.info("getAccreditationsBackup - zipResult: " + zipResult.getAbsolutePath());
         return metaInf;
     }
 
     @Asynchronous
     public void processVotingHistoryRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        UserVS userVS = messageSMIME.getUserVS();
-        RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
-        request.validate();
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
-        if(representative == null) throw new ValidationExceptionVS("ERROR - user is not representative - nif: " +
-                request.getRepresentativeNif());
-        RepresentativeVotingHistoryMetaInf metaInf =
-                getVotingHistoryBackup(representative, request.getDateFrom(),  request.getDateTo());
+        try {
+            SMIMEMessage smimeMessage = messageSMIME.getSMIME();
+            UserVS userVS = messageSMIME.getUserVS();
+            RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
+            request.validate();
+            Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
+                    .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
+            UserVS representative = dao.getSingleResult(UserVS.class, query);
+            if(representative == null) throw new ValidationExceptionVS("ERROR - user is not representative - nif: " +
+                    request.getRepresentativeNif());
+            RepresentativeVotingHistoryMetaInf metaInf =
+                    getVotingHistoryBackup(representative, request.getDateFrom(), request.getDateTo());
 
-        BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
-                TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-                representative, messageSMIME, request.getEmail()));
-        mailBean.sendRepresentativeVotingHistory(backupRequest, messageTemplate, request.getDateFrom(), request.getDateTo());
+            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
+                    TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
+                    representative, messageSMIME, request.getEmail()));
+            mailBean.sendRepresentativeVotingHistory(backupRequest, messageTemplate, request.getDateFrom(), request.getDateTo());
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     @Asynchronous
     public void processAccreditationsRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        UserVS userVS = messageSMIME.getUserVS();
-        RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
-        request.validate();
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
-        if(representative == null) throw new ValidationExceptionVS("ERROR - representativeNifErrorMsg - nif: " +
-                request.getRepresentativeNif());
-        RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup( representative, request.getSelectedDate());
-        BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
-                TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageSMIME, request.getEmail()));
-        mailBean.sendRepresentativeAccreditations(backupRequest, messageTemplate ,request.getSelectedDate());
+        try {
+            UserVS userVS = messageSMIME.getUserVS();
+            RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
+            request.validate();
+            Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
+                    .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
+            UserVS representative = dao.getSingleResult(UserVS.class, query);
+            if(representative == null) throw new ValidationExceptionVS("ERROR - representativeNifErrorMsg - nif: " +
+                    request.getRepresentativeNif());
+            RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
+            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
+                    TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageSMIME, request.getEmail()));
+            String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
+            String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
+            String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
+                    DateUtils.getDayWeekDateStr(request.getSelectedDate()), downloadURL);
+            mailBean.send(request.getEmail(), subject, content);
+        } catch(Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     private RepresentativeVotingHistoryMetaInf getVotingHistoryBackup (

@@ -2,10 +2,12 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
@@ -62,11 +64,12 @@ public class RepresentativeResource {
     public Response accreditations(MessageSMIME messageSMIME,
                    @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
-        context.getRequestDispatcher("/jsf/mail/RepresentativeAccreditationRequestDownloadInstructions.vsp").forward(req, responseWrapper);
+        req.setAttribute("pageTitle", messages.get("representativeAccreditationsLbl"));
+        context.getRequestDispatcher("/jsf/mail/RepresentativeAccreditationRequestDownloadInstructions.jsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        //log.info("Output : " + content);
+        RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
         representativeBean.processAccreditationsRequest(messageSMIME, mailTemplate);
-        return Response.ok().build();
+        return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
 
