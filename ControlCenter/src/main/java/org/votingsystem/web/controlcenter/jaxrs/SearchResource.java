@@ -2,8 +2,8 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.EventVSDto;
-import org.votingsystem.model.EventVS;
+import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;

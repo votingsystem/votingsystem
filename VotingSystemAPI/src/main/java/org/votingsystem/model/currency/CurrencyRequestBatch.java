@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.BatchRequest;
-import org.votingsystem.model.CurrencyServer;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;

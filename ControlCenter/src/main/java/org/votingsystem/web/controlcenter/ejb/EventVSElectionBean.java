@@ -1,8 +1,9 @@
 package org.votingsystem.web.controlcenter.ejb;
 
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.EventVSDto;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;

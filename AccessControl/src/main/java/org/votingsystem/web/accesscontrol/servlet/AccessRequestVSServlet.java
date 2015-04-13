@@ -1,10 +1,10 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
-import org.votingsystem.model.AccessRequestVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;

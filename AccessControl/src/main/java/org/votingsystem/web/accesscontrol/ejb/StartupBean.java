@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;

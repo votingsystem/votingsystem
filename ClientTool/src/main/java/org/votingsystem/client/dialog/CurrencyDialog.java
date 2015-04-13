@@ -19,7 +19,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.*;
-import org.votingsystem.model.CurrencyServer;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;

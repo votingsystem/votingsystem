@@ -14,7 +14,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.votingsystem.client.Browser;
 import org.votingsystem.dto.OperationVS;
-import org.votingsystem.dto.RepresentativeDto;
+import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;
 

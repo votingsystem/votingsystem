@@ -11,7 +11,7 @@ import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.model.Representation;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
-import org.votingsystem.dto.AnonymousDelegationDto;
+import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;

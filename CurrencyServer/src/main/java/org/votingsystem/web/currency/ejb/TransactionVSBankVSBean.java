@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.model.BankVS;
+import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;

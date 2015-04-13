@@ -65,9 +65,9 @@ public class CurrencyBean {
         Map batchDataMap = currencyBatch.getDataMap();
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), batchDataMap.toString(), currencyBatch.getSubject());
-        em.persist(currencyBatch.setState(BatchRequest.State.OK));
-        MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.RECEIPT, currencyBatch);
+        MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.RECEIPT);
         em.persist(messageSMIME);
+        em.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
         //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();

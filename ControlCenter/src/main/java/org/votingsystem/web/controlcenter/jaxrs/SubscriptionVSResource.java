@@ -3,13 +3,11 @@ package org.votingsystem.web.controlcenter.jaxrs;
 import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedOutput;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSClaim;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.ws.rs.*;
@@ -35,49 +33,11 @@ public class SubscriptionVSResource {
     List<String> supportedFormats = Arrays.asList("rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93",
             "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3");
 
-    @Path("/claims")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response claims(@DefaultValue("rss_2.0") @QueryParam("feedType") String feedType) throws Exception {
-        return Response.ok().entity(getClaimsFeeds(feedType)).type(MediaType.APPLICATION_XML).build();
-    }
 
     @Path("/elections")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response elections(@DefaultValue("rss_2.0") @QueryParam("feedType") String feedType) throws Exception {
         return Response.ok().entity(getElectionFeeds(feedType)).type(MediaType.APPLICATION_XML).build();
-    }
-
-    private String getClaimsFeeds(String feedType) throws IOException, FeedException {
-        Query query = dao.getEM().createQuery("select e from EventVSClaim e where e.state =:state order by e.dateCreated DESC")
-                .setParameter("state", EventVS.State.ACTIVE);
-        List<EventVSClaim> eventVSList = query.getResultList();
-        List<SyndEntryImpl> feeds = query.getResultList();
-        for(EventVSClaim eventVSClaim : eventVSList) {
-            String claimURL = config.getRestURL() + "/eventVSClaim/id" + eventVSClaim.getId();
-            SyndEntryImpl entry = new SyndEntryImpl();
-            entry.setTitle(eventVSClaim.getSubject());
-            entry.setLink(claimURL);
-            entry.setPublishedDate(eventVSClaim.getDateCreated());
-            SyndContent description = new SyndContentImpl();
-            description.setType("text/plain");
-            String feedContent = format("<p>{0}</p><a href='{1}'>{3}</a>", eventVSClaim.getContent(), 
-                    claimURL, messages.get("signClaim"));
-            description.setValue(feedContent);
-            entry.setDescription(description);
-            feeds.add(entry);
-        }
-        SyndFeed feed = new SyndFeedImpl();
-        feed.setFeedType(feedType);
-        feed.setTitle(messages.get("claimsSubscriptionTitle") + " - " + config.getServerName());
-        feed.setLink(config.getRestURL() + "/eventVSClaim");
-        feed.setDescription(messages.get("claimsSubscriptionDescription"));
-        feed.setEntries(feeds);
-
-        StringWriter writer = new StringWriter();
-        SyndFeedOutput output = new SyndFeedOutput();
-        output.output(feed, writer);
-        writer.close();
-        return writer.toString();
     }
 
     private String getElectionFeeds(String feedType) throws IOException, FeedException {

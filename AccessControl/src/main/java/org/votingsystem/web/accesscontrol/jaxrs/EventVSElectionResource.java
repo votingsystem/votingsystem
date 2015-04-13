@@ -1,12 +1,11 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.EventVSDto;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
@@ -114,9 +113,9 @@ public class EventVSElectionResource {
     @Path("/") @POST
     public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        MessageSMIME response = eventVSElectionBean.saveEvent(messageSMIME);
-        resp.setHeader("eventURL", format("{0}/eventVSElection/id/{1}", config.getRestURL(), response.getEventVS().getId()));
-        return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        EventVSElection response = eventVSElectionBean.saveEvent(messageSMIME);
+        resp.setHeader("eventURL", format("{0}/eventVSElection/id/{1}", config.getRestURL(), response.getId()));
+        return Response.ok().entity(response.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Transactional
@@ -150,6 +149,6 @@ public class EventVSElectionResource {
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
         if(messageSMIME == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection without " +
                 "publishRequest - eventId: " + id).build();
-        return Response.ok().entity(messageSMIME.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 }

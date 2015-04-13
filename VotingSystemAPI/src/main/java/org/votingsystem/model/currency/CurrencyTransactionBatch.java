@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.BatchRequest;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -41,6 +42,7 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
     @Column(name="paymentMethod", nullable=false) @Enumerated(EnumType.STRING) private Payment paymentMethod;
+    @OneToOne private MessageSMIME messageSMIME;
     @Column(name="batchUUID") private String batchUUID;
     @Column(name="subject") private String subject;
 
@@ -324,5 +326,14 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
 
     public void setIsTimeLimited(Boolean isTimeLimited) {
         this.isTimeLimited = isTimeLimited;
+    }
+
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
+    }
+
+    public CurrencyTransactionBatch setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
+        return this;
     }
 }

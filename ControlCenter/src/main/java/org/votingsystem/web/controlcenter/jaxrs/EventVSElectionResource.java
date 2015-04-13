@@ -1,9 +1,9 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.EventVSDto;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -144,6 +144,6 @@ public class EventVSElectionResource {
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
         if(messageSMIME == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection without " +
                 "publishRequest - eventId: " + id).build();
-        return Response.ok().entity(messageSMIME.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 }

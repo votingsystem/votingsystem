@@ -2,9 +2,10 @@ package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.SubscriptionVS;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -69,34 +70,6 @@ public class UserVSBean {
         resultMap.put("dateActivated", subscriptionVS.getDateActivated());
         resultMap.put("dateCancelled", subscriptionVS.getDateCancelled());
         resultMap.put("lastUpdated", subscriptionVS.getLastUpdated());
-        Map userDataMap = new HashMap<>();
-        userDataMap.put("id", subscriptionVS.getUserVS().getId());
-        userDataMap.put("IBAN", subscriptionVS.getUserVS().getIBAN());
-        userDataMap.put("NIF", subscriptionVS.getUserVS().getNif());
-        userDataMap.put("name", subscriptionVS.getUserVS().getFirstName() + " " + subscriptionVS.getUserVS().getLastName());
-        resultMap.put("uservs", userDataMap);
-        Map groupDataMap = new HashMap<>();
-        groupDataMap.put("id", subscriptionVS.getGroupVS().getId());
-        groupDataMap.put("name", subscriptionVS.getGroupVS().getName());
-        resultMap.put("groupvs", groupDataMap);
-        return resultMap;
-    }
-
-    public Map getSubscriptionVSDetailedDataMap(SubscriptionVS subscriptionVS){
-        String subscriptionMessageURL = config.getContextURL() + "/messageSMIME/" + subscriptionVS.getSubscriptionSMIME().getId();
-        List<String> adminMessages = new ArrayList<>();
-        for(MessageSMIME messageSMIME : subscriptionVS.getAdminMessageSMIMESet()) {
-            adminMessages.add(config.getContextURL() + "/messageSMIME/" + messageSMIME.getId());
-        }
-        Map resultMap = new HashMap<>();
-        resultMap.put("id", subscriptionVS.getId());
-        resultMap.put("state", subscriptionVS.getState().toString());
-        resultMap.put("dateCreated", subscriptionVS.getDateCreated());
-        resultMap.put("dateActivated", subscriptionVS.getDateActivated());
-        resultMap.put("dateCancelled", subscriptionVS.getDateCancelled());
-        resultMap.put("lastUpdated", subscriptionVS.getLastUpdated());
-        resultMap.put("messageURL", subscriptionMessageURL);
-        resultMap.put("adminMessages", adminMessages);
         Map userDataMap = new HashMap<>();
         userDataMap.put("id", subscriptionVS.getUserVS().getId());
         userDataMap.put("IBAN", subscriptionVS.getUserVS().getIBAN());

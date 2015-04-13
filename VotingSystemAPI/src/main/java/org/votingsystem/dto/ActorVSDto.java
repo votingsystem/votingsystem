@@ -2,10 +2,10 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.CurrencyServer;
+import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.util.EnvironmentVS;
 
 import java.util.Date;

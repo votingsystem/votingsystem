@@ -1,8 +1,12 @@
 package org.votingsystem.web.ejb;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.*;
+import org.votingsystem.dto.currency.SubscriptionVSDto;
+import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -118,97 +122,63 @@ public class SubscriptionVSBean {
     }
 
     //DeviceVS(UserVS userVS, String deviceId, String email, String phone, Type type)
-
-    public SubscriptionVS deActivateUser(MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public SubscriptionVS deActivateUser(MessageSMIME messageSMIME) throws Exception {
+        UserVS signer = messageSMIME.getUserVS();
         log.log(Level.FINE, "signer: " + signer.getNif());
-        SubscriptionVSRequest request = new SubscriptionVSRequest(messageSMIMEReq.getSMIME().getSignedContent());
-        GroupVS groupVS = dao.find(GroupVS.class, request.id);
-        if(groupVS == null || !request.groupvsName.equals(groupVS.getName())) {
-            throw new ExceptionVS("group with name: " + request.groupvsName + " and id: " + request.id + " not found");
+        SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
+        GroupVS groupVS = dao.find(GroupVS.class, request.getId());
+        if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
+            throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
         }
-        if(!groupVS.getRepresentative().getNif().equals(request.userVSNIF) && !signatureBean.isUserAdmin(signer.getNif())) {
-            throw new ExceptionVS("'userWithoutGroupPrivilegesErrorMsg - groupVS:" + request.groupvsName + " - nif:" +
+        if(!groupVS.getRepresentative().getNif().equals(request.getUserVSNIF()) && !signatureBean.isUserAdmin(signer.getNif())) {
+            throw new ExceptionVS("'userWithoutGroupPrivilegesErrorMsg - groupVS:" + request.getGroupvsName() + " - nif:" +
                     signer.getNif());
         }
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.userVSNIF);
+        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserVSNIF());
         UserVS groupUser = dao.getSingleResult(UserVS.class, query);
-        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.userVSNIF);
+        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.getUserVSNIF());
         query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("groupVS", groupVS)
                 .setParameter("userVS", groupUser);
         SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
         if(subscription == null || SubscriptionVS.State.CANCELED == subscription.getState()) {
-            throw new ExceptionVS("groupUserAlreadyCencelledErrorMsg - user nif: " + request.userVSNIF +
-                    " - group: " + request.groupvsName);
+            throw new ExceptionVS("groupUserAlreadyCencelledErrorMsg - user nif: " + request.getUserVSNIF() +
+                    " - group: " + request.getGroupvsName());
         }
-        subscription.setReason(request.reason);
+        subscription.setReason(request.getReason());
         subscription.setState(SubscriptionVS.State.CANCELED);
         subscription.setDateCancelled(new Date());
-        messageSMIMEReq.setSubscriptionVS(subscription);
-        log.info("deActivateUser OK - user nif: " + request.userVSNIF + " - group: " + request.groupvsName);
+        subscription.setCancellationSMIME(messageSMIME);
+        log.info("deActivateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }
 
-    public SubscriptionVS activateUser(MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public SubscriptionVS activateUser(MessageSMIME messageSMIME) throws Exception {
+        UserVS signer = messageSMIME.getUserVS();
         log.info("signer: " + signer.getNif());
-        String msg = null;
-        SubscriptionVSRequest request = SubscriptionVSRequest.getUserVSActivationRequest(
-                messageSMIMEReq.getSMIME().getSignedContent());
-        GroupVS groupVS = dao.find(GroupVS.class, request.id);
-        if(groupVS == null || !request.groupvsName.equals(groupVS.getName())) {
-            throw new ValidationExceptionVS("Group with id: " + request.id + " and name: " + request.groupvsName + " not found");
+        SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
+        request.validateActivationRequest();
+        GroupVS groupVS = dao.find(GroupVS.class, request.getId());
+        if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
+            throw new ValidationExceptionVS("Group with id: " + request.getId() + " and name: " + request.getGroupvsName() + " not found");
         }
         if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isUserAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("userWithoutGroupPrivilegesErrorMsg - operation: " +
                     TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString() + " - nif: " + signer.getNif() + " - group: " +
-                    request.groupvsName);
+                    request.getGroupvsName());
         }
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.userVSNIF);
+        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserVSNIF());
         UserVS groupUser = dao.getSingleResult(UserVS.class, query);
-        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.userVSNIF);
+        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.getUserVSNIF());
         query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("groupVS", groupVS)
                 .setParameter("userVS", groupUser);
         SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
-        if(subscription == null) throw new ValidationExceptionVS("user:" + request.userVSNIF +
+        if(subscription == null) throw new ValidationExceptionVS("user:" + request.getUserVSNIF() +
                 " has not pending subscription request");
         subscription.setState(SubscriptionVS.State.ACTIVE);
         subscription.setDateActivated(new Date());
-        messageSMIMEReq.setSubscriptionVS(subscription);
-        log.info("activateUser OK - user nif: " + request.userVSNIF + " - group: " + request.groupvsName);
+        subscription.setActivationSMIME(messageSMIME);
+        log.info("activateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }
-
-    private static class SubscriptionVSRequest {
-        String groupvsName, groupvsInfo, userVSName, userVSNIF, reason;
-        TypeVS operation;
-        Long id;
-        public SubscriptionVSRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            JsonNode dataJSON = new ObjectMapper().readTree(signedContent);
-            if(dataJSON.get("groupvsName") == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-            if(dataJSON.get("userVSName") == null) throw new ValidationExceptionVS("missing param 'userVSName'");
-            if(dataJSON.get("userVSNIF") == null) throw new ValidationExceptionVS("missing param 'userVSNIF'");
-            if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
-            operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-            groupvsName = dataJSON.get("groupvs").get("name").asText();
-            userVSName = dataJSON.get("uservs").get("name").asText();
-            reason = dataJSON.get("reason").asText();
-            id = dataJSON.get("groupvs").get("id").asLong();
-            userVSNIF =  dataJSON.get("uservs").get("NIF").asText();
-        }
-
-        public static SubscriptionVSRequest getUserVSActivationRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            SubscriptionVSRequest result = new SubscriptionVSRequest(signedContent);
-            if(TypeVS.CURRENCY_GROUP_USER_ACTIVATE != result.operation) throw new ValidationExceptionVS(
-                    "Operation expected: 'CURRENCY_GROUP_USER_ACTIVATE' - operation found: " + result.operation.toString());
-            return result;
-        }
-
-        public static SubscriptionVSRequest getUserVSDeActivationRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            SubscriptionVSRequest result = new SubscriptionVSRequest(signedContent);
-            if(TypeVS.CURRENCY_GROUP_USER_DEACTIVATE != result.operation) throw new ValidationExceptionVS(
-                    "Operation expected: 'CURRENCY_GROUP_USER_ACTIVATE' - operation found: " + result.operation.toString());
-            return result;
-        }
-    }
+    
 }

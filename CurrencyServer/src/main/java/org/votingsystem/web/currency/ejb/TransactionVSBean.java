@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.model.*;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -68,7 +67,7 @@ public class TransactionVSBean {
     }
 
     public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod) throws Exception {
-        if(userVS instanceof  BankVS) return bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
+        if(userVS instanceof BankVS) return bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
         else if(userVS instanceof GroupVS) return groupVSBean.getDataWithBalancesMap(userVS, timePeriod);
         else return userVSBean.getDataWithBalancesMap(userVS, timePeriod);
     }

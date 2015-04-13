@@ -1,6 +1,5 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.BankVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;

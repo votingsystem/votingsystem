@@ -1,9 +1,14 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.dto.RepresentativeDelegationDto;
-import org.votingsystem.dto.RepresentativeDto;
-import org.votingsystem.dto.RepresentativeRevokeDto;
-import org.votingsystem.model.*;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
+import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.voting.RepresentativeRevokeDto;
+import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AnonymousDelegation;
+import org.votingsystem.model.voting.RepresentationDocument;
+import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;

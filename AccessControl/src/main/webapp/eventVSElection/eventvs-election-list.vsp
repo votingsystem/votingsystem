@@ -32,13 +32,6 @@
                                 <option value="TERMINATED" style="color:#cc1606;"> - ${msg.selectClosedPollsLbl} - </option>
                             </select>
                         </template>
-                        <template if="{{eventvstype == 'claim'}}">
-                            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
-                                <option value="ACTIVE" style="color:#388746;"> - ${msg.selectOpenClaimsLbl} - </option>
-                                <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingClaimsLbl} - </option>
-                                <option value="TERMINATED" style="color:#cc1606;"> - ${msg.selectClosedClaimsLbl} - </option>
-                            </select>
-                        </template>
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in eventsVSMap.eventVS}}">

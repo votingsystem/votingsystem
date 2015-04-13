@@ -1,12 +1,13 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.VoteVSDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.VoteVS;
-import org.votingsystem.model.VoteVSCanceler;
+import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.SMIMECheck;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.VoteVSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -38,9 +39,10 @@ public class VoteVSResource {
      */
     @Path("/")
     @POST
-    public Response save(MessageSMIME messageSMIME,  @Context ServletContext context,
+    public Response save(SMIMECheck smimeCheck,  @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = voteVSBean.validateVote(messageSMIME);
+        VoteVS voteVS = voteVSBean.validateVote(smimeCheck);
+        MessageSMIME messageSMIME = smimeCheck.getMessageSMIME();
         if(messageSMIME.getUserVS() != null) resp.setHeader("representativeNIF", messageSMIME.getUserVS().getNif());
         return Response.ok().entity(voteVS.getMessageSMIME().getContent()).type(ContentTypeVS.VOTE.getName()).build();
     }
@@ -83,7 +85,7 @@ public class VoteVSResource {
         if(voteVSCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - voteId: " + id).build();
         return Response.ok().entity(voteVSCanceler.getMessageSMIME().getContent())
-                .type(ContentTypeVS.JSON_SIGNED.getName()).build();
+                .type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 
@@ -104,7 +106,7 @@ public class VoteVSResource {
     public Response post (MessageSMIME messageSMIME,  @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         VoteVSCanceler canceler = voteVSBean.processCancel(messageSMIME);
-        return Response.ok().entity(canceler.getMessageSMIME().getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(canceler.getMessageSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

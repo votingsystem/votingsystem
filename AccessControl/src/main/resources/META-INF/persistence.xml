@@ -5,32 +5,30 @@
         <jta-data-source>java:jboss/datasources/AccessControl</jta-data-source>
         <class>org.votingsystem.model.ActorVS</class>
         <class>org.votingsystem.model.AddressVS</class>
-        <class>org.votingsystem.model.AccessControlVS</class>
-        <class>org.votingsystem.model.AccessRequestVS</class>
-        <class>org.votingsystem.model.AnonymousDelegation</class>
         <class>org.votingsystem.model.BackupRequestVS</class>
         <class>org.votingsystem.model.BatchRequest</class>
         <class>org.votingsystem.model.CertificateVS</class>
-        <class>org.votingsystem.model.ControlCenterVS</class>
         <class>org.votingsystem.model.DeviceVS</class>
-        <class>org.votingsystem.model.EventVS</class>
-        <class>org.votingsystem.model.EventVSClaim</class>
-        <class>org.votingsystem.model.EventVSElection</class>
-        <class>org.votingsystem.model.FieldEventVS</class>
-        <class>org.votingsystem.model.FieldValueEventVS</class>
-        <class>org.votingsystem.model.GroupVS</class>
+        <class>org.votingsystem.model.currency.GroupVS</class>
         <class>org.votingsystem.model.ImageVS</class>
         <class>org.votingsystem.model.KeyStoreVS</class>
         <class>org.votingsystem.model.MessageSMIME</class>
-        <class>org.votingsystem.model.RepresentationDocument</class>
-        <class>org.votingsystem.model.RepresentativeDocument</class>
         <class>org.votingsystem.model.ResponseVS</class>
-        <class>org.votingsystem.model.SubscriptionVS</class>
         <class>org.votingsystem.model.TagVS</class>
         <class>org.votingsystem.model.UserRequestCsrVS</class>
         <class>org.votingsystem.model.UserVS</class>
-        <class>org.votingsystem.model.VoteVSCanceler</class>
-        <class>org.votingsystem.model.VoteVS</class>
+        <class>org.votingsystem.model.voting.AccessControlVS</class>
+        <class>org.votingsystem.model.voting.AccessRequestVS</class>
+        <class>org.votingsystem.model.voting.AnonymousDelegation</class>
+        <class>org.votingsystem.model.voting.ControlCenterVS</class>
+        <class>org.votingsystem.model.voting.EventVS</class>
+        <class>org.votingsystem.model.voting.EventVSElection</class>
+        <class>org.votingsystem.model.voting.FieldEventVS</class>
+        <class>org.votingsystem.model.voting.FieldValueEventVS</class>
+        <class>org.votingsystem.model.voting.RepresentationDocument</class>
+        <class>org.votingsystem.model.voting.RepresentativeDocument</class>
+        <class>org.votingsystem.model.voting.VoteVSCanceler</class>
+        <class>org.votingsystem.model.voting.VoteVS</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

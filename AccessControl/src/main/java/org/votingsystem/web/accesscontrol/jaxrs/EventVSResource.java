@@ -1,9 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSClaim;
-import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
@@ -35,13 +34,8 @@ public class EventVSResource {
         EventVS eventVS = dao.find(EventVS.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSClaim not found - " +
                 "eventId: " + id).build();
-        if(eventVS instanceof EventVSClaim) {
-            context.getRequestDispatcher("/rest/eventVSClaim/id/" + eventVS.getId()).forward(req, resp);
-            return Response.ok().build();
-        } else if(eventVS instanceof EventVSElection) {
-            context.getRequestDispatcher("/rest/eventVSElection/id/" + eventVS.getId()).forward(req, resp);
-            return Response.ok().build();
-        } else throw new ExceptionVS("unprocessed event typy: " + eventVS.getClass().getName());
+        context.getRequestDispatcher("/rest/eventVSElection/id/" + eventVS.getId()).forward(req, resp);
+        return Response.ok().build();
     }
 
     @Path("/cancel") @POST

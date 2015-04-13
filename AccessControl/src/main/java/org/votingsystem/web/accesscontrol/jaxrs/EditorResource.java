@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ControlCenterVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -42,14 +42,6 @@ public class EditorResource {
         List<Map> controlCenterList = Arrays.asList(controlCenterMap);
         req.setAttribute("controlCenters", JSON.getMapper().writeValueAsString(controlCenterList));
         context.getRequestDispatcher("/eventVSElection/editor.xhtml").forward(req, resp);
-        return Response.ok().build();
-    }
-
-
-    @Path("/claim") @GET
-    public Object getIssuedCert(@Context ServletContext context, @Context HttpServletRequest req,
-                                @Context HttpServletResponse resp) throws Exception {
-        context.getRequestDispatcher("/eventVSClaim/editor.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 

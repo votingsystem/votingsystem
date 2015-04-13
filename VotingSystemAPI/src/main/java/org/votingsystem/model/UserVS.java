@@ -3,6 +3,8 @@ package org.votingsystem.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;

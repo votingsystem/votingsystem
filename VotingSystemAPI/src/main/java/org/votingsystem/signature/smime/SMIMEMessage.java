@@ -20,7 +20,7 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;

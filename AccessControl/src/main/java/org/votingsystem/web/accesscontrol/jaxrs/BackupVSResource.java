@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.model.BackupRequestVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;

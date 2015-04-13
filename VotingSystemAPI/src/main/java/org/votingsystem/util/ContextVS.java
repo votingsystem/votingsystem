@@ -7,6 +7,9 @@ import org.bouncycastle.tsp.TSPAlgorithms;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.votingsystem.model.*;
+import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.model.voting.AccessControlVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -78,8 +81,8 @@ public class ContextVS implements BundleActivator {
     public static final String CSR_FILE_NAME                 = "csr" + ":" + ContentTypeVS.TEXT.getName();
     public static final String IMAGE_FILE_NAME               = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
-    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + ContentTypeVS.JSON_SIGNED.getName();
-    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + ContentTypeVS.JSON_SIGNED.getName();
+    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
 
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;

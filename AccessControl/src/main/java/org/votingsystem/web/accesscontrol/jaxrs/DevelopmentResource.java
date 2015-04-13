@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.model.RepresentativeDocument;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;

@@ -3,7 +3,7 @@ package org.votingsystem.client.backup;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.model.EventVS;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.DocumentVSValidator;

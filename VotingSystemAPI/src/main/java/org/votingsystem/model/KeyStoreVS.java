@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;

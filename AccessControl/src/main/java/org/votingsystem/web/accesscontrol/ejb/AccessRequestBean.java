@@ -1,9 +1,9 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.model.AccessRequestVS;
-import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AccessRequestVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationExceptionVS;

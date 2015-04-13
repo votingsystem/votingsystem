@@ -2,7 +2,11 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.*;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;

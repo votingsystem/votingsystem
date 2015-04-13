@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import org.votingsystem.model.voting.EventVS;
+
 import java.util.Date;
 
 /**

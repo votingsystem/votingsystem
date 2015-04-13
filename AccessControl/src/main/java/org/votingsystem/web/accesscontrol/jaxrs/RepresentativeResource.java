@@ -2,10 +2,15 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.RepresentativeAccreditationsDto;
-import org.votingsystem.dto.RepresentativeDto;
-import org.votingsystem.dto.RepresentativeVotingHistoryDto;
-import org.votingsystem.model.*;
+import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
+import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
+import org.votingsystem.model.ImageVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.RepresentationDocument;
+import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
@@ -47,7 +52,7 @@ public class RepresentativeResource {
     @Path("/delegation") @POST
     public Response delegation(MessageSMIME messageSMIME) throws Exception {
         RepresentationDocument representationDocument = representativeDelegationBean.saveDelegation(messageSMIME);
-        return Response.ok().entity(messageSMIME.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/history") @POST
@@ -77,7 +82,7 @@ public class RepresentativeResource {
     @Path("/revoke") @POST
     public Response revoke(MessageSMIME messageSMIME) throws Exception {
         MessageSMIME response = representativeDelegationBean.processRevoke(messageSMIME);
-        return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/") @GET
@@ -192,13 +197,13 @@ public class RepresentativeResource {
     public Response anonymousDelegation(MessageSMIME messageSMIME) throws Exception {
         RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageSMIME);
         return Response.ok().entity(response.getActivationSMIME().getContent()).type(
-                ContentTypeVS.JSON_SIGNED.getName()).build();
+                MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/cancelAnonymousDelegation")
     public Response cancelAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
         MessageSMIME response = representativeDelegationBean.cancelAnonymousDelegation(messageSMIME);
-        return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 

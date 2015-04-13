@@ -2,8 +2,8 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.CurrencyServer;
-import org.votingsystem.model.GroupVS;
+import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;

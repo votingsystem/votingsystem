@@ -1,11 +1,12 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.EventVS;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -51,7 +52,7 @@ public class EncryptorResource {
         byte[] responseBytes = new ObjectMapper().writeValueAsBytes(requestMap);
         //if(requestMap.receiverCert) signatureBean.encryptToCMS(responseBytes, requestMap.receiverCert)
         byte[] encryptedResponse = signatureBean.encryptMessage(responseBytes, receiverPublic);
-        return Response.ok().entity(encryptedResponse).type(ContentTypeVS.MULTIPART_ENCRYPTED.getName()).build();
+        return Response.ok().entity(encryptedResponse).type(MediaTypeVS.MULTIPART_ENCRYPTED).build();
     }
 
     @Path("/getMultiSignedMessage") @POST
@@ -62,7 +63,7 @@ public class EncryptorResource {
         String subject = "Multisigned response";
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
                 messageSMIME.getSMIME(), subject);
-        return  Response.ok().entity(smimeMessage.getBytes()).type(ContentTypeVS.JSON_SIGNED.getName()).build();
+        return  Response.ok().entity(smimeMessage.getBytes()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/validateTimeStamp") @POST

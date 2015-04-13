@@ -1,6 +1,6 @@
 package org.votingsystem.test.dto;
 
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.voting.VoteVS;
 
 public class VoteResultDto {
 

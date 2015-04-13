@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.signature.util.KeyStoreInfo;

@@ -11,5 +11,6 @@ public class MediaTypeVS {
     public static final String ZIP = "application/zip";
     public static final String MESSAGEVS = "application/pkcs7-messagevs";
     public static final String BACKUP = "application/backup";
+    public static final String MULTIPART_ENCRYPTED = "multipart/encrypted";
 
 }

@@ -1,7 +1,7 @@
 package org.votingsystem.client.model;
 
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.FieldEventVS;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;

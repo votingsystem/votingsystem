@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.voting.EventVS;
 
 import javax.persistence.*;
 import java.io.Serializable;

@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.model.BankVS;
-import org.votingsystem.model.GroupVS;
+import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;

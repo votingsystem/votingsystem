@@ -2,10 +2,10 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.EventVSDto;
-import org.votingsystem.dto.RepresentativeDto;
-import org.votingsystem.model.EventVS;
+import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;

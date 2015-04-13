@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.URLMessage;
+import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.*;
+import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -264,7 +267,7 @@ public class GroupVSResource {
 
     @Path("/id/{groupId}/user/id/{userId}") //old_url -> /groupVS/$id/user/$userId
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object user(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @PathParam("userId") long userId, 
+    public Response user(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @PathParam("userId") long userId,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) 
             throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -272,11 +275,12 @@ public class GroupVSResource {
                 "and s.userVS.id =:userId").setParameter("groupId", groupId).setParameter("userId", userId);
         SubscriptionVS subscriptionVS = dao.getSingleResult(SubscriptionVS.class, query);
         if(subscriptionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "SubscriptionVS not found - groupId: " + groupId + " - userId: " + userId);
-        Map resultMap = userVSBean.getSubscriptionVSDetailedDataMap(subscriptionVS);
-        if(contentType.contains("json")) return resultMap;
+                "SubscriptionVS not found - groupId: " + groupId + " - userId: " + userId).build();
+        SubscriptionVSDto dto = SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL());
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
+                .type(MediaTypeVS.JSON).build();
         else {
-            req.setAttribute("subscriptionMap", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("subscriptionMap", JSON.getMapper().writeValueAsString(dto));
             context.getRequestDispatcher("/groupVS/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }

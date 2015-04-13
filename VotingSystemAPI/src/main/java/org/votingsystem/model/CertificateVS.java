@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;

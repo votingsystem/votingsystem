@@ -4,8 +4,11 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.EventVSDto;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.AccessControlVS;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.ClaimSignedSender;
 import org.votingsystem.test.callable.SignTask;
@@ -57,7 +60,7 @@ public class Claim_publishAndSend {
                 simulationData.getAccessControlURL()),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
-        if(!(actorVS instanceof AccessControlVS)) throw new org.votingsystem.throwable.ExceptionVS("Expected access control but found " + 
+        if(!(actorVS instanceof AccessControlVS)) throw new org.votingsystem.throwable.ExceptionVS("Expected access control but found " +
                 actorVS.getType().toString());
         if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
             throw new org.votingsystem.throwable.ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());

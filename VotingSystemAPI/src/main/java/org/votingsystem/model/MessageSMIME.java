@@ -6,7 +6,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.SMIMECheck;
 import org.votingsystem.util.TypeVS;
-
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
@@ -42,19 +41,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVS") private EventVS eventVS;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="batchRequest") private BatchRequest batchRequest;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="subscriptionVS") private SubscriptionVS subscriptionVS;
-
-    @OneToOne(mappedBy="messageSMIME") private AccessRequestVS accessRequestVS;
-    
-    @OneToOne(mappedBy="messageSMIME") private VoteVS voteVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="smimeParent") private MessageSMIME smimeParent;
@@ -100,7 +86,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
         this.userVS = smimeCheck.getSigner();
         this.anonymousSigner = smimeCheck.getAnonymousSigner();
         this.signers = smimeCheck.getSigners();
-        this.eventVS = smimeCheck.getEventVS();
     }
 
     public MessageSMIME(SMIMEMessage smime, UserVS userVS, TypeVS type) throws Exception {
@@ -116,11 +101,9 @@ public class MessageSMIME extends EntityVS implements Serializable {
     }
 
 
-    public MessageSMIME(SMIMEMessage smime, TypeVS typeVS, BatchRequest batchRequest) throws Exception {
+    public MessageSMIME(SMIMEMessage smime, TypeVS typeVS) throws Exception {
         this.smimeMessage = smime;
         this.type = typeVS;
-        this.batchRequest = batchRequest;
-
     }
 
     public MessageSMIME setContent(byte[] content) {
@@ -169,22 +152,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
 		return type;
 	}
 
-	public void setAccessRequestVS(AccessRequestVS accessRequestVS) {
-		this.accessRequestVS = accessRequestVS;
-	}
-
-	public AccessRequestVS getAccessRequestVS() {
-		return accessRequestVS;
-	}
-
-	public VoteVS getVoteVS() {
-		return voteVS;
-	}
-
-	public void setVoteVS(VoteVS voteVS) {
-		this.voteVS = voteVS;
-	}
-
 	public MessageSMIME getSmimeParent() {
 		return smimeParent;
 	}
@@ -193,14 +160,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
 		this.smimeParent = smimeParent;
 	}
 
-	public EventVS getEventVS() {
-		return eventVS;
-	}
-
-	public MessageSMIME setEventVS(EventVS eventVS) {
-		this.eventVS = eventVS;
-        return this;
-	}
 
 	public String getMetaInf() { return metaInf; }
 
@@ -233,7 +192,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
     public MessageSMIME refresh() throws Exception {
         getSMIME().setMessageID("/messageSMIME/" + getId());
         setContent(getSMIME().getBytes());
-        if(eventVS != null) setEventVS(eventVS);
         if(type != null) setType(type);
         if(reason != null) setReason(reason);
         if(metaInf != null) setMetaInf(metaInf);
@@ -262,22 +220,6 @@ public class MessageSMIME extends EntityVS implements Serializable {
 
     public void setReason(String reason) {
         this.reason = reason;
-    }
-
-    public BatchRequest getBatchRequest() {
-        return batchRequest;
-    }
-
-    public void setBatchRequest(BatchRequest batchRequest) {
-        this.batchRequest = batchRequest;
-    }
-
-    public SubscriptionVS getSubscriptionVS() {
-        return subscriptionVS;
-    }
-
-    public void setSubscriptionVS(SubscriptionVS subscriptionVS) {
-        this.subscriptionVS = subscriptionVS;
     }
 
     public String getMessageSubject() {

@@ -2,10 +2,11 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.dto.EventVSDto;
-import org.votingsystem.dto.EventVSMetaInf;
-import org.votingsystem.dto.RepresentativesAccreditations;
+import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.EventVSMetaInf;
+import org.votingsystem.dto.voting.RepresentativesAccreditations;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
@@ -46,7 +47,7 @@ public class EventVSElectionBean {
     @Inject TimeStampBean timeStampBean;
     @Inject MessagesBean messages;
 
-    public MessageSMIME saveEvent(MessageSMIME messageSMIME) throws Exception {
+    public EventVSElection saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();
         EventVSDto request  = messageSMIME.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
@@ -96,9 +97,9 @@ public class EventVSElectionBean {
                 new CertificateVS(controlCenterVS, eventVS, controlCenterX509Cert));
         CertificateVS eventVSAccessControlCertificate = dao.persist(
                 new CertificateVS(null, eventVS, signatureBean.getServerCert()));
-        dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime).setEventVS(eventVS));
-        dao.merge(eventVS.setState(EventVS.State.ACTIVE));
-        return messageSMIME;
+        dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime));
+        dao.merge(eventVS.setState(EventVS.State.ACTIVE).setPublishRequestSMIME(messageSMIME));
+        return eventVS;
     }
 
     public synchronized void generateBackups () throws Exception {

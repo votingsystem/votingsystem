@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -349,16 +350,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public MessageSMIME refreshMessageSMIME() throws Exception {
-        messageSMIME.getSMIME().setMessageID("/messageSMIME/" + messageSMIME.getId());
-        messageSMIME.setContent(messageSMIME.getSMIME().getBytes());
-        if(eventVS != null) messageSMIME.setEventVS(eventVS);
-        if(type != null) messageSMIME.setType(type);
-        if(reason != null) messageSMIME.setReason(reason);
-        if(metaInf != null) messageSMIME.setMetaInf(metaInf);
-        return messageSMIME;
     }
 
     public static ResponseVS OK(byte[] messageBytes) {

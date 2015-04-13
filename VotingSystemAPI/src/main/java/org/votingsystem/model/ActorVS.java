@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;

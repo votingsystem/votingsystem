@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.model.AccessRequestVS;
-import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AccessRequestVS;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;

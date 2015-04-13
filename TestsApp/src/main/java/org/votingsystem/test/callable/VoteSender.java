@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.test.dto.VoteResultDto;

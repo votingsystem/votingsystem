@@ -5,6 +5,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.MediaTypeVS;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
@@ -46,7 +47,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
             //        representativeDataSmimeMessage, accesRequestServerCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName();
+                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED;
             fileMap.put(representativeDataFileName, representativeDataSmimeMessage.getBytes());
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
             responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, urlToSendDocument);

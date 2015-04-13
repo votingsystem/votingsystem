@@ -17,7 +17,7 @@ import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.*;

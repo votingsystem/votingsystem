@@ -1,6 +1,10 @@
 package org.votingsystem.web.controlcenter.ejb;
 
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ExceptionVS;
@@ -10,7 +14,6 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.DAOUtils;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -40,8 +43,9 @@ public class VoteVSBean {
     @Inject MessagesBean messages;
 
     @Transactional
-    public VoteVS validateVote(MessageSMIME messageSMIME) throws Exception {
-        EventVSElection eventVS = (EventVSElection) messageSMIME.getEventVS();
+    public VoteVS validateVote(SMIMECheck smimeCheck) throws Exception {
+        MessageSMIME messageSMIME = smimeCheck.getMessageSMIME();
+        EventVSElection eventVS = (EventVSElection) smimeCheck.getEventVS();
         eventVS = em.merge(eventVS);
         VoteVS voteVS = messageSMIME.getSMIME().getVoteVS();
         voteVS.setMessageSMIME(messageSMIME);

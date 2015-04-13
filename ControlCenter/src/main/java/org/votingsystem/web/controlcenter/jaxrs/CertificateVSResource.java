@@ -3,7 +3,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.EventVSElection;
+import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;

@@ -174,7 +174,7 @@
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_CANCEL)
                 webAppMessage.serviceURL = "${restURL}/groupVS/cancel/" + this.groupvs.userVS.id
                 webAppMessage.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
-                webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_CANCEL, groupvsName:this.groupvs.userVS.name,
+                webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.userVS.name,
                     id:this.groupvs.userVS.id}
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
@@ -277,6 +277,7 @@
             this.page = 1;
             this.$.transactionvsCoreMenu.selected = null
         },
+
         back:function() {
             this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.userVS.id});
         },

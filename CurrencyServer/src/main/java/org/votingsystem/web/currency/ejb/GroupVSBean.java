@@ -1,11 +1,10 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.votingsystem.currency.dto.GroupVSDto;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
@@ -22,7 +21,6 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Logger;
@@ -44,56 +42,56 @@ public class GroupVSBean {
     @Inject TransactionVSBean transactionVSBean;
 
 
-    public GroupVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public GroupVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIME) throws Exception {
+        UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
         if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isUserAdmin(signer.getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_CANCEL.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSDto request = messageSMIMEReq.getSignedContent(GroupVSDto.class);
+        GroupVSDto request = messageSMIME.getSignedContent(GroupVSDto.class);
         request.validateCancelRequest();
         dao.merge(groupVS.setState(UserVS.State.CANCELED));
         return groupVS;
     }
 
-    public GroupVS editGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public GroupVS editGroup(GroupVS groupVS, MessageSMIME messageSMIME) throws Exception {
+        UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
-        if(!groupVS.getRepresentative().getNif().equals(messageSMIMEReq.getUserVS().getNif()) &&
-                !signatureBean.isUserAdmin(messageSMIMEReq.getUserVS().getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(messageSMIME.getUserVS().getNif()) &&
+                !signatureBean.isUserAdmin(messageSMIME.getUserVS().getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_EDIT.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSDto request = messageSMIMEReq.getSignedContent(GroupVSDto.class);
+        GroupVSDto request = messageSMIME.getSignedContent(GroupVSDto.class);
         request.validateEditRequest();
         if(request.getId().longValue() != groupVS.getId().longValue()) {
             throw new ExceptionVS("group id error - expected: " + groupVS.getId() + " - found: " + request.getId());
         }
-        dao.merge(groupVS.setDescription(request.getGroupvsInfo()));
+        dao.merge(groupVS.setDescription(request.getInfo()));
         return groupVS;
     }
 
-    public GroupVS saveGroup(MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public GroupVS saveGroup(MessageSMIME messageSMIME) throws Exception {
+        UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
-        GroupVSDto request = validateNewGroupRequest(messageSMIMEReq.getSignedContent(GroupVSDto.class)) ;
-        Query query = dao.getEM().createNamedQuery("findGroupByName").setParameter("name", request.getGroupvsName().trim());
+        GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
+        Query query = dao.getEM().createNamedQuery("findGroupByName").setParameter("name", request.getName().trim());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
         if(groupVS == null) {
-            throw new ExceptionVS(messages.get("nameGroupRepeatedMsg", request.getGroupvsName()));
+            throw new ExceptionVS(messages.get("nameGroupRepeatedMsg", request.getName()));
         }
         currencyAccountBean.checkUserVSAccount(signer);
-        groupVS = dao.persist(new GroupVS(request.getGroupvsName().trim(), UserVS.State.ACTIVE, signer,
-                request.getGroupvsInfo(), request.getTagSet()));
+        groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
+                request.getInfo(), request.getTagSet()));
         groupVS.setIBAN(ibanBean.getIBAN(groupVS.getId()));
         dao.persist(new CurrencyAccount(groupVS, BigDecimal.ZERO, Currency.getInstance("EUR").getCurrencyCode(),
                 config.getTag(TagVS.WILDTAG)));
         String fromUser = config.getServerName();
         String toUser = signer.getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
-                messageSMIMEReq.getSMIME(), messages.get("newGroupVSReceiptSubject"));
-        messageSMIMEReq.setSMIME(receipt);
+                messageSMIME.getSMIME(), messages.get("newGroupVSReceiptSubject"));
+        messageSMIME.setSMIME(receipt);
         return groupVS;
     }
 
@@ -111,11 +109,11 @@ public class GroupVSBean {
         return groupVSDto;
     }
 
-    public SubscriptionVS subscribe(MessageSMIME messageSMIMEReq) throws Exception {
+    public SubscriptionVS subscribe(MessageSMIME messageSMIME) throws Exception {
         SubscriptionVS subscriptionVS = null;
-        UserVS signer = messageSMIMEReq.getUserVS();
+        UserVS signer = messageSMIME.getUserVS();
         log.info("signer: " + signer.getNif());
-        GroupVSDto request = validateNewGroupRequest(messageSMIMEReq.getSignedContent(GroupVSDto.class)) ;
+        GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
         request.validateSubscriptionRequest();
         GroupVS groupVS = dao.find(GroupVS.class, request.getId());
         if(groupVS.getRepresentative().getNif().equals(signer.getNif())) {
@@ -128,7 +126,7 @@ public class GroupVSBean {
         if(subscriptionVS != null) {
             throw new ExceptionVS(messages.get("userAlreadySubscribedErrorMsg", signer.getNif(), groupVS.getName()));
         }
-        subscriptionVS = dao.persist(new SubscriptionVS(signer, groupVS, SubscriptionVS.State.PENDING, messageSMIMEReq));
+        subscriptionVS = dao.persist(new SubscriptionVS(signer, groupVS, SubscriptionVS.State.PENDING, messageSMIME));
         return subscriptionVS;
     }
 
