@@ -4,7 +4,7 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>-->
+    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite.js'></script>
     <f:facet name="first">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -13,8 +13,8 @@
         <link rel="shortcut icon" type="image/png" href="#{contextURL}/resources/images/icon_16/fa-bolt.png" />
     </f:facet>
     <title><ui:insert name="title" /></title>
-    <h:outputScript name="js/utilsVS.js" />
     <h:outputStylesheet name="css/currency.css" />
+    <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
     <link href="${elementURL}/element/votingsystem-navbar.vsp" rel="import"/>

@@ -35,6 +35,8 @@ public class BrowserVSMenuButton extends MenuButton {
     private MenuItem currencyUsersProceduresMenuItem;
     private MenuItem walletMenuItem;
     private MenuItem connectMenuItem;
+    private MenuItem votingSystemAdminMenuItem;
+    private MenuItem currencyAdminMenuItem;
 
     class EventBusConnectionListener {
         @Subscribe public void responseVSChange(ResponseVS responseVS) {
@@ -96,12 +98,16 @@ public class BrowserVSMenuButton extends MenuButton {
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
-        MenuItem currencyAdminMenuItem = new MenuItem(ContextVS.getMessage("currencyAdminLbl"));
-        currencyAdminMenuItem.setOnAction(actionEvent ->  Browser.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getAdminDashBoardURL(),
+        currencyAdminMenuItem = new MenuItem(ContextVS.getMessage("currencyAdminLbl"));
+        currencyAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openCurrencyURL(
+                ContextVS.getInstance().getCurrencyServer().getAdminDashBoardURL(),
                 ContextVS.getMessage("currencyAdminLbl")));
-        MenuItem votingSystemAdminMenuItem = new MenuItem(ContextVS.getMessage("votingSystemProceduresLbl"));
-        votingSystemAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getDashBoardURL(),
+        currencyAdminMenuItem.setVisible(false);
+        votingSystemAdminMenuItem = new MenuItem(ContextVS.getMessage("votingSystemProceduresLbl"));
+        votingSystemAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openVotingSystemURL(
+                ContextVS.getInstance().getAccessControl().getDashBoardURL(),
                 ContextVS.getMessage("votingSystemProceduresLbl")));
+        votingSystemAdminMenuItem.setVisible(false);
 
         Menu adminsMenu = new Menu(ContextVS.getMessage("adminsMenuLbl"));
         adminsMenu.setGraphic(Utils.getIcon(FontAwesomeIconName.USERS));
@@ -117,6 +123,7 @@ public class BrowserVSMenuButton extends MenuButton {
         PlatformImpl.runLater(() -> {
             voteMenuItem.setVisible(available);
             selectRepresentativeMenuItem.setVisible(available);
+            votingSystemAdminMenuItem.setVisible(available);
         });
     }
 
@@ -125,6 +132,7 @@ public class BrowserVSMenuButton extends MenuButton {
             currencyUsersProceduresMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
             connectMenuItem.setVisible(available);
+            currencyAdminMenuItem.setVisible(available);
         });
     }
 

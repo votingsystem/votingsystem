@@ -388,6 +388,12 @@ VotingSystemClient.call = function (messageJSON) {
 
 window['isClientToolConnected'] = false
 
+function setClientToolConnected() {
+    console.log("setClientToolConnected");
+    window['isClientToolConnected'] = true;
+    document.querySelector("#voting_system_page").fire('votingsystem-client-connected', {})
+}
+
 var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
     window['isClientToolConnected'] = true

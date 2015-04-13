@@ -60,7 +60,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getAdminDashBoardURL() {
-        return getServerURL() + "/app/admin?menu=admin";
+        return getServerURL() + "/app/admin.xhtml?menu=admin";
     }
 
     public String getSaveBankServiceURL() {
