@@ -15,7 +15,6 @@
         <class>org.votingsystem.model.MessageSMIME</class>
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.TagVS</class>
-        <class>org.votingsystem.model.voting.UserRequestCsrVS</class>
         <class>org.votingsystem.model.UserVS</class>
         <class>org.votingsystem.model.voting.AccessControlVS</class>
         <class>org.votingsystem.model.voting.AccessRequestVS</class>
@@ -27,6 +26,7 @@
         <class>org.votingsystem.model.voting.FieldValueEventVS</class>
         <class>org.votingsystem.model.voting.RepresentationDocument</class>
         <class>org.votingsystem.model.voting.RepresentativeDocument</class>
+        <class>org.votingsystem.model.voting.UserRequestCsrVS</class>
         <class>org.votingsystem.model.voting.VoteVSCanceler</class>
         <class>org.votingsystem.model.voting.VoteVS</class>
 

@@ -1,4 +1,4 @@
-package org.votingsystem.dto;
+package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OptionInfo {
+public class ElectionOptionDto {
 
     private String content;
     private Long numVoteRequests;
@@ -14,10 +14,10 @@ public class OptionInfo {
     private Long numRepresentativesWithVote;
     private Long numVotesResult;
     
-    public OptionInfo() {}
+    public ElectionOptionDto() {}
     
-    public OptionInfo(String content, Long numVoteRequests, Long numUsersWithVote, 
-                      Long numRepresentativesWithVote, Long numVotesResult) {
+    public ElectionOptionDto(String content, Long numVoteRequests, Long numUsersWithVote,
+                             Long numRepresentativesWithVote, Long numVotesResult) {
         this.content = content;
         this.numVoteRequests = numVoteRequests;
         this.numUsersWithVote = numUsersWithVote;

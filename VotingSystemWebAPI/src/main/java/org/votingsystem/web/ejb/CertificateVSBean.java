@@ -1,6 +1,6 @@
 package org.votingsystem.web.ejb;
 
-import org.votingsystem.dto.URLMessage;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -37,7 +37,7 @@ public class CertificateVSBean {
      * El procedimiento para añadir una autoridad certificadora consiste en
      * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
-    public URLMessage addCertificateAuthority(MessageSMIME messageSMIME) throws Exception {
+    public MessageDto addCertificateAuthority(MessageSMIME messageSMIME) throws Exception {
         CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
         if(!signatureBean.isUserAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
@@ -64,7 +64,7 @@ public class CertificateVSBean {
         }
         log.info("addCertificateAuthority - new CA - id:" + certificateVS.getId());
         signatureBean.addCertAuthority(certificateVS);
-        return new URLMessage(ResponseVS.SC_OK,  messages.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
+        return new MessageDto(ResponseVS.SC_OK,  messages.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
                 config.getRestURL() + "/certificateVS/serialNumber/" + x509NewCACert.getSerialNumber().toString());
     }
 

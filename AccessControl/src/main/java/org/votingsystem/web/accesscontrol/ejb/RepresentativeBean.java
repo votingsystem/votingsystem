@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.dto.OptionInfo;
+import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
@@ -144,7 +144,7 @@ public class RepresentativeBean {
                     new TypeReference<RepresentativesAccreditations>() {});
             return repAccreditations;
         }
-        Map<Long, OptionInfo> optionsMap = new HashMap<>();
+        Map<Long, ElectionOptionDto> optionsMap = new HashMap<>();
         Query query = null;
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
@@ -155,9 +155,9 @@ public class RepresentativeBean {
                     .setParameter("state", VoteVS.State.OK);
             Long numUsersWithVote = (long) query.getSingleResult();
             Long numRepresentativesWithVote = numVoteRequests - numUsersWithVote;
-            OptionInfo optionInfo = new OptionInfo(option.getContent(), numVoteRequests, numUsersWithVote,
+            ElectionOptionDto electionOptionDto = new ElectionOptionDto(option.getContent(), numVoteRequests, numUsersWithVote,
                     numRepresentativesWithVote, null);
-            optionsMap.put(option.getId(), optionInfo);
+            optionsMap.put(option.getId(), electionOptionDto);
         }
         log.info("this is for TEST - CHANGE dateCreated to dateBegin !!!");
         query = dao.getEM().createQuery("select count(r) from RepresentativeDocument r where r.dateCreated <:dateBegin " +
@@ -180,7 +180,7 @@ public class RepresentativeBean {
                 .setParameter("states", Arrays.asList(RepresentativeDocument.State.OK, RepresentativeDocument.State.RENEWED))
                 .setMaxResults(pageSize);
         List<RepresentativeDocument> representativeDocList = null;
-        Map<String, RepresentativeVoteInfo> representativesMap = new HashMap<>();
+        Map<String, RepresentativeVoteDto> representativesMap = new HashMap<>();
         DecimalFormat batchFormat = new DecimalFormat("00000000");
         int batch = 0;
         while ((representativeDocList = query.setFirstResult(offset).getResultList()).size() > 0) {
@@ -256,10 +256,10 @@ public class RepresentativeBean {
                     optionsMap.get(representativeVote.getOptionSelected().getId()).addNumVotesResult(
                             numVotesRepresentedByRepresentative - 1);
                 }
-                RepresentativeVoteInfo representativeVoteInfo = new RepresentativeVoteInfo(representative.getId(),
+                RepresentativeVoteDto representativeVoteDto = new RepresentativeVoteDto(representative.getId(),
                         representativeVote.getOptionSelected().getId(), numRepresented, numRepresentedWithAccessRequest,
                         numVotesRepresentedByRepresentative);
-                representativesMap.put(representative.getNif(), representativeVoteInfo);
+                representativesMap.put(representative.getNif(), representativeVoteDto);
 
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
                 /*String csvLine = "${representative.nif}, numRepresented:${formatted.format(numRepresented)}, " +

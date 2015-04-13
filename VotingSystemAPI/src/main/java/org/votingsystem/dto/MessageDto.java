@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class URLMessage {
+public class MessageDto {
 
     private Integer statusCode;
     private String message;
-    @JsonProperty("UUID")
+    @JsonProperty("URL")
     private String URL;
 
-    public URLMessage(Integer statusCode, String message, String URL) {
+    public MessageDto(Integer statusCode, String message, String URL) {
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;

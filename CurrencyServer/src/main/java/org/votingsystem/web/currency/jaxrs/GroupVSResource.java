@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.URLMessage;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.GroupVS;
@@ -209,8 +209,8 @@ public class GroupVSResource {
         GroupVS groupVS = groupVSBean.saveGroup(messageSMIME);
         String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
         String message =  messages.get("newCurrencyGroupOKMsg", groupVS.getName());
-        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
+        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/edit")//old_url -> /groupVS/edit/$id
@@ -223,8 +223,8 @@ public class GroupVSResource {
         groupVS = groupVSBean.editGroup(groupVS, messageSMIME);
         String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
         String message =  messages.get("currencyGroupEditedOKMsg", groupVS.getName());
-        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
+        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/edit") @GET //old_url -> /groupVS/edit/$id
@@ -249,8 +249,8 @@ public class GroupVSResource {
         groupVS = groupVSBean.cancelGroup(groupVS, messageSMIME);
         String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
         String message =  messages.get("currencyGroupCancelledOKMsg", groupVS.getName());
-        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
+        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/cancel") //old_url -> /groupVS/$id/subscribe
