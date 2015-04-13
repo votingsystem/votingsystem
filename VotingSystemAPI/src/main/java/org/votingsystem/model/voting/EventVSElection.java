@@ -1,12 +1,14 @@
 package org.votingsystem.model.voting;
 
 
+import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
@@ -19,6 +21,9 @@ import java.util.Date;
 public class EventVSElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @OneToOne private CertificateVS accessControlCert;
+    @OneToOne private CertificateVS controlCenterCert;
 
     public EventVSElection() {}
 
@@ -68,4 +73,21 @@ public class EventVSElection extends EventVS implements Serializable {
         return this;
     }
 
+    public CertificateVS getAccessControlCert() {
+        return accessControlCert;
+    }
+
+    public EventVSElection setAccessControlCert(CertificateVS accessControlCert) {
+        this.accessControlCert = accessControlCert;
+        return this;
+    }
+
+    public CertificateVS getControlCenterCert() {
+        return controlCenterCert;
+    }
+
+    public EventVSElection setControlCenterCert(CertificateVS controlCenterCert) {
+        this.controlCenterCert = controlCenterCert;
+        return this;
+    }
 }

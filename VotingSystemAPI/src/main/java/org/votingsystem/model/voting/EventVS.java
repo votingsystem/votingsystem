@@ -1,11 +1,14 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -63,7 +66,7 @@ public class EventVS extends EntityVS implements Serializable {
     private State state;
     @Column(name="cardinality") @Enumerated(EnumType.STRING)
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
-    @OneToOne(mappedBy="eventVS") private KeyStoreVS keyStoreVS;
+    @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS")
     private UserVS userVS;
@@ -267,13 +270,6 @@ public class EventVS extends EntityVS implements Serializable {
         this.controlCenterVS = controlCenterVS;
     }
 
-	public KeyStoreVS getKeyStoreVS() {
-		return keyStoreVS;
-	}
-
-	public void setKeyStoreVS(KeyStoreVS keyStoreVS) {
-		this.keyStoreVS = keyStoreVS;
-	}
 
 	public Boolean getBackupAvailable() { return backupAvailable; }
 
@@ -353,16 +349,19 @@ public class EventVS extends EntityVS implements Serializable {
         return null;
     }
 
-    public Map getChangeEventDataMap(String serverURL, State state) {
-        log.info("getCancelEventDataMap");
-        Map resultMap = new HashMap();
-        resultMap.put("operation", TypeVS.EVENT_CANCELLATION.toString());
-        resultMap.put("accessControlURL", serverURL);
-        if(getAccessControlEventVSId() != null) resultMap.put("eventId", getAccessControlEventVSId());
-        else resultMap.put("eventId", id);
-        resultMap.put("state", state.toString());
-        resultMap.put("UUID", UUID.randomUUID().toString());
-        return resultMap;
+    public CertificateVS getCertificateVS() {
+        return certificateVS;
+    }
+
+    public EventVS setCertificateVS(CertificateVS certificateVS) {
+        this.certificateVS = certificateVS;
+        return this;
+    }
+
+    public Set<X509Certificate> getTrustedCerts() throws Exception {
+        Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>();
+        eventTrustedCerts.add(CertUtils.loadCertificate(certificateVS.getContent()));
+        return eventTrustedCerts;
     }
 
 }

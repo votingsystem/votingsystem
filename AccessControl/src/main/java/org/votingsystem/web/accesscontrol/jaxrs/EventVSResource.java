@@ -2,8 +2,6 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.ejb.DAOBean;

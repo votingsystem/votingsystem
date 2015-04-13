@@ -18,7 +18,10 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
@@ -39,7 +42,8 @@ public class SubscriptionVSBean {
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
 
-    public UserVS checkUser(UserVS userVS) throws ExceptionVS, IOException, CertificateEncodingException {
+    public UserVS checkUser(UserVS userVS) throws ExceptionVS, IOException, CertificateException,
+            NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, "nif: " + userVS.getNif());
         CertificateVS certificate = null;
         if(userVS.getNif() == null) throw new ExceptionVS("ERROR - missing Nif");
@@ -56,14 +60,13 @@ public class SubscriptionVSBean {
             userVSDB.setCertificateCA(userVS.getCertificateCA());
             userVSDB.setCertificate(userVS.getCertificate());
             userVSDB.setTimeStampToken(userVS.getTimeStampToken());
-            setUserData(userVSDB, deviceData);
         }
         setUserData(userVSDB, deviceData);
         return userVSDB;
     }
 
     public void setUserData(UserVS userVS, Map<String, String> deviceData) throws
-            CertificateEncodingException, IOException {
+            CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, " deviceData: " + deviceData);
         X509Certificate x509Cert = userVS.getCertificate();
         Query query = dao.getEM().createNamedQuery("findCertByUserAndStateAndSerialNumberAndCertificateCA")
@@ -73,8 +76,7 @@ public class SubscriptionVSBean {
         CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
         DeviceVS deviceVS = null;
         if(certificate == null){
-            certificate = dao.persist(new CertificateVS(userVS, x509Cert,  CertificateVS.State.OK,
-                    CertificateVS.Type.USER,  userVS.getCertificateCA(), x509Cert.getNotBefore(), x509Cert.getNotAfter()));
+            certificate = dao.persist(CertificateVS.USER(userVS, x509Cert));
             if(deviceData != null) {
                 query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId").setParameter("userVS", userVS)
                         .setParameter("deviceId", deviceData.get("deviceId"));

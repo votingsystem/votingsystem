@@ -87,16 +87,16 @@ public class VoteVSBean {
         VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
+        if(!voteVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
-                DateUtils.getDateStr(certificateVS.getEventVS().getDateBegin()),
-                DateUtils.getDateStr(certificateVS.getEventVS().getDateFinish())));
-        String toUser = certificateVS.getEventVS().getControlCenterVS().getName();
+                DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
+                DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
+        String toUser = voteVS.getEventVS().getControlCenterVS().getName();
         String subject = messages.get("voteCancelationSubject");
         smimeMessage.setMessageID(format("{0}/messageSMIME/id/{1}", config.getRestURL(), messageSMIME.getId()));
         SMIMEMessage smimeMessageReq = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
-        String controlCenterURL = certificateVS.getEventVS().getControlCenterVS().getServerURL();
-        String eventURL = format("{0}/eventVSElection/id/{1}", config.getRestURL(), certificateVS.getEventVS().getId());
+        String controlCenterURL = voteVS.getEventVS().getControlCenterVS().getServerURL();
+        String eventURL = format("{0}/eventVSElection/id/{1}", config.getRestURL(), voteVS.getEventVS().getId());
         String voteCancelerURL = format("{0}/rest/voteVSCanceler?url={1}", controlCenterURL, eventURL);
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),
                 ContentTypeVS.JSON_SIGNED, voteCancelerURL);

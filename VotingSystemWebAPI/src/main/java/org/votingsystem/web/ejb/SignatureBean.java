@@ -176,11 +176,7 @@ public class SignatureBean {
                 .setParameter("serialNumber", x509AuthorityCert.getSerialNumber().longValue());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) {
-            certificateVS = new CertificateVS(CertUtils.isSelfSigned(x509AuthorityCert),
-                    CertificateVS.Type.CERTIFICATE_AUTHORITY, CertificateVS.State.OK, null, x509AuthorityCert.getEncoded(),
-                    x509AuthorityCert.getSerialNumber().longValue(), x509AuthorityCert.getNotBefore(),
-                    x509AuthorityCert.getNotAfter());
-            dao.persist(certificateVS);
+            certificateVS = dao.persist(CertificateVS.AUTHORITY(x509AuthorityCert, null));
             log.info("ADDED NEW FILE SYSTEM CA CERT - certificateVS.id:" + certificateVS.getId());
         } else if (CertificateVS.State.OK != certificateVS.getState()) {
             throw new ExceptionVS("File system athority cert: " + x509AuthorityCert.getSubjectDN() + " }' " +
@@ -208,10 +204,7 @@ public class SignatureBean {
     public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS) throws Exception {
         Set<TrustAnchor> eventTrustedAnchors = eventTrustedAnchorsMap.get(eventVS.getId());
         if(eventTrustedAnchors == null) {
-            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.eventVS =:eventVS and " +
-                    "c.state =:state and c.type =:type").setParameter("eventVS", eventVS)
-                    .setParameter("state", CertificateVS.State.OK).setParameter("type", CertificateVS.Type.VOTEVS_ROOT);
-            CertificateVS eventCACert = dao.getSingleResult(CertificateVS.class, query);
+            CertificateVS eventCACert = eventVS.getCertificateVS();
             X509Certificate certCAEventVS = eventCACert.getX509Cert();
             eventTrustedAnchors = new HashSet<TrustAnchor>();
             eventTrustedAnchors.add(new TrustAnchor(certCAEventVS, null));
@@ -228,18 +221,6 @@ public class SignatureBean {
         return false;
     }
 
-    public Set<X509Certificate> getEventTrustedCerts(EventVS eventVS) throws Exception {
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.eventVS =:eventVS and " +
-                "c.state =:state and c.type =:type").setParameter("eventVS", eventVS)
-                .setParameter("state", CertificateVS.State.OK).setParameter("type", CertificateVS.Type.VOTEVS_ROOT);
-        CertificateVS eventVSCertificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if(eventVSCertificateVS == null) throw new ValidationExceptionVS(
-                "ERROR - eventWithoutCAErrorMsg - EventVS id: " + eventVS.getId());
-        Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>();
-        eventTrustedCerts.add(CertUtils.loadCertificate(eventVSCertificateVS.getContent()));
-        return eventTrustedCerts;
-    }
-
     public KeyStoreVS generateElectionKeysStore(EventVS eventVS) throws Exception {
         Query query = dao.getEM().createQuery("select k from KeyStoreVS k where k.valid =:valid " +
                 "and k.eventVS =:eventVS").setParameter("valid", Boolean.TRUE).setParameter("eventVS", eventVS);
@@ -254,8 +235,8 @@ public class SignatureBean {
                 password.toCharArray(), keyAlias, strSubjectDNRoot);
         java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
         java.security.cert.Certificate cert = chain[0];
-        CertificateVS certificateVS = dao.persist(new CertificateVS((X509Certificate) cert, eventVS,
-                CertificateVS.Type.VOTEVS_ROOT, CertificateVS.State.OK));
+        CertificateVS certificateVS = dao.persist(CertificateVS.ELECTION((X509Certificate) cert));
+        dao.merge(eventVS.setCertificateVS(certificateVS));
         keyStoreVS = dao.persist(new KeyStoreVS (Boolean.TRUE, Boolean.TRUE, keyAlias, eventVS, eventVS.getDateBegin(),
                 eventVS.getDateFinish(), KeyStoreUtil.getBytes(keyStore, password.toCharArray())));
         keyStoreVS.setCertificateVS(certificateVS);

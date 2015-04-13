@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.jaxrs.provider;
 
-import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.SMIMECheck;

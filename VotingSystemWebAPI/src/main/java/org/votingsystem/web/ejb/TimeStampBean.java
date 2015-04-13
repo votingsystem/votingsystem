@@ -100,9 +100,10 @@ public class TimeStampBean {
             throw new ExceptionVS(timeStampServer.getServerURL() + " - signing cert is lapsed");
         }
         log.info("updated TimeStampServer '${timeStampServer.id}' signing cert");
-        CertificateVS certificateVS = dao.persist(new CertificateVS(timeStampServer, timeStampServer.getCertChainPEM().getBytes(),
-                x509TimeStampServerCert.getEncoded(), CertificateVS.State.OK, x509TimeStampServerCert.getSerialNumber().longValue(),
-                CertificateVS.Type.TIMESTAMP_SERVER, x509TimeStampServerCert.getNotBefore(), x509TimeStampServerCert.getNotAfter()));
+        CertificateVS certificateVS = CertificateVS.ACTORVS(timeStampServer, x509TimeStampServerCert);
+        certificateVS.setType(CertificateVS.Type.TIMESTAMP_SERVER);
+        certificateVS.setCertChainPEM(timeStampServer.getCertChainPEM().getBytes());
+        dao.persist(certificateVS);
         log.info("Added TimeStampServer Cert: " + certificateVS.getId());
         signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
     }

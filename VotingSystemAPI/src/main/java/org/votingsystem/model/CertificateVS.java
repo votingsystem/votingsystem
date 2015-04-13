@@ -1,14 +1,14 @@
 package org.votingsystem.model;
 
-import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -48,8 +48,6 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private UserRequestCsrVS userRequestCsrVS;
-    @OneToOne(mappedBy="certificateVS") private VoteVS voteVS;
     @Column(name="serialNumber", nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) private byte[] content;
 
@@ -58,9 +56,6 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="actorVS") private ActorVS actorVS;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVS") private EventVS eventVS;
 
     @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
@@ -99,93 +94,65 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public CertificateVS() {}
 
-    public static CertificateVS VOTE(VoteVS voteVS) throws CertificateEncodingException {
-        CertificateVS result = new CertificateVS();
+    public CertificateVS(X509Certificate x509Cert) throws CertificateEncodingException {
+        this.validFrom = x509Cert.getNotBefore();
+        this.validTo = x509Cert.getNotAfter();
+        this.content = x509Cert.getEncoded();
+        this.serialNumber = x509Cert.getSerialNumber().longValue();
+    }
+
+    public static CertificateVS VOTE(String hashCertVSBase64, UserVS userVS, X509Certificate x509Cert)
+            throws CertificateEncodingException {
+        CertificateVS result = new CertificateVS(x509Cert);
         result.setIsRoot(false);
         result.setState(State.OK).setType(Type.VOTEVS);
-        result.setHashCertVSBase64(voteVS.getHashCertVSBase64());
-        result.setUserVS(voteVS.getMessageSMIME().getUserVS());
-        result.setEventVS(voteVS.getEventVS());
-        result.setContent(voteVS.getX509Certificate().getEncoded());
-        result.setValidFrom(voteVS.getX509Certificate().getNotBefore());
-        result.setValidTo(voteVS.getX509Certificate().getNotAfter());
-        result.setSerialNumber(voteVS.getX509Certificate().getSerialNumber().longValue());
+        result.setHashCertVSBase64(hashCertVSBase64);
+        result.setUserVS(userVS);
         return result;
     }
 
-    public CertificateVS(boolean isRoot, Type type, State state, String description, byte[] content, long serialNumber,
-            Date validFrom, Date validTo) {
-        this.isRoot = isRoot;
-        this.type = type;
-        this.state = state;
-        this.description = description;
-        this.content = content;
-        this.serialNumber = serialNumber;
-        this.validFrom = validFrom;
-        this.validTo = validTo;
+    public static CertificateVS ELECTION(X509Certificate x509Cert) throws CertificateEncodingException {
+        CertificateVS result = new CertificateVS(x509Cert);
+        result.type = CertificateVS.Type.VOTEVS_ROOT;
+        result.state = CertificateVS.State.OK;
+        return result;
     }
 
-    public CertificateVS(ActorVS actorVS, byte[] certChainPEM, byte[] content, State state, long serialNumber,
-                        Type type, Date validFrom, Date validTo) {
-        this.actorVS = actorVS;
-        this.certChainPEM = certChainPEM;
-        this.content = content;
-        this.state = state;
-        this.serialNumber = serialNumber;
-        this.type = type;
-        this.validFrom = validFrom;
-        this.validTo = validTo;
-    }
-
-    public CertificateVS(ActorVS actorVS, EventVS eventVS, X509Certificate x509Certificate)
+    public static CertificateVS ACTORVS(ActorVS actorVS, X509Certificate x509Cert)
             throws CertificateEncodingException {
-        this.actorVS = actorVS;
-        this.eventVS = eventVS;
-        this.state = CertificateVS.State.OK;
-        this.type = CertificateVS.Type.ACTOR_VS;
-        this.content = x509Certificate.getEncoded();
-        this.serialNumber = x509Certificate.getSerialNumber().longValue();
-        this.validFrom = x509Certificate.getNotBefore();
-        this.validTo = x509Certificate.getNotAfter();
-
+        CertificateVS result = new CertificateVS(x509Cert);
+        result.type = CertificateVS.Type.ACTOR_VS;
+        result.state = CertificateVS.State.OK;
+        result.actorVS = actorVS;
+        return result;
     }
 
-    public CertificateVS(UserVS userVS, X509Certificate x509Cert, State state, Type type,
-             CertificateVS authorityCertificateVS, Date validFrom, Date validTo) throws CertificateEncodingException {
-        this.userVS = userVS;
-        this.content = x509Cert.getEncoded();
-        this.serialNumber = x509Cert.getSerialNumber().longValue();
-        this.state = state;
-        this.type = type;
-        this.authorityCertificateVS = authorityCertificateVS;
-        this.validFrom = validFrom;
-        this.validTo = validTo;
-    }
-    public CertificateVS(X509Certificate x509Cert, State state, Type type, String hashCertVSBase64,
-            Date validFrom, Date validTo) throws CertificateEncodingException {
-        this(null, x509Cert, state, type, null, validFrom, validTo);
-        this.hashCertVSBase64 = hashCertVSBase64;
-    }
-
-    public CertificateVS(X509Certificate x509Cert, EventVS eventVS, Type type, State state, String hashCertVSBase64)
+    public static CertificateVS ANONYMOUS_REPRESENTATIVE_DELEGATION(String hashCertVSBase64, X509Certificate x509Cert)
             throws CertificateEncodingException {
-        this.serialNumber = x509Cert.getSerialNumber().longValue();
-        this.content = x509Cert.getEncoded();
-        this.eventVS = eventVS;
-        this.type = type;
-        this.state = state;
-        this.hashCertVSBase64 = hashCertVSBase64;
+        CertificateVS result = new CertificateVS(x509Cert);
+        result.type = CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION;
+        result.state = CertificateVS.State.OK;
+        result.hashCertVSBase64 = hashCertVSBase64;
+        return result;
     }
 
-    public CertificateVS(X509Certificate x509Cert, EventVS eventVS, Type type, State state)
-            throws CertificateEncodingException {
-        this.serialNumber = x509Cert.getSerialNumber().longValue();
-        this.content = x509Cert.getEncoded();
-        this.eventVS = eventVS;
-        this.type = type;
-        this.state = state;
-        this.validTo = x509Cert.getNotAfter();
-        this.validFrom = x509Cert.getNotBefore();
+    public static CertificateVS AUTHORITY(X509Certificate x509Cert, String description) throws CertificateException,
+            NoSuchAlgorithmException,  NoSuchProviderException {
+        CertificateVS result = new CertificateVS(x509Cert);
+        result.isRoot = CertUtils.isSelfSigned(x509Cert);
+        result.type = CertificateVS.Type.CERTIFICATE_AUTHORITY;
+        result.state = CertificateVS.State.OK;
+        result.description = description;
+        return result;
+    }
+
+    public static CertificateVS USER(UserVS userVS, X509Certificate x509Cert)
+            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+        CertificateVS result = new CertificateVS(x509Cert);
+        result.type = CertificateVS.Type.USER;
+        result.state = CertificateVS.State.OK;
+        result.authorityCertificateVS = userVS.getCertificateCA();
+        return result;
     }
 
     public MessageSMIME getMessageSMIME() {
@@ -262,14 +229,6 @@ public class CertificateVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public EventVS getEventVS() {
-        return eventVS;
-    }
-
-    public void setEventVS(EventVS eventVS) {
-        this.eventVS = eventVS;
-    }
-
     public ActorVS getActorVS() {
         return actorVS;
     }
@@ -292,14 +251,6 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public void setServerURL(String serverURL) {
         this.serverURL = serverURL;
-    }
-
-    public VoteVS getVoteVS() {
-        return voteVS;
-    }
-
-    public void setVoteVS(VoteVS voteVS) {
-        this.voteVS = voteVS;
     }
 
     public Type getType() {
@@ -328,14 +279,6 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public void setValidTo(Date validTo) {
         this.validTo = validTo;
-    }
-
-    public UserRequestCsrVS getUserRequestCsrVS() {
-        return userRequestCsrVS;
-    }
-
-    public void setUserRequestCsrVS(UserRequestCsrVS userRequestCsrVS) {
-        this.userRequestCsrVS = userRequestCsrVS;
     }
 
     public Date getCancelDate() {

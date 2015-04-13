@@ -24,7 +24,7 @@
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.currency.SubscriptionVS</class>
         <class>org.votingsystem.model.TagVS</class>
-        <class>org.votingsystem.model.UserRequestCsrVS</class>
+        <class>org.votingsystem.model.voting.UserRequestCsrVS</class>
         <class>org.votingsystem.model.UserVS</class>
         <class>org.votingsystem.model.currency.GroupVS</class>
         <class>org.votingsystem.model.currency.BankVS</class>

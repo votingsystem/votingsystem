@@ -4,7 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.UserRequestCsrVS;
+import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.cdi.ConfigVS;

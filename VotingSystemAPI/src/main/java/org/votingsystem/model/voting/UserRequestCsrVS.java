@@ -1,5 +1,9 @@
-package org.votingsystem.model;
+package org.votingsystem.model.voting;
 
+import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -22,7 +26,7 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="serialNumber") private Long serialNumber;
     @Column(name="content", nullable=false) private byte[] content;
-    @OneToOne(mappedBy="userRequestCsrVS") private CertificateVS certificateVS;
+    @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="device") private DeviceVS deviceVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;

@@ -60,19 +60,17 @@ public class EventVSElectionBean {
         if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = signatureBean.getServerCert();
-        CertificateVS eventVSControlCenterCertificate =  new CertificateVS(controlCenterX509Cert, eventVS,
-                CertificateVS.Type.ACTOR_VS, CertificateVS.State.OK);
+        CertificateVS eventVSControlCenterCertificate =  CertificateVS.ACTORVS(null, controlCenterX509Cert);
         dao.persist(eventVSControlCenterCertificate);
         Collection<X509Certificate> accessControlCerts = CertUtils.fromPEMToX509CertCollection(request.getCertChain().getBytes());
         X509Certificate accessControlX509Cert = accessControlCerts.iterator().next();
-        CertificateVS eventVSAccessControlCertificate = new CertificateVS(accessControlX509Cert, eventVS,
-                CertificateVS.Type.ACTOR_VS, CertificateVS.State.OK);
+        CertificateVS eventVSAccessControlCertificate = CertificateVS.ACTORVS(accessControl, accessControlX509Cert);
         dao.persist(eventVSAccessControlCertificate);
-        CertificateVS eventVSRootCertificate = new CertificateVS(certCAVotacion, eventVS,
-                CertificateVS.Type.VOTEVS_ROOT, CertificateVS.State.OK);
-        eventVSRootCertificate.setActorVS(accessControl);
-        dao.persist(eventVSRootCertificate);
-        eventVS.setState(EventVS.State.ACTIVE);
+        CertificateVS eventVSCertificate = CertificateVS.ELECTION(certCAVotacion);
+        eventVSCertificate.setActorVS(accessControl);
+        dao.persist(eventVSCertificate);
+        eventVS.setAccessControlCert(eventVSAccessControlCertificate).setControlCenterCert(eventVSControlCenterCertificate)
+                .setCertificateVS(eventVSCertificate).setState(EventVS.State.ACTIVE);
         return dao.merge(eventVS);
     }
 
@@ -89,11 +87,6 @@ public class EventVSElectionBean {
                 "ERROR - trying to cancel an EventVS tha isn't active");
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
-        query = dao.getEM().createQuery("select c from CertificateVS c where c.eventVS =:eventVS and c.type =:type " +
-                "and c.actorVS =:actorVS").setParameter("eventVS", eventVS).setParameter("type", CertificateVS.Type.ACTOR_VS)
-                .setParameter("actorVS", eventVS.getAccessControlVS());
-        CertificateVS accessControlCert = dao.getSingleResult(CertificateVS.class, query);
-        if(accessControlCert == null) throw new ExceptionVS("ERROR - missing Access Control Cert");
         String fromUser = config.getServerName();
         String toUser = eventVS.getAccessControlVS().getName();
         String subject = messages.get("mime.subject.eventCancellationValidated");

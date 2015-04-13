@@ -79,9 +79,8 @@ public class ControlCenterBean {
                             x509Cert).setState(ActorVS.State.OK));
                 }
                 controlCenterDB.setCertChainPEM(actorVS.getCertChainPEM());
-                controlCenterCert = new CertificateVS(controlCenterDB, actorVS.getCertChainPEM().getBytes(),
-                        x509Cert.getEncoded(), CertificateVS.State.OK, x509Cert.getSerialNumber().longValue(),
-                        CertificateVS.Type.ACTOR_VS, x509Cert.getNotBefore(), x509Cert.getNotAfter());
+                controlCenterCert = CertificateVS.ACTORVS(controlCenterDB, x509Cert);
+                controlCenterCert.setCertChainPEM(actorVS.getCertChainPEM().getBytes());
                 dao.persist(controlCenterCert);
                 controlCenter = controlCenterDB;
             } else throw new ExceptionVS(responseVS.getMessage());

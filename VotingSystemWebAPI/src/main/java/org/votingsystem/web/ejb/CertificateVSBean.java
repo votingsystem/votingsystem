@@ -52,10 +52,7 @@ public class CertificateVSBean {
                 x509NewCACert.getSerialNumber().longValue());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) {
-            certificateVS = new CertificateVS(CertUtils.isSelfSigned(x509NewCACert), CertificateVS.Type.CERTIFICATE_AUTHORITY,
-                    CertificateVS.State.OK, request.info, x509NewCACert.getEncoded(), x509NewCACert.getSerialNumber().longValue(),
-                    x509NewCACert.getNotBefore(), x509NewCACert.getNotAfter());
-            dao.persist(certificateVS);
+            certificateVS = dao.persist(CertificateVS.AUTHORITY(x509NewCACert, request.info));
         } else {
             if(certificateVS.getType() != CertificateVS.Type.CERTIFICATE_AUTHORITY) {
                 certificateVS.setType(CertificateVS.Type.CERTIFICATE_AUTHORITY);

@@ -3,6 +3,7 @@ package org.votingsystem.test.voting;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AccessControlVS;
@@ -188,12 +189,12 @@ public class Election_publishAndSend {
 
     private static void changeEventState(String publisherNIF) throws Exception {
         log.info("changeEventState");
-        Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
-                simulationData.getEventStateWhenFinished());
+        EventVSChangeDto cancelData = new EventVSChangeDto(eventVS, ContextVS.getInstance().getAccessControl().getServerURL(),
+                TypeVS.EVENT_CANCELLATION, simulationData.getEventStateWhenFinished());
         String smimeMessageSubject = "cancelEventMsgSubject";
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().
-                getName(), new ObjectMapper().writeValueAsString(cancelDataMap), smimeMessageSubject);
+                getName(), new ObjectMapper().writeValueAsString(cancelData), smimeMessageSubject);
         SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),

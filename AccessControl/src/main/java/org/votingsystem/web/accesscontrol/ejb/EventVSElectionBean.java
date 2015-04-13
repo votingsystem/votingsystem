@@ -92,13 +92,13 @@ public class EventVSElectionBean {
                 "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
                 .setParameter("actorVS", controlCenterVS).setParameter("state", CertificateVS.State.OK);
         CertificateVS controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
-        X509Certificate controlCenterX509Cert = controlCenterCert.getX509Cert();
-        CertificateVS eventVSControlCenterCertificate = dao.persist(
-                new CertificateVS(controlCenterVS, eventVS, controlCenterX509Cert));
-        CertificateVS eventVSAccessControlCertificate = dao.persist(
-                new CertificateVS(null, eventVS, signatureBean.getServerCert()));
+        CertificateVS controlCenterCertEventVS = dao.persist(
+                CertificateVS.ACTORVS(controlCenterVS, controlCenterCert.getX509Cert()));
+        CertificateVS accessControlCertEventVS = dao.persist(
+                CertificateVS.ACTORVS(null, signatureBean.getServerCert()));
         dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime));
-        dao.merge(eventVS.setState(EventVS.State.ACTIVE).setPublishRequestSMIME(messageSMIME));
+        dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
+                .setState(EventVS.State.ACTIVE).setPublishRequestSMIME(messageSMIME));
         return eventVS;
     }
 
@@ -131,7 +131,7 @@ public class EventVSElectionBean {
         }
         RepresentativesAccreditations representativesAccreditations =
                 representativeBean.getAccreditationsBackupForEvent(eventVS);
-        Set<X509Certificate> eventTrustedCerts = signatureBean.getEventTrustedCerts(eventVS);
+        Set<X509Certificate> eventTrustedCerts = eventVS.getTrustedCerts();
         Set<X509Certificate> systemTrustedCerts = signatureBean.getTrustedCerts();
         File systemTrustedCertsFile = new File(format("{0}/systemTrustedCerts.pem", filesDir.getAbsolutePath()));
         IOUtils.write(CertUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));

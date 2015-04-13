@@ -55,7 +55,8 @@ public class VoteVSBean {
         FieldEventVS optionSelected = DAOUtils.getSingleResult(FieldEventVS.class, query);
         if (optionSelected == null) throw new ValidationExceptionVS("ERROR - FieldEventVS not found - fieldEventId: " +
                 voteVS.getOptionSelected().getId());
-        CertificateVS certificateVS = CertificateVS.VOTE(voteVS);
+        CertificateVS certificateVS = CertificateVS.VOTE(voteVS.getHashCertVSBase64(),
+                voteVS.getMessageSMIME().getUserVS(), voteVS.getX509Certificate());
         String signedVoteDigest = messageSMIME.getSMIME().getContentDigestStr();
         String fromUser = config.getServerName();
         String toUser = eventVS.getAccessControlVS().getName();
@@ -97,10 +98,10 @@ public class VoteVSBean {
         VoteVS voteVS = DAOUtils.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(!certificateVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
+        if(!voteVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
-                DateUtils.getDateStr(certificateVS.getEventVS().getDateBegin()),
-                DateUtils.getDateStr(certificateVS.getEventVS().getDateFinish())));
+                DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
+                DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
         String fromUser = config.getServerName();
         String toUser = messageSMIME.getUserVS().getNif();
         String subject = messages.get("voteCancelationSubject");

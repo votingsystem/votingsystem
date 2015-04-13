@@ -7,7 +7,9 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.signature.util.KeyStoreInfo;
@@ -27,12 +29,15 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @Stateless
 public class CSRBean {
 
     private static Logger log = Logger.getLogger(CSRBean.class.getSimpleName());
+
+    private static final ConcurrentHashMap<Long, KeyStoreVS> keyStoreMap = new ConcurrentHashMap<>();
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
@@ -62,6 +67,15 @@ public class CSRBean {
         return deviceVS;
     }
 
+    private KeyStoreVS getKeyStoreVS(EventVS eventVS) {
+        if(!keyStoreMap.contains(eventVS.getId())) {
+            Query query = dao.getEM().createQuery("select k from KeyStoreVS k where k.eventVS =:eventVS")
+                    .setParameter("eventVS", eventVS);
+            keyStoreMap.put(eventVS.getId(), dao.getSingleResult(KeyStoreVS.class, query));
+        }
+        return keyStoreMap.get(eventVS.getId());
+    }
+
 
     public X509Certificate signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
         Date validFrom = new Date();
@@ -70,9 +84,7 @@ public class CSRBean {
         X509Certificate issuedCert = signatureBean.signCSR(csr, null, validFrom, validTo, null);
         csrRequest.setSerialNumber(issuedCert.getSerialNumber().longValue());
         dao.persist(csrRequest.setState(UserRequestCsrVS.State.OK));
-        CertificateVS certificate = new CertificateVS(csrRequest.getUserVS(), issuedCert, CertificateVS.State.OK,
-                CertificateVS.Type.USER, null, validFrom, validTo);
-        dao.persist(certificate);
+        CertificateVS certificate = dao.persist(CertificateVS.USER(csrRequest.getUserVS(), issuedCert));
         log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for UserRequestCsrVS: " +
                 csrRequest.getId());
         return issuedCert;
@@ -81,14 +93,13 @@ public class CSRBean {
 
     public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
-        KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
+        KeyStoreVS keyStoreVS = getKeyStoreVS(eventVS);
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish());
-        CertificateVS certificate = dao.persist(new CertificateVS(issuedCert, eventVS, CertificateVS.Type.VOTEVS,
-                CertificateVS.State.OK, csrResponse.getHashCertVSBase64()));
+        CertificateVS certificate = dao.persist(CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), null, issuedCert));
         csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
         return csrResponse;
     }
@@ -96,7 +107,7 @@ public class CSRBean {
     public synchronized CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
                           UserVS representative) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
-        KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
+        KeyStoreVS keyStoreVS = getKeyStoreVS(eventVS);
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         String representativeURL = config.getRestURL() + "/representative/id/" + representative.getId();
@@ -105,8 +116,7 @@ public class CSRBean {
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish(), representativeExtension);
-        CertificateVS certificate = new CertificateVS(issuedCert, eventVS, CertificateVS.Type.VOTEVS,
-                CertificateVS.State.OK, csrResponse.getHashCertVSBase64());
+        CertificateVS certificate = CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), representative, issuedCert);
         certificate.setUserVS(representative);
         dao.persist(certificate);
         csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
@@ -167,8 +177,7 @@ public class CSRBean {
         Calendar calendarValidTo = Calendar.getInstance();
         calendarValidTo.add(Calendar.DATE, 1);//cert valid for one day
         X509Certificate issuedCert = signatureBean.signCSR(csr, null, certValidFrom, calendarValidTo.getTime());
-        CertificateVS certificate = new CertificateVS(issuedCert, CertificateVS.State.OK,
-                CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, hashCertVSBase64, certValidFrom, calendarValidTo.getTime());
+        CertificateVS certificate = CertificateVS.ANONYMOUS_REPRESENTATIVE_DELEGATION(hashCertVSBase64, issuedCert);
         dao.persist(certificate);
         return issuedCert;
         /*byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
