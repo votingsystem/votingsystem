@@ -10,7 +10,7 @@
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
    <children>
-      <HBox prefWidth="420.0">
+      <HBox prefWidth="415.0">
          <children>
             <DatePicker fx:id="dateFromPicker" />
             <DatePicker fx:id="dateToPicker">

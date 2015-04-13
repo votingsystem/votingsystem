@@ -86,11 +86,11 @@ public class ConfigVSImpl implements ConfigVS {
             bankCode = (String) props.get("vs.IBAN_bankCode");
             branchCode = (String) props.get("vs.IBAN_branchCode");
             staticResURL = (String) props.get("vs.staticResourcesURL");
-            serverDir =  new File((String) props.get("vs.serverDirPath"));
+            serverDir =  new File((String) props.get("vs.staticResourcesPath"));
             serverDir.mkdirs();
             log.info("serverDir: " + serverDir.getAbsolutePath());
-            new File((String) props.get("vs.serverDirPath") + "/backup");
-            new File((String) props.get("vs.serverDirPath") + "/error").mkdirs();
+            new File((String) props.get("vs.staticResourcesPath") + "/backup");
+            new File((String) props.get("vs.staticResourcesPath") + "/error").mkdirs();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

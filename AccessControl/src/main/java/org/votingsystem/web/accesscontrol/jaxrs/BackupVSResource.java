@@ -45,7 +45,8 @@ public class BackupVSResource {
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - BackupRequestVS not found - id: " + requestId).build();
         log.info("backupRequest: " + backupRequest.getId() + " - " + backupRequest.getFilePath());
-        resp.sendRedirect(backupRequest.getFilePath());
+        String downloadURL = config.getStaticResURL() + backupRequest.getFilePath();
+        resp.sendRedirect(downloadURL);
         return Response.ok().build();
     }
 

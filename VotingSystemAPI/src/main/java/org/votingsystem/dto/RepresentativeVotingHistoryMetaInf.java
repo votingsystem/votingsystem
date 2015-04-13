@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;
@@ -14,16 +15,18 @@ public class RepresentativeVotingHistoryMetaInf {
     private Date dateFrom;
     private Date dateTo;
     private String representativeURL;
+    private String filePath;
     private String downloadURL;
 
     public RepresentativeVotingHistoryMetaInf() {}
 
     public RepresentativeVotingHistoryMetaInf(Long numVotes, Date dateFrom, Date dateTo, String representativeURL,
-                  String downloadURL) {
+                  String filePath, String downloadURL) {
         this.numVotes = numVotes;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.representativeURL = representativeURL;
+        this.filePath = filePath;
         this.downloadURL = downloadURL;
     }
 
@@ -45,5 +48,13 @@ public class RepresentativeVotingHistoryMetaInf {
 
     public String getDownloadURL() {
         return downloadURL;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }

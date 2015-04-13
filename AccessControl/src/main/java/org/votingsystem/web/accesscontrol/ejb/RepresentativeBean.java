@@ -324,7 +324,7 @@ public class RepresentativeBean {
             offset = offset + pageSize;
         }
         RepresentativeAccreditationsMetaInf metaInf = new RepresentativeAccreditationsMetaInf(numAccreditations,
-                selectedDate, representativeURL, downloadURL);
+                selectedDate, representativeURL, accreditationsPath + ".zip", downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
         new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);
@@ -373,7 +373,7 @@ public class RepresentativeBean {
             if(representative == null) throw new ValidationExceptionVS("ERROR - representativeNifErrorMsg - nif: " +
                     request.getRepresentativeNif());
             RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
-            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
+            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getFilePath(),
                     TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageSMIME, request.getEmail()));
             String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
@@ -421,7 +421,7 @@ public class RepresentativeBean {
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));
         String representativeURL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
         RepresentativeVotingHistoryMetaInf metaInf = new RepresentativeVotingHistoryMetaInf(numVotes, dateFrom,
-                dateTo, representativeURL, downloadURL);
+                dateTo, representativeURL, votingHistoryPath + ".zip" , downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
         new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);

@@ -14,14 +14,16 @@ public class RepresentativeAccreditationsMetaInf {
     private Date selectedDate;
     private String representativeURL;
     private String downloadURL;
+    private String filePath;
 
     public RepresentativeAccreditationsMetaInf() {}
 
     public RepresentativeAccreditationsMetaInf(Long numAccreditations, Date selectedDate, String representativeURL,
-                                               String downloadURL) {
+               String filePath, String downloadURL) {
         this.numAccreditations = numAccreditations;
         this.selectedDate = selectedDate;
         this.representativeURL = representativeURL;
+        this.filePath = filePath;
         this.downloadURL = downloadURL;
     }
 
@@ -39,5 +41,13 @@ public class RepresentativeAccreditationsMetaInf {
 
     public String getDownloadURL() {
         return downloadURL;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }

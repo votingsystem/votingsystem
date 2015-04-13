@@ -17,7 +17,7 @@ for that in standalone.xml:
         <file name="accessControlStatic" path="/var/local/voting_system/access_control" directory-listing="true"/>
     </handlers>
 
-The value of the variables 'vs.staticResourcesURL' and 'vs.serverDirPath' must be set according to the values configured
+The value of the variables 'vs.staticResourcesURL' and 'vs.staticResourcesPath' must be set according to the values configured
 in the file standalone.xml.
 
 #### Build and Deploy

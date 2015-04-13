@@ -87,11 +87,11 @@ public class ConfigVSImpl implements ConfigVS {
             serverName = (String) props.get("vs.serverName");
             timeStampServerURL = (String) props.get("vs.timeStampServerURL");
             staticResURL = (String) props.get("vs.staticResourcesURL");
-            serverDir = new File((String) props.get("vs.serverDirPath"));
+            serverDir = new File((String) props.get("vs.staticResourcesPath"));
             serverDir.mkdirs();
             log.info("serverDir: " + serverDir.getAbsolutePath());
-            new File((String) props.get("vs.serverDirPath") + "/backup").mkdirs();
-            new File((String) props.get("vs.serverDirPath") + "/error").mkdirs();
+            new File((String) props.get("vs.staticResourcesPath") + "/backup").mkdirs();
+            new File((String) props.get("vs.staticResourcesPath") + "/error").mkdirs();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

@@ -16,7 +16,7 @@ for that in standalone.xml:
         <file name="timeStampServerStatic" path="/var/local/voting_system/timestamp_server" directory-listing="true"/>
     </handlers>
 
-The value of the variables 'vs.staticResourcesURL' and 'vs.serverDirPath' must be set according to the values configured
+The value of the variables 'vs.staticResourcesURL' and 'vs.staticResourcesPath' must be set according to the values configured
 in the file standalone.xml.
 
 #### Build and Deploy
