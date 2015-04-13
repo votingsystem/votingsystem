@@ -5,6 +5,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -48,7 +49,7 @@ public class CurrencyRequestServlet extends HttpServlet {
                     messageSMIME, config.getContextURL());
             currencyBatch.setTagVS(config.getTag(currencyBatch.getTag()));
             Map result = currencyBean.processCurrencyRequest(currencyBatch);
-            resp.setContentType(ContentTypeVS.JSON.getName());
+            resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(new ObjectMapper().writeValueAsBytes(result));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

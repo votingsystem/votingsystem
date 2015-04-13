@@ -82,7 +82,7 @@ public class CertificateVSResource {
     public Response addCertificateAuthority(MessageSMIME messageSMIME, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certificateVSBean.addCertificateAuthority(messageSMIME)))
-                .type(ContentTypeVS.JSON.getName()).build();
+                .type(MediaTypeVS.JSON).build();
     }
 
     @Path("/editCert")

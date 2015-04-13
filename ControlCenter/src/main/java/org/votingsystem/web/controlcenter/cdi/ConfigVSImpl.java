@@ -1,7 +1,6 @@
 package org.votingsystem.web.controlcenter.cdi;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;

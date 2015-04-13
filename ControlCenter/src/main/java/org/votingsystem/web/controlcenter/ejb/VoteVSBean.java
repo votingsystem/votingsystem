@@ -8,7 +8,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.DAOUtils;
 
@@ -23,7 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.text.MessageFormat.*;
+
+import static java.text.MessageFormat.format;
 
 
 /**

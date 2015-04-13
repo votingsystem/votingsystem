@@ -16,7 +16,7 @@ public enum ContentTypeVS {
     ASCIIDOC("asciidoc", "asciidoc"),
     ASCIIDOC_SIGNED("asciidoc;application/pkcs7-signature", "asciidoc"),
 
-    JSON("application/json;charset=UTF-8", "json"),
+    JSON(MediaTypeVS.JSON, "json"),
     JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7s"),
     JSON_ENCRYPTED("application/json;application/pkcs7-mime","p7m"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-mime", "p7m"),

@@ -1,12 +1,10 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MapUtils;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -39,11 +37,10 @@ public class TagVSResource {
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object index(@QueryParam("tag") String tag, @Context ServletContext context,
+    public Object index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
                   @Context HttpServletRequest req, @Context HttpServletResponse resp) {
-        if(tag == null) return Response.status(Response.Status.BAD_REQUEST).entity("missing param - tag").build();
         Query query = dao.getEM().createQuery("select t from TagVS t where t.name like :tag").setParameter("tag",
-                "%" + tag +  "%");
+                "%" + tag.toUpperCase() +  "%");
         List<TagVS> tagVSList = query.getResultList();
         List resultList = new ArrayList<>();
         for(TagVS tagVS : tagVSList) {
@@ -68,7 +65,7 @@ public class TagVSResource {
             dao.persist(new CurrencyAccount(signatureBean.getSystemUser(), BigDecimal.ZERO,
                     Currency.getInstance("EUR").getCurrencyCode(), tagVS));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(tagVS)).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(tagVS)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/list")

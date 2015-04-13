@@ -2,9 +2,9 @@ package org.votingsystem.web.controlcenter.jaxrs.provider;
 
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;

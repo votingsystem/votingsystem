@@ -1,7 +1,5 @@
 package org.votingsystem.web.controlcenter.ejb;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.model.*;
@@ -18,11 +16,15 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

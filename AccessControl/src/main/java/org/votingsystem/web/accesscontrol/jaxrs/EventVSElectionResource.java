@@ -8,6 +8,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
@@ -59,7 +60,7 @@ public class EventVSElectionResource {
         EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getContextURL());
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSDto))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
             context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
@@ -102,7 +103,7 @@ public class EventVSElectionResource {
         eventsVSMap.put("totalCount", totalCount);
         if(contentType.contains("json")){
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(eventsVSMap));
             context.getRequestDispatcher("/eventVSElection/index.xhtml").forward(req, resp);
@@ -129,7 +130,7 @@ public class EventVSElectionResource {
         Map statsMap = eventVSElectionBean.getStatsMap(eventVS);
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(statsMap))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("statsDataMap", JSON.getMapper().writeValueAsString(statsMap));
             context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);

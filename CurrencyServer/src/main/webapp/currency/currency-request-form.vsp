@@ -51,8 +51,7 @@
                 <div layout vertical center center-justified>
                 <div horizontal layout center center-justified style="">
                     <div style="width: 250px;">
-                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.7em;margin:10px 10px 10px 10px;
-                            display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.7em;margin:10px 10px 10px 10px;">
                             <i class="fa fa-tag"></i> ${msg.addTagLbl}
                         </paper-button>
                     </div>
@@ -84,7 +83,7 @@
                         <paper-input-decorator label="${msg.amountLbl}" floatingLabel
                                                error="${msg.onlyNumbersErrorMsg}"
                                                isInvalid="{{!$.inputAmount.validity.valid}}">
-                            <input id="inputAmount" value="{{amountValue}}" is="core-input" pattern="\d*">
+                            <input id="inputAmount" value="{{amountValue}}" is="core-input" pattern="\d+">
                         </paper-input-decorator>
 
                         <vs-currency-selector id="currencySelector" style="margin:0px 0 0 15px; font-size: 1.5em; width: 100px;"></vs-currency-selector>
@@ -130,7 +129,7 @@
             submit:function() {
                 console.log("submit - amountValue: " + this.amountValue + " " + this.$.currencySelector.getSelected())
                 this.messageToUser = null
-                if(this.amountValue == 0) {
+                if(!this.amountValue || this.amountValue == 0) {
                     this.messageToUser = "${msg.amountTooLowMsg}"
                     return
                 }

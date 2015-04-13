@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -75,7 +75,7 @@ public class MessageSMIMEResource {
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);

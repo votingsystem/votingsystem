@@ -5,6 +5,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +54,7 @@ public class RequestUtils {
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);

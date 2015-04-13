@@ -2,6 +2,8 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.URLMessage;
 import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -92,15 +94,11 @@ public class GroupVSResource {
                 "or g.description =:searchText").setParameter("searchText", "%" + searchText + "%")
                 .setParameter("state", state);
         totalCount = (long) query.getSingleResult();
-        Map resultMap = new HashMap<>();
-        resultMap.put("groupvsList", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", totalCount);
-        resultMap.put("state", state);
-        if(contentType.contains("json")) return resultMap;
+        ResultListDto resultListDto = ResultListDto.GROUPVS(resultList, state, offset, max, totalCount);
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
+                .type(MediaTypeVS.JSON).build();
         else {
-            req.setAttribute("groupVSList", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("groupVSList", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/groupVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -114,7 +112,6 @@ public class GroupVSResource {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-
         Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
         if(contentType.contains("json")) return resultMap;
         else {
@@ -207,26 +204,24 @@ public class GroupVSResource {
     public Object search(MessageSMIME messageSMIME,  @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = groupVSBean.saveGroup(messageSMIME);
-        Map resultMap = new HashMap<>();
-        resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", messages.get("newCurrencyGroupOKMsg", groupVS.getName()));
-        resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
-        return resultMap;
+        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
+        String message =  messages.get("newCurrencyGroupOKMsg", groupVS.getName());
+        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/edit")//old_url -> /groupVS/edit/$id
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
-    public Object edit(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
+    public Response edit(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                        @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         groupVS = groupVSBean.editGroup(groupVS, messageSMIME);
-        Map resultMap = new HashMap<>();
-        resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", messages.get("currencyGroupEditedOKMsg", groupVS.getName()));
-        resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
-        return resultMap;
+        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
+        String message =  messages.get("currencyGroupEditedOKMsg", groupVS.getName());
+        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/edit") @GET //old_url -> /groupVS/edit/$id
@@ -243,17 +238,16 @@ public class GroupVSResource {
 
     @Path("/id/{id}/cancel") //old_url -> /groupVS/cancel/$id
     @POST @Consumes(MediaTypeVS.JSON_SIGNED)
-    public Object cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
+    public Response cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         groupVS = groupVSBean.cancelGroup(groupVS, messageSMIME);
-        Map resultMap = new HashMap<>();
-        resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", messages.get("currencyGroupCancelledOKMsg", groupVS.getName()));
-        resultMap.put("URL", config.getRestURL() + "/groupVS/id/" + groupVS.getId());
-        return resultMap;
+        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
+        String message =  messages.get("currencyGroupCancelledOKMsg", groupVS.getName());
+        URLMessage urlMessage = new URLMessage(ResponseVS.SC_OK, message, URL);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(urlMessage)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/cancel") //old_url -> /groupVS/$id/subscribe

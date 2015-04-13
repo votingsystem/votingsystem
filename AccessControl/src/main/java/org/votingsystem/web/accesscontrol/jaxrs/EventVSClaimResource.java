@@ -8,6 +8,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.EventVSClaimBean;
@@ -67,7 +68,7 @@ public class EventVSClaimResource {
             eventVSDto.setNumSignatures((long) query.getSingleResult());
             if(contentType.contains("json")) {
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSDto))
-                        .type(ContentTypeVS.JSON.getName()).build();
+                        .type(MediaTypeVS.JSON).build();
             } else {
                 req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
                 context.getRequestDispatcher("/eventVSClaim/eventVSClaim.xhtml").forward(req, resp);
@@ -99,7 +100,7 @@ public class EventVSClaimResource {
         eventsVSMap.put("totalCount", resultListJSON.size()); //TODO
         if(contentType.contains("json")){
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(eventsVSMap));
             context.getRequestDispatcher("/eventVSClaim/index.xhtml").forward(req, resp);
@@ -163,6 +164,6 @@ public class EventVSClaimResource {
         }
         resultMap.put("signatures", signatureList);
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(
-                ContentTypeVS.JSON.getName()).build();
+                MediaTypeVS.JSON).build();
     }
 }

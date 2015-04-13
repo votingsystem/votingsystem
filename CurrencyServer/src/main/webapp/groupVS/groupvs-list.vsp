@@ -63,7 +63,7 @@
                 groupVSListMap: {value: {}}
             },
             groupVSListMapChanged:function() {
-                this.groupvsList = this.groupVSListMap.groupvsList
+                this.groupvsList = this.groupVSListMap.resultList
                 this.loading = false
             },
             ready :  function(e) {

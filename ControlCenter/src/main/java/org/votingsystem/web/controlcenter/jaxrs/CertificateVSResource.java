@@ -96,7 +96,7 @@ public class CertificateVSResource {
                 resultMap.put("max", max);
                 resultMap.put("totalCount", resultList.size());
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap))
-                        .type(ContentTypeVS.JSON.getName()).build();
+                        .type(MediaTypeVS.JSON).build();
             }
         }
         context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
@@ -123,7 +123,7 @@ public class CertificateVSResource {
             CertificateVSDto certJSON = new CertificateVSDto(certificate);
             if(req.getContentType().contains("json")) {
                 return Response.ok().entity(new ObjectMapper().writeValueAsBytes(certJSON))
-                        .type(ContentTypeVS.JSON.getName()).build();
+                        .type(MediaTypeVS.JSON).build();
             } else {
                 req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
                 context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);

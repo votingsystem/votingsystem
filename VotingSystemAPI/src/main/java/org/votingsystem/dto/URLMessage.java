@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -10,6 +11,7 @@ public class URLMessage {
 
     private Integer statusCode;
     private String message;
+    @JsonProperty("UUID")
     private String URL;
 
     public URLMessage(Integer statusCode, String message, String URL) {

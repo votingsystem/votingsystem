@@ -9,6 +9,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
@@ -99,7 +100,7 @@ public class RepresentativeResource {
         representativeMap.put("numTotalRepresentatives", responseList.size());//TODO totalCount
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeMap))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("representativeData", JSON.getMapper().writeValueAsString(representativeMap));
             context.getRequestDispatcher("/representative/index.xhtml").forward(req, resp);
@@ -119,7 +120,7 @@ public class RepresentativeResource {
         RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeDto))
-                    .type(ContentTypeVS.JSON.getName()).build();
+                    .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
             context.getRequestDispatcher("/representative/representative.xhtml").forward(req, resp);
@@ -143,13 +144,13 @@ public class RepresentativeResource {
                 "ERROR - RepresentativeDocument not found - nif: " + nif).build();
         RepresentativeDto representativeDto = new RepresentativeDto(
                 representativeDocument.getUserVS(), representativeDocument.getDescription());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto)).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/nif/{nif}/state") @GET
     public Response state(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
         Map result = representativeBean.checkRepresentationState(nifReq);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/image/id/{id}") @GET

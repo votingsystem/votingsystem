@@ -1,7 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

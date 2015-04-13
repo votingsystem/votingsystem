@@ -6,7 +6,7 @@ import org.votingsystem.dto.EventVSDto;
 import org.votingsystem.dto.RepresentativeDto;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -52,7 +52,7 @@ public class SearchResource {
         }
         Map resultMap = new HashMap<>();
         resultMap.put("eventsVS", resultList);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/representative") @GET
@@ -109,7 +109,7 @@ public class SearchResource {
         resultMap.put("totalCount", resultList.size());
         resultMap.put("offset", offset);
         resultMap.put("max", max);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
 

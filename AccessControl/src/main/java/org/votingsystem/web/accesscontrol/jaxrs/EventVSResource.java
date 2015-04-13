@@ -5,7 +5,7 @@ import org.votingsystem.model.EventVSClaim;
 import org.votingsystem.model.EventVSElection;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -47,7 +47,7 @@ public class EventVSResource {
     @Path("/cancel") @POST
     public Response cancelled(MessageSMIME messageSMIME) throws Exception {
         MessageSMIME response = eventVSBean.cancelEvent(messageSMIME);
-        return Response.ok().entity(response.getContent()).type(ContentTypeVS.JSON.getName()).build();
+        return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/checkDates") @GET

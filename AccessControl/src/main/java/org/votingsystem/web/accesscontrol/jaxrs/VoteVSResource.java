@@ -6,6 +6,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.VoteVSCanceler;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.VoteVSBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -51,7 +52,7 @@ public class VoteVSResource {
         if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVS not found - voteId: " + id).build();
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(
-                new VoteVSDto(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
+                new VoteVSDto(voteVS, config.getRestURL()))).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/hash/{hashHex}") @GET
@@ -64,7 +65,7 @@ public class VoteVSResource {
         if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVS not found - hashHex: " + hashHex).build();
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(
-                new VoteVSDto(voteVS, config.getRestURL()))).type(ContentTypeVS.JSON.getName()).build();
+                new VoteVSDto(voteVS, config.getRestURL()))).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/cancelation")
@@ -94,7 +95,7 @@ public class VoteVSResource {
         if(voteCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - hashHex: " + hashHex + " - hashBase64: " + hashCertVSBase64).build();
         return Response.ok().entity(new ObjectMapper().writeValueAsBytes(new VoteVSDto(voteCanceler, config.getRestURL())))
-                .entity(ContentTypeVS.JSON.getName()).build();
+                .entity(MediaTypeVS.JSON).build();
     }
 
     @Path("/cancel") @POST
