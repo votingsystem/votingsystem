@@ -1,7 +1,6 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.RepresentativeDocument;
 import org.votingsystem.model.UserVS;
 
 import static java.text.MessageFormat.format;

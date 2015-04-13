@@ -68,15 +68,15 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getSaveGroupVSServiceURL() {
-        return getServerURL() + "/groupVS/newGroup";
+        return getServerURL() + "/rest/groupVS/newGroup";
     }
 
     public String getGroupVSSubscriptionServiceURL(Long groupId) {
-        return getServerURL() + "/groupVS/" + String.valueOf(groupId) + "/subscribe";
+        return getServerURL() + "/rest/groupVS/" + String.valueOf(groupId) + "/subscribe";
     }
 
     public String getWalletURL() {
-        return getServerURL() + "/currency/wallet";
+        return getServerURL() + "/rest/currency/wallet";
     }
 
     public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
@@ -89,11 +89,11 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getGroupVSUsersActivationServiceURL() {
-        return getServerURL() + "/groupVS/activateUser";
+        return getServerURL() + "/rest/groupVS/activateUser";
     }
 
     public String getDeviceVSConnectedServiceURL(String nif) {
-        return getServerURL() + "/deviceVS/" + nif + "/connected";
+        return getServerURL() + "/rest/deviceVS/" + nif + "/connected";
     }
 
 }

@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.ejb;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.votingsystem.currency.dto.GroupVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
@@ -50,7 +51,8 @@ public class GroupVSBean {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_CANCEL.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSRequest request = new GroupVSRequest().getCancelRequest(messageSMIMEReq.getSMIME().getSignedContent());
+        GroupVSDto request = messageSMIMEReq.getSignedContent(GroupVSDto.class);
+        request.validateCancelRequest();
         dao.merge(groupVS.setState(UserVS.State.CANCELED));
         return groupVS;
     }
@@ -63,26 +65,27 @@ public class GroupVSBean {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_EDIT.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSRequest request = new GroupVSRequest().getEditRequest(messageSMIMEReq.getSMIME().getSignedContent());
-        if(request.id != groupVS.getId()) {
-            throw new ExceptionVS("group id error - expected: " + groupVS.getId() + " - found: " + request.id);
+        GroupVSDto request = messageSMIMEReq.getSignedContent(GroupVSDto.class);
+        request.validateEditRequest();
+        if(request.getId().longValue() != groupVS.getId().longValue()) {
+            throw new ExceptionVS("group id error - expected: " + groupVS.getId() + " - found: " + request.getId());
         }
-        dao.merge(groupVS.setDescription(request.groupvsInfo));
+        dao.merge(groupVS.setDescription(request.getGroupvsInfo()));
         return groupVS;
     }
 
     public GroupVS saveGroup(MessageSMIME messageSMIMEReq) throws Exception {
         UserVS signer = messageSMIMEReq.getUserVS();
         log.info("signer:" + signer.getNif());
-        GroupVSRequest request = new GroupVSRequest(messageSMIMEReq.getSMIME().getSignedContent());
-        Query query = dao.getEM().createNamedQuery("findGroupByName").setParameter("name", request.groupvsName.trim());
+        GroupVSDto request = validateNewGroupRequest(messageSMIMEReq.getSignedContent(GroupVSDto.class)) ;
+        Query query = dao.getEM().createNamedQuery("findGroupByName").setParameter("name", request.getGroupvsName().trim());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
         if(groupVS == null) {
-            throw new ExceptionVS(messages.get("nameGroupRepeatedMsg", request.groupvsName));
+            throw new ExceptionVS(messages.get("nameGroupRepeatedMsg", request.getGroupvsName()));
         }
         currencyAccountBean.checkUserVSAccount(signer);
-        groupVS = dao.persist(new GroupVS(request.groupvsName.trim(), UserVS.State.ACTIVE, signer,
-                request.groupvsInfo, request.tagSet));
+        groupVS = dao.persist(new GroupVS(request.getGroupvsName().trim(), UserVS.State.ACTIVE, signer,
+                request.getGroupvsInfo(), request.getTagSet()));
         groupVS.setIBAN(ibanBean.getIBAN(groupVS.getId()));
         dao.persist(new CurrencyAccount(groupVS, BigDecimal.ZERO, Currency.getInstance("EUR").getCurrencyCode(),
                 config.getTag(TagVS.WILDTAG)));
@@ -94,12 +97,27 @@ public class GroupVSBean {
         return groupVS;
     }
 
+    private GroupVSDto validateNewGroupRequest(GroupVSDto groupVSDto) throws ValidationExceptionVS {
+        groupVSDto.validateNewGroupRequest();
+        if(groupVSDto.getTagSet() != null) {
+            Set<TagVS> resultTagVSSet = new HashSet<>();
+            for(TagVS tagVS: groupVSDto.getTagSet()) {
+                TagVS tagVSDB = config.getTag(tagVS.getName());
+                if(tagVSDB != null) resultTagVSSet.add(tagVSDB);
+                else throw new ValidationExceptionVS(tagVS.getName() + " not found");
+            }
+            groupVSDto.setTagSet(resultTagVSSet);
+        }
+        return groupVSDto;
+    }
+
     public SubscriptionVS subscribe(MessageSMIME messageSMIMEReq) throws Exception {
         SubscriptionVS subscriptionVS = null;
         UserVS signer = messageSMIMEReq.getUserVS();
         log.info("signer: " + signer.getNif());
-        GroupVSRequest request = new GroupVSRequest().getSubscribeRequest(messageSMIMEReq.getSMIME().getSignedContent());
-        GroupVS groupVS = dao.find(GroupVS.class, request.id);
+        GroupVSDto request = validateNewGroupRequest(messageSMIMEReq.getSignedContent(GroupVSDto.class)) ;
+        request.validateSubscriptionRequest();
+        GroupVS groupVS = dao.find(GroupVS.class, request.getId());
         if(groupVS.getRepresentative().getNif().equals(signer.getNif())) {
             throw new ExceptionVS(messages.get("representativeSubscribedErrorMsg", groupVS.getRepresentative().getNif(),
                     groupVS.getName()));
@@ -174,71 +192,5 @@ public class GroupVSBean {
         return resultMap;
     }
 
-    private class GroupVSRequest {
-        String groupvsName, groupvsInfo;
-        TypeVS operation;
-        Long id;
-        Set<TagVS> tagSet = new HashSet<>();
-        public GroupVSRequest() {}
-        public GroupVSRequest(String signedContent) throws ExceptionVS, IOException {
-            JsonNode dataJSON = new ObjectMapper().readTree(signedContent);
-            if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
-            operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-            if(dataJSON.get("groupvsName") == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-            groupvsName = dataJSON.get("groupvsName").asText();
-            if(dataJSON.get("groupvsInfo") == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
-            groupvsInfo = dataJSON.get("groupvsInfo").asText();
-            if(TypeVS.CURRENCY_GROUP_NEW != operation)   throw new ValidationExceptionVS(
-                    "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + operation.toString());
-            Iterator<JsonNode> ite = ((ArrayNode)dataJSON.get("tags")).elements();
-            while (ite.hasNext()) {
-                String tagName = ite.next().asText();
-                TagVS tagVS = config.getTag(tagName);
-                if(tagVS != null) tagSet.add(tagVS);
-                else throw new ValidationExceptionVS(tagName + " not found");
-            }
-        }
-
-        public GroupVSRequest getCancelRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            JsonNode dataJSON = new ObjectMapper().readTree(signedContent);
-            if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
-            operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-            if(TypeVS.CURRENCY_GROUP_CANCEL != operation) throw new ValidationExceptionVS(
-                    "operation expected: 'CURRENCY_GROUP_CANCEL' - operation found: " + operation.toString());
-            if(dataJSON.get("groupvsName") == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-            groupvsName = dataJSON.get("groupvsName").asText();
-            if(dataJSON.get("id") == null) throw new ValidationExceptionVS("missing param 'id'");
-            id = dataJSON.get("id").asLong();
-            return this;
-        }
-
-        public GroupVSRequest getEditRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            JsonNode dataJSON = new ObjectMapper().readTree(signedContent);
-            if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
-            operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-            if(TypeVS.CURRENCY_GROUP_NEW != operation) throw new ValidationExceptionVS(
-                    "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + operation.toString());
-            if(dataJSON.get("groupvsName") == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-            groupvsName = dataJSON.get("groupvsName").asText();
-            if(dataJSON.get("id") == null) throw new ValidationExceptionVS("missing param 'id'");
-            id = dataJSON.get("id").asLong();
-            if(dataJSON.get("groupvsInfo") == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
-            groupvsInfo = dataJSON.get("groupvsInfo").asText();
-            return this;
-        }
-
-        public GroupVSRequest getSubscribeRequest(String signedContent) throws IOException, ValidationExceptionVS {
-            JsonNode dataJSON = new ObjectMapper().readTree(signedContent);
-            if(dataJSON.get("operation") == null) throw new ValidationExceptionVS("missing param 'operation'");
-            operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-            if(TypeVS.CURRENCY_GROUP_SUBSCRIBE != operation) throw new ValidationExceptionVS(
-                    "operation expected: 'CURRENCY_GROUP_SUBSCRIBE' - operation found: " + operation.toString());
-            if(dataJSON.get("groupvs") == null || dataJSON.get("groupvs").get("id") == null)
-                throw new ValidationExceptionVS("missing param 'groupvs.id'");
-            id = dataJSON.get("groupvs").get("id").asLong();
-            return this;
-        }
-
-    }
     
 }
