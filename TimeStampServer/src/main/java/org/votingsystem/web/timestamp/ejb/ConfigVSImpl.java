@@ -1,10 +1,14 @@
 package org.votingsystem.web.timestamp.ejb;
 
+import org.votingsystem.model.TagVS;
 import org.votingsystem.util.EnvironmentVS;
+import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import java.io.File;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +18,7 @@ import java.util.logging.Logger;
  */
 @Singleton
 @Startup
-public class ConfigVSImpl {
+public class ConfigVSImpl implements ConfigVS {
 
     private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getSimpleName());
 
@@ -51,12 +55,72 @@ public class ConfigVSImpl {
         return props.getProperty(key);
     }
 
+    @Override
+    public String getTimeStampServerURL() {
+        return null;
+    }
+
+    @Override
+    public String getSystemNIF() {
+        return null;
+    }
+
+    @Override
+    public String getEmailAdmin() {
+        return null;
+    }
+
+    @Override
+    public TagVS getTag(String tagName) {
+        return null;
+    }
+
+    @Override
+    public void setX509TimeStampServerCert(X509Certificate x509Cert) {
+
+    }
+
+    @Override
+    public String getServerName() {
+        return null;
+    }
+
     public EnvironmentVS getMode() {
         return mode;
     }
 
+    @Override
+    public Properties getProperties() {
+        return null;
+    }
+
+    @Override
+    public File getServerDir() {
+        return null;
+    }
+
     public String getContextURL() {
         return contextURL;
+    }
+
+    @Override
+    public String getWebSocketURL() {
+        return null;
+    }
+
+    @Override
+    public String getWebURL() {
+        return null;
+    }
+
+    @Override
+    public String getRestURL() {
+        return null;
+    }
+
+    @Override
+    public String getStaticResURL() {
+        return null;
     }
 
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.timestamp.ejb.ConfigVSImpl;
+import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +27,7 @@ public class ServerInfoResource {
     private static final Logger log = Logger.getLogger(ServerInfoResource.class.getSimpleName());
 
     @Inject TimeStampService timeStampService;
-    @Inject ConfigVSImpl config;
+    @Inject ConfigVS config;
 
 
     @GET @Produces(MediaType.APPLICATION_JSON)

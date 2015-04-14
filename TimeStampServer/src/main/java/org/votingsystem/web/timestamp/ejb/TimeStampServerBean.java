@@ -9,6 +9,7 @@ import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
@@ -31,7 +32,7 @@ public class TimeStampServerBean implements TimeStampService {
     private static final Logger log = Logger.getLogger(TimeStampServerBean.class.getSimpleName());
 
     private TimeStampServiceImpl timeStampService = null;
-    @Inject ConfigVSImpl config;
+    @Inject ConfigVS config;
 
     public TimeStampServerBean() { }
 
