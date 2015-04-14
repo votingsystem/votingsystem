@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -71,25 +72,23 @@ public class AuditingBean {
             transactionFromList.add(dto);
         }
         BalancesDto balancesDto = BalancesDto.FROM(transactionFromList, balancesFromMap);
-        //incomes
         query = em.createNamedQuery("findTransByToUserAndDateCreatedBetween").setParameter("toUserVS", userVS)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo",timePeriod.getDateTo());
         transactionList = query.getResultList();
         List<TransactionVSDto> transactionToList = new ArrayList<>();
-        Map<String, Map<String, Map>> balancesToMap = new HashMap<>();
+        Map<String, Map<String, IncomesDto>> balancesToMap = new HashMap<>();
         for(TransactionVS transaction : transactionList) {
-            Map<String, Map> currencyMap = null;
-            /*if((currencyMap = balancesToMap.get(transaction.getCurrencyCode())) != null) {
-                Map<String, Map> tagMap = balancesToMap.get(transaction.getCurrencyCode());
-                BigDecimal tagAccumulated = null;
-                if((tagAccumulated = tagMap.get(transaction.getTag().getName())) != null) {
-                    tagMap.put(transaction.getTag().getName(), tagAccumulated.add(transaction.getAmount()));
-                } else tagMap.put(transaction.getTag().getName(), transaction.getAmount());
+            Map<String, IncomesDto> currencyMap = null;
+            if((currencyMap = balancesToMap.get(transaction.getCurrencyCode())) != null) {
+                IncomesDto tagAccumulated = null;
+                if((tagAccumulated = currencyMap.get(transaction.getTag().getName())) != null) {
+                    currencyMap.put(transaction.getTag().getName(), tagAccumulated.add(transaction));
+                } else currencyMap.put(transaction.getTag().getName(), new IncomesDto(transaction));
             } else {
-                Map<String, BigDecimal> tagMap = new HashMap<>();
-                tagMap.put(transaction.getTag().getName(), transaction.getAmount());
+                currencyMap = new HashMap<>();
+                currencyMap.put(transaction.getTag().getName(), new IncomesDto(transaction));
                 balancesToMap.put(transaction.getCurrencyCode(), currencyMap);
-            }*/
+            }
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transaction);
             MessageSMIME messageSMIME = transaction.getMessageSMIME();
             transactionDto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(messageSMIME.getContent()));

@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.util;
 
+import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.TransactionVS;
 
 import java.math.BigDecimal;
@@ -37,9 +38,9 @@ public class BalanceUtils {
         return result;
     }
 
-    public static Map<String, Map<String, Map>> getBalancesTo(Collection<TransactionVS> transactionList) {
+    public static Map<String, Map<String, IncomesDto>> getBalancesTo(Collection<TransactionVS> transactionList) {
         Collector<TransactionVS, ?, ?> amountCollector = new TransactionVSToAmountCollector();
-        Map<String, Map<String, Map>> result = new HashMap<>();
+        Map<String, Map<String, IncomesDto>> result = new HashMap<>();
         Map<String, List<TransactionVS>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
         for(String currency : currencyMaps.keySet()) {
             Map tagVSMap = currencyMaps.get(currency).stream().collect(groupingBy(tagName, amountCollector));

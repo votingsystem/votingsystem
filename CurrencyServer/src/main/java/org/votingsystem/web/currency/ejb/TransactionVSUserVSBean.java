@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -32,21 +33,21 @@ public class TransactionVSUserVSBean {
     @Inject WalletBean walletBean;
 
 
-    public SMIMEMessage processTransactionVS(TransactionVSBean.TransactionVSRequest request) throws Exception {
+    public SMIMEMessage processTransactionVS(TransactionVSDto request) throws Exception {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                request.fromUserVS.getIBAN(), request.tag, request.amount, request.currencyCode);
+                request.getSigner().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
-        TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.fromUserVS, request.toUserVS,
-                request.transactionType, accountFromMovements, request.amount, request.currencyCode, request.subject,
-                request.validTo, request.messageSMIME, request.tag));
+        TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
+                request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
+                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
         String fromUser = config.getServerName();
-        String toUser = request.fromUserVS.getNif();
+        String toUser = request.getSigner().getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
-                request.messageSMIME.getSMIME(), request.messageSMIME.getSMIME().getSubject());
-        request.messageSMIME.setSMIME(receipt);
-        em.merge(request.messageSMIME.refresh());
-        log.info("operation: " + request.operation.toString() + " - transactionVS: " + transactionVS.getId());
+                request.getTransactionVSSMIME().getSMIME(), request.getTransactionVSSMIME().getSMIME().getSubject());
+        request.getTransactionVSSMIME().setSMIME(receipt);
+        em.merge(request.getTransactionVSSMIME().refresh());
+        log.info("operation: " + request.getOperation() + " - transactionVS: " + transactionVS.getId());
         return receipt;
     }
 

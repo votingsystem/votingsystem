@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
@@ -24,15 +25,16 @@ public class TransactionVSBankVSBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
 
-    public String processTransactionVS(TransactionVSBean.TransactionVSRequest request) throws ExceptionVS {
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.fromUserVS.getNif());
+    public String processTransactionVS(TransactionVSDto request) throws ExceptionVS {
+        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);
-        if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.operation.toString()));
-        TransactionVS transactionParent = dao.persist(TransactionVS.BANKVS_PARENT(bankVS, request.fromUserIBAN, request.fromUser,
-                request.amount, request.currencyCode, request.subject, request.validTo, request.messageSMIME, request.tag));
+        if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
+        TransactionVS transactionParent = dao.persist(TransactionVS.BANKVS_PARENT(bankVS, request.getFromUserIBAN(),
+                request.getFromUser(), request.getAmount(), request.getCurrencyCode(), request.getSubject(),
+                request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
-                transactionParent, transactionParent.getAmount(), request.toUserVS, request.toUserVS.getIBAN()));
-        log.info("BankVS: " + bankVS.getId() + " - to user: " + request.toUserVS.getId());
+                transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
+        log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return "Transaction OK";
     }
 }

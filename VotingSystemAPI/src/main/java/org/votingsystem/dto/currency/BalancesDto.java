@@ -23,13 +23,13 @@ public class BalancesDto {
     private List<TransactionVSDto> transactionToList;
     private Map<String, Map> balances;
     private Map<String, Map<String, BigDecimal>> balancesFrom;
-    private Map<String, Map<String, Map>> balancesTo;
+    private Map<String, Map<String, IncomesDto>> balancesTo;
     private Map<String, Map<String, BigDecimal>> balancesCash;
 
     public BalancesDto() {}
 
 
-    public static BalancesDto TO(List<TransactionVSDto> transactionList, Map<String, Map<String, Map>> balances) {
+    public static BalancesDto TO(List<TransactionVSDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
         BalancesDto dto = new BalancesDto();
         dto.setTransactionToList(transactionList);
         dto.setBalancesTo(balances);
@@ -43,7 +43,7 @@ public class BalancesDto {
         return dto;
     }
 
-    public void setTo(List<TransactionVSDto> transactionList, Map<String, Map<String, Map>> balances) {
+    public void setTo(List<TransactionVSDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
         setTransactionToList(transactionList);
         setBalancesTo(balances);
     }
@@ -85,12 +85,12 @@ public class BalancesDto {
         }
     }
 
-    public static Map<String, Map<String, BigDecimal>> filterBalanceTo(Map<String, Map<String, Map>> balanceTo) {
+    public static Map<String, Map<String, BigDecimal>> filterBalanceTo(Map<String, Map<String, IncomesDto>> balanceTo) {
         Map result = new HashMap<>();
         for(String currency : balanceTo.keySet()) {
-            Map currencyMap = new HashMap<>();
+            Map<String, BigDecimal> currencyMap = new HashMap<>();
             for(String tag : balanceTo.get(currency).keySet()) {
-                currencyMap.put(tag, balanceTo.get(currency).get(tag).get("total"));
+                currencyMap.put(tag, balanceTo.get(currency).get(tag).getTotal());
             }
             result.put(currency, currencyMap);
         }
@@ -162,11 +162,11 @@ public class BalancesDto {
         this.balancesFrom = balancesFrom;
     }
 
-    public Map<String, Map<String, Map>> getBalancesTo() {
+    public Map<String, Map<String, IncomesDto>> getBalancesTo() {
         return balancesTo;
     }
 
-    public void setBalancesTo(Map<String, Map<String, Map>> balancesTo) {
+    public void setBalancesTo(Map<String, Map<String, IncomesDto>> balancesTo) {
         this.balancesTo = balancesTo;
     }
 }
