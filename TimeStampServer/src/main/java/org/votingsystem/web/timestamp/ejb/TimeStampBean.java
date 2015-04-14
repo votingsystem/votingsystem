@@ -31,7 +31,7 @@ public class TimeStampBean implements TimeStampService {
     private static final Logger log = Logger.getLogger(TimeStampBean.class.getSimpleName());
 
     private TimeStampServiceImpl timeStampService = null;
-    @Inject AppData data;
+    @Inject ConfigVSImpl config;
 
     public TimeStampBean() { }
 
@@ -42,8 +42,8 @@ public class TimeStampBean implements TimeStampService {
         URL res = Thread.currentThread().getContextClassLoader().getResource("TimeStampServer.jks");
         try {
             byte[] keyStoreBytes = FileUtils.getBytesFromStream(res.openStream());
-            timeStampService =  new TimeStampServiceImpl(keyStoreBytes, data.getProperty("vs.signKeyAlias"),
-                    data.getProperty("vs.signKeyPassword"));
+            timeStampService =  new TimeStampServiceImpl(keyStoreBytes, config.getProperty("vs.signKeyAlias"),
+                    config.getProperty("vs.signKeyPassword"));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

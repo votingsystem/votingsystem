@@ -1,6 +1,5 @@
 package org.votingsystem.test.currency;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.BankVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -11,9 +10,6 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.*;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 public class PublishBankVS {

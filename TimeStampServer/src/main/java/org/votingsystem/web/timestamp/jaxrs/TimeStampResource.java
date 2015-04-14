@@ -2,7 +2,7 @@ package org.votingsystem.web.timestamp.jaxrs;
 
 import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.timestamp.ejb.DAOBean;
+import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -17,8 +17,7 @@ import javax.ws.rs.core.Response;
 @Path("/timestamp")
 public class TimeStampResource {
 
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
 
     @GET
     @Path("/{id}")

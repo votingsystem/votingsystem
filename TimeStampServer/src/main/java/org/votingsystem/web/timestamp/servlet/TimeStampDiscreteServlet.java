@@ -5,8 +5,8 @@ import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.timestamp.ejb.DAOBean;
-import org.votingsystem.web.timestamp.ejb.AppData;
+import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.timestamp.filter.FilterVS;
 
 import javax.inject.Inject;
@@ -16,9 +16,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
@@ -30,10 +28,9 @@ public class TimeStampDiscreteServlet extends HttpServlet {
 
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(TimeStampDiscreteServlet.class.getSimpleName());
 
-    @Inject AppData data;
+    @Inject MessagesBean messages;
     @Inject TimeStampService timeStampService;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -43,8 +40,7 @@ public class TimeStampDiscreteServlet extends HttpServlet {
                 TimeStampResponseGenerator responseGenerator = timeStampService.getResponseGeneratorDiscrete(
                         req.getInputStream());
                 byte[] tokenBytes = responseGenerator.getTimeStampToken().getEncoded();
-                final InputStream inputStream = new ByteArrayInputStream(tokenBytes);
-                dao.create(new TimeStampVS(responseGenerator.getSerialNumber().longValue(), tokenBytes,
+                dao.persist(new TimeStampVS(responseGenerator.getSerialNumber().longValue(), tokenBytes,
                         TimeStampVS.State.OK));
                 resp.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName());
                 final ServletOutputStream out = resp.getOutputStream();
@@ -61,7 +57,7 @@ public class TimeStampDiscreteServlet extends HttpServlet {
             resp.setContentType("text/plain");
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
             if(writer == null) writer = resp.getWriter();
-            writer.println(data.get("requestWithoutFile", req.getLocale()));
+            writer.println(messages.get("requestWithoutFile"));
         }
         if(writer != null) writer.close();
     }

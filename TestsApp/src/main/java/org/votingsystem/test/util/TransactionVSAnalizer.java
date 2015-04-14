@@ -2,7 +2,7 @@ package org.votingsystem.test.util;
 
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 
 import java.util.ArrayList;
 import java.util.List;

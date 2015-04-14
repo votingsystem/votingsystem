@@ -17,7 +17,10 @@ import org.votingsystem.signature.util.KeyStoreInfo;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 

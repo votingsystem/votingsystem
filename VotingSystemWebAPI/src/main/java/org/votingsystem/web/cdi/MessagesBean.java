@@ -39,7 +39,6 @@ public class MessagesBean {
 
     public void setLocale(Locale locale) {
         try {
-
             this.bundle = ResourceBundle.getBundle(bundleBaseName, locale);
         } catch (Exception ex) {
             log.log(Level.SEVERE, "resource not found for locale: " + locale);

@@ -1,7 +1,9 @@
 package org.votingsystem.web.timestamp.filter;
 
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.web.cdi.MessagesBean;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.Cookie;
@@ -16,7 +18,7 @@ public class FilterVS implements Filter {
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(FilterVS.class.getSimpleName());
 
     private ServletContext servletContext;
-
+    @Inject MessagesBean messages;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -32,6 +34,7 @@ public class FilterVS implements Filter {
         RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
         log.info(((HttpServletRequest)req).getMethod() + " - " + ((HttpServletRequest)req).getRequestURI() +
                 " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
+        messages.setLocale(req.getLocale());
         filterChain.doFilter(requestWrapper, resp);
     }
 

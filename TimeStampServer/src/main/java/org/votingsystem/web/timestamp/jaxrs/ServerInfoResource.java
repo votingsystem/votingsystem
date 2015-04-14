@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.timestamp.ejb.AppData;
+import org.votingsystem.web.timestamp.ejb.ConfigVSImpl;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -26,7 +27,7 @@ public class ServerInfoResource {
     private static final Logger log = Logger.getLogger(ServerInfoResource.class.getSimpleName());
 
     @Inject TimeStampService timeStampService;
-    @Inject AppData data;
+    @Inject ConfigVSImpl config;
 
 
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -34,8 +35,8 @@ public class ServerInfoResource {
         HashMap serverInfo = new HashMap();
         serverInfo.put("serverType", ActorVS.Type.TIMESTAMP_SERVER);
         serverInfo.put("certChainPEM", new String(timeStampService.getSigningCertChainPEMBytes()));
-        serverInfo.put("serverURL", data.getContextURL());
-        serverInfo.put("environmentMode", data.getMode());
+        serverInfo.put("serverURL", config.getContextURL());
+        serverInfo.put("environmentMode", config.getMode());
         resp.setHeader("Access-Control-Allow-Origin", "*");
         return JSON.getMapper().writeValueAsString(serverInfo);
     }

@@ -10,8 +10,8 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.TimePeriod;
 
 import java.io.File;
 import java.math.BigDecimal;

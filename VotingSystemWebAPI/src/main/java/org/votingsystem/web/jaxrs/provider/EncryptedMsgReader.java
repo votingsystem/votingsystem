@@ -5,6 +5,7 @@ import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;

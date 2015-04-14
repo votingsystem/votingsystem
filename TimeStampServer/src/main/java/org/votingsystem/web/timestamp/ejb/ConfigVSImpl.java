@@ -4,32 +4,25 @@ import org.votingsystem.util.EnvironmentVS;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.inject.Named;
 import java.net.URL;
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
 @Startup
-public class AppData {
+public class ConfigVSImpl {
 
-    private static final Logger log = Logger.getLogger(AppData.class.getSimpleName());
-
-    private static Map<String, ResourceBundle> bundleMap = new HashMap<>();
+    private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getSimpleName());
 
     private String contextURL;
     private EnvironmentVS mode;
     private Properties props;
 
-    public AppData() {
+    public ConfigVSImpl() {
         try {
             String resourceFile = null;
             //String fileName = System.getProperty("jboss.server.config.dir") + "/my.properties";
@@ -57,27 +50,6 @@ public class AppData {
     public String getProperty(String key) {
         return props.getProperty(key);
     }
-    
-    public String get(String key, Locale locale, String... arguments) {
-        ResourceBundle bundle = null;
-        if((bundle = bundleMap.get(locale.getCountry())) == null) {
-            bundle = ResourceBundle.getBundle("org.votingsystem.web.timestamp.messages", locale);
-            if(bundle == null) {
-                log.info("Can't find bundle for locale " + locale.toString());
-                return "---" + key + "---";
-            }
-            bundleMap.put(locale.getCountry(), bundle);
-        }
-        try {
-            String pattern = bundle.getString(key);
-            if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-            else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
-        } catch(Exception ex) {
-            log.info("missing key: " + key + " - country: " + locale.getCountry());
-            return "---" + key + "---";
-        }
-    }
-
 
     public EnvironmentVS getMode() {
         return mode;

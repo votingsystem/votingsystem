@@ -52,11 +52,11 @@
             <artifactId>VotingSystemAPI</artifactId>
             <version>${votingsystem.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.votingsystem</groupId>
             <artifactId>VotingSystemWebAPI</artifactId>
             <version>${votingsystem.version}</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
