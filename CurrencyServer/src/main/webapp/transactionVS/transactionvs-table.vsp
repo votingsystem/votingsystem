@@ -28,7 +28,7 @@
             <div flex style="width:240px;">${msg.subjectLbl}</div>
         </div>
         <div>
-            <template repeat="{{transaction in transactionRecords}}">
+            <template repeat="{{transaction in resultList}}">
                 <div layout horizontal center center justified on-click="{{showTransactionDetails}}" class="rowvs {{getClass(transaction)}}">
                     <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
@@ -96,14 +96,14 @@
             console.log(this.tagName + " - transactionsMapChanged - transactionsMap: " +
                     Object.prototype.toString.call(this.transactionsMap))
             this.transactionsMap = toJSON(this.transactionsMap)
-            this.transactionRecords = this.transactionsMap.transactionRecords
+            this.resultList = this.transactionsMap.resultList
         },
         ajaxComplete: function() {
             this.transactionsMap = this.responseData
             console.log(this.tagName + " - ajaxComplete")
         },
         addTransaction:function(transactionvs) {
-            this.transactionsMap.transactionRecords.push(transactionvs)
+            this.transactionsMap.resultList.push(transactionvs)
         }
     });</script>
 </polymer-element>

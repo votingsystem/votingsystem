@@ -10,6 +10,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -70,7 +71,7 @@ public class CurrencyBean {
         em.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
-        //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        //TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         //if(currencyBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
 
         TransactionVS transactionVS = TransactionVS.CURRENCY_BATCH(currencyBatch, toUserVS, validTo, messageSMIME);
@@ -114,7 +115,7 @@ public class CurrencyBean {
 
     public Map processCurrencyRequest(CurrencyRequestBatch currencyBatch) throws Exception {
         UserVS fromUserVS = currencyBatch.getMessageSMIME().getUserVS();
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
         //Check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), currencyBatch.getTagVS(), currencyBatch.getRequestAmount(), currencyBatch.getCurrencyCode());

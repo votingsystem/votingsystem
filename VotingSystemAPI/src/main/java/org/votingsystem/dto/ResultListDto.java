@@ -15,6 +15,13 @@ public class ResultListDto {
 
     public ResultListDto() { }
 
+    public ResultListDto(List resultList, Integer offset, Integer max, Long totalCount) {
+        this.resultList = resultList;
+        this.offset = offset;
+        this.max = max;
+        this.totalCount = totalCount;
+    }
+
     public static ResultListDto GROUPVS(List groupList, Object state, Integer offset, Integer max, Long totalCount) {
         ResultListDto result = new ResultListDto();
         result.setResultList(groupList);

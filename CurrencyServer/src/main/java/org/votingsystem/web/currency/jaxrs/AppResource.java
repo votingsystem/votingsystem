@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.DashBoardBean;
 
 import javax.inject.Inject;
@@ -103,7 +104,7 @@ public class AppResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Object userVS(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
-        DateUtils.TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
+        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
         Map dataMap = new HashMap<>();
         dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
         if(req.getContentType() != null && req.getContentType().contains("json")) {
@@ -120,7 +121,7 @@ public class AppResource {
     public Object userVS(@PathParam("numHours") Integer numHours,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
-        DateUtils.TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours);
+        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours);
         Map dataMap = new HashMap<>();
         dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
         if(req.getContentType() != null && req.getContentType().contains("json")) {

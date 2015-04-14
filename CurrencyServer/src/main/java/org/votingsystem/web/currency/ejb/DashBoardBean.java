@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -23,10 +23,10 @@ public class DashBoardBean {
 
     @PersistenceContext private EntityManager em;
 
-     public Map getUserVSInfo(DateUtils.TimePeriod timePeriod) {
+     public Map getUserVSInfo(TimePeriod timePeriod) {
          log.info("timePeriod: " + timePeriod.toString());
          Map result = new HashMap<>();
-         result.put("timePeriod", timePeriod.getMap());
+         result.put("timePeriod", timePeriod);
 
          Query query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),

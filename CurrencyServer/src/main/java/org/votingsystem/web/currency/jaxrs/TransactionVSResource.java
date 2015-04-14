@@ -1,5 +1,8 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyTransactionBatch;
@@ -7,6 +10,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
@@ -41,28 +45,25 @@ public class TransactionVSResource {
 
     @Inject UserVSBean serVSBean;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject SignatureBean signatureBean;
     @Inject CurrencyBean currencyBean;
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject ConfigVS config;
 
-    @Path("/id/{id}") //old_url -> /transactionVS/$id
+    @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object get(@PathParam("id") long id) throws UnsupportedEncodingException {
-        Map resultMap = null;
+    public Response get(@PathParam("id") long id) throws UnsupportedEncodingException, JsonProcessingException {
         TransactionVS transactionVS = dao.find(TransactionVS.class, id);
         if(transactionVS != null) {
-            resultMap = transactionVSBean.getTransactionMap(transactionVS);
-            resultMap.put("receipt", new String(transactionVS.getMessageSMIME().getContent(), "UTF-8"));
-        } else resultMap = new HashMap<>();
-        return resultMap;
+            TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transactionVS);
+            transactionDto.setReceipt(new String(transactionVS.getMessageSMIME().getContent(), "UTF-8"));
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(transactionDto)).build();
+        } else return Response.status(Response.Status.NOT_FOUND).entity("ERROR - TransactionVS not found - id: " + id).build();
     }
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object index(@DefaultValue("0") @QueryParam("offset") int offset,
+    public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
               @DefaultValue("100") @QueryParam("max") int max, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -71,32 +72,28 @@ public class TransactionVSResource {
         List<TransactionVS> transactionList = query.getResultList();
         query = dao.getEM().createQuery("select COUNT(t) from TransactionVS t where t.transactionParent is null");
         long totalCount = (long) query.getSingleResult();
-        List<Map> resultList = new ArrayList<>();
+        List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS : transactionList) {
-            resultList.add(transactionVSBean.getTransactionMap(transactionVS));
+            resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
-        Map resultMap = new HashMap<>();
-        resultMap.put("transactionRecords", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", totalCount);
-
-        if(contentType.contains("json")) return resultMap;
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+        if(contentType.contains("json")) return Response.ok().entity(
+                JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         else {
-            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
     @Path("/") @POST @Consumes(MediaTypeVS.JSON_SIGNED)
-    public Object  post(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+    public Response post(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
         return Response.ok().entity(transactionVSBean.processTransactionVS(messageSMIME)).build();
     }
 
     @Path("/from/{dateFrom}/to/{dateTo}") //old_url -> /transactionVS/from/$dateFrom/to/$dateTo
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object search(@DefaultValue("0") @QueryParam("offset") int offset,
+    public Response search(@DefaultValue("0") @QueryParam("offset") int offset,
                        @DefaultValue("100") @QueryParam("max") int max,
                        @QueryParam("transactionvsType") String transactionvsType,
                        @QueryParam("searchText") String searchText,
@@ -125,19 +122,15 @@ public class TransactionVSResource {
                 .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
                 .setParameter("searchText", searchText);
         long totalCount = (long) query.getSingleResult();
-        List<Map> resultList = new ArrayList<>();
+        List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS :  transactionList) {
-            resultList.add(transactionVSBean.getTransactionMap(transactionVS));
+            resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
-        Map resultMap = new HashMap<>();
-        resultMap.put("transactionRecords", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", totalCount);
-
-        if(contentType.contains("json")) return resultMap;
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+        if(contentType.contains("json")) return Response.ok().entity(
+                JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         else {
-            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -152,9 +145,9 @@ public class TransactionVSResource {
         if(userVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
-        DateUtils.TimePeriod.Lapse lapse =  DateUtils.TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
-        DateUtils.TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        return transactionVSBean.getDataWithBalancesMap(userVS, timePeriod);
+        TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
+        TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
+        return transactionVSBean.getBalancesDto(userVS, timePeriod);
     }
 
     @Path("/currency")

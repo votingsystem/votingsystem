@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -11,6 +12,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -58,7 +60,7 @@ public class BalancesBean {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
         String transactionMsgSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
         Query query = dao.getEM().createNamedQuery("countUserActiveOrCancelledAfter").setParameter("dateCancelled", timePeriod.getDateFrom());
         long numTotalUsers = (long)query.getSingleResult();
@@ -95,15 +97,15 @@ public class BalancesBean {
         }
     }
 
-    public boolean initUserVSWeekPeriod(UserVS userVS, DateUtils.TimePeriod timePeriod, String transactionMsgSubject)
+    public boolean initUserVSWeekPeriod(UserVS userVS, TimePeriod timePeriod, String transactionMsgSubject)
             throws Exception {
-        Map balanceMap = null;
+        BalancesDto balancesDto = null;
         String userSubPath;
         if(userVS instanceof GroupVS) {
-            balanceMap = groupVSBean.getDataWithBalancesMap(userVS, timePeriod);
+            balancesDto = groupVSBean.getBalancesDto(userVS, timePeriod);
             userSubPath = "GroupVS_"+ userVS.getId();
         } else if (userVS instanceof UserVS) {
-            balanceMap = userVSBean.getDataWithBalancesMap(userVS, timePeriod);
+            balancesDto = userVSBean.getBalancesDto(userVS, timePeriod);
             //userSubPath = StringUtils.getUserDirPath(userVS.getNif());
             userSubPath = userVS.getNif();
         } else {
@@ -112,7 +114,7 @@ public class BalancesBean {
         }
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), userSubPath);
         log.info("$methodName - UserVS '$userVS.id' - dir: '$reportFiles.baseDir.absolutePath'");
-        Map<String, Map> currencyMap = (Map<String, Map>) balanceMap.get("balancesCash");
+        Map<String, Map<String, BigDecimal>> currencyMap = balancesDto.getBalancesCash();
         Query query = null;
         for(String currency: currencyMap.keySet()) {
             for(Object entry:  currencyMap.get(currency).entrySet()) {
@@ -128,8 +130,7 @@ public class BalancesBean {
                         "UserVS:" + userVS.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
                 //Send TimeLimited incomes not expended to system
                 BigDecimal timeLimitedNotExpended = TransactionVSUtils.checkRemainingForTag(
-                        (Map<String, Map<String, String>>)balanceMap.get("balancesFrom"),
-                        (Map<String, Map<String, Map>>)balanceMap.get("balancesTo"), currentTagVS.getName(), currency);
+                        balancesDto.getBalancesFrom(), balancesDto.getBalancesTo(), currentTagVS.getName(), currency);
                 if(TagVS.WILDTAG.equals(currentTagVS.getName()) &&
                         timeLimitedNotExpended.compareTo(BigDecimal.ZERO) < 0) timeLimitedNotExpended = BigDecimal.ZERO;
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
@@ -164,7 +165,7 @@ public class BalancesBean {
     }
 
     //@Transactional
-    public Map signPeriodResult(DateUtils.TimePeriod timePeriod) throws Exception {
+    public Map signPeriodResult(TimePeriod timePeriod) throws Exception {
         long beginCalc = System.currentTimeMillis();
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
                 .setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS));
@@ -184,9 +185,9 @@ public class BalancesBean {
             for (UserVS userVS : userVSList) {
                 try {
                     if(userVS instanceof BankVS)
-                    bankVSBalanceList.add(bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod));
-                    else if(userVS instanceof GroupVS) groupVSBalanceList.add(groupVSBean.getDataWithBalancesMap(userVS, timePeriod));
-                    else userVSBalanceList.add(userVSBean.getDataWithBalancesMap(userVS, timePeriod));
+                    bankVSBalanceList.add(bankVSBean.getBalancesDto((BankVS) userVS, timePeriod));
+                    else if(userVS instanceof GroupVS) groupVSBalanceList.add(groupVSBean.getBalancesDto(userVS, timePeriod));
+                    else userVSBalanceList.add(userVSBean.getBalancesDto(userVS, timePeriod));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -203,7 +204,7 @@ public class BalancesBean {
             String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
             log.info("processed " + offset + " of " + numTotalUsers + " - elapsedTime: " + elapsedTime);
         }
-        Map systemBalance = systemBean.genBalanceForSystem(timePeriod);
+        BalancesDto systemBalance = systemBean.genBalanceForSystem(timePeriod);
         Map userBalances = new HashMap<>();
         userBalances.put("systemBalance", systemBalance);
         userBalances.put("groupVSBalanceList", groupVSBalanceList);
@@ -211,7 +212,7 @@ public class BalancesBean {
         userBalances.put("bankVSBalanceList", bankVSBalanceList);
 
         Map resultMap = new HashMap<>();
-        resultMap.put("timePeriod",timePeriod.getMap(null));
+        resultMap.put("timePeriod",timePeriod);
         resultMap.put("userBalances", userBalances);
 
         String resultBalanceStr = new ObjectMapper().writeValueAsString(resultMap);
@@ -226,11 +227,11 @@ public class BalancesBean {
         return resultMap;
     }
 
-    public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) throws Exception {
+    public BalancesDto genBalance(UserVS uservs, TimePeriod timePeriod) throws Exception {
         if(UserVS.Type.SYSTEM == uservs.getType()) return systemBean.genBalanceForSystem(timePeriod);
-        else if(uservs instanceof BankVS) return bankVSBean.getDataWithBalancesMap((BankVS) uservs, timePeriod);
-        else if(uservs instanceof GroupVS) return groupVSBean.getDataWithBalancesMap(uservs, timePeriod);
-        else return userVSBean.getDataWithBalancesMap(uservs, timePeriod);
+        else if(uservs instanceof BankVS) return bankVSBean.getBalancesDto((BankVS) uservs, timePeriod);
+        else if(uservs instanceof GroupVS) return groupVSBean.getBalancesDto(uservs, timePeriod);
+        else return userVSBean.getBalancesDto(uservs, timePeriod);
     }
 
 }

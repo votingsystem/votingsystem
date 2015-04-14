@@ -21,6 +21,10 @@ public class MessageDto {
         this.URL = URL;
     }
 
+    public static MessageDto OK(String message, String URL) {
+        return new MessageDto(ResponseVS.SC_OK, message, URL);
+    }
+
     public static MessageDto REQUEST_REPEATED(String message, String URL) {
         return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
     }

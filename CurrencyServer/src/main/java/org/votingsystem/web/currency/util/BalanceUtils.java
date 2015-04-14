@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.util;
 
 import org.votingsystem.model.currency.TransactionVS;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -25,18 +26,10 @@ public class BalanceUtils {
     };
 
 
-    public static Map<String, Map> getBalances(Collection<TransactionVS> transactionList, TransactionVS.Source source) {
-        Collector<TransactionVS, ?, ?> amountCollector = null;
-        switch(source) {
-            case FROM:
-                amountCollector = new TransactionVSFromAmountCollector();
-                break;
-            case TO:
-                amountCollector = new TransactionVSToAmountCollector();
-                break;
-        }
+    public static Map<String, Map<String, BigDecimal>> getBalancesFrom(Collection<TransactionVS> transactionList) {
+        Collector<TransactionVS, ?, ?> amountCollector = new TransactionVSFromAmountCollector();
         Map<String, List<TransactionVS>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
-        Map<String, Map> result = new HashMap<>();
+        Map<String, Map<String, BigDecimal>> result = new HashMap<>();
         for(String currency : currencyMaps.keySet()) {
             Map tagVSMap = currencyMaps.get(currency).stream().collect(groupingBy(tagName, amountCollector));
             result.put(currency, tagVSMap);
@@ -44,5 +37,15 @@ public class BalanceUtils {
         return result;
     }
 
-    public static String getCurrencyCode(TransactionVS transactionVS) { return transactionVS.getCurrencyCode();}
+    public static Map<String, Map<String, Map>> getBalancesTo(Collection<TransactionVS> transactionList) {
+        Collector<TransactionVS, ?, ?> amountCollector = new TransactionVSToAmountCollector();
+        Map<String, Map<String, Map>> result = new HashMap<>();
+        Map<String, List<TransactionVS>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
+        for(String currency : currencyMaps.keySet()) {
+            Map tagVSMap = currencyMaps.get(currency).stream().collect(groupingBy(tagName, amountCollector));
+            result.put(currency, tagVSMap);
+        }
+        return result;
+    }
+
 }

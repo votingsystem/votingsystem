@@ -3,12 +3,12 @@
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <link href="${elementURL}/groupVS/groupvs-editor.vsp" rel="import"/>
+        <link href="${elementURL}/groupVS/groupvs-details.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.editGroupVSLbl}"></vs-innerpage-signal>
         <div class="pageContentDiv" style="min-height: 1000px; padding:0px 30px 0px 30px;">
-            <groupvs-editor groupvs='${groupvsMap}'></groupvs-editor>
+            <groupvs-details groupvs='${groupvsDto}'></groupvs-details>
         </div>
     </ui:define>
 </ui:composition>

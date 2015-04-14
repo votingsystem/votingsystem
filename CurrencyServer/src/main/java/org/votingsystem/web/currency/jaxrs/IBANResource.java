@@ -49,7 +49,7 @@ public class IBANResource {
                     .setParameter("IBAN", iban.toString());
             List<TransactionVS> transactionVSList = query.getResultList();
             for(TransactionVS transactionVS : transactionVSList) {
-                result.add(transactionVSBean.getTransactionMap(transactionVS));
+                result.add(transactionVSBean.getTransactionDto(transactionVS));
             }
         } else {
             log.log(Level.FINE, "external IBAN");
@@ -57,7 +57,7 @@ public class IBANResource {
                     .setParameter("IBAN", iban.toString());
             List<TransactionVS> transactionVSList = query.getResultList();
             for(TransactionVS transactionVS : transactionVSList) {
-                result.add(transactionVSBean.getTransactionMap(transactionVS));
+                result.add(transactionVSBean.getTransactionDto(transactionVS));
             }
         }
         return result;

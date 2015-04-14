@@ -2,9 +2,11 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
@@ -61,18 +63,18 @@ public class BalanceResource {
         return getUserVSBalanceMap(req, resp, context, userId, calendar);
     }
 
-    private Object getUserVSBalanceMap(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
+    private Response getUserVSBalanceMap(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
                long userId, Calendar calendar) throws Exception {
         UserVS uservs = dao.find(UserVS.class, userId);
         if(uservs == null) {
             throw new NotFoundException("userId: " + userId);
         } else {
-            DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-            Map balanceMap = balancesBean.genBalance(uservs, timePeriod);
+            TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+            BalancesDto balancesDto = balancesBean.genBalance(uservs, timePeriod);
             if(req.getContentType() != null && req.getContentType().contains("json")) {
-                return balanceMap;
+                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
             } else {
-                req.setAttribute("balanceMap", JSON.getMapper().writeValueAsString(balanceMap));
+                req.setAttribute("balanceMap", JSON.getMapper().writeValueAsString(balancesDto));
                 context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
@@ -95,7 +97,7 @@ public class BalanceResource {
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
         if(reportFiles.getJsonFile() == null) {
             throw new NotFoundException("reportsForWeekNotFoundMsg - timePeriod: " + timePeriod.toString());
@@ -119,7 +121,7 @@ public class BalanceResource {
                        @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
         //TODO balancesBean.calculatePeriod(DateUtils.getWeekPeriod(calendar))
         return new HashMap<>();
     }

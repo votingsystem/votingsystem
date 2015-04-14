@@ -305,7 +305,7 @@ public class Currency extends EntityVS implements Serializable  {
         }
     }
 
-    public Currency loadCertData(X509Certificate x509AnonymousCert, DateUtils.TimePeriod timePeriod,
+    public Currency loadCertData(X509Certificate x509AnonymousCert, TimePeriod timePeriod,
             CertificateVS authorityCertificateVS) throws CertificateEncodingException {
         this.x509AnonymousCert = x509AnonymousCert;
         this.serialNumber = x509AnonymousCert.getSerialNumber().longValue();

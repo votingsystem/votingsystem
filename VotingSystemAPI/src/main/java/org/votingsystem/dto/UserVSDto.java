@@ -2,7 +2,10 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.UserVS;
+
+import java.util.*;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,9 +14,18 @@ import org.votingsystem.model.UserVS;
 public class UserVSDto {
 
     private Long id;
+    private UserVS.State state;
+    private UserVS.Type type;
+    private String name;
+    private String reason;
+    private String description;
+    private Set<DeviceVSDto> connectedDevices;
+    private Set<CertificateVSDto> certCollection;
+    private String firstName;
+    private String lastName;
     @JsonProperty("IBAN") private String IBAN;
     @JsonProperty("NIF") private String NIF;
-    private String name;
+    private Map sender;
 
     public UserVSDto() {}
 
@@ -23,9 +35,25 @@ public class UserVSDto {
         result.setName(userVS.getName());
         result.setIBAN(userVS.getIBAN());
         result.setNIF(userVS.getNif());
+        result.setType(userVS.getType());
         return result;
     }
 
+    public static UserVSDto DEVICES(UserVS userVS, Set<DeviceVSDto> connectedDevices,
+                    List<CertificateVS> certificateVSList) throws Exception {
+        UserVSDto userVSDto = BASIC(userVS);
+        userVSDto.setState(userVS.getState());
+        userVSDto.setType(userVS.getType());
+        userVSDto.setReason(userVS.getReason());
+        userVSDto.setDescription(userVS.getDescription());
+        userVSDto.setConnectedDevices(connectedDevices);
+        Set<CertificateVSDto> certCollection = new HashSet<>();
+        for(CertificateVS certificateVS : certificateVSList) {
+            certCollection.add(new CertificateVSDto(certificateVS.getX509Cert()));
+        }
+        userVSDto.setCertCollection(certCollection);
+        return userVSDto;
+    }
 
     public Long getId() {
         return id;
@@ -59,4 +87,75 @@ public class UserVSDto {
         this.name = name;
     }
 
+    public UserVS.State getState() {
+        return state;
+    }
+
+    public void setState(UserVS.State state) {
+        this.state = state;
+    }
+
+    public UserVS.Type getType() {
+        return type;
+    }
+
+    public void setType(UserVS.Type type) {
+        this.type = type;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<DeviceVSDto> getConnectedDevices() {
+        return connectedDevices;
+    }
+
+    public void setConnectedDevices(Set<DeviceVSDto> connectedDevices) {
+        this.connectedDevices = connectedDevices;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Set<CertificateVSDto> getCertCollection() {
+        return certCollection;
+    }
+
+    public void setCertCollection(Set<CertificateVSDto> certCollection) {
+        this.certCollection = certCollection;
+    }
+
+    public Map getSender() {
+        return sender;
+    }
+
+    public void setSender(Map sender) {
+        this.sender = sender;
+    }
 }

@@ -325,65 +325,6 @@ public class DateUtils {
         return urlDateFormatter.parse(dateStr);
     }
 
-    public static class TimePeriod {
-
-        public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
-
-        private Date dateFrom;
-        private Date dateTo;
-
-        public TimePeriod(Date dateFrom, Date dateTo) {
-            this.dateFrom = dateFrom;
-            this.dateTo = dateTo;
-        }
-
-        public Date getDateFrom() {
-            return dateFrom;
-        }
-
-        public Date getDateTo() {
-            return dateTo;
-        }
-
-        public static TimePeriod parse(Map dataMap) throws ParseException {
-            Date dateFrom = DateUtils.getDateFromString((String) dataMap.get("dateFrom"));
-            Date dateTo = DateUtils.getDateFromString((String) dataMap.get("dateTo"));
-            return new TimePeriod(dateFrom, dateTo);
-        }
-
-        public Map toMap() {
-            Map dataMap = new HashMap<>();
-            dataMap.put("dateFrom", dateFrom);
-            dataMap.put("dateTo", dateTo);
-            return dataMap;
-        }
-
-        public Map getMap() {
-            return getMap(null);
-        }
-
-        public Map getMap(String dateFormat) {
-            Map dataMap = new HashMap();
-            dataMap.put("dateFrom", dateFormat == null ? dateFrom : DateUtils.getDateStr(dateFrom, dateFormat));
-            dataMap.put("dateTo", dateFormat == null ? dateTo : DateUtils.getDateStr(dateTo, dateFormat));
-            return dataMap;
-        }
-
-        public boolean isCurrentWeekPeriod() {
-            TimePeriod currentWeekPeriod = getCurrentWeekPeriod();
-            return (dateFrom.compareTo(currentWeekPeriod.getDateFrom()) >=0 &&
-                    dateTo.compareTo(currentWeekPeriod.getDateTo()) <= 0);
-        }
-
-        public boolean inRange(Date dateToCheck) {
-            return dateToCheck.compareTo(dateFrom) >= 0 && dateToCheck.compareTo(dateTo) <= 0;
-        }
-
-        @Override public String toString() {
-            return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
-        }
-    }
-
     public static String getDayWeekDateStr (Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

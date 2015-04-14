@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.util;
 
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -18,7 +18,7 @@ public class ReportFiles {
     private File receiptFile;
     private File jsonFile;
 
-    public ReportFiles(DateUtils.TimePeriod timePeriod, String baseDirPath, String subPath) {
+    public ReportFiles(TimePeriod timePeriod, String baseDirPath, String subPath) {
         String reportsBasePath = baseDirPath + "/backup/weekReports";
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());

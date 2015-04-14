@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class TransactionPlan_send {
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(BankVS_sendTransactionVS.class, new SimulationData());
+        Logger log = TestUtils.init(SendTransactionVSFromBankVS.class, new SimulationData());
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
         TransactionVSPlan transactionVSPlan = new TransactionVSPlan(

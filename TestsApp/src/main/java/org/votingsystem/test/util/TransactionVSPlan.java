@@ -29,7 +29,7 @@ public class TransactionVSPlan {
     private static Logger log = Logger.getLogger(TransactionVSPlan.class.getSimpleName());
 
 
-    private DateUtils.TimePeriod timePeriod;
+    private TimePeriod timePeriod;
     private CurrencyServer currencyServer;
     private List<TransactionVS> bankVSTransacionList = new ArrayList<>();
     private List<TransactionVS> groupVSTransacionList = new ArrayList<>();
@@ -138,7 +138,7 @@ public class TransactionVSPlan {
         return currencyMap;
     }
 
-    public DateUtils.TimePeriod getTimePeriod() {
+    public TimePeriod getTimePeriod() {
         return timePeriod;
     }
 

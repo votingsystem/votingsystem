@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.websocket;
 
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -57,14 +58,11 @@ public class SessionVSManager {
         return Collections.list(connectedUserVSDeviceMap.keys());
     }
 
-    public Set<Map> connectedDeviceMap(Long userId) {
+    public Set<DeviceVSDto> connectedDeviceMap(Long userId) {
         if(!connectedUserVSDeviceMap.containsKey(userId)) return new HashSet<>();
         else {
-            Set<Map> userVSConnectedDevices = connectedUserVSDeviceMap.get(userId).stream().map(d -> {
-                    Map<String, Object> result = new HashMap<String, Object>();
-                    result.put("id", d.getId());
-                    result.put("name", d.getDeviceName());
-                    return result;
+            Set<DeviceVSDto> userVSConnectedDevices = connectedUserVSDeviceMap.get(userId).stream().map(d -> {
+                    return new DeviceVSDto(d.getId(), d.getDeviceName());
                 }).collect(Collectors.toSet());
             return userVSConnectedDevices;
         }

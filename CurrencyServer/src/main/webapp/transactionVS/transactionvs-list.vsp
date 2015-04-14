@@ -10,10 +10,10 @@
     <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                contentType="application/json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
     <div layout flex horizontal wrap around-justified>
-        <template repeat="{{transaction in transactionRecords}}">
+        <template repeat="{{transaction in resultList}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
-        <div hidden?="{{transactionRecords.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
+        <div hidden?="{{resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
             ${msg.withoutMovementsLbl}
         </div>
     </div>
@@ -31,14 +31,14 @@
             console.log(this.tagName + " - transactionsMapChanged - transactionsMap: " +
                     Object.prototype.toString.call(this.transactionsMap))
             this.transactionsMap = toJSON(this.transactionsMap)
-            this.transactionRecords = this.transactionsMap.transactionRecords
+            this.resultList = this.transactionsMap.resultList
         },
         ajaxComplete: function() {
             this.transactionsMap = this.responseData
             console.log(this.tagName + " - ajaxComplete")
         },
         addTransaction:function(transactionvs) {
-            this.transactionsMap.transactionRecords.push(transactionvs)
+            this.transactionsMap.resultList.push(transactionvs)
         }
     });</script>
 </polymer-element>

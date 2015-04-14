@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -54,7 +57,7 @@ public class GroupVSResource {
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object index(@DefaultValue("0") @QueryParam("offset") int offset,
+    public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
                         @DefaultValue("100") @QueryParam("max") int max,
                         @QueryParam("state") String stateStr,
                         @QueryParam("searchText") String searchText,
@@ -86,9 +89,9 @@ public class GroupVSResource {
                 "or g.description =:searchText").setParameter("searchText", "%" + searchText + "%")
                 .setParameter("state", state).setFirstResult(offset).setMaxResults(max);
         List<GroupVS> groupVSList = query.getResultList();
-        List<Map> resultList = new ArrayList<>();
+        List<GroupVSDto> resultList = new ArrayList<>();
         for(GroupVS groupVS : groupVSList) {
-            resultList.add(groupVSBean.getGroupVSDataMap(groupVS));
+            resultList.add(groupVSBean.getGroupVSDto(groupVS));
         }
         if(dateFrom != null && dateTo != null) {
             query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.dateCreated between :dateFrom and :dateTo " +
@@ -111,16 +114,16 @@ public class GroupVSResource {
 
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object getById(@PathParam("id") long id, @Context ServletContext context,
+    public Response getById(@PathParam("id") long id, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-        Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
-        if(contentType.contains("json")) return resultMap;
+        GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).build();
         else {
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(groupVSDto));
             context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -128,7 +131,7 @@ public class GroupVSResource {
 
     @Path("/id/{id}/users") //old_url -> /groupVS/$id/users
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object listUsers(@PathParam("id") long id,
+    public Response listUsers(@PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max,
             @DefaultValue("") @QueryParam("searchText") String searchText,
@@ -161,9 +164,9 @@ public class GroupVSResource {
                     .setFirstResult(offset).setMaxResults(max);
 
             List<SubscriptionVS> userList = query.getResultList();
-            List<Map> resultList = new ArrayList<>();
+            List<SubscriptionVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : userList) {
-                resultList.add(userVSBean.getSubscriptionVSDataMap(subscriptionVS));
+                resultList.add(SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL()));
             }
             query = dao.getEM().createQuery(queryCountPrefix + querySufix)
                     .setParameter("subscriptionState", subscriptionState)
@@ -174,7 +177,8 @@ public class GroupVSResource {
             resultMap.put("offset", offset);
             resultMap.put("max", max);
             resultMap.put("totalCount", totalCount);
-            return resultMap;
+            ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else {
             req.setAttribute("subscriptionMap", JSON.getMapper().writeValueAsString(new HashMap<>()));
             context.getRequestDispatcher("/groupVS/listUsers.xhtml").forward(req, resp);
@@ -194,11 +198,10 @@ public class GroupVSResource {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null)  return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-
-        Map resultMap = groupVSBean.getDataWithBalancesMap(groupVS, DateUtils.getCurrentWeekPeriod());
-        if(contentType.contains("json")) return resultMap;
+        BalancesDto balancesDto = groupVSBean.getBalancesDto(groupVS, DateUtils.getCurrentWeekPeriod());
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
         else {
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(resultMap));
+            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(balancesDto));
             context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -235,8 +238,8 @@ public class GroupVSResource {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-        Map resultMap = groupVSBean.getGroupVSDataMap(groupVS);
-        req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(resultMap));
+        GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
+        req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(groupVSDto));
         context.getRequestDispatcher("/groupVS/edit.xhtml").forward(req, resp);
         return Response.ok().build();
     }
@@ -288,9 +291,9 @@ public class GroupVSResource {
         }
     }
 
-    @Path("/id/{groupId}/users") //old_url -> /groupVS/$id/users
+    @Path("/id/{groupId}/users")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object users(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @Context ServletContext context,
+    public Response users(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @Context ServletContext context,
                     @DefaultValue("0") @QueryParam("offset") int offset,
                     @DefaultValue("100") @QueryParam("max") int max,
                     @QueryParam("state") String stateStr,
@@ -303,18 +306,14 @@ public class GroupVSResource {
                 "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states)
                 .setFirstResult(offset).setMaxResults(max);
         List<SubscriptionVS> subscriptionVSList = query.getResultList();
-        List<Map> resultList = new ArrayList<>();
+        List<UserVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscriptionVS : subscriptionVSList) {
-            resultList.add(userVSBean.getUserVSDataMap(subscriptionVS.getUserVS(), false));
+            resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));
         }
         query = dao.getEM().createQuery("select count(s) from SubscriptionVS s where s.groupVS.id =:groupId " +
                 "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states);
-        Map resultMap = new HashMap<>();
-        resultMap.put("userVSList", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", (long)query.getSingleResult());
-        return resultMap;
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/activateUser")

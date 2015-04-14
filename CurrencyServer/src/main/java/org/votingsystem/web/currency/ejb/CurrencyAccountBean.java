@@ -77,7 +77,7 @@ public class CurrencyAccountBean {
         return result;
     }
 
-    public void checkBalancesMap(UserVS userVS, Map<String, Map> balancesMap) throws ExceptionVS {
+    public void checkBalancesMap(UserVS userVS, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
         Map<String, Map> accountsMap = getAccountsBalanceMap(userVS);
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("UserVS: " + userVS.getId() + "has " +
                 accountsMap.keySet().size() + " accounts");

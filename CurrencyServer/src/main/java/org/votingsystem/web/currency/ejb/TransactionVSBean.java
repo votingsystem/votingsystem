@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -12,6 +14,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -23,7 +26,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
@@ -68,10 +70,10 @@ public class TransactionVSBean {
         }
     }
 
-    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod) throws Exception {
-        if(userVS instanceof BankVS) return bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
-        else if(userVS instanceof GroupVS) return groupVSBean.getDataWithBalancesMap(userVS, timePeriod);
-        else return userVSBean.getDataWithBalancesMap(userVS, timePeriod);
+    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
+        if(userVS instanceof BankVS) return bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
+        else if(userVS instanceof GroupVS) return groupVSBean.getBalancesDto(userVS, timePeriod);
+        else return userVSBean.getBalancesDto(userVS, timePeriod);
     }
 
     private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
@@ -176,9 +178,10 @@ public class TransactionVSBean {
 
     //Check the amount from WILDTAG account expended for the param tag
     public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        Map<String, Map> balancesFrom = BalanceUtils.getBalances(getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
-        Map<String, Map> balancesTo = BalanceUtils.getBalances(getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO);
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Map<String, Map<String, BigDecimal>> balancesFrom =
+                BalanceUtils.getBalancesFrom(getTransactionFromList(userVS, timePeriod));
+        Map<String, Map<String, Map>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(userVS, timePeriod));
         if(balancesFrom.get("currencyCode") == null) return BigDecimal.ZERO;
         BigDecimal expendedForTagVS = (BigDecimal) balancesFrom.get(currencyCode).get(tagVS.getName());
         if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO;
@@ -187,68 +190,36 @@ public class TransactionVSBean {
         else return BigDecimal.ZERO;
     }
 
-    public Map getTransactionListWithBalances(List<TransactionVS> transactionList, TransactionVS.Source source) {
-        List<Map> transactionFromList = new ArrayList<>();
+    public BalancesDto getBalancesDto(List<TransactionVS> transactionList, TransactionVS.Source source) throws ExceptionVS {
+        List<TransactionVSDto> transactionFromList = new ArrayList<>();
         for(TransactionVS transaction : transactionList) {
-            transactionFromList.add(getTransactionMap(transaction));
+            transactionFromList.add(getTransactionDto(transaction));
         }
-        Map result = new HashMap<>();
-        result.put("transactionList", transactionFromList);
-        result.put("balances", BalanceUtils.getBalances(transactionList, source));
-        return result;
+        switch (source) {
+            case FROM:
+                return BalancesDto.FROM(transactionFromList, BalanceUtils.getBalancesFrom(transactionList));
+            case TO:
+                return BalancesDto.TO(transactionFromList, BalanceUtils.getBalancesTo(transactionList));
+        }
+        throw new ExceptionVS("unknown source: " + source);
     }
 
-    public Map getTransactionMap(TransactionVS transaction) {
-        Map transactionMap = new HashMap<>();
-        transactionMap.put("id", transaction.getId());
-        if(transaction.getFromUserVS() != null) {
-            Map fromUserVSMap = new HashMap<>();
-            fromUserVSMap.put("id", transaction.getFromUserVS().getId());
-            fromUserVSMap.put("nif", transaction.getFromUserVS().getNif());
-            fromUserVSMap.put("IBAN", transaction.getFromUserVS().getIBAN());
-            fromUserVSMap.put("type", transaction.getFromUserVS().getType().toString());
-            fromUserVSMap.put("name", transaction.getFromUserVS().getNif());
-            if(transaction.getFromUserIBAN() != null) {
-                Map senderMap = new HashMap<>();
-                senderMap.put("fromUserIBAN", transaction.getFromUserIBAN());
-                senderMap.put("fromUser", transaction.getFromUser());
-                fromUserVSMap.put("sender", senderMap);
-            }
-            transactionMap.put("fromUserVS", fromUserVSMap);
-        }
-        if(transaction.getToUserVS() != null) {
-            Map toUserVSMap = new HashMap<>();
-            toUserVSMap.put("id", transaction.getToUserVS().getId());
-            toUserVSMap.put("name", transaction.getToUserVS().getName());
-            toUserVSMap.put("nif", transaction.getToUserVS().getNif());
-            toUserVSMap.put("IBAN", transaction.getToUserVS().getIBAN());
-            toUserVSMap.put("type", transaction.getToUserVS().getType().toString());
-            transactionMap.put("toUserVS", toUserVSMap);
-        }
-        if(transaction.getValidTo() != null) transactionMap.put("validTo", transaction.getValidTo());
-        transactionMap.put("dateCreated", transaction.getDateCreated());
-        transactionMap.put("subject", transaction.getSubject());
-        transactionMap.put("amount", transaction.getAmount().setScale(2, RoundingMode.FLOOR).toString());
-        transactionMap.put("description", getTransactionTypeDescription(transaction.getType().toString()));
-        transactionMap.put("type",  transaction.getType().toString());
-        transactionMap.put("currency",  transaction.getCurrencyCode());
-        if(transaction.getMessageSMIME() != null) {
-            transactionMap.put("messageSMIMEURL",
-                    config.getContextURL() + "/messageSMIME/" + transaction.getMessageSMIME().getId());
-        }
-        if(transaction.getType()  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+    public TransactionVSDto getTransactionDto(TransactionVS transactionVS) {
+        TransactionVSDto dto = new TransactionVSDto(transactionVS, config.getContextURL());
+        dto.setDescription(getTransactionTypeDescription(transactionVS.getType().toString()));
+        if(transactionVS.getType()  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             TransactionVS transactionParent =
-                    (transaction.getTransactionParent() == null)?transaction:transaction.getTransactionParent();
+                    (transactionVS.getTransactionParent() == null)?transactionVS:transactionVS.getTransactionParent();
             Query query = dao.getEM().createNamedQuery("countTransByTransactionParent")
                     .setParameter("transactionParent", transactionParent);
-            transactionMap.put("numChildTransactions",  (long)query.getSingleResult());
+            dto.setNumChildTransactions((long) query.getSingleResult());
         }
-        if(transaction.getTag() != null) {
-            String tagName = TagVS.WILDTAG.equals(transaction.getTag().getName())? messages.get("wildTagLbl")
-                    .toUpperCase():transaction.getTag().getName();
-            transactionMap.put("tags", Arrays.asList(tagName));
-        } else transactionMap.put("tags", new ArrayList<>());
-        return transactionMap;
+        if(transactionVS.getTag() != null) {
+            String tagName = TagVS.WILDTAG.equals(transactionVS.getTag().getName())? messages.get("wildTagLbl")
+                    .toUpperCase():transactionVS.getTag().getName();
+            dto.setTags(new HashSet<>(Arrays.asList(tagName)));
+        }
+        return dto;
     }
 
     public String getTransactionTypeDescription(String transactionType) {
@@ -277,7 +248,7 @@ public class TransactionVSBean {
         return typeDescription;
     }
 
-    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
+    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, TimePeriod timePeriod) {
         List<TransactionVS> transactionList = null;
         Query query = null;
         if(fromUserVS instanceof GroupVS) {
@@ -297,7 +268,7 @@ public class TransactionVSBean {
         return transactionList;
     }
 
-    public List<TransactionVS> getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
+    public List<TransactionVS> getTransactionToList(UserVS toUserVS, TimePeriod timePeriod) {
         Query query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndDateCreatedBetween")
                 .setParameter("toUserVS", toUserVS).setParameter("state", TransactionVS.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo());

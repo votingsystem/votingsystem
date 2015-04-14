@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -74,7 +75,7 @@ public class MessageSMIMEResource {
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         if(TypeVS.CURRENCY_SEND != operation) {
             if(signedContentMap.containsKey("fromUserVS")) {
-                signedContentMap.put("fromUserVS", userVSBean.getUserVSBasicDataMap(messageSMIME.getUserVS()));
+                signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
             }
 
         }

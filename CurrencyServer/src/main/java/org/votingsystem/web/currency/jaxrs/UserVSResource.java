@@ -2,6 +2,9 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.iban4j.Iban;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -14,6 +17,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.ejb.BankVSBean;
@@ -57,7 +61,7 @@ public class UserVSResource {
 
     @Path("/") @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Map indexJSON(@DefaultValue("0") @QueryParam("offset") int offset,
+    public Response indexJSON(@DefaultValue("0") @QueryParam("offset") int offset,
                          @DefaultValue("100") @QueryParam("max") int max,
                          @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
@@ -71,7 +75,7 @@ public class UserVSResource {
                 req.getParameter("state") != null) {
             UserVS.Type userType = UserVS.Type.USER;
             UserVS.State userState = UserVS.State.ACTIVE;
-            DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+            TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
             Date dateFrom = null;
             Date dateTo = null;
             try {userType = UserVS.Type.valueOf(req.getParameter("type"));} catch(Exception ex) {}
@@ -106,16 +110,12 @@ public class UserVSResource {
             totalCount = (Long) dao.getEM().createQuery(queryCountPrefix + querySufix).getSingleResult();
 
         }
-        List<Map> resultList = new ArrayList<>();
+        List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS userVS :  userList) {
-            resultList.add(userVSBean.getUserVSDataMap(userVS, false));
+            resultList.add(userVSBean.getUserVSDto(userVS, false));
         }
-        Map resultMap = new HashMap<>();
-        resultMap.put("userVSList", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", totalCount);
-        return resultMap;
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
 
 
@@ -144,7 +144,7 @@ public class UserVSResource {
 
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object index(@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response index(@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
         UserVS userVS = dao.find(UserVS.class, id);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
@@ -152,34 +152,34 @@ public class UserVSResource {
         else return processUserVSResult(userVS, null, req, resp, context);
     }
 
-    private Object processUserVSResult(UserVS userVS, String msg,
+    private Response processUserVSResult(UserVS userVS, String msg,
                HttpServletRequest req,  HttpServletResponse resp, ServletContext context) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Object resultDto = null;
         Map resultMap = new HashMap<>();
-        Map userMap = null;
         String view = null;
         if(userVS instanceof GroupVS) {
-            userMap = groupVSBean.getDataMap((GroupVS) userVS, timePeriod);
-            resultMap.put("groupvsMap", userMap);
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(userMap));
+            resultDto = groupVSBean.getDataMap((GroupVS) userVS, timePeriod);
+            resultMap.put("groupvsMap", resultDto);
+            req.setAttribute("groupvsDto", JSON.getMapper().writeValueAsString(resultDto));
             view = "/groupVS/groupvs.xhtml";
         }
         else if(userVS instanceof BankVS) {
-            userMap = bankVSBean.getDataWithBalancesMap((BankVS) userVS, timePeriod);
-            resultMap.put("uservsMap", userMap);
+            resultDto = bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
+            resultMap.put("uservsMap", resultDto);
             resultMap.put("messageToUser", msg);
-            req.setAttribute("uservsMap", JSON.getMapper().writeValueAsString(userMap));
+            req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             req.setAttribute("messageToUser", msg);
             view = "/userVS/userVS.xhtml";
         } else {
-            userMap = userVSBean.getDataWithBalancesMap(userVS, timePeriod);
-            resultMap.put("uservsMap", userMap);
-            req.setAttribute("uservsMap", JSON.getMapper().writeValueAsString(userMap));
+            resultDto = userVSBean.getBalancesDto(userVS, timePeriod);
+            resultMap.put("uservsMap", resultDto);
+            req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             view = "/userVS/userVS.xhtml";
         }
         if(contentType.contains("json")) {
-            return resultMap;
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build() ;
         } else {
             context.getRequestDispatcher(view).forward(req, resp);
             return Response.ok().build();
@@ -188,7 +188,7 @@ public class UserVSResource {
 
     @Path("/search")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object searchHTML(@DefaultValue("0") @QueryParam("offset") int offset,
+    public Response searchHTML(@DefaultValue("0") @QueryParam("offset") int offset,
              @DefaultValue("100") @QueryParam("max") int max, @QueryParam("searchText") String searchText,
             @Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws Exception {
@@ -204,7 +204,7 @@ public class UserVSResource {
     @Path("/search")
     @POST @Produces(MediaType.APPLICATION_JSON)
     @Consumes({"application/json"})
-    public Object search(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response search(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
         if(requestMap.containsKey("searchText")) {
             int offset = ((Number)requestMap.get("offset")).intValue();
@@ -213,7 +213,7 @@ public class UserVSResource {
         } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();
     }
 
-    private Map processSearch(String searchText, int offset, int max) throws Exception {
+    private Response processSearch(String searchText, int offset, int max) throws Exception {
         Query query = dao.getEM().createQuery("select u from UserVS u where u.state =:state and u.type =:type " +
                 "and (u.name like :searchText or u.firstName like :searchText or u.lastName like :searchText " +
                 "or u.nif like :searchText)").setParameter("type", UserVS.Type.USER)
@@ -221,31 +221,27 @@ public class UserVSResource {
                 .setParameter("searchText", "%" + searchText + "%")
                 .setFirstResult(offset).setMaxResults(max);
         List<UserVS> userVSList = query.getResultList();
-        List<Map> resultList = new ArrayList<>();
+        List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS userVS : userVSList) {
-            resultList.add(userVSBean.getUserVSDataMap(userVS, false));
+            resultList.add(userVSBean.getUserVSDto(userVS, false));
         }
         query = dao.getEM().createQuery("SELECT COUNT(u) FROM UserVS u where u.state =:state and u.type =:type " +
                 "and (u.name like :searchText or u.firstName like :searchText or u.lastName like :searchText " +
                 "or u.nif like :searchText)").setParameter("type", UserVS.Type.USER)
                 .setParameter("state", UserVS.State.ACTIVE)
                 .setParameter("searchText", "%" + searchText + "%");
-        Map resultMap = new HashMap<>();
-        resultMap.put("userVSList", resultList);
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        resultMap.put("totalCount", (long)query.getSingleResult());
-        return resultMap;
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
 
 
     @Path("/search/group/{groupId}")
     @POST @Produces(MediaType.APPLICATION_JSON)
     @Consumes({"application/json"})
-    public Object searchGroup(Map requestMap, @PathParam("groupId") long groupId, @Context ServletContext context,
+    public Response searchGroup(Map requestMap, @PathParam("groupId") long groupId, @Context ServletContext context,
             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, groupId);
-        if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - groupId: " + groupId);
+        if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - groupId: " + groupId).build();
         if(requestMap.containsKey("searchText")) {
             int offset = ((Number)requestMap.get("offset")).intValue();
             int max = ((Number)requestMap.get("max")).intValue();
@@ -265,16 +261,12 @@ public class UserVSResource {
                     .setFirstResult(offset).setMaxResults(max).setParameter("param", "s").setParameter("state", state)
                     .setParameter("userState", UserVS.State.ACTIVE).setParameter("groupVS", groupVS)
                     .setParameter("searchText", "%" + requestMap.get("searchText") + "%");
-            List<Map> resultList = new ArrayList<>();
+            List<UserVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : subscriptionList) {
-                resultList.add(userVSBean.getUserVSDataMap(subscriptionVS.getUserVS(), false));
+                resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));
             }
-            Map result = new HashMap<>();
-            result.put("userVSList", resultList);
-            result.put("offset", offset);
-            result.put("max", max);
-            result.put("totalCount", (long)query.getSingleResult());
-            return result;
+            ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();
     }
 
@@ -292,8 +284,8 @@ public class UserVSResource {
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-        return userVSBean.getDataWithBalancesMap(userVS, timePeriod, withCheck);
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        return userVSBean.getBalancesDto(userVS, timePeriod, withCheck);
     }
 
     @Path("/nif/{nif}")
@@ -305,8 +297,8 @@ public class UserVSResource {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        return userVSBean.getDataWithBalancesMap(userVS, timePeriod, withCheck);
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        return userVSBean.getBalancesDto(userVS, timePeriod, withCheck);
     }
 
     @Path("/searchByDevice")
@@ -322,20 +314,21 @@ public class UserVSResource {
         if(deviceVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("device not found - email: " + email +
                     " - phone: " + phone).build();
-        } else return userVSBean.getUserVSDataMap(deviceVS.getUserVS(), false);
+        } else return userVSBean.getUserVSDto(deviceVS.getUserVS(), false);
     }
 
     @Path("/bankVSList")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object bankVSList(@Context ServletContext context, @Context HttpServletRequest req,
+    public Response bankVSList(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<BankVS> bankVSList = dao.findAll(BankVS.class);
-        List<Map> resultList = new ArrayList<>();
+        List<UserVSDto> resultList = new ArrayList<>();
         for(BankVS bankVS :  bankVSList) {
-            resultList.add(userVSBean.getUserVSDataMap(bankVS, false));
+            resultList.add(userVSBean.getUserVSDto(bankVS, false));
         }
-        if(contentType.contains("json")) return resultList;
+
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
         else {
             req.setAttribute("bankVSMap", JSON.getMapper().writeValueAsString(resultList));
             context.getRequestDispatcher("/userVS/bankVSList.xhtml").forward(req, resp);
@@ -350,8 +343,8 @@ public class UserVSResource {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         Map<String, Object> dataMap = new ObjectMapper().readValue(smimeMessage.getSignedContent(), Map.class);
         //TODO check operation
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        return userVSBean.getDataWithBalancesMap(messageSMIME.getUserVS(), timePeriod);
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        return userVSBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);
     }
 
     @Path("/save") @GET
@@ -362,25 +355,22 @@ public class UserVSResource {
     }
 
     @Path("/save")
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
-    public Object save(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response save(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
         UserVS newUser = userVSBean.saveUser(messageSMIME);
-        Map result = new HashMap<>();
-        result.put("statusCode", ResponseVS.SC_OK);
-        result.put("message", messages.get("certUserNewMsg", newUser.getNif()));
-        result.put("URL", config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
-        return result;
+        MessageDto messageDto = MessageDto.OK(messages.get("certUserNewMsg", newUser.getNif()),
+                config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).build();
     }
 
     @Path("/newBankVS")
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
-    public Object newBankVS(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response newBankVS(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
         BankVS newBankVS = bankVSBean.saveBankVS(messageSMIME);
-        Map result = new HashMap<>();
-        result.put("statusCode", ResponseVS.SC_OK);
-        result.put("message", messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()));
-        result.put("URL", config.getContextURL() + "/rest/userVS/id/" + newBankVS.getId());
-        return result;
+        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK,
+                messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()),
+                config.getContextURL() + "/rest/userVS/id/" + newBankVS.getId());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/connected")

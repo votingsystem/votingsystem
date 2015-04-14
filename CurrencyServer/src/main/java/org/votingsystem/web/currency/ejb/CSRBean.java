@@ -5,6 +5,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
@@ -36,12 +37,12 @@ public class CSRBean {
 
 
     public synchronized CurrencyRequestBatch signCurrencyBatchRequest (CurrencyRequestBatch currencyBatchRequest) throws ExceptionVS {
-        DateUtils.TimePeriod timePeriod = null;
+        TimePeriod timePeriod = null;
         if(currencyBatchRequest.getIsTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
             Date dateFrom = DateUtils.resetCalendar().getTime();
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
-            timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo);
+            timePeriod = new TimePeriod(dateFrom, dateTo);
         }
         Collection<Currency> currencyCollection = currencyBatchRequest.getCurrencyMap().values();
         CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
@@ -67,12 +68,12 @@ public class CSRBean {
     public synchronized Currency signCurrencyRequest(Currency currency) throws ExceptionVS {
         if(currencyMinValue.compareTo(currency.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), currency.getAmount().toString()));
-        DateUtils.TimePeriod timePeriod = null;
+        TimePeriod timePeriod = null;
         if(currency.getIsTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
             Date dateFrom = DateUtils.resetCalendar().getTime();
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
-            timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo);
+            timePeriod = new TimePeriod(dateFrom, dateTo);
         }
         CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
         try {

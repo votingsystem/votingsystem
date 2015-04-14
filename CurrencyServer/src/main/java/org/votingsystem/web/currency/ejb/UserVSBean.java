@@ -2,18 +2,19 @@ package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
-import org.votingsystem.web.currency.util.TransactionVSUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -22,9 +23,10 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 @Stateless
@@ -61,87 +63,35 @@ public class UserVSBean {
         return newUser;
     }
 
-    public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
-        Map resultMap = new HashMap<>();
-        resultMap.put("id", subscriptionVS.getId());
-        resultMap.put("state", subscriptionVS.getState().toString());
-        resultMap.put("dateCreated", subscriptionVS.getDateCreated());
-        resultMap.put("dateActivated", subscriptionVS.getDateActivated());
-        resultMap.put("dateCancelled", subscriptionVS.getDateCancelled());
-        resultMap.put("lastUpdated", subscriptionVS.getLastUpdated());
-        Map userDataMap = new HashMap<>();
-        userDataMap.put("id", subscriptionVS.getUserVS().getId());
-        userDataMap.put("IBAN", subscriptionVS.getUserVS().getIBAN());
-        userDataMap.put("NIF", subscriptionVS.getUserVS().getNif());
-        userDataMap.put("name", subscriptionVS.getUserVS().getFirstName() + " " + subscriptionVS.getUserVS().getLastName());
-        resultMap.put("uservs", userDataMap);
-        Map groupDataMap = new HashMap<>();
-        groupDataMap.put("id", subscriptionVS.getGroupVS().getId());
-        groupDataMap.put("name", subscriptionVS.getGroupVS().getName());
-        resultMap.put("groupvs", groupDataMap);
-        return resultMap;
-    }
-
-    public Map getUserVSBasicDataMap(UserVS userVS){
-        Map resultMap = new HashMap<>();
-        resultMap.put("name", userVS.getName());
-        resultMap.put("nif", userVS.getNif());
-        return resultMap;
-    }
-    
-    public Map getUserVSDataMap(UserVS userVS, boolean withCerts) throws Exception {
-        Map resultMap = new HashMap<>();
+    public UserVSDto getUserVSDto(UserVS userVS, boolean withCerts) throws Exception {
+        List<CertificateVS> certificates = null;
         if(withCerts) {
             Query query = dao.getEM().createNamedQuery("findCertByUserAndState").setParameter("userVS", userVS)
                     .setParameter("state", CertificateVS.State.OK);
-            List<CertificateVS> certificates = query.getResultList();
-            List<Map> certList = new ArrayList<>();
-            for(CertificateVS certificateVS : certificates) {
-                Map certDataMap = new HashMap<>();
-                certDataMap.put("serialNumber", certificateVS.getX509Cert().getSerialNumber());
-                certDataMap.put("pemCert", new String(CertUtils.getPEMEncoded (certificateVS.getX509Cert()), "UTF-8"));
-                certList.add(certDataMap);
-            }
-            resultMap.put("certificateList", certList);
+            certificates = query.getResultList();
         }
-        resultMap.put("id", userVS.getId());
-        resultMap.put("nif", userVS.getNif());
-        resultMap.put("name", userVS.getName());
-        resultMap.put("firstName", userVS.getFirstName());
-        resultMap.put("lastName", userVS.getLastName());
-        resultMap.put("IBAN", userVS.getIBAN());
-        resultMap.put("state", userVS.getState().toString());
-        resultMap.put("type", userVS.getType().toString());
-        resultMap.put("reason", userVS.getReason());
-        resultMap.put("description", userVS.getDescription());
-        resultMap.put("connectedDevices", SessionVSManager.getInstance().connectedDeviceMap(userVS.getId()));
-        return resultMap;
+        Set<DeviceVSDto> deviceVSDtoSet = SessionVSManager.getInstance().connectedDeviceMap(userVS.getId());
+        return UserVSDto.DEVICES(userVS, deviceVSDtoSet, certificates);
     }
-    
-    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod, boolean withResultCheck) throws Exception {
-        Map resultMap = new HashMap<>();
-        resultMap.put("timePeriod", timePeriod.getMap());
-        resultMap.put("userVS", getUserVSDataMap(userVS, false));
-        Map transactionListWithBalances = transactionVSBean.getTransactionListWithBalances(
+
+    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod, boolean validateResult) throws Exception {
+        BalancesDto balancesDto = transactionVSBean.getBalancesDto(
                 transactionVSBean.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
-        resultMap.put("transactionFromList", transactionListWithBalances.get("transactionList"));
-        resultMap.put("balancesFrom", transactionListWithBalances.get("balances"));
+        balancesDto.setTimePeriod(timePeriod);
+        balancesDto.setUserVS(getUserVSDto(userVS, false));
 
-        transactionListWithBalances = transactionVSBean.getTransactionListWithBalances(
+        BalancesDto balancesToDto = transactionVSBean.getBalancesDto(
                 transactionVSBean.getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO);
-        resultMap.put("transactionToList", transactionListWithBalances.get("transactionList"));
-        resultMap.put("balancesTo", transactionListWithBalances.get("balances"));
-        resultMap.put("resultMap", transactionListWithBalances.get("balances"));
-        resultMap.put("balancesCash", TransactionVSUtils.balancesCash((Map<String, Map<String, Map>>) resultMap.get("balancesTo"),
-                (Map<String, Map<String, BigDecimal>>) resultMap.get("balancesFrom")));
-        //Map<String, Map<String, Map>> balancesTo, Map<String, Map<String, BigDecimal>> balancesFrom
-        if(withResultCheck && UserVS.Type.SYSTEM != userVS.getType() && timePeriod.isCurrentWeekPeriod())
-            currencyAccountBean.checkBalancesMap(userVS, (Map<String, Map>) resultMap.get("balancesCash"));
-        return resultMap;
+        balancesDto.setTo(balancesToDto);
+
+        balancesToDto.calculateCash();
+        if(validateResult && UserVS.Type.SYSTEM != userVS.getType() && timePeriod.isCurrentWeekPeriod())
+            currencyAccountBean.checkBalancesMap(userVS, balancesDto.getBalancesCash());
+        return balancesDto;
     }
 
-    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod) throws Exception {
-        return getDataWithBalancesMap(userVS, timePeriod, true);
+    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
+        return getBalancesDto(userVS, timePeriod, true);
     }
     
 }

@@ -1,5 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -11,11 +13,10 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
-import org.votingsystem.web.currency.util.TransactionVSUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -85,7 +86,7 @@ public class GroupVSBean {
         }
         currencyAccountBean.checkUserVSAccount(signer);
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
-                request.getInfo(), request.getTagSet()));
+                request.getInfo(), request.getTags()));
         groupVS.setIBAN(ibanBean.getIBAN(groupVS.getId()));
         dao.persist(new CurrencyAccount(groupVS, BigDecimal.ZERO, Currency.getInstance("EUR").getCurrencyCode(),
                 config.getTag(TagVS.WILDTAG)));
@@ -99,14 +100,14 @@ public class GroupVSBean {
 
     private GroupVSDto validateNewGroupRequest(GroupVSDto groupVSDto) throws ValidationExceptionVS {
         groupVSDto.validateNewGroupRequest();
-        if(groupVSDto.getTagSet() != null) {
+        if(groupVSDto.getTags() != null) {
             Set<TagVS> resultTagVSSet = new HashSet<>();
-            for(TagVS tagVS: groupVSDto.getTagSet()) {
+            for(TagVS tagVS: groupVSDto.getTags()) {
                 TagVS tagVSDB = config.getTag(tagVS.getName());
                 if(tagVSDB != null) resultTagVSSet.add(tagVSDB);
                 else throw new ValidationExceptionVS(tagVS.getName() + " not found");
             }
-            groupVSDto.setTagSet(resultTagVSSet);
+            groupVSDto.setTags(resultTagVSSet);
         }
         return groupVSDto;
     }
@@ -132,64 +133,37 @@ public class GroupVSBean {
         return subscriptionVS;
     }
 
-    public Map getGroupVSDataMap(GroupVS groupVS) throws Exception {
-        Map resultMap = new HashMap<>();
-        resultMap.put("id", groupVS.getId());
-        resultMap.put("IBAN", groupVS.getIBAN());
-        resultMap.put("name", groupVS.getName());
-        resultMap.put("description", groupVS.getDescription());
-        resultMap.put("state", groupVS.getState().toString());
-        resultMap.put("dateCreated", groupVS.getDateCreated());
-        resultMap.put("representative", userVSBean.getUserVSDataMap(groupVS.getRepresentative(), false));
-        resultMap.put("type", groupVS.getType().toString());
-        if(groupVS.getTagVSSet() != null) {
-            List<Map> tagList = new ArrayList<>();
-            for(TagVS tag :  groupVS.getTagVSSet()) {
-                Map tagMap = new HashMap<>();
-                tagMap.put("id", tag.getId());
-                tagMap.put("name", tag.getName());
-                tagList.add(tagMap);
-            }
-            resultMap.put("tags", tagList);
-        }
-        resultMap.put("numActiveUsers", groupVS.getType().toString());
-        resultMap.put("numPendingUsers", groupVS.getType().toString());
+    public GroupVSDto getGroupVSDto(GroupVS groupVS) throws Exception {
+        GroupVSDto groupVSDto = GroupVSDto.DETAILS( groupVS, userVSBean.getUserVSDto(groupVS.getRepresentative(), false));
         Query query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
                 .setParameter("state", SubscriptionVS.State.ACTIVE);
-        resultMap.put("numActiveUsers", (long)query.getSingleResult());
+        groupVSDto.setNumActiveUsers((long) query.getSingleResult());
         query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
                 .setParameter("state", SubscriptionVS.State.PENDING);
-        resultMap.put("numPendingUsers", (long)query.getSingleResult());
-        return resultMap;
+        groupVSDto.setNumPendingUsers((long) query.getSingleResult());
+        return groupVSDto;
     }
 
-    public Map getDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod) throws Exception {
+
+    public Map getDataMap(GroupVS groupVS, TimePeriod timePeriod) throws Exception {
         Map resultMap = new HashMap<>();
-        resultMap.put("timePeriod",timePeriod.getMap());
-        resultMap.put("userVS", getGroupVSDataMap(groupVS));
+        resultMap.put("timePeriod",timePeriod);
+        resultMap.put("userVS", getGroupVSDto(groupVS));
         return resultMap;
     }
     
-    public Map getDataWithBalancesMap(UserVS groupVS, DateUtils.TimePeriod timePeriod) throws Exception {
-        Map resultMap = new HashMap<>();
-        resultMap.put("timePeriod", timePeriod.getMap());
-        resultMap.put("userVS", getGroupVSDataMap((GroupVS) groupVS));
-
-        Map transactionListWithBalances = transactionVSBean.getTransactionListWithBalances(
+    public BalancesDto getBalancesDto(UserVS groupVS, TimePeriod timePeriod) throws Exception {
+        BalancesDto balancesDto = transactionVSBean.getBalancesDto(
                 transactionVSBean.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM);
-        resultMap.put("transactionFromList", transactionListWithBalances.get("transactionList"));
-        resultMap.put("balancesFrom", transactionListWithBalances.get("balances"));
+        balancesDto.setTimePeriod(timePeriod);
+        balancesDto.setUserVS(UserVSDto.BASIC(groupVS));
 
-
-        transactionListWithBalances = transactionVSBean.getTransactionListWithBalances(
+        BalancesDto balancesToDto = transactionVSBean.getBalancesDto(
                 transactionVSBean.getTransactionToList(groupVS, timePeriod), TransactionVS.Source.TO);
-        resultMap.put("transactionToList", transactionListWithBalances.get("transactionList"));
-        resultMap.put("balancesTo", transactionListWithBalances.get("balances"));
-        resultMap.put("balancesCash", TransactionVSUtils.balancesCash((Map<String, Map<String, Map>>)resultMap.get("balancesTo"),
-                (Map<String, Map<String, BigDecimal>>)resultMap.get("balancesFrom")));
-
-        currencyAccountBean.checkBalancesMap(groupVS, (Map<String, Map>) resultMap.get("balancesCash"));
-        return resultMap;
+        balancesDto.setTo(balancesToDto);
+        balancesDto.calculateCash();
+        currencyAccountBean.checkBalancesMap(groupVS, balancesDto.getBalancesCash());
+        return balancesDto;
     }
 
     

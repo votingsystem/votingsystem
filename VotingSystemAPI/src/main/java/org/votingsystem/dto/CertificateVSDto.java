@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -29,19 +33,23 @@ public class CertificateVSDto {
 
     public CertificateVSDto() {}
 
-    public CertificateVSDto(CertificateVS certificate) throws Exception {
-        X509Certificate x509Cert = CertUtils.loadCertificate(certificate.getContent());
+    public CertificateVSDto(X509Certificate x509Cert) throws CertificateException, NoSuchAlgorithmException,
+            NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
-        description = certificate.getDescription();
         pemCert = new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8");
-        type = certificate.getType();
-        state = certificate.getState();
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
         sigAlgName = x509Cert.getSigAlgName();
         notBefore = x509Cert.getNotBefore();
         notAfter = x509Cert.getNotAfter();
+    }
+
+    public CertificateVSDto(CertificateVS certificate) throws Exception {
+        this(CertUtils.loadCertificate(certificate.getContent()));
+        description = certificate.getDescription();
+        type = certificate.getType();
+        state = certificate.getState();
         if(certificate.getAuthorityCertificateVS() != null) issuerSerialNumber = certificate
                 .getAuthorityCertificateVS().getSerialNumber().toString();
     }

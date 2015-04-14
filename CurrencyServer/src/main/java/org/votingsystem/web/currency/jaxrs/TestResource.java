@@ -3,14 +3,16 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MapUtils;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.AuditingBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
-import org.votingsystem.web.currency.util.TransactionVSUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -109,7 +111,7 @@ public class TestResource {
     @GET @Path("/checkCooin")
     public Response checkCooin(@Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws ServletException, IOException {
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         auditingBean.checkCurrencyRequest(timePeriod);
         return Response.ok().entity("OK").build();
     }
@@ -161,33 +163,31 @@ public class TestResource {
 
     @Path("/balance")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object balance() throws IOException {
+    public Response balance() throws IOException {
         Map balanceTo = new HashMap<>();
         balanceTo.put("EUR", MapUtils.getTagMapForIncomes(new MapUtils.TagData("HIDROGENO", new BigDecimal(880.5), new BigDecimal(700.5)),
                 new MapUtils.TagData("NITROGENO", new BigDecimal(100), new BigDecimal(50.5))));
         balanceTo.put("DOLLAR", MapUtils.getTagMapForIncomes(new MapUtils.TagData("WILDTAG", new BigDecimal(1454), new BigDecimal(400.5)),
                 new MapUtils.TagData("NITROGENO", new BigDecimal(100), new BigDecimal(50.5))));
-
         Map balanceFrom = new HashMap<>();
         balanceFrom.put("EUR", MapUtils.getTagMapForExpenses(new MapUtils.TagData("HIDROGENO", new BigDecimal(1080.5)),
                 new MapUtils.TagData("OXIGENO", new BigDecimal(350))));
         balanceFrom.put("DOLLAR", MapUtils.getTagMapForExpenses(new MapUtils.TagData("WILDTAG", new BigDecimal(6000))));
         balanceFrom.put("YEN", MapUtils.getTagMapForExpenses(new MapUtils.TagData("WILDTAG", new BigDecimal(8000))));
 
-        Map result = TransactionVSUtils.balancesCash(balanceTo, balanceFrom);
-        Map allResults = new HashMap<>();
-        allResults.put("balanceTo", balanceTo);
-        allResults.put("balanceFrom", balanceFrom);
-        allResults.put("result", result);
+        BalancesDto balancesDto = new BalancesDto();
+        balancesDto.setBalancesTo(balanceTo);
+        balancesDto.setBalancesFrom(balanceFrom);
+        balancesDto.calculateCash();
 
-        return allResults;
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
     @Path("/initWeek")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object initWeek() throws Exception {
         UserVS userVS = dao.find(UserVS.class, 2L);
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()));
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()));
         balanceBean.initUserVSWeekPeriod(userVS, timePeriod, "TestingController");
         return Response.ok().entity("OK").build();
     }
@@ -198,6 +198,5 @@ public class TestResource {
         balanceBean.initWeekPeriod(Calendar.getInstance());
         return Response.ok().entity("OK").build();
     }
-
 
 }

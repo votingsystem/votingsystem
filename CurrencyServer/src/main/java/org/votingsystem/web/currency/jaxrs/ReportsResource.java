@@ -19,13 +19,13 @@ public class ReportsResource {
     def index() {
         String weekReportsBaseDir = "${config.vs.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
-        List<DateUtils.TimePeriod> periods = []
+        List<TimePeriod> periods = []
         if(dir.exists()) {
             DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             dir.eachFileRecurse (FileType.FILES) { file ->
                 if("balances.json".equals(file.getName())) {
                     String[] period = file.getParentFile().getName().split("_")
-                    DateUtils.TimePeriod timePeriod = new DateUtils.TimePeriod(formatter.parse(period[0]), formatter.parse(period[1]));
+                    TimePeriod timePeriod = new TimePeriod(formatter.parse(period[0]), formatter.parse(period[1]));
                     periods.add(timePeriod)
                 }
             }
@@ -49,7 +49,7 @@ public class ReportsResource {
 
     def week() {
         Calendar calendar = RequestUtils.getCalendar(params)
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null)
         if(request.contentType?.contains("json")) {
             if(reportFiles.jsonFile.exists()) {
@@ -73,15 +73,15 @@ public class ReportsResource {
             RollingFileAppender appender = transactionslog.getAppender("CooinTransactionsReports")
             File reportsFile = new File(appender.file)
             //testfile.eachLine{ line ->}
-            def messageJSON = JSON.parse("{\"transactionRecords\":[" + reportsFile.text + "]}")
+            def messageJSON = JSON.parse("{\"resultList\":[" + reportsFile.text + "]}")
             if(params.transactionvsType) {
-                messageJSON.transactionRecords = messageJSON["transactionRecords"].findAll() { item ->
+                messageJSON.resultList = messageJSON["resultList"].findAll() { item ->
                     if(item.type.equals(params.transactionvsType)) { return item }
                 }
             }
             messageJSON.offset = 0
-            messageJSON.max = messageJSON.transactionRecords.size()
-            messageJSON.totalCount = messageJSON.transactionRecords.size()
+            messageJSON.max = messageJSON.resultList.size()
+            messageJSON.totalCount = messageJSON.resultList.size()
             render messageJSON as JSON
             return false
         } else {

@@ -16,20 +16,20 @@ public class TransactionVSAnalizer {
 
     private static Logger log = Logger.getLogger(TransactionVSAnalizer.class.getSimpleName());
 
-    private DateUtils.TimePeriod timePeriod;
+    private TimePeriod timePeriod;
     private UserVSTransactionBatch systemVSBatch;
     private List<UserVSTransactionBatch> groupVSListBatch;
     private List<UserVSTransactionBatch> userVSListBatch;
 
     public TransactionVSAnalizer() { }
 
-    public DateUtils.TimePeriod getTimePeriod() {
+    public TimePeriod getTimePeriod() {
         return timePeriod;
     }
 
     public static TransactionVSAnalizer parse(Map dataMap) throws Exception {
         TransactionVSAnalizer transactionVSAnalizer = new TransactionVSAnalizer();
-        transactionVSAnalizer.timePeriod = DateUtils.TimePeriod.parse((Map) dataMap.get("timePeriod"));
+        transactionVSAnalizer.timePeriod = TimePeriod.parse((Map) dataMap.get("timePeriod"));
         UserVSTransactionBatch systemBatch = UserVSTransactionBatch.parse(UserVS.Type.SYSTEM,
                 (Map) ((Map)dataMap.get("userBalances")).get("systemBalance"));
         transactionVSAnalizer.systemVSBatch = systemBatch;
