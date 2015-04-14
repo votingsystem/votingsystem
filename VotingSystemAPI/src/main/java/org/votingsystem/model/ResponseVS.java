@@ -203,7 +203,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     public <S> S getDto(Class<S> type) throws Exception {
         return JSON.getMapper().readValue(getMessage(), type);
     }
-
     
     public String toString () {
     	StringBuilder responseVS = new StringBuilder();

@@ -462,7 +462,7 @@ public class SignatureBean {
         return getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
     }
 
-    public ResponseVS decryptMessage (byte[] encryptedFile) throws Exception {
+    public byte[] decryptMessage (byte[] encryptedFile) throws Exception {
         return getEncryptor().decryptMessage(encryptedFile);
     }
 

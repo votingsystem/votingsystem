@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -170,7 +172,7 @@ public class SignatureService {
         return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
     }
 
-    public ResponseVS decryptMessage (byte[] encryptedFile) throws Exception {
+    public byte[] decryptMessage (byte[] encryptedFile) throws Exception {
         return getEncryptor().decryptMessage(encryptedFile);
     }
 

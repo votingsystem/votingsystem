@@ -2,6 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.votingsystem.model.ResponseVS;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -18,6 +19,10 @@ public class MessageDto {
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
+    }
+
+    public static MessageDto REQUEST_REPEATED(String message, String URL) {
+        return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
     }
 
     public Integer getStatusCode() {

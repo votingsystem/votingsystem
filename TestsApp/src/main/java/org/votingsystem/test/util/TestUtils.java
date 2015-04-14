@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 

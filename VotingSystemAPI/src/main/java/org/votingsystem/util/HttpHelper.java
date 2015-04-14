@@ -36,8 +36,10 @@ import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.throwable.*;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -48,6 +50,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -195,6 +198,45 @@ public class HttpHelper {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
+
+    public <T> T getData(Class<T> type, String serverURL, String mediaType) throws Exception {
+        log.info("getData - contentType: " + mediaType + " - serverURL: " + serverURL);
+        CloseableHttpResponse response = null;
+        HttpGet httpget = null;
+        String responseContentType = null;
+        httpget = new HttpGet(serverURL);
+        if(mediaType != null) httpget.setHeader("Content-Type", mediaType);
+        response = httpClient.execute(httpget);
+        log.info("----------------------------------------");
+            /*Header[] headers = response.getAllHeaders();
+            for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
+        log.info(response.getStatusLine().toString() + " - connManager stats: " +
+                connManager.getTotalStats().toString());
+        log.info("----------------------------------------");
+        Header header = response.getFirstHeader("Content-Type");
+        if(header != null) responseContentType = header.getValue();
+        try {
+            byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
+                return JSON.getMapper().readValue(responseBytes, type);
+            } else {
+                MessageDto messageDto = null;
+                if(responseContentType != null && responseContentType.contains("json")) messageDto =
+                        JSON.getMapper().readValue(responseBytes, MessageDto.class);
+                String responseStr = new String(responseBytes, StandardCharsets.UTF_8);
+                switch (response.getStatusLine().getStatusCode()) {
+                    case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedExceptionVS(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestExceptionVS(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR: throw new ServerExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                    default:throw new ExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                }
+            }
+        } finally {
+            if(response != null) response.close();
+        }
+    }
+
 
     public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
         log.info("getData - contentType: " + contentType + " - serverURL: " + serverURL);

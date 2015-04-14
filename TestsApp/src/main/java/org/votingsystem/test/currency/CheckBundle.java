@@ -1,7 +1,7 @@
 package org.votingsystem.test.currency;
 
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;

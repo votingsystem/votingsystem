@@ -59,22 +59,27 @@ public class EventVSDto {
         this.serverURL = serverURL;
     }
 
-    public EventVSDto(EventVS eventVS) { }
-
-    public EventVSDto(EventVS eventVS, String serverName, String contextURL) {
+    public EventVSDto(EventVS eventVS) {
         this.setId(eventVS.getId());
         this.setDateCreated(eventVS.getDateCreated());
         this.setSubject(eventVS.getSubject());
         this.setContent(eventVS.getContent());
-        this.setUserVS(eventVS.getUserVS().getName());
+        if(eventVS.getUserVS() != null) this.setUserVS(eventVS.getUserVS().getName());
         this.setCardinality(eventVS.getCardinality());
         this.setTags(eventVS.getTagVSSet());
         this.setBackupAvailable(eventVS.getBackupAvailable());
         this.setState(eventVS.getState());
         this.setDateBegin(eventVS.getDateBegin());
         this.setDateFinish(eventVS.getDateFinish());
-        this.setDuration(DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(
-                eventVS.getDateBegin().getTime() - eventVS.getDateFinish().getTime()));
+        if(eventVS.getDateBegin() != null && eventVS.getDateFinish() != null) {
+            this.setDuration(DateUtils.getElapsedTimeHoursMinutesFromMilliseconds( eventVS.getDateBegin().getTime() -
+                    eventVS.getDateFinish().getTime()));
+        }
+        this.setFieldsEventVS(eventVS.getFieldsEventVS());
+    }
+
+    public EventVSDto(EventVS eventVS, String serverName, String contextURL) {
+        this(eventVS);
         if(eventVS instanceof EventVSElection) {
             this.setURL(contextURL + "/eventVSElection/id/" + eventVS.getId());
             this.setPublishRequestURL(contextURL + "/eventVSElection/id/" + eventVS.getId() + "/publishRequest");
@@ -84,7 +89,6 @@ public class EventVSDto {
             if(controlCenterVS != null) this.setControlCenter(new ActorVSDto(
                     controlCenterVS.getServerURL(), controlCenterVS.getName()));
         }
-        this.setFieldsEventVS(eventVS.getFieldsEventVS());
         this.setAccessControl(new ActorVSDto(contextURL, serverName));
     }
 

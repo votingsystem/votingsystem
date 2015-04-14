@@ -18,6 +18,7 @@ import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.util.Strings;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 
@@ -108,7 +109,7 @@ public class Encryptor {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    public ResponseVS decryptMessage (byte[] encryptedFile) throws Exception {
+    public byte[] decryptMessage (byte[] encryptedFile) throws Exception {
         MimeMessage msg = new MimeMessage(ContextVS.MAIL_SESSION, new ByteArrayInputStream(encryptedFile));
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
@@ -117,11 +118,7 @@ public class Encryptor {
         if(recipientInfo != null && recipientInfo.getRID() != null) {
             messageRecipientId = recipientInfo.getRID();
             log.info("messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
-        } else {
-            log.log(Level.SEVERE, "No message found for recipientId: " + recipientId.getSerialNumber());
-            return new ResponseVS(ResponseVS.SC_ERROR, "No message found for recipientId: " +
-                    recipientId.getSerialNumber());
-        }
+        } else throw new ExceptionVS("No message found for recipientId: " + recipientId.getSerialNumber());
         MimeBodyPart mimeMessage = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
         			/*ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			mimeMessage.writeTo(baos)
@@ -154,7 +151,7 @@ public class Encryptor {
                 } else log.log(Level.SEVERE, "### unknown  votingSystemMessageType: " + encodedContentType);
             } else messageContentBytes = messageContent.toString().getBytes();
         }
-        return new ResponseVS(ResponseVS.SC_OK, messageContentBytes);
+        return messageContentBytes;
     }
 
     /**

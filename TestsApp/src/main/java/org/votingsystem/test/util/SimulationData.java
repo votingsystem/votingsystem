@@ -1,8 +1,8 @@
 package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 

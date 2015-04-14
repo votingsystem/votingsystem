@@ -5,7 +5,9 @@ import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
@@ -25,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class Election_publishAndSend {
+public class PublishAndSendElection {
 
     private static Logger log;
 
@@ -65,7 +67,7 @@ public class Election_publishAndSend {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(Election_publishAndSend.class, simulationData);
+        log = TestUtils.init(PublishAndSendElection.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -164,7 +166,7 @@ public class Election_publishAndSend {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
                 ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
-                        eventVS), smimeMessageSubject);
+                        new EventVSDto(eventVS)), smimeMessageSubject);
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,

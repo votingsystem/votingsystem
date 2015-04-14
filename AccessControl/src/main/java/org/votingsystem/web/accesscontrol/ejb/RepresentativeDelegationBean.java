@@ -1,5 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.dto.voting.RepresentativeRevokeDto;
@@ -13,7 +14,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -164,15 +164,15 @@ public class RepresentativeDelegationBean {
         } else log.info("cancelRepresentationDocument - user without representative - user id: " + userVS.getId());
     }
 
-    private void checkUserDelegationStatus(UserVS userVS) throws ValidationExceptionVS, RequestRepeatedException {
+    private void checkUserDelegationStatus(UserVS userVS) throws ValidationExceptionVS, ExceptionVS {
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) throw new ValidationExceptionVS(
                 "ERROR - user is representative: " + userVS.getNif());
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
         if (anonymousDelegation != null) {
             String delegationURL = format("{0}/messageSMIME/id/{1}", config.getRestURL(),
                     anonymousDelegation.getDelegationSMIME().getId());
-            throw new RequestRepeatedException(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
-                    DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL);
+            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
+                    DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL));
         }
     }
 

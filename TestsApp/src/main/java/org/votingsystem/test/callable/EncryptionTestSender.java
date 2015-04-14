@@ -1,10 +1,12 @@
 package org.votingsystem.test.callable;
 
+import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -37,8 +39,8 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         PrivateKey privateKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
-        byte[] encryptedRequestBytes = Encryptor.encryptMessage(
-                getRequestJSON(requestNIF, publicKey).toString().getBytes(), serverCert);
+        byte[] encryptedRequestBytes = Encryptor.encryptMessage(JSON.getMapper().writeValueAsBytes(
+                EncryptedMsgDto.NEW(requestNIF, publicKey)), serverCert);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptedRequestBytes, ContentTypeVS.ENCRYPTED, serverURL);
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] encryptedData = responseVS.getMessageBytes();
@@ -46,15 +48,6 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
             log.info("decryptedData: " + new String(decryptedData));
         }
         return responseVS;
-    }
-
-    private Map getRequestJSON(String from, PublicKey publicKey) {
-        //PublicKey pk =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
-        Map map = new HashMap();
-        map.put("from", from);
-        map.put("publicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        map.put("UUID", UUID.randomUUID().toString());
-        return map;
     }
 
 }

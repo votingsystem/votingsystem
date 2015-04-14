@@ -19,7 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class Multisign_send {
+public class SendMultisign {
 
     private static Logger log;
     private static SimulationData simulationData;
@@ -27,7 +27,7 @@ public class Multisign_send {
 
     public static void main(String[] args) throws Exception {
         simulationData = new SimulationData();
-        simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setServerURL("http://localhost:8080/AccessControl");
         simulationData.setMaxPendingResponses(10);
         simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();

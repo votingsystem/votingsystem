@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -41,15 +42,15 @@ public class EncryptorResource {
     @Inject DAOBean dao;
 
     @Path("/") @POST
-    public Response request(Map requestMap, @Context ServletContext context,
-                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        if(!requestMap.containsKey("publicKey")) return Response.status(Response.Status.BAD_REQUEST).entity(
+    public Response request(EncryptedMsgDto request, @Context ServletContext context,
+                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        if(request.getPublicKey() == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - missing publicKey").build();
-        byte[] decodedPK = Base64.getDecoder().decode((String) requestMap.get("publicKey"));
+        byte[] decodedPK = Base64.getDecoder().decode(request.getPublicKey());
         PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
         //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-        requestMap.put("message", format("Hello '{0}' from '{1}'", requestMap.get("from"), config.getServerName()));
-        byte[] responseBytes = new ObjectMapper().writeValueAsBytes(requestMap);
+        request.setMessage(format("Hello ''{0}'' from ''{1}''", request.getFrom(), config.getServerName()));
+        byte[] responseBytes = new ObjectMapper().writeValueAsBytes(request);
         //if(requestMap.receiverCert) signatureBean.encryptToCMS(responseBytes, requestMap.receiverCert)
         byte[] encryptedResponse = signatureBean.encryptMessage(responseBytes, receiverPublic);
         return Response.ok().entity(encryptedResponse).type(MediaTypeVS.MULTIPART_ENCRYPTED).build();

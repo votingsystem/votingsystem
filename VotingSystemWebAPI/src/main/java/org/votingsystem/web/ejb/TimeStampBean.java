@@ -54,7 +54,6 @@ public class TimeStampBean {
             timeStampServiceURL = serverURL + "/timestamp";
             Query query = dao.getEM().createNamedQuery("findActorVSByServerURL").setParameter("serverURL", serverURL);
             ActorVS timeStampServer = dao.getSingleResult(ActorVS.class, query);
-            x509TimeStampServerCert = null;
             CertificateVS timeStampServerCert = null;
             if(timeStampServer == null) {
                 fetchTimeStampServerInfo(new ActorVS(serverURL));
@@ -106,6 +105,10 @@ public class TimeStampBean {
         dao.persist(certificateVS);
         log.info("Added TimeStampServer Cert: " + certificateVS.getId());
         signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
+        timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                ContextVS.PROVIDER).build(x509TimeStampServerCert);
+        X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
+        TSPUtil.validateCertificate(certHolder);
     }
 
     private void fetchTimeStampServerInfo(final ActorVS timeStampServer) {
@@ -121,8 +124,8 @@ public class TimeStampBean {
                             timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
                             updateTimeStampServer(timeStampServer);
                         } else updateTimeStampServer(serverActorVS);
-                    } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  + " - found " +
-                            serverActorVS.getServerURL());
+                    } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
+                            " - found " + serverActorVS.getServerURL());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

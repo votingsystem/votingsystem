@@ -3,11 +3,14 @@ package org.votingsystem.test.voting;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.test.callable.EncryptionTestSender;
+import org.votingsystem.test.callable.TimeStamperTestSender;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.NifUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,89 +21,74 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Encryption_send {
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+public class TimeStampRequest {
+    
     private static Logger log;
     private static SimulationData simulationData;
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
         simulationData = new SimulationData();
-        simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setServerURL("http://www.sistemavotacion.org/TimeStampServer");
         simulationData.setMaxPendingResponses(10);
-        simulationData.setNumRequestsProjected(1);
+        simulationData.setNumRequestsProjected(10);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(Encryption_send.class, simulationData);
+        log = TestUtils.init(TimeStampRequest.class, simulationData);
 
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
+        if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
-        if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
+        /*if (actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
             throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
-        }
+        }*/
         ContextVS.getInstance().setDefaultServer(actorVS);
-        initSimulation();
-    }
-
-    private static void initSimulation(){
-        log.info("initSimulation");
+        ContextVS.getInstance().setTimeStampServerCert(actorVS.getX509Certificate());
         if(!(simulationData.getNumRequestsProjected() > 0)) {
-            log.info("WITHOUT NumberOfRequestsProjected");
+            log.info("NumRequestsProjected = 0");
             return;
         }
-        log.info("initSimulation - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
-                " -serverURL" + simulationData.getServerURL());
+        log.info("initSimulation - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         completionService = new ExecutorCompletionService<ResponseVS>(executorService);
-        executorService.execute(new Runnable() {
-            @Override public void run() {
-                try {
-                    sendRequests(
-                            ContextVS.getInstance().getDefaultServer().getEncryptionServiceURL());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        executorService.execute(() -> {
+            try {
+                sendRequests();
+            } catch (Exception e) { e.printStackTrace();  }
         });
-        executorService.execute(new Runnable() {
-            @Override public void run() {
-                try {
-                    waitForResponses();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        executorService.execute(() -> {
+            try {
+                waitForResponses();
+            } catch (Exception e) { e.printStackTrace();  }
         });
     }
 
-    public static void sendRequests(String serviceURL) throws Exception {
+    public static void sendRequests() throws Exception {
         log.info("sendRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
         while(simulationData.getNumRequests() < simulationData.getNumRequestsProjected()) {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsCollected()) <= simulationData.getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
-                completionService.submit(new EncryptionTestSender(nifFrom, serviceURL,
-                        ContextVS.getInstance().getDefaultServer().getX509Certificate()));
+                completionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getServerURL()));
             } else Thread.sleep(300);
         }
     }
 
-
     private static void waitForResponses() throws Exception {
         log.info("waitForResponses - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
-        while (simulationData.getNumRequestsProjected() >
-                simulationData.getNumRequestsCollected()) {
+        while (simulationData.getNumRequestsProjected() > simulationData.getNumRequestsCollected()) {
             try {
                 Future<ResponseVS> f = completionService.take();
                 ResponseVS responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     simulationData.getAndIncrementNumRequestsOK();
-                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(),
-                        simulationData.getNumRequestsOK());
+                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), simulationData.getNumRequestsOK());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
@@ -108,8 +96,11 @@ public class Encryption_send {
         }
         TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsOK());
     }
-    
+
 }
+    
+
+
 
 
 

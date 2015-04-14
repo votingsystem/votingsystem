@@ -1,5 +1,6 @@
 package org.votingsystem.model.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -358,6 +359,7 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
     }
 
+    @JsonIgnore
     public Set<X509Certificate> getTrustedCerts() throws Exception {
         Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>();
         eventTrustedCerts.add(CertUtils.loadCertificate(certificateVS.getContent()));

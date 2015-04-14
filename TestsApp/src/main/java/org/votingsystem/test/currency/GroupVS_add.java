@@ -1,9 +1,9 @@
 package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;

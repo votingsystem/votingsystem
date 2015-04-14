@@ -38,23 +38,11 @@ public class Multisign {
 
         SMIMEMessage smimeSigned = signatureService1.getSMIMEMultiSigned("03455543T", "08888888D", smimeMessage,
                 DateUtils.getDateStr(new Date()));
-//log.info(new String(smimeSigned.getBytes()))
-
+        //log.info(new String(smimeSigned.getBytes()))
         X509Certificate x509Cert = signatureService1.getCertSigner();
         smimeSigned.isValidSignature();
         Collection result = smimeSigned.checkSignerCert(x509Cert);
-        log.info("matches: " + result.size());
-
-/*for(int i = 0; i< 100; i++) {
-    SMIMEMessage smimeMessage = signatureService.getSMIME("08888888D", "00111222V", dataToSign.toString(),
-        DateUtils.getDateStr(new Date()))
-    smimeMessage = signatureService1.getSMIMEMultiSigned("00111222V", "03455543T", smimeMessage,
-            DateUtils.getDateStr(new Date()))
-    multiSigned =  signatureService1.getSMIMEMultiSigned("03455543T", "08888888D", smimeMessage,
-            DateUtils.getDateStr(new Date()))
-}*/
-
-//	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header... headers)
+        log.info("cert matches: " + result.size());
     }
 }
 

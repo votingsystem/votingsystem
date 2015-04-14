@@ -44,7 +44,7 @@ public enum ContentTypeVS {
     //smime.p7m -> Email message encrypted
     //smime.p7s -> Email message that includes a digital signature
     SIGNED("application/pkcs7-signature","p7s"),
-    ENCRYPTED("application/pkcs7-mime","p7m"),//.p7c
+    ENCRYPTED(MediaTypeVS.ENCRYPTED, "p7m"),//.p7c
     SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-mime", "p7m"),
 
     PKCS7_CERT("application/pkcs7-certificates","p7b"),//.spc

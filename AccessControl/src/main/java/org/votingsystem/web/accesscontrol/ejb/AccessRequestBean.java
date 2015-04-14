@@ -1,16 +1,15 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -37,8 +36,8 @@ public class AccessRequestBean {
                 .setParameter("eventVS", request.eventVS).setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if (accessRequestVS != null){
-            throw new RequestRepeatedException(config.getRestURL() + "/messageSMIME/id/" +
-                    accessRequestVS.getMessageSMIME().getId());
+            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(null, config.getRestURL() + "/messageSMIME/id/" +
+                    accessRequestVS.getMessageSMIME().getId()));
         } else {
             request.accessRequestVS = dao.persist(new AccessRequestVS(signer, messageSMIME, AccessRequestVS.State.OK,
                     request.hashAccessRequestBase64, request.eventVS));

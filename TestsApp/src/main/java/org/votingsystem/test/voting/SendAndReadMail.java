@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 
-public class Mail_sendAndRead {
+public class SendAndReadMail {
 
     private static Logger log;
     private static Session session;
@@ -39,7 +39,7 @@ public class Mail_sendAndRead {
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
 
-        log = TestUtils.init(Mail_sendAndRead.class, simulationData);
+        log = TestUtils.init(SendAndReadMail.class, simulationData);
 
         Properties properties = new Properties();
         properties.put("mail.smtp.host", simulationData.getSmtpHostName());
