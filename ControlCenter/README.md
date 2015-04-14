@@ -34,7 +34,8 @@ server configuration just after the extensions section:
         <system-properties>
                 <property name="vs.environment" value="PRODUCTION"/>
         </system-properties>
-
+2. The application needs access to a [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer),
+the property **vs.timeStampServerURL** must be set according to that.
 3. Make sure you have  Wildfly server started.
 4. Add a datasource with the name 'java:jboss/datasources/ControlCenter'
 5. Use this command to build and deploy the archive:

@@ -16,7 +16,7 @@ Change what follows to the standalone / domain  server configurationt:
         <file name="currencyServerStatic" path="/var/local/voting_system/currency_server" directory-listing="true"/>
     </handlers>
 
-The value of the variables 'vs.staticResourcesURL' and 'vs.staticResourcesPath' must be set according to the values configured.
+The value of the variables **vs.staticResourcesURL** and **vs.staticResourcesPath** must be set according to the values configured.
 
 #### enable appplication filter
 To enable application filters change what follows to the standalone / domain  server configurationt 
@@ -36,7 +36,9 @@ server configuration just after the extensions section:
         </system-properties>
 
 2. Make sure you have  Wildfly server started.
-3. Add a datasource with the name 'java:jboss/datasources/CurrencyServer'
-4. Use this command to build and deploy the archive:
+3. The application needs access to a [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer),
+the property **vs.timeStampServerURL** must be set according to that.
+4. Add a datasource with the name 'java:jboss/datasources/CurrencyServer'
+5. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy
