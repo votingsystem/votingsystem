@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.SMIMECheck;
+import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
@@ -79,14 +79,14 @@ public class MessageSMIME extends EntityVS implements Serializable {
         this.content = content;
     }
 
-    public MessageSMIME(SMIMEMessage smime, SMIMECheck smimeCheck, TypeVS type) throws Exception {
+    public MessageSMIME(SMIMEMessage smime, SMIMEDto smimeDto, TypeVS type) throws Exception {
         this.smimeMessage = smime;
         this.content = smimeMessage.getBytes();
         this.base64ContentDigest = smime.getContentDigestStr();
         this.type = type;
-        this.userVS = smimeCheck.getSigner();
-        this.anonymousSigner = smimeCheck.getAnonymousSigner();
-        this.signers = smimeCheck.getSigners();
+        this.userVS = smimeDto.getSigner();
+        this.anonymousSigner = smimeDto.getAnonymousSigner();
+        this.signers = smimeDto.getSigners();
     }
 
     public MessageSMIME(SMIMEMessage smime, UserVS userVS, TypeVS type) throws Exception {

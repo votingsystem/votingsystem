@@ -1,8 +1,8 @@
 package org.votingsystem.web.controlcenter.jaxrs.provider;
 
+import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.SMIMECheck;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 @Provider
 @Consumes(MediaTypeVS.VOTE)
-public class VoteVSReader implements MessageBodyReader<SMIMECheck> {
+public class VoteVSReader implements MessageBodyReader<SMIMEDto> {
 
     private static final Logger log = Logger.getLogger(VoteVSReader.class.getSimpleName());
 
@@ -32,11 +32,11 @@ public class VoteVSReader implements MessageBodyReader<SMIMECheck> {
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return SMIMECheck.class.isAssignableFrom(aClass);
+        return SMIMEDto.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public SMIMECheck readFrom(Class<SMIMECheck> aClass, Type type, Annotation[] annotations, MediaType mediaType,
+    public SMIMEDto readFrom(Class<SMIMEDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                  MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
             return signatureBean.validatedVote(new SMIMEMessage(inputStream));

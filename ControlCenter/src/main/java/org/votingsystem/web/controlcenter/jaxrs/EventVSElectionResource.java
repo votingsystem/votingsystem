@@ -2,11 +2,10 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;

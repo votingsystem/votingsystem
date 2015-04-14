@@ -1,8 +1,13 @@
 package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.model.*;
-import org.votingsystem.model.currency.*;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;

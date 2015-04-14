@@ -2,11 +2,10 @@ package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;

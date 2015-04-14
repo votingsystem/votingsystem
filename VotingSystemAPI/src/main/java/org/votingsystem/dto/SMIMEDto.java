@@ -1,17 +1,16 @@
-package org.votingsystem.util;
+package org.votingsystem.dto;
 
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.VoteVS;
-
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SMIMECheck {
+public class SMIMEDto {
 
     private UserVS signer;
     private VoteVS voteVS;
@@ -20,9 +19,9 @@ public class SMIMECheck {
     private Set<UserVS> signers;
     private MessageSMIME messageSMIME;
 
-    public SMIMECheck() {}
+    public SMIMEDto() {}
 
-    public SMIMECheck(VoteVS voteVS) {
+    public SMIMEDto(VoteVS voteVS) {
         this.voteVS = voteVS;
     }
 

@@ -1,5 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
@@ -8,7 +9,10 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -44,9 +48,9 @@ public class VoteVSBean {
     @Inject MessagesBean messages;
 
 
-    public synchronized VoteVS validateVote(SMIMECheck smimeCheck) throws Exception {
-        MessageSMIME messageSMIME = smimeCheck.getMessageSMIME();
-        EventVSElection eventVS = (EventVSElection) smimeCheck.getEventVS();
+    public synchronized VoteVS validateVote(SMIMEDto smimeDto) throws Exception {
+        MessageSMIME messageSMIME = smimeDto.getMessageSMIME();
+        EventVSElection eventVS = (EventVSElection) smimeDto.getEventVS();
         eventVS = em.merge(eventVS);
         VoteVS voteVSRequest = messageSMIME.getSMIME().getVoteVS();
         CertificateVS voteVSCertificate = voteVSRequest.getCertificateVS();

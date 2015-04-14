@@ -2,10 +2,12 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
-import org.votingsystem.model.*;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.util.DateUtils;

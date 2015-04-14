@@ -1,13 +1,13 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.SMIMECheck;
 import org.votingsystem.web.accesscontrol.ejb.VoteVSBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -39,9 +39,9 @@ public class VoteVSResource {
      */
     @Path("/")
     @POST
-    public Response save(SMIMECheck smimeCheck,  @Context ServletContext context,
+    public Response save(SMIMEDto smimeDto,  @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = voteVSBean.validateVote(smimeCheck);
+        VoteVS voteVS = voteVSBean.validateVote(smimeDto);
         return Response.ok().entity(voteVS.getMessageSMIME().getContent()).type(ContentTypeVS.VOTE.getName()).build();
     }
 

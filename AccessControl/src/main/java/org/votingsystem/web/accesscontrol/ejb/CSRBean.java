@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
-import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -29,7 +28,6 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @Stateless

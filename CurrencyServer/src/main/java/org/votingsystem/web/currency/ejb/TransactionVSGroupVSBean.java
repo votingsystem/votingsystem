@@ -1,9 +1,9 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;

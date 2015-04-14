@@ -2,7 +2,10 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.iban4j.Iban;
-import org.votingsystem.model.*;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.model.currency.GroupVS;

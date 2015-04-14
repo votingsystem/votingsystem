@@ -1,10 +1,10 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.model.currency.BankVS;
-import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.web.ejb.DAOBean;
